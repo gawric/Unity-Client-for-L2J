@@ -1,7 +1,4 @@
-using Newtonsoft.Json.Linq;
-using System;
 using System.Collections.Generic;
-using UnityEditorInternal.Profiling.Memory.Experimental;
 using UnityEngine;
 
 public class IconManager

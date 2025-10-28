@@ -1,12 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
-using UnityEditorInternal.Profiling.Memory.Experimental;
 using UnityEngine;
 
 using static StorageVariable;
-using static UnityEditor.Progress;
 
 public class PlayerInventory : MonoBehaviour
 {

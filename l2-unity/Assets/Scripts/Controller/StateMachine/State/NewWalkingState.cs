@@ -1,8 +1,3 @@
-
-using UnityEditorInternal;
-using UnityEngine;
-using static AttackingState;
-
 public class NewWalkingState : StateBase
 {
     public NewWalkingState(PlayerStateMachine stateMachine) : base(stateMachine)

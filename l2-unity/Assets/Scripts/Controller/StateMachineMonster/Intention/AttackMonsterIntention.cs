@@ -1,5 +1,3 @@
-using System.Xml;
-using UnityEditorInternal;
 using UnityEngine;
 
 public class AttackMonsterIntention : MonsterIntentionBase

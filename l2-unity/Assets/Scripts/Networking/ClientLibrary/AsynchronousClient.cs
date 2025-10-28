@@ -1,10 +1,7 @@
-using FMOD.Studio;
 using System;
-using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using UnityEngine;
-using static UnityEditor.U2D.ScriptablePacker;
 
 public class AsynchronousClient {
     private Socket _socket;

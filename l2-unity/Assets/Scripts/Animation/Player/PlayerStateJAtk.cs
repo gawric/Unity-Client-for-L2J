@@ -1,9 +1,5 @@
-using System;
-using System.Threading;
-using UnityEditor;
-using UnityEditorInternal;
 using UnityEngine;
-using static UnityEngine.Rendering.DebugUI;
+
 
 
 public class PlayerStateJAtk : StateMachineBehaviour

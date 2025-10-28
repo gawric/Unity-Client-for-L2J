@@ -1,11 +1,3 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using static UnityEditor.FilePathAttribute;
-using UnityEngine.UIElements.Experimental;
-using UnityEditor.VersionControl;
-
 public class CreatureSay : ServerPacket
 {
     private int objectId = 0;

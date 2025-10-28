@@ -1,7 +1,4 @@
-
-using UnityEditorInternal;
 using UnityEngine;
-using static AttackingState;
 
 public class RunningState : StateBase
 {

@@ -1,8 +1,4 @@
-using System.Xml;
-using UnityEditorInternal;
 using UnityEngine;
-using UnityEngine.InputSystem.XR;
-using static UnityEngine.EventSystems.EventTrigger;
 
 public class MovementData
 {

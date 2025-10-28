@@ -1,9 +1,5 @@
 using System.Collections;
-using System.Threading;
-using TMPro;
-using UnityEditor.Experimental.GraphView;
 using UnityEngine;
-using UnityEngine.UIElements;
 
 
 public class FlyObjectToTarget : MonoBehaviour

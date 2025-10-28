@@ -1,7 +1,3 @@
-using UnityEditor.Build.Content;
-using UnityEngine;
-using static UnityEditor.Progress;
-
 public class AssignData
 {
     private ItemInstance _itemInstance;

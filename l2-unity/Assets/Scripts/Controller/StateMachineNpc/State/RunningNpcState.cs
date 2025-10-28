@@ -1,7 +1,3 @@
-using UnityEditorInternal;
-using UnityEngine;
-using static AttackingState;
-
 public class RunningNpcState : NpcBase
 {
     private NpcEntity npcEntity;

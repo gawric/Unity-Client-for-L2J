@@ -1,7 +1,4 @@
-using System.Xml;
-using UnityEditorInternal;
 using UnityEngine;
-using static UnityEngine.EventSystems.EventTrigger;
 
 public class MoveToMonsterIntention : MonsterIntentionBase
 {

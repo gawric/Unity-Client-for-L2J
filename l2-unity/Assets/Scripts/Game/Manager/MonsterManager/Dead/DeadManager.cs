@@ -1,7 +1,5 @@
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.LightTransport;
-using UnityEngine.tvOS;
 
 public class DeadManager : MonoBehaviour, IDead
 {

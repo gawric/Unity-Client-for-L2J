@@ -1,4 +1,5 @@
 using AtmosphericHeightFog;
+using System;
 using UnityEngine;
 
 [ExecuteInEditMode]
@@ -59,50 +60,58 @@ public class DayNightCycle : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (_clock == null)
+        try
         {
-            _clock = GetComponent<WorldClock>();
+            if (_clock == null)
+            {
+                _clock = GetComponent<WorldClock>();
+            }
+            if (_mainLight == null)
+            {
+                _mainLight = GetComponent<Light>();
+            }
+            float test1 = _clock.Clock.dayRatio;
+            float test2 = _clock.Clock.nightRatio;
+            float mainLightLerpValue = _clock.Clock.dayRatio > 0 ? _clock.Clock.dayRatio : _clock.Clock.nightRatio;
+            float sunRotation = Mathf.Lerp(0 - _horizonOffsetDegree, 180 + _horizonOffsetDegree, mainLightLerpValue);
+            transform.eulerAngles = new Vector3(sunRotation, _mainLightRotY, 0);
+
+            // Update main light rotation with sky material
+            ShareMainLightRotation();
+
+            if (transform.eulerAngles.x < -1 || transform.eulerAngles.x > 181)
+            {
+                _mainLight.intensity = 0;
+            }
+            else
+            {
+                // Lerping lights
+                UpdateMainLightIntensity();
+            }
+
+            UpdateAmbientLightIntensity();
+
+            // Lerping sky color
+            UpdateSkyColor();
+
+            // Lerping fog color
+            UpdateFogColor();
+
+            // Lerping cloud opacity
+            UpdateCloudsOpacity();
+
+            // Update main light texture
+            UpdateMainLightTexture();
+
+            UpdateAmbientLightColor();
+
+            UpdateLightColor();
         }
-        if (_mainLight == null)
+        catch (Exception e)
         {
-            _mainLight = GetComponent<Light>();
-        }
-        float test1 = _clock.Clock.dayRatio;
-        float test2 = _clock.Clock.nightRatio;
-        float mainLightLerpValue = _clock.Clock.dayRatio > 0 ? _clock.Clock.dayRatio : _clock.Clock.nightRatio;
-        float sunRotation = Mathf.Lerp(0 - _horizonOffsetDegree, 180 + _horizonOffsetDegree, mainLightLerpValue);
-        transform.eulerAngles = new Vector3(sunRotation, _mainLightRotY, 0);
 
-        // Update main light rotation with sky material
-        ShareMainLightRotation();
-
-        if (transform.eulerAngles.x < -1 || transform.eulerAngles.x > 181)
-        {
-            _mainLight.intensity = 0;
-        }
-        else
-        {
-            // Lerping lights
-            UpdateMainLightIntensity();
         }
 
-        UpdateAmbientLightIntensity();
-
-        // Lerping sky color
-        UpdateSkyColor();
-
-        // Lerping fog color
-        UpdateFogColor();
-
-        // Lerping cloud opacity
-        UpdateCloudsOpacity();
-
-        // Update main light texture
-        UpdateMainLightTexture();
-
-        UpdateAmbientLightColor();
-
-        UpdateLightColor();
     }
 
     private void UpdateSkyColor()
