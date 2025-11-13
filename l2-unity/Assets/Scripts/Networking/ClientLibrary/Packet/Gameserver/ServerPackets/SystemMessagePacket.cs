@@ -33,9 +33,11 @@ public class SystemMessagePacket : ServerPacket {
                         param.SetValue(ReadOtherS());
                         break;
                     case SMParamType.TYPE_LONG_NUMBER:
-                        param.SetValue(ReadL());
+                        param.SetValue(ReadI());
                         break;
                     case SMParamType.TYPE_ITEM_NAME:
+                        param.SetValue(ReadI());
+                        break;
                     case SMParamType.TYPE_CASTLE_NAME:
                     case SMParamType.TYPE_INT_NUMBER:
                     case SMParamType.TYPE_NPC_NAME:

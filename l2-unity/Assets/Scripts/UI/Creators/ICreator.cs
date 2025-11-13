@@ -6,13 +6,10 @@ public interface ICreator
 {
     //public void InitTabs(string[] nameTabs);
 
-    public void InitTradeTabs(string[] nameTabs);
 
     public void InitContentTabs(string[] nameTabs);
 
     public void CreateTabs(VisualElement _inventoryTabView, VisualTreeAsset _tabTemplate, VisualTreeAsset _tabHeaderTemplate);
-
-    public void CreateTradeTabs(VisualElement _inventoryTabView, VisualTreeAsset _tabTemplate, VisualTreeAsset _tabHeaderTemplate);
 
     public void AddData(List<ItemInstance> allItems);
 

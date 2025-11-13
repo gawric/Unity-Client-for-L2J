@@ -37,7 +37,7 @@ public class UserInfo : ServerPacket
         _info.Stats.Level = ReadI();
          long exp =  ReadOtherL();
         int ost = (int)exp - (int)_info.Stats.Exp;
-        if (ost > 0) StorageVariable.getInstance().AddS1Items(new VariableItem(ost.ToString(), _info.Identity.Id));
+       // if (ost > 0) StorageVariable.getInstance().AddS1Items(new VariableItem(ost.ToString(), _info.Identity.Id));
         _info.Stats.Exp = exp;
         _info.Stats.MaxExp  = LevelServer.GetExp(_info.Stats.Level + 1);
         _info.Stats.Str = ReadI();
@@ -54,7 +54,7 @@ public class UserInfo : ServerPacket
         int sp = ReadI();
         int oldSp = (int)_info.Stats.OldSp;
         int ostSp = (int)sp - oldSp;
-        StorageVariable.getInstance().AddS2Items(new VariableItem(ostSp.ToString(), _info.Identity.Id));
+        //StorageVariable.getInstance().AddS2Items(new VariableItem(ostSp.ToString(), _info.Identity.Id));
         _info.Stats.OldSp = sp;
         _info.Stats.Sp = sp;
         _info.Stats.CurrWeight = ReadI();

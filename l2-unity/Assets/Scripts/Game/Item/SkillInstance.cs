@@ -10,6 +10,14 @@ public class SkillInstance : AbstractSkill
         IsDisabled = pDisabled;
     }
 
+    public void RefreshData(int pId, int pLevel, bool pPassive, bool pDisabled)
+    {
+        SkillID = pId;
+        Level = pLevel;
+        IsPassive = pPassive;
+        IsDisabled = pDisabled;
+    }
+
     public string GetTypeName()
     {
         return IsPassive ? "Passive Skill" : "Active Skill";

@@ -189,7 +189,7 @@ public abstract class AbstractDataProvider : AbstractDataFunction
     protected void SetOther(VisualElement container , IDataTips text , string etcIcon , int priceItem ,  string accessoriesName , string weight)
     {
      
-            container.Q<Label>("nameAccessories").text = text.GetName();
+            container.Q<Label>("nameAccessories").text = text.GetName(true);
 
             //set icon
             VisualElement groupBoxIcon = container.Q<VisualElement>("GrowIcon");
@@ -235,6 +235,25 @@ public abstract class AbstractDataProvider : AbstractDataFunction
             AddElementIfNotEmpty(descriptionLabel, descriptionLabel, text.GetItemDiscription());
         //container.Q<Label>("descriptedLabel").text = text.GetItemDiscription();
 
+        
+    }
+
+    public void SetRequired(VisualElement container, IDataTips text, string etcIcon, int priceItem, string accessoriesName, string weight , int requiredCount , int countInventory)
+    {
+        SetOther(container, text, etcIcon, priceItem, accessoriesName, weight);
+        SetRequiredField(container , requiredCount , countInventory);
+    }
+
+    private void SetRequiredField(VisualElement container, int requiredCount , int inventoryCount)
+    {
+        Label groupRequiredLabel = (Label)container.Q<Label>("RequredName");
+        Label RequiredLabel = (Label)container.Q<Label>("requiredLabel");
+        AddElementIfNotEmpty(groupRequiredLabel, RequiredLabel, requiredCount.ToString());
+
+
+        Label groupInStockLabel = (Label)container.Q<Label>("InStockName");
+        Label inStockLabel = (Label)container.Q<Label>("inStockLabel");
+        AddElementIfNotEmpty(groupInStockLabel, inStockLabel, inventoryCount.ToString());
         
     }
 

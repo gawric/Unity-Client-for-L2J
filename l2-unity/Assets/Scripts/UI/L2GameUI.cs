@@ -213,6 +213,18 @@ public class L2GameUI : L2UI
             MapWindow.Instance.AddWindow(_rootVisualContainer);
             MapWindow.Instance.HideWindow();
         }
+
+        if (RecipeBookWindow.Instance != null)
+        {
+            RecipeBookWindow.Instance.AddWindow(_rootVisualContainer);
+            RecipeBookWindow.Instance.HideWindow();
+        }
+
+        if (CraftingItemWindow.Instance != null)
+        {
+            CraftingItemWindow.Instance.AddWindow(_rootVisualContainer);
+            CraftingItemWindow.Instance.HideWindow();
+        }
     }
 
     public void EnableMouse()

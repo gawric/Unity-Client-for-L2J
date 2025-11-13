@@ -37,9 +37,15 @@ public class SimpleToolTipData : IDataTips
             _enchant = _skillInstance.Level;
         }
     }
-    public string GetName()
+    public string GetName(bool hideCount = false)
     {
-        if(_product != null)
+
+        if (hideCount)
+        {
+            return _name;
+        }
+
+        if (_product != null)
         {
             if (_product.Count > 1) _name = _name + " (" + _product.Count + ")";
         }

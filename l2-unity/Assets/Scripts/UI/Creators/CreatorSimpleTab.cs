@@ -1,13 +1,12 @@
 using System;
 using UnityEngine;
-using UnityEngine.Diagnostics;
 using UnityEngine.UIElements;
-using UnityEngine.VFX;
 
-public class CreatorSimpleTab : AbstractCreator, ICreatorSimpleTab
+
+public class CreatorSimpleTab : AbstractLoaderTemplate, ICreatorSimpleTab
 {
     public event Action<int> EventSwitchTabByIndexOfTab;
-    private VisualTreeAsset[] _templates;
+
     private VisualElement _injectTemplate;
     public void SetContent(int idTemplate)
     {
@@ -32,28 +31,6 @@ public class CreatorSimpleTab : AbstractCreator, ICreatorSimpleTab
         throw new NotImplementedException();
     }
 
-    private VisualElement GetTemplateById(int idTemplate)
-    {
-
-        if (!ArrayUtils.IsValidIndexArray(_templates, idTemplate))
-        {
-            return null;
-        }
-
-        VisualTreeAsset template = _templates[idTemplate];
-        return ToolTipsUtils.CloneOne(template);
-    }
-
-
-    public void LoadAsset(Func<string, VisualTreeAsset> loaderFunc , string[] loadTemplate)
-    {
-        _templates = new VisualTreeAsset[loadTemplate.Length];
-
-        for (int i = 0; i < loadTemplate.Length; i++)
-        {
-            _templates[i] = loaderFunc(loadTemplate[i]);
-        }
-    }
 
     public VisualElement[] GetVisualElements(string[] names)
     {
@@ -67,5 +44,10 @@ public class CreatorSimpleTab : AbstractCreator, ICreatorSimpleTab
         }
 
         return elements;
+    }
+
+    void ICreatorSimpleTab.LoadAsset(Func<string, VisualTreeAsset> loaderFunc, string[] loadTemplate)
+    {
+        LoadAsset(loaderFunc, loadTemplate);
     }
 }

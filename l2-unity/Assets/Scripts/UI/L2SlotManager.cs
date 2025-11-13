@@ -120,6 +120,9 @@ public class L2SlotManager : L2PopupWindow
             case L2Slot.SlotType.SkillWindow:
                 HandleSkillWindowDrag();
                 break;
+            case L2Slot.SlotType.Recipe:
+                DestroyRecipe();
+                break;
             default:
                 break;
         }
@@ -204,6 +207,46 @@ public class L2SlotManager : L2PopupWindow
         SkillSlot sourceSlot = (SkillSlot)_draggedSlot;
         PlayerShortcuts.Instance.AddShortcut(position, sourceSlot.Id, Shortcut.TYPE_SKILL, sourceSlot.Level);
     }
+
+    private int _recipeId = -1;
+    private void DestroyRecipe()
+    {
+        if (_hoverSlot == null)
+        {
+            return;
+        }
+
+        SystemMessageWindow.Instance.OnButtonOk += OkDestroyRecipe;
+        SystemMessageWindow.Instance.OnButtonClosed += On—ancelRecipe;
+        SystemMessageWindow.Instance.ShowWindowDialogYesOrNot("Are you sure you want to destroy the recipe?");
+
+        int position = _hoverSlot.Position;
+        TradingSlot sourceSlot = (TradingSlot)_draggedSlot;
+        _recipeId = RecipeBookWindow.Instance.GetRecipeIdByPosition(sourceSlot.Position);
+
+    }
+
+    private void OkDestroyRecipe()
+    {
+        SendGameDataQueue.Instance().AddItem(
+            CreatorPacketsUser.CreateRequestRecipeBookDestroy(_recipeId),
+            GameClient.Instance.IsCryptEnabled(),
+            GameClient.Instance.IsCryptEnabled()
+        );
+        CleanupMessageWindow();
+    }
+
+    private void On—ancelRecipe()
+    {
+
+        CleanupMessageWindow();
+    }
+
+    private void CleanupMessageWindow()
+    {
+        SystemMessageUtils.CancelEvent(SystemMessageWindow.Instance, OkDestroyRecipe, On—ancelRecipe);
+    }
+
 
     private void HandleSkillbarDrag()
     {

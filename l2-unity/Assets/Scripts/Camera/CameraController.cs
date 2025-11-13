@@ -150,7 +150,7 @@ public class CameraController : MonoBehaviour
             _x += Input.GetAxis("Mouse X") * _camSpeed;
             _y -= Input.GetAxis("Mouse Y") * _camSpeed;
             _y = ClampAngle(_y, -90, 90);
-            Debug.Log("Update position turn");
+            //Debug.Log("Update position turn");
         }
     }
 

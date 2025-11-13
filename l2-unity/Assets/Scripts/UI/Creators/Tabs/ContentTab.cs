@@ -21,7 +21,7 @@ public class ContentTab : AbstractTab , ITab
         return _contentContainer;
     }
 
-    public void AddDataTrade(List<ItemInstance> allItems)
+    public void AddDataTrade(List<ItemInstance> allItems, bool isInventory = false)
     {
         throw new NotImplementedException();
     }
@@ -46,5 +46,15 @@ public class ContentTab : AbstractTab , ITab
     public string GetTabName()
     {
         return _tabName;
+    }
+
+    public void ClearSlots(List<ItemInstance> oldListItems)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void ClearAllSlots()
+    {
+        throw new NotImplementedException();
     }
 }

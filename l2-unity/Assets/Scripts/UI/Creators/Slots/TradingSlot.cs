@@ -5,23 +5,27 @@ using static L2Slot;
 
 public class TradingSlot : L2DraggableSlot
 {
-    private TradingSlotModel model;
+    private TradingSlotModel _model;
     protected bool _empty = true;
     private AssignData _data;
     public event Action<int> EventLeftClick;
     public TradingSlot(TradingSlotModel model)
-        : base(model.GetPosition(), model.GetSlotElement(), model.GetSlotType())
+        : base(model.GetPosition(), model.GetSlotElement(), model.GetSlotType() , model.isDragged)
     {
+        _model = model;
         _data = new AssignData();
         _empty = true;
     }
 
-    public void AssignItem(ItemInstance item)
+    public void AssignItem(ItemInstance item, bool isDisabled = false)
     {
         _slotElement.RemoveFromClassList("empty");
         _data.RefreshData(item);
         _data.RefreshDataItem(item);
         _empty = false;
+
+        if (_model != null && _slotDragManipulator != null) SetDragged(_model.isDragged);
+        SetDisabled(_slotDisabled , isDisabled);
 
         if (_slotElement != null)
         {
@@ -29,7 +33,30 @@ public class TradingSlot : L2DraggableSlot
         }
         else
         {
-            Debug.LogWarning("Не критическая ошибка не смогли найти TradingSlotModel>SlotElement");
+            Debug.LogWarning("TradingSlot> AssignItem: Не критическая ошибка не смогли найти TradingSlotModel>SlotElement");
+        }
+    }
+
+    public void SetDisabled(VisualElement slotDisabled , bool isDisabled)
+    {
+        if(slotDisabled != null)
+        {
+            if (!isDisabled)
+            {
+                slotDisabled.style.display = DisplayStyle.None;
+            }
+            else
+            {
+                slotDisabled.style.display = DisplayStyle.Flex;
+            }
+        }
+    }
+
+    public void SetDragged(bool isDragged)
+    {
+        if(_slotDragManipulator != null)
+        {
+            _slotDragManipulator.enabled = isDragged;
         }
     }
 
@@ -52,6 +79,7 @@ public class TradingSlot : L2DraggableSlot
     {
         _empty = true;
         _data.ResetData();
+        SetDisabled(_slotDisabled, false);
 
         if (_slotElement != null)
         {
@@ -122,19 +150,22 @@ public class TradingSlotModel
     private VisualElement _slotElement;
     private SlotType _slotType;
     private int _position;
+    private bool _isDragged;
 
-
-    public TradingSlotModel(int position , TradeTab currentTab , VisualElement slotElement , SlotType slotType)
+    public TradingSlotModel(int position , bool isDragged ,  VisualElement slotElement , SlotType slotType)
     {
         _position = position;
         _slotElement = slotElement;
         _slotType = slotType;
+        _isDragged = isDragged;
     }
 
  
     public VisualElement GetSlotElement(){ return _slotElement;}
 
     public SlotType GetSlotType() { return _slotType;}
+
+    public bool isDragged { get { return _isDragged; } }
 
     public int GetPosition() { return _position; }
 }

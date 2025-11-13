@@ -21,6 +21,14 @@ public class MapPanner
     private Vector3 MAX_POS_TOP = VectorUtils.ConvertPosToUnity(new Vector3(197885f, -258615f , -4672f));
     private Button _buttonLocation;
     private bool _isDisabled = false;
+    private bool _isManualUpdate = false;
+
+    private Vector2 _mapPos = Vector2.zero;
+    //setting map
+    Vector2 mapSize = new Vector2(MAP_H, MAP_W);
+    Vector2 mapSizeD = new Vector2(MAP_W, MAP_H);
+
+
     public void SetElements(VisualElement viewport, VisualElement map, VisualElement minmapElement , Button buttonLocation)
     {
         _viewport = viewport;
@@ -38,6 +46,11 @@ public class MapPanner
             viewport.CapturePointer(evt.pointerId);
         });
 
+    }
+
+    public void SetManualUpdate(bool isManualUpdate)
+    {
+        _isManualUpdate = isManualUpdate;
     }
 
     public void SetDisabled(bool disabled)
@@ -69,40 +82,47 @@ public class MapPanner
 
     void MoveMarkerToPoint(GeometryChangedEvent up)
     {
-        MoveMarker();
+        MoveMarker(false);
 
     }
 
+    //event click button Location
     void MoveMarkerToPoint(MouseUpEvent up)
     {
-        MoveMarker();
+        if (_isDisabled) return;
+        MapUtils.PanViewportToMarker(ref offset, _map, _viewport, _marker);
     }
 
-    private void MoveMarker()
+    public void UpdateMarker(bool isHideWindow)
     {
-        if (_map == null || _marker == null || _isDisabled) return;
+        MoveMarker(isHideWindow);
+    }
 
-        Vector3 worldPos2D = StorageNpc.getInstance().GetFirstUser().PlayerInfoInterlude.Identity.GetXZPos();
+    private void MoveMarker(bool isHideWindow)
+    {
+        if (_map == null || _marker == null || _isDisabled || isHideWindow) return;
 
-        Vector2 mapSize = new Vector2(MAP_H, MAP_W);
-        Vector2 mapSizeD = new Vector2(MAP_W, MAP_H);
+        Vector3 worldPos2D = PlayerController.Instance.GetPlayerPosition();
+          //Vector3 worldPos2D = StorageNpc.getInstance().GetFirstUser().PlayerInfoInterlude.Identity.GetXZPos();
+        //Debug.Log($"MoveMarker position user : {worldPos2D}");
 
         Vector2 _mapPos = MapUtils.WorldToMap(worldPos2D, MIN_POS_LEFT, MAX_POS_TOP, mapSize, useXZ: true, invertYForUI: false);
 
-        //y + 100 right
-        //x + 100 bottom
-        if(!MapUtils.PlaceMarkerOnMap(ref offset , _map, _marker, new Vector2(_mapPos.y - offsetMap, _mapPos.x - offsetMap), mapSizeD))
-        {
-            if (_isDisabled) return;
-            MapUtils.PanViewportToMarker(ref offset, _map, _viewport, _marker);
-        }
-
+        MapUtils.PlaceMarkerOnMap(ref offset, _map, _marker, new Vector2(_mapPos.y - offsetMap, _mapPos.x - offsetMap), mapSizeD);
     }
 
     private void OnMarkerGeometryChanged(GeometryChangedEvent evt)
     {
         if(_isDisabled) return;
-        MapUtils.PanViewportToMarker(ref offset , _map, _viewport, _marker);
+
+        if(evt.newRect.x == 0) return;
+
+        if (_isManualUpdate == true)
+        {
+            _isManualUpdate = false;
+            MapUtils.PanViewportToMarker(ref offset, _map, _viewport, _marker);
+        }
+
     }
 
     void OnPointerDown(PointerDownEvent evt)

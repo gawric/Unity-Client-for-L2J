@@ -5,15 +5,10 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-
-
 public class MultiSellWindow : L2PopupWindow
 {
     private static MultiSellWindow _instance;
-    private VisualTreeAsset _tabTemplate;
-    private VisualTreeAsset _tabHeaderTemplate;
-    private VisualElement _inventoryTabView;
-    private ICreator _creatorWindow;
+    private ICreatorTradeTab _creatorWindow;
 
     private ScrollView _scrollView1;
     private ScrollView _scrollView2;
@@ -39,7 +34,7 @@ public class MultiSellWindow : L2PopupWindow
         if (_instance == null)
         {
             _instance = this;
-            _creatorWindow = new CreatorTradingWindows();
+            _creatorWindow = new CreatorTradingWindowsWithTabs();
             _dataProvider = new TooltipDataProvider();
             _toolTips = new MultiSellToolTips(_dataProvider);
 
@@ -54,13 +49,15 @@ public class MultiSellWindow : L2PopupWindow
     protected override void LoadAssets()
     {
         _windowTemplate = LoadAsset("Data/UI/_Elements/Game/Merchant/MultiSellWindow");
-        _tabTemplate = LoadAsset("Data/UI/_Elements/Game/Inventory/InventoryTab");
-        _tabHeaderTemplate = LoadAsset("Data/UI/_Elements/Game/Inventory/InventoryTabHeader");
+        //_tabTemplate = LoadAsset("Data/UI/_Elements/Game/Inventory/InventoryTab");
+        //_tabHeaderTemplate = LoadAsset("Data/UI/_Elements/Game/Inventory/InventoryTabHeader");
 
         _windowTemplateWeapon = LoadAsset("Data/UI/_Elements/Game/ToolTips/ToolTipWeapon");
         _windowTemplateAcccesories = LoadAsset("Data/UI/_Elements/Game/ToolTips/ToolTipAccessories");
         _windowTemplateArmor = LoadAsset("Data/UI/_Elements/Game/ToolTips/ToolTipArmor");
         _itemTemplateIngredient = LoadAsset("Data/UI/_Elements/Template/Merchant/ItemsIngredient");
+
+        _creatorWindow.LoadAsset(LoadAsset);
     }
 
 
@@ -72,10 +69,10 @@ public class MultiSellWindow : L2PopupWindow
         _userInput = (TextField)GetElementById("UserInputField");
          var deleteButton = (Button)GetElementById("DeleteButton");
          var exchangeButton = (Button)GetElementById("ExchangeButton");
-        _inventoryTabView = GetElementById("InventoryTabView");
+        //_inventoryTabView = GetElementById("InventoryTabView");
 
         _creatorWindow.InitTradeTabs(new string[] { "ALL" , "Other" });
-        _creatorWindow.CreateTradeTabs(_inventoryTabView, _tabTemplate, _tabHeaderTemplate);
+        _creatorWindow.CreateTradeTabs(GetElementById("InventoryTabView"));
 
         _scrollView1 = (ScrollView)GetElementById("1Panel-ScrollView");
         _scrollView2 = (ScrollView)GetElementById("2Panel-ScrollView");

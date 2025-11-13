@@ -21,7 +21,7 @@ public class QuestWindow : L2TwoPanels
     private IContent _questTabPanelSingle;
     private IContent _questTabPanelRepeat;
     private DataProviderDetailedInfo _dataProvider;
-    private ICreator _creatorRewardTables;
+    private ICreatorVerticalScroll _creatorRewardTables;
     private List<OtherModel> _questsList = new List<OtherModel>();
 
     private const string _singleTabName = "Single";
@@ -127,7 +127,7 @@ public class QuestWindow : L2TwoPanels
         _builderTabs.InitContentTabs(new string[5] { _singleTabName, _repeatTabName, _epicTabName , _transferTabName , _specialTabName });
         _builderTabs.CreateTabs(content, _tabTemplate, _tabHeaderTemplate);
 
-        _creatorRewardTables.InitTradeTabs(new string[] { "ALL", "Other" });
+        //_creatorRewardTables.InitTradeTabs(new string[] { "ALL", "Other" });
         _creatorRewardTables.CreateTabs(_detailedInfoElement, null, _rowsTemplate);
 
 

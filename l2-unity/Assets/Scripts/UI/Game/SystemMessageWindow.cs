@@ -149,6 +149,8 @@ public class SystemMessageWindow : L2PopupWindow
 
     }
 
+
+    
     private void OnDestroy()
     {
         _instance = null;

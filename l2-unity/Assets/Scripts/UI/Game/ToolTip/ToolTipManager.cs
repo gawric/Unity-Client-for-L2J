@@ -66,15 +66,6 @@ public class ToolTipManager
         return false;
     }
 
-    public void RegisterCallbackActiveSkills(Dictionary<int, VisualElement> dict  , SkillListWindow skillWindow)
-    {
-        ToolTipSkill.Instance.RegisterCallbackActive(dict, skillWindow);
-    }
-
-    public void RegisterCallbackPassiveSkills(Dictionary<int, VisualElement> dict, SkillListWindow skillWindow)
-    {
-        ToolTipSkill.Instance.RegisterCallbackPassive(dict, skillWindow);
-    }
 
 
     public void RegisterSimple(SlotType type , VisualElement list , int position)

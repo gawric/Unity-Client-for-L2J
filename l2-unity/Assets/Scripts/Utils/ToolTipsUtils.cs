@@ -2,10 +2,11 @@ using System.Globalization;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.UIElements;
+using static L2Slot;
 
-public class ToolTipsUtils 
+public class ToolTipsUtils
 {
-    
+
 
     public static Color GetColorPrice(string price)
     {
@@ -47,5 +48,33 @@ public class ToolTipsUtils
     {
         var e = vta.CloneTree();
         return e.Children().First();
+    }
+
+    public static string[] GetUniquePosition(VisualElement ve)
+    {
+        return ve.name.Split('_');
+    }
+
+    public static SlotType DetectedClickPanel(int type)
+    {
+        switch (type)
+        {
+            case (int)SlotType.PriceBuy:
+                return SlotType.PriceBuy;
+            case (int)SlotType.PriceSell:
+                return SlotType.PriceSell;
+            case (int)SlotType.BuffPanel:
+                return SlotType.BuffPanel;
+            case (int)SlotType.Recipe:
+                return SlotType.Recipe;
+            case (int)SlotType.Enchant:
+                return SlotType.Enchant;
+            case (int)SlotType.Skill:
+                return SlotType.Skill;
+            case (int)SlotType.SkillBar:
+                return SlotType.SkillBar;
+            default:
+                return SlotType.Other;
+        }
     }
 }

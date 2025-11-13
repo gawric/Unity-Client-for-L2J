@@ -16,6 +16,7 @@ public class BufferPanel : L2Window
 
     private int[] _deathPenalty;
     private int[] _weightPenalty;
+    private int[] _weaponPenalty;
     public static BufferPanel Instance { get { return _instance; } }
     public BLink _bLink;
     public VisualElement _content;
@@ -65,12 +66,15 @@ public class BufferPanel : L2Window
     {
         _deathPenalty = etcStatusUpdatePacket.DeathPenalty;
         _weightPenalty = etcStatusUpdatePacket.WeightPenalty;
+        _weaponPenalty = etcStatusUpdatePacket.WeaponPenalty;
 
         AddDataCell(_deathPenalty[0], _deathPenalty[1]);
         AddDataCell(_weightPenalty[0], _weightPenalty[1]);
+        AddDataCell(_weaponPenalty[0], _weaponPenalty[1]);
 
         DeleteDataCell(_deathPenalty[0], _deathPenalty[1]);
         DeleteDataCell(_weightPenalty[0], _weightPenalty[1]);
+        DeleteDataCell(_weaponPenalty[0], _weaponPenalty[1]);
     }
 
     public void AddDataCell(int skillId, int skillLevel)
@@ -105,7 +109,7 @@ public class BufferPanel : L2Window
         }
         else
         {
-            Debug.LogWarning("Buffpanel: Не критическая ошибка, мы не нашли skill id при попытке обновить herb effect!!!! skillID " + skillId + " level " + skillLevel);
+            Debug.LogWarning("Buffpanel > AddDataCellToTime: Не критическая ошибка, мы не нашли skill id при попытке обновить herb effect!!!! skillID " + skillId + " level " + skillLevel);
         }
 
 
@@ -162,13 +166,13 @@ public class BufferPanel : L2Window
         {
             VisualElement cell = GetElementById("SlotBuffer"+i);
             VisualElement labelTemplate = GetElementById("LabelBuffer" + i);
-            
+            VisualElement slot = GetElementById("border"+i);
 
             if (cell != null)
             {
                  cell.style.display = DisplayStyle.None;
                  labelTemplate.style.display = DisplayStyle.None;
-                _dictElement.Add(i, new DataCell(-1, cell , labelTemplate ,  i));
+                _dictElement.Add(i, new DataCell(-1, cell , labelTemplate  , slot ,  i));
             }
         }
     }
@@ -210,6 +214,12 @@ public class BufferPanel : L2Window
 
     }
 
+
+    public SkillInstance GetCellByPosition(int position)
+    {
+        DataCell data = _filterData.GetCellByPosition(position);
+        return (data != null)? data.GetSkillInstance() : null;
+    }
     private void OnDestroy()
     {
         _instance = null;

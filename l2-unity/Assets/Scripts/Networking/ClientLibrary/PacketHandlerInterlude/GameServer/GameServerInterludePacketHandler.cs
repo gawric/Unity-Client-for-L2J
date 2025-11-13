@@ -221,6 +221,15 @@ public class GameServerInterludePacketHandler : ServerPacketHandler
 
                 OnAcquireSkillInfo(itemQueue.DecodeData());
                 break;
+            case GameInterludeServerPacketType.RecipeBookItemList:
+
+                OnRecipeBookItemList(itemQueue.DecodeData());
+                break;
+            case GameInterludeServerPacketType.RecipeItemMakeInfo:
+
+                OnRecipeItemMakeInfo(itemQueue.DecodeData());
+                break;
+
 
         }
     }
@@ -1059,6 +1068,35 @@ public class GameServerInterludePacketHandler : ServerPacketHandler
         EventProcessor.Instance.QueueEvent(() => {
             ClanWindow.Instance.ShowGradeInfo(pledgePowerGradeList);
         });
+    }
+
+    private void OnRecipeBookItemList(byte[] data)
+    {
+        if (!InitPacketsLoadWord.getInstance().IsInit)
+        {
+            RecipeBookItemList packet = new RecipeBookItemList(data);
+
+            EventProcessor.Instance.QueueEvent(() => {
+                RecipeBookWindow.Instance.AddData(packet);
+                RecipeBookWindow.Instance.ShowWindow();
+            });
+        }
+
+    }
+
+    private void OnRecipeItemMakeInfo(byte[] data)
+    {
+        if (!InitPacketsLoadWord.getInstance().IsInit)
+        {
+            RecipeItemMakeInfo packet = new RecipeItemMakeInfo(data);
+
+            EventProcessor.Instance.QueueEvent(() => {
+                RecipeBookWindow.Instance.HideWindow();
+                CraftingItemWindow.Instance.AddData(packet);
+                CraftingItemWindow.Instance.ShowWindow();
+            });
+        }
+
     }
 
     public void OnExPledgeReceivePowerInfo(byte[] data)

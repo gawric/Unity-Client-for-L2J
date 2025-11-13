@@ -16,7 +16,7 @@ public class L2DraggableSlot : L2ClickableSlot
         CreateDragManipulator(ref _slotDragManipulator, ref slotElement);
     }
 
-    public L2DraggableSlot(int position, VisualElement slotElement, SlotType slotType)
+    public L2DraggableSlot(int position, VisualElement slotElement, SlotType slotType , bool isDragged)
          : base(slotElement, position, slotType, true, false)
     {
         if (slotElement == null)
@@ -24,7 +24,7 @@ public class L2DraggableSlot : L2ClickableSlot
             return;
         }
 
-        CreateDragManipulator(ref _slotDragManipulator, ref slotElement);
+        CreateDragManipulator(ref _slotDragManipulator, ref slotElement , isDragged);
     }
 
 
@@ -34,6 +34,15 @@ public class L2DraggableSlot : L2ClickableSlot
         {
              slotDragManipulator = new SlotDragManipulator(slotElement, this);
              slotElement.AddManipulator(slotDragManipulator);
+        }
+    }
+
+    private void CreateDragManipulator(ref SlotDragManipulator slotDragManipulator, ref VisualElement slotElement , bool isDragged)
+    {
+        if (slotDragManipulator == null)
+        {
+            slotDragManipulator = new SlotDragManipulator(slotElement, this , isDragged);
+            slotElement.AddManipulator(slotDragManipulator);
         }
     }
 

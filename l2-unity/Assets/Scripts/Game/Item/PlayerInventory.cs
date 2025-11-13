@@ -12,6 +12,8 @@ public class PlayerInventory : MonoBehaviour
         UNCHANGED = 0, ADDED = 1, REMOVED = 3, MODIFIED = 2
     }
 
+    private const string TYPE_RECIPE = "recipe";
+    private int _objectIdEtcType = -1;
     private Dictionary<int , ItemInstance> _playerInventory;
     private Dictionary<int, ItemInstance> _playerEquipInventory;
     private ChangeInventoryData _changeInventoryData;
@@ -70,6 +72,14 @@ public class PlayerInventory : MonoBehaviour
         }
         return null;
     }
+
+    public ItemInstance GetItemByItemId(int itemId)
+    {
+        if (_playerInventory == null) return null;
+
+        return _playerInventory.Values.FirstOrDefault(item => item.ItemId == itemId);
+    }
+
 
     public bool IsItemEquipByItemId(int itemId)
     {
@@ -278,8 +288,8 @@ public class PlayerInventory : MonoBehaviour
             if (!item.Equipped)
             {
                 
-                StorageVariable.getInstance().AddS1Items(new VariableItem(item.Count.ToString(), item.ObjectId));
-                StorageVariable.getInstance().AddS2Items(new VariableItem(item.ItemData.ItemName.Name, item.ObjectId));
+               // StorageVariable.getInstance().AddS1Items(new VariableItem(item.Count.ToString(), item.ObjectId));
+               // StorageVariable.getInstance().AddS2Items(new VariableItem(item.ItemData.ItemName.Name, item.ObjectId));
                 AddInventory(item); 
             }
         }
@@ -290,8 +300,8 @@ public class PlayerInventory : MonoBehaviour
             int count = item.Count - oldItem.Count;
             item.SetSlot(oldItem.Slot);
             
-            StorageVariable.getInstance().AddS1Items(new VariableItem(count.ToString(), item.ObjectId));
-            StorageVariable.getInstance().AddS2Items(new VariableItem(item.ItemData.ItemName.Name, item.ObjectId));
+            //StorageVariable.getInstance().AddS1Items(new VariableItem(count.ToString(), item.ObjectId));
+           // StorageVariable.getInstance().AddS2Items(new VariableItem(item.ItemData.ItemName.Name, item.ObjectId));
             oldItem.Update(item);
         }
     }
@@ -422,38 +432,102 @@ public class PlayerInventory : MonoBehaviour
         //}
 
         //InventoryWindow.Instance.SelectSlot(toSlot);
-        Debug.Log("Нужно реализовать пакеты для отпарвки на сервер");
+        Debug.Log("пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ");
         //GameClient.Instance.ClientPacketHandler.UpdateInventoryOrder(orders);
     }
 
     public bool UseItem(int objectId)
     {
-        //Cache Name for Message Equip
- 
-        if (_playerInventory.ContainsKey(objectId))
+        if (!TryGetItem(objectId, out ItemInstance item))
         {
-
-            ItemInstance item = _playerInventory[objectId];
-            SetVariableInfoS1(item);
-            var sendPaket = CreatorPacketsUser.CreateUseItem(objectId, 0);
-            bool enable = GameClient.Instance.IsCryptEnabled();
-            SendGameDataQueue.Instance().AddItem(sendPaket, enable, enable);
-            return true;
-        }
-        else
-        {
-            Debug.Log("Not found use items");
             return false;
         }
 
+        SetVariableInfoS1(item);
+
+        if (IsRecipeItem(item))
+        {
+            HandleRecipeItem(objectId);
+        }
+        else
+        {
+            SendUseItemPacket(objectId);
+        }
+
+        return true;
     }
+
+
+    private bool IsRecipeItem(ItemInstance item)
+    {
+        if (item.ItemData is EtcItem etcItem)
+        {
+            return etcItem.EtcItemgrp.EtcItemType == TYPE_RECIPE;
+        }
+        return false;
+    }
+
+    private void HandleRecipeItem(int objectId)
+    {
+        _objectIdEtcType = objectId;
+        SetupMessageWindow();
+    }
+
+    private void SendUseItemPacket(int objectId)
+    {
+        bool isCryptEnabled = GameClient.Instance.IsCryptEnabled();
+        SendGameDataQueue.Instance().AddItem(
+            CreatorPacketsUser.CreateUseItem(objectId, 0),
+            isCryptEnabled,
+            isCryptEnabled
+        );
+    }
+
+    private void SetupMessageWindow()
+    {
+        SystemMessageWindow.Instance.OnButtonOk += OkUse;
+        SystemMessageWindow.Instance.OnButtonClosed += OnпїЅancel;
+        SystemMessageWindow.Instance.ShowWindowDialogYesOrNot("Component registration is not reversible, do you want to continue?");
+    }
+
+    private bool TryGetItem(int objectId, out ItemInstance item)
+    {
+        if (!_playerInventory.TryGetValue(objectId, out item))
+        {
+            Debug.Log("Item not found");
+            return false;
+        }
+        return true;
+    }
+
+
+
+    private void OkUse()
+    {
+        SendUseItemPacket(_objectIdEtcType);
+        CleanupMessageWindow();
+    }
+
+    private void OnпїЅancel()
+    {
+        _objectIdEtcType = -1;
+        CleanupMessageWindow();
+    }
+
+    private void CleanupMessageWindow()
+    {
+        SystemMessageUtils.CancelEvent(SystemMessageWindow.Instance, OkUse, OnпїЅancel);
+    }
+
+
+
 
     private async void SetVariableInfoS1(ItemInstance item)
     {
        // if (item.Category == ItemCategory.Item)
        // {
-            StorageVariable.getInstance().AddS1Items(new VariableItem(item.ItemData.ItemName.Name, item.ObjectId));
-            StorageVariable.getInstance().AddS2Items(new VariableItem(item.Count.ToString(), item.ObjectId));
+           // StorageVariable.getInstance().AddS1Items(new VariableItem(item.ItemData.ItemName.Name, item.ObjectId));
+           // StorageVariable.getInstance().AddS2Items(new VariableItem(item.Count.ToString(), item.ObjectId));
        // }
        // else
        // {
@@ -471,7 +545,7 @@ public class PlayerInventory : MonoBehaviour
         {
 
             ItemInstance item = _playerInventory[objectId];
-            getInstance().AddS1Items(new VariableItem(item.ItemData.ItemName.Name, objectId));
+            //getInstance().AddS1Items(new VariableItem(item.ItemData.ItemName.Name, objectId));
             //AudioManager.Instance.PlayEquipSound("trash_basket");
             var sendPaket = CreatorPacketsUser.CreateDestroyItem(objectId, quantity);
             bool enable = GameClient.Instance.IsCryptEnabled();

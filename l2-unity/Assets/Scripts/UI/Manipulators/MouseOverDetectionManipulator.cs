@@ -30,7 +30,7 @@ public class MouseOverDetectionManipulator : PointerManipulator
         _enabled = false;
         if (_overThisManipulator)
         {
-            Debug.Log("PointerLeaveHandler> leave1 unblock 2");
+           // Debug.Log("PointerLeaveHandler> leave1 unblock 2");
             UnBlock();
         }
 

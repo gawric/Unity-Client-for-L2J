@@ -7,5 +7,6 @@ public enum ItemCategory : byte
     Quest = 3,
     Adena = 4,
     Item = 5,
-    None = 6,
+    RequiredItem = 6,
+    None = 7,
 }

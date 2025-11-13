@@ -17,6 +17,14 @@ public class SlotDragManipulator : PointerManipulator
         this.target = target;
     }
 
+    public SlotDragManipulator(VisualElement target, L2Slot slot , bool isEnabled)
+    {
+        _slot = slot;
+        _root = target;
+        this.target = target;
+        enabled = isEnabled;
+    }
+
     protected override void RegisterCallbacksOnTarget()
     {
         target.RegisterCallback<PointerDownEvent>(PointerDownHandler, TrickleDown.TrickleDown);

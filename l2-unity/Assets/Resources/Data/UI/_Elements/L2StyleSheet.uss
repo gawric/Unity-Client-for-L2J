@@ -1152,6 +1152,24 @@
     background-image: resource('Data/UI/Assets/Button/Button_DF_Over');
 }
 
+
+
+.l2-button:active .l2-button-bg-recipe {
+    background-image: resource('Data/UI/Recipe/Icon_Recipe_Down_new');
+}
+
+.l2-button:active:hover .l2-button-bg-recipe {
+    background-image: resource('Data/UI/Recipe/Icon_Recipe_Down_new');
+}
+
+.l2-button:hover .l2-button-bg-recipe {
+    background-image: resource('Data/UI/Recipe/Icon_Recipe_Over_new');
+}
+
+.l2-button-bg-recipe{
+    background-image: resource('Data/UI/Recipe/Icon_Recipe_Over_new');
+}
+
 .l2-button-bg {
     flex-grow: 1;
     background-image: resource('Data/UI/Assets/Button/Button_DF');

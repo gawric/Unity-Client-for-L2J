@@ -44,7 +44,7 @@ public class GearSlot : InventorySlot
     {
         if (item != null)
         {
-            StorageVariable.getInstance().AddS1Items(new VariableItem(item.ItemData.ItemName.Name, objectId));
+           // StorageVariable.getInstance().AddS1Items(new VariableItem(item.ItemData.ItemName.Name, objectId));
         }
     }
 

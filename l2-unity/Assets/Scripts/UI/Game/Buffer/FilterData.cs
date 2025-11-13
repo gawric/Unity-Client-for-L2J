@@ -27,6 +27,14 @@ public class FilterData
             .FirstOrDefault(kvp => !kvp.Value.IsBusy()).Value;
     }
 
+    public DataCell GetCellByPosition(int position)
+    {
+        return _dictElement
+            .FirstOrDefault(kvp => kvp.Value.GetPosition() == position)
+            .Value;
+    }
+
+
     public List<DataCell> GetListActiveAndBusy()
     {
         return _dictElement

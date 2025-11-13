@@ -3,10 +3,42 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.UIElements;
+using static L2Slot;
 
-public class CreatorTradingWindows : AbstractCreator , ICreator
+public class CreatorTradingWindows : AbstractCreator , ICreatorTradeTab
 {
     public event Action<int> EventSwitchTabByIndexOfTab;
+    private VisualTreeAsset[] _templates;
+    //tabTemplate 0 , tabHeaderTemplate 1
+    private readonly string[] loadTemplate = new string[2] { "Data/UI/_Elements/Game/Inventory/InventoryTab", "Data/UI/_Elements/Game/Inventory/InventoryTabHeader" };
+
+    public void LoadAsset(Func<string, VisualTreeAsset> loaderFunc)
+    {
+        _templates = new VisualTreeAsset[loadTemplate.Length];
+
+        for (int i = 0; i < loadTemplate.Length; i++)
+        {
+            _templates[i] = loaderFunc(loadTemplate[i]);
+        }
+    }
+
+    public void CreateTradeTabs(VisualElement inventoryTabView , SlotType slotType = SlotType.Multisell , bool isDragged = false)
+    {
+        if(inventoryTabView == null)
+        {
+            Debug.LogWarning("CreatorTradingWindows > CreateTradeTabs: Not Found inventoryTabView ");
+            return;
+        }
+
+        var tabTemplate = _templates[0];
+        var tabHeaderTemplate = _templates[1];
+        base.CreateTradeTabs(inventoryTabView, tabTemplate, tabHeaderTemplate , slotType, isDragged);
+    }
+
+    public void ClearSlots(List<ItemInstance> oldListItems)
+    {
+        base.ClearSlotsActiveTab(oldListItems);
+    }
 
     public void SetClickActiveTab(int position)
     {
@@ -50,29 +82,4 @@ public class CreatorTradingWindows : AbstractCreator , ICreator
         return null;
     }
 
-
-    public void AddOtherData(List<OtherModel> allItems)
-    {
-        throw new NotImplementedException();
-    }
-    //not use in TradeWindow
-    public void CreateTabs(VisualElement _inventoryTabView, VisualTreeAsset _tabTemplate, VisualTreeAsset _tabHeaderTemplate)
-    {
-        throw new NotImplementedException();
-    }
-    //not use in TradeWindow
-    public void InsertTablesIntoContent(ICreatorTables creatorTable, List<TableColumn> dataColumn, bool useAllTabs)
-    {
-        throw new NotImplementedException();
-    }
-
-    public void RefreshDataColumns(List<TableColumn> dataColumns)
-    {
-        throw new NotImplementedException();
-    }
-
-    public void InsertFooterIntoContent(VisualElement footerElement, VisualElement rootFooterElement)
-    {
-        throw new NotImplementedException();
-    }
 }

@@ -10,7 +10,7 @@ public class SkillLearnWindow : L2PopupWindow
 {
     private static SkillLearnWindow _instance;
     protected VisualTreeAsset _rowsTemplate;
-    private ICreator _creatorWindow;
+    private ICreatorVerticalScroll _creatorWindow;
     private Label _spLabel;
     private List<OtherModel> _list;
 
@@ -47,7 +47,7 @@ public class SkillLearnWindow : L2PopupWindow
         _spLabel = (Label)GetElementById("spCount");
 
 
-        _creatorWindow.InitTradeTabs(new string[] { "ALL", "Other" });
+        //_creatorWindow.InitTradeTabs(new string[] { "ALL", "Other" });
         _creatorWindow.CreateTabs(content, null, _rowsTemplate);
         _creatorWindow.EventLeftClick += ClickItem;
 

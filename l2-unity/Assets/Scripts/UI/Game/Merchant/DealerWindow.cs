@@ -149,10 +149,10 @@ public class DealerWindow : L2PopupWindow
 
     public void EventDoubleClick(VisualElement slotElement)
     {
-        string[] ids = GetUniquePosition(slotElement);
+        string[] ids = ToolTipsUtils.GetUniquePosition(slotElement);
         int position = Int32.Parse(ids[0]);
         int type = Int32.Parse(ids[1]);
-        SlotType slot = _shopCellCreator.DetectedClickPanel(type);
+        SlotType slot = ToolTipsUtils.DetectedClickPanel(type);
         Move—ellElsePriceType(slot , _listBuy , position);
         RefreshToolTips(slotElement , slot);
     }
@@ -166,10 +166,7 @@ public class DealerWindow : L2PopupWindow
         
     }
    
-    private string[] GetUniquePosition(VisualElement ve)
-    {
-        return ve.name.Split('_');
-    }
+
 
     private List<Product> _listServer;
     private int _position;

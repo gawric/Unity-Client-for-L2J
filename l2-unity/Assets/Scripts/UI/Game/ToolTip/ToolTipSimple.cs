@@ -18,6 +18,7 @@ public class ToolTipSimple : L2PopupWindow, IToolTips
     private VisualTreeAsset _windowTemplateSimple;
     private VisualTreeAsset _windowTemplateString;
     private VisualTreeAsset _windowTemplateAcccesories;
+    private VisualTreeAsset _windowTemplateRequiredAcccesories;
     private VisualTreeAsset _windowTemplateArmor;
     private VisualTreeAsset _setsElements;
     private VisualTreeAsset _setsEffects;
@@ -27,7 +28,7 @@ public class ToolTipSimple : L2PopupWindow, IToolTips
     private float _widtchContent = 0;
     private VisualElement _selectShow;
     private TooltipDataProvider _dataProvider;
-
+    private CalcNewPosition _calcPosition;
     public static ToolTipSimple Instance { get { return _instance; } }
 
 
@@ -40,6 +41,7 @@ public class ToolTipSimple : L2PopupWindow, IToolTips
  
              _showToolTip = new ShowToolTip(this);
             _dataProvider = new TooltipDataProvider();
+            _calcPosition = new CalcNewPosition();
         }
         else
         {
@@ -54,6 +56,7 @@ public class ToolTipSimple : L2PopupWindow, IToolTips
         _windowTemplateSimple = LoadAsset("Data/UI/_Elements/Game/ToolTips/ToolTipSimple");
         _windowTemplateWeapon = LoadAsset("Data/UI/_Elements/Game/ToolTips/ToolTipWeapon");
         _windowTemplateAcccesories = LoadAsset("Data/UI/_Elements/Game/ToolTips/ToolTipAccessories");
+        _windowTemplateRequiredAcccesories = LoadAsset("Data/UI/_Elements/Game/ToolTips/ToolTipRequiredAccessories");
         _windowTemplateArmor = LoadAsset("Data/UI/_Elements/Game/ToolTips/ToolTipArmor");
         _windowTemplateSkill = LoadAsset("Data/UI/_Elements/Game/ToolTips/ToolTipSkill");
         _setsElements = LoadAsset("Data/UI/_Elements/Game/ToolTips/Elements/SetsElements");
@@ -146,6 +149,9 @@ public class ToolTipSimple : L2PopupWindow, IToolTips
                 break;
             case ItemCategory.Item:
                 _dataProvider.AddDataOther(template, item);
+                break;
+            case ItemCategory.RequiredItem:
+                _dataProvider.AddRequiredData(template, item);
                 break;
             case ItemCategory.ShieldArmor:
                 _dataProvider.AddDataArmor(template, item, _setsElements, _setsEffects);
@@ -258,13 +264,14 @@ public class ToolTipSimple : L2PopupWindow, IToolTips
             _contentInside.MarkDirtyRepaint();
 
             AddData(ids, template);
+            bool isBelow = GetForceBelow(ids);
             _selectShow = ve;
             //esle position layout != 0 <--- (EndNewPosition add new Vector2(0,0))
             //This means the layout did not return to the base, most likely this is an error. Restarting the transition to a new position
             //if (_windowEle.worldBound.height != 0)
             if (_contentInside.worldBound.height != 0)
             {
-                _showToolTip.Show(_selectShow);
+                _showToolTip.Show(_selectShow , isBelow);
                 yield return new WaitForEndOfFrame();
             }
         }
@@ -300,6 +307,14 @@ public class ToolTipSimple : L2PopupWindow, IToolTips
                     ItemInstance multiSelltItem = MultiSellWindow.Instance.GetItemByPosition(position);
                     if (multiSelltItem != null) return GetInventoryContainer(multiSelltItem);
                     break;
+                case (int)SlotType.Recipe:
+                    ItemInstance receiptInstance = RecipeBookWindow.Instance.GetRecipeInstanceByPosition(position);
+                    if (receiptInstance != null) return GetInventoryContainer(receiptInstance);
+                    break;
+                case (int)SlotType.RecipeCraftItem:
+                    ItemInstance requiredItem = CraftingItemWindow.Instance.GetRequiredInstanceByPosition(position);
+                    if (requiredItem != null) return GetInventoryContainer(requiredItem);
+                    break;
                 case (int)SlotType.Gear:
                     GearItem gearItem = InventoryWindow.Instance.GetGearPosition(position);
                     return GetGearContainer(gearItem);
@@ -324,6 +339,10 @@ public class ToolTipSimple : L2PopupWindow, IToolTips
                     return SwitchToString();
                 case (int)SlotType.Multisell:
                     return SwitchToString();
+                case (int)SlotType.Recipe:
+                    return SwitchToString();
+                case (int)SlotType.RecipeCraftItem:
+                    return SwitchToString();
                 case (int)SlotType.Gear:
                     GearItem gearItem = InventoryWindow.Instance.GetGearPosition(position);
                     return GetGearStringContainer(gearItem);
@@ -332,6 +351,9 @@ public class ToolTipSimple : L2PopupWindow, IToolTips
                     int skillId  = position;
                     SkillInstance skillItem = SkillListWindow.Instance.GetSkillInstanceBySkillId(skillId);
                     return GetSkillContainer(skillItem);
+                case (int)SlotType.BuffPanel:
+                    SkillInstance instance = BufferPanel.Instance.GetCellByPosition(position);
+                    return GetSkillContainer(instance);
             }
         }
 
@@ -362,6 +384,8 @@ public class ToolTipSimple : L2PopupWindow, IToolTips
             case ItemCategory.Jewel:
             case ItemCategory.Item:
                 return SwitchToAccessories();
+            case ItemCategory.RequiredItem:
+                return SwitchToRequiredAccessories();
             case ItemCategory.ShieldArmor:
                 return SwitchToArmor();
         }
@@ -453,128 +477,48 @@ public class ToolTipSimple : L2PopupWindow, IToolTips
         return null;
     }
 
-    //backup code for switch tooltip
-    // private TemplateContainer SwitchToolTip(string[] ids , bool isClickLeft)
-    //{
-    //int position = Int32.Parse(ids[0]);
-    //  int type = Int32.Parse(ids[1]);
 
-    //if (isClickLeft)
-    //{
-    //if (type == (int)SlotType.PriceSell)
-    //{
-    // Product product =  ToolTipManager.GetInstance().FindProductInSellList(position);
-    //if(product != null)
-    //{
-    // switch (product.GetTypeItem())
-    // {
-    // case EnumType2.TYPE2_WEAPON:
-    //  return SwitchToWeapon();
-    // case EnumType2.TYPE2_ACCESSORY:
-    //   return SwitchToAccessories();
-    // case EnumType2.TYPE2_OTHER:
-    //  return SwitchToAccessories();
-    //case EnumType2.TYPE2_SHIELD_ARMOR:
-    //    return SwitchToArmor();
-    // }
-    // }
 
-    // }else if (type == (int)SlotType.PriceBuy)
-    //{
-    //Product product = ToolTipManager.GetInstance().FindProductInBuyList(position);
-    //if(product != null)
-    // {
-    //switch (product.GetTypeItem())
-    //{
-    //case EnumType2.TYPE2_WEAPON:
-    //    return SwitchToWeapon();
-    // case EnumType2.TYPE2_ACCESSORY:
-    //   return SwitchToAccessories();
-    //case EnumType2.TYPE2_OTHER:
-    //  return SwitchToAccessories();
-    //case EnumType2.TYPE2_SHIELD_ARMOR:
-    //  return SwitchToArmor();
-    //}
-    //}
-
-    // }
-    // else if (type == (int)SlotType.Inventory)
-    //{
-    // ItemInstance item = InventoryWindow.Instance.GetItemByPosition(position);
-    // if (item != null)
-    /// {
-    // switch (item.Category)
-    // {
-    // case ItemCategory.Weapon:
-    //    return SwitchToWeapon();
-    // case ItemCategory.Jewel:
-    //    return SwitchToAccessories();
-    // case ItemCategory.Item:
-    //       return SwitchToAccessories();
-    //   case ItemCategory.ShieldArmor:
-    //       return SwitchToArmor();
-    //  }
-    // }
-    // }
-    // }
-    //else
-    // {
-    //if (type == (int)SlotType.PriceSell | type == (int)SlotType.PriceBuy)
-    // {
-    //     return SwitchToSimple();
-    // }else if (type == (int)SlotType.Inventory)
-    // {
-    //    return SwitchToString();
-    // }
-    // else if (type == (int)SlotType.Gear)
-    // {
-    //     return SwitchToString();
-    // }
-    // }
-
-    // return null;
-    //}
-
-    public object GetDataClickLeft(int type , int position)
+    public object GetDataClickLeft(int type, int position)
     {
-            if (type == (int)SlotType.PriceSell)
-            {
+        switch ((SlotType)type)
+        {
+            case SlotType.PriceSell:
                 return ToolTipManager.GetInstance().FindProductInSellList(position);
-            }
-            else if (type == (int)SlotType.PriceBuy)
-            {
-                return ToolTipManager.GetInstance().FindProductInBuyList(position);
-            }
-            else if (type == (int)SlotType.Inventory)
-            {
-                return InventoryWindow.Instance.GetItemByPosition(position);
-            }
-            else if (type == (int)SlotType.Enchant)
-            {
-                return EnchantWindow.Instance.GetItemByPosition(position);
-            }
-            else if (type == (int)SlotType.Multisell)
-            {
-                return MultiSellWindow.Instance.GetItemByPosition(position);
-            }
-            else if (type == (int)SlotType.SkillWindow)
-            {
-                int skillId = position;
-                return SkillListWindow.Instance.GetSkillInstanceBySkillId(position);
-            }
-        else if (type == (int)SlotType.Gear)
-            {
-                GearItem gearItem = InventoryWindow.Instance.GetGearPosition(position);
 
+            case SlotType.PriceBuy:
+                return ToolTipManager.GetInstance().FindProductInBuyList(position);
+
+            case SlotType.Inventory:
+                return InventoryWindow.Instance.GetItemByPosition(position);
+
+            case SlotType.Enchant:
+                return EnchantWindow.Instance.GetItemByPosition(position);
+
+            case SlotType.Multisell:
+                return MultiSellWindow.Instance.GetItemByPosition(position);
+
+            case SlotType.Recipe:
+                return RecipeBookWindow.Instance.GetRecipeInstanceByPosition(position);
+            case SlotType.RecipeCraftItem:
+                return CraftingItemWindow.Instance.GetRequiredInstanceByPosition(position);
+            case SlotType.SkillWindow:
+                return SkillListWindow.Instance.GetSkillInstanceBySkillId(position);
+
+            case SlotType.Gear:
+                GearItem gearItem = InventoryWindow.Instance.GetGearPosition(position);
                 if (gearItem != null && gearItem.GetItemId() != 0)
                 {
                     int objectId = gearItem.GetObjectId();
-                    return  PlayerInventory.Instance.GetItemEquip(objectId);
+                    return PlayerInventory.Instance.GetItemEquip(objectId);
                 }
-            }
+                return null;
 
-        return null;
+            default:
+                return null;
+        }
     }
+
 
     private TemplateContainer SwitchToSimple()
     {
@@ -598,11 +542,7 @@ public class ToolTipSimple : L2PopupWindow, IToolTips
         return template;
     }
 
-    private TemplateContainer GetStringContainerToGear(int position)
-    {
-        GearItem gearItem = InventoryWindow.Instance.GetGearPosition(position);
-        return GetGearContainer(gearItem);
-    }
+
 
     private TemplateContainer SwitchToWeapon()
     {
@@ -634,6 +574,16 @@ public class ToolTipSimple : L2PopupWindow, IToolTips
         return _accessories;
     }
 
+    private TemplateContainer SwitchToRequiredAccessories()
+    {
+        _content.Clear();
+        var _accessories = _windowTemplateRequiredAcccesories.CloneTree();
+        _content.Add(_accessories);
+        _contentInside = _accessories.Q<VisualElement>(className: "content");
+        _contentInside.RegisterCallback<GeometryChangedEvent>(OnGeometryChanged);
+        return _accessories;
+    }
+
     private TemplateContainer SwitchToArmor()
     {
         _content.Clear();
@@ -651,7 +601,7 @@ public class ToolTipSimple : L2PopupWindow, IToolTips
         return  ve.name.Split('_');
     }
 
-
+    private bool _isForceBelow = false;
     //experimental code 
     private void OnGeometryChanged(GeometryChangedEvent evt)
     {
@@ -662,62 +612,24 @@ public class ToolTipSimple : L2PopupWindow, IToolTips
         {
             _heightContent = _contentInside.worldBound.height;
             _widtchContent = _contentInside.worldBound.width;
-            _showToolTip.Show(_selectShow);
+            _showToolTip.Show(_selectShow , _isForceBelow);
         }
 
     }
 
  
     //experimental code 
-    public void NewPosition(Vector2 newPoint, float sdfig)
+    public void NewPosition(Vector2 newPoint, float sdfig , bool isForceBelow)
     {
-        
-        var highest = highestPoint(newPoint, _heightContent);
-        var lowest = lowestPoint(newPoint, _heightContent);
+        _isForceBelow = isForceBelow;
+        var highest = _calcPosition.HighestPoint(newPoint, _heightContent);
         bool insideRoot = L2GameUI.Instance.IsWindowContain(highest);
-        //if (!ActionWindow.Instance.IsWindowContain(lowest) | IsTop(newPoint))
-       // {
-            if (!insideRoot)
-            {
-                //shift down to 0 and to the right to the icon border
-                //2px border 
-                float sdfig1 = sdfig + 2;
-               // float new_x = newPoint.x + _widtchContent;
-                float new_x2 = newPoint.x + sdfig1;
-                Vector2 reversePoint = new Vector2(new_x2, 0);
-            
-                // var test1 = _windowTemplateWeapon.Instantiate()[0];
-               // _content.Add(test1);
-                _content.transform.position = reversePoint;
-            }
-            else
-            {
-                float width = _heightContent;
-                float newddfig = width;
-                //2px border 
-                float sdfig1 = sdfig + 2;
-                float new_y = newPoint.y - newddfig;
-                float new_y2 = new_y - sdfig1;
-                Vector2 reversePoint = new Vector2(newPoint.x, new_y2);
-
-                _content.transform.position = reversePoint;
-            }
-
+        Vector2 reversePoint = _calcPosition.GetNewPosition(newPoint, sdfig, _heightContent , insideRoot , isForceBelow);
+        _content.transform.position = reversePoint;
         BringToFront();
     }
 
-    private Vector2 highestPoint(Vector2 newPoint, float element)
-    {
-        //Added 28px. If there are problems with the upper tooltips, you need to remove them
-        var element1 = element + 28;
-        return new Vector2(newPoint.x, newPoint.y - element1);
-    }
 
-
-    private Vector2 lowestPoint(Vector2 newPoint, float element)
-    {
-        return new Vector2(newPoint.x, newPoint.y + element);
-    }
 
 
 
@@ -750,10 +662,22 @@ public class ToolTipSimple : L2PopupWindow, IToolTips
                 ItemInstance itemMultisell = MultiSellWindow.Instance.GetItemByPosition(position);
                 SetSimpleItemSingleToolTip(itemMultisell, template);
                 break;
+            case (int)SlotType.Recipe:
+                ItemInstance recipeInstance = RecipeBookWindow.Instance.GetRecipeInstanceByPosition(position);
+                SetSimpleItemSingleToolTip(recipeInstance, template);
+                break;
+            case (int)SlotType.RecipeCraftItem:
+                ItemInstance requiredItem = CraftingItemWindow.Instance.GetRequiredInstanceByPosition(position);
+                SetSimpleRequireditemToolTip(requiredItem, template);
+                break;
             case (int)SlotType.SkillWindow:
                 int skillId = position;
                 SkillInstance skillInstance = SkillListWindow.Instance.GetSkillInstanceBySkillId(skillId);
                 SetSkillToolTip(skillInstance, template);
+                break;
+            case (int)SlotType.BuffPanel:
+                SkillInstance instance = BufferPanel.Instance.GetCellByPosition(position);
+                SetSkillToolTip(instance, template);
                 break;
             case (int)SlotType.Gear:
                 GearItem gearItem = InventoryWindow.Instance.GetGearPosition(position);
@@ -770,7 +694,22 @@ public class ToolTipSimple : L2PopupWindow, IToolTips
         }
     }
 
-   
+    private bool GetForceBelow(string[] ids)
+    {
+        int position = Int32.Parse(ids[0]);
+        int type = Int32.Parse(ids[1]);
+
+        switch (type)
+        {
+            case (int)SlotType.BuffPanel:
+                return true;
+
+            default: return false;
+        }
+    }
+
+
+
 
 
 
@@ -845,7 +784,26 @@ public class ToolTipSimple : L2PopupWindow, IToolTips
         }
     }
 
+    public void SetSimpleRequireditemToolTip(ItemInstance item, TemplateContainer template)
+    {;
+        SetSimpleItemSingleToolTip(item, template);
+        SetNameRequiredItem(item, template);
 
+    }
+    public void SetNameRequiredItem(ItemInstance item, TemplateContainer template)
+    {
+        if(item != null)
+        {
+            IDataTips data = ToolTipManager.GetInstance().GetProductText(item);
+            ItemInstance inventoryItem = PlayerInventory.Instance.GetItemByItemId(item.ItemId);
+            Label nameText = (Label)template.Q<VisualElement>("name");
+            if(nameText != null) nameText.text = data.GetName(true);
+
+
+
+        }
+
+    }
 
     private void SetImageElement(VisualElement element , Texture2D texture)
     {
@@ -881,7 +839,7 @@ public class ToolTipSimple : L2PopupWindow, IToolTips
 
     public void SetTextEnchantIfNot0(int data , Label element)
     {
-        if (data != 0)
+        if (data != 0 & data != -1)
         {
             element.style.display = DisplayStyle.Flex;
             element.text = "+"+ data;
@@ -914,9 +872,6 @@ public class ToolTipSimple : L2PopupWindow, IToolTips
 
         }
     }
-
-
-
 
     public void ResetPosition(Vector2 vector2)
     {

@@ -67,21 +67,23 @@ public class L2ClickableSlot : L2Slot
 
     private void EventLeftDoubleClick(VisualElement slotElement)
     {
-
-      if (Time.time - clickTime < doubleClickThreshold)
-      {
-          if(SlotType.PriceBuy == _slotType | SlotType.PriceSell == _slotType)
-          {
-                DealerWindow.Instance.EventDoubleClick(slotElement);
-
-   
-          }
-
-      }
-      clickTime = Time.time; 
+        if (Time.time - clickTime < doubleClickThreshold)
+        {
+            switch (_slotType)
+            {
+                case SlotType.Recipe:
+                    RecipeBookWindow.Instance.EventDoubleClick(slotElement);
+                    break;
+                case SlotType.PriceBuy:
+                case SlotType.PriceSell:
+                    DealerWindow.Instance.EventDoubleClick(slotElement);
+                    break;
+            }
+        }
+        clickTime = Time.time;
     }
 
-   
+
     public void UnSelect()
     {
         Debug.Log($"Slot {_position} unselected.");

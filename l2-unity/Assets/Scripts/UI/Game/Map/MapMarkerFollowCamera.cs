@@ -6,45 +6,55 @@ public class MapMarkerFollowCamera : MonoBehaviour
     public Camera targetCamera;
     private VisualElement _marker;
 
-    // храним последний применённый угол (в диапазоне -180..180)
-    float lastAngle = float.NaN;
+     // Optional: Add an offset value to fine-tune the rotation
+    public float rotationOffset = 90f;
+
+
+    private float _lastAngle = float.NaN;
+    private float _desiredAngle = float.NaN;
 
     public void SetElement(VisualElement marker)
     {
         _marker = marker;
-
-        // Устанавливаем точку вращения в центр элемента (если нужно).
-        // В зависимости от версии Unity API эта строчка может выглядеть иначе.
-        //marker.style.transformOrigin = new StyleTransformOrigin(
-        //    new TransformOrigin(new Length(50, LengthUnit.Percent), new Length(50, LengthUnit.Percent))
-        //);
     }
 
-    public void UpdateTurn(Camera targetCamera)
+    public void TurnUpdate(Camera targetCamera , bool isWindowHide)
     {
-        if (_marker == null || targetCamera == null) return;
-
-        // Выбираем нужную ось: для top-down — yaw (Y)
         float cameraYaw = targetCamera.transform.eulerAngles.y;
+        _desiredAngle = cameraYaw + rotationOffset;
+        _desiredAngle = NormalizeAngle(_desiredAngle);
 
-        // Если маркер поворачивается в противоположную сторону — просто уберите знак минус.
-        // Используйте cameraYaw или -cameraYaw в зависимости от желаемого результата.
-        float desiredAngle = cameraYaw; // <- исправление: убрали минус
+        if (_marker == null || targetCamera == null || isWindowHide) return;
 
-        // Нормализуем в диапазон -180..180, чтобы плавно сравнивать и избегать прыжков 359->0
-        desiredAngle = NormalizeAngle(desiredAngle);
+  
+        //Debug.Log($"Camera Yaw: {cameraYaw}, Desired Angle: {desiredAngle}");
 
-        // Обновляем только если угол изменился (экономим присвоения стиля)
-        if (Mathf.Approximately(desiredAngle, lastAngle)) return;
-        lastAngle = desiredAngle;
+        if (!Mathf.Approximately(_desiredAngle, _lastAngle))
+        {
+            _lastAngle = _desiredAngle;
+            _marker.style.rotate = new Rotate(new Angle(_desiredAngle, AngleUnit.Degree));
+        }
+    }
 
-        _marker.style.rotate = new Rotate(new Angle(desiredAngle, AngleUnit.Degree));
+    public void ManualTurnUpdate()
+    {
+        if (!Mathf.Approximately(_desiredAngle, _lastAngle))
+        {
+            _lastAngle = _desiredAngle;
+            _marker.style.rotate = new Rotate(new Angle(_desiredAngle, AngleUnit.Degree));
+        }
     }
 
     static float NormalizeAngle(float a)
     {
-        a = (a + 180f) % 360f;
+        // Normalize to 0..360 range first
+        a = a % 360f;
         if (a < 0) a += 360f;
-        return a - 180f;
+
+        // Then convert to -180..180 range
+        if (a > 180f)
+            a -= 360f;
+
+        return a;
     }
 }

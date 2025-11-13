@@ -118,6 +118,27 @@ public class CreatorPacketsUser
         return new RequestQuestAbort(questId);
     }
 
+
+    public static RequestRecipeItemMakeSelf CreateRequestRecipeItemMakeSelf(int recipeId)
+    {
+        return new RequestRecipeItemMakeSelf(recipeId);
+    }
+
+    public static RequestRecipeBookDestroy CreateRequestRecipeBookDestroy(int recipeId)
+    {
+        return new RequestRecipeBookDestroy(recipeId);
+    }
+
+
+    public static RequestRecipeBookOpen CreateRequestRecipeBookOpen(int isDwarven)
+    {
+        return new RequestRecipeBookOpen(isDwarven);
+    }
+    public static RequestRecipeItemMakeInfo CreateRequestRecipeItemMakeInfo(int recipeId)
+    {
+        return new RequestRecipeItemMakeInfo(recipeId);
+    }
+
     public static SendWarehouseDepositList CreateWHDepositList(List<Product> depositList)
     {
         return new SendWarehouseDepositList(depositList);

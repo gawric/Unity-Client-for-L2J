@@ -154,4 +154,31 @@ public abstract class AbstractServerItem
         return null;
     }
 
+    protected Texture2D GetGradeImage(ItemGrade grade)
+    {
+        switch (grade)
+        {
+            case ItemGrade.none:
+                return null;
+
+            case ItemGrade.d:
+                return IconManager.Instance.GetInterfaceIcon("grade_d");
+
+            case ItemGrade.c:
+                return IconManager.Instance.GetInterfaceIcon("grade_c");
+
+            case ItemGrade.b:
+                return IconManager.Instance.GetInterfaceIcon("grade_b");
+
+            case ItemGrade.a:
+                return IconManager.Instance.GetInterfaceIcon("grade_a");
+
+            case ItemGrade.s:
+                return IconManager.Instance.GetInterfaceIcon("grade_s");
+
+            default:
+                return null;
+        }
+    }
+
 }

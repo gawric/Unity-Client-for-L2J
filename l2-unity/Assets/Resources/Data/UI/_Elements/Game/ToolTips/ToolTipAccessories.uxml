@@ -13,8 +13,8 @@
                         </engine:GroupBox>
                         <engine:GroupBox name="Name" style="margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; padding-top: 0; padding-bottom: 0; padding-left: 0; flex-direction: row; align-items: flex-start; align-self: flex-start;">
                             <engine:Label text="+2" name="enchant" style="margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 3px; font-size: 12px; color: rgb(165, 143, 113);" />
-                            <engine:Label tabindex="-1" parse-escape-sequences="true" display-tooltip-when-elided="true" name="nameAccessories" selectable="true" class="NameSkill" style="margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; padding-top: 0; padding-right: 0; padding-bottom: 0; color: rgb(222, 222, 222); padding-left: 3px; font-size: 12px; flex-grow: 0; align-items: flex-start;" />
-                            <engine:VisualElement name="grade" style="flex-grow: 1; width: 16px; height: 16px; max-width: 16px; max-height: 16px; min-height: 16px; min-width: 16px; background-image: resource(&apos;Data/SysTextures/Icon/grade_c&apos;); padding-left: 0; margin-left: 3px;" />
+                            <engine:Label tabindex="-1" parse-escape-sequences="true" display-tooltip-when-elided="true" name="nameAccessories" selectable="true" class="NameSkill" style="margin-top: 0; margin-right: 5px; margin-bottom: 0; margin-left: 0; padding-top: 0; padding-right: 0; padding-bottom: 0; color: rgb(222, 222, 222); padding-left: 3px; font-size: 12px; flex-grow: 0; align-items: flex-start;" />
+                            <engine:VisualElement name="grade" style="flex-grow: 1; width: 16px; height: 16px; max-width: 16px; max-height: 16px; min-height: 16px; min-width: 16px; background-image: resource(&apos;Data/SysTextures/Icon/grade_c&apos;); padding-left: 0; margin-left: 0; padding-right: 0;" />
                         </engine:GroupBox>
                     </engine:GroupBox>
                 </engine:GroupBox>

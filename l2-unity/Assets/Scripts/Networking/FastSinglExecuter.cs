@@ -148,13 +148,13 @@ public class FastSinglExecuter : MonoBehaviour
             string name = World.Instance.getEntityName(attackPacket.TargetId);
             //example "$c1 hit you for $s2 damage."
             //system message info c1
-            StorageVariable.getInstance().Add—1Items(new VariableItem(name, attackPacket.AttackerObjId));
+            //StorageVariable.getInstance().Add—1Items(new VariableItem(name, attackPacket.AttackerObjId));
             //system message info s1
 
         });
-        StorageVariable.getInstance().AddS1Items(new VariableItem(attackPacket.Damage.ToString(), attackPacket.AttackerObjId));
+        //StorageVariable.getInstance().AddS1Items(new VariableItem(attackPacket.Damage.ToString(), attackPacket.AttackerObjId));
         //system message info s2
-        StorageVariable.getInstance().AddS2Items(new VariableItem(attackPacket.Damage.ToString(), attackPacket.AttackerObjId));
+        //StorageVariable.getInstance().AddS2Items(new VariableItem(attackPacket.Damage.ToString(), attackPacket.AttackerObjId));
 
     }
 

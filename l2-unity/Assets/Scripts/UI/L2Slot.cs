@@ -11,10 +11,13 @@ public class L2Slot
         Inventory,
         Enchant,
         Multisell,
+        Recipe,
+        RecipeCraftItem,
         InventoryBis, //other tab slots
         Gear,
         Skill,
         SkillBar,
+        BuffPanel,
         SkillWindow,
         Action,
         Trash,
@@ -32,6 +35,7 @@ public class L2Slot
     protected int _enchantLevel;
     protected VisualElement _slotElement;
     protected VisualElement _slotBg;
+    protected VisualElement _slotDisabled;
     protected TooltipManipulator _tooltipManipulator;
     protected SlotHoverDetectManipulator _hoverManipulator;
 
@@ -52,6 +56,7 @@ public class L2Slot
         _slotElement = slotElement;
         _slotElement.AddToClassList("dragged");
         _slotBg = _slotElement.Q<VisualElement>(null, "slot-bg");
+        _slotDisabled = _slotElement.Q<VisualElement>(null, "slot-disabled");
 
         _position = -1;
         _id = -1;
@@ -73,6 +78,7 @@ public class L2Slot
         }
 
         _slotBg = _slotElement.Q<VisualElement>(null, "slot-bg");
+        _slotDisabled = _slotElement.Q<VisualElement>(null, "slot-disabled");
 
         if (slotElement != null)
         {

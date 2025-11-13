@@ -2,7 +2,7 @@ using UnityEngine;
 
 public interface IDataTips
 {
-    string GetName();
+    string GetName(bool hideCount = false);
     string GetDiscription();
 
     string GetPrice();
