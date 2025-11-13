@@ -1,11 +1,9 @@
 using System;
 using System.Collections;
-using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.UIElements;
 using static L2Slot;
-using static UnityEditor.ShaderGraph.Internal.KeywordDependentCollection;
 
 public class RecipeBookWindow : L2PopupWindow
 {

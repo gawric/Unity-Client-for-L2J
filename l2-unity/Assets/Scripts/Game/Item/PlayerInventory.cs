@@ -486,7 +486,7 @@ public class PlayerInventory : MonoBehaviour
     private void SetupMessageWindow()
     {
         SystemMessageWindow.Instance.OnButtonOk += OkUse;
-        SystemMessageWindow.Instance.OnButtonClosed += On�ancel;
+        SystemMessageWindow.Instance.OnButtonClosed += OnCancel;
         SystemMessageWindow.Instance.ShowWindowDialogYesOrNot("Component registration is not reversible, do you want to continue?");
     }
 
@@ -508,7 +508,7 @@ public class PlayerInventory : MonoBehaviour
         CleanupMessageWindow();
     }
 
-    private void On�ancel()
+    private void OnCancel()
     {
         _objectIdEtcType = -1;
         CleanupMessageWindow();
@@ -516,7 +516,7 @@ public class PlayerInventory : MonoBehaviour
 
     private void CleanupMessageWindow()
     {
-        SystemMessageUtils.CancelEvent(SystemMessageWindow.Instance, OkUse, On�ancel);
+        SystemMessageUtils.CancelEvent(SystemMessageWindow.Instance, OkUse, OnCancel);
     }
 
 
