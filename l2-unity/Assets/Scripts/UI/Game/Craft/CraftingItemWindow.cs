@@ -34,7 +34,7 @@ public class CraftingItemWindow : L2PopupWindow
 
     protected override void LoadAssets()
     {
-        _windowTemplate = LoadAsset("Data/UI/_Elements/Game/Ñraft/CraftingItemWindow");
+        _windowTemplate = LoadAsset("Data/UI/_Elements/Game/Craft/CraftingItemWindow");
         _creatorSimpleTrade.LoadAsset(LoadAsset);
 
     }
