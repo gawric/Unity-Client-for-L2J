@@ -1,10 +1,5 @@
-using UnityEditor;
-using UnityEditor.Sprites;
 using UnityEngine;
-using UnityEngine.Timeline;
 using UnityEngine.UIElements;
-using static UnityEditor.PlayerSettings;
-using static UnityEngine.UI.GridLayoutGroup;
 
 public class MapPanner 
 {

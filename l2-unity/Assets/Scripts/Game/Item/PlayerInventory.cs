@@ -1,13 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
-using UnityEditor;
-using UnityEditorInternal.Profiling.Memory.Experimental;
 using UnityEngine;
 
 using static StorageVariable;
-using static UnityEditor.Progress;
 
 public class PlayerInventory : MonoBehaviour
 {
@@ -436,7 +432,7 @@ public class PlayerInventory : MonoBehaviour
         //}
 
         //InventoryWindow.Instance.SelectSlot(toSlot);
-        Debug.Log("Нужно реализовать пакеты для отпарвки на сервер");
+        Debug.Log("пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ");
         //GameClient.Instance.ClientPacketHandler.UpdateInventoryOrder(orders);
     }
 
@@ -490,7 +486,7 @@ public class PlayerInventory : MonoBehaviour
     private void SetupMessageWindow()
     {
         SystemMessageWindow.Instance.OnButtonOk += OkUse;
-        SystemMessageWindow.Instance.OnButtonClosed += OnСancel;
+        SystemMessageWindow.Instance.OnButtonClosed += OnCancel;
         SystemMessageWindow.Instance.ShowWindowDialogYesOrNot("Component registration is not reversible, do you want to continue?");
     }
 
@@ -512,7 +508,7 @@ public class PlayerInventory : MonoBehaviour
         CleanupMessageWindow();
     }
 
-    private void OnСancel()
+    private void OnCancel()
     {
         _objectIdEtcType = -1;
         CleanupMessageWindow();
@@ -520,7 +516,7 @@ public class PlayerInventory : MonoBehaviour
 
     private void CleanupMessageWindow()
     {
-        SystemMessageUtils.CancelEvent(SystemMessageWindow.Instance, OkUse, OnСancel);
+        SystemMessageUtils.CancelEvent(SystemMessageWindow.Instance, OkUse, OnCancel);
     }
 
 

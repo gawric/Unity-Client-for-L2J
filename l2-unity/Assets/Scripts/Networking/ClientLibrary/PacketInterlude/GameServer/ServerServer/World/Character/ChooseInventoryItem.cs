@@ -1,10 +1,3 @@
-using System;
-using System.Collections.Generic;
-using UnityEditor;
-using UnityEngine;
-using static UnityEditor.FilePathAttribute;
-using static UnityEditor.Progress;
-
 public class ChooseInventoryItem : ServerPacket
 {
 

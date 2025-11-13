@@ -1,6 +1,3 @@
-using UnityEditor.Search;
-using UnityEngine;
-
 public class QuestName
 {
     private int _quest_id;

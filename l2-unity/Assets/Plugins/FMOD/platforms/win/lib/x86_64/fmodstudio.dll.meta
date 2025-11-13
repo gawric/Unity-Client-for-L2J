@@ -37,7 +37,11 @@ PluginImporter:
       settings:
         CPU: None
     Win64:
+<<<<<<< HEAD
       enabled: 1
+=======
+      enabled: 0
+>>>>>>> 99acf30d4734f7b6888052b591f38d31a8349e6a
       settings:
         CPU: AnyCPU
     WindowsStoreApps:

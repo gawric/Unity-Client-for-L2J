@@ -1,10 +1,5 @@
-using System.Security.Cryptography;
 using System.Threading;
-using System.Threading.Tasks;
 using UnityEngine;
-using static AttackingState;
-using static UnityEditor.Progress;
-using static UnityEngine.EventSystems.EventTrigger;
 
 public class FastSinglExecuter : MonoBehaviour
 {

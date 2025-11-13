@@ -1,12 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Cryptography;
-using UnityEditor;
 using UnityEngine;
-using UnityEngine.InputSystem.EnhancedTouch;
 using UnityEngine.UIElements;
-using static L2Slot;
-using static UnityEditor.Progress;
 
 [System.Serializable]
 public class InventoryGearTab : L2Tab

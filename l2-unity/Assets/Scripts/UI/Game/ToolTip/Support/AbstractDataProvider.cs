@@ -1,8 +1,5 @@
-using System.Xml.Linq;
 using UnityEngine;
-using UnityEngine.Rendering;
 using UnityEngine.UIElements;
-using static UnityEditor.Rendering.FilterWindow;
 
 public abstract class AbstractDataProvider : AbstractDataFunction
 {

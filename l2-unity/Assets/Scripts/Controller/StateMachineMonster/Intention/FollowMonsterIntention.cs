@@ -1,6 +1,4 @@
-using UnityEditorInternal;
 using UnityEngine;
-using static UnityEngine.GraphicsBuffer;
 
 public class FollowMonsterIntention : MonsterIntentionBase
 {

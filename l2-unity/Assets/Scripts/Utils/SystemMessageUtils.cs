@@ -1,4 +1,3 @@
-using OpenCover.Framework.Model;
 using System;
 using UnityEngine;
 

@@ -1,9 +1,5 @@
-
 using UnityEngine;
 using UnityEngine.UIElements;
-using static UnityEditor.Experimental.GraphView.Port;
-using static UnityEngine.Rendering.DebugUI;
-
 
 public class DataCell : L2Slot
 {

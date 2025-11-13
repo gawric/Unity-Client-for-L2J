@@ -1,16 +1,11 @@
-using NUnit.Framework;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using UnityEditor;
 using UnityEngine;
-using UnityEngine.Rendering;
 using UnityEngine.UIElements;
 using static EnchantResult;
 using static L2Slot;
-using static UnityEditor.FilePathAttribute;
-using static UnityEditor.Progress;
 
 
 public class EnchantWindow : L2PopupWindow
