@@ -1,6 +1,7 @@
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -69,12 +70,11 @@ public class HtmlWindow : L2PopupWindow
 
         foreach (IElementsUI element in elements)
         {
-            if(element.GetType() == typeof(ParseLabel))
+            if (element.GetType() == typeof(ParseLabel))
             {
-
                 ParseLabel parce = (ParseLabel)element;
                 TextElement label = new TextElement();
-                
+
                 //Else last element font color
                 if (_fontColorFirst != null)
                 {
@@ -88,29 +88,29 @@ public class HtmlWindow : L2PopupWindow
                     _content.Add(label);
                     _latTextElement = label;
                 }
-
             }
-            else if(element.GetType() == typeof(ParseBr))
+            else if (element.GetType() == typeof(ParseBr))
             {
                 Label label = new Label("\n\n");
-                
+
                 label.AddToClassList("html_br");
                 _content.Add(label);
                 //no concat font color
                 _latTextElement = null;
                 _fontColorFirst = null;
-            }else if (element.GetType() == typeof(ParseEdit))
+            }
+            else if (element.GetType() == typeof(ParseEdit))
             {
                 ParseEdit editElement = (ParseEdit)element;
                 VisualElement fieldElement = ToolTipsUtils.CloneOne(_fieldText);
                 VisualElement textField = fieldElement.Q<TextField>(_defaultIdTextField);
                 _content.Add(fieldElement);
-                if(!_textFieldHtml.ContainsKey(editElement.GetVarName())) _textFieldHtml.Add(editElement.GetVarName(), textField);
+                if (!_textFieldHtml.ContainsKey(editElement.GetVarName())) _textFieldHtml.Add(editElement.GetVarName(), textField);
             }
             else if (element.GetType() == typeof(ParseHref))
             {
                 ParseHref parce = (ParseHref)element;
-                Label label = new Label("<u>"+parce.Name+ "</u>");
+                Label label = new Label("<u>" + parce.Name + "</u>");
                 label.name = parce.Name;
                 label.AddToClassList("html_link");
                 ChangeDefaultColor(parce, label);
@@ -118,11 +118,12 @@ public class HtmlWindow : L2PopupWindow
                 _actionsHtml.Add(parce.Name, parce.Action);
 
                 label.RegisterCallback<ClickEvent>(evt => OnLabelClick(label));
-            }else if (element.GetType() == typeof(ParseFontColor))
+            }
+            else if (element.GetType() == typeof(ParseFontColor))
             {
                 ParseFontColor parce = (ParseFontColor)element;
 
-                if(_latTextElement != null)
+                if (_latTextElement != null)
                 {
                     ConcatText(parce);
                 }
@@ -130,12 +131,60 @@ public class HtmlWindow : L2PopupWindow
                 {
                     AddNewFontColot(parce);
                 }
-
+            }
+            else if (element.GetType() == typeof(ParseButton))
+            {
+                ParseButton buttonElement = (ParseButton)element;
+                CreateButton(buttonElement);
             }
         }
     }
 
-   
+    private void CreateButton(ParseButton buttonElement)
+    {
+        Button button = new Button();
+        button.text = buttonElement.Value;
+        button.name = buttonElement.Value;
+
+        if (!string.IsNullOrEmpty(buttonElement.Width))
+        {
+            if (int.TryParse(buttonElement.Width, out int width))
+            {
+                button.style.width = width;
+            }
+        }
+
+        if (!string.IsNullOrEmpty(buttonElement.Height))
+        {
+            if (int.TryParse(buttonElement.Height, out int height))
+            {
+                button.style.height = height;
+            }
+        }
+
+        button.AddToClassList("html_button");
+
+        _actionsHtml.Add(buttonElement.Value, buttonElement.Action);
+
+        button.clicked += () => OnButtonClick(buttonElement.Value, buttonElement.Action);
+
+        _content.Add(button);
+
+        _latTextElement = null;
+        _fontColorFirst = null;
+    }
+
+    private void OnButtonClick(string buttonName, string action)
+    {
+        Debug.Log($"Button clicked: {buttonName}, Action: {action}");
+
+        if (!string.IsNullOrEmpty(action))
+        {
+            action = ReplaceVarToStringData(action);
+            SendSenver(action);
+        }
+    }
+
     private void ChangeDefaultColor(ParseHref parce , Label label)
     {
         if (parce.Color != null)
