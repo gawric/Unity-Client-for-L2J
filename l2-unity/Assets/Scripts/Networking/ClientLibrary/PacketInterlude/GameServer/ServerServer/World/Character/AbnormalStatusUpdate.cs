@@ -42,4 +42,19 @@ public class EffectHolder
         _value = value;
         _duration = duration;
     }
+
+    public int Id
+    {
+        get { return _id; }
+    }
+
+    public int Value
+    {
+        get { return _value; }
+    }
+
+    public int Duration
+    {
+        get { return _duration; }
+    }
 }

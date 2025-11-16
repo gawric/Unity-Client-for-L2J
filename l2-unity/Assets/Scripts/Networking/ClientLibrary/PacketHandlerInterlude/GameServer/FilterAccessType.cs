@@ -55,6 +55,7 @@ public class FilterAccessType
         { GameInterludeServerPacketType.TeleportToLocation, true },
         { GameInterludeServerPacketType.Revive, true },
         { GameInterludeServerPacketType.AbnormalStatusUpdate, true },
+        { GameInterludeServerPacketType.ShortBuffStatusUpdate, true },
         { GameInterludeServerPacketType.AcquireSkillList, true },
         { GameInterludeServerPacketType.AcquireSkillInfo, true },
         { GameInterludeServerPacketType.RecipeBookItemList, true },

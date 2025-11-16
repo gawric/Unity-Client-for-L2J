@@ -80,7 +80,7 @@ public class PlayerShortcuts : MonoBehaviour
         switch (shortcut.Type)
         {
             case Shortcut.TYPE_ITEM:
-                PlayerInventory.Instance.UseItem(shortcut.Id);
+                PlayerInventory.Instance.UseItem(shortcut.Id , true);
                 break;
             case Shortcut.TYPE_ACTION:
                 PlayerActions.Instance.UseAction((ActionType)shortcut.Id);

@@ -119,30 +119,13 @@ public class GSInterludeMessageHandler : ServerPacketHandler
 
         if (messageData != null)
         {
-            //if(messageData.Id == (int)StorageVariable.MessageID.ADD_INVENTORY 
-            //| messageData.Id == (int)StorageVariable.MessageID.ADD_EXP_SP
-            //| messageData.Id == (int)StorageVariable.MessageID.USE_SKILL)
-            //{
-               // SystemMessage systemMessage = new SystemMessage(smParams, messageData);
-               // if (!_delayMessage.ContainsKey(messageData.Id))
-               // {
-                    
-                //    _delayMessage.TryAdd(messageData.Id, systemMessage);
-               // }
-                
-           // }
-           // else
-            //{
                 SystemMessage systemMessage = new SystemMessage(smParams, messageData);
 
                 
-                UnityMainThreadDispatcher.Instance().Enqueue(() =>
-                {
-                    ChatWindow.Instance.ReceiveSystemMessage(systemMessage);
-                });
-                //EventProcessor.Instance.QueueEvent(() => ChatWindow.Instance.ReceiveSystemMessage(systemMessage));
-           // }
-           
+            UnityMainThreadDispatcher.Instance().Enqueue(() =>
+            {
+                ChatWindow.Instance.ReceiveSystemMessage(systemMessage);
+            });
         }
         else
         {

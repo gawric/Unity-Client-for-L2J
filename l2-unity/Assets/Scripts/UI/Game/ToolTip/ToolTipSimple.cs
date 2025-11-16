@@ -332,7 +332,6 @@ public class ToolTipSimple : L2PopupWindow, IToolTips
                 case (int)SlotType.PriceSell:
                 case (int)SlotType.PriceBuy:
                     return SwitchToSimple();
-
                 case (int)SlotType.Inventory:
                     return SwitchToString();
                 case (int)SlotType.Enchant:
@@ -342,6 +341,8 @@ public class ToolTipSimple : L2PopupWindow, IToolTips
                 case (int)SlotType.Recipe:
                     return SwitchToString();
                 case (int)SlotType.RecipeCraftItem:
+                    return SwitchToString();
+                case (int)SlotType.SkillBar:
                     return SwitchToString();
                 case (int)SlotType.Gear:
                     GearItem gearItem = InventoryWindow.Instance.GetGearPosition(position);
@@ -675,9 +676,13 @@ public class ToolTipSimple : L2PopupWindow, IToolTips
                 SkillInstance skillInstance = SkillListWindow.Instance.GetSkillInstanceBySkillId(skillId);
                 SetSkillToolTip(skillInstance, template);
                 break;
+            case (int)SlotType.SkillBar:
+                Shortcut skillbarInstance = SkillbarWindow.Instance.GetShortcutByPosition(position);
+                SetSimpleItemSingleToolTip(skillbarInstance, template);
+                break;
             case (int)SlotType.BuffPanel:
                 SkillInstance instance = BufferPanel.Instance.GetCellByPosition(position);
-                SetSkillToolTip(instance, template);
+                SetBuffPanelToolTip(instance, template);
                 break;
             case (int)SlotType.Gear:
                 GearItem gearItem = InventoryWindow.Instance.GetGearPosition(position);
@@ -694,6 +699,37 @@ public class ToolTipSimple : L2PopupWindow, IToolTips
         }
     }
 
+
+    private void SetBuffPanelToolTip(SkillInstance instance , TemplateContainer template)
+    {
+        if (instance != null)
+        {
+            int skillId = instance.SkillID;
+            float buffTimeLeft = BufferPanel.Instance.GetLeftTimeByPosition(skillId);
+
+            VisualElement updateElement = SetSkillToolTip(instance, template, buffTimeLeft);
+            BindingLeftTime(updateElement, buffTimeLeft, skillId);
+        }
+    }
+
+    private void BindingLeftTime(VisualElement updateElement , float buffTimeLeft , int skillId)
+    {
+        if (updateElement != null && buffTimeLeft > 0)
+        {
+            Action<int, float> timeUpdateHandler = (skillId, timeLeft) => HandleTimeLeftUpdated(skillId, timeLeft, updateElement);
+            BufferPanel.Instance.TrackSkillId(skillId);
+            BufferPanel.Instance.SetSubscrible(timeUpdateHandler);
+        }
+    }
+    private void HandleTimeLeftUpdated(int skillId, float newTimeLeft, VisualElement elementToUpdate)
+    {
+        if (elementToUpdate != null)
+        {
+            Label label = (Label)elementToUpdate;
+            label.text = TimeUtils.FormatTime(newTimeLeft);
+        }
+    }
+
     private bool GetForceBelow(string[] ids)
     {
         int position = Int32.Parse(ids[0]);
@@ -707,13 +743,6 @@ public class ToolTipSimple : L2PopupWindow, IToolTips
             default: return false;
         }
     }
-
-
-
-
-
-
-
 
     private void SetSimpleSingleToolTip(Product product , TemplateContainer template)
     {
@@ -750,18 +779,18 @@ public class ToolTipSimple : L2PopupWindow, IToolTips
         }
     }
 
-    private void SetSkillToolTip(SkillInstance skillInstance, TemplateContainer template)
+    private VisualElement SetSkillToolTip(SkillInstance skillInstance, TemplateContainer template , float leftTime = 0 )
     {
         IDataTips data = ToolTipManager.GetInstance().GetProductText(skillInstance);
-        _dataProvider.SetDataSkillInTemplate(template, skillInstance, data);
+       return  _dataProvider.SetDataSkillInTemplate(template, skillInstance, data , leftTime);
     }
-    private void SetSimpleItemSingleToolTip(ItemInstance item, TemplateContainer template)
+
+    private void SetSimpleItemSingleToolTip(object item, TemplateContainer template)
     {
         if (item != null)
         {
             IDataTips data = ToolTipManager.GetInstance().GetProductText(item);
-            // var _nameText = (Label)template.Q<VisualElement>(null, "name");
-            // var _gradeImg = template.Q<VisualElement>(null, "grade");
+
 
             Label nameText =(Label) template.Q<VisualElement>("name");
             VisualElement gradeImg = template.Q<VisualElement>("grade");
@@ -775,7 +804,16 @@ public class ToolTipSimple : L2PopupWindow, IToolTips
             }
 
             SetImageElement(gradeImg, grade);
-            SetTextEnchantIfNot0(item.EnchantLevel, encahntText);
+
+            int ehchantLevel = 0;
+            if (item.GetType() == typeof(ItemInstance))
+            {
+                ItemInstance itemInstance = (ItemInstance)item;
+                ehchantLevel = itemInstance.EnchantLevel;
+            }
+
+            SetTextEnchantIfNot0(ehchantLevel, encahntText);
+
         }
         else
         {
@@ -798,9 +836,6 @@ public class ToolTipSimple : L2PopupWindow, IToolTips
             ItemInstance inventoryItem = PlayerInventory.Instance.GetItemByItemId(item.ItemId);
             Label nameText = (Label)template.Q<VisualElement>("name");
             if(nameText != null) nameText.text = data.GetName(true);
-
-
-
         }
 
     }

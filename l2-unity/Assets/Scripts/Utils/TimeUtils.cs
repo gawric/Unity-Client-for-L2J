@@ -17,10 +17,37 @@ public class TimeUtils
         return formattedTime;
     }
 
-    public static void PrintFullTime(string text)
-    {
-        Debug.Log(text + "  " + "PrintFullTime :> " + GetCurrentFullTime());
+   
+   public static string FormatTime(float seconds)
+   {
+       if (seconds < 0)
+       {
+                return "";
+       }
+
+       if (seconds < 60)
+       {
+                return $"{Mathf.RoundToInt(seconds)} Cекунд";
+       }
+
+       float minutes = seconds / 60f;
+       if (minutes < 2f)
+       {
+            return $"{minutes:F1}".Replace(',', '.') + " Минуты";
+        }
+
+       if (minutes < 60f)
+       {
+                return $"{Mathf.RoundToInt(minutes)} Минут";
+       }
+
+       float hours = minutes / 60f;
+       if (hours < 24f)
+       {
+           return $"{Mathf.RoundToInt(hours)} Часов";
+       }
+
+       float days = hours / 24f;
+        return $"{Mathf.RoundToInt(days)} Дней";
     }
-
-
 }

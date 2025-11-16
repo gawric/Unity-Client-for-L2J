@@ -52,6 +52,7 @@ public enum GameInterludeServerPacketType : byte
     TeleportToLocation = 0x28,
     Revive = 0x07,
     AbnormalStatusUpdate = 0x7f,
+    ShortBuffStatusUpdate = 0xF4,
     AcquireSkillList = 0x8a,
     AcquireSkillInfo = 0x8b,
     RecipeBookItemList = 0xD6,

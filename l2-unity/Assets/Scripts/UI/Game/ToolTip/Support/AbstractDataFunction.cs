@@ -116,7 +116,6 @@ public abstract class AbstractDataFunction
         {
             labelData.text = ToolTipsUtils.ConvertNumberToNormal(addParam.ToString());
             groupElement.style.display = DisplayStyle.Flex;
-
         }
         else
         {

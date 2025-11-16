@@ -64,6 +64,18 @@ public class PlayerInventory : MonoBehaviour
         return null;
     }
 
+    public ItemInstance FindByAllInventory(int objId)
+    {
+        ItemInstance item = GetItem(objId);
+        if (item != null)
+        {
+            return item;
+        }
+
+        return GetItemEquip(objId);
+    }
+
+
     public ItemInstance GetItem(int objId)
     {
         if (_playerInventory.ContainsKey(objId))
@@ -436,7 +448,7 @@ public class PlayerInventory : MonoBehaviour
         //GameClient.Instance.ClientPacketHandler.UpdateInventoryOrder(orders);
     }
 
-    public bool UseItem(int objectId)
+    public bool UseItem(int objectId , bool isShortCut = false)
     {
         if (!TryGetItem(objectId, out ItemInstance item))
         {
@@ -447,7 +459,7 @@ public class PlayerInventory : MonoBehaviour
 
         if (IsRecipeItem(item))
         {
-            HandleRecipeItem(objectId);
+            UseRecipeItem(_objectIdEtcType , objectId, isShortCut);
         }
         else
         {
@@ -457,7 +469,18 @@ public class PlayerInventory : MonoBehaviour
         return true;
     }
 
-
+    private void UseRecipeItem(int objectIdEtcType , int objectId, bool isShortCut)
+    {
+        if (isShortCut)
+        {
+            _objectIdEtcType = objectId;
+            SendUseItemPacket(objectId);
+        }
+        else
+        {
+            HandleRecipeItem(objectId);
+        }
+    }
     private bool IsRecipeItem(ItemInstance item)
     {
         if (item.ItemData is EtcItem etcItem)

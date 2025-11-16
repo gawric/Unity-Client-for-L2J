@@ -41,6 +41,10 @@
                         <ui:Label tabindex="-1" text="Reuse time :" parse-escape-sequences="true" display-tooltip-when-elided="true" name="TimeLabel" style="margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0; background-color: rgba(149, 149, 149, 0); color: rgb(149, 149, 149); font-size: 10px;" />
                         <ui:Label tabindex="-1" parse-escape-sequences="true" display-tooltip-when-elided="true" name="reuselabel" class="Castlabel" style="margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; padding-top: 0; padding-right: 0; padding-bottom: 0; font-size: 10px; color: rgb(165, 143, 113); -unity-text-outline-width: 0.3px;" />
                     </ui:GroupBox>
+                    <ui:GroupBox name="TimeLeftText" class="RadiusText" style="margin-top: 4px; margin-right: 0; margin-bottom: 0; margin-left: 0; padding-top: 0; padding-bottom: 0; padding-left: 0; flex-direction: row; display: flex;">
+                        <ui:Label tabindex="-1" text="Time left :" parse-escape-sequences="true" display-tooltip-when-elided="true" name="TimeLeftLabel" style="margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0; background-color: rgba(149, 149, 149, 0); color: rgb(149, 149, 149); font-size: 10px;" />
+                        <ui:Label tabindex="-1" parse-escape-sequences="true" display-tooltip-when-elided="true" name="timeLeftLabel" class="RangeLabel" style="margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; padding-top: 0; padding-right: 0; padding-bottom: 0; font-size: 10px; color: rgb(165, 143, 113); -unity-text-outline-width: 0.3px;" />
+                    </ui:GroupBox>
                 </ui:GroupBox>
             </ui:GroupBox>
             <ui:GroupBox name="FooterBox" style="margin-top: 3px; margin-right: 0; margin-bottom: 0; margin-left: 0; padding-top: 0; padding-bottom: 0; padding-left: 0; width: auto; height: auto; align-items: flex-start; display: flex;">

@@ -16,4 +16,16 @@ public class ActionData
     public string Name { get => _name; set => _name = value; }
     public string Descripion { get => _description; set => _description = value; }
     public string Icon { get => _icon; set => _icon = value; }
+
+    public string GetName()
+    {
+        return _name;
+    }
+
+    public string GetDescription()
+    {
+        return _description;
+    }
+
+    public int Level { get { return 0; } }
 }

@@ -22,6 +22,7 @@ public class DataCell : L2Slot
     private Label _labelShadow;
     private VisualElement _labelTemplate;
     private SkillInstance _skillInstance;
+    private float _lastRemaningTime = 0;
     public DataCell(int idSkill , VisualElement element  ,  VisualElement labelTemplate, VisualElement slot  , int position) :
         base(slot, position, SlotType.BuffPanel)
     {
@@ -189,7 +190,13 @@ public class DataCell : L2Slot
     {
         float elapsedTime = time - _startTime;
         float timeEnd = _activeTime - elapsedTime;
-        return Mathf.Max(0, timeEnd);
+        _lastRemaningTime = Mathf.Max(0, timeEnd);
+        return _lastRemaningTime;
+    }
+
+    public float GetLastRemainingTime()
+    {
+        return _lastRemaningTime;
     }
 
     public void SetActiveTime(float activeTime)

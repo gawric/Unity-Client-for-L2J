@@ -24,6 +24,7 @@ public class ShowToolTip
     public void Hide(VisualElement ve)
     {
         _toolTip.ResetPosition(new Vector2(0,0));
+        BufferPanel.Instance.ResetAllSubscrible();
     }
 
 }

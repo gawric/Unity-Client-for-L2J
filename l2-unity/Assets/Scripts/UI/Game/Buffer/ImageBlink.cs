@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Rendering;
 using UnityEngine.UIElements;
 using static UnityEngine.Rendering.DebugUI;
 
@@ -18,7 +19,11 @@ public class BLink
     private float opacityHide = 0.4f;
     private float opacityShow = 1.0f;
     private float durationOpacity = 0.26f;
-
+    public event Action<int, float> OnTimeLeftUpdated;
+    public event Action<int, float> OnSpecificTimeLeftUpdated;
+    private Dictionary<int, float> _lastUpdateTime = new Dictionary<int, float>();
+    private float _updateInterval = 1.0f; // 1 second
+    private HashSet<int> _trackedSkillIds = new HashSet<int>();
     public BLink(BufferPanel bufferPanel)
     {
         _dict = new Dictionary<int, DataCell>();
@@ -26,6 +31,19 @@ public class BLink
         bufferPanel.StartCoroutine(Blink(_dict , _filter));
     }
 
+    public void AllClearTrackSkillId()
+    {
+        _trackedSkillIds.Clear();
+    }
+    public void TrackSkillId(int skillId)
+    {
+        _trackedSkillIds.Add(skillId);
+    }
+
+    public void UntrackSkillId(int skillId)
+    {
+        _trackedSkillIds.Remove(skillId);
+    }
     public void StartBlinking(DataCell element)
     {
         int position = element.GetPosition();
@@ -64,7 +82,7 @@ public class BLink
 
             HideElements(_dict , elapsedTime);
             ShowElements(_dict , elapsedTime);
-     
+            
         }
     }
 
@@ -79,10 +97,42 @@ public class BLink
             {
                 int roundTime = (int)Math.Round(time);
                 cell.SetText(roundTime.ToString());
+
+
+
+                // Check if this skill ID is being tracked
+                if (_trackedSkillIds.Contains(cell.GetSkillId()))
+                {
+                    // Check if enough time has passed since last update
+                    if (!CheckAndUpdateLastTime(cell.GetSkillId(), elapsedTime))
+                    {
+                        OnSpecificTimeLeftUpdated?.Invoke(cell.GetSkillId(), time);
+                    }
+                }
+
+                // Check if enough time has passed since last update
+                if (!CheckAndUpdateLastTime(cell.GetSkillId(), elapsedTime))
+                {
+                    OnTimeLeftUpdated?.Invoke(cell.GetSkillId(), time);
+                }
             }
         
         }
         
+    }
+
+    private bool CheckAndUpdateLastTime(int skillId, float currentTime)
+    {
+        if (_lastUpdateTime.TryGetValue(skillId, out float lastTime))
+        {
+            if (currentTime - lastTime < _updateInterval)
+            {
+                return true; // Skip update
+            }
+        }
+
+        _lastUpdateTime[skillId] = currentTime;
+        return false; // Allow update
     }
     private void HideElements(Dictionary<int, DataCell> _dict , float elapsedTime)
     {
@@ -150,9 +200,43 @@ public class BLink
         filter.Clear();
     }
 
+    public bool IsBLink()
+    {
+        return _isBlinking;
+    }
+
+    public float  GetLeftTimeBySkillId(int skillId)
+    {
+        
+        foreach (KeyValuePair<int, DataCell> entry in _dict)
+        {
+            if (entry.Value.GetSkillId() == skillId)
+            {
+                return entry.Value.GetLastRemainingTime();
+            }
+        }
+
+        return 0;
+    }
+
+    public float GetLeftTimeByPosition(int position)
+    {
+
+        if (_dict.ContainsKey(position))
+        {
+            return _dict[position].GetLastRemainingTime();
+        }
+
+        return 0;
+    }
+
+
     public void OnDisable()
     {
         _isBlinking = false;
         _dict.Clear();
+        _lastUpdateTime.Clear();
+        OnTimeLeftUpdated = null;
+        OnSpecificTimeLeftUpdated = null;
     }
 }

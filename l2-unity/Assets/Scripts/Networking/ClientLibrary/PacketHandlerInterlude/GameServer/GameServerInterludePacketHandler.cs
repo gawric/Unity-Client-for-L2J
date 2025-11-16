@@ -214,6 +214,10 @@ public class GameServerInterludePacketHandler : ServerPacketHandler
 
                 OnAbnormalStatusUpdate(itemQueue.DecodeData());
                 break;
+            case GameInterludeServerPacketType.ShortBuffStatusUpdate:
+
+                OnShortBuffStatusUpdate(itemQueue.DecodeData());
+                break;
             case GameInterludeServerPacketType.AcquireSkillList:
 
                 OnAcquireSkillList(itemQueue.DecodeData());
@@ -368,8 +372,17 @@ public class GameServerInterludePacketHandler : ServerPacketHandler
         EventProcessor.Instance.QueueEvent(() => {
             foreach (var item in packet.ListEffect)
             {
-                BufferPanel.Instance.AddDataCellToTime(item._id, item._value, item._duration);
+                BufferPanel.Instance.AddDataCellToTime(item.Id, item.Value, item.Duration);
             }
+        });
+    }
+
+    public void OnShortBuffStatusUpdate(byte[] data)
+    {
+        ShortBuffStatusUpdate packet = new ShortBuffStatusUpdate(data);
+        EventProcessor.Instance.QueueEvent(() => {
+                var item = packet.Effect;
+                BufferPanel.Instance.AddDataCellToTime(item.Id, item.Value, item.Duration);
         });
     }
 

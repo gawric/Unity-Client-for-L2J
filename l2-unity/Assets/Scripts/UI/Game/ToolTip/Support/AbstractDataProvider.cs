@@ -3,10 +3,13 @@ using UnityEngine.UIElements;
 
 public abstract class AbstractDataProvider : AbstractDataFunction
 {
-
-    public void SetDataSkillInTemplate(VisualElement container, SkillInstance skill, IDataTips text)
+ 
+    public VisualElement SetDataSkillInTemplate(VisualElement container, SkillInstance skill, IDataTips text , float timeleft)
     {
+        VisualElement returnElement = null;
+
         container.Q<Label>("nameSkill").text = text.GetName();
+
 
         VisualElement centerBox = container.Q<VisualElement>("CenterBox");
         VisualElement footerBox = container.Q<VisualElement>("FooterBox");
@@ -36,8 +39,20 @@ public abstract class AbstractDataProvider : AbstractDataFunction
         Label radiusLabel = container.Q<Label>("rangeLabel");
         AddElementIfNot0(groupTypeRadius, radiusLabel, skill.GetRange());
 
+        VisualElement groupTypeTimeLeft = container.Q<VisualElement>("TimeLeftText");
+        Label timeLeftLabel = container.Q<Label>("timeLeftLabel");
 
-        if (skill.GetHp() == 0 && skill.GetMp() == 0 && skill.GetRange() == -1){
+
+        if(timeleft != 0)
+        {
+            AddElementIfNotEmpty(groupTypeTimeLeft, timeLeftLabel, TimeUtils.FormatTime(timeleft));
+            returnElement =  timeLeftLabel;
+        }
+
+
+
+        if (skill.GetHp() == 0 && skill.GetMp() == 0 && skill.GetRange() == -1 && timeleft == 0)
+        {
             AddBoxIfNotEmpty(centerBox, "");
         }
 
@@ -66,6 +81,8 @@ public abstract class AbstractDataProvider : AbstractDataFunction
         VisualElement groupIcon = container.Q<VisualElement>("GrowIcon");
         var icon = container.Q<VisualElement>("icon");
         AddElementIfNotNull(groupIcon, icon, IconManager.Instance.LoadTextureByName(skill.Icon()));
+
+        return returnElement;
     }
 
     protected void SetDataWeaponInTemplate(VisualElement container, Weapongrp weapon, int price , IDataTips text)

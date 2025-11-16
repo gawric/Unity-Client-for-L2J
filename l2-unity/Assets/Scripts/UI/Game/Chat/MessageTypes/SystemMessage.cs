@@ -20,7 +20,6 @@ public class SystemMessage
     {
         string value = String.Copy(_messageData.Message);
         ProcessMessageParameters(ref value);
-        Debug.Log("System Message Color " + _messageData.Color);
         return $"<color=#{_messageData.Color}>{value}</color>";
     }
 
@@ -97,7 +96,7 @@ public class SystemMessage
                 return skill.Name;
             }
 
-            return "Unknown Skill";
+            return "Unknown Skill Skill ID " + skillData[0] + " Level " + skillData[1];
         }
         catch (Exception e)
         {

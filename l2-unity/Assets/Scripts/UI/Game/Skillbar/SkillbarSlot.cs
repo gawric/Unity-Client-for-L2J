@@ -20,6 +20,11 @@ public class SkillbarSlot : L2ClickableSlot
         _keyElement = _slotElement.Q<VisualElement>("Key");
     }
 
+    public Shortcut Shortcut
+    {
+        get { return _shortcut; }
+    }
+
     public void AssignShortcut(Shortcut shortcut)
     {
         ClearManipulators();
@@ -47,10 +52,10 @@ public class SkillbarSlot : L2ClickableSlot
 
     public void AssignItem(int objectId)
     {
-        //ItemInstance item = PlayerInventory.Instance.GetItemByObjectId(objectId);
-        //_innerSlot = new InventorySlot(_position, _slotElement, SlotType.SkillBar);
-        //((InventorySlot)_innerSlot).AssignItem(item);
-        //((L2ClickableSlot)_innerSlot).UnregisterClickableCallback();
+        ItemInstance item = PlayerInventory.Instance.FindByAllInventory(objectId);
+        _innerSlot = new InventorySlot(_position, _slotElement, SlotType.SkillBar);
+        ((InventorySlot)_innerSlot).AssignItem(item);
+        ((L2ClickableSlot)_innerSlot).UnregisterClickableCallback();
 
         UpdateInputInfo();
     }

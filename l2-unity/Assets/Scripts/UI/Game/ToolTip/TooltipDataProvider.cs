@@ -16,7 +16,7 @@ public class TooltipDataProvider : AbstractDataProvider
         {
             SkillInstance skill = (SkillInstance)item;
             IDataTips text = ToolTipManager.GetInstance().GetProductText(skill);
-            SetDataSkillInTemplate(container, skill, text);
+            SetDataSkillInTemplate(container, skill, text , 0);
         }
     }
     public  void AddDataWeapon(VisualElement container, object item)

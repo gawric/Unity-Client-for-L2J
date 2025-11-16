@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.UIElements;
+using static UnityEngine.Rendering.DebugUI;
 
 public class BufferPanel : L2Window
 {
@@ -178,7 +179,25 @@ public class BufferPanel : L2Window
     }
 
 
+    public float GetLeftTimeBySkillId(int skillId)
+    {
+        if(_bLink.IsBLink() == true)
+        {
+            return _bLink.GetLeftTimeBySkillId(skillId);
+        }
 
+        return 0;
+    }
+
+    public float GetLeftTimeByPosition(int position)
+    {
+        if (_bLink.IsBLink() == true)
+        {
+            return _bLink.GetLeftTimeBySkillId(position);
+        }
+
+        return 0;
+    }
 
     private void RebindCellElseOnlyPenalty()
     {
@@ -206,6 +225,49 @@ public class BufferPanel : L2Window
     }
 
   
+    public void TrackSkillId(int skillId)
+    {
+        _bLink.TrackSkillId(skillId);
+    }
+
+    public void UntrackSkillId(int skillId)
+    {
+        _bLink.UntrackSkillId(skillId);
+    }
+
+    // Add these events after the class declaration
+    public event Action<int, float> OnTimeLeftUpdated
+    {
+        add { _bLink.OnTimeLeftUpdated += value; }
+        remove { _bLink.OnTimeLeftUpdated -= value; }
+    }
+
+
+    private List<Action<int, float>> _allCurrentHandler = new List<Action<int, float>>();
+
+    public void ResetAllSubscrible()
+    {
+        foreach (Action<int, float> handler in _allCurrentHandler)
+        {
+            _bLink.OnSpecificTimeLeftUpdated -= handler;
+        }
+        _allCurrentHandler.Clear();
+        _bLink.AllClearTrackSkillId();
+    }
+    public void SetSubscrible(Action<int, float> handler)
+    {
+        _allCurrentHandler.Add(handler);
+        OnSpecificTimeLeftUpdated += handler;
+    }
+
+    public event Action<int, float> OnSpecificTimeLeftUpdated
+    {
+        add { _bLink.OnSpecificTimeLeftUpdated += value; }
+        remove { _bLink.OnSpecificTimeLeftUpdated -= value; }
+    }
+
+
+
 
     public void MovePanelToChatPosition(float sourceY)
     {

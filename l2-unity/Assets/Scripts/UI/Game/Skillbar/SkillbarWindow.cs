@@ -74,36 +74,38 @@ public class SkillbarWindow : L2PopupWindow
 
         _skillbars = new List<AbstractSkillbar>();
 
-        for (int x = 0; x < 2; x++)
-        {
-            for (int i = 0; i < PlayerShortcuts.MAXIMUM_SKILLBAR_COUNT; i++)
-            {
-                AbstractSkillbar skillbar;
+        InitializeSkillbars();
+        //backup
+        //for (int x = 0; x < 2; x++)
+        //{
+        // for (int i = 0; i < PlayerShortcuts.MAXIMUM_SKILLBAR_COUNT; i++)
+        //{
+        // AbstractSkillbar skillbar;
 
-                bool mainBar = i == 0;
-                bool horizontalBar = x == 0;
+        // bool mainBar = i == 0;
+        //bool horizontalBar = x == 0;
 
-                if (mainBar)
-                {
-                    skillbar = new SkillbarMain(_windowEle, i, i, horizontalBar);
-                }
-                else
-                {
-                    skillbar = new SkillbarMin(_windowEle, i, i, horizontalBar);
-                }
+        // if (mainBar)
+        // {
+        //     skillbar = new SkillbarMain(_windowEle, i, i, horizontalBar);
+        // }
+        //else
+        // {
+        //     skillbar = new SkillbarMin(_windowEle, i, i, horizontalBar);
+        // }
 
-                if (horizontalBar)
-                {
-                    StartCoroutine(skillbar.BuildWindow(_skillbarHorizontalTemplate, _skillbarContainerHorizontal));
-                }
-                else
-                {
-                    StartCoroutine(skillbar.BuildWindow(_skillbarVerticalTemplate, _skillbarContainerVertical));
-                }
+        // if (horizontalBar)
+        // {
+        //     StartCoroutine(skillbar.BuildWindow(_skillbarHorizontalTemplate, _skillbarContainerHorizontal));
+        // }
+        // else
+        // {
+        //    StartCoroutine(skillbar.BuildWindow(_skillbarVerticalTemplate, _skillbarContainerVertical));
+        // }
 
-                _skillbars.Add(skillbar);
-            }
-        }
+        // _skillbars.Add(skillbar);
+        //}
+        // }
 
         yield return new WaitForEndOfFrame();
 
@@ -115,6 +117,35 @@ public class SkillbarWindow : L2PopupWindow
 #if UNITY_EDITOR
         // DebugData();
 #endif
+    }
+
+
+    private void InitializeSkillbars()
+    {
+        for (int x = 0; x < 2; x++)
+        {
+            for (int i = 0; i < PlayerShortcuts.MAXIMUM_SKILLBAR_COUNT; i++)
+            {
+                bool horizontalBar = x == 0;
+                var skillbar = CreateSkillbar(i, horizontalBar);
+                StartCoroutine(BuildSkillbarWindow(skillbar, horizontalBar));
+                _skillbars.Add(skillbar);
+            }
+        }
+    }
+
+    private AbstractSkillbar CreateSkillbar(int index, bool horizontalBar)
+    {
+        return index == 0 ?
+            new SkillbarMain(_windowEle, index, index, horizontalBar) :
+            new SkillbarMin(_windowEle, index, index, horizontalBar);
+    }
+
+    private IEnumerator BuildSkillbarWindow(AbstractSkillbar skillbar, bool horizontalBar)
+    {
+        var template = horizontalBar ? _skillbarHorizontalTemplate : _skillbarVerticalTemplate;
+        var container = horizontalBar ? _skillbarContainerHorizontal : _skillbarContainerVertical;
+        return skillbar.BuildWindow(template, container);
     }
 
     public void AddSkillbar()
@@ -287,6 +318,34 @@ public class SkillbarWindow : L2PopupWindow
             }
         });
     }
+
+  
+    public Shortcut GetShortcutByPosition(int skillbarListPosition)
+    {
+        if(skillbarListPosition > PlayerShortcuts.MAXIMUM_SHORTCUTS_PER_BAR * PlayerShortcuts.MAXIMUM_SKILLBAR_COUNT)
+        {
+            return null;
+        }
+
+        int slotPosition = skillbarListPosition % PlayerShortcuts.MAXIMUM_SHORTCUTS_PER_BAR;
+        int pagePosition = skillbarListPosition / PlayerShortcuts.MAXIMUM_SHORTCUTS_PER_BAR;
+
+        AbstractSkillbar skillbar = _skillbars[pagePosition];
+
+        foreach (var slot in skillbar.BarSlots)
+        {
+            if (slot.Position == slotPosition)
+            {
+                return slot.Shortcut;
+            }
+        }
+
+        Debug.LogError($"No skill found at position {skillbarListPosition}");
+        return null;
+    }
+
+
+
 
 #if UNITY_EDITOR
     private void DebugData()

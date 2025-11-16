@@ -30,20 +30,7 @@ public class CharacterSkills
             _skills.Clear();
         }
     }
-    public void AddSkill(int id  , int pLevel , bool pPassive , bool pDisabled)
-    {
 
-            if (_skills.ContainsKey(id))
-            {
-                _skills.Remove(id);
-                _skills.Add(id, new SkillInstance(id, pLevel, pPassive, pDisabled));
-            }
-            else
-            {
-                _skills.Add(id, new SkillInstance(id, pLevel, pPassive, pDisabled));
-            }
-
-    }
 
     public SkillInstance GetSkill(int id)
     {

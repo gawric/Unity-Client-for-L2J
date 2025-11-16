@@ -65,6 +65,13 @@ public abstract class AbstractSkillbar
         ResetShortcuts();
     }
 
+
+    public List<SkillbarSlot> BarSlots
+    {
+        get { return _barSlots; }
+    }
+
+
     public void ResetShortcuts()
     {
         // Clean up slot callbacks and manipulators

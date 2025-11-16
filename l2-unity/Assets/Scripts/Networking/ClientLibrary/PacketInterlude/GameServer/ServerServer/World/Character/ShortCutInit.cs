@@ -30,10 +30,7 @@ public class ShortCutInit : ServerPacket
         for (int i = 0; i < size; i++)
         {
             int type = ReadI();
-            int world_slot = ReadI();//buffer.writeInt(sc.getSlot() + (sc.getPage() * 12));
-
-            //int page = ParcePages(world_slot);
-            // int slot = ConvertWorldSlot(world_slot, page);
+            int world_slot = ReadI();
 
             int slot = world_slot % 12;
             int page = world_slot / 12;
