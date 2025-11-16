@@ -1,13 +1,8 @@
-
-using Org.BouncyCastle.Bcpg;
-using Org.BouncyCastle.Utilities.Encoders;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using UnityEditor.Sprites;
 using UnityEngine;
 
-using UnityEngine.UI;
 using UnityEngine.UIElements;
 
 public class ClanWindow : L2TwoPanels
@@ -215,25 +210,25 @@ public class ClanWindow : L2TwoPanels
 
     private void OnClickShowMember(ClickEvent evt)
     {
-        if (!string.IsNullOrEmpty(_masterClan.GetSelectMemberName()))
-        {
-            SendGameDataQueue.Instance().AddItem(
-                CreatorPacketsUser.CreateRequestPladgeMemberInfo(_masterClan.GetSelectMemberName()), 
-                GameClient.Instance.IsCryptEnabled(), 
-                GameClient.Instance.IsCryptEnabled());
-        }
+        //if (!string.IsNullOrEmpty(_masterClan.GetSelectMemberName()))
+        //{
+        //    SendGameDataQueue.Instance().AddItem(
+        //        CreatorPacketsUser.CreateRequestPladgeMemberInfo(_masterClan.GetSelectMemberName()), 
+        //        GameClient.Instance.IsCryptEnabled(), 
+        //        GameClient.Instance.IsCryptEnabled());
+        //}
 
     }
 
     private void OnClickPrivileges(ClickEvent evt)
     {
-        if (!string.IsNullOrEmpty(_masterClan.GetSelectMemberName()))
-        {
-            SendGameDataQueue.Instance().AddItem(
-                CreatorPacketsUser.CreateRequestPledgeMemberPowerInfo(_masterClan.GetSelectMemberName()),
-                GameClient.Instance.IsCryptEnabled(),
-                GameClient.Instance.IsCryptEnabled());
-        }
+        //if (!string.IsNullOrEmpty(_masterClan.GetSelectMemberName()))
+        //{
+        //    SendGameDataQueue.Instance().AddItem(
+        //        CreatorPacketsUser.CreateRequestPledgeMemberPowerInfo(_masterClan.GetSelectMemberName()),
+        //        GameClient.Instance.IsCryptEnabled(),
+        //        GameClient.Instance.IsCryptEnabled());
+        //}
 
     }
 
@@ -242,13 +237,13 @@ public class ClanWindow : L2TwoPanels
 
     private void OnClickEditAuthButton(ClickEvent evt)
     {
-        if (!string.IsNullOrEmpty(_masterClan.GetSelectMemberName()))
-        {
-            SendGameDataQueue.Instance().AddItem(
-                CreatorPacketsUser.CreateRequestPledgePowerGradeList(),
-                GameClient.Instance.IsCryptEnabled(),
-                GameClient.Instance.IsCryptEnabled());
-        }
+        //if (!string.IsNullOrEmpty(_masterClan.GetSelectMemberName()))
+        //{
+        //    SendGameDataQueue.Instance().AddItem(
+        //        CreatorPacketsUser.CreateRequestPledgePowerGradeList(),
+        //        GameClient.Instance.IsCryptEnabled(),
+        //        GameClient.Instance.IsCryptEnabled());
+        //}
 
     }
 

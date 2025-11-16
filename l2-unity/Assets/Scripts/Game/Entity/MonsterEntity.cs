@@ -1,8 +1,4 @@
-using System;
 using UnityEngine;
-using UnityEngine.AI;
-using UnityEngine.InputSystem.XR;
-using static UnityEditor.ShaderGraph.Internal.KeywordDependentCollection;
 
 [RequireComponent(typeof(NetworkAnimationController)),
     RequireComponent(typeof(MonsterAnimationAudioHandler))]

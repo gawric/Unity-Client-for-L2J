@@ -59,7 +59,20 @@ public class FilterAccessType
         { GameInterludeServerPacketType.AcquireSkillList, true },
         { GameInterludeServerPacketType.AcquireSkillInfo, true },
         { GameInterludeServerPacketType.RecipeBookItemList, true },
-         { GameInterludeServerPacketType.RecipeItemMakeInfo, true }
+        { GameInterludeServerPacketType.RecipeItemMakeInfo, true },
+        { GameInterludeServerPacketType.SendTradeRequest, true },
+        { GameInterludeServerPacketType.AskJoinParty, true },
+        { GameInterludeServerPacketType.TradeStart, true },
+        { GameInterludeServerPacketType.TradeUpdate, true },
+        { GameInterludeServerPacketType.TradeDone, true },
+        { GameInterludeServerPacketType.TradeOwnAdd, true },
+        { GameInterludeServerPacketType.TradeOtherAdd, true },
+        { GameInterludeServerPacketType.TradePressOtherOk, true },
+        { GameInterludeServerPacketType.TradePressOwnOk, true },
+        { GameInterludeServerPacketType.CharInfo, true },
+        { GameInterludeServerPacketType.DropItem, true },
+        { GameInterludeServerPacketType.GetItem, true },
+
     };
 
     private static readonly Dictionary<GSInterludeCombatPacketType, bool> CombatPacketTypes = new Dictionary<GSInterludeCombatPacketType, bool>
@@ -79,6 +92,7 @@ public class FilterAccessType
         { GSInterludeCombatPacketType.ChooseInventoryItem, true },
         { GSInterludeCombatPacketType.EnchantResult, true },
         { GSInterludeCombatPacketType.MagicSkillLaunched, true }
+
     };
 
     private static readonly Dictionary<GSInterludeMessagePacketType, bool> MessagePacketTypes = new Dictionary<GSInterludeMessagePacketType, bool>

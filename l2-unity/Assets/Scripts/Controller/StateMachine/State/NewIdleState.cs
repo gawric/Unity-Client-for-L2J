@@ -1,7 +1,3 @@
-
-using UnityEditorInternal;
-using UnityEngine;
-
 public class NewIdleState : StateBase
 {
     public NewIdleState(PlayerStateMachine stateMachine) : base(stateMachine) {

@@ -1,6 +1,3 @@
-using UnityEditorInternal;
-using UnityEngine;
-
 public class WalkingMonsterState : MonsterBase
 {
     public WalkingMonsterState(MonsterStateMachine stateMachine) : base(stateMachine) { }

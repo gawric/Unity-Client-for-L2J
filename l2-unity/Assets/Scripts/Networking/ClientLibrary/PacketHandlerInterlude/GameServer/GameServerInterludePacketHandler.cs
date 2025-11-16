@@ -1,32 +1,29 @@
-
-using Org.BouncyCastle.Bcpg;
-using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
-using static UnityEditor.Progress;
 
 
 public class GameServerInterludePacketHandler : ServerPacketHandler
 {
-    private bool isKeyAuthСompleted = false;
+    private bool isKeyAuthРЎompleted = false;
     public override void HandlePacket(IData itemQueue)
     {
         ItemServer item = (ItemServer)itemQueue;
 
         if (!IsExPacket(item))
         {
+            Debug.Log($"PacketName: {item.ToString()}");
             UsePacket(item, itemQueue);
         }
         else
         {
-           int type = item.ExPacketType();
-           UseExPacket(type, itemQueue);
+            int type = item.ExPacketType();
+            UseExPacket(type, itemQueue);
         }
     }
 
 
-    private void UsePacket(ItemServer item , IData itemQueue)
+    private void UsePacket(ItemServer item, IData itemQueue)
     {
         switch (item.PaketType())
         {
@@ -238,6 +235,43 @@ public class GameServerInterludePacketHandler : ServerPacketHandler
                 OnRecipeItemMakeInfo(itemQueue.DecodeData());
                 break;
 
+            case GameInterludeServerPacketType.AskJoinParty:
+                OnAskJoinParty(itemQueue.DecodeData());
+                break;
+
+            case GameInterludeServerPacketType.SendTradeRequest:
+                OnTradeRequest(itemQueue.DecodeData());
+                break;
+
+            case GameInterludeServerPacketType.TradeStart:
+                OnTradeStart(itemQueue.DecodeData());
+                break;
+            case GameInterludeServerPacketType.TradeDone:
+                OnTradeDone(itemQueue.DecodeData());
+                break;
+            case GameInterludeServerPacketType.TradeOtherAdd:
+                OnTradeOtherAdd(itemQueue.DecodeData());
+                break;
+            case GameInterludeServerPacketType.TradeOwnAdd:
+                OnTradeOwnAdd(itemQueue.DecodeData());
+                break;
+            case GameInterludeServerPacketType.TradePressOtherOk:
+                OnTradeOtherOk(itemQueue.DecodeData());
+                break;
+            case GameInterludeServerPacketType.TradePressOwnOk:
+                OnTradeOwnOk(itemQueue.DecodeData());
+                break;
+
+            case GameInterludeServerPacketType.GetItem:
+                break;
+            case GameInterludeServerPacketType.DropItem:
+                break;
+            case GameInterludeServerPacketType.CharInfo:
+                break;
+
+            default:
+                var s = 1;
+                break;
 
         }
     }
@@ -281,7 +315,7 @@ public class GameServerInterludePacketHandler : ServerPacketHandler
     private void OnKeyReceive(byte[] data)
     {
         InterludeKeyPacket packet = new InterludeKeyPacket(data);
-        if (!isKeyAuthСompleted)
+        if (!isKeyAuthРЎompleted)
         {
             if (!packet.AuthAllowed)
             {
@@ -298,7 +332,7 @@ public class GameServerInterludePacketHandler : ServerPacketHandler
                 byte[] equalsKey = BlowFishStaticKey.GetCreateFullKeyBlowFish(packet.BlowFishKey);
                 GameClient.Instance.EnableCrypt(equalsKey);
             }
-            
+
             //Debug.Log("Data1" + LoginClient.Instance.Account);
             //Debug.Log("Data2" + GameClient.Instance.PlayKey1);
             //Debug.Log("Data3" + GameClient.Instance.PlayKey2);
@@ -312,9 +346,9 @@ public class GameServerInterludePacketHandler : ServerPacketHandler
 
             SendGameDataQueue.Instance().AddItem(sendPaket, enable, enable);
         }
-        
-        isKeyAuthСompleted = true;
-       //_eventProcessor.QueueEvent(() => ((GameClientPacketHandler)_clientPacketHandler).SendAuth());
+
+        isKeyAuthРЎompleted = true;
+        //_eventProcessor.QueueEvent(() => ((GameClientPacketHandler)_clientPacketHandler).SendAuth());
         //_eventProcessor.QueueEvent(() => ((GameClientPacketHandler)_clientPacketHandler).SendPing());
     }
 
@@ -370,7 +404,7 @@ public class GameServerInterludePacketHandler : ServerPacketHandler
             DescriptionSkillWindow.Instance.ShowWindow();
         });
     }
-    
+
     private void OnCharTemplate(byte[] data)
     {
         CharTemplates templates = new CharTemplates(data);
@@ -378,7 +412,7 @@ public class GameServerInterludePacketHandler : ServerPacketHandler
         EventProcessor.Instance.QueueEvent(() => {
             GameManager.Instance.OnCreateUser(list);
         });
-        
+
     }
 
     private void OnCharCreateOk(byte[] data)
@@ -427,18 +461,18 @@ public class GameServerInterludePacketHandler : ServerPacketHandler
         GameClient.Instance.PlayerInfo = charOk.PlayeInfo;
         GameClient.Instance.SetDataPreparationCompleted(false);
         InitPacketsLoadWord.getInstance().IsInit = true;
-       // Task.Run(() =>
+        // Task.Run(() =>
         //{
-            _eventProcessor.QueueEvent(() => {
-                GameClient.Instance.PlayerInfo = charOk.PlayeInfo;
-                GameManager.Instance.OnCharacterSelect();
-            });
+        _eventProcessor.QueueEvent(() => {
+            GameClient.Instance.PlayerInfo = charOk.PlayeInfo;
+            GameManager.Instance.OnCharacterSelect();
+        });
         //});
 
 
         var sendPaket = CreatorPacketsGameLobby.CreateEnterWorld();
         bool enable = GameClient.Instance.IsCryptEnabled();
-        //Debug.Log("GameServerPacket OnCharUserInfo : Отправил серверу пакет EnterWorld!!!! ");
+        //Debug.Log("GameServerPacket OnCharUserInfo : пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ EnterWorld!!!! ");
         SendGameDataQueue.Instance().AddItem(sendPaket, enable, enable);
     }
 
@@ -449,7 +483,7 @@ public class GameServerInterludePacketHandler : ServerPacketHandler
         if (InitPacketsLoadWord.getInstance().IsInit)
         {
             GameClient.Instance.SetDataPreparationCompleted(true);
-            Debug.Log("GameServerPacket OnCharUserInfo : Завершили обработку пакета UserInfo Init Packet");
+            Debug.Log("GameServerPacket OnCharUserInfo : пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ UserInfo Init Packet");
         }
         else
         {
@@ -458,7 +492,7 @@ public class GameServerInterludePacketHandler : ServerPacketHandler
                 World.Instance.UserInfoUpdateCharacter(userInfo);
                 UserInfoCharacterCombat(userInfo);
             });
-            Debug.Log("GameServerPacket OnCharUserInfo : Завершили обработку пакета UserInfo noraml packet");
+            Debug.Log("GameServerPacket OnCharUserInfo : пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ UserInfo noraml packet");
         }
 
 
@@ -466,21 +500,21 @@ public class GameServerInterludePacketHandler : ServerPacketHandler
 
     private void UserInfoCharacterCombat(UserInfo userInfo)
     {
-        World.Instance.UpdateUserInfo(PlayerEntity.Instance , userInfo);
+        World.Instance.UpdateUserInfo(PlayerEntity.Instance, userInfo);
     }
 
     private void OnCharSkillCoolTime(byte[] data)
     {
-        //Debug.Log("GameServerPacket SkillCoolTime : Обработали но не сохранили т.к не реализован механизм ");
+        //Debug.Log("GameServerPacket SkillCoolTime : пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ.пїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ ");
         SkillCoolTime skillCoolTime = new SkillCoolTime(data);
-        //Debug.Log("GameServerPacket OnCharSkillCoolTime : Завершено ");
+        //Debug.Log("GameServerPacket OnCharSkillCoolTime : пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ ");
 
     }
     private void OnCharMacroList(byte[] data)
     {
-        //Debug.Log("GameServerPacket OnCharMacroList : Обработали но не сохранили т.к не реализован механизм ");
+        //Debug.Log("GameServerPacket OnCharMacroList : пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ.пїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ ");
         MacroList macroList = new MacroList(data);
-        //Debug.Log("GameServerPacket OnCharMacroList : Завершено ");
+        //Debug.Log("GameServerPacket OnCharMacroList : пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ ");
     }
 
     private void OnNpcHtmlMessage(byte[] data)
@@ -492,13 +526,13 @@ public class GameServerInterludePacketHandler : ServerPacketHandler
             Entity npc = World.Instance.GetEntityNoLockSync(npcHtmlMessage.GetNpcId());
 
             //npcId> 0 - the current use
-            if(npcHtmlMessage.GetNpcId() == 0) ShowHtmlBrightToFront(npcHtmlMessage);
+            if (npcHtmlMessage.GetNpcId() == 0) ShowHtmlBrightToFront(npcHtmlMessage);
 
             if (npc == null) return;
 
             var nsm = npc.GetComponent<NpcStateMachine>();
 
-            if(nsm != null)
+            if (nsm != null)
             {
 
                 nsm.ChangeIntention(NpcIntention.STARTED_TALKING, npcHtmlMessage);
@@ -509,7 +543,7 @@ public class GameServerInterludePacketHandler : ServerPacketHandler
                 ManualRotate(npc.transform, position);
                 ShowHtmlPage(npcHtmlMessage);
             }
-           
+
         });
     }
 
@@ -538,7 +572,7 @@ public class GameServerInterludePacketHandler : ServerPacketHandler
         });
     }
 
-    private void ManualRotate(Transform npc  , Vector3 player)
+    private void ManualRotate(Transform npc, Vector3 player)
     {
         Vector3 direction = player - npc.position;
         Quaternion lookRotation = Quaternion.LookRotation(direction);
@@ -568,14 +602,14 @@ public class GameServerInterludePacketHandler : ServerPacketHandler
     private void OnBuyList(byte[] data)
     {
         BuyList buyList = new BuyList(data);
-       
+
         EventProcessor.Instance.QueueEvent(() => {
             UserInfo info = StorageNpc.getInstance().GetFirstUser();
             DealerWindow.Instance.SetWindowName("Shop");
             DealerWindow.Instance.SetHeaderNameSellPanel("Sell");
             DealerWindow.Instance.SetHeaderNameBuyPanel("Buy");
             DealerWindow.Instance.SetProductType(ProductType.BUY);
-            DealerWindow.Instance.UpdateBuyData(buyList.Products, false , buyList.ListID);
+            DealerWindow.Instance.UpdateBuyData(buyList.Products, false, buyList.ListID);
             DealerWindow.Instance.UpdateDataForm(buyList.CurrentMoney, info.PlayerInfoInterlude.Stats.WeightPercent(), info.PlayerInfoInterlude.Stats.CurrWeight, info.PlayerInfoInterlude.Stats.MaxWeight);
             DealerWindow.Instance.ShowWindowToCenter();
         });
@@ -607,7 +641,7 @@ public class GameServerInterludePacketHandler : ServerPacketHandler
         MultiSellList multiSellList = new MultiSellList(data);
 
         EventProcessor.Instance.QueueEvent(() => {
-            MultiSellWindow.Instance.AddData(multiSellList.GetOnlyItems()  , multiSellList);
+            MultiSellWindow.Instance.AddData(multiSellList.GetOnlyItems(), multiSellList);
             MultiSellWindow.Instance.ShowWindow();
         });
     }
@@ -696,22 +730,22 @@ public class GameServerInterludePacketHandler : ServerPacketHandler
 
     private void OnCharShortCutInit(byte[] data)
     {
-        Debug.Log("GameServerPacket OnCharShortCutInit : Приняли пакет");
+        Debug.Log("GameServerPacket OnCharShortCutInit : пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ");
         ShortCutInit shortCutList = new ShortCutInit(data);
         if (InitPacketsLoadWord.getInstance().IsInit)
         {
             StorageItems.getInstance().AddShortCuts(shortCutList.ShortCuts);
-            Debug.Log("GameServerPacket OnCharShortCutInit : Сохранили пока init не запущен!");
+            Debug.Log("GameServerPacket OnCharShortCutInit : пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ init пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ!");
         }
         else
         {
             //EventProcessor.Instance.QueueEvent(() => SkillbarWindow.Instance.UpdateAllShortcuts(shortCutList.ShortCuts));
             EventProcessor.Instance.QueueEvent(() => PlayerShortcuts.Instance.SetShortcutList(shortCutList.ShortCuts));
-            Debug.Log("GameServerPacket OnCharShortCutInit : Обновили на лету=========");
+            Debug.Log("GameServerPacket OnCharShortCutInit : пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅ=========");
         }
-            
-        
-        //Debug.Log("GameServerPacket OnCharShortCutInit : Завершено ");
+
+
+        //Debug.Log("GameServerPacket OnCharShortCutInit : пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ ");
     }
 
     private void OnCharShortCutRegister(byte[] data)
@@ -729,16 +763,16 @@ public class GameServerInterludePacketHandler : ServerPacketHandler
     private void OnSocialAction(byte[] data)
     {
         SocialAction socialAction = new SocialAction(data);
-        //Debug.Log("Пришел пакет не обрабатываем Social Action ObjectId +++" + socialAction.ObjectId + " ID +++" + socialAction.ActionId);
+        //Debug.Log("пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ Social Action ObjectId +++" + socialAction.ObjectId + " ID +++" + socialAction.ActionId);
     }
 
     private void OnTeleportToLocation(byte[] data)
     {
         TeleportToLocation teleportLocation = new TeleportToLocation(data);
-        //_eventProcessor.QueueEvent(() => {
-        //    World.Instance.TeleportTo(teleportLocation.TarObjId, teleportLocation.TeleportPos);
-        //});
-        
+        _eventProcessor.QueueEvent(() => {
+            World.Instance.TeleportTo(teleportLocation.TarObjId, teleportLocation.TeleportPos);
+        });
+
     }
 
     public void OnRevive(byte[] data)
@@ -747,20 +781,21 @@ public class GameServerInterludePacketHandler : ServerPacketHandler
         Revive revive = new Revive(data);
         EventProcessor.Instance.QueueEvent(() => World.Instance.Revive(revive.ObjectId));
         PlayerEntity.Instance.SetDead(false);
+        // PlayerStateMachine.Instance.ChangeIntention(Intention.INTENTION_IDLE, data);
         //Debug.Log("DoRevive 2");
     }
 
 
     private void OnCharHennaInfo(byte[] data)
     {
-        //Debug.Log("GameServerPacket HennaInfo : Обработали но не сохранили т.к не реализован механизм ");
+        //Debug.Log("GameServerPacket HennaInfo : пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ.пїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ ");
         HennaInfo hennaInfo = new HennaInfo(data);
-        //Debug.Log("GameServerPacket HennaInfo : Завершено ");
+        //Debug.Log("GameServerPacket HennaInfo : пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ ");
     }
 
     private void OnCharQuestList(byte[] data)
     {
-  
+
         QuestList questPacket = new QuestList(data);
 
         if (InitPacketsLoadWord.getInstance().IsInit)
@@ -867,7 +902,7 @@ public class GameServerInterludePacketHandler : ServerPacketHandler
 
     private void OnCharNpcInfo(byte[] data)
     {
-        //Debug.Log("GameServerPacket NpcInfo  : начало обработки пакета ");
+        //Debug.Log("GameServerPacket NpcInfo  : пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ ");
         NpcInfo npcInfo = new NpcInfo(data);
         StorageNpc.getInstance().AddNpcInfo(npcInfo);
 
@@ -877,9 +912,9 @@ public class GameServerInterludePacketHandler : ServerPacketHandler
         }
         else
         {
-             _eventProcessor.QueueEvent(() =>{
-                 UpdateNpc(npcInfo);
-             });
+            _eventProcessor.QueueEvent(() => {
+                UpdateNpc(npcInfo);
+            });
         }
     }
 
@@ -906,11 +941,11 @@ public class GameServerInterludePacketHandler : ServerPacketHandler
 
     private void OnMoveToLocation(byte[] data)
     {
-        //Debug.Log("GameServerPacket OnMoveToLocation  : Пришел пакет");
+        //Debug.Log("GameServerPacket OnMoveToLocation  : пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ");
         CharMoveToLocation charMoveToLocation = new CharMoveToLocation(data);
         if (!InitPacketsLoadWord.getInstance().IsInit)
         {
-                EventProcessor.Instance.QueueEvent(() => MoveTo(charMoveToLocation.ObjId, charMoveToLocation.NewPosition ,  charMoveToLocation.OldPosition , charMoveToLocation));
+            EventProcessor.Instance.QueueEvent(() => MoveTo(charMoveToLocation.ObjId, charMoveToLocation.NewPosition, charMoveToLocation.OldPosition, charMoveToLocation));
         }
         else
         {
@@ -918,34 +953,34 @@ public class GameServerInterludePacketHandler : ServerPacketHandler
         }
     }
 
-    public async Task MoveTo(int objId, Vector3 charMovePosition , Vector3 currentPosition  , CharMoveToLocation moveToLocation)
+    public async Task MoveTo(int objId, Vector3 charMovePosition, Vector3 currentPosition, CharMoveToLocation moveToLocation)
     {
-            Entity entity = await World.Instance.GetEntityNoLock(objId);
-            float distance = GetDistance(entity, charMovePosition);
+        Entity entity = await World.Instance.GetEntityNoLock(objId);
+        float distance = GetDistance(entity, charMovePosition);
 
-            if (entity.name.Equals("Elpy")) return;
+        if (entity.name.Equals("Elpy")) return;
 
-            if (entity.GetType() == typeof(PlayerEntity))
+        if (entity.GetType() == typeof(PlayerEntity))
+        {
+            PlayerMove(moveToLocation);
+        }
+        else if (entity.GetType() == typeof(NpcEntity))
+        {
+            var npc = (NpcEntity)entity;
+            NpcMove(npc, moveToLocation);
+        }
+        else if (entity.GetType() == typeof(MonsterEntity))
+        {
+            var monster = (MonsterEntity)entity;
+            if (!monster.IsDead())
             {
-                PlayerMove(moveToLocation);
+                DebugLineDraw.ShowDrawLineDebug(objId, charMovePosition, currentPosition, Color.red);
+                MonsterMove(monster, charMovePosition);
             }
-            else if (entity.GetType() == typeof(NpcEntity))
-            {
-                var npc = (NpcEntity)entity;
-                NpcMove(npc, moveToLocation);
-            }
-            else if (entity.GetType() == typeof(MonsterEntity))
-            {
-                var monster = (MonsterEntity)entity;
-                if (!monster.IsDead())
-                {
-                    DebugLineDraw.ShowDrawLineDebug(objId, charMovePosition, currentPosition , Color.red);
-                    MonsterMove(monster, charMovePosition);
-                }
 
-            }
-       //}
-  
+        }
+        //}
+
     }
 
 
@@ -963,8 +998,8 @@ public class GameServerInterludePacketHandler : ServerPacketHandler
 
     private async Task PlayerMove(CharMoveToLocation charMovePosition)
     {
-      //PlayerController.Instance.StopMove();
-      PlayerStateMachine.Instance.ChangeIntention(Intention.INTENTION_MOVE_TO, charMovePosition);
+        //PlayerController.Instance.StopMove();
+        PlayerStateMachine.Instance.ChangeIntention(Intention.INTENTION_MOVE_TO, charMovePosition);
     }
     private async Task MonsterMove(MonsterEntity monster, Vector3 monsterMovePosition)
     {
@@ -975,11 +1010,11 @@ public class GameServerInterludePacketHandler : ServerPacketHandler
     private async Task NpcMove(NpcEntity npc, CharMoveToLocation moveToLocation)
     {
         var nsm = npc.GetComponent<NpcStateMachine>();
-        if(nsm != null)
+        if (nsm != null)
         {
             nsm.ChangeIntention(NpcIntention.INTENTION_MOVE_TO, moveToLocation);
         }
-        
+
     }
 
     private void OnValidateLocation(byte[] data)
@@ -1030,14 +1065,14 @@ public class GameServerInterludePacketHandler : ServerPacketHandler
         Debug.Log("Event Open ExShowQuestInfo Info");
     }
 
-    public void  OnExShowSellCropList(byte[] data)
+    public void OnExShowSellCropList(byte[] data)
     {
         ExShowSellCropList showSellCropList = new ExShowSellCropList(data);
 
         EventProcessor.Instance.QueueEvent(() => {
             SellCropListWindow.Instance.ShowWindow();
             SellCropListWindow.Instance.SetDataTable(showSellCropList);
- 
+
         });
     }
 
@@ -1054,10 +1089,10 @@ public class GameServerInterludePacketHandler : ServerPacketHandler
     public void OnExShowCropInfo(byte[] data)
     {
         ExShowCropInfo showSellCropList = new ExShowCropInfo(data);
-         EventProcessor.Instance.QueueEvent(() => {
-             SeedInfoWindow.Instance.SetDataCropInfo(showSellCropList.List);
-             SeedInfoWindow.Instance.ShowWindow();
-          });
+        EventProcessor.Instance.QueueEvent(() => {
+            SeedInfoWindow.Instance.SetDataCropInfo(showSellCropList.List);
+            SeedInfoWindow.Instance.ShowWindow();
+        });
 
 
     }
@@ -1100,6 +1135,154 @@ public class GameServerInterludePacketHandler : ServerPacketHandler
         }
 
     }
+
+    #region ItemsOnTheGroundRegion
+    private void OnItemDrop(byte[] data)
+    {
+        if (!InitPacketsLoadWord.getInstance().IsInit)
+        {
+            RecipeBookItemList packet = new RecipeBookItemList(data);
+
+            EventProcessor.Instance.QueueEvent(() => {
+                RecipeBookWindow.Instance.AddData(packet);
+                RecipeBookWindow.Instance.ShowWindow();
+            });
+        }
+
+    }
+    private void OnItemGet(byte[] data)
+    {
+        if (!InitPacketsLoadWord.getInstance().IsInit)
+        {
+            RecipeBookItemList packet = new RecipeBookItemList(data);
+
+            EventProcessor.Instance.QueueEvent(() => {
+                RecipeBookWindow.Instance.AddData(packet);
+                RecipeBookWindow.Instance.ShowWindow();
+            });
+        }
+
+    }
+    #endregion
+
+
+    #region PartyRegion
+    private void OnAskJoinParty(byte[] data)
+    {
+        
+        if (!InitPacketsLoadWord.getInstance().IsInit)
+        {
+            AskJoinParty packet = new AskJoinParty(data);
+
+            EventProcessor.Instance.QueueEvent(() => {
+                PartyInvitationWindow.Instance.AddData(packet);
+                PartyInvitationWindow.Instance.ShowWindow();
+            });
+        }
+    }
+
+    #endregion
+
+
+    #region TradeRegion
+
+    private void OnTradeStart(byte[] data)
+    {
+        if (!InitPacketsLoadWord.getInstance().IsInit)
+        {
+            TradeStart packet = new TradeStart(data);
+
+            EventProcessor.Instance.QueueEvent(() =>
+            {
+                TradeWindow.Instance.AddData(packet);
+                TradeWindow.Instance.ShowWindow();
+            });
+        }
+    }
+
+    private void OnTradeDone(byte[] data)
+    {
+        if (!InitPacketsLoadWord.getInstance().IsInit)
+        {
+            //TradeStart packet = new TradeStart(data);
+
+            EventProcessor.Instance.QueueEvent(() =>
+            {
+                //TradeWindow.Instance.AddData(packet);
+                TradeWindow.Instance.HideWindow();
+            });
+        }
+    }
+
+    private void OnTradeOtherAdd(byte[] data)
+    {
+        if (!InitPacketsLoadWord.getInstance().IsInit)
+        {
+            //TradeStart packet = new TradeStart(data);
+
+            EventProcessor.Instance.QueueEvent(() =>
+            {
+                //TradeWindow.Instance.AddData(packet);
+                //TradeWindow.Instance.HideWindow();
+            });
+        }
+    }
+
+    private void OnTradeOwnAdd(byte[] data)
+    {
+        if (!InitPacketsLoadWord.getInstance().IsInit)
+        {
+            //TradeStart packet = new TradeStart(data);
+
+            EventProcessor.Instance.QueueEvent(() =>
+            {
+                //TradeWindow.Instance.AddData(packet);
+                //TradeWindow.Instance.HideWindow();
+            });
+        }
+    }
+    private void OnTradeOwnOk(byte[] data)
+    {
+        if (!InitPacketsLoadWord.getInstance().IsInit)
+        {
+            //TradeStart packet = new TradeStart(data);
+
+            EventProcessor.Instance.QueueEvent(() =>
+            {
+                //TradeWindow.Instance.AddData(packet);
+                //TradeWindow.Instance.HideWindow();
+            });
+        }
+    }
+
+    private void OnTradeOtherOk(byte[] data)
+    {
+        if (!InitPacketsLoadWord.getInstance().IsInit)
+        {
+            //TradeStart packet = new TradeStart(data);
+
+            EventProcessor.Instance.QueueEvent(() =>
+            {
+                //TradeWindow.Instance.AddData(packet);
+                //TradeWindow.Instance.HideWindow();
+            });
+        }
+    }
+
+    private void OnTradeRequest(byte[] data)
+    {
+        if (!InitPacketsLoadWord.getInstance().IsInit)
+        {
+            SendTradeRequest packet = new SendTradeRequest(data);
+
+            EventProcessor.Instance.QueueEvent(() =>
+            {
+                TradeRequestWindow.Instance.AddData(packet);
+                TradeRequestWindow.Instance.ShowWindow();
+            });
+        }
+    }
+    #endregion
 
     private void OnRecipeItemMakeInfo(byte[] data)
     {

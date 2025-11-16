@@ -1,10 +1,5 @@
-using System.Security.Cryptography;
 using System.Threading;
-using System.Threading.Tasks;
 using UnityEngine;
-using static AttackingState;
-using static UnityEditor.Progress;
-using static UnityEngine.EventSystems.EventTrigger;
 
 public class FastSinglExecuter : MonoBehaviour
 {
@@ -136,8 +131,8 @@ public class FastSinglExecuter : MonoBehaviour
         if (attakerEntity.GetType() == typeof(PlayerEntity) & targetEntity.GetType() == typeof(MonsterEntity))
         {
             // WorldCombat.Instance.InflictAttack(attakerEntity.transform, targetEntity.transform);
-            //Пока не нудно включать вызывает баг когда атакуешь из-за конфликта пакетов. В этом месте я пытаюсь предугадать действие,
-            //а нужно ждать ответа от сервера и просто двигаться дальше
+            //пїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ-пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ. пїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ,
+            //пїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
             MonsterStateMachine targetMonster = targetEntity.GetComponent<MonsterStateMachine>();
             if (targetMonster.State == MonsterState.RUNNING | targetMonster.State == MonsterState.WALKING)
             {
@@ -153,7 +148,7 @@ public class FastSinglExecuter : MonoBehaviour
             string name = World.Instance.getEntityName(attackPacket.TargetId);
             //example "$c1 hit you for $s2 damage."
             //system message info c1
-            //StorageVariable.getInstance().AddС1Items(new VariableItem(name, attackPacket.AttackerObjId));
+            //StorageVariable.getInstance().AddпїЅ1Items(new VariableItem(name, attackPacket.AttackerObjId));
             //system message info s1
 
         });

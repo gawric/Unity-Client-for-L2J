@@ -140,8 +140,8 @@ public class World : MonoBehaviour {
         //Debug.Log("PLAYER SPAWN PAtkSpd " + statsIntr.PAtkSpd);
         // player.UpdatePAtkSpeedPlayer((int)statsIntr.BasePAtkSpeed);
 
-        //416 - нормальная атака
-        //554 - с ускорением
+        //416 - пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
+        //554 - пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
         player.UpdatePAtkSpeedPlayer((int)statsIntr.BasePAtkSpeed);
         player.UpdateMAtkSpeed((int)statsIntr.MAtkSpd);
         //go.transform.SetParent(_usersContainer.transform);
@@ -167,7 +167,7 @@ public class World : MonoBehaviour {
 
         if (_npcs.ContainsKey(identity.Id)) return;
 
-        //Debug.Log("Запуск обработки Spawn Npc Interlude ++++++++++++++++++ ");
+        //Debug.Log("пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ Spawn Npc Interlude ++++++++++++++++++ ");
         Npcgrp npcgrp = NpcgrpTable.Instance.GetNpcgrp(identity.NpcId);
         NpcName npcName = NpcNameTable.Instance.GetNpcName(identity.NpcId);
 
@@ -190,7 +190,7 @@ public class World : MonoBehaviour {
         {
 
             Debug.Log("Name NPC " + npcName.Name);
-            //Debug режим добавляет только 1 гремлина и все !!!!
+            //Debug пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ 1 пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅ !!!!
            //if (isSinglSpawn | !npcName.Name.Equals("Elder Keltir")) return;
 
            // if (!isSinglSpawn)
@@ -467,7 +467,7 @@ public class World : MonoBehaviour {
 
 
 
-    public Task TeleportToTest(int id, Vector3 position)
+    public Task TeleportTo(int id, Vector3 position)
     {
         return ExecuteWithEntityAsync(id, entity => {
             if (entity.GetType() == typeof(PlayerEntity))

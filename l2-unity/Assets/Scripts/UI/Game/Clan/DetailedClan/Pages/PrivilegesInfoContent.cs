@@ -1,9 +1,5 @@
-using FMOD.Studio;
 using System.Collections.Generic;
-using System.Drawing;
-using UnityEngine;
 using UnityEngine.UIElements;
-using static UnityEditor.Rendering.FilterWindow;
 
 
 public class PrivilegesInfoContent : AbstractClanContent

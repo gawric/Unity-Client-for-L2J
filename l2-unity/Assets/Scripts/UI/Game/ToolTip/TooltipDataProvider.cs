@@ -1,7 +1,5 @@
-
 using UnityEngine;
 using UnityEngine.UIElements;
-using static UnityEditor.Progress;
 
 
 public class TooltipDataProvider : AbstractDataProvider

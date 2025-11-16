@@ -1,7 +1,4 @@
-using System.Collections;
 using System.Collections.Generic;
-using System.Threading;
-using UnityEditorInternal;
 using UnityEngine;
 using static ServerListPacket;
 
@@ -190,7 +187,7 @@ public class GameManager : MonoBehaviour {
             }
             else
             {
-                //Debug.Log("GameManager: йпхрхвеяйюъ ньхайю !!!! OnGameLaunched L2LoginUI NULLL");
+                //Debug.Log("GameManager: О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫ О©╫О©╫О©╫О©╫О©╫О©╫ !!!! OnGameLaunched L2LoginUI NULLL");
             }
 
             CharacterCreator.Instance.SpawnAllPawns();

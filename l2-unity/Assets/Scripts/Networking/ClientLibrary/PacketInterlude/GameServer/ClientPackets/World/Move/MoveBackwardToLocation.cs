@@ -13,7 +13,7 @@ public class MoveBackwardToLocation : ClientPacket
     //_originX = readInt();
     //_originY = readInt();
     //_originZ = readInt();
-    public MoveBackwardToLocation(Vector3 position , Vector3 target) : base((byte)GameInterludeClientPacketType.MoveBackwardToLocation)
+    public MoveBackwardToLocation(Vector3 position , Vector3 target) : base((byte)GameInterludeClientPacketType.MoveToLocation)
     {
         //Debug.Log("POSITION DIST SEND SERVER " + VectorUtils.Distance2D(position , target));
         //Debug.Log("POSITION DIST SEND SERVER l2j" + Distance2D(position.x , position.z, target.x , target.z));

@@ -110,12 +110,12 @@ public class ClanDetailedInfo
 
     private void OnClickOkRank(string memberName, int rank)
     {
-        SendGameDataQueue.Instance().AddItem(
-            CreatorPacketsUser.CreateRequestPledgeSetMemberPowerGrade(memberName , rank),
-            GameClient.Instance.IsCryptEnabled(),
-            GameClient.Instance.IsCryptEnabled());
+        //SendGameDataQueue.Instance().AddItem(
+        //    CreatorPacketsUser.CreateRequestPledgeSetMemberPowerGrade(memberName , rank),
+        //    GameClient.Instance.IsCryptEnabled(),
+        //    GameClient.Instance.IsCryptEnabled());
 
-        //Debug.Log("Click OnClickOkRank memberName " + memberName + " Rank " + rank);
+        ////Debug.Log("Click OnClickOkRank memberName " + memberName + " Rank " + rank);
     }
 
     private void OnClickOkTitle(string memberName, string title)

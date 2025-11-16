@@ -1,14 +1,6 @@
-using System;
-
-using System.Security.Cryptography;
-using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
-using UnityEditor.Experimental.GraphView;
-using UnityEditorInternal;
 using UnityEngine;
-using UnityEngine.PlayerLoop;
-using UnityEngine.UIElements;
 
 using static StorageVariable;
 
@@ -59,7 +51,9 @@ public class GsInterludeCombatHandler : ServerPacketHandler
             case GSInterludeCombatPacketType.ChooseInventoryItem:
                 OnChooseInventoryItem(itemQueue.DecodeData());
                 break;
-
+            default:
+                var s = 1;
+                break;
 
         }
 
@@ -86,7 +80,7 @@ public class GsInterludeCombatHandler : ServerPacketHandler
             //{
 
             //}, null);
-            //Debug.Log("Пришел пакет IntelList");
+            //Debug.Log("пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ IntelList");
             PlayerInventory.Instance.SetInventory(_items, itemList.EquipItems, showWindow, itemList.AdenaCount , itemList.Items.Count + itemList.EquipItems.Count);
 
             

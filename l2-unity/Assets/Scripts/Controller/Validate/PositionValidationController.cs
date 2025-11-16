@@ -1,12 +1,5 @@
-using NUnit.Framework;
 using System.Collections.Generic;
-using System.Threading;
-using UnityEditorInternal;
 using UnityEngine;
-using UnityEngine.UIElements;
-using static UnityEngine.EventSystems.EventTrigger;
-using static UnityEngine.Rendering.DebugUI;
-using static UnityEngine.UI.CanvasScaler;
 
 public class PositionValidationController : MonoBehaviour
 {

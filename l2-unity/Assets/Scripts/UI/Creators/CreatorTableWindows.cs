@@ -1,10 +1,9 @@
-
+п»ї
 
 using System;
 using System.Collections.Generic;
 
 using System.Linq;
-using UnityEditor;
 using UnityEngine;
 
 using UnityEngine.UIElements;
@@ -376,28 +375,29 @@ public class CreatorTableWindows : ICreatorTables
 
     void OnHeaderGeometryChanged(VisualElement containerHeader , ScrollView innerScrollView)
     {
-        EditorApplication.delayCall += () =>
-        {
-            bool isFirst = true;
-            float[] allWith = new float[containerHeader.childCount];
+        //todo: РІРµСЂРЅСѓС‚СЊСЃСЏ Рё РїРѕС„РёРєСЃРёС‚СЊ
+        //EditorApplication.delayCall += () =>
+        //{
+        //    bool isFirst = true;
+        //    float[] allWith = new float[containerHeader.childCount];
 
-            for (int i = 0; i < containerHeader.childCount; i++)
-            {
-                var headerItem = containerHeader[i];
-                float headerWidth = headerItem.resolvedStyle.width;
+        //    for (int i = 0; i < containerHeader.childCount; i++)
+        //    {
+        //        var headerItem = containerHeader[i];
+        //        float headerWidth = headerItem.resolvedStyle.width;
 
-                float newWidth = isFirst ? headerWidth + 2 : headerWidth;
-                isFirst = false;
-                allWith[i] = newWidth;
-            }
+        //        float newWidth = isFirst ? headerWidth + 2 : headerWidth;
+        //        isFirst = false;
+        //        allWith[i] = newWidth;
+        //    }
 
 
-            if (innerScrollView != null)
-            {
-                var innerContainer = innerScrollView.contentContainer;
-                ChangeWidthListView(innerContainer.Children(), allWith);
-            }
-        };
+        //    if (innerScrollView != null)
+        //    {
+        //        var innerContainer = innerScrollView.contentContainer;
+        //        ChangeWidthListView(innerContainer.Children(), allWith);
+        //    }
+        //};
     }
 
     private void ChangeWidthListView(IEnumerable<VisualElement> elementsListView ,  float[] allWith)
@@ -633,9 +633,9 @@ public class CreatorTableWindows : ICreatorTables
 
     private void CleapText(Label rowLabel)
     {
-        //rowLabel.style.width = 200;                   // фикс. ширина
-        rowLabel.style.whiteSpace = WhiteSpace.NoWrap; // запретить перенос
-        rowLabel.style.textOverflow = TextOverflow.Clip; // обрезать
+        //rowLabel.style.width = 200;                   // ГґГЁГЄГ±. ГёГЁГ°ГЁГ­Г 
+        rowLabel.style.whiteSpace = WhiteSpace.NoWrap; // Г§Г ГЇГ°ГҐГІГЁГІГј ГЇГҐГ°ГҐГ­Г®Г±
+        rowLabel.style.textOverflow = TextOverflow.Clip; // Г®ГЎГ°ГҐГ§Г ГІГј
     }
 
     private VisualElement GetNewRow()

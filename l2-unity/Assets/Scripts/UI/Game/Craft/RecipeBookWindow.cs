@@ -1,11 +1,9 @@
 using System;
 using System.Collections;
-using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.UIElements;
 using static L2Slot;
-using static UnityEditor.ShaderGraph.Internal.KeywordDependentCollection;
 
 public class RecipeBookWindow : L2PopupWindow
 {
@@ -34,7 +32,7 @@ public class RecipeBookWindow : L2PopupWindow
 
     protected override void LoadAssets()
     {
-        _windowTemplate = LoadAsset("Data/UI/_Elements/Game/Ñraft/RecipeBookWindow");
+        _windowTemplate = LoadAsset("Data/UI/_Elements/Game/Craft/RecipeBookWindow");
         _creatorWindow.LoadAsset(LoadAsset);
     }
 

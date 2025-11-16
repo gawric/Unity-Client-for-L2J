@@ -1,7 +1,4 @@
-using UnityEditor;
-using UnityEditorInternal;
 using UnityEngine;
-using static UnityEditor.Progress;
 
 public class ItemInstance : AbstractServerItem
 {

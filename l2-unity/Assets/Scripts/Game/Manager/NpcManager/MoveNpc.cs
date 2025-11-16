@@ -7,12 +7,12 @@ public class MoveNpc : MonoBehaviour
     //setting Rotate
     private Transform _targetObj;
 
-    private float rotationSpeed = 40f; // Скорость поворота
+    private float rotationSpeed = 40f; // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
     private bool _isRotate = false;
     public bool _isFollow = false;
     private bool _isMove = false;
-    private Quaternion _lastRotation; // Хранит поворот 
-    public float rotationThreshold = 0.01f; // Порог изменения для определения вращения
+    private Quaternion _lastRotation; // пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ 
+    public float rotationThreshold = 0.01f; // пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 
     //setting Follow
     private ModelMovePawn _targetModelObj;
@@ -62,10 +62,10 @@ public class MoveNpc : MonoBehaviour
     
             if (_isRotate)
             {
-                // Проверяем, изменился ли поворот
+                // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
                 if (IsRotating())
                 {
-                    Debug.Log("Персонаж поворачивается. " + transform.position);
+                    Debug.Log("пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ. " + transform.position);
                 }
                 else
                 {
@@ -131,7 +131,7 @@ public class MoveNpc : MonoBehaviour
             var gravityOffTransform = new Vector3(transform.position.x, 0, transform.position.z);
             var gravityOffTarget = new Vector3(target.x, 0, target.z);
             float monsterSpeed = GetMonsterSpeed();
-            // Вычисляем расстояние до цели
+            // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅ
             float distance = Vector2.Distance(gravityOffTarget, gravityOffTransform);
 
 
@@ -147,9 +147,9 @@ public class MoveNpc : MonoBehaviour
                     _detectedIsMove = true;
                     _controller.Move(direction * monsterSpeed * Time.deltaTime);
 
-                    // Поворачиваем NPC лицом к цели
+                    // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ NPC пїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅ
                     Quaternion lookRotation = Quaternion.LookRotation(direction);
-                    transform.rotation = Quaternion.Slerp(transform.rotation, lookRotation, Time.deltaTime * 5.0f); // Плавный поворот
+                    transform.rotation = Quaternion.Slerp(transform.rotation, lookRotation, Time.deltaTime * 5.0f); // пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
                 }
 
                 if (_lastPos == transform.position)
@@ -168,7 +168,7 @@ public class MoveNpc : MonoBehaviour
 
     private void OnFinish(Vector3 target)
     {
-        // Debug.Log("MoveMonster: Мы достигли точки назначения останавливаемя и ждем!!!! " + this.name);
+        // Debug.Log("MoveMonster: пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅ!!!! " + this.name);
         _isMove = false;
 
         var teset = new Vector3(target.x, 0, target.z);
@@ -197,10 +197,10 @@ public class MoveNpc : MonoBehaviour
 
     private bool IsRotating()
     {
-        // Вычисляем разницу между текущим и предыдущим вращением
+        // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
         float rotationDifference = Quaternion.Angle(_lastRotation, transform.rotation);
 
-        // Если разница больше порога, значит объект поворачивается
+        // пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
         return rotationDifference > rotationThreshold;
     }
     public bool IsRotate { get { return _isRotate; } }
@@ -235,10 +235,10 @@ public class MoveNpc : MonoBehaviour
 
     public void RotateObject()
     {
-        // Вычисляем направление к цели
+        // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅ
         Vector3 direction = _targetObj.position - transform.position;
 
-        // Игнорируем ось Y, если нужно (например, для движения по плоскости)
+        // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ Y, пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ (пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ)
         direction.y = 0;
 
         Quaternion targetRotation = Quaternion.LookRotation(direction);

@@ -22,7 +22,8 @@ public class L2Slot
         Action,
         Trash,
         PriceBuy,
-        PriceSell
+        PriceSell,
+        Trade
     }
 
     [SerializeField] protected int _id;

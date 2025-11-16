@@ -1,15 +1,10 @@
-using Newtonsoft.Json.Linq;
 using System;
-using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
-using UnityEngine.InputSystem;
 using static SMParam;
-using static UnityEditor.ShaderGraph.Internal.KeywordDependentCollection;
-using static UnityEngine.Rendering.DebugUI;
 public class GSInterludeMessageHandler : ServerPacketHandler
 {
 
@@ -42,6 +37,9 @@ public class GSInterludeMessageHandler : ServerPacketHandler
             case GSInterludeMessagePacketType.NpcSay:
                 OnNpcSay(itemQueue.DecodeData());
                 break;
+            default:
+                var s = 1;
+                break;
         }
 
     }
@@ -49,7 +47,7 @@ public class GSInterludeMessageHandler : ServerPacketHandler
     private void OnMessage(byte[] data)
     {
         //SystemMessageInterlude packet = new SystemMessageInterlude(data);
-        //Debug.Log("Пришло сообщение на отображение в самом начале !!!! " + 1);
+        //Debug.Log("пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ !!!! " + 1);
         SystemMessagePacket packet = new SystemMessagePacket(data);
         try
         {
@@ -64,7 +62,7 @@ public class GSInterludeMessageHandler : ServerPacketHandler
         }
         catch (Exception ex)
         {
-            Debug.Log("GSInterludeMessageHandler: Критическая ошибка в сервисе сообщений!!!!! " + ex.ToString());
+            Debug.Log("GSInterludeMessageHandler: пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ!!!!! " + ex.ToString());
         }
      
 
@@ -73,7 +71,7 @@ public class GSInterludeMessageHandler : ServerPacketHandler
     private void OnCreatureSay(byte[] data)
     {
         //SystemMessageInterlude packet = new SystemMessageInterlude(data);
-        //Debug.Log("Пришло сообщение на отображение в самом начале !!!! " + 1);
+        //Debug.Log("пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ !!!! " + 1);
         CreatureSay packet = new CreatureSay(data);
         if(packet.Message != null)
         {
@@ -93,7 +91,7 @@ public class GSInterludeMessageHandler : ServerPacketHandler
     private void OnNpcSay(byte[] data)
     {
         //SystemMessageInterlude packet = new SystemMessageInterlude(data);
-        //Debug.Log("Пришло сообщение на отображение в самом начале !!!! " + 1);
+        //Debug.Log("пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ !!!! " + 1);
         NpcSay packet = new NpcSay(data);
         if (packet.NpcMessage != null)
         {
@@ -115,7 +113,7 @@ public class GSInterludeMessageHandler : ServerPacketHandler
     {
         SMParam[] smParams = packet.Params;
         int messageId = packet.Id;
-        //Debug.Log("Добавлено TRY ADD" + messageId);
+        //Debug.Log("пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ TRY ADD" + messageId);
         SystemMessageDat messageData = SystemMessageTable.Instance.GetSystemMessage(messageId);
         OpenMessageWindow(messageId, messageData , smParams);
 
@@ -201,13 +199,13 @@ public class GSInterludeMessageHandler : ServerPacketHandler
                        // SystemMessage newMessage = new SystemMessage(messageDelay.Params, newText);
                         //EventProcessor.Instance.QueueEvent(() => ChatWindow.Instance.ReceiveSystemMessage(newMessage));
                         //_delayMessage.Remove(messageId , out messageDelay);
-                        //Debug.Log("Выведено на экран и удалено!" + messageId);
+                        //Debug.Log("пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ!" + messageId);
                        // exit = 0;
                        // Block();
                    // }
                    // else
                    // {
-                    //    Debug.Log("GSInterludeMessageHandler DelayMessage: Ждем сообщения для вывода на экран!!! ");
+                    //    Debug.Log("GSInterludeMessageHandler DelayMessage: пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅ!!! ");
                   //  }
                // }
               //  else

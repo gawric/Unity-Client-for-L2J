@@ -1,12 +1,5 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.TextCore.Text;
-using UnityEngine.UIElements;
 using static StorageVariable;
-using static UnityEditor.Experimental.GraphView.GraphView;
-using static UnityEditor.Progress;
 
 public class UserInfo : ServerPacket
 {
@@ -279,7 +272,7 @@ public class UserInfo : ServerPacket
         int titleColor = ReadI();
         int isCursedWeaponEquipped = ReadI();
         StorageVariable.getInstance().ResumeShowDelayMessage((int)MessageID.ADD_EXP_SP);
-        Debug.Log("USERRRR INFO Загрузка звершена!!!! ");
+        Debug.Log("USERRRR INFO пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ!!!! ");
     }
 
     private float GetRealSpeed(int baseSpeed , float speedMultiplier)

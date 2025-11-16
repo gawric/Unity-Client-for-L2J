@@ -56,5 +56,22 @@ public enum GameInterludeServerPacketType : byte
     AcquireSkillList = 0x8a,
     AcquireSkillInfo = 0x8b,
     RecipeBookItemList = 0xD6,
-    RecipeItemMakeInfo = 0xD7
+    RecipeItemMakeInfo = 0xD7,
+
+    SendTradeRequest = 0x5e,
+    TradeStart = 0x1e,
+    TradeOwnAdd = 0x20,
+    TradeOtherAdd = 0x21,
+    TradeDone = 0x22,
+    TradeUpdate = 0x74,
+    TradePressOwnOk = 0x75,
+    TradePressOtherOk = 0x76,
+
+    AskJoinParty = 0x39,
+    JoinParty = 0x3a,
+
+
+    CharInfo = 0x03,
+    DropItem = 0x0c,
+    GetItem = 0x0d,
 }

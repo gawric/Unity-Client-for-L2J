@@ -2,15 +2,9 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Globalization;
-using UnityEditorInternal.Profiling.Memory.Experimental;
 using UnityEngine;
-using UnityEngine.Rendering;
 using UnityEngine.UIElements;
 using static L2Slot;
-using static UnityEditor.Progress;
-using static UnityEditor.Rendering.FilterWindow;
-using static UnityEditor.ShaderGraph.Internal.KeywordDependentCollection;
 
 
 public class ToolTipSimple : L2PopupWindow, IToolTips

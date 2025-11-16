@@ -1,12 +1,5 @@
-using System.Collections;
-using System.Threading;
 using System.Threading.Tasks;
-using UnityEditorInternal;
 using UnityEngine;
-using UnityEngine.InputSystem.XR;
-using static AttackingState;
-using static UnityEditor.ShaderGraph.Internal.KeywordDependentCollection;
-using static UnityEngine.EventSystems.EventTrigger;
 
 public class MagicAttackIntention : IntentionBase
 {

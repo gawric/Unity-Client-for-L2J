@@ -1,11 +1,8 @@
 using System.Collections.Generic;
-using UnityEngine;
 using static L2Slot;
 using UnityEngine.UIElements;
 using System;
 using System.Linq;
-using static UnityEditor.Progress;
-using FMOD;
 
 public class ShopInventoryController
 {

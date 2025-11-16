@@ -225,6 +225,25 @@ public class L2GameUI : L2UI
             CraftingItemWindow.Instance.AddWindow(_rootVisualContainer);
             CraftingItemWindow.Instance.HideWindow();
         }
+
+
+        if (PartyInvitationWindow.Instance != null)
+        {
+            PartyInvitationWindow.Instance.AddWindow(_rootVisualContainer);
+            PartyInvitationWindow.Instance.HideWindow();
+        }
+        
+        if (TradeRequestWindow.Instance != null)
+        {
+            TradeRequestWindow.Instance.AddWindow(_rootVisualContainer);
+            TradeRequestWindow.Instance.HideWindow();
+        }
+        
+        if (TradeWindow.Instance != null)
+        {
+            TradeWindow.Instance.AddWindow(_rootVisualContainer);
+            TradeWindow.Instance.HideWindow();
+        }
     }
 
     public void EnableMouse()

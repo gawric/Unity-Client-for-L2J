@@ -1,7 +1,4 @@
-using System.Security.Cryptography;
-using UnityEditorInternal;
 using UnityEngine;
-using static AttackingState;
 
 public class RunningMonsterState : MonsterBase
 {

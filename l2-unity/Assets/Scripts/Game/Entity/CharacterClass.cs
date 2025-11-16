@@ -70,3 +70,40 @@ public enum CharacterClass : byte {
     Artisan = 0x38,
     Warsmith = 0x39
 }
+
+public class CharacterClassParser
+{
+    public static bool IsMage(CharacterClass characterClass)
+    {
+        switch (characterClass)
+        {
+            case CharacterClass.Mage:
+            case CharacterClass.Wizard:
+            case CharacterClass.Sorceror:
+            case CharacterClass.Necromancer:
+            case CharacterClass.Warlock:
+            case CharacterClass.Cleric:
+            case CharacterClass.Bishop:
+            case CharacterClass.Prophet:
+            case CharacterClass.ElvenMage:
+            case CharacterClass.ElvenWizard:
+            case CharacterClass.Spellsinger:
+            case CharacterClass.ElementalSummoner:
+            case CharacterClass.Oracle:
+            case CharacterClass.Elder:
+            case CharacterClass.DarkMage:
+            case CharacterClass.DarkWizard:
+            case CharacterClass.Spellhowler:
+            case CharacterClass.PhantomSummoner:
+            case CharacterClass.ShillienOracle:
+            case CharacterClass.ShillenElder:
+            case CharacterClass.OrcMage:
+            case CharacterClass.OrcShaman:
+            case CharacterClass.Overlord:
+            case CharacterClass.Warcryer:
+                return true;
+            default:
+                return false;
+        }
+    }
+}
