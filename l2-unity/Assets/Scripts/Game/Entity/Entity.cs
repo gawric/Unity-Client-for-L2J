@@ -87,7 +87,7 @@ public class Entity : MonoBehaviour {
        
         UpdatePAtkSpeed((int)_stats.PAtkSpd);
         UpdateMAtkSpeed(_stats.MAtkSpd);
-        UpdateSpeed(_stats.RunSpeed);
+        UpdateSpeed(_stats.Speed);
 
         EquipAllWeapons();
     }
@@ -197,7 +197,7 @@ public class Entity : MonoBehaviour {
         float anim_converted = UpdateAnimWalkSpeed(walkSpeed);
         if (_networkAnimationReceive != null) _networkAnimationReceive.SetWalkSpeed(anim_converted);
         //Debug.Log("Scaled speed NPC Walk " + anim_converted + " name walk speed " + name + " original speed " + walkSpeed);
-        Stats.WalkSpeed = (int)scaled;
+        Stats.UnitySpeedWalking = scaled;
     }
 
     public void UpdateNpcRunningSpd(float runSpeed)
@@ -206,12 +206,12 @@ public class Entity : MonoBehaviour {
         float anim_converted = UpdateAnimRunSpeed(runSpeed);
         if (_networkAnimationReceive != null) _networkAnimationReceive.SetRunSpeed(anim_converted);
         //Debug.Log("Scaled speed NPC Run " + anim_converted + " name walk speed " + name);
-        Stats.RunSpeed = (int)scaled;
+        Stats.UnitySpeedRun = scaled;
     } 
 
     public virtual float UpdateSpeed(int speed) {
         float scaled = StatsConverter.Instance.ConvertStat(Stat.SPEED, speed);
-        _stats.RunSpeed = speed;
+        _stats.Speed = speed;
         _stats.ScaledSpeed = scaled;
         return StatsConverter.Instance.ConvertStat(Stat.SPEED, speed);
     }
@@ -219,7 +219,7 @@ public class Entity : MonoBehaviour {
     public virtual float UpdateRunSpeed(float speed)
     {
         float scaled = StatsConverter.Instance.ConvertStat(Stat.SPEED, speed);
-        _stats.RunSpeed = (int)speed;
+        _stats.UnitySpeedRun = speed;
         return scaled;
         //_stats.ScaledRunSpeed = scaled;
         //return StatsConverter.Instance.ConvertStat(Stat.SPEED, speed);
@@ -244,7 +244,7 @@ public class Entity : MonoBehaviour {
     public virtual float UpdateWalkSpeed(float speed)
     {
         float scaled = StatsConverter.Instance.ConvertStat(Stat.SPEED, speed);
-        _stats.WalkSpeed = (int)scaled;
+        _stats.UnitySpeedWalking = scaled;
         return scaled;
         //_stats.ScaledWalkSpeed = scaled;
        // return StatsConverter.Instance.ConvertStat(Stat.SPEED, speed);

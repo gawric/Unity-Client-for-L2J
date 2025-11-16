@@ -133,15 +133,15 @@ public class World : MonoBehaviour {
         var statsIntr = (PlayerInterludeStats)player.Stats;
         player.Initialize();
         //player.GetComponent<NetworkTransformReceive>().Initialize();
-        player.UpdateRunSpeed(statsIntr.RunSpeed);
-        player.UpdateWalkSpeed(statsIntr.WalkSpeed);
+        player.UpdateRunSpeed(statsIntr.RunRealSpeed);
+        player.UpdateWalkSpeed(statsIntr.WalkRealSpeed);
 
         // Debug.Log("PLAYER SPAWN RunSpeed " + statsIntr.RunSpeed);
         //Debug.Log("PLAYER SPAWN PAtkSpd " + statsIntr.PAtkSpd);
         // player.UpdatePAtkSpeedPlayer((int)statsIntr.BasePAtkSpeed);
 
-        //416 - нормальная атака
-        //554 - с ускорением
+        //416 - пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
+        //554 - пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
         player.UpdatePAtkSpeedPlayer((int)statsIntr.BasePAtkSpeed);
         player.UpdateMAtkSpeed((int)statsIntr.MAtkSpd);
         //go.transform.SetParent(_usersContainer.transform);
@@ -167,7 +167,7 @@ public class World : MonoBehaviour {
 
         if (_npcs.ContainsKey(identity.Id)) return;
 
-        //Debug.Log("Запуск обработки Spawn Npc Interlude ++++++++++++++++++ ");
+        //Debug.Log("пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ Spawn Npc Interlude ++++++++++++++++++ ");
         Npcgrp npcgrp = NpcgrpTable.Instance.GetNpcgrp(identity.NpcId);
         NpcName npcName = NpcNameTable.Instance.GetNpcName(identity.NpcId);
 
@@ -190,7 +190,7 @@ public class World : MonoBehaviour {
         {
 
             Debug.Log("Name NPC " + npcName.Name);
-            //Debug режим добавляет только 1 гремлина и все !!!!
+            //Debug пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ 1 пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅ !!!!
            //if (isSinglSpawn | !npcName.Name.Equals("Elder Keltir")) return;
 
            // if (!isSinglSpawn)
@@ -333,9 +333,9 @@ public class World : MonoBehaviour {
         if(entity.GetType() == typeof(MonsterEntity))
         {
             MonsterEntity m_entity = (MonsterEntity) entity;
-            m_entity.UpdateNpcPAtkSpd((int)npcInfo.Stats.PAtkSpd);
-            m_entity.UpdateNpcRunningSpd(npcInfo.Stats.RunSpeed);
-            m_entity.UpdateNpcWalkSpd(npcInfo.Stats.WalkSpeed);
+            m_entity.UpdateNpcPAtkSpd((int)npcInfo.Stats.PAtkRealSpeed);
+            m_entity.UpdateNpcRunningSpd(npcInfo.Stats.RunRealSpeed);
+            m_entity.UpdateNpcWalkSpd(npcInfo.Stats.WalkRealSpeed);
             m_entity.Running = npcInfo.Identity.IsRunning;
         }
 
@@ -351,8 +351,8 @@ public class World : MonoBehaviour {
 
             var statsIntr = userInfo.PlayerInfoInterlude.Stats;
 
-            p_entity.UpdateRunSpeed(statsIntr.RunSpeed);
-            p_entity.UpdateWalkSpeed(statsIntr.WalkSpeed);
+            p_entity.UpdateRunSpeed(statsIntr.RunRealSpeed);
+            p_entity.UpdateWalkSpeed(statsIntr.WalkRealSpeed);
 
 
             p_entity.UpdatePAtkSpeedPlayer((int)statsIntr.BasePAtkSpeed);
@@ -375,9 +375,9 @@ public class World : MonoBehaviour {
             //Debug.Log("NPC IS RUNNING " + npc.IdentityInterlude.IsRunning);
             //Debug.Log("NPC IS RunSpeed " + npc.Stats.RunSpeed);
             //Debug.Log("NPC IS WalkSpeed " + npc.Stats.WalkSpeed);
-            npc.UpdateNpcPAtkSpd((int)npc.Stats.PAtkSpd);
-            npc.UpdateNpcRunningSpd(npc.Stats.RunSpeed);
-            npc.UpdateNpcWalkSpd(npc.Stats.WalkSpeed);
+            npc.UpdateNpcPAtkSpd((int)npc.Stats.PAtkRealSpeed);
+            npc.UpdateNpcRunningSpd(npc.Stats.RunRealSpeed);
+            npc.UpdateNpcWalkSpd(npc.Stats.WalkRealSpeed);
             npc.Running = npc.IdentityInterlude.IsRunning;
             msm.Initialize(npc.IdentityInterlude.Id, npc.IdentityInterlude.NpcId, npcGo, npc);
         }
@@ -395,8 +395,8 @@ public class World : MonoBehaviour {
         if (nsm != null)
         {
             npc.UpdateNpcPAtkSpd((int)npc.Stats.PAtkSpd);
-            npc.UpdateNpcRunningSpd(npc.Stats.RunSpeed);
-            npc.UpdateNpcWalkSpd(npc.Stats.WalkSpeed);
+            npc.UpdateNpcRunningSpd(npc.Stats.RunRealSpeed);
+            npc.UpdateNpcWalkSpd(npc.Stats.WalkRealSpeed);
             npc.Running = npc.IdentityInterlude.IsRunning;
             nsm.Initialize(npc.IdentityInterlude.Id, npc.IdentityInterlude.NpcId, npcGo, moveNpc, npc);
         }
@@ -495,7 +495,7 @@ public class World : MonoBehaviour {
 
     public Task UpdateObjectDestination(int id, Vector3 position, int speed, bool walking) {
         return ExecuteWithEntityAsync(id, e => {
-            if (speed != e.Stats.RunSpeed) {
+            if (speed != e.Stats.Speed) {
                 e.UpdateSpeed(speed);
             }
 
@@ -523,7 +523,7 @@ public class World : MonoBehaviour {
 
     public Task UpdateObjectMoveDirection(int id, int speed, Vector3 direction) {
         return ExecuteWithEntityAsync(id, e => {
-            if (speed != e.Stats.RunSpeed) {
+            if (speed != e.Stats.Speed) {
                 e.UpdateSpeed(speed);
             }
 

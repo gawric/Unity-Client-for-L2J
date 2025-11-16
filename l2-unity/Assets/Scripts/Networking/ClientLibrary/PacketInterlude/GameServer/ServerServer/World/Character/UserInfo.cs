@@ -187,8 +187,8 @@ public class UserInfo : ServerPacket
         int runSpeed = ReadI();
         _info.Stats.Speed = runSpeed;
         //_info.Stats.WalkingSpeed = ReadI();
-        _info.Stats.WalkSpeed = ReadI();
-        _info.Stats.RunSpeed = runSpeed;
+        _info.Stats.BaseWalkingSpeed = ReadI();
+        _info.Stats.BaseRunSpeed = runSpeed;
         
 
 
@@ -203,15 +203,11 @@ public class UserInfo : ServerPacket
         double moveMultiplier = ReadD();
         double attackSpeedMultiplier = ReadD();
 
-        //_info.Stats.WalkRealSpeed = GetRealSpeed(_info.Stats.BaseWalkingSpeed, (float) moveMultiplier);
-        //_info.Stats.RunRealSpeed = GetRealSpeed(_info.Stats.BaseRunSpeed, (float)moveMultiplier);
-        //_info.Stats.PAtkRealSpeed = GetRealSpeed(_info.Stats.PAtkSpd, (float)attackSpeedMultiplier);
+        _info.Stats.WalkRealSpeed = GetRealSpeed(_info.Stats.BaseWalkingSpeed, (float) moveMultiplier);
+        _info.Stats.RunRealSpeed = GetRealSpeed(_info.Stats.BaseRunSpeed, (float)moveMultiplier);
+        _info.Stats.PAtkRealSpeed = GetRealSpeed(_info.Stats.PAtkSpd, (float)attackSpeedMultiplier);
 
-        _info.Stats.WalkSpeed = _info.Stats.WalkSpeed;
-        _info.Stats.RunSpeed = _info.Stats.RunSpeed;
-        _info.Stats.PAtkSpd = _info.Stats.PAtkSpd;
-
-        Debug.Log("BasePatakSpeed R " + _info.Stats.PAtkSpd);
+        Debug.Log("BasePatakSpeed R " + _info.Stats.PAtkRealSpeed);
         Debug.Log("BasePatakSpeed B" + _info.Stats.BasePAtkSpeed);
         Debug.Log("BasePatakSpeed Spd" + attackSpeedMultiplier);
 
@@ -276,7 +272,7 @@ public class UserInfo : ServerPacket
         int titleColor = ReadI();
         int isCursedWeaponEquipped = ReadI();
         StorageVariable.getInstance().ResumeShowDelayMessage((int)MessageID.ADD_EXP_SP);
-        Debug.Log("USERRRR INFO Загрузка звершена!!!! ");
+        Debug.Log("USERRRR INFO пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ!!!! ");
     }
 
     private float GetRealSpeed(int baseSpeed , float speedMultiplier)

@@ -36,7 +36,7 @@ public class NpcInfo : ServerPacket
         Status.SetHp(100);
         Stats.MaxHp = 100;
 
-        //Debug.Log("Начинаем обработку пакета NPCINFOOO");
+        //Debug.Log("пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ NPCINFOOO");
         int objectId = ReadI();
         Identity.Id = objectId;
         Identity.NpcId = ReadI() - 1000000; // npctype id (-1000000)
@@ -67,8 +67,8 @@ public class NpcInfo : ServerPacket
         Stats.MAtkSpd = ReadI();
         Stats.PAtkSpd= ReadI();
         //int runSpeed = ReadI();
-        Stats.RunSpeed = ReadI();
-        Stats.WalkSpeed = ReadI();
+        Stats.BaseRunSpeed = ReadI();
+        Stats.BaseWalkingSpeed = ReadI();
         int swimRunSpd = ReadI();
         int swimWalkSpd = ReadI();
         int flyRunSpd = ReadI();
@@ -78,12 +78,12 @@ public class NpcInfo : ServerPacket
         int flyWalkSpd2 = ReadI();
         double moveMultiplier = ReadD();
 
-        Stats.WalkSpeed = Stats.WalkSpeed;
-        Stats.RunSpeed = Stats.RunSpeed;
+        Stats.WalkRealSpeed = GetRealSpeed(Stats.BaseWalkingSpeed, (float)moveMultiplier);
+        Stats.RunRealSpeed = GetRealSpeed(Stats.BaseRunSpeed, (float)moveMultiplier);
 
         double atkSpeedMultiplier = ReadD();
         //Stats.PAtkRealSpeed = GetRealSpeed(Stats.PAtkSpd, (float)atkSpeedMultiplier);
-        Stats.PAtkSpd = Stats.PAtkSpd;
+        Stats.PAtkRealSpeed = GetRealSpeed(Stats.PAtkSpd, 1);
         double collisionRadius = ReadD();
         double collisionHeight = ReadD();
         int _rhand = ReadI();
@@ -120,7 +120,7 @@ public class NpcInfo : ServerPacket
             Debug.Log(" object NpcInfo  object 3 " + objectId);
         }
 
-        //Debug.Log("Завершили обработку пакета NPCINFOOO NPCID " + Identity.NpcId);
+        //Debug.Log("пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ NPCINFOOO NPCID " + Identity.NpcId);
     }
 
     private float GetRealSpeed(int baseSpeed, float speedMultiplier)

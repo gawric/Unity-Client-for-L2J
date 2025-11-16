@@ -60,7 +60,7 @@ public class MovementData
 
     public float GetSpeed()
     {
-        return (_entity.Running) ? _entity.Stats.RunSpeed : _entity.Stats.RunSpeed;
+        return (_entity.Running) ? _entity.Stats.UnitySpeedRun : _entity.Stats.UnitySpeedWalking;
     }
 
     public void Move(Vector3 direction , float speed)
