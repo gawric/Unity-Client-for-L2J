@@ -28,9 +28,29 @@ public class CreatorPacketsUser
         return new RequestDestroyItem(_objectId, _count);
     }
 
+    public static TradeDone CreateTradeDone(int result)
+    {
+        return new TradeDone(result);
+    }
+
     public static RequestEnchantItem CreateEnchantItem(int _objectId)
     {
         return new RequestEnchantItem(_objectId);
+    }
+
+    public static AddTradeItem CreateAddTradeItem(int tradeId, int objectId, int count)
+    {
+        return new AddTradeItem(tradeId, objectId, count);
+    }
+
+    public static AnswerTradeRequest CreateAnswerTradeRequest(int answer)
+    {
+        return new AnswerTradeRequest(answer);
+    }
+
+    public static RequestAnswerJoinParty CreateRequestAnswerJoinParty(int answer)
+    {
+        return new RequestAnswerJoinParty(answer);
     }
 
     public static RequestOustPledgeMember CreateRequestOustPledgeMember(string memberName)
@@ -83,25 +103,25 @@ public class CreatorPacketsUser
         return new RequestPledgeInfo(clanId);
     }
 
-    public static RequestPledgeMemberInfo CreateRequestPladgeMemberInfo(string memberName)
-    {
-        return new RequestPledgeMemberInfo(memberName);
-    }
+    //public static RequestPledgeMemberInfo CreateRequestPladgeMemberInfo(string memberName)
+    //{
+    //    return new RequestPledgeMemberInfo(memberName);
+    //}
 
-    public static RequestPledgeMemberPowerInfo CreateRequestPledgeMemberPowerInfo(string memberName)
-    {
-        return new RequestPledgeMemberPowerInfo(memberName);
-    }
+    //public static RequestPledgeMemberPowerInfo CreateRequestPledgeMemberPowerInfo(string memberName)
+    //{
+    //    return new RequestPledgeMemberPowerInfo(memberName);
+    //}
 
-    public static RequestPledgePowerGradeList CreateRequestPledgePowerGradeList()
-    {
-        return new RequestPledgePowerGradeList();
-    }
+    //public static RequestPledgePowerGradeList CreateRequestPledgePowerGradeList()
+    //{
+    //    return new RequestPledgePowerGradeList();
+    //}
 
-    public static RequestPledgeSetMemberPowerGrade CreateRequestPledgeSetMemberPowerGrade(string memberName, int powerGrade)
-    {
-        return new RequestPledgeSetMemberPowerGrade(memberName, powerGrade);
-    }
+    //public static RequestPledgeSetMemberPowerGrade CreateRequestPledgeSetMemberPowerGrade(string memberName, int powerGrade)
+    //{
+    //    return new RequestPledgeSetMemberPowerGrade(memberName, powerGrade);
+    //}
 
     public static RequestWithdrawPledge CreateRequestWithdrawPledge()
     {

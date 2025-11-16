@@ -191,7 +191,7 @@ public class MoveNpc : MonoBehaviour
 
     private float GetMonsterSpeed()
     {
-        return (_entity.Running) ? _entity.Stats.UnitySpeedRun : _entity.Stats.UnitySpeedWalking;
+        return (_entity.Running) ? _entity.Stats.RunSpeed : _entity.Stats.RunSpeed;
     }
 
 

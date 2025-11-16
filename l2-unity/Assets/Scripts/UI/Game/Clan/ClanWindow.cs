@@ -210,25 +210,25 @@ public class ClanWindow : L2TwoPanels
 
     private void OnClickShowMember(ClickEvent evt)
     {
-        if (!string.IsNullOrEmpty(_masterClan.GetSelectMemberName()))
-        {
-            SendGameDataQueue.Instance().AddItem(
-                CreatorPacketsUser.CreateRequestPladgeMemberInfo(_masterClan.GetSelectMemberName()), 
-                GameClient.Instance.IsCryptEnabled(), 
-                GameClient.Instance.IsCryptEnabled());
-        }
+        //if (!string.IsNullOrEmpty(_masterClan.GetSelectMemberName()))
+        //{
+        //    SendGameDataQueue.Instance().AddItem(
+        //        CreatorPacketsUser.CreateRequestPladgeMemberInfo(_masterClan.GetSelectMemberName()), 
+        //        GameClient.Instance.IsCryptEnabled(), 
+        //        GameClient.Instance.IsCryptEnabled());
+        //}
 
     }
 
     private void OnClickPrivileges(ClickEvent evt)
     {
-        if (!string.IsNullOrEmpty(_masterClan.GetSelectMemberName()))
-        {
-            SendGameDataQueue.Instance().AddItem(
-                CreatorPacketsUser.CreateRequestPledgeMemberPowerInfo(_masterClan.GetSelectMemberName()),
-                GameClient.Instance.IsCryptEnabled(),
-                GameClient.Instance.IsCryptEnabled());
-        }
+        //if (!string.IsNullOrEmpty(_masterClan.GetSelectMemberName()))
+        //{
+        //    SendGameDataQueue.Instance().AddItem(
+        //        CreatorPacketsUser.CreateRequestPledgeMemberPowerInfo(_masterClan.GetSelectMemberName()),
+        //        GameClient.Instance.IsCryptEnabled(),
+        //        GameClient.Instance.IsCryptEnabled());
+        //}
 
     }
 
@@ -237,13 +237,13 @@ public class ClanWindow : L2TwoPanels
 
     private void OnClickEditAuthButton(ClickEvent evt)
     {
-        if (!string.IsNullOrEmpty(_masterClan.GetSelectMemberName()))
-        {
-            SendGameDataQueue.Instance().AddItem(
-                CreatorPacketsUser.CreateRequestPledgePowerGradeList(),
-                GameClient.Instance.IsCryptEnabled(),
-                GameClient.Instance.IsCryptEnabled());
-        }
+        //if (!string.IsNullOrEmpty(_masterClan.GetSelectMemberName()))
+        //{
+        //    SendGameDataQueue.Instance().AddItem(
+        //        CreatorPacketsUser.CreateRequestPledgePowerGradeList(),
+        //        GameClient.Instance.IsCryptEnabled(),
+        //        GameClient.Instance.IsCryptEnabled());
+        //}
 
     }
 

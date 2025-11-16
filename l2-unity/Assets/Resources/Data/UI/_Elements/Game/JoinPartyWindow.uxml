@@ -1,0 +1,41 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xmlns="UnityEngine.UIElements" editor-extension-mode="False">
+    <ui:Template name="WindowTemplate" src="project://database/Assets/Resources/Data/UI/_Elements/Template/WindowTemplate.uxml?fileID=9197481963319205126&amp;guid=57919e48a99c2de4787ca2b8810527ea&amp;type=3#WindowTemplate" />
+    <Style src="project://database/Assets/Resources/Data/UI/_Elements/L2StyleSheet.uss?fileID=7433441132597879392&amp;guid=72e99cc94b130bf4ba100dceaa830b13&amp;type=3#L2StyleSheet" />
+    <ui:Instance name="WindowTemplate" template="WindowTemplate" style="overflow: hidden; width: 300px; height: 180px; position: absolute; max-width: 300px; max-height: 180px; flex-grow: 1; flex-shrink: 1; align-items: stretch;">
+        <AttributeOverrides element-name="windows-name-label" text="Party Invitation" />
+        <ui:GroupBox name="background" style="position: absolute; margin: 0; padding: 0; flex-grow: 1; flex-shrink: 0; align-self: stretch; align-content: stretch; flex-wrap: wrap; width: 100%; height: 140px; justify-content: center; flex-basis: auto; display: flex; visibility: visible; overflow: visible; top: 40px;">
+            <ui:VisualElement name="Back_Image" style="flex-grow: 0; background-color: rgba(0, 0, 0, 0.21); width: 92%; height: 100%; margin: 0; border-color: rgba(44, 42, 34, 0.6); border-radius: 1px; border-width: 1px; display: flex; position: absolute; max-width: 92%; align-self: center; flex-shrink: 0; padding: 0; align-content: flex-start; align-items: flex-start; justify-content: flex-start; top: 0;" />
+        </ui:GroupBox>
+        <ui:GroupBox name="content" style="margin: 0; padding: 0; position: absolute; height: 140px; width: 100%; align-items: center; justify-content: center; align-self: stretch; display: flex; visibility: visible; overflow: visible; flex-shrink: 1; flex-grow: 1; align-content: stretch; top: 40px;">
+            <ui:GroupBox name="body" style="margin: 0; padding: 10px; align-self: center; align-items: center; justify-content: center; width: 100%; height: 100%;">
+                <ui:GroupBox name="textBox" style="margin: 0 0 10px 0; padding: 0; display: flex; height: 40px; width: 90%; align-items: center; justify-content: center;">
+                    <ui:Label text="" name="invitationText" style="white-space: normal; text-align: center; margin: 0; padding: 0; color: rgb(165, 166, 161); font-size: 12px; width: 100%;" />
+                </ui:GroupBox>
+
+                <ui:GroupBox name="progressSection" style="margin: 5px 0 15px 0; padding: 0; align-self: center; align-items: center; justify-content: center; width: 91%; flex-grow: 1; flex-shrink: 1; height: 12px;">
+                    <ui:GroupBox name="ProgressBg" style="flex-direction: row; margin: 0; padding: 0; position: absolute; width: 100%; height: 100%; left: 0; flex-shrink: 1; flex-grow: 1; align-content: auto; align-self: stretch; justify-content: flex-start; display: flex; visibility: visible; overflow: visible; align-items: flex-start;">
+                        <ui:VisualElement name="Left" style="flex-grow: 1; max-width: 4px; max-height: 12px; width: 4px; height: 12px; background-image: resource(&apos;Data/UI/Status/Gauge/Gauge_DF_Attribute_Earth/Gauge_DF_Attribute_Earth_bg_Left&apos;); -unity-slice-left: 2; -unity-slice-top: 2; -unity-slice-right: 2; -unity-slice-bottom: 2;" />
+                        <ui:VisualElement name="Center" style="flex-grow: 1; max-width: none; min-width: auto; background-image: resource(&apos;Data/UI/Status/Gauge/Gauge_DF_Attribute_Earth/Gauge_DF_Attribute_Earth_bg_Center&apos;); max-height: 12px; min-height: auto; align-self: stretch; justify-content: flex-start; align-items: auto; -unity-slice-left: 2; -unity-slice-top: 2; -unity-slice-right: 2; -unity-slice-bottom: 2;" />
+                        <ui:VisualElement name="Right" style="flex-grow: 1; width: 4px; height: 12px; max-width: 4px; max-height: 12px; background-image: resource(&apos;Data/UI/Status/Gauge/Gauge_DF_Attribute_Earth/Gauge_DF_Attribute_Earth_bg_Right&apos;); -unity-slice-left: 2; -unity-slice-top: 2; -unity-slice-right: 2; -unity-slice-bottom: 2;" />
+                    </ui:GroupBox>
+                    <ui:GroupBox name="ProgressGauge" style="flex-direction: row; margin: 0; padding: 0; height: 100%; align-self: stretch; justify-content: flex-start; align-items: flex-start; width: 100%; position: absolute; display: flex; visibility: visible; overflow: visible; left: 0; flex-shrink: 1; flex-grow: 1; align-content: auto;">
+                        <ui:VisualElement name="Left" style="flex-grow: 1; max-width: 4px; max-height: 12px; width: 4px; height: 12px; background-image: resource(&apos;Data/UI/Status/Gauge/Gauge_DF_Attribute_Earth/Gauge_DF_Attribute_Earth_Left&apos;); display: flex; -unity-slice-left: 2; -unity-slice-top: 2; -unity-slice-right: 2; -unity-slice-bottom: 2;" />
+                        <ui:VisualElement name="Center" style="flex-grow: 1; max-width: none; min-width: auto; background-image: resource(&apos;Data/UI/Status/Gauge/Gauge_DF_Attribute_Earth/Gauge_DF_Attribute_Earth_Center&apos;); max-height: 12px; min-height: auto; align-self: stretch; justify-content: flex-start; align-items: auto; display: flex; -unity-slice-left: 2; -unity-slice-top: 2; -unity-slice-right: 2; -unity-slice-bottom: 2;" />
+                        <ui:VisualElement name="Right" style="flex-grow: 1; width: 4px; height: 12px; max-width: 4px; max-height: 12px; background-image: resource(&apos;Data/UI/Status/Gauge/Gauge_DF_Attribute_Earth/Gauge_DF_Attribute_Earth_Right&apos;); -unity-slice-left: 2; -unity-slice-top: 2; -unity-slice-right: 2; -unity-slice-bottom: 2;" />
+                    </ui:GroupBox>
+                </ui:GroupBox>
+
+                <ui:GroupBox name="buttons" style="flex-direction: row; margin: 0; padding: 0; align-self: center; justify-content: center; align-items: center; gap: 20px;">
+                    <ui:Button text="Yes" parse-escape-sequences="true" display-tooltip-when-elided="true" name="YesButton" class="l2-button" style="width: 80px; height: 25px; background-color: rgba(188, 188, 188, 0);">
+                        <ui:VisualElement name="ButtonBg" class="l2-button-bg" />
+                        <ui:Label text="Yes" parse-escape-sequences="true" display-tooltip-when-elided="true" name="ButtonLabel" picking-mode="Ignore" class="button-label" style="letter-spacing: 0;" />
+                    </ui:Button>
+                    <ui:Button text="No" parse-escape-sequences="true" display-tooltip-when-elided="true" name="NoButton" class="l2-button" style="width: 80px; height: 25px; background-color: rgba(188, 188, 188, 0);">
+                        <ui:VisualElement name="ButtonBg" class="l2-button-bg" />
+                        <ui:Label text="No" parse-escape-sequences="true" display-tooltip-when-elided="true" name="ButtonLabel" picking-mode="Ignore" class="button-label" style="letter-spacing: 0;" />
+                    </ui:Button>
+                </ui:GroupBox>
+            </ui:GroupBox>
+        </ui:GroupBox>
+    </ui:Instance>
+</ui:UXML>

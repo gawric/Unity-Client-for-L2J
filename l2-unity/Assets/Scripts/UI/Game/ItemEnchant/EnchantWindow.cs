@@ -46,7 +46,7 @@ public class EnchantWindow : L2PopupWindow
             _loadingAnimWaitPng = new List<Texture2D>();
             _loadingAnimSuccessPng = new List<Texture2D>();
             _loadingAnimFailPng = new List<Texture2D>();
-            ÑacheTexture();
+            CacheTexture();
         }
         else
         {
@@ -62,19 +62,19 @@ public class EnchantWindow : L2PopupWindow
         _inventorySlotChoiceTemplate = LoadAsset("Data/UI/_Elements/Template/SlotEnchantChoice");
     }
 
-    private void ÑacheTexture()
+    private void CacheTexture()
     {
         List<string> listWait = EnchantListTextures.GetNameTexturesLoading();
         List<string> listSuccess = EnchantListTextures.GetNameTexturesSuccess();
         List<string> listFail = EnchantListTextures.GetNameTexturesFail();
 
-        AddÑache(listWait, ref _loadingAnimWaitPng);
-        AddÑache(listSuccess, ref _loadingAnimSuccessPng);
-        AddÑache(listFail, ref _loadingAnimFailPng);
+        AddCache(listWait, ref _loadingAnimWaitPng);
+        AddCache(listSuccess, ref _loadingAnimSuccessPng);
+        AddCache(listFail, ref _loadingAnimFailPng);
 
     }
 
-    private void AddÑache(List<string> list , ref List<Texture2D> animList)
+    private void AddCache(List<string> list , ref List<Texture2D> animList)
     {
         foreach (string href in list)
         {

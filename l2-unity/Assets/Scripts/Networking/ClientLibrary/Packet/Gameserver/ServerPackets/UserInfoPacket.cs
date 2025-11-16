@@ -31,7 +31,7 @@ public class UserInfoPacket : ServerPacket {
             Status.SetHp(ReadI());
             Stats.MaxHp = ReadI();
             // Stats
-            Stats.Speed = ReadI();
+            Stats.RunSpeed = ReadI();
             Stats.PAtkSpd = ReadI();
             Stats.MAtkSpd = ReadI();
             // Appearance

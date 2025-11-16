@@ -67,8 +67,8 @@ public class NpcInfo : ServerPacket
         Stats.MAtkSpd = ReadI();
         Stats.PAtkSpd= ReadI();
         //int runSpeed = ReadI();
-        Stats.BaseRunSpeed = ReadI();
-        Stats.BaseWalkingSpeed = ReadI();
+        Stats.RunSpeed = ReadI();
+        Stats.WalkSpeed = ReadI();
         int swimRunSpd = ReadI();
         int swimWalkSpd = ReadI();
         int flyRunSpd = ReadI();
@@ -78,12 +78,12 @@ public class NpcInfo : ServerPacket
         int flyWalkSpd2 = ReadI();
         double moveMultiplier = ReadD();
 
-        Stats.WalkRealSpeed = GetRealSpeed(Stats.BaseWalkingSpeed, (float)moveMultiplier);
-        Stats.RunRealSpeed = GetRealSpeed(Stats.BaseRunSpeed, (float)moveMultiplier);
+        Stats.WalkSpeed = Stats.WalkSpeed;
+        Stats.RunSpeed = Stats.RunSpeed;
 
         double atkSpeedMultiplier = ReadD();
         //Stats.PAtkRealSpeed = GetRealSpeed(Stats.PAtkSpd, (float)atkSpeedMultiplier);
-        Stats.PAtkRealSpeed = GetRealSpeed(Stats.PAtkSpd, 1);
+        Stats.PAtkSpd = Stats.PAtkSpd;
         double collisionRadius = ReadD();
         double collisionHeight = ReadD();
         int _rhand = ReadI();

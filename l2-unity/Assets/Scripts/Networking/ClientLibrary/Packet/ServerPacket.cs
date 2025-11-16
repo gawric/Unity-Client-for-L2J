@@ -28,6 +28,17 @@ public abstract class ServerPacket : Packet
         return data;
     }
 
+    protected int ReadH()
+    {
+        byte[] data = new byte[2];
+        Array.Copy(_packetData, _iterator, data, 0, 2);
+        // Array.Reverse(data);
+        double value = BitConverter.ToInt16(data, 0);
+        _iterator += 2;
+        return (int)value;
+    }
+
+
     protected int ReadI() {
         //if (_iterator >= _packetData.Length) return 0;
         if (_iterator + 4 > _packetData.Length) return 0;

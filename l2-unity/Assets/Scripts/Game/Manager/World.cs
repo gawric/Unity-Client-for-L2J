@@ -133,8 +133,8 @@ public class World : MonoBehaviour {
         var statsIntr = (PlayerInterludeStats)player.Stats;
         player.Initialize();
         //player.GetComponent<NetworkTransformReceive>().Initialize();
-        player.UpdateRunSpeed(statsIntr.RunRealSpeed);
-        player.UpdateWalkSpeed(statsIntr.WalkRealSpeed);
+        player.UpdateRunSpeed(statsIntr.RunSpeed);
+        player.UpdateWalkSpeed(statsIntr.WalkSpeed);
 
         // Debug.Log("PLAYER SPAWN RunSpeed " + statsIntr.RunSpeed);
         //Debug.Log("PLAYER SPAWN PAtkSpd " + statsIntr.PAtkSpd);
@@ -333,9 +333,9 @@ public class World : MonoBehaviour {
         if(entity.GetType() == typeof(MonsterEntity))
         {
             MonsterEntity m_entity = (MonsterEntity) entity;
-            m_entity.UpdateNpcPAtkSpd((int)npcInfo.Stats.PAtkRealSpeed);
-            m_entity.UpdateNpcRunningSpd(npcInfo.Stats.RunRealSpeed);
-            m_entity.UpdateNpcWalkSpd(npcInfo.Stats.WalkRealSpeed);
+            m_entity.UpdateNpcPAtkSpd((int)npcInfo.Stats.PAtkSpd);
+            m_entity.UpdateNpcRunningSpd(npcInfo.Stats.RunSpeed);
+            m_entity.UpdateNpcWalkSpd(npcInfo.Stats.WalkSpeed);
             m_entity.Running = npcInfo.Identity.IsRunning;
         }
 
@@ -351,8 +351,8 @@ public class World : MonoBehaviour {
 
             var statsIntr = userInfo.PlayerInfoInterlude.Stats;
 
-            p_entity.UpdateRunSpeed(statsIntr.RunRealSpeed);
-            p_entity.UpdateWalkSpeed(statsIntr.WalkRealSpeed);
+            p_entity.UpdateRunSpeed(statsIntr.RunSpeed);
+            p_entity.UpdateWalkSpeed(statsIntr.WalkSpeed);
 
 
             p_entity.UpdatePAtkSpeedPlayer((int)statsIntr.BasePAtkSpeed);
@@ -375,9 +375,9 @@ public class World : MonoBehaviour {
             //Debug.Log("NPC IS RUNNING " + npc.IdentityInterlude.IsRunning);
             //Debug.Log("NPC IS RunSpeed " + npc.Stats.RunSpeed);
             //Debug.Log("NPC IS WalkSpeed " + npc.Stats.WalkSpeed);
-            npc.UpdateNpcPAtkSpd((int)npc.Stats.PAtkRealSpeed);
-            npc.UpdateNpcRunningSpd(npc.Stats.RunRealSpeed);
-            npc.UpdateNpcWalkSpd(npc.Stats.WalkRealSpeed);
+            npc.UpdateNpcPAtkSpd((int)npc.Stats.PAtkSpd);
+            npc.UpdateNpcRunningSpd(npc.Stats.RunSpeed);
+            npc.UpdateNpcWalkSpd(npc.Stats.WalkSpeed);
             npc.Running = npc.IdentityInterlude.IsRunning;
             msm.Initialize(npc.IdentityInterlude.Id, npc.IdentityInterlude.NpcId, npcGo, npc);
         }
@@ -395,8 +395,8 @@ public class World : MonoBehaviour {
         if (nsm != null)
         {
             npc.UpdateNpcPAtkSpd((int)npc.Stats.PAtkSpd);
-            npc.UpdateNpcRunningSpd(npc.Stats.RunRealSpeed);
-            npc.UpdateNpcWalkSpd(npc.Stats.WalkRealSpeed);
+            npc.UpdateNpcRunningSpd(npc.Stats.RunSpeed);
+            npc.UpdateNpcWalkSpd(npc.Stats.WalkSpeed);
             npc.Running = npc.IdentityInterlude.IsRunning;
             nsm.Initialize(npc.IdentityInterlude.Id, npc.IdentityInterlude.NpcId, npcGo, moveNpc, npc);
         }
@@ -467,7 +467,7 @@ public class World : MonoBehaviour {
 
 
 
-    public Task TeleportToTest(int id, Vector3 position)
+    public Task TeleportTo(int id, Vector3 position)
     {
         return ExecuteWithEntityAsync(id, entity => {
             if (entity.GetType() == typeof(PlayerEntity))
@@ -495,7 +495,7 @@ public class World : MonoBehaviour {
 
     public Task UpdateObjectDestination(int id, Vector3 position, int speed, bool walking) {
         return ExecuteWithEntityAsync(id, e => {
-            if (speed != e.Stats.Speed) {
+            if (speed != e.Stats.RunSpeed) {
                 e.UpdateSpeed(speed);
             }
 
@@ -523,7 +523,7 @@ public class World : MonoBehaviour {
 
     public Task UpdateObjectMoveDirection(int id, int speed, Vector3 direction) {
         return ExecuteWithEntityAsync(id, e => {
-            if (speed != e.Stats.Speed) {
+            if (speed != e.Stats.RunSpeed) {
                 e.UpdateSpeed(speed);
             }
 

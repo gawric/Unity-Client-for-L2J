@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class SendWarehouseDepositList : ClientPacket
 {
-    public SendWarehouseDepositList(List<Product> sellList) : base((byte)GameInterludeClientPacketType.SendWarehouseDepositList)
+    public SendWarehouseDepositList(List<Product> sellList) : base((byte)GameInterludeClientPacketType.SendWareHouseDepositList)
     {
         if (sellList == null || sellList.Count == 0)
         {

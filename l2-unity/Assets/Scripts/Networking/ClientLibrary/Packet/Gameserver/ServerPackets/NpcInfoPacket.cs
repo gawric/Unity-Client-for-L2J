@@ -24,7 +24,7 @@ public class NpcInfoPacket : ServerPacket {
             Identity.SetPosY(ReadF());
             Identity.SetPosZ(ReadF());
             // Stats
-            Stats.Speed = ReadI();
+            Stats.RunSpeed = ReadI();
             Stats.PAtkSpd = ReadI();
             Stats.MAtkSpd = ReadI();
             // Status
