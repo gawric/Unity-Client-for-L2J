@@ -23,7 +23,7 @@ public class MonsterStateAtk : MonsterStateBase
 
         _animationCurve = new AnimationCurve();
         //float test = CalcBaseParam.CalculateTimeL2j(_entity.Stats.PAtkRealSpeed);
-        float timeAtk = CalcBaseParam.CalculateTimeL2j(_entity.Stats.PAtkSpd);
+        float timeAtk = CalcBaseParam.CalculateTimeL2j(_entity.Stats.PAtkRealSpeed);
         _startTime = Time.time;
         _endTime = TimeUtils.ConvertMsToSec(timeAtk);
         float timeAnimation = clipInfos[0].clip.length;
