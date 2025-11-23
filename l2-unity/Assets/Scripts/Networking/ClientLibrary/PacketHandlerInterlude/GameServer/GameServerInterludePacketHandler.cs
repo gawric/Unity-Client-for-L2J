@@ -12,7 +12,7 @@ public class GameServerInterludePacketHandler : ServerPacketHandler
 
         if (!IsExPacket(item))
         {
-            Debug.Log($"PacketName: {item.ToString()}");
+            //Debug.Log($"PacketName: {item.ToString()}");
             UsePacket(item, itemQueue);
         }
         else

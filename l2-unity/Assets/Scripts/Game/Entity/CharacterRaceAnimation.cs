@@ -1,3 +1,6 @@
+using System;
+using UnityEngine;
+
 public enum CharacterRaceAnimation : byte {
     FElf = 0,
     MElf = 1,
@@ -39,7 +42,32 @@ public static class CharacterRaceAnimationParser {
             default:
                 return CharacterRaceAnimation.FDwarf;
         }
+
     }
+
+
+    public static CharacterRaceAnimation SafeConvertToRace(int value)
+    {
+        try
+        {
+            // First convert int to byte
+            byte byteValue = Convert.ToByte(value);
+
+            // Then check if it's a valid enum value
+            if (Enum.IsDefined(typeof(CharacterRaceAnimation), byteValue))
+            {
+                return (CharacterRaceAnimation)byteValue;
+            }
+        }
+        catch (OverflowException)
+        {
+            Debug.LogWarning($"Value {value} is too large for CharacterRaceAnimation enum");
+        }
+
+        Debug.LogWarning($"Invalid CharacterRaceAnimation value: {value}");
+        return CharacterRaceAnimation.FElf; // or some default value
+    }
+
 
     public static CharacterRaceAnimation ParseRaceInterlude(CharacterRace race, int sex, int baseClass)
     {
@@ -76,6 +104,8 @@ public static class CharacterRaceAnimationParser {
 
 
 }
+
+
 
 public enum BaseClass : int
 {

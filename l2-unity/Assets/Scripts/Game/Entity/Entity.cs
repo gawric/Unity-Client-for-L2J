@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using static UnityEngine.EventSystems.EventTrigger;
 
 [System.Serializable]
 public class Entity : MonoBehaviour {
@@ -269,4 +270,83 @@ public class Entity : MonoBehaviour {
     {
         _gear.EquipWeapon(weaponId, isLeftHand);
     }
+
+    public void UnequipWeapon(bool isLeftHand)
+    {
+        _gear.UnequipWeapon(isLeftHand);
+    }
+
+    public void UnequipAndDetermineType(ItemInstance item)
+    {
+        if (_gear is not UserGear usergear) return;
+
+        switch (item.Category)
+        {
+            case ItemCategory.Weapon:
+                UnequipWeapon(false);
+                break;
+
+            case ItemCategory.ShieldArmor:
+                HandleUnequipSheildArmorItem(item, usergear);
+                break;
+
+            default:
+                Debug.LogWarning($"Entity->UnEquipAndDetermineType->Unhandled item category: {item.Category}");
+                break;
+        }
+
+    }
+
+    public void EquipAndDetermineType(ItemInstance item, int objectId)
+    {
+        if (_gear is not UserGear usergear) return;
+
+        switch (item.Category)
+        {
+            case ItemCategory.Weapon:
+                EquipWeapon(item.ItemId, false);
+                break;
+
+            case ItemCategory.ShieldArmor:
+                HandleShieldArmorItem(item, usergear);
+                break;
+
+            default:
+                Debug.LogWarning($"Entity->EquipAndDetermineType->Unhandled item category: {item.Category}");
+                break;
+        }
+    }
+
+    private void HandleUnequipSheildArmorItem(ItemInstance item, UserGear usergear)
+    {
+        int itemId = item.ItemId;
+        Weapon weapon = ItemTable.Instance.GetWeapon(itemId);
+
+        if (weapon != null)
+        {
+            usergear.UnequipWeapon(true);
+            usergear.UnequipShield();
+        }
+        else
+        {
+            //usergear.Un(itemId, item.BodyPart);
+            Debug.Log("HandleUnequipSheildArmorItem> not implemented yet unequip");
+        }
+    }
+    private void HandleShieldArmorItem(ItemInstance item, UserGear usergear)
+    {
+        int itemId = item.ItemId;
+
+        Weapon weapon = ItemTable.Instance.GetWeapon(itemId);
+
+        if (weapon != null)
+        {
+            usergear.EquipShield(itemId);
+        }
+        else
+        {
+            usergear.EquipArmor(itemId, item.BodyPart);
+        }
+    }
+
 }

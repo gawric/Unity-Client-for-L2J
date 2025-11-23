@@ -36,12 +36,14 @@ public class ListenerCharacterGear : MonoBehaviour
     private void HandleItemEquipped(ItemInstance item , int objectId)
     {
         Entity entity = World.Instance.GetEntityNoLockSync(objectId);
-        if (entity != null) entity.EquipWeapon(item.ItemId, false);
+        entity?.EquipAndDetermineType(item, objectId);
+
     }
 
     private void HandleItemUnequipped(ItemInstance item, int objectId)
     {
-
+        Entity entity = World.Instance.GetEntityNoLockSync(objectId);
+        entity?.UnequipAndDetermineType(item);
     }
 
     
