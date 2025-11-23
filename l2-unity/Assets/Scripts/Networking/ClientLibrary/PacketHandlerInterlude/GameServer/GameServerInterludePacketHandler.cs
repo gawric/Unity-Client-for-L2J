@@ -263,10 +263,13 @@ public class GameServerInterludePacketHandler : ServerPacketHandler
                 break;
 
             case GameInterludeServerPacketType.GetItem:
+                OnGetItem(itemQueue.DecodeData());
                 break;
             case GameInterludeServerPacketType.DropItem:
+                OnDropItem(itemQueue.DecodeData());
                 break;
             case GameInterludeServerPacketType.CharInfo:
+                OnCharInfo(itemQueue.DecodeData());
                 break;
 
             default:
@@ -1280,6 +1283,52 @@ public class GameServerInterludePacketHandler : ServerPacketHandler
                 TradeRequestWindow.Instance.AddData(packet);
                 TradeRequestWindow.Instance.ShowWindow();
             });
+        }
+    }
+    #endregion
+
+    #region ItemsRegion
+    private void OnGetItem(byte[] data)
+    {
+        if (!InitPacketsLoadWord.getInstance().IsInit)
+        {
+            GetItem packet = new GetItem(data);
+
+            //EventProcessor.Instance.QueueEvent(() =>
+            //{
+            //    TradeWindow.Instance.AddData(packet);
+            //    TradeWindow.Instance.ShowWindow();
+            //});
+        }
+    }
+
+    private void OnDropItem(byte[] data)
+    {
+        if (!InitPacketsLoadWord.getInstance().IsInit)
+        {
+            DropItem packet = new DropItem(data);
+
+            //EventProcessor.Instance.QueueEvent(() =>
+            //{
+            //    TradeWindow.Instance.AddData(packet);
+            //    TradeWindow.Instance.ShowWindow();
+            //});
+        }
+    }
+    #endregion
+
+    #region CharRegion
+    private void OnCharInfo(byte[] data)
+    {
+        if (!InitPacketsLoadWord.getInstance().IsInit)
+        {
+            //TradeStart packet = new TradeStart(data);
+
+            //EventProcessor.Instance.QueueEvent(() =>
+            //{
+            //    TradeWindow.Instance.AddData(packet);
+            //    TradeWindow.Instance.ShowWindow();
+            //});
         }
     }
     #endregion
