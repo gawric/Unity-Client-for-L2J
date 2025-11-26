@@ -160,6 +160,21 @@ public class World : MonoBehaviour {
 
     bool isSinglSpawn = false;
 
+    public GameObject testPrefab;
+
+    public void SpawnItem(int objectId, int itemId, Vector3 position, int count)
+    {
+        var itemModel = ModelTable.Instance.GetWeapon("LineageWeapons.small_sword_m00_wp");
+        position.y = GetGroundHeight(position);
+        GameObject itemGo = Instantiate(itemModel, position, Quaternion.identity);
+        itemGo.transform.name = "sword1";
+        itemGo.SetActive(true);
+
+        //GameObject go = ModelTable.Instance.GetNpc("LineageMonsters.goblin_m00");
+
+        //GameObject npcGo = Instantiate(go, position, Quaternion.identity);
+    }
+
     public void SpawnNpcInterlude(NetworkIdentityInterlude identity, NpcStatusInterlude status, Stats stats)
     {
 

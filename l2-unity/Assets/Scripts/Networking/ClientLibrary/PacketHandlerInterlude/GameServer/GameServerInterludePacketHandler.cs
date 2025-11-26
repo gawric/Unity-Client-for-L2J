@@ -1294,11 +1294,10 @@ public class GameServerInterludePacketHandler : ServerPacketHandler
         {
             GetItem packet = new GetItem(data);
 
-            //EventProcessor.Instance.QueueEvent(() =>
-            //{
-            //    TradeWindow.Instance.AddData(packet);
-            //    TradeWindow.Instance.ShowWindow();
-            //});
+            EventProcessor.Instance.QueueEvent(() =>
+            {
+                //WorldItemManager.Instance.RemoveItem(packet.);
+            });
         }
     }
 
@@ -1307,12 +1306,11 @@ public class GameServerInterludePacketHandler : ServerPacketHandler
         if (!InitPacketsLoadWord.getInstance().IsInit)
         {
             DropItem packet = new DropItem(data);
-
-            //EventProcessor.Instance.QueueEvent(() =>
-            //{
-            //    TradeWindow.Instance.AddData(packet);
-            //    TradeWindow.Instance.ShowWindow();
-            //});
+            EventProcessor.Instance.QueueEvent(() =>
+            {
+                //todo: у предмета должно быть  stackable и тогда нужен count
+                World.Instance.SpawnItem(packet.ObjectId, packet.ItemId, packet.Coordinats, 0); 
+            });
         }
     }
     #endregion
