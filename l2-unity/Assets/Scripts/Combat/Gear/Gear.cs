@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -82,16 +82,18 @@ public class Gear : AbstractMeshManager
 
 
         GameObject weaponPrefab = (GameObject)LoadMesh(EquipmentCategory.Weapon, weaponId);
-        _origWeaponPrefabName = weaponPrefab.name;
-        WeaponType type = weapon.Weapongrp.WeaponType;
-        RefreshData(leftSlot, weapon);
-        UpdateWeaponType(type);
+        if (weaponPrefab is not null) //todo: если модели нет - на этапе загрузки меню выбора персонажа ломает весь клиент
+        {
+            _origWeaponPrefabName = weaponPrefab.name;
+            WeaponType type = weapon.Weapongrp.WeaponType;
+            RefreshData(leftSlot, weapon);
+            UpdateWeaponType(type);
 
-        Transform[] refreshAllBone = RefreshBone(allBone);
-        GameObject go = CreateCopy(weaponPrefab, weaponName , ObjectType.Weapon);
+            Transform[] refreshAllBone = RefreshBone(allBone);
+            GameObject go = CreateCopy(weaponPrefab, weaponName, ObjectType.Weapon);
 
-        ActivateGameObject(go, type, leftSlot, refreshAllBone);
-
+            ActivateGameObject(go, type, leftSlot, refreshAllBone);
+        }
     }
 
 

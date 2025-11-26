@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -75,10 +76,17 @@ public class L2LoginUI : L2UI
     }
 
     public void ShowCharSelectWindow() {
-        LoginWindow.Instance.HideWindow();
-        CharCreationWindow.Instance.HideWindow();
-        CharSelectWindow.Instance.ShowWindow();
-        ServerSelectWindow.Instance.HideWindow();
+        try
+        {
+            LoginWindow.Instance.HideWindow();
+            CharCreationWindow.Instance.HideWindow();
+            CharSelectWindow.Instance.ShowWindow();
+            ServerSelectWindow.Instance.HideWindow();
+        }
+        catch(Exception e)
+        {
+
+        }
     }
 
     public void ShowLoginWindow() {

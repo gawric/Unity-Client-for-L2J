@@ -68,29 +68,23 @@ public class MapClassId
         Debug.Log("Critical error: Not Found Race!!!");
         return 0;
     }
+
     public static CharacterRace GetCharacterRace(int serverClassId)
     {
-        if((int)ClassId.FIGHTER == serverClassId | (int)ClassId.WARRIOR == serverClassId | (int)ClassId.MAGE == serverClassId | (int)ClassId.WIZARD == serverClassId)
+        return serverClassId switch
         {
-            return CharacterRace.Human;
-        }else if ((int)ClassId.ELVEN_FIGHTER == serverClassId | (int)ClassId.ELVEN_KNIGHT == serverClassId | (int)ClassId.ELVEN_MAGE == serverClassId | (int)ClassId.ELVEN_WIZARD == serverClassId)
-        {
-            return CharacterRace.Elf;
-        }
-        else if ((int)ClassId.DARK_FIGHTER == serverClassId | (int)ClassId.PALUS_KNIGHT == serverClassId | (int)ClassId.DARK_MAGE == serverClassId | (int)ClassId.DARK_WIZARD == serverClassId)
-        {
-            return CharacterRace.DarkElf;
-        }
-        else if ((int)ClassId.ORC_FIGHTER == serverClassId | (int)ClassId.ORC_RAIDER == serverClassId | (int)ClassId.ORC_MAGE == serverClassId | (int)ClassId.ORC_SHAMAN == serverClassId)
-        {
-            return CharacterRace.Orc;
-        } //4 Dwarf Race
-        else if ((int)ClassId.DWARVEN_FIGHTER == serverClassId | (int)ClassId.SCAVENGER == serverClassId | 4 == serverClassId)
-        {
-            return CharacterRace.Dwarf;
-        }
-
-        return CharacterRace.DarkElf;
+            >= 0 and <= 17 => CharacterRace.Human,
+            >= 18 and <= 30 => CharacterRace.Elf,
+            >= 31 and <= 43 => CharacterRace.DarkElf,
+            >= 44 and <= 52 => CharacterRace.Orc,
+            >= 53 and <= 57 => CharacterRace.Dwarf,
+            >= 88 and <= 98 => CharacterRace.Human,
+            >= 99 and <= 105 => CharacterRace.Elf,
+            >= 106 and <= 112 => CharacterRace.DarkElf,
+            >= 113 and <= 116 => CharacterRace.Orc,
+            >= 117 and <= 118 => CharacterRace.Dwarf,
+            _ => CharacterRace.Human
+        };
     }
 
     public static bool IsMage(int serverClassId)
