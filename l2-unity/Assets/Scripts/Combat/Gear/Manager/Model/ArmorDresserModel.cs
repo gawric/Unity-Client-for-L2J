@@ -1,19 +1,12 @@
 
 using System.Collections.Generic;
+using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 
 public class ArmorDresserModel
 {
     private readonly Dictionary<ArmorPart, (GameObject go, Armor armor)> _armorData;
 
-    public enum ArmorPart
-    {
-        Torso,
-        Legs,
-        FullArmor,
-        Gloves,
-        Boots
-    }
 
     public ArmorDresserModel()
     {
@@ -46,8 +39,61 @@ public class ArmorDresserModel
         return _armorData.TryGetValue(part, out var data) ? data.go : null;
     }
 
+
+
+    public GameObject GetGo(ItemSlot slot)
+    {
+        if (slot == ItemSlot.chest)
+        {
+            return GetGo(ArmorPart.Torso);
+        }else if (slot == ItemSlot.feet)
+        {
+            return GetGo(ArmorPart.Boots);
+        }
+            return null;
+    }
+
+    public Armor GetData(ItemSlot slot)
+    {
+        if (slot == ItemSlot.chest)
+        {
+            return GetData(ArmorPart.Torso);
+        }
+        else if (slot == ItemSlot.feet)
+        {
+            return GetData(ArmorPart.Boots);
+        }
+        return null;
+    }
+
+
+
+
     public Armor GetData(ArmorPart part)
     {
         return _armorData.TryGetValue(part, out var data) ? data.armor : null;
     }
+
+
+
+
+    public enum ArmorPart
+    {
+        Torso,
+        Legs,
+        FullArmor,
+        Gloves,
+        Boots,
+        Unknow,
+    }
+
+    public static ItemSlot GetExtendedArmorPart(ItemSlot slot)
+    {
+        if(ItemSlot.boots == slot)
+        {
+            return ItemSlot.feet;
+        }
+        return slot;
+    }
+
 }

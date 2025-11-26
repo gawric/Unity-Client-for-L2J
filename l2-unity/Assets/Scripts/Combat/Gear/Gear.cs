@@ -19,7 +19,8 @@ public class Gear : AbstractMeshManager
     private Weapon _rightHandWeapon;
     private Weapon _leftHandWeapon;
     private Weapon _leftHandShield;
-
+    private string _origWeaponPrefabName = "";
+    private string _origShieldPrefabName = "";
 
     [Header("Models")]
     [Header("Right hand")]
@@ -57,13 +58,13 @@ public class Gear : AbstractMeshManager
         }
 
         GameObject weaponPrefab = (GameObject)LoadMesh(EquipmentCategory.Weapon, weaponId);
-
+        _origShieldPrefabName = weaponPrefab.name;
         WeaponType type = WeaponType.none;
         RefreshDataShield(weapon);
         UpdateWeaponType(type);
 
         Transform[] refreshAllBone = RefreshBone(allBone);
-        GameObject go = CreateCopy(weaponPrefab, shieldName);
+        GameObject go = CreateCopy(weaponPrefab, shieldName , ObjectType.Weapon);
 
         ActivateGameObject(go, type, true, refreshAllBone);
 
@@ -81,13 +82,13 @@ public class Gear : AbstractMeshManager
 
 
         GameObject weaponPrefab = (GameObject)LoadMesh(EquipmentCategory.Weapon, weaponId);
-
+        _origWeaponPrefabName = weaponPrefab.name;
         WeaponType type = weapon.Weapongrp.WeaponType;
         RefreshData(leftSlot, weapon);
         UpdateWeaponType(type);
 
         Transform[] refreshAllBone = RefreshBone(allBone);
-        GameObject go = CreateCopy(weaponPrefab, weaponName);
+        GameObject go = CreateCopy(weaponPrefab, weaponName , ObjectType.Weapon);
 
         ActivateGameObject(go, type, leftSlot, refreshAllBone);
 
@@ -158,8 +159,22 @@ public class Gear : AbstractMeshManager
         if (weapon != null)
         {
             Debug.LogWarning("Gear: UnequipShield->Unequip weapon");
-            Destroy(weapon.gameObject);
+
+
+            if(ObjectPoolManager.Instance != null)
+            {
+                weapon.gameObject.name = _origWeaponPrefabName;
+                if(!ObjectPoolManager.Instance.ReturnToPool(ObjectType.Weapon, weapon.gameObject))
+                {
+                    Destroy(weapon.gameObject);
+                }
+            }
+            else
+            {
+                Destroy(weapon.gameObject);
+            }
             RefreshData(leftSlot, null);
+
         }
     }
 
@@ -168,8 +183,20 @@ public class Gear : AbstractMeshManager
         Transform shield = GetShieldBone()?.Find("shield");
         if (shield != null)
         {
+            if (ObjectPoolManager.Instance != null)
+            {
+                shield.gameObject.name = _origShieldPrefabName;
+                if (!ObjectPoolManager.Instance.ReturnToPool(ObjectType.Weapon, shield.gameObject))
+                {
+                    Destroy(shield.gameObject);
+                }
+            }
+            else
+            {
+                Destroy(shield.gameObject);
+            }
+
             Debug.LogWarning("Gear: UnequipShield->Unequip shield");
-            Destroy(shield.gameObject);
             RefreshDataShield(null);
         }
     }
@@ -207,6 +234,11 @@ public class Gear : AbstractMeshManager
         _leftHandShield = weapon;
         _leftHandWeapon = weapon;
         _leftHandType = WeaponType.none;
+    }
+
+    public L2ArmorPiece GetMeshBaseArmor(ItemSlot slot , int baseArmorId , int raceId)
+    {
+        return (L2ArmorPiece)LoadMesh(EquipmentCategory.Armor, baseArmorId, raceId);
     }
 
 }

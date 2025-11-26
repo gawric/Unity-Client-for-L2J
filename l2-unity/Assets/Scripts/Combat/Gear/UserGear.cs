@@ -28,21 +28,36 @@ public class UserGear : Gear
             _container = transform.GetChild(0).gameObject;
         }
 
+
+
         _armorDresser = new CharacterArmorDresser(_container.transform);
         _armorDresser.OnDestroyGameObject += OnDestroyGameObject;
         _armorDresser.OnSyncMash += OnSyncMash;
+        _armorDresser.OnAddSyncMash += OnAddSyncMash;
         _armorDresser.OnEquipArmor += OnEquipArmor;
         _skinnedMeshSync = _container.GetComponentInChildren<SkinnedMeshSync>();
+
+        Debug.Log($"Container '{_container.name}' has {_container.transform.childCount} children:");
+        for (int i = 0; i < _skinnedMeshSync.transform.childCount; i++)
+        {
+            var children = _skinnedMeshSync.transform.GetChild(i);
+            Debug.Log($"Child {i}: {_skinnedMeshSync.transform.GetChild(i).name}");
+        }
+    }
+
+
+    public void UnequipArmor(int itemId, ItemSlot slot)
+    {
+        int race = (int)_raceId;
+        slot = ArmorDresserModel.GetExtendedArmorPart(slot);
+        Armor baseArmor = CharacterDefaultEquipment.GetDefaultArmorByItemSlot(slot);
+        var armorPiece = GetMeshBaseArmor(slot, baseArmor.Id ,  race);
+
+        _armorDresser.UnequipArmorPiece(slot , itemId, baseArmor, CreateArmorMesh(armorPiece));
     }
 
 
 
-
-    /// <summary>
-    /// Equips armor piece to the specified slot
-    /// </summary>
-    /// <param name="itemId">ID of the armor item to equip</param>
-    /// <param name="slot">Equipment slot where the armor will be equipped</param>
     public void EquipArmor(int itemId, ItemSlot slot)
     {
 
@@ -54,19 +69,30 @@ public class UserGear : Gear
             return;
         }
 
+        ItemSlot slotArmor = _armorDresser.GetExtendedOrGetCurrentArmorPart(slot);
+
+        if (_armorDresser.IsArmorEquipped(armor, slotArmor))
+        {
+            return;
+        }
 
         L2ArmorPiece armorPiece = (L2ArmorPiece)LoadMesh(EquipmentCategory.Armor, itemId, (int)_raceId);
+
+
+
         if (!ValidateArmorPiece(armorPiece, itemId))
         {
             return;
         }
+
 
         try
         {
             GameObject armorMesh = CreateArmorMesh(armorPiece);
             if (armorMesh != null)
             {
-                _armorDresser.SetArmorPiece(armor, armorMesh, slot);
+                _armorDresser.SetArmorPiece(armor, armorMesh, slotArmor);
+
             }
         }
         catch (System.Exception e)
@@ -74,6 +100,8 @@ public class UserGear : Gear
             Debug.LogError($"UserGear-> Error equipping armor {itemId}: {e.Message}");
         }
     }
+
+
 
     /// <summary>
     /// Validates the armor piece data
@@ -93,7 +121,7 @@ public class UserGear : Gear
     /// </summary>
     private GameObject CreateArmorMesh(L2ArmorPiece armorPiece)
     {
-        GameObject mesh = CreateCopy(armorPiece.baseArmorModel);
+        GameObject mesh = GetOrCreate(armorPiece.baseArmorModel , ObjectType.Armor);
         if (mesh == null)
         {
             Debug.LogWarning("UserGear-> Failed to create armor model copy");
@@ -193,17 +221,41 @@ public class UserGear : Gear
 
     public void OnDestroyGameObject(GameObject go)
     {
-        Destroy(go);
+        if(ObjectPoolManager.Instance != null)
+        {
+            if (!ObjectPoolManager.Instance.ReturnToPool(ObjectType.Armor , go))
+            {
+                Destroy(go);
+            }
+        }
+        else
+        {
+            Destroy(go);
+        }
+
+        Debug.LogWarning("Запрос на удаление. Удаление состоялось размер " + _container.transform.childCount);
     }
 
     public void OnSyncMash(int status)
     {
+        Debug.LogWarning("Запрос на удаление. Синхронизация начало");
         _skinnedMeshSync?.SyncMesh();
+        Debug.LogWarning("Запрос на удаление. Синхронизация конец");
     }
+
+    public void OnAddSyncMash(GameObject add)
+    {
+        _skinnedMeshSync?.AddObjectToQueue(add);
+
+    }
+
+
 
     public void OnEquipArmor(int naked, ItemSlot slot)
     {
         EquipArmor(naked , slot);
     }
+
+
 
 }

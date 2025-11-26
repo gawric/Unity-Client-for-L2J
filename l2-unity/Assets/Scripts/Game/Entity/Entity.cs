@@ -331,6 +331,7 @@ public class Entity : MonoBehaviour {
         {
             //usergear.Un(itemId, item.BodyPart);
             Debug.Log("HandleUnequipSheildArmorItem> not implemented yet unequip");
+            usergear.UnequipArmor(item.ItemId , item.BodyPart);
         }
     }
     private void HandleShieldArmorItem(ItemInstance item, UserGear usergear)

@@ -91,7 +91,7 @@ public class ModelTable
 
             string path = $"Data/Animations/{race}/{raceId}/User_{raceId}";
             _userContainers[r] = Resources.Load<GameObject>(path);
-          //  Debug.Log($"Loading user container {r} [{path}]");
+            //Debug.Log($"Loading user container {r} [{path}]");
         }
 
         // Pawn Containers
@@ -348,7 +348,7 @@ public class ModelTable
         _armors[model].materials.TryGetValue(armor.Armorgrp.Texture[(byte) raceId], out material);
 
         if (material == null) {
-            Debug.LogWarning($"Can't find armor material for {model} and {raceId} in ModelTable");
+            Debug.LogWarning($"Can't find armor material for model: {model} and material: {textureName} and race: {raceId} in ModelTable");
             return null;
         }
 
@@ -419,7 +419,7 @@ public class ModelTable
 
     public GameObject GetHair(CharacterRaceAnimation raceId, byte hairStyle, byte hairColor, bool bh) {
         byte index = (byte)(hairStyle * 8 + hairColor * 2);
-        index = bugFix(raceId, index);
+        index = BugFix(raceId, index);
         if (bh) {
             index += 1;
         }
@@ -436,7 +436,7 @@ public class ModelTable
         return go;
     }
 
-    public byte bugFix(CharacterRaceAnimation raceId , byte index)
+    public byte BugFix(CharacterRaceAnimation raceId , byte index)
     {
         if(CharacterRaceAnimation.FFighter == raceId)
         {

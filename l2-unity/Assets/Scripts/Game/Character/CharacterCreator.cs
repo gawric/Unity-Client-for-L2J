@@ -346,54 +346,11 @@ public class CharacterCreator : MonoBehaviour
         UserGear gear = pawnObject.GetComponent<UserGear>();
 
         gear.Initialize(-1, raceId);
-
-        if (appearance.Chest != 0)
-        {
-            gear.EquipArmor(appearance.Chest, ItemSlot.chest);
-        }
-        else
-        {
-            gear.EquipArmor(ItemTable.NAKED_CHEST, ItemSlot.chest);
-        }
-
-        if (appearance.Legs != 0)
-        {
-            gear.EquipArmor(appearance.Legs, ItemSlot.legs);
-        }
-        else
-        {
-            gear.EquipArmor(ItemTable.NAKED_LEGS, ItemSlot.legs);
-        }
-
-        if (appearance.Gloves != 0)
-        {
-            gear.EquipArmor(appearance.Gloves, ItemSlot.gloves);
-        }
-        else
-        {
-            gear.EquipArmor(ItemTable.NAKED_GLOVES, ItemSlot.gloves);
-        }
-
-        if (appearance.Feet != 0)
-        {
-            gear.EquipArmor(appearance.Feet, ItemSlot.feet);
-        }
-        else
-        {
-            gear.EquipArmor(ItemTable.NAKED_BOOTS, ItemSlot.feet);
-        }
-
-        if (appearance.LHand != 0)
-        {
-            gear.EquipWeapon(appearance.LHand, true);
-        }
-        if (appearance.RHand != 0)
-        {
-            gear.EquipWeapon(appearance.RHand, false);
-        }
-
+        CharacterDefaultEquipment.EquipStarterGear(gear, appearance);
         return pawnObject;
     }
+
+
 
 
 
