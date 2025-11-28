@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem.HID;
 using static ModelTable;
+using static UnityEditor.Progress;
 
 public class UserGear : Gear
 {
@@ -53,7 +54,11 @@ public class UserGear : Gear
         Armor baseArmor = CharacterDefaultEquipment.GetDefaultArmorByItemSlot(slot);
         var armorPiece = GetMeshBaseArmor(slot, baseArmor.Id ,  race);
 
-        _armorDresser.UnequipArmorPiece(slot , itemId, baseArmor, CreateArmorMesh(armorPiece));
+        if(armorPiece != null)
+        {
+            _armorDresser.UnequipArmorPiece(slot, itemId, baseArmor, CreateArmorMesh(armorPiece.baseArmorModel, armorPiece.material));
+        }
+
     }
 
 
@@ -70,7 +75,59 @@ public class UserGear : Gear
         }
 
         ItemSlot slotArmor = _armorDresser.GetExtendedOrGetCurrentArmorPart(slot);
+        if(ItemSlot.fullarmor != slotArmor)
+        {
+            EquipSingleArmor(armor, slotArmor, itemId);
+        }
+        else if (ItemSlot.fullarmor == slotArmor)
+        {
+            EquipFullArmor(armor, slotArmor, itemId);
+        }
 
+    }
+
+    private void EquipFullArmor(Armor armor, ItemSlot slotArmor, int itemId)
+    {
+            if (_armorDresser.IsArmorEquipped(armor, slotArmor))
+            {
+                return;
+
+            }
+
+            L2ArmorPiece armorPiece = (L2ArmorPiece)LoadMesh(EquipmentCategory.FullArmor, itemId, (int)_raceId);
+
+
+            if (!ValidateArmorPieceFullArmor(armorPiece, itemId))
+            {
+                return;
+            }
+
+            try
+            {
+                GameObject[] listGo = CreateListArmorMesh(armorPiece.baseAllModels, armorPiece.allMaterials);
+
+                if (listGo.Length == 2)
+                {
+                    GameObject goChest = listGo[0];
+                    GameObject goLegs = listGo[1];
+
+                    _armorDresser.SetFullArmor(false , armor, goChest, ItemSlot.chest);
+                    _armorDresser.SetFullArmor(true , armor, goLegs, ItemSlot.legs);
+                }
+                else
+                {
+                    Debug.LogWarning("UserGear->EquipFullArmor: Not Found GameObject FullPlateArmor!");
+                }
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogError($"UserGear-> EquipFullArmor: Error equipping armor {itemId}: {e.Message}");
+            }
+        
+    }
+
+    private void EquipSingleArmor(Armor armor , ItemSlot slotArmor , int itemId)
+    {
         if (_armorDresser.IsArmorEquipped(armor, slotArmor))
         {
             return;
@@ -88,7 +145,7 @@ public class UserGear : Gear
 
         try
         {
-            GameObject armorMesh = CreateArmorMesh(armorPiece);
+            GameObject armorMesh = CreateArmorMesh(armorPiece.baseArmorModel, armorPiece.material);
             if (armorMesh != null)
             {
                 _armorDresser.SetArmorPiece(armor, armorMesh, slotArmor);
@@ -116,12 +173,33 @@ public class UserGear : Gear
         return true;
     }
 
-    /// <summary>
-    /// Creates and configures the armor mesh
-    /// </summary>
-    private GameObject CreateArmorMesh(L2ArmorPiece armorPiece)
+    private bool ValidateArmorPieceFullArmor(L2ArmorPiece armorPiece, int itemId)
     {
-        GameObject mesh = GetOrCreate(armorPiece.baseArmorModel , ObjectType.Armor);
+        if (armorPiece == null || armorPiece.baseAllModels == null || armorPiece.allMaterials == null)
+        {
+            Debug.LogWarning($"UserGear->ValidateArmorPieceFullArmor: Invalid armor data for item {itemId}");
+            return false;
+        }
+        return true;
+    }
+
+
+    private GameObject[] CreateListArmorMesh(GameObject[] baseListArmorModel, Material[] materials)
+    {
+        GameObject[] listGo = new GameObject[baseListArmorModel.Length];
+
+        for(int i = 0; i < baseListArmorModel.Length; i++)
+        {
+            GameObject baseArmorModel = baseListArmorModel[i];
+            Material material = materials[i];
+            listGo[i] = CreateArmorMesh(baseArmorModel, material);
+        }
+        return listGo;
+    }
+
+    private GameObject CreateArmorMesh(GameObject baseArmorModel , Material material)
+    {
+        GameObject mesh = GetOrCreate(baseArmorModel, ObjectType.Armor);
         if (mesh == null)
         {
             Debug.LogWarning("UserGear-> Failed to create armor model copy");
@@ -135,7 +213,7 @@ public class UserGear : Gear
             return null;
         }
 
-        renderer.material = armorPiece.material;
+        renderer.material = material;
         return mesh;
     }
 

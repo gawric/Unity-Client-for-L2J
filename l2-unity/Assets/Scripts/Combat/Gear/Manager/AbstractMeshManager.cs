@@ -25,7 +25,13 @@ public class AbstractMeshManager : MonoBehaviour
                     ModelTable.L2ArmorPiece goArmor = LoadArmor(armor, CharacterRaceAnimationParser.SafeConvertToRace(raceId));
                     if (armor != null) ObjectPoolManager.Instance?.AddPrefabToPool(ObjectType.Armor, goArmor.baseArmorModel);
                     return goArmor;
-
+                case EquipmentCategory.FullArmor:
+                    int fullArmorId = itemIds[0];
+                    int fullArmorraceId = itemIds[1];
+                    Armor armorModel = ItemTable.Instance.GetArmor(fullArmorId);
+                    ModelTable.L2ArmorPiece fullGoArmor = LoadArmor(armorModel, CharacterRaceAnimationParser.SafeConvertToRace(fullArmorraceId));
+                    if (armorModel != null) AddPrefabToList(ObjectType.Armor , fullGoArmor.baseAllModels);
+                    return fullGoArmor;
 
                 default:
                     Debug.LogWarning("Unknown equipment category");
@@ -56,6 +62,17 @@ public class AbstractMeshManager : MonoBehaviour
         return null;
     }
 
+    private void AddPrefabToList(ObjectType type , GameObject[] allModels)
+    {
+        if(allModels != null)
+        {
+            for (int i = 0; i < allModels.Length; i++)
+            {
+                GameObject go = allModels[i];
+                ObjectPoolManager.Instance?.AddPrefabToPool(type, go);
+            }
+        }
+    }
     protected GameObject GetOrCreate(GameObject originalGameObject , ObjectType type)
     {
         if (ObjectPoolManager.Instance != null)
@@ -100,6 +117,8 @@ public class AbstractMeshManager : MonoBehaviour
 
         return armorPiece;
     }
+
+
 
     //GetShieldBone
     //GetLeftHandBone

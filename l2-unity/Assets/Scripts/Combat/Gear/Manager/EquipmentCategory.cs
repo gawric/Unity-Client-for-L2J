@@ -4,5 +4,6 @@ public enum EquipmentCategory
 {
     Weapon,
     Shield,
-    Armor
+    Armor,
+    FullArmor,
 }

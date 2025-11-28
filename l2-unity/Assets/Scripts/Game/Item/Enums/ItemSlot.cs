@@ -24,6 +24,8 @@ public enum ItemSlot : byte {
     belt = 22,
     agation = 23,
     pendant = 24,
+    alldress = 25,
+    onepiece = 26,
 }
 
 public class ItemSlotParser {
@@ -57,6 +59,8 @@ public class ItemSlotParser {
                 return ItemSlot.lhand_shield;
             case "lrhand":
                 return ItemSlot.lrhand;
+            case "alldress":
+                return ItemSlot.alldress;
             default:
                 return ItemSlot.feet;
         }

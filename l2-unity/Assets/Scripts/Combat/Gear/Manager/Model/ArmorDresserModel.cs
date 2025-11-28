@@ -1,24 +1,25 @@
 
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 
-public class ArmorDresserModel
+public class ArmorDresserModel : IDresserModel
 {
     private readonly Dictionary<ArmorPart, (GameObject go, Armor armor)> _armorData;
-
 
     public ArmorDresserModel()
     {
         _armorData = new Dictionary<ArmorPart, (GameObject, Armor)>();
     }
 
-    public void Update(ArmorPart part, GameObject go, Armor armor)
+    public virtual void Update(ArmorPart part, IEnumerable<GameObject> go, IEnumerable<Armor> armor)
     {
-        _armorData[part] = (go, armor);
+        _armorData[part] = (go == null || armor == null)? (null, null) : (go.First(), armor.First());
     }
 
-    public void UpdateGo(ArmorPart part, GameObject go)
+    public virtual  void UpdateGo(ArmorPart part, GameObject go)
     {
         if (_armorData.TryGetValue(part, out var current))
         {
@@ -26,7 +27,7 @@ public class ArmorDresserModel
         }
     }
 
-    public void UpdateData(ArmorPart part, Armor armor)
+    public virtual void UpdateData(ArmorPart part, Armor armor)
     {
         if (_armorData.TryGetValue(part, out var current))
         {
@@ -34,48 +35,44 @@ public class ArmorDresserModel
         }
     }
 
-    public GameObject GetGo(ArmorPart part)
+    public virtual GameObject GetGo(ArmorPart part)
     {
         return _armorData.TryGetValue(part, out var data) ? data.go : null;
     }
 
-
-
-    public GameObject GetGo(ItemSlot slot)
+    public virtual GameObject GetGo(ItemSlot slot)
     {
-        if (slot == ItemSlot.chest)
-        {
-            return GetGo(ArmorPart.Torso);
-        }else if (slot == ItemSlot.feet)
-        {
-            return GetGo(ArmorPart.Boots);
-        }
-            return null;
+        return (GameObject)GetItemData(slot, true);
     }
 
-    public Armor GetData(ItemSlot slot)
+    public virtual Armor GetData(ItemSlot slot)
     {
-        if (slot == ItemSlot.chest)
-        {
-            return GetData(ArmorPart.Torso);
-        }
-        else if (slot == ItemSlot.feet)
-        {
-            return GetData(ArmorPart.Boots);
-        }
-        return null;
+        return (Armor)GetItemData(slot, false);
     }
 
-
-
+    private object GetItemData(ItemSlot slot, bool returnGameObject)
+    {
+        switch (slot)
+        {
+            case ItemSlot.chest:
+                return returnGameObject ? (object)GetGo(ArmorPart.Torso) : GetData(ArmorPart.Torso);
+            case ItemSlot.feet:
+                return returnGameObject ? (object)GetGo(ArmorPart.Boots) : GetData(ArmorPart.Boots);
+            case ItemSlot.legs:
+                return returnGameObject ? (object)GetGo(ArmorPart.Legs) : GetData(ArmorPart.Legs);
+            case ItemSlot.gloves:
+                return returnGameObject ? (object)GetGo(ArmorPart.Gloves) : GetData(ArmorPart.Gloves);
+            case ItemSlot.fullarmor:
+                return returnGameObject ? (object)GetGo(ArmorPart.Torso) : GetData(ArmorPart.Torso);
+            default:
+                return null;
+        }
+    }
 
     public Armor GetData(ArmorPart part)
     {
         return _armorData.TryGetValue(part, out var data) ? data.armor : null;
     }
-
-
-
 
     public enum ArmorPart
     {
