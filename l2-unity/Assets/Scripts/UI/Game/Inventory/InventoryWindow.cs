@@ -437,6 +437,7 @@ public class InventoryWindow : L2PopupWindow
             //if there are 2 items in LHand and Rhand, we move 1 to the position of the one who is trying to change, and insert the second item into the inventory
             else if (gearItem != null & source_item_slot == null)
             {
+                EventBus.Instance.UnEquipped(gearItem, userId);
                 _tabs[0].AddItem(gearItem);
             }
 

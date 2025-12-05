@@ -6,6 +6,7 @@ public class ListenerCharacterGear : MonoBehaviour
 
     public static ListenerCharacterGear Instance { get; private set; }
 
+
     private void Awake()
     {
         if (Instance == null)
@@ -47,4 +48,7 @@ public class ListenerCharacterGear : MonoBehaviour
     }
 
     
+
+
+
 }

@@ -1,4 +1,6 @@
 using UnityEngine;
+using static ModelTable;
+using static UnityEditor.Progress;
 using static UnityEngine.EventSystems.EventTrigger;
 
 
@@ -27,9 +29,9 @@ public class AbstractMeshManager : MonoBehaviour
                     return goArmor;
                 case EquipmentCategory.FullArmor:
                     int fullArmorId = itemIds[0];
-                    int fullArmorraceId = itemIds[1];
+                    int fullArmorRaceId = itemIds[1];
                     Armor armorModel = ItemTable.Instance.GetArmor(fullArmorId);
-                    ModelTable.L2ArmorPiece fullGoArmor = LoadArmor(armorModel, CharacterRaceAnimationParser.SafeConvertToRace(fullArmorraceId));
+                    ModelTable.L2ArmorPiece fullGoArmor = LoadArmor(armorModel, CharacterRaceAnimationParser.SafeConvertToRace(fullArmorRaceId));
                     if (armorModel != null) AddPrefabToList(ObjectType.Armor , fullGoArmor.baseAllModels);
                     return fullGoArmor;
 
@@ -126,7 +128,16 @@ public class AbstractMeshManager : MonoBehaviour
     //GetRightHandBone
     protected void SetType(WeaponType weaponType , bool leftSlot , Transform[] allBone)
     {
-        if(_go == null)
+        SetParentGo(_go, weaponType, leftSlot, allBone);
+    }
+
+    protected void SetTypeOtherGo(GameObject go, WeaponType weaponType, bool leftSlot, Transform[] allBone)
+    {
+        SetParentGo(go, weaponType, leftSlot, allBone);
+    }
+    private void SetParentGo(GameObject go , WeaponType weaponType, bool leftSlot, Transform[] allBone)
+    {
+        if (go == null)
         {
             Debug.LogError("Gear: Not Create GameObject " + weaponType);
             return;
@@ -134,21 +145,94 @@ public class AbstractMeshManager : MonoBehaviour
 
         if (weaponType == WeaponType.none)
         {
-            _go.transform.SetParent(allBone[0], false);
+            go.transform.SetParent(allBone[0], false);
         }
         else if (weaponType == WeaponType.bow)
         {
-            _go.transform.SetParent(allBone[1], false);
+            go.transform.SetParent(allBone[1], false);
         }
         else if (leftSlot)
         {
-            _go.transform.SetParent(allBone[2], false);
+            go.transform.SetParent(allBone[2], false);
         }
         else
         {
-            _go.transform.SetParent(allBone[3], false);
+            go.transform.SetParent(allBone[3], false);
         }
     }
+
+
+    public void GetDefaultGoWithArmorModel(ItemSlot slot, out Armor[] defaultArmor, out GameObject[] listArmorPiece , int raceId)
+    {
+        //int race = (int)_raceId;
+        slot = ArmorDresserModel.GetExtendedArmorPart(slot);
+
+        defaultArmor = CharacterDefaultEquipment.GetDefaultArmorByItemSlot(slot);
+        listArmorPiece = CopyListMash(slot, defaultArmor, raceId);
+    }
+
+
+    protected GameObject[] CopyListMash(ItemSlot slot , Armor[] defaultArmor , int raceId)
+    {
+        var armorPiece = GetMeshBaseArmor(slot, defaultArmor, raceId);
+        return  CreateCopyOrGetPool(armorPiece, slot);
+    }
+
+    public L2ArmorPiece[] GetMeshBaseArmor(ItemSlot slot, Armor[] defaultArmor, int raceId)
+    {
+        L2ArmorPiece[] baseArmorArr = new L2ArmorPiece[defaultArmor.Length];
+
+        for (int i = 0; i < defaultArmor.Length; i++)
+        {
+            int baseArmorId = defaultArmor[i].Id;
+            baseArmorArr[i] = (L2ArmorPiece)LoadMesh(EquipmentCategory.Armor, baseArmorId, raceId);
+        }
+
+        return baseArmorArr;
+    }
+
+    protected GameObject[] CreateCopyOrGetPool(L2ArmorPiece[] armorArrPiece, ItemSlot slot)
+    {
+        GameObject[] arrGo = new GameObject[armorArrPiece.Length];
+        for (int i = 0; i < armorArrPiece.Length; i++)
+        {
+            var armorPiece = armorArrPiece[i];
+            arrGo[i] = CreateArmorMesh(armorPiece.baseArmorModel, armorPiece.material);
+        }
+        return arrGo;
+    }
+
+    protected GameObject CreateArmorMesh(GameObject baseArmorModel, Material material)
+    {
+        GameObject mesh = GetOrCreate(baseArmorModel, ObjectType.Armor);
+        if (mesh == null)
+        {
+            Debug.LogWarning("UserGear-> Failed to create armor model copy");
+            return null;
+        }
+
+        SkinnedMeshRenderer renderer = mesh.GetComponentInChildren<SkinnedMeshRenderer>();
+        if (renderer == null)
+        {
+            Debug.LogWarning("UserGear-> No SkinnedMeshRenderer found in the armor model");
+            return null;
+        }
+
+        renderer.material = material;
+        return mesh;
+    }
+
+    protected string GetWeaponModelName(int itemId)
+    {
+        Weapon weapon = ItemTable.Instance.GetWeapon(itemId);
+        if (weapon == null)
+        {
+            return "Not_Found_Model_Name";
+        }
+       return  weapon.Weapongrp.Model.Replace("LineageWeapons." , "");
+
+    }
+
 
 
 }

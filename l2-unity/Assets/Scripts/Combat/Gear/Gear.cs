@@ -1,18 +1,20 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using static ModelTable;
 using static Unity.Burst.Intrinsics.Arm;
 using static UnityEditor.Progress;
+using static UnityEngine.Rendering.DebugUI;
 
 public class Gear : AbstractMeshManager 
 {
     protected NetworkAnimationController _networkAnimationReceive;
     protected int _ownerId;
     protected CharacterRaceAnimation _raceId;
-    public const string weaponName = "weapon";
-    public const string shieldName = "shield";
+    public const string weaponName = "weapon_";
+    public const string shieldName = "shield_";
     public Transform[] allBone = new Transform[4];
     [Header("Weapons")]
     [Header("Meta")]
@@ -21,9 +23,14 @@ public class Gear : AbstractMeshManager
     private Weapon _leftHandShield;
     private string _origWeaponPrefabName = "";
     private string _origShieldPrefabName = "";
+ 
+    public Action<int, Weapon>  OnEquipAnimationRefresh;
+    public Action<string> OnUnequipAnimationRefresh;
 
     [Header("Models")]
     [Header("Right hand")]
+    private WeaponType _lastRightHandType;
+    private WeaponType _lastShieldHandType;
     [SerializeField] private WeaponType _rightHandType;
     [SerializeField] protected Transform _rightHandBone;
     [SerializeField] protected Transform _rightHand;
@@ -33,11 +40,12 @@ public class Gear : AbstractMeshManager
     [SerializeField] protected Transform _shieldBone;
     [SerializeField] protected Transform _leftHand;
     [SerializeField] protected string _weaponAnim;
+    protected string _lastWeaponAnim = "";
     private int _weaponRange;
 
     public WeaponType WeaponType { get { return _leftHandType != WeaponType.none ? _leftHandType : _rightHandType; } }
     public string WeaponAnim { get { return _weaponAnim; } }
-
+    public string LastWeaponAnim { get { return _lastWeaponAnim; } }
 
     public virtual void Initialize(int ownderId, CharacterRaceAnimation raceId) {
         TryGetComponent(out _networkAnimationReceive);
@@ -60,19 +68,34 @@ public class Gear : AbstractMeshManager
         GameObject weaponPrefab = (GameObject)LoadMesh(EquipmentCategory.Weapon, weaponId);
         _origShieldPrefabName = weaponPrefab.name;
         WeaponType type = WeaponType.none;
-        RefreshDataShield(weapon);
+        RefreshDataShield(weapon , WeaponType.shield);
         UpdateWeaponType(type);
-
+        string shieldNameId = shieldName+weaponId;
         Transform[] refreshAllBone = RefreshBone(allBone);
-        GameObject go = CreateCopy(weaponPrefab, shieldName , ObjectType.Weapon);
-
+        GameObject go = CreateCopy(weaponPrefab, shieldNameId, ObjectType.Weapon);
+        _lastWeaponAnim = _weaponAnim;
         ActivateGameObject(go, type, true, refreshAllBone);
 
+        if (_rightHandType != _lastRightHandType | type != _lastShieldHandType 
+            | _rightHandType == WeaponType.pole 
+            | _rightHandType == WeaponType.staff)
+        {
+            OnEquipAnimationRefresh?.Invoke(-1, weapon);
+        }
+        else
+        {
+            //if we have nothing in our right hand
+            if (_rightHandWeapon == null) OnEquipAnimationRefresh?.Invoke(-1, weapon);
+        }
+
+        _lastShieldHandType = type;
     }
 
     public virtual void EquipWeapon(int weaponId, bool leftSlot) {
 
         Weapon weapon = ItemTable.Instance.GetWeapon(weaponId);
+        leftSlot = weapon?.Weapongrp?.WeaponType == WeaponType.bow;
+
 
         ErrorPrint(weapon, weaponId);
 
@@ -80,22 +103,83 @@ public class Gear : AbstractMeshManager
             return;
         }
 
-
         GameObject weaponPrefab = (GameObject)LoadMesh(EquipmentCategory.Weapon, weaponId);
         if (weaponPrefab is not null) //todo: если модели нет - на этапе загрузки меню выбора персонажа ломает весь клиент
         {
             _origWeaponPrefabName = weaponPrefab.name;
+            var weaponNameAndId = weaponName + weaponId;
             WeaponType type = weapon.Weapongrp.WeaponType;
             RefreshData(leftSlot, weapon);
             UpdateWeaponType(type);
 
             Transform[] refreshAllBone = RefreshBone(allBone);
-            GameObject go = CreateCopy(weaponPrefab, weaponName, ObjectType.Weapon);
+            GameObject go = CreateCopy(weaponPrefab, weaponNameAndId, ObjectType.Weapon);
+
 
             ActivateGameObject(go, type, leftSlot, refreshAllBone);
         }
+
+        if(type != _lastRightHandType & _leftHandShield == null 
+            | _rightHandType == WeaponType.pole
+            | _rightHandType == WeaponType.staff
+            | _rightHandType == WeaponType.bigword
+            | _leftHandType == WeaponType.bow)
+        {
+            OnEquipAnimationRefresh?.Invoke(-1, weapon);
+        }
+        else
+        {
+            if (_leftHandWeapon == null | _leftHandShield == null) OnEquipAnimationRefresh?.Invoke(-1, weapon);
+        }
+
+        _lastRightHandType = type;
+
     }
 
+    public void EquipLeftAndRightWeapon(int weaponId)
+    {
+        Weapon weapon = ItemTable.Instance.GetWeapon(weaponId);
+
+        ErrorPrint(weapon, weaponId);
+
+        if (weaponId == 0 | IsWeaponEquippedInBothHands(weaponId) | weapon == null)
+        {
+            return;
+        }
+
+        GameObject weaponPrefab = (GameObject)LoadMesh(EquipmentCategory.Weapon, weaponId);
+        //GameObject weaponPrefabRight = (GameObject)LoadMesh(EquipmentCategory.Weapon, weaponId);
+
+        _origWeaponPrefabName = weaponPrefab.name;
+        WeaponType type = weapon.Weapongrp.WeaponType;
+        var weaponNameAndId = weaponName + weaponId;
+        RefreshData(false, weapon);
+        RefreshData(true, weapon);
+        UpdateWeaponType(type);
+
+        Transform[] refreshAllBone = RefreshBone(allBone);
+
+        GameObject leftGo = CreateCopy(weaponPrefab, weaponNameAndId, ObjectType.Weapon);
+        GameObject rightGo = CreateCopy(weaponPrefab, weaponNameAndId, ObjectType.Weapon);
+
+        if (type != _lastRightHandType
+            | _rightHandType == WeaponType.pole
+            | _rightHandType == WeaponType.staff
+            | _leftHandType == WeaponType.bow)
+        {
+            OnEquipAnimationRefresh?.Invoke(-1, weapon);
+        }
+        else
+        {
+            if (_leftHandWeapon == null | _leftHandShield == null) OnEquipAnimationRefresh?.Invoke(-1, weapon);
+        }
+
+        ActivateOtherGameObject(leftGo, type, true, refreshAllBone);
+        ActivateOtherGameObject(rightGo, type, false, refreshAllBone);
+
+        _lastRightHandType = type;
+        //_lastShieldHandType = type;
+    }
 
 
     private void ActivateGameObject(GameObject go, WeaponType type , bool leftSlot , Transform[] refreshAllBone)
@@ -103,6 +187,15 @@ public class Gear : AbstractMeshManager
         if (go != null)
         {
             SetType(type, leftSlot, refreshAllBone);
+            go.SetActive(true);
+        }
+    }
+
+    private void ActivateOtherGameObject(GameObject go, WeaponType type, bool leftSlot, Transform[] refreshAllBone)
+    {
+        if (go != null)
+        {
+            SetTypeOtherGo(go , type, leftSlot, refreshAllBone);
             go.SetActive(true);
         }
     }
@@ -116,6 +209,7 @@ public class Gear : AbstractMeshManager
 
     }
     private void UpdateWeaponType(WeaponType weaponType) {
+        _lastWeaponAnim = _weaponAnim;
         _weaponAnim = WeaponTypeParser.GetWeaponAnim(weaponType);
         _weaponRange = WeaponTypeParser.WeaponRange(weaponType);
     }
@@ -154,59 +248,122 @@ public class Gear : AbstractMeshManager
         return VectorUtils.ConvertL2jDistance(_weaponRange);
     }
 
-
-    public  void UnequipWeapon(bool leftSlot)
+    private Transform[] destroy = new Transform[2];
+    public  void UnequipWeapon(bool leftSlot , int weaponId, bool lrDestroy = false)
     {
-        Transform weapon = (leftSlot ? GetLeftHandBone() : GetRightHandBone())?.Find("weapon");
+
+        string weapondNameId = weaponName + weaponId;
+
+        if (lrDestroy)
+        {
+            UnequipSingleWeapon(true, weaponId, weapondNameId);
+            UnequipSingleWeapon(false, weaponId, weapondNameId);
+        }
+        else
+        {
+            UnequipSingleWeapon(leftSlot, weaponId, weapondNameId);
+        }
+
+    }
+
+    private void UnequipSingleWeapon(bool leftSlot , int weaponId , string weapondNameId)
+    {
+
+        Transform weapon = (leftSlot ? GetLeftHandBone() : GetRightHandBone())?.Find(weapondNameId);
+
+
         if (weapon != null)
         {
-            Debug.LogWarning("Gear: UnequipShield->Unequip weapon");
+            string origWeaponPrefabName = GetWeaponModelName(weaponId);
+
+            DestroyObject(weapon.gameObject, origWeaponPrefabName);
+            RefreshLastType(leftSlot, weaponId, WeaponType.none);
+            RefreshHandWeapon(leftSlot, null, weaponId);
 
 
-            if(ObjectPoolManager.Instance != null)
+            int findCount = FindAllWeaponCount(weaponName, shieldName);
+
+            if (findCount == 0)
             {
-                weapon.gameObject.name = _origWeaponPrefabName;
-                if(!ObjectPoolManager.Instance.ReturnToPool(ObjectType.Weapon, weapon.gameObject))
+                RefreshData(leftSlot, null);
+                _lastWeaponAnim = _weaponAnim;
+                UpdateWeaponType(WeaponType.hand);
+                OnUnequipAnimationRefresh?.Invoke("");
+                Debug.Log("Destroy request item id 3 " + weaponId);
+            }
+        }
+    }
+
+    private void RefreshLastType(bool leftslot , int weaponId, WeaponType type)
+    {
+        if (!leftslot)
+        {
+            if(_rightHandWeapon != null)
+            {
+                if(_rightHandWeapon.Id == weaponId)
                 {
-                    Destroy(weapon.gameObject);
+                    _lastRightHandType = type;
                 }
             }
-            else
+        }
+
+    }
+
+    public void UnequipShield(int shieldId)
+    {
+        string shieldNameId = shieldName + shieldId;
+        Transform shield = GetShieldBone()?.Find(shieldNameId);
+
+
+
+        if (shield != null)
+        {
+            DestroyObject(shield.gameObject, _origShieldPrefabName);
+
+            RefreshHandShield(null);
+            int findCount = FindAllWeaponCount(weaponName, shieldName);
+            //if no equip sword and no equip shield. findCount = 1 > then remove current shield 
+            if (findCount == 0)
             {
-                Destroy(weapon.gameObject);
+                RefreshDataShield(null);
+                UpdateWeaponType(WeaponType.hand);
+                OnUnequipAnimationRefresh?.Invoke("");
             }
-            RefreshData(leftSlot, null);
 
         }
     }
 
-    public void UnequipShield()
+    private void DestroyObject(GameObject go , string origPrefabName)
     {
-        Transform shield = GetShieldBone()?.Find("shield");
-        if (shield != null)
+        if (ObjectPoolManager.Instance != null)
         {
-            if (ObjectPoolManager.Instance != null)
+            go.name = origPrefabName;
+            if (!ObjectPoolManager.Instance.ReturnToPool(ObjectType.Weapon, go))
             {
-                shield.gameObject.name = _origShieldPrefabName;
-                if (!ObjectPoolManager.Instance.ReturnToPool(ObjectType.Weapon, shield.gameObject))
-                {
-                    Destroy(shield.gameObject);
-                }
+                Destroy(go);
             }
-            else
-            {
-                Destroy(shield.gameObject);
-            }
-
-            Debug.LogWarning("Gear: UnequipShield->Unequip shield");
-            RefreshDataShield(null);
+        }
+        else
+        {
+            Destroy(go);
         }
     }
 
     public bool IsWeaponEquipped(int weaponId, bool leftSlot)
     {
         Weapon weapon = leftSlot ? _leftHandWeapon : _rightHandWeapon;
-        return weapon != null && weapon.Id == weaponId;
+        if (weapon == null) return false;
+        return weapon.Id == weaponId;
+    }
+
+    public bool IsWeaponEquippedInBothHands(int weaponId)
+    {
+
+        bool inLeftHand = _leftHandWeapon != null && _leftHandWeapon.Id == weaponId;
+        bool inRightHand = _rightHandWeapon != null && _rightHandWeapon.Id == weaponId;
+
+    
+        return inLeftHand && inRightHand;
     }
 
     public bool IsShieldEquipped(int weaponId)
@@ -222,25 +379,71 @@ public class Gear : AbstractMeshManager
         if (leftSlot)
         {
             _leftHandWeapon = weapon;
-            _leftHandType = (weapon == null) ? WeaponType.none : weapon.Weapongrp.WeaponType;
+            var typeL = (weapon == null) ? WeaponType.hand : weapon.Weapongrp.WeaponType;
+            _leftHandType = typeL;
         }
         else
         {
             _rightHandWeapon = weapon;
-            _rightHandType = (weapon == null) ? WeaponType.none : weapon.Weapongrp.WeaponType;
+            var typeR = (weapon == null) ? WeaponType.hand : weapon.Weapongrp.WeaponType;
+            _rightHandType = typeR;
         }
     }
 
-    private void RefreshDataShield(Weapon weapon)
+    private void RefreshHandWeapon(bool leftSlot, Weapon weapon, int weaponId)
+    {
+        var targetWeapon = leftSlot ? _leftHandWeapon : _rightHandWeapon;
+        if (targetWeapon?.Id == weaponId)
+        {
+            if (leftSlot) _leftHandWeapon = weapon;
+            else _rightHandWeapon = weapon;
+        }
+    }
+
+
+    private void RefreshDataShield(Weapon weapon , WeaponType weaponType = WeaponType.hand)
     {
         _leftHandShield = weapon;
         _leftHandWeapon = weapon;
-        _leftHandType = WeaponType.none;
+        _leftHandType = weaponType;
     }
 
-    public L2ArmorPiece GetMeshBaseArmor(ItemSlot slot , int baseArmorId , int raceId)
+    private void RefreshHandShield(Weapon weapon)
     {
-        return (L2ArmorPiece)LoadMesh(EquipmentCategory.Armor, baseArmorId, raceId);
+        _leftHandShield = weapon;
+        _leftHandWeapon = weapon;
     }
+
+
+    private IEnumerable<Transform> FindTransformsWithName(Transform parent, string pattern)
+    {
+        if (parent == null) yield break;
+
+        // Check current transform
+        if (parent.name.Contains(pattern))
+        {
+            yield return parent;
+        }
+
+        // Recursively check all children
+        foreach (Transform child in parent)
+        {
+            foreach (Transform match in FindTransformsWithName(child, pattern))
+            {
+                yield return match;
+            }
+        }
+    }
+    private int FindAllWeaponCount(string allWeapons , string allShields)
+    {
+        var allWeaponsFound = new List<Transform>();
+        allWeaponsFound.AddRange(FindTransformsWithName(GetLeftHandBone(), allWeapons));
+        allWeaponsFound.AddRange(FindTransformsWithName(GetRightHandBone(), allWeapons));
+
+        var allShieldsFound = FindTransformsWithName(GetShieldBone(), allShields).ToList();
+
+        return allWeaponsFound.Count + allShieldsFound.Count;
+    }
+
 
 }

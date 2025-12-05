@@ -10,6 +10,11 @@ public class Animation
         Value = value;
     }
 
+    public string Concat(string name)
+    {
+        return Value + name;
+    }
+
     public override string ToString()
     {
         return Value;
@@ -33,3 +38,4 @@ public static class AnimationNames
     public static readonly Animation MONSTER_RUN = new Animation("run");
     public static readonly Animation MONSTER_ATK01 = new Animation("atk01");
 }
+

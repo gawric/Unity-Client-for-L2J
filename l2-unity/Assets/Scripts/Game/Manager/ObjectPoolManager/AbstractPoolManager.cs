@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using UnityEditor;
 using UnityEngine;
 using static ObjectPoolManager;
 
@@ -6,6 +7,9 @@ public abstract class  AbstractPoolManager : MonoBehaviour
 {
     protected Dictionary<ObjectType, Dictionary<GameObject, Queue<GameObject>>> poolDictionary;
     protected Dictionary<ObjectType, GameObject> tagToPrefabMap;
+    protected Dictionary<GameObject, int> createdInstancesTracker;
+
+
     protected void SetupPoolHierarchy(List<Pool> pools , Transform poolParent)
     {
         foreach (Pool pool in pools)
@@ -48,6 +52,8 @@ public abstract class  AbstractPoolManager : MonoBehaviour
             poolDictionary[tag] = new Dictionary<GameObject, Queue<GameObject>>();
             tagToPrefabMap[tag] = prefab;
         }
+
+
     }
 
     protected void ValidAndCreateQueue(ObjectType tag, GameObject prefab)
@@ -120,6 +126,29 @@ public abstract class  AbstractPoolManager : MonoBehaviour
         return null;
     }
 
+    protected void Plus1Create(GameObject prefab)
+    {
+        if (createdInstancesTracker.ContainsKey(prefab))
+        {
+            int countCreate = createdInstancesTracker[prefab];
+            createdInstancesTracker[prefab] = countCreate + 1;
+        }
+        else
+        {
+            createdInstancesTracker.Add(prefab , 1);
+        }
+    }
+
+    protected int GetCreateCount(GameObject prefab)
+    {
+
+        if (createdInstancesTracker.ContainsKey(prefab))
+        {
+            return createdInstancesTracker[prefab];
+        }
+
+        return 0;
+    }
 
 
 }

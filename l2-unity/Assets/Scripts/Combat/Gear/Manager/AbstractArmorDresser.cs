@@ -56,8 +56,6 @@ public abstract class AbstractArmorDresser
 
     protected bool HasEquipped(ItemSlot slot, int itemId)
     {
-        var d1 = _equippedArmor.ContainsKey(slot);
-        var d2 = _equippedArmor[slot].GetGo(slot);
         if (_equippedArmor.ContainsKey(slot) && _equippedArmor[slot].GetGo(slot) != null)
         {
 
@@ -71,16 +69,28 @@ public abstract class AbstractArmorDresser
 
     protected void UpdateData(ItemSlot slot, ArmorDresserModel.ArmorPart part, Armor data)
     {
-        _equippedArmor[slot].UpdateData(part, data);
+        if (_equippedArmor.ContainsKey(slot))
+        {
+            _equippedArmor[slot].UpdateData(part, data);
+        }
+
     }
 
     protected void UpdateGo(ItemSlot slot, ArmorDresserModel.ArmorPart part, GameObject go)
     {
-        _equippedArmor[slot].UpdateGo(part, go);
+        if (_equippedArmor.ContainsKey(slot))
+        {
+            _equippedArmor[slot].UpdateGo(part, go);
+        }
+
     }
     protected GameObject GetGameObject(ItemSlot slot, ArmorDresserModel.ArmorPart part)
     {
-        return _equippedArmor[slot].GetGo(part);
+        if (_equippedArmor.ContainsKey(slot))
+        {
+            return _equippedArmor[slot].GetGo(part);
+        }
+        return null;
     }
 
     public bool IsArmorEquipped(Armor armor, ItemSlot slot)
@@ -99,7 +109,20 @@ public abstract class AbstractArmorDresser
         return false;
     }
 
+    public bool IsFullPlateEquipped(ItemSlot slot)
+    {
+        if (_equippedArmor.ContainsKey(slot))
+        {
+            var equippedArmor = _equippedArmor[slot];
+            var mainPartChest= GetMainArmorPart(ItemSlot.chest);
+            var mainPartLegs = GetMainArmorPart(ItemSlot.legs);
 
+            if (equippedArmor.GetData(mainPartChest) != null 
+                || equippedArmor.GetData(mainPartLegs) != null) return true;
+        }
+
+        return false;
+    }
 
     public ItemSlot GetExtendedOrGetCurrentArmorPart(ItemSlot slot, Dictionary<ItemSlot, IDresserModel> equippedArmor)
     {

@@ -5,6 +5,7 @@ public enum Event
     REBIRTH,
     ARRIVED,
     MOVE_TO,
+    CHANGE_EQUIP,
     MOVE_INPUT_PRESSED,
     ATTACKED,
     FORGET_OBJECT,

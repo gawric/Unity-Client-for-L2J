@@ -38,11 +38,9 @@ public class UserGear : Gear
         _armorDresser.OnEquipArmor += OnEquipArmor;
         _skinnedMeshSync = _container.GetComponentInChildren<SkinnedMeshSync>();
 
-        Debug.Log($"Container '{_container.name}' has {_container.transform.childCount} children:");
         for (int i = 0; i < _skinnedMeshSync.transform.childCount; i++)
         {
             var children = _skinnedMeshSync.transform.GetChild(i);
-            Debug.Log($"Child {i}: {_skinnedMeshSync.transform.GetChild(i).name}");
         }
     }
 
@@ -50,16 +48,16 @@ public class UserGear : Gear
     public void UnequipArmor(int itemId, ItemSlot slot)
     {
         int race = (int)_raceId;
-        slot = ArmorDresserModel.GetExtendedArmorPart(slot);
-        Armor baseArmor = CharacterDefaultEquipment.GetDefaultArmorByItemSlot(slot);
-        var armorPiece = GetMeshBaseArmor(slot, baseArmor.Id ,  race);
+        GetDefaultGoWithArmorModel(slot, out Armor[] defaultArmor, out GameObject[] listArmorPiece , (int)_raceId);
 
-        if(armorPiece != null)
+        if (listArmorPiece != null && listArmorPiece.Length > 0)
         {
-            _armorDresser.UnequipArmorPiece(slot, itemId, baseArmor, CreateArmorMesh(armorPiece.baseArmorModel, armorPiece.material));
+            _armorDresser.UnequipArmorPiece(slot, itemId, defaultArmor, listArmorPiece);
         }
 
     }
+
+
 
 
 
@@ -75,7 +73,7 @@ public class UserGear : Gear
         }
 
         ItemSlot slotArmor = _armorDresser.GetExtendedOrGetCurrentArmorPart(slot);
-        if(ItemSlot.fullarmor != slotArmor)
+        if (ItemSlot.fullarmor != slotArmor)
         {
             EquipSingleArmor(armor, slotArmor, itemId);
         }
@@ -83,7 +81,6 @@ public class UserGear : Gear
         {
             EquipFullArmor(armor, slotArmor, itemId);
         }
-
     }
 
     private void EquipFullArmor(Armor armor, ItemSlot slotArmor, int itemId)
@@ -145,10 +142,12 @@ public class UserGear : Gear
 
         try
         {
+            GetDefaultGoWithArmorModel(ItemSlot.fullarmor, out Armor[] defaultArmor, out GameObject[] listArmorPiece , (int)_raceId);
+
             GameObject armorMesh = CreateArmorMesh(armorPiece.baseArmorModel, armorPiece.material);
             if (armorMesh != null)
             {
-                _armorDresser.SetArmorPiece(armor, armorMesh, slotArmor);
+                _armorDresser.SetArmorPiece(armor, armorMesh, slotArmor , defaultArmor, listArmorPiece);
 
             }
         }
@@ -157,6 +156,8 @@ public class UserGear : Gear
             Debug.LogError($"UserGear-> Error equipping armor {itemId}: {e.Message}");
         }
     }
+
+
 
 
 
@@ -197,25 +198,6 @@ public class UserGear : Gear
         return listGo;
     }
 
-    private GameObject CreateArmorMesh(GameObject baseArmorModel , Material material)
-    {
-        GameObject mesh = GetOrCreate(baseArmorModel, ObjectType.Armor);
-        if (mesh == null)
-        {
-            Debug.LogWarning("UserGear-> Failed to create armor model copy");
-            return null;
-        }
-
-        SkinnedMeshRenderer renderer = mesh.GetComponentInChildren<SkinnedMeshRenderer>();
-        if (renderer == null)
-        {
-            Debug.LogWarning("UserGear-> No SkinnedMeshRenderer found in the armor model");
-            return null;
-        }
-
-        renderer.material = material;
-        return mesh;
-    }
 
 
 
@@ -311,14 +293,14 @@ public class UserGear : Gear
             Destroy(go);
         }
 
-        Debug.LogWarning("Запрос на удаление. Удаление состоялось размер " + _container.transform.childCount);
+        //Debug.LogWarning("Запрос на удаление. Удаление состоялось размер " + _container.transform.childCount);
     }
 
     public void OnSyncMash(int status)
     {
-        Debug.LogWarning("Запрос на удаление. Синхронизация начало");
+        //Debug.LogWarning("Запрос на удаление. Синхронизация начало");
         _skinnedMeshSync?.SyncMesh();
-        Debug.LogWarning("Запрос на удаление. Синхронизация конец");
+        //Debug.LogWarning("Запрос на удаление. Синхронизация конец");
     }
 
     public void OnAddSyncMash(GameObject add)

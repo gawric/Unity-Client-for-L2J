@@ -333,6 +333,7 @@ public class CharacterCreator : MonoBehaviour
             gear.EquipWeapon(appearance.RHand, false);
         }
 
+
         return pawnObject;
     }
 
@@ -371,14 +372,7 @@ public class CharacterCreator : MonoBehaviour
         //animController.SetWaitSpeedLobby("wait_" + gear.WeaponAnim, 0.1f);
     }
 
-    public void SetSpeed(GameObject pawnObject)
-    {
-        UserGear gear = pawnObject.GetComponent<UserGear>();
-        BaseAnimationController animController = pawnObject.GetComponent<BaseAnimationController>();
 
-        animController.SetBool("wait_" + gear.WeaponAnim, true);
-        animController.SetWalkSpeedLobby(0.1f);
-    }
 
     public void UpdatePawnPosAndRot(GameObject pawnObject, Logongrp pawnData) {
         Vector3 pawnPosition = new Vector3(pawnData.X, pawnData.Y, pawnData.Z);

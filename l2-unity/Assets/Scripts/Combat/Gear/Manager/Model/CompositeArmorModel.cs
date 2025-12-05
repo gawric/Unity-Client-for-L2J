@@ -38,10 +38,21 @@ public class CompositeArmorModel : ArmorDresserModel , IDresserModel
         return base.GetData(slot);
     }
 
-    public Armor GetData(ArmorPart part)
+    public override Armor GetData(ArmorPart part)
     {
         return base.GetData(part == ArmorPart.FullArmor ? ArmorPart.Torso : part);
     }
 
+    public override GameObject GetGo(ItemSlot slot)
+    {
+        return base.GetGo(slot);
+    }
+
+    public override GameObject GetGo(ArmorPart slot)
+    {
+        var go =  base.GetGo(slot);
+        if(go != null) Debug.Log("CompositeArmorModel > slot " + slot.ToString() + " goName " + go.name);
+        return go;
+    }
 
 }

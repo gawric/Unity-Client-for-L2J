@@ -1,42 +1,68 @@
+using UnityEditorInternal;
+using UnityEngine;
+
 public class NewIdleState : StateBase
 {
-    public NewIdleState(PlayerStateMachine stateMachine) : base(stateMachine) {
-    }
+    public NewIdleState(PlayerStateMachine stateMachine) : base(stateMachine) { }
 
-
-    public override void Update()
-    {
-        
-    }
+    public override void Update() { }
 
     public override void HandleEvent(Event evt)
     {
         switch (evt)
         {
-            case Event.READY_TO_ACT:
-                break;
             case Event.ENTER_WORLD:
-                AnimationManager.Instance.PlayAnimation(AnimationNames.WAIT.ToString() , true);
+                HandleEnterWorld();
+                break;
+            case Event.CHANGE_EQUIP:
+                HandleEquipChange();
                 break;
             case Event.ARRIVED:
-                Arrived(_stateMachine, AnimationManager.Instance);
+                HandleArrival();
                 break;
             case Event.WAIT_RETURN:
-                AnimationManager.Instance.PlayAnimation(AnimationNames.ATK_WAIT.ToString(), true);
+                HandleWaitReturn();
                 break;
-
         }
     }
 
-    private void Arrived(PlayerStateMachine stateMachine , IAnimationManager animationManager)
+    private void HandleEnterWorld()
     {
-        if (stateMachine.Player.isAutoAttack)
+        PlayAnimation(AnimationNames.WAIT);
+    }
+
+    private void HandleEquipChange()
+    {
+        PlayAnimation(AnimationNames.WAIT);
+    }
+
+    private void HandleArrival()
+    {
+        var animation = _stateMachine.Player.isAutoAttack
+            ? AnimationNames.ATK_WAIT
+            : AnimationNames.WAIT;
+        PlayAnimation(animation);
+    }
+
+    private void HandleWaitReturn()
+    {
+        PlayAnimation(AnimationNames.ATK_WAIT);
+    }
+
+    private void StopPreviousEquipAnimation()
+    {
+        string lastAnimName = _stateMachine.Player.GetLastAnimName();
+        Debug.Log("StopPreviousEquipAnimation>>> stop " + lastAnimName);
+        if (!string.IsNullOrEmpty(lastAnimName))
         {
-            animationManager.PlayAnimation(AnimationNames.ATK_WAIT.ToString(), true);
+            string paramName = AnimationNames.WAIT.Concat(lastAnimName);
+            Debug.Log("StopPreviousEquipAnimation>>> start " + paramName);
+            AnimationManager.Instance.StopCurrentAnimation(paramName);
         }
-        else
-        {
-            animationManager.PlayAnimation(AnimationNames.WAIT.ToString(), true);
-        }
+    }
+
+    private void PlayAnimation(Animation animation)
+    {
+        AnimationManager.Instance.PlayAnimation(animation.ToString(), true);
     }
 }

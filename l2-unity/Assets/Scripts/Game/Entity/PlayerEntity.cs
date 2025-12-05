@@ -224,4 +224,9 @@ public class PlayerEntity : Entity
             CharacterInfoWindow.Instance.UpdateValues();
         }
     }
+
+    public string GetLastAnimName()
+    {
+        return _gear.LastWeaponAnim;
+    }
 }

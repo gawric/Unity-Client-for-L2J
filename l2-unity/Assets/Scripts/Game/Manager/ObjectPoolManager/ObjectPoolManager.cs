@@ -15,7 +15,8 @@ public class ObjectPoolManager : AbstractPoolManager , IPoolManager
     }
 
     public List<Pool> pools;
-    private int _maxSizePool = 2;
+    //mix size pool >=3
+    private int _maxSizePool = 3;
     [SerializeField] private Transform poolParent;
 
     #region Singleton
@@ -31,6 +32,7 @@ public class ObjectPoolManager : AbstractPoolManager , IPoolManager
     {
         poolDictionary = new Dictionary<ObjectType, Dictionary<GameObject, Queue<GameObject>>>();
         tagToPrefabMap = new Dictionary<ObjectType, GameObject>();
+        createdInstancesTracker = new Dictionary<GameObject, int>();
 
         SetupPoolHierarchy(pools , poolParent);
 
@@ -52,13 +54,19 @@ public class ObjectPoolManager : AbstractPoolManager , IPoolManager
             return;
         }
 
+
+
         ValidateAndCreateDictionary(tag, prefab);
 
         ValidAndCreateQueue(tag, prefab);
 
+        if (GetCreateCount(prefab) >= _maxSizePool)
+        {
+            return;
+        }
+
         Transform parentTag = GetParent(tag , pools);
         Queue<GameObject> prefabPool = poolDictionary[tag][prefab];
-
 
         int availableSpace = _maxSizePool - prefabPool.Count;
         int objectsToAdd = Mathf.Min(count, availableSpace);
@@ -69,15 +77,26 @@ public class ObjectPoolManager : AbstractPoolManager , IPoolManager
             return;
         }
 
+       // Debug.Log($"Prefab_name for {prefab.name} pool_name   has reached maximum size ({prefabPool.ToString()}). Cannot add {count} objects.");
 
         for (int i = 0; i < objectsToAdd; i++)
         {
+            if (GetCreateCount(prefab) >= _maxSizePool) break;
+
             GameObject obj = CopyObject(prefab, parentTag, poolParent);
             obj.SetActive(false);
             prefabPool.Enqueue(obj);
+            Plus1Create(prefab);
+
+
+           // if (prefab.name.IndexOf("MFighter_m001_u") > -1)
+           // {
+            //    Debug.LogWarning("Test add 1 " + i + " size: " + GetCreateCount(prefab));
+           // }
+
         }
 
-        Debug.Log($"ObjectPoolManager->Added {objectsToAdd} objects to pool for {prefab.name}. Total count: {prefabPool.Count}/{_maxSizePool}");
+        Debug.Log($"ObjectPoolManager->Added {objectsToAdd} objects to pool for {prefab.name}. Total count: {prefabPool.Count}/{_maxSizePool} All Size: {poolDictionary[ObjectType.Armor].Count}");
     }
 
     public GameObject SpawnFromPool(ObjectType tag, GameObject specificPrefab = null)
@@ -102,16 +121,24 @@ public class ObjectPoolManager : AbstractPoolManager , IPoolManager
 
         if (objectPool.Count == 0)
         {
+            //Transform parentTag = GetParent(tag, pools);
             GameObject newObj = Instantiate(prefab, poolParent);
             newObj.SetActive(false);
             objectPool.Enqueue(newObj);
-            //Debug.Log($"ObjectPoolManager-> Created new {prefab.name} instance for pool {tag} (pool was empty)");
+            Plus1Create(prefab);
+            Debug.LogError($"ObjectPoolManager->SpawnFromPool: Critical bug. Object pooling has stopped working; all objects will now be destroyed by Unity and created via Instentian.");
+            return newObj;
         }
 
-  
+
+
         GameObject objectToSpawn = objectPool.Dequeue();
-        //string spawnMaterialInfo = GetMaterialInfo(objectToSpawn);
-        //Debug.Log($"ObjectPoolManager-> Spawned {objectToSpawn.name} from pool {tag}. Remaining objects: {objectPool.Count}. Material: {spawnMaterialInfo}");
+
+        //if (prefab.name.IndexOf("MFighter_m001_u") > -1)
+        //{
+        //    Debug.LogWarning("Test get 1 " + objectPool.Count);
+        //}
+
 
         return objectToSpawn;
     }
@@ -156,39 +183,26 @@ public class ObjectPoolManager : AbstractPoolManager , IPoolManager
 
         if (objectPool.Count >= maxSize)
         {
-            //Debug.Log($"Pool for {prefab.name} in {tag} has reached max size ({maxSize}). Destroying excess object.");
+            //if (prefab.name.IndexOf("MFighter_m001_u") > -1)
+            //{
+            //    Debug.LogWarning("Test return destroy 1 " + objectPool.Count);
+            //}
+            Debug.LogError($"ObjectPoolManager->HandlePoolReturn: Destroyed the object via Destroy Unity!");
             Destroy(objectToReturn);
         }
         else
         {
             objectPool.Enqueue(objectToReturn);
-            //Debug.Log($"Returned {objectToReturn.name} to pool {tag}. Current count: {objectPool.Count}/{maxSize}");
+
+           // if (prefab.name.IndexOf("MFighter_m001_u") > -1)
+           // {
+           //     Debug.LogWarning("Test return 1 " + objectPool.Count);
+           // }
+
         }
 
         return true;
     }
-
-
-
- 
-    private string GetMaterialInfo(GameObject obj)
-    {
-        if (obj == null) return "";
-
-        Renderer renderer = obj.GetComponent<Renderer>();
-        if (renderer == null) return " (No Renderer found)";
-
-        if (renderer.materials.Length == 0) return " (No materials)";
-
-        if (renderer.materials.Length == 1)
-        {
-            return $" (Material: {renderer.material.name})";
-        }
-
-        string materialsList = string.Join(", ", renderer.materials.Select(m => m.name));
-        return $" (Materials: {materialsList})";
-    }
-
 
 }
 

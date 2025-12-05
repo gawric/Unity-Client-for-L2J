@@ -69,7 +69,7 @@ public class ArmorDresserModel : IDresserModel
         }
     }
 
-    public Armor GetData(ArmorPart part)
+    public virtual Armor GetData(ArmorPart part)
     {
         return _armorData.TryGetValue(part, out var data) ? data.armor : null;
     }

@@ -122,7 +122,7 @@ AnimatorState:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: wait_pole
-  m_Speed: 0.3
+  m_Speed: 0.1
   m_CycleOffset: 0
   m_Transitions: []
   m_StateMachineBehaviours:
@@ -651,7 +651,7 @@ AnimatorState:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: wait_bow
-  m_Speed: 0.3
+  m_Speed: 0.1
   m_CycleOffset: 0
   m_Transitions: []
   m_StateMachineBehaviours:
@@ -859,9 +859,9 @@ AnimatorState:
   m_MirrorParameterActive: 0
   m_CycleOffsetParameterActive: 0
   m_TimeParameterActive: 0
-  m_Motion: {fileID: 7400000, guid: 9847aecb47056e040ae8d56c5d2b1437, type: 2}
+  m_Motion: {fileID: 7400000, guid: 80eb07d93cccac0439a474920f9f1114, type: 2}
   m_Tag: 
-  m_SpeedParameter: speed
+  m_SpeedParameter: run_speed
   m_MirrorParameter: 
   m_CycleOffsetParameter: 
   m_TimeParameter: 
@@ -1292,7 +1292,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0405c13ddaf88874bbff9c836f2fae22, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  parameterName: 
+  parameterName: walk_hand
 --- !u!1101 &-3278478516532948859
 AnimatorStateTransition:
   m_ObjectHideFlags: 1
@@ -1535,7 +1535,7 @@ AnimatorState:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: wait_hand
-  m_Speed: 1
+  m_Speed: 0.1
   m_CycleOffset: 0
   m_Transitions: []
   m_StateMachineBehaviours:
@@ -1737,7 +1737,7 @@ AnimatorState:
   m_TimeParameterActive: 0
   m_Motion: {fileID: 7400000, guid: 0f79c550a29381a4084db99c5381c5be, type: 2}
   m_Tag: 
-  m_SpeedParameter: speed
+  m_SpeedParameter: run_speed
   m_MirrorParameter: 
   m_CycleOffsetParameter: 
   m_TimeParameter: 
@@ -1890,7 +1890,7 @@ AnimatorState:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: wait_2HS
-  m_Speed: 0.3
+  m_Speed: 0.1
   m_CycleOffset: 0
   m_Transitions: []
   m_StateMachineBehaviours:
@@ -2008,7 +2008,7 @@ AnimatorState:
   m_TimeParameterActive: 0
   m_Motion: {fileID: 7400000, guid: 469f9d1f29ef02941a7b81a6cd119aeb, type: 2}
   m_Tag: 
-  m_SpeedParameter: speed
+  m_SpeedParameter: run_speed
   m_MirrorParameter: 
   m_CycleOffsetParameter: 
   m_TimeParameter: 
@@ -3348,12 +3348,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   parameterName: jatk03_1HS
-  _animationCurve:
-    serializedVersion: 2
-    m_Curve: []
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
 --- !u!1102 &1682319737004145859
 AnimatorState:
   serializedVersion: 6
@@ -3521,7 +3515,7 @@ AnimatorState:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: wait_dual
-  m_Speed: 0.3
+  m_Speed: 0.1
   m_CycleOffset: 0
   m_Transitions: []
   m_StateMachineBehaviours:
@@ -3932,7 +3926,7 @@ AnimatorState:
   m_TimeParameterActive: 0
   m_Motion: {fileID: 7400000, guid: 9847aecb47056e040ae8d56c5d2b1437, type: 2}
   m_Tag: 
-  m_SpeedParameter: speed
+  m_SpeedParameter: run_speed
   m_MirrorParameter: 
   m_CycleOffsetParameter: 
   m_TimeParameter: 
@@ -4279,12 +4273,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   parameterName: jatk02_1HS
-  _animationCurve:
-    serializedVersion: 2
-    m_Curve: []
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
 --- !u!1101 &5090265770684097590
 AnimatorStateTransition:
   m_ObjectHideFlags: 1
@@ -4976,9 +4964,9 @@ AnimatorState:
   m_MirrorParameterActive: 0
   m_CycleOffsetParameterActive: 0
   m_TimeParameterActive: 0
-  m_Motion: {fileID: 7400000, guid: 9847aecb47056e040ae8d56c5d2b1437, type: 2}
+  m_Motion: {fileID: 7400000, guid: 2c763227965a47f4796f65922ff7c9d4, type: 2}
   m_Tag: 
-  m_SpeedParameter: speed
+  m_SpeedParameter: run_speed
   m_MirrorParameter: 
   m_CycleOffsetParameter: 
   m_TimeParameter: 
@@ -5203,30 +5191,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   parameterName: jatk01_1HS
-  _animationCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 0
-      inSlope: 3124.9998
-      outSlope: 3124.9998
-      tangentMode: 34
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0.33333334
-    - serializedVersion: 3
-      time: 0.6
-      value: 1875
-      inSlope: 3124.9998
-      outSlope: 3124.9998
-      tangentMode: 34
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
 --- !u!1101 &8217562025343072822
 AnimatorStateTransition:
   m_ObjectHideFlags: 1
@@ -5287,7 +5251,7 @@ AnimatorState:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: wait_1HS
-  m_Speed: 1
+  m_Speed: 0.1
   m_CycleOffset: 0
   m_Transitions: []
   m_StateMachineBehaviours:
