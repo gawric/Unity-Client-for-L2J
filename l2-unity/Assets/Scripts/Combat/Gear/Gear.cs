@@ -117,23 +117,23 @@ public class Gear : AbstractMeshManager
 
 
             ActivateGameObject(go, type, leftSlot, refreshAllBone);
-        }
 
-        if(type != _lastRightHandType & _leftHandShield == null 
-            | _rightHandType == WeaponType.pole
-            | _rightHandType == WeaponType.staff
-            | _rightHandType == WeaponType.bigword
-            | _leftHandType == WeaponType.bow)
-        {
-            OnEquipAnimationRefresh?.Invoke(-1, weapon);
-        }
-        else
-        {
-            if (_leftHandWeapon == null | _leftHandShield == null) OnEquipAnimationRefresh?.Invoke(-1, weapon);
-        }
 
-        _lastRightHandType = type;
+            if (type != _lastRightHandType & _leftHandShield == null
+                | _rightHandType == WeaponType.pole
+                | _rightHandType == WeaponType.staff
+                | _rightHandType == WeaponType.bigword
+                | _leftHandType == WeaponType.bow)
+            {
+                OnEquipAnimationRefresh?.Invoke(-1, weapon);
+            }
+            else
+            {
+                if (_leftHandWeapon == null | _leftHandShield == null) OnEquipAnimationRefresh?.Invoke(-1, weapon);
+            }
 
+            _lastRightHandType = type;
+        }
     }
 
     public void EquipLeftAndRightWeapon(int weaponId)
