@@ -112,6 +112,11 @@ public class L2GameUI : L2UI
             L2ToolTip.Instance.AddWindow(_tooltipVisualContainer);
             L2ToolTip.Instance.HideWindow();
         }
+        if (L2TransparentTooltip.Instance != null)
+        {
+            L2TransparentTooltip.Instance.AddWindow(_tooltipVisualContainer);
+            L2TransparentTooltip.Instance.HideWindow();
+        }
         if (L2SlotManager.Instance != null)
         {
             L2SlotManager.Instance.AddWindow(_slotVisualContainer);

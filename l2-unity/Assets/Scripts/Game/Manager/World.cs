@@ -25,6 +25,7 @@ public class World : MonoBehaviour {
     private Dictionary<int, Entity> _players = new Dictionary<int, Entity>();
     private Dictionary<int, Entity> _npcs = new Dictionary<int, Entity>();
     private Dictionary<int, Entity> _objects = new Dictionary<int, Entity>();
+    private Dictionary<int, Entity> _droppedItems = new Dictionary<int, Entity>();
 
 
 
@@ -80,6 +81,7 @@ public class World : MonoBehaviour {
         _objects.Clear();
         _players.Clear();
         _npcs.Clear();
+        _droppedItems.Clear();
     }
 
     public void RemoveObject(int id) {
@@ -88,6 +90,7 @@ public class World : MonoBehaviour {
             _players.Remove(id);
             _npcs.Remove(id);
             _objects.Remove(id);
+            _droppedItems.Remove(id);
 
             Destroy(transform.gameObject);
             
@@ -170,21 +173,29 @@ public class World : MonoBehaviour {
 
     public void DropItemOnTheGround(int objectId, int itemId, Vector3 position, int count)
     {
-        var itemModel = ModelTable.Instance.GetWeapon("LineageWeapons.small_sword_m00_wp");
-        itemModel.transform.localScale = new Vector3(100,100,100);
-        itemModel.transform.rotation = Quaternion.Euler(90f, 90f, 0f);
-        position.y = GetGroundHeight(position);
-        GameObject itemGo = Instantiate(itemModel, position, Quaternion.identity);
-        itemGo.transform.name = "sword1";
+        try
+        {
+            var itemModel = ModelTable.Instance.GetWeapon("LineageWeapons.small_sword_m00_wp");
+            itemModel.transform.localScale = new Vector3(100, 100, 100);
+            itemModel.transform.rotation = Quaternion.Euler(90f, 90f, 0f);
+            position.y = GetGroundHeight(position);
+            GameObject itemGo = Instantiate(itemModel, position, Quaternion.identity);
+            itemGo.transform.name = "sword1";
 
+            itemGo.transform.SetParent(_droppedItemsContainer.transform);
 
-        var tooltip = itemGo.AddComponent<ItemTooltip>();
-        tooltip.itemName = "Малый меч";
+            var adapter = itemGo.AddComponent<WorldItemManager>();
+            adapter.SetTooltipText("Малый меч\nУрон: 15-20");
 
-        itemGo.SetActive(true);
-        //GameObject go = ModelTable.Instance.GetNpc("LineageMonsters.goblin_m00");
+            itemGo.SetActive(true);
+            //GameObject go = ModelTable.Instance.GetNpc("LineageMonsters.goblin_m00");
 
-        //GameObject npcGo = Instantiate(go, position, Quaternion.identity);
+            //GameObject npcGo = Instantiate(go, position, Quaternion.identity);
+        }
+        catch (Exception e)
+        {
+
+        }
     }
 
     public void SpawnNpcInterlude(NetworkIdentityInterlude identity, NpcStatusInterlude status, Stats stats)

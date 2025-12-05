@@ -1,60 +1,110 @@
-﻿//using UnityEngine;
-//using static UnityEditor.ShaderGraph.Internal.KeywordDependentCollection;
+﻿using UnityEngine;
+using UnityEngine.UIElements;
 
-//public class WorldItemManager : MonoBehaviour
-//{
-//    private static WorldItemManager _instance;
+public class WorldItemManager : MonoBehaviour
+{
 
-//    public static WorldItemManager Instance {
-//        get
-//        {
-//            if (_instance == null)
-//            {
-//                _instance = new WorldItemManager();
-//            }
+    private static WorldItemManager _instance;
 
-//            return _instance;
-//        }
-//    }
+    public static WorldItemManager Instance { get { return _instance; } }
+    [SerializeField] private UIDocument uiDocument;
+    [SerializeField] private string tooltipText = "thing";
+    [SerializeField] private long itemsCount = 0;
+    [SerializeField] private Vector2 uiSize = new Vector2(100, 100); //todo: в идеале передать сюда размеры модели и ее кординаты
 
-//    [SerializeField] private Transform worldItemsRoot; // пустой объект в сцене, куда класть дропы
+    private VisualElement uiProxy;
+    private TooltipManipulator manipulator;
 
-//    //private readonly Dictionary<int, WorldItem> _items = new();
+    void Start()
+    {
+        CreateUIProxy();
+    }
 
-//    private void Awake()
-//    {
-//        //Instance = this;
-//    }
+    void CreateUIProxy()
+    {
+        if (uiDocument == null)
+            uiDocument = FindObjectOfType<UIDocument>();
 
-//    public void SpawnItem(int objectId, int itemId, Vector3 position, int count)
-//    {
-//        var itemModel = ModelTable.Instance.GetWeapon("LineageWeapons.long_sword_m00_wp");
+        var root = uiDocument.rootVisualElement;
 
-//        GameObject itemGo = Instantiate(itemModel, position, Quaternion.identity);
-        
+        uiProxy = new VisualElement
+        {
+            name = $"Proxy_{gameObject.name}",
+            style =
+            {
+                position = Position.Absolute,
+                width = uiSize.x,
+                height = uiSize.y,
+                backgroundColor = new Color(0, 0, 0, 0)
+            }
+        };
 
-//        //var itemDef = ItemDatabase.Instance.Get(itemId); // или как у тебя устроена база
-//        //var prefab = itemDef.WorldPrefab;
+        root.Add(uiProxy);
 
-//        //if (prefab == null)
-//        //{
-//        //    Debug.LogWarning($"No world prefab for itemId {itemId}, spawning cube instead");
-//        //    prefab = DefaultCubePrefab; // на первое время можно просто куб
-//        //}
+        manipulator = new TooltipManipulator(uiProxy, tooltipText);
+        manipulator.target = uiProxy;
 
-//        //var go = Instantiate(prefab, position, Quaternion.identity, worldItemsRoot);
-//        //var worldItem = go.GetComponent<WorldItem>();
-//        //worldItem.Init(objectId, itemId, count);
+        // Обновляем позицию прокси
+        UpdateProxyPosition();
+    }
 
-//        //_items[objectId] = worldItem;
-//    }
+    void Update()
+    {
+        if (uiProxy != null)
+        {
+            UpdateProxyPosition();
+        }
+    }
 
-//    public void RemoveItem(int objectId)
-//    {
-//        //if (_items.TryGetValue(objectId, out var worldItem))
-//        //{
-//        //    Destroy(worldItem.gameObject);
-//        //    _items.Remove(objectId);
-//        //}
-//    }
-//}
+    void UpdateProxyPosition()
+    {
+        // Конвертируем мировую позицию в экранные координаты
+        Vector3 screenPos = Camera.main.WorldToScreenPoint(transform.position);
+
+        // UI Toolkit использует Y-ось сверху вниз
+        screenPos.y = Screen.height - screenPos.y;
+
+        // Устанавливаем позицию с учетом центра
+        uiProxy.style.left = screenPos.x - uiSize.x / 2;
+        uiProxy.style.top = screenPos.y - uiSize.y / 2;
+
+        // Проверяем видимость объекта
+        Vector3 viewportPos = Camera.main.WorldToViewportPoint(transform.position);
+        bool isVisible = viewportPos.x >= 0 && viewportPos.x <= 1 &&
+                        viewportPos.y >= 0 && viewportPos.y <= 1 &&
+                        viewportPos.z > 0;
+
+        uiProxy.style.display = isVisible ? DisplayStyle.Flex : DisplayStyle.None;
+    }
+
+    void OnDestroy()
+    {
+        if (uiProxy != null && uiProxy.panel != null)
+        {
+            uiProxy.RemoveFromHierarchy();
+        }
+        manipulator?.Clear();
+    }
+
+    public void SetTooltipText(string text)
+    {
+        tooltipText = text;
+        if (manipulator != null)
+        {
+            manipulator.SetText(text);
+        }
+    }
+    public void SetItemsCount(long count)
+    {
+        itemsCount = count;
+        if (manipulator != null)
+        {
+            //manipulator.SetText(text);
+        }
+    }
+
+    public void SetSize(Vector3 vec) //todo: сделать
+    {
+
+    }
+}
