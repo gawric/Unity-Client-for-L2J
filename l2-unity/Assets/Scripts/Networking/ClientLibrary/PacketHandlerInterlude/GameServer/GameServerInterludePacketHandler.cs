@@ -1296,7 +1296,7 @@ public class GameServerInterludePacketHandler : ServerPacketHandler
 
             EventProcessor.Instance.QueueEvent(() =>
             {
-                //WorldItemManager.Instance.RemoveItem(packet.);
+                //World.Instance.PickupItemFromTheGround();
             });
         }
     }
@@ -1309,7 +1309,7 @@ public class GameServerInterludePacketHandler : ServerPacketHandler
             EventProcessor.Instance.QueueEvent(() =>
             {
                 //todo: у предмета должно быть  stackable и тогда нужен count
-                World.Instance.SpawnItem(packet.ObjectId, packet.ItemId, packet.Coordinats, 0); 
+                World.Instance.DropItemOnTheGround(packet.ObjectId, packet.ItemId, packet.Coordinats, 0); 
             });
         }
     }

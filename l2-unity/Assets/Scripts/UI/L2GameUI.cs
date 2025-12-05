@@ -244,6 +244,12 @@ public class L2GameUI : L2UI
             TradeWindow.Instance.AddWindow(_rootVisualContainer);
             TradeWindow.Instance.HideWindow();
         }
+
+        //if (TooltipUI.Instance != null)
+        //{
+        //    TooltipUI.Instance.AddWindow(_rootVisualContainer);
+        //    TooltipUI.Instance.HideWindow();
+        //}
     }
 
     public void EnableMouse()

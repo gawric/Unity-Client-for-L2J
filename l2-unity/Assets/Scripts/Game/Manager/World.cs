@@ -18,12 +18,14 @@ public class World : MonoBehaviour {
     [SerializeField] private GameObject _monstersContainer;
     [SerializeField] private GameObject _npcsContainer;
     [SerializeField] private GameObject _usersContainer;
+    [SerializeField] private GameObject _droppedItemsContainer;
 
     private EventProcessor _eventProcessor;
 
     private Dictionary<int, Entity> _players = new Dictionary<int, Entity>();
     private Dictionary<int, Entity> _npcs = new Dictionary<int, Entity>();
     private Dictionary<int, Entity> _objects = new Dictionary<int, Entity>();
+
 
 
     [Header("Layer Masks")]
@@ -56,6 +58,7 @@ public class World : MonoBehaviour {
         _npcsContainer = GameObject.Find("Npcs");
         _monstersContainer = GameObject.Find("Monsters");
         _usersContainer = GameObject.Find("Users");
+        _droppedItemsContainer = GameObject.Find("DroppedItems");
     }
 
     void OnDestroy() {
@@ -160,16 +163,25 @@ public class World : MonoBehaviour {
 
     bool isSinglSpawn = false;
 
-    public GameObject testPrefab;
+    public void PickupItemFromTheGround(int objectId, int playerId, Vector3 position)
+    {
 
-    public void SpawnItem(int objectId, int itemId, Vector3 position, int count)
+    }
+
+    public void DropItemOnTheGround(int objectId, int itemId, Vector3 position, int count)
     {
         var itemModel = ModelTable.Instance.GetWeapon("LineageWeapons.small_sword_m00_wp");
+        itemModel.transform.localScale = new Vector3(100,100,100);
+        itemModel.transform.rotation = Quaternion.Euler(90f, 90f, 0f);
         position.y = GetGroundHeight(position);
         GameObject itemGo = Instantiate(itemModel, position, Quaternion.identity);
         itemGo.transform.name = "sword1";
-        itemGo.SetActive(true);
 
+
+        var tooltip = itemGo.AddComponent<ItemTooltip>();
+        tooltip.itemName = "Малый меч";
+
+        itemGo.SetActive(true);
         //GameObject go = ModelTable.Instance.GetNpc("LineageMonsters.goblin_m00");
 
         //GameObject npcGo = Instantiate(go, position, Quaternion.identity);

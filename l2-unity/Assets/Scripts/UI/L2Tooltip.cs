@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -76,16 +76,57 @@ public class L2ToolTip : L2PopupWindow
         }
     }
 
-    public void HideWindow(VisualElement exitElement)
+    public void HideWindow(VisualElement exitElement = null)
     {
-        if (exitElement == _tooltipTarget)
+        if (exitElement == null || exitElement == _tooltipTarget)
         {
             base.HideWindow();
 
             if (_updateStyleCoroutine != null)
             {
                 StopCoroutine(_updateStyleCoroutine);
+                _updateStyleCoroutine = null;
             }
+
+            _tooltipTarget = null;
+        }
+    }
+
+    public void UpdateTooltipWorld(string title, Vector3 worldPos, Camera cam)
+    {
+        _windowEle.style.left = -1000;
+        _windowEle.style.opacity = 0;
+
+        _tooltipTarget = null;
+
+        ShowWindow();
+
+        if (_updateStyleCoroutine != null)
+        {
+            StopCoroutine(_updateStyleCoroutine);
+        }
+
+        _updateStyleCoroutine = StartCoroutine(UpdateToolTipWorldCoroutine(title, worldPos, cam));
+    }
+
+    private IEnumerator UpdateToolTipWorldCoroutine(string title, Vector3 worldPos, Camera cam)
+    {
+        while (true)
+        {
+            _title.text = title;
+
+            yield return new WaitForEndOfFrame();
+
+            Vector3 screenPos = cam.WorldToScreenPoint(worldPos);
+
+            float panelHeight = _windowEle.panel.visualTree.worldBound.height;
+            float x = screenPos.x;
+            float y = panelHeight - screenPos.y;
+
+            _windowEle.style.left = x;
+            _windowEle.style.top = y - _windowEle.resolvedStyle.height;
+
+            _windowEle.style.opacity = 1;
         }
     }
 }
