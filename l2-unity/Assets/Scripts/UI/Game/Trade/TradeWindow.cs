@@ -9,7 +9,19 @@ using static L2Slot;
 public class TradeWindow : L2PopupWindow
 {
     private static TradeWindow _instance;
+
+    private VisualElement _contentInventory;
+    private VisualElement _contentMyOffer;
+    private VisualElement _contentOtherPlayersOffer;
+
+
+    private ExchangeSlot[] _inventorySlotsInventory;
+    private ExchangeSlot[] _inventorySlotsMyOffer;
+    private ExchangeSlot[] _inventorySlotsOtherPlayersOffer;
+
     private VisualTreeAsset _inventorySlotTemplate;
+
+    public VisualTreeAsset InventorySlotTemplate { get { return _inventorySlotTemplate; } }
 
     private Label _playerNameLabel;
     private Button _okButton;
@@ -44,7 +56,28 @@ public class TradeWindow : L2PopupWindow
 
     public void AddData(TradeStart data)
     {
-        _playerId = data.PlayerId;
+        try
+        {
+            _playerId = data.PlayerId;
+
+            var s = PlayerInventory.Instance.GetPlayerInvetoryToList();
+
+            for (int i = 0; i < s.Count; i++)
+            {
+                ItemInstance item = s[i];
+                item.SetSlot(i);
+                //Debug.Log("AssignItem Set Inventory>>>> " + item.ItemId + " ObjectId " + item.ObjectId + " Add Slot " + item.Slot);
+                _inventorySlotsInventory[i].AssignItem(item);
+            }
+        }
+        catch (Exception e)
+        { 
+        }
+    }
+
+    public void OtherAddItem(TradeOtherAdd item)
+    {
+
     }
 
     private void OnDestroy()
@@ -65,6 +98,10 @@ public class TradeWindow : L2PopupWindow
         var dragArea = GetElementByClass("drag-area");
         DragManipulator drag = new DragManipulator(dragArea, _windowEle);
         dragArea.AddManipulator(drag);
+
+        _contentInventory = GetElementByClass("content-inventory");
+        _contentMyOffer = GetElementByClass("content-offer");
+        _contentOtherPlayersOffer = GetElementByClass("content-other-offer");
 
         RegisterCloseWindowEvent("btn-close-frame");
         RegisterClickWindowEvent(_windowEle, dragArea);
@@ -103,6 +140,17 @@ public class TradeWindow : L2PopupWindow
         });
     }
 
+    public void EventDoubleClick(VisualElement slotElement)
+    {
+        string[] ids = ToolTipsUtils.GetUniquePosition(slotElement);
+        int position = Int32.Parse(ids[0]);
+        int type = Int32.Parse(ids[1]);
+        SlotType slot = ToolTipsUtils.DetectedClickPanel(type);
+        //MoveSellElsePriceType(slot, _listBuy, position);
+        //RefreshToolTips(slotElement, slot);
+    }
+
+
     protected override IEnumerator BuildWindow(VisualElement root)
     {
         InitWindow(root);
@@ -116,15 +164,37 @@ public class TradeWindow : L2PopupWindow
     {
         _exchangeSlots.Clear();
 
-        for (int i = 1; i <= 8; i++)
+        _inventorySlotsInventory = CreateEmptyBuy(24, _contentInventory, _inventorySlotTemplate);
+        _inventorySlotsMyOffer = CreateEmptyBuy(24, _contentMyOffer, _inventorySlotTemplate);
+        _inventorySlotsOtherPlayersOffer = CreateEmptyBuy(24, _contentOtherPlayersOffer, _inventorySlotTemplate);
+        //_inventorySlotsBuy = _shopCellCreator.CreateEmptyBuy(_tabBuy, _defaultCount, _contentBuy, GetInventorySlotTemplate());
+
+        //for (int i = 1; i <= 8; i++)
+        //{
+        //    var slotElement = GetElementById($"exchangeSlot{i}");
+        //    if (slotElement != null)
+        //    {
+        //        var slot = CreateExchangeSlot(i - 1, slotElement);
+        //        _exchangeSlots.Add(slot);
+        //    }
+        //}
+    }
+
+    public ExchangeSlot[] CreateEmptyBuy(int defaultCount, VisualElement contentBuy, VisualTreeAsset InventorySlotTemplate) //InventoryTab tabBuy,
+    {
+        var inventorySlotsBuy = new ExchangeSlot[defaultCount];
+        for (int i = 0; i < inventorySlotsBuy.Count(); i++)
         {
-            var slotElement = GetElementById($"exchangeSlot{i}");
-            if (slotElement != null)
-            {
-                var slot = CreateExchangeSlot(i - 1, slotElement);
-                _exchangeSlots.Add(slot);
-            }
+            VisualElement slotElement = InventorySlotTemplate.Instantiate()[0];
+            contentBuy.Add(slotElement);
+
+            ExchangeSlot slot = new ExchangeSlot(i, slotElement, SlotType.PriceBuy);
+            inventorySlotsBuy[i] = slot;
         }
+
+        //tabBuy.UpdateInventorySlots(inventorySlotsBuy);
+
+        return inventorySlotsBuy;
     }
 
     private ExchangeSlot CreateExchangeSlot(int index, VisualElement slotElement)

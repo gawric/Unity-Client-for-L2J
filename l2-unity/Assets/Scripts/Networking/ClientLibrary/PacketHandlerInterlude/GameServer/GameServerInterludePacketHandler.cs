@@ -1221,12 +1221,12 @@ public class GameServerInterludePacketHandler : ServerPacketHandler
     {
         if (!InitPacketsLoadWord.getInstance().IsInit)
         {
-            //TradeStart packet = new TradeStart(data);
+            TradeOtherAdd packet = new TradeOtherAdd(data);
 
             EventProcessor.Instance.QueueEvent(() =>
             {
-                //TradeWindow.Instance.AddData(packet);
-                //TradeWindow.Instance.HideWindow();
+                TradeWindow.Instance.OtherAddItem(packet);
+                TradeWindow.Instance.HideWindow();
             });
         }
     }

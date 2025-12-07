@@ -12,6 +12,8 @@ public class WorldItemManager : MonoBehaviour
     [SerializeField] private long itemsCount = 0;
     [SerializeField] private Vector2 uiSize = new Vector2(100, 100); //todo: в идеале передать сюда размеры модели и ее кординаты
 
+    //todo: думается даже лучше чтоб он сам все спавнил и грузил модели? 
+
     private VisualElement uiProxy;
     private TooltipManipulator manipulator;
 

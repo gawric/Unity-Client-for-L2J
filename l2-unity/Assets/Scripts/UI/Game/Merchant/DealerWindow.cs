@@ -153,7 +153,7 @@ public class DealerWindow : L2PopupWindow
         int position = Int32.Parse(ids[0]);
         int type = Int32.Parse(ids[1]);
         SlotType slot = ToolTipsUtils.DetectedClickPanel(type);
-        Move—ellElsePriceType(slot , _listBuy , position);
+        MoveSellElsePriceType(slot , _listBuy , position);
         RefreshToolTips(slotElement , slot);
     }
 
@@ -172,7 +172,7 @@ public class DealerWindow : L2PopupWindow
     private int _position;
     private SlotType _type;
   
-    private void Move—ellElsePriceType(SlotType type , List<Product> listServer, int position)
+    private void MoveSellElsePriceType(SlotType type , List<Product> listServer, int position)
     {
 
         if (type == SlotType.PriceBuy)
@@ -251,10 +251,10 @@ public class DealerWindow : L2PopupWindow
     {
          _dealerWindow.RefreshOpacity(1);
         Debug.Log("Move value 1 " + value);
-         _dealerWindow.Move—ellElseQuantitySelected(_type, listServer, _position, int.Parse(value));
+         _dealerWindow.MoveSellElseQuantitySelected(_type, listServer, _position, int.Parse(value));
     }
 
-    public void Move—ellElseQuantitySelected(SlotType type, List<Product> listServer, int position , int selectCount)
+    public void MoveSellElseQuantitySelected(SlotType type, List<Product> listServer, int position , int selectCount)
     {
 
         if (type == SlotType.PriceBuy)
@@ -451,11 +451,11 @@ public class DealerWindow : L2PopupWindow
 
                 case ProductType.WEAR:
                     SystemMessageWindow.Instance.OnButtonOk += OkWear;
-                    SystemMessageWindow.Instance.OnButtonClosed += On—ancel;
+                    SystemMessageWindow.Instance.OnButtonClosed += OnSancel;
                     SystemMessageWindow.Instance.ShowWindowDialogYesOrNot("The try-on state lasts only 5 seconds. When the character's state changes, it can be canceled.");
                     break;
                 case ProductType.BUY_SEED:
-                    Debug.LogWarning("ÕÂ Â‡ÎËÁÓ‚‡Ì Ô‡ÍÂÚ ÓÚÔ‡‚Í‡ BUY_SEED ");
+                    Debug.LogWarning("SS SSSSSSSSSS SSSSS SSSSSSSS BUY_SEED ");
                     break;
             }
         }
@@ -481,7 +481,7 @@ public class DealerWindow : L2PopupWindow
                     SendServer(packetSendable);
                     break;
                 case ProductType.BUY_SEED:
-                    Debug.LogWarning("ÕÂ Â‡ÎËÁÓ‚‡Ì Ô‡ÍÂÚ ÓÚÔ‡‚Í‡ BUY_SEED ");
+                    Debug.LogWarning("SS SSSSSSSSSS SSSSS SSSSSSSS BUY_SEED ");
                     break;
             }
         }
@@ -500,7 +500,7 @@ public class DealerWindow : L2PopupWindow
         CancelEvent();
     }
 
-    private void On—ancel()
+    private void OnSancel()
     {
         _listSell.Clear();
         _listId = 0;
@@ -510,7 +510,7 @@ public class DealerWindow : L2PopupWindow
     private void CancelEvent()
     {
         SystemMessageWindow.Instance.OnButtonOk -= OkWear;
-        SystemMessageWindow.Instance.OnButtonClosed -= On—ancel;
+        SystemMessageWindow.Instance.OnButtonClosed -= OnSancel;
     }
 
     protected override IEnumerator BuildWindow(VisualElement root)

@@ -78,6 +78,9 @@ public class L2ClickableSlot : L2Slot
                 case SlotType.PriceSell:
                     DealerWindow.Instance.EventDoubleClick(slotElement);
                     break;
+                case SlotType.Trade:
+                    TradeWindow.Instance.EventDoubleClick(slotElement);
+                    break;
             }
         }
         clickTime = Time.time;
