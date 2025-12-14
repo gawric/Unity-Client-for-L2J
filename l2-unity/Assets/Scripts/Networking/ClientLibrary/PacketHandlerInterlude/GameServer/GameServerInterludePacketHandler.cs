@@ -1226,7 +1226,6 @@ public class GameServerInterludePacketHandler : ServerPacketHandler
             EventProcessor.Instance.QueueEvent(() =>
             {
                 TradeWindow.Instance.OtherAddItem(packet);
-                TradeWindow.Instance.HideWindow();
             });
         }
     }
@@ -1240,7 +1239,6 @@ public class GameServerInterludePacketHandler : ServerPacketHandler
             EventProcessor.Instance.QueueEvent(() =>
             {
                 //TradeWindow.Instance.AddData(packet);
-                //TradeWindow.Instance.HideWindow();
             });
         }
     }

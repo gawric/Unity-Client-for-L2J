@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
 using static L2Slot;
@@ -77,7 +78,17 @@ public class TradeWindow : L2PopupWindow
 
     public void OtherAddItem(TradeOtherAdd item)
     {
+        try
+        {
+            ItemInstance i = new(item.Item.ObjectId, item.BaseItem.Id, ItemLocation.Trade, 0, (int)item.Item.Count, (ItemCategory)item.Item.Type1, false, (ItemSlot)item.Item.BodyPart, item.Item.Enchant, 0);
+            var itm = item.BaseItem;
+            i.SetSlot(1);
+            _inventorySlotsOtherPlayersOffer.FirstOrDefault(x => x.IsEmpty).AssignItem(i);
+        }
+        catch(Exception e)
+        {
 
+        }
     }
 
     private void OnDestroy()
@@ -188,7 +199,7 @@ public class TradeWindow : L2PopupWindow
             VisualElement slotElement = InventorySlotTemplate.Instantiate()[0];
             contentBuy.Add(slotElement);
 
-            ExchangeSlot slot = new ExchangeSlot(i, slotElement, SlotType.PriceBuy);
+            ExchangeSlot slot = new ExchangeSlot(i, slotElement, SlotType.Trade);
             inventorySlotsBuy[i] = slot;
         }
 
