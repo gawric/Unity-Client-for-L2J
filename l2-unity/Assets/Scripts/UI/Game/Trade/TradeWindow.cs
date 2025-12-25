@@ -281,7 +281,6 @@ public class TradeWindow : L2PopupWindow
     private void OnOkClicked(ClickEvent evt)
     {
         SendOkResponse();
-        HideWindow();
     }
 
     private void OnCancelClicked(ClickEvent evt)

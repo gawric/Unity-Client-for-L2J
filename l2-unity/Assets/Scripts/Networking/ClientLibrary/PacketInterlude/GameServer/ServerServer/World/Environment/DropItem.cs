@@ -3,6 +3,9 @@
 public class DropItem : ServerPacket
 {
     private int _objectId;
+    /// <summary>
+    /// playerid
+    /// </summary>
     public int ObjectId { get => _objectId; }
 
     //private ItemInstance _item;
@@ -15,6 +18,12 @@ public class DropItem : ServerPacket
 
     private int _displayId { get; set; }
     public int DisplayId { get => _displayId; }
+
+    private int _count { get; set; }
+
+    public int Count { get => _count; }
+
+    public bool Stackable { get; private set; }
 
     public DropItem(byte[] d) : base(d)
     {
@@ -34,7 +43,9 @@ public class DropItem : ServerPacket
         var vector = new Vector3(x, y, z);
         Coordinats = VectorUtils.ConvertPosToUnity(vector);
         var isStackable = ReadI();
+        Stackable = isStackable != 0;
         var count = ReadI();
+        _count = count;
         var unknown = ReadI();
     }
 }

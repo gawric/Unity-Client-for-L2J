@@ -1,10 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Security.Principal;
+using System.Text;
 using System.Threading.Tasks;
 
 using UnityEngine;
 using UnityEngine.UIElements.Experimental;
+using static UnityEditor.Progress;
 
 
 
@@ -25,7 +27,7 @@ public class World : MonoBehaviour {
     private Dictionary<int, Entity> _players = new Dictionary<int, Entity>();
     private Dictionary<int, Entity> _npcs = new Dictionary<int, Entity>();
     private Dictionary<int, Entity> _objects = new Dictionary<int, Entity>();
-    private Dictionary<int, Entity> _droppedItems = new Dictionary<int, Entity>();
+    private Dictionary<int, GameObject> _droppedItems = new Dictionary<int, GameObject>();
 
     private Dictionary<int , MonsterStateMachine> _msObjects = new Dictionary<int, MonsterStateMachine>();
 
@@ -169,29 +171,53 @@ public class World : MonoBehaviour {
 
     public void PickupItemFromTheGround(int objectId, int playerId, Vector3 position)
     {
+        try
+        {
+            var res = _droppedItems.TryGetValue(objectId, out var obj);
+            if(res)
+            {
+                Destroy(obj);
+                obj.SetActive(false);
+            }
+        }
+        catch (Exception e)
+        { 
 
+        }
     }
 
-    public void DropItemOnTheGround(int objectId, int itemId, Vector3 position, int count)
+    public void DropItemOnTheGround(int objectId, int itemId, int displayId, Vector3 position, int count, bool stackable = false)
     {
         try
         {
-            var itemModel = ModelTable.Instance.GetWeapon("LineageWeapons.small_sword_m00_wp");
+            ItemInstance i = new(itemId, displayId, ItemLocation.Void, 0, count, ItemCategory.Item, false, ItemSlot.none, 999, 0);
+
+            var itemModel = ModelTable.Instance.GetWeapon("LineageWeapons.small_sword_m00_wp"); //todo: replase by items model
             itemModel.transform.localScale = new Vector3(100, 100, 100);
             itemModel.transform.rotation = Quaternion.Euler(90f, 90f, 0f);
             position.y = GetGroundHeight(position);
             GameObject itemGo = Instantiate(itemModel, position, Quaternion.identity);
-            itemGo.transform.name = "sword1";
+            itemGo.transform.name = i.GetName();
 
             itemGo.transform.SetParent(_droppedItemsContainer.transform);
 
+            
+
             var adapter = itemGo.AddComponent<WorldItemManager>();
-            adapter.SetTooltipText("Малый меч\nУрон: 15-20");
+            StringBuilder sb = new StringBuilder();
+            sb.Append(i.GetName());
+            if(stackable)
+            { 
+                sb.Append("(");
+                sb.Append(count);
+                sb.Append(")");
+            }
+            adapter.SetTooltipText(sb.ToString());
 
             itemGo.SetActive(true);
-            //GameObject go = ModelTable.Instance.GetNpc("LineageMonsters.goblin_m00");
 
-            //GameObject npcGo = Instantiate(go, position, Quaternion.identity);
+            _droppedItems.Add(itemId, itemGo);
+
         }
         catch (Exception e)
         {

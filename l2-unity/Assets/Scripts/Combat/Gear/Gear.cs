@@ -93,7 +93,8 @@ public class Gear : AbstractMeshManager
         _lastShieldHandType = type;
     }
 
-    public virtual void EquipWeapon(int weaponId, bool leftSlot) {
+    public virtual void EquipWeapon(int weaponId, bool leftSlot)
+    {
 
         Weapon weapon = ItemTable.Instance.GetWeapon(weaponId);
         leftSlot = weapon?.Weapongrp?.WeaponType == WeaponType.bow;
@@ -101,7 +102,8 @@ public class Gear : AbstractMeshManager
 
         ErrorPrint(weapon, weaponId);
 
-        if (weaponId == 0 | IsWeaponEquipped(weaponId, leftSlot) | weapon == null) {
+        if (weaponId == 0 | IsWeaponEquipped(weaponId, leftSlot) | weapon == null)
+        {
             return;
         }
 
@@ -119,40 +121,21 @@ public class Gear : AbstractMeshManager
 
         ActivateGameObject(go, type, leftSlot, refreshAllBone);
 
-        if(type != _lastRightHandType & _leftHandShield == null 
+        if (type != _lastRightHandType & _leftHandShield == null
             | _rightHandType == WeaponType.pole
             | _rightHandType == WeaponType.staff
             | _rightHandType == WeaponType.bigword
             | _leftHandType == WeaponType.bow)
         {
-            _origWeaponPrefabName = weaponPrefab.name;
-            var weaponNameAndId = weaponName + weaponId;
-            WeaponType type = weapon.Weapongrp.WeaponType;
-            RefreshData(leftSlot, weapon);
-            UpdateWeaponType(type);
-
-            Transform[] refreshAllBone = RefreshBone(allBone);
-            GameObject go = CreateCopy(weaponPrefab, weaponNameAndId, ObjectType.Weapon);
-
-
-            ActivateGameObject(go, type, leftSlot, refreshAllBone);
-
-
-            if (type != _lastRightHandType & _leftHandShield == null
-                | _rightHandType == WeaponType.pole
-                | _rightHandType == WeaponType.staff
-                | _rightHandType == WeaponType.bigword
-                | _leftHandType == WeaponType.bow)
-            {
-                OnEquipAnimationRefresh?.Invoke(-1, weapon);
-            }
-            else
-            {
-                if (_leftHandWeapon == null | _leftHandShield == null) OnEquipAnimationRefresh?.Invoke(-1, weapon);
-            }
-
-            _lastRightHandType = type;
+            OnEquipAnimationRefresh?.Invoke(-1, weapon);
         }
+        else
+        {
+            if (_leftHandWeapon == null | _leftHandShield == null) OnEquipAnimationRefresh?.Invoke(-1, weapon);
+        }
+
+        _lastRightHandType = type;
+
     }
 
 

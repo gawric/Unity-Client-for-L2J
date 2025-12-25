@@ -15,7 +15,7 @@ public class WorldItemManager : MonoBehaviour
     //todo: думается даже лучше чтоб он сам все спавнил и грузил модели? 
 
     private VisualElement uiProxy;
-    private TooltipManipulator manipulator;
+    private TransparentTooltipManipulator manipulator;
 
     void Start()
     {
@@ -43,7 +43,7 @@ public class WorldItemManager : MonoBehaviour
 
         root.Add(uiProxy);
 
-        manipulator = new TooltipManipulator(uiProxy, tooltipText);
+        manipulator = new TransparentTooltipManipulator(uiProxy, tooltipText);
         manipulator.target = uiProxy;
 
         // Обновляем позицию прокси
