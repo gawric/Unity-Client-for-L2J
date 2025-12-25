@@ -6,6 +6,8 @@ public class EtcItemgrp : Abstractgrp {
     private string _etcItemType;
     private ConsumeCategory _consume_typ;
 
+    private string _model;
     public string EtcItemType { get { return _etcItemType; } set { _etcItemType = value; } }
     public ConsumeCategory ConsumeType { get { return _consume_typ; } set { _consume_typ = value; } }
+    public string Model { get { return _model; } set { _model = value; } }
 }

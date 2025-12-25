@@ -34,6 +34,12 @@ public class AbstractMeshManager : MonoBehaviour
                     ModelTable.L2ArmorPiece fullGoArmor = LoadArmor(armorModel, CharacterRaceAnimationParser.SafeConvertToRace(fullArmorRaceId));
                     if (armorModel != null) AddPrefabToList(ObjectType.Armor , fullGoArmor.baseAllModels);
                     return fullGoArmor;
+                case EquipmentCategory.EtcItem:
+                    int etcId = itemIds[0];
+                    EtcItem etcItem = ItemTable.Instance.GetEtcItem(etcId);
+                    GameObject goEtcItem = LoadEtcItem(etcItem, etcId);
+                    if (goEtcItem != null) ObjectPoolManager.Instance?.AddPrefabToPool(ObjectType.Arrow, goEtcItem);
+                    return goEtcItem;
 
                 default:
                     Debug.LogWarning("Unknown equipment category");
@@ -105,6 +111,24 @@ public class AbstractMeshManager : MonoBehaviour
         return weaponPrefab;
     }
 
+    private GameObject LoadEtcItem(EtcItem etcItem, int etcId)
+    {
+        if (etcItem == null)
+        {
+            Debug.LogWarning($"Could find etc item {etcItem}");
+            return null;
+        }
+
+        GameObject weaponPrefab = ModelTable.Instance.GetEtcById(etcId);
+        if (weaponPrefab == null)
+        {
+            Debug.LogWarning($"Could load prefab for {etcId}");
+            return null;
+        }
+
+        return weaponPrefab;
+    }
+
     private ModelTable.L2ArmorPiece LoadArmor(Armor armor, CharacterRaceAnimation raceId)
     {
         if (armor == null ) return null;
@@ -150,6 +174,10 @@ public class AbstractMeshManager : MonoBehaviour
         else if (weaponType == WeaponType.bow)
         {
             go.transform.SetParent(allBone[1], false);
+        }
+        else if (weaponType == WeaponType.arrow)
+        {
+            go.transform.SetParent(allBone[3], false);
         }
         else if (leftSlot)
         {

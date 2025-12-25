@@ -145,31 +145,20 @@ public class MonsterEntity : NetworkEntity
             
         }
     }
-
- 
-    public void StartRunAnim(bool run)
+  
+    public void AttachArrowToNearestBone(GameObject attach , Vector3 hitPointCollider, Transform target , Vector3 hitDirection)
     {
-        if (run)
+        if(_gear.GetType() != typeof(MonsterGear))
         {
-            //Debug.Log("GETTTTTTTTTTTTT ANIIIIIIII MATION STATUS " + _networkAnimationReceive.name);
-            _networkAnimationReceive.Test();
-            _networkAnimationReceive.SetAnimationProperty((int)MonsterAnimationEvent.Run, 1f);
-            //if (!_networkAnimationReceive.GetBool(_run))
-            // {
-            //   _networkAnimationReceive.SetBool("wait", true);
-            _networkAnimationReceive.SetBool(_run, true);
-            //    _networkAnimationReceive.SetBool("wait", false);
-           // }
+            Debug.LogWarning("MonsterEntity->AttachArrowToNearestBone: gear invalid cast !!!");
+            return;
         }
-        else
-        {
-            if (!_networkAnimationReceive.GetBool(_walk))
-            {
-                _networkAnimationReceive.SetBool(_walk, true);
-            }
-        }
-    }
 
+        MonsterGear gear = (MonsterGear)_gear;
+        Transform targetBone = gear.DetermineHitSide(hitPointCollider, target);
+        bool isSpecialBone = (targetBone == gear.GetHeadBone() || targetBone == gear.GetTailBone());
+        gear.SetPositionArrowRandomlyNearCenter( attach,  targetBone  , hitDirection , isSpecialBone);
+    }
 
 
 

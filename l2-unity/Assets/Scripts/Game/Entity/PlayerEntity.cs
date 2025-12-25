@@ -9,6 +9,9 @@ public class PlayerEntity : Entity
 
     private static PlayerEntity _instance;
     public Animation RandomName { get; set; }
+
+    public float RemainingTime { get; set; }
+
     public int CountAtk { get; set; }
     public int CurrentAttackCount { get; set; }
 
@@ -17,6 +20,8 @@ public class PlayerEntity : Entity
 
     public bool IsAttack { get; set; }
     public bool isAutoAttack { get; set; }
+
+    public  Animation LastAtkAnimation { get; set; }
     public static PlayerEntity Instance { get => _instance; }
 
     //default combo name
@@ -142,8 +147,8 @@ public class PlayerEntity : Entity
     {
         int randomIndex = UnityEngine.Random.Range(0, pAtkList.Length);
         RandomName = pAtkList[randomIndex];
-        //RandomName = pAtkList[2];
     }
+
 
     public void UpdatePAtkSpeedPlayer(int pAtkSpd)
     {
@@ -228,5 +233,28 @@ public class PlayerEntity : Entity
     public string GetLastAnimName()
     {
         return _gear.LastWeaponAnim;
+    }
+
+    public string GetCurrentAnimName()
+    {
+        return _gear.WeaponAnim;
+    }
+
+    public Vector3 GetPositionRightHand()
+    {
+        return _gear.GetPositionRightHand();
+    }
+
+    public GameObject GetGoEtcItem()
+    {
+        return _gear.GetGoEtcItem();
+    }
+
+    public float TargetDistance()
+    {
+        Vector3 startPos = GetPositionRightHand();
+        Transform target = PlayerEntity.Instance.Target;
+
+        return VectorUtils.Distance2D(startPos , target.position);
     }
 }

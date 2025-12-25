@@ -26,14 +26,12 @@ public class MonsterStateMachine : MonoBehaviour
 
     private void Start()
     {
-        //_waitingForServerReply = false;
         this.enabled = false;
 
         InitializeState();
         InitializeIntention();
     }
 
-    public PlayerEntity GetTarget() { return _target; }
 
     public void SetTarget(PlayerEntity target)
     {

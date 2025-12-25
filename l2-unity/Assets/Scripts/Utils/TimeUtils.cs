@@ -8,6 +8,11 @@ public class TimeUtils
         return (float) milliseconds / 1000.0f;
     }
 
+    public static float ConvertSecToMs(float sec)
+    {
+        return (float)sec * 1000.0f;
+    }
+
     public static string GetCurrentFullTime()
     {
 

@@ -8,7 +8,7 @@ public abstract class  AbstractPoolManager : MonoBehaviour
     protected Dictionary<ObjectType, Dictionary<GameObject, Queue<GameObject>>> poolDictionary;
     protected Dictionary<ObjectType, GameObject> tagToPrefabMap;
     protected Dictionary<GameObject, int> createdInstancesTracker;
-
+    protected Dictionary<ObjectType, int> objectTypePoolLimits = new Dictionary<ObjectType, int>();
 
     protected void SetupPoolHierarchy(List<Pool> pools , Transform poolParent)
     {
@@ -43,6 +43,18 @@ public abstract class  AbstractPoolManager : MonoBehaviour
                 //prefabPool.Enqueue(obj);
             }
         }
+    }
+
+    public void SetPoolLimit(ObjectType type, int maxSize)
+    {
+        if (maxSize <= 0)
+        {
+            Debug.LogWarning($"Лимит пула для {type} должен быть больше 0!");
+            return;
+        }
+
+        objectTypePoolLimits[type] = maxSize;
+        Debug.Log($"Установлен лимит пула для {type} равный {maxSize}");
     }
 
     protected void ValidateAndCreateDictionary(ObjectType tag, GameObject prefab)

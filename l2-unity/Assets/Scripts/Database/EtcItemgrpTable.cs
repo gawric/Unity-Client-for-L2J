@@ -29,11 +29,11 @@ public class EtcItemgrpTable {
 
 
     public void Initialize() {
-        ReadEtcItemgrpDat();
+        ReadEtcItemGrpDat();
         ReadEtcItemInterlude();
     }
 
-    private void ReadEtcItemgrpDat() {
+    private void ReadEtcItemGrpDat() {
         _etcItemGrps = new Dictionary<int, EtcItemgrp>();
         string dataPath = Path.Combine(Application.streamingAssetsPath, "Data/Meta/EtcItemgrp_Classic.txt");
         if (!File.Exists(dataPath)) {
@@ -59,7 +59,10 @@ public class EtcItemgrpTable {
                     if (DatUtils.ParseBaseAbstractItemGrpDat(etcItemgrp, key, value)) {
                         continue;
                     }
-
+                    if(etcItemgrp.ObjectId == 17)
+                    {
+                        Debug.Log("");
+                    }
                     switch (key) {
                         case "etcitem_type": 
                             etcItemgrp.EtcItemType = value;
@@ -67,6 +70,11 @@ public class EtcItemgrpTable {
                         case "consume_type":
                             //Debug.Log("Consume Category " + value  + " ID "  + etcItemgrp.ObjectId);
                             etcItemgrp.ConsumeType = ConsumeType.ParceCategory(value);
+                            break;
+                        case "mesh": //{{[LineageWeapons.hell_knife_m00_wp]};{1}}
+                            //TODO for dualswords, store 2 models and textures
+                            var modTex = DatUtils.ParseArray(value);
+                            etcItemgrp.Model = modTex[0];
                             break;
                     }
                 }

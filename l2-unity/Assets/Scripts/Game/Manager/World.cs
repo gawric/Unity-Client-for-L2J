@@ -27,6 +27,7 @@ public class World : MonoBehaviour {
     private Dictionary<int, Entity> _objects = new Dictionary<int, Entity>();
     private Dictionary<int, Entity> _droppedItems = new Dictionary<int, Entity>();
 
+    private Dictionary<int , MonsterStateMachine> _msObjects = new Dictionary<int, MonsterStateMachine>();
 
 
     [Header("Layer Masks")]
@@ -205,7 +206,7 @@ public class World : MonoBehaviour {
 
         if (_npcs.ContainsKey(identity.Id)) return;
 
-        //Debug.Log("������ ��������� Spawn Npc Interlude ++++++++++++++++++ ");
+        MonsterStateMachine msm = null;
         Npcgrp npcgrp = NpcgrpTable.Instance.GetNpcgrp(identity.NpcId);
         NpcName npcName = NpcNameTable.Instance.GetNpcName(identity.NpcId);
 
@@ -216,13 +217,13 @@ public class World : MonoBehaviour {
             return;
         }
 
-
-        GameObject go = ModelTable.Instance.GetNpc(npcgrp.Mesh);
-
-        if(identity.NpcId == 35103)
+        if (identity.NpcId == 20481)
         {
             Debug.Log(" object NpcInfo 5 " + identity.Id);
         }
+
+        GameObject go = ModelTable.Instance.GetNpc(npcgrp.Mesh);
+
 
         if (go != null)
         {
@@ -306,29 +307,22 @@ public class World : MonoBehaviour {
             npcGo.transform.name = identity.Name;
             npcGo.SetActive(true);
 
-            if (identity.NpcId == 35103)
-            {
-                Debug.Log(" object NpcInfo 5 " + identity.Id);
-            }
 
             if (npc.GetType() == typeof(MonsterEntity))
             {
-                InitMonster(npc, npcGo);
+                msm = InitMonster(npc, npcGo);
             }
             else
             {
                 InitNpc(npc, npcGo);
             }
 
-            if (identity.NpcId == 35103)
-            {
-                Debug.Log(" object NpcInfo 5 " + identity.Id);
-            }
+
 
             RespawnPositionElseLoadingGame(identity, npcGo);
 
 
-
+            if (msm != null) _msObjects.Add(npc.IdentityInterlude.Id, msm);
             _npcs.Add(identity.Id, npc);
             _objects.Add(identity.Id, npc);
             Debug.Log("NPC NEW SPAWN !!!!!!!!!! " + identity.Id);
@@ -399,26 +393,24 @@ public class World : MonoBehaviour {
     }
 
 
-    private void InitMonster(Entity npc , GameObject npcGo)
+    private MonsterStateMachine InitMonster(Entity npc , GameObject npcGo)
     {
         npc.GetComponent<NetworkAnimationController>().Initialize();
-        //MoveMonster mm = npcGo.GetComponent<MoveMonster>();
-       // GravityMonster gm = npcGo.GetComponent<GravityMonster>();
         npcGo.GetComponent<Gear>().Initialize(npc.IdentityInterlude.Id, npc.RaceId);
         npc.Initialize();
         var msm = npcGo.GetComponent<MonsterStateMachine>();
 
         if (msm != null)
         {
-            //Debug.Log("NPC IS RUNNING " + npc.IdentityInterlude.IsRunning);
-            //Debug.Log("NPC IS RunSpeed " + npc.Stats.RunSpeed);
-            //Debug.Log("NPC IS WalkSpeed " + npc.Stats.WalkSpeed);
+
             npc.UpdateNpcPAtkSpd((int)npc.Stats.PAtkRealSpeed);
             npc.UpdateNpcRunningSpd(npc.Stats.RunRealSpeed);
             npc.UpdateNpcWalkSpd(npc.Stats.WalkRealSpeed);
             npc.Running = npc.IdentityInterlude.IsRunning;
             msm.Initialize(npc.IdentityInterlude.Id, npc.IdentityInterlude.NpcId, npcGo, npc);
         }
+
+        return msm;
     }
 
     private void InitNpc(Entity npc, GameObject npcGo)
@@ -643,6 +635,15 @@ public class World : MonoBehaviour {
         if (_objects.ContainsKey(id))
         {
             return _objects[id];
+        }
+        return null;
+    }
+
+    public MonsterStateMachine GetMonsterStateMachine(int id)
+    {
+        if (_msObjects.ContainsKey(id))
+        {
+            return _msObjects[id];
         }
         return null;
     }

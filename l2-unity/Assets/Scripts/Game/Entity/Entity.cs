@@ -288,6 +288,14 @@ public class Entity : MonoBehaviour {
         _gear.EquipWeapon(weaponId, isLeftHand);
     }
 
+
+    public void EquipArrow(int itemId , bool leftSlot = false)
+    {
+        _gear.EquipArrowEtcItem(itemId, leftSlot);
+    }
+
+    public bool IsUseBow() => PlayerEntity.Instance.GetCurrentAnimName().IndexOf("bow") > -1;
+
     public void EquipDualWeapon(int weaponId)
     {
         _gear.EquipLeftAndRightWeapon(weaponId);
@@ -391,7 +399,9 @@ public class Entity : MonoBehaviour {
         {
             if(this.GetType() == typeof(PlayerEntity))
             {
+               
                 PlayerStateMachine.Instance.NotifyEvent(Event.CHANGE_EQUIP);
+
             }
         }
     }
@@ -403,5 +413,7 @@ public class Entity : MonoBehaviour {
           PlayerStateMachine.Instance.NotifyEvent(Event.CHANGE_EQUIP);
        }
     }
+
+    
 
 }

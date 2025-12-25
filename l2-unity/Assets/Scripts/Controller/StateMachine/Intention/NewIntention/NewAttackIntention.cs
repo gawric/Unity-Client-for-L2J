@@ -20,8 +20,11 @@ public class NewAttackIntention : IntentionBase
         {
             Debug.Log("NewAttackIntention > State " + PlayerStateMachine.Instance.State);
             Attack myModel = (Attack)arg0;
+            int targetId = myModel.TargetId;
 
-            Entity entity = World.Instance.GetEntityNoLockSync(myModel.TargetId);
+            Entity entity = World.Instance.GetEntityNoLockSync(targetId);
+
+
             PlayerController.Instance.RotateToAttacker(entity.transform.position);
 
             PlayerEntity.Instance.IsAttack = true;
@@ -31,6 +34,8 @@ public class NewAttackIntention : IntentionBase
 
         }
     }
+
+
 
 
 

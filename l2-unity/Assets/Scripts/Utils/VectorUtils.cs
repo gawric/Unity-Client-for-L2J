@@ -1,3 +1,4 @@
+using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 
 public class VectorUtils : MonoBehaviour {
@@ -129,6 +130,15 @@ public class VectorUtils : MonoBehaviour {
             return attacker.position + direction * raduis + Vector3.up * particleHeight;
     }
 
+    public static Vector3 GetCollision(Vector3 attacker, Transform target)
+    {
+        var heading = attacker - target.position;
+        float angle = Vector3.Angle(heading, target.forward);
+        float particleHeight = target.GetComponent<Entity>().Appearance.CollisionHeight * 1.25f;
+        Vector3 direction = Quaternion.Euler(0, angle, 0) * target.forward;
+        return target.position + direction * 0.15f + Vector3.up * particleHeight;
+    }
+
     public static Vector3 ConvertToUnityUnscaled(Vector3 ueVector) {
         return new Vector3(ueVector.y, ueVector.z, ueVector.x);
     }
@@ -191,13 +201,10 @@ public class VectorUtils : MonoBehaviour {
 
     }
 
-    //use Player heading
-    public static float HeadingToUnityQuaternionForPlayer(float heading) 
+
+    public static Vector3 CalcHitDirection(Vector3 currentPosition, Vector3 startPosition)
     {
-        const float ServerToDegrees = 182.04444444444444f; 
-        float angleServer = heading / ServerToDegrees;     
-        float unityY = 90f + angleServer;
-        return  Mathf.Repeat(unityY + 180f, 360f); // если нужен противоположный
+        return (currentPosition - startPosition).normalized;
     }
 
 

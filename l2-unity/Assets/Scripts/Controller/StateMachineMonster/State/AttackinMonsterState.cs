@@ -29,5 +29,6 @@ public class AttackinMonsterState : MonsterBase
         MonsterEntity entity = (MonsterEntity)_stateMachine.Entity;
         NetworkAnimationController nac = entity.GetAnimatorController();
         AnimationManager.Instance.PlayMonsterAnimation(entity.IdentityInterlude.Id, nac, AnimationNames.MONSTER_ATK01.ToString());
+        //AnimationManager.Instance.PlayMonsterAnimation(entity.IdentityInterlude.Id, nac, AnimationNames.MONSTER_DamageAction.Value);
     }
 }

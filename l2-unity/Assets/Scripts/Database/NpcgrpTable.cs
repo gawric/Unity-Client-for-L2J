@@ -59,7 +59,8 @@ public class NpcgrpTable {
                             npcgrp.Mesh = DatUtils.CleanupString(value);
                             break;
                         case "texture_name": //{[LineageNPCsTex.e_warehouse_keeper_FDwarf_m00_t00_b00];[LineageNPCsTex.e_warehouse_keeper_FDwarf_m00_t00_b01];...}
-                            npcgrp.Materials = DatUtils.ParseArray(value);
+                            var allMaterials = DatUtils.ParseMultiArray(value);
+                            npcgrp.Materials = allMaterials[0].ToArray();
                             break;
                         case "attack_sound1": //{[ItemSound.fist_1];[ItemSound.fist_2];[ItemSound.fist_3]}	
                             npcgrp.AttackSounds = DatUtils.ParseArray(value);

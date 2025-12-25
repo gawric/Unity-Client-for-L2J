@@ -15,7 +15,7 @@ public class MoveToNpcIntention : NpcIntentionBase
                 npcEntity.OnStartL2jMoving((npcEntity.Running) ? false : true);
           
                 int id = _stateMachine.Entity.IdentityInterlude.Id;
-                DebugLineDraw.ShowDrawLineDebugNpc(PlayerEntity.Instance.IdentityInterlude.Id, packet.OldPosition, packet.NewPosition, Color.red);
+                //DebugLineDraw.ShowDrawLineDebugNpc(PlayerEntity.Instance.IdentityInterlude.Id, packet.OldPosition, packet.NewPosition, Color.red);
 
                 //Debug.Log("object position 3 " + npcEntity.transform.position + " go name " + npcEntity.name);
                 MovementTarget movementTarget = new MovementTarget(packet.NewPosition, 0.1f);

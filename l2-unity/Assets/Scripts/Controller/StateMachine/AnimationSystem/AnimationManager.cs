@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -10,12 +11,18 @@ public class AnimationManager : IAnimationManager
     private string[] recentAnimationNames = new string[2];
     private Dictionary<int, string[]> recentMonsterAnimationNames = new Dictionary<int, string[]>();
     private List<string> listTriggerAfterStart = new List<string>(10);
-    public void SetAnimationManager(PlayerAnimationController controller , PlayerEntity player)
+    private float _remainingAtkTime = 0;
+    public event Action<string> OnAnimationFinished;
+    public event Action<string , float> OnAnimationStartShoot;
+    public event Action<string> OnAnimationLoadArrow;
+
+    public void SetAnimationManager(PlayerAnimationController controller, PlayerEntity player)
     {
         _player = player;
+        PlayerAnimationController.Instance.OnAnimationFinished += AnimationFinishedPlayerCallback;
+        PlayerAnimationController.Instance.OnAnimationStartShoot += AnimationShootPlayerCallback;
+        PlayerAnimationController.Instance.OnAnimationStartLoadArrow += AnimationLoadArrowPlayerCallback;
     }
-
-
     public static IAnimationManager Instance
     {
         get
@@ -37,10 +44,10 @@ public class AnimationManager : IAnimationManager
 
         DesibleLastAnimationElseTrue();
 
-        Debug.Log($"AnimationManager> start name player  {_player.name} animation {finalAnimName}");
+        //Debug.Log($"AnimationManager> start name player  {_player.name} animation {finalAnimName}");
         SetRecentName(finalAnimName);
         AddDebugInfo(finalAnimName);
-        PlayerAnimationController.Instance.SetBool(finalAnimName, true);
+        PlayerAnimationController.Instance.SetBool(finalAnimName, true , _player.name);
     }
 
 
@@ -213,7 +220,7 @@ public class AnimationManager : IAnimationManager
         return _player.GetEquippedWeaponName();
     }
 
-    public void StopCurrentAnimation(string paramName)
+    public void StopCurrentAnimation(string paramName , string runName = "")
     {
         //Debug.Log("Walking State STOP Event param name 1 " + paramName);
         if (!string.IsNullOrEmpty(paramName))
@@ -222,7 +229,7 @@ public class AnimationManager : IAnimationManager
             if (PlayerAnimationController.Instance != null)
             {
                 //Debug.Log("Walking State STOP Event param name 3 " + paramName);
-                PlayerAnimationController.Instance.SetBool(paramName, false);
+                PlayerAnimationController.Instance.SetBool(paramName, false , runName);
             }
             
         }
@@ -232,5 +239,30 @@ public class AnimationManager : IAnimationManager
         }
     }
 
-   
+    public void AnimationFinishedPlayerCallback(string animationName)
+    {
+        OnAnimationFinished?.Invoke(animationName);
+    }
+
+    public void AnimationShootPlayerCallback(string animationName)
+    {
+        OnAnimationStartShoot?.Invoke(animationName , _remainingAtkTime);
+    }
+
+    public void AnimationLoadArrowPlayerCallback(string animationName)
+    {
+        OnAnimationLoadArrow?.Invoke(animationName);
+    }
+
+    public void UpdateRemainingAtkTime(float remainingAtkTime)
+    {
+        _remainingAtkTime = remainingAtkTime;
+    }
+
+    public float GetRemainingAtkTime()
+    {
+        return _remainingAtkTime;
+    }
+
+
 }

@@ -38,6 +38,11 @@ public abstract class AbstractCache : AbstractGetCache
         return LoadAllArmorResources(allModels, LoadArmorMaterial);
     }
 
+    protected Material[] LoadAllMaterials(List<string> allModels)
+    {
+        return LoadAllArmorResources(allModels, LoadArmorMaterial);
+    }
+
     protected GameObject LoadArmorModel(string model)
     {
 
@@ -63,23 +68,15 @@ public abstract class AbstractCache : AbstractGetCache
 
     protected Material LoadArmorMaterial(string texture)
     {
-        string[] folderFile = texture.Split(".");
+        var parts = texture.Split('.');
+        if (parts.Length < 2) return null;
 
-        if (folderFile.Length < 2) return null;
+        var materialPath = $"Data/SysTextures/{parts[0]}/Materials/{parts[1]}";
+        var material = Resources.Load<Material>(materialPath);
 
-
-
-        string materialPath = $"Data/SysTextures/{folderFile[0]}/Materials/{folderFile[1]}";
-
-        Material material = (Material)Resources.Load(materialPath);
-        if (material == null)
-        {
-            // Debug.LogWarning($"Can't find armor model at {materialPath}");
-        }
-        else
-        {
-            // Debug.Log($"Successfully loaded armor model at {materialPath}");
-        }
+        Debug.Log(material != null
+            ? $"Successfully loaded armor material at {materialPath}"
+            : $"Can't find armor material at {materialPath}");
 
         return material;
     }
@@ -100,24 +97,15 @@ public abstract class AbstractCache : AbstractGetCache
 
     protected GameObject LoadWeaponModel(string model)
     {
-        string[] folderFile = model.Split(".");
+        var parts = model.Split('.');
+        if (parts.Length < 2) return null;
 
-        if (folderFile.Length < 2) return null;
-
-        string modelPath = $"Data/Animations/{folderFile[0]}/{folderFile[1]}";
-
-        GameObject weapon = (GameObject)Resources.Load(modelPath);
-        if (weapon == null)
-        {
-            //Debug.LogWarning($"Can't find weapon model at {modelPath}");
-        }
-        else
-        {
-            //Debug.Log($"Successfully loaded weapon {model} model.");
-        }
+        var weapon = Resources.Load<GameObject>($"Data/Animations/{parts[0]}/{parts[1]}");
+        Debug.Log(weapon != null ? $"Successfully loaded weapon {model} model." : $"Can't find weapon model at Data/Animations/{parts[0]}/{parts[1]}");
 
         return weapon;
     }
+
 
 
 

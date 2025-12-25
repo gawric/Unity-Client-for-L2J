@@ -1,4 +1,7 @@
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using static UnityEngine.Rendering.DebugUI;
 
@@ -11,12 +14,39 @@ public class BaseAnimationController : MonoBehaviour
     private string _lastAnimationVariableName;
     private float _lastAtkClipLength;
     private float _pAtkSpd;
-
+    private Dictionary<string, bool> _priorityAnimations = new Dictionary<string, bool>();
+    private Queue<string> _animationQueue = new Queue<string>();
+    private bool _isProcessingQueue = false;
+    public Action<string> OnAnimationFinished;
+    public Action<string> OnAnimationStartShoot;
+    public Action<string> OnAnimationStartLoadArrow;
     public virtual void Initialize()
     {
         _animator = gameObject.GetComponentInChildren<Animator>(true);
         _lastAnimationVariableName = "wait_hand";
-        
+        _priorityAnimations = new Dictionary<string, bool>
+        {
+            { "jatk01_bow", false },
+            { "jatk02_bow", false },
+            { "jatk03_bow", false },
+
+            { "jatk01_dual", false },
+            { "jatk02_dual", false },
+            { "jatk03_dual", false },
+
+            { "jatk01_2HS", false },
+            { "jatk02_2HS", false },
+            { "jatk03_2HS", false },
+
+            { "jatk01_1HS", false },
+            { "jatk02_1HS", false },
+            { "jatk03_1HS", false },
+ 
+            { "jatk01_pole", false },
+            { "jatk02_pole", false },
+            { "jatk03_pole", false },
+        };
+
     }
 
     public void SetRunSpeed(float value)
@@ -31,7 +61,33 @@ public class BaseAnimationController : MonoBehaviour
 
     public void SetWalkSpeedLobby(float value) => _animator.SetFloat("walk_speed", value);
 
+    public void OnAnimationComplete(string animationName)
+    {
+        if (_priorityAnimations.ContainsKey(animationName)){
 
+            _priorityAnimations[animationName] = false;
+            _isProcessingQueue = false;
+            OnAnimationFinished?.Invoke(animationName);
+
+            if (_animationQueue.Count > 0)
+            {
+                var lastAnimation = _animationQueue.Last();
+                SetBool(lastAnimation, true , "player");
+            }
+
+        }
+
+    }
+
+    public void OnAnimationShoot(string animationName)
+    {
+        OnAnimationStartShoot?.Invoke(animationName);
+    }
+
+    public void OnAnimationLoadArrow(string animationName)
+    {
+        OnAnimationStartLoadArrow?.Invoke(animationName);
+    }
     public void SetPAtkSpd(float value)
     {
         //Debug.Log("Update Patak speed set " + value);
@@ -52,7 +108,6 @@ public class BaseAnimationController : MonoBehaviour
     public void UpdateAnimatorAtkSpeedL2j(float timeAtk , float clipLength)
     {
         float newAtkSpd = clipLength * 1000f / timeAtk;
-        //Debug.Log("PATACK speed set " + newAtkSpd);
         _animator.SetFloat("patkspd", newAtkSpd);
     }
 
@@ -98,34 +153,21 @@ public class BaseAnimationController : MonoBehaviour
         }
     }
 
-    public void WeaponAnimChanged(string newWeaponAnim)
-    {
-        ClearAnimParams();
 
-        if (!_lastAnimationVariableName.Contains("_"))
+
+
+    public void SetBool(string name, bool value , string entityName = "")
+    {
+        if(_isProcessingQueue && value == true)
         {
-            Debug.LogWarning($"The last animation was not a weapon animation: {_lastAnimationVariableName}");
-            // The last animation was not a weapon animation
-            return;
+            IfAnimationNeedsWait( _priorityAnimations, name);
+
+            if (value) return;
+            Debug.Log($"AnimationManager> start name player  добавление в список ожидания {name} статус {value} продолжение return ");
         }
 
-        string[] parts = _lastAnimationVariableName.Split("_");
-        if (parts.Length < 1)
-        {
-            // Should not happen
-            Debug.LogWarning($"Error while parsing previous animation name: {_lastAnimationVariableName}");
-            return;
-        }
 
-        string newAnimation = parts[0] + "_" + newWeaponAnim;
-        Debug.Log($"New Weapon animation name: {newAnimation}");
-        SetBool(newAnimation, true);
-    }
-
-
-    public void SetBool(string name, bool value)
-    {
-        //Debug.Log($"Set bool loooooooooooogggggggggg +++++++++++++ {name}={value}");
+        IfSpecialAnimationsCreateProcessQueue(name , ref _isProcessingQueue, _priorityAnimations, value);
 
         // Save the last animation name
         if (value == true)
@@ -135,14 +177,34 @@ public class BaseAnimationController : MonoBehaviour
         
         _animator.SetBool(name, value);
 
+        if (!string.IsNullOrEmpty(entityName))
+        {
+            Debug.Log($"AnimationManager> start name player  animation {name} and value {value}");
+        }
+
     }
 
-    public void Rebind()
+    private void IfSpecialAnimationsCreateProcessQueue(string animName , ref bool _isProcessingQueue , Dictionary<string, bool> _priorityAnimations , bool value)
     {
-        _animator.Rebind();
+       
+        if (_priorityAnimations.ContainsKey(animName) && _priorityAnimations[animName] == false && value == true)
+        {
+            _priorityAnimations[animName] = true;
+            _isProcessingQueue = true;
+        }
     }
 
-    public void debugPrint()
+    private void IfAnimationNeedsWait(Dictionary<string, bool> _priorityAnimations , string animName)
+    {
+        if (!_priorityAnimations.ContainsKey(animName))
+        {
+            _animationQueue.Enqueue(animName);
+            Debug.Log($"AnimationManager> start name player  добавление в список ожидания {animName} испольнение return ");
+        }
+    }
+
+
+public void debugPrint()
     {
         AnimatorControllerParameter[] parameters = _animator.parameters;
 
@@ -171,13 +233,7 @@ public class BaseAnimationController : MonoBehaviour
         }
     }
 
-    public void Test()
-    {
-        //bool t1 = _animator.GetBool("wait");
-        //bool t2 = _animator.GetBool("atk01");
-        //bool t3 = _animator.GetBool("run");
-        Debug.Log("");
-    }
+
     public bool GetBool(string name)
     {
         return _animator.GetBool(name);

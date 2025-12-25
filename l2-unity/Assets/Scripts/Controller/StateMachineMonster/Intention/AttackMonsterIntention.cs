@@ -1,3 +1,4 @@
+using UnityEditorInternal;
 using UnityEngine;
 
 public class AttackMonsterIntention : MonsterIntentionBase
@@ -9,14 +10,7 @@ public class AttackMonsterIntention : MonsterIntentionBase
 
         if (arg0.GetType() == typeof(Attack))
         {
-           // PlayerEntity _target = (PlayerEntity)arg0;
-            //_stateMachine.SetTarget(_target);
-            //Vector3 tarPos = _target.transform.position;
-            //Vector3 monsterPos = _stateMachine.MonsterObject.transform.position;
-            //float dist = VectorUtils.Distance2D(tarPos, monsterPos);
-            //10 metr distance tar and defens
-            //if(dist == 0 | dist <= 10)
-            //{
+  
                 Attack attack = (Attack)arg0;
 
                 Entity entity = World.Instance.GetEntityNoLockSync(attack.TargetId);
@@ -26,6 +20,8 @@ public class AttackMonsterIntention : MonsterIntentionBase
                 {
                     Debug.Log("AttackMonsterIntention: Enter: " + _stateMachine.State);
                 }
+
+
 
                 if (entity == null) return;
 
@@ -39,8 +35,6 @@ public class AttackMonsterIntention : MonsterIntentionBase
                     _stateMachine.NotifyEvent(Event.READY_TO_ACT);
                 }
 
-            //}
-  
         }
  
     }

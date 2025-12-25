@@ -13,6 +13,7 @@ public enum Event
     CANCEL,
     WAIT_RETURN,
     MY_TARGET_SELECT,
-    ENTER_WORLD
+    ENTER_WORLD,
+    HIT_REACTION
 
 }

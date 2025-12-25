@@ -32,6 +32,10 @@ public class IdleMosterState : MonsterBase
                 //Debug.Log("MosterAnimation State Walk > start animation");
                 AnimationManager.Instance.PlayMonsterAnimation(ent.IdentityInterlude.Id , nac, AnimationNames.MONSTER_WAIT.ToString());
                 break;
+            case Event.HIT_REACTION:
+                Debug.Log("MosterAnimation State HIT_REACTION > start animation");
+                AnimationManager.Instance.PlayMonsterAnimation(ent.IdentityInterlude.Id, nac, AnimationNames.MONSTER_DamageAction.Value);
+                break;
 
 
         }

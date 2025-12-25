@@ -13,9 +13,11 @@ public class Gear : AbstractMeshManager
     protected NetworkAnimationController _networkAnimationReceive;
     protected int _ownerId;
     protected CharacterRaceAnimation _raceId;
+    public const string etcName = "etc_";
     public const string weaponName = "weapon_";
     public const string shieldName = "shield_";
     public Transform[] allBone = new Transform[4];
+    private GameObject _goCurrentEtcItem;
     [Header("Weapons")]
     [Header("Meta")]
     private Weapon _rightHandWeapon;
@@ -104,7 +106,24 @@ public class Gear : AbstractMeshManager
         }
 
         GameObject weaponPrefab = (GameObject)LoadMesh(EquipmentCategory.Weapon, weaponId);
-        if (weaponPrefab is not null) //todo: если модели нет - на этапе загрузки меню выбора персонажа ломает весь клиент
+        if (weaponPrefab == null) return;
+        _origWeaponPrefabName = weaponPrefab.name;
+        var weaponNameAndId = weaponName + weaponId;
+        WeaponType type = weapon.Weapongrp.WeaponType;
+        RefreshData(leftSlot, weapon);
+        UpdateWeaponType(type);
+
+        Transform[] refreshAllBone = RefreshBone(allBone);
+        GameObject go = CreateCopy(weaponPrefab, weaponNameAndId, ObjectType.Weapon);
+
+
+        ActivateGameObject(go, type, leftSlot, refreshAllBone);
+
+        if(type != _lastRightHandType & _leftHandShield == null 
+            | _rightHandType == WeaponType.pole
+            | _rightHandType == WeaponType.staff
+            | _rightHandType == WeaponType.bigword
+            | _leftHandType == WeaponType.bow)
         {
             _origWeaponPrefabName = weaponPrefab.name;
             var weaponNameAndId = weaponName + weaponId;
@@ -134,6 +153,29 @@ public class Gear : AbstractMeshManager
 
             _lastRightHandType = type;
         }
+    }
+
+
+    public void EquipArrowEtcItem(int etcId, bool leftSlot)
+    {
+        EtcItem etcItem = ItemTable.Instance.GetEtcItem(etcId);
+
+        if (etcId == 0 | IsWeaponEquipped(etcId, leftSlot) | etcItem == null)
+        {
+            return;
+        }
+
+        GameObject etcItemPrefab = (GameObject)LoadMesh(EquipmentCategory.EtcItem, etcId);
+        if (etcItemPrefab == null) return;
+
+        var etcIdNameAndId = etcName + etcId;
+        Transform[] refreshAllBone = RefreshBone(allBone);
+        GameObject go = CreateCopy(etcItemPrefab, etcIdNameAndId, ObjectType.Arrow);
+
+        _goCurrentEtcItem = go;
+
+        ActivateGameObject(go, WeaponType.arrow, leftSlot, refreshAllBone);
+
     }
 
     public void EquipLeftAndRightWeapon(int weaponId)
@@ -243,6 +285,8 @@ public class Gear : AbstractMeshManager
         }
         return _shieldBone;
     }
+
+    
 
     public float GetWeaponRange() {
         return VectorUtils.ConvertL2jDistance(_weaponRange);
@@ -443,6 +487,21 @@ public class Gear : AbstractMeshManager
         var allShieldsFound = FindTransformsWithName(GetShieldBone(), allShields).ToList();
 
         return allWeaponsFound.Count + allShieldsFound.Count;
+    }
+
+    public Vector3 GetPositionRightHand()
+    {
+        return GetRightHandBone().position;
+    }
+
+    public GameObject GetGoEtcItem()
+    {
+        return _goCurrentEtcItem;
+    }
+
+    public Transform FindRecursiveBone(string boneName)
+    {
+        return transform.FindRecursive(boneName);
     }
 
 

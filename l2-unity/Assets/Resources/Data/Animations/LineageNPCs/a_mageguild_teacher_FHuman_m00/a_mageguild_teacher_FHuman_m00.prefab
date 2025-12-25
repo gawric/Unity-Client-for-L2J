@@ -377,7 +377,7 @@ PrefabInstance:
     - target: {fileID: 230961121682829855, guid: a796cfe52ccbe2e45a78b817f3ab9b73, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
-      objectReference: {fileID: 2100000, guid: 3148b8e7747fce846b224a2a9314713e, type: 2}
+      objectReference: {fileID: 2100000, guid: 2bcdc44fda3d7a342bffbf52db359a60, type: 2}
     - target: {fileID: 230961121682829855, guid: a796cfe52ccbe2e45a78b817f3ab9b73, type: 3}
       propertyPath: 'm_Materials.Array.data[1]'
       value: 
@@ -903,86 +903,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4057a068ca79edd469897aa33319d243, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _rightHandWeapon:
-    _id: 0
-    _icon: 
-    _itemName:
-      _id: 0
-      _name: 
-      _description: 
-      _defaultAction: 
-      _tradeable: 0
-      _destructible: 0
-      _droppable: 0
-      _sellable: 0
-    _itemStatData:
-      _objectId: 0
-      _pDef: 0
-      _mDef: 0
-      _pAtk: 0
-      _mAtk: 0
-      _pAtkSpd: 0
-      _pHit: 0
-      _mHit: 0
-      _pCrit: 0
-      _mCrit: 0
-      _speed: 0
-      _shieldDef: 0
-      _shieldDefRate: 0
-      _pAvoid: 0
-      _mAvoid: 0
-    _itemgrp:
-      _objectId: 0
-      _dropModel: 
-      _dropTexture: 
-      _icon: 
-      _weight: 0
-      _material: 0
-      _dropSound: 
-      _grade: 0
-      _equipSound: 
-      _inventoryType: 
-      _crystallizable: 0
-  _leftHandWeapon:
-    _id: 0
-    _icon: 
-    _itemName:
-      _id: 0
-      _name: 
-      _description: 
-      _defaultAction: 
-      _tradeable: 0
-      _destructible: 0
-      _droppable: 0
-      _sellable: 0
-    _itemStatData:
-      _objectId: 0
-      _pDef: 0
-      _mDef: 0
-      _pAtk: 0
-      _mAtk: 0
-      _pAtkSpd: 0
-      _pHit: 0
-      _mHit: 0
-      _pCrit: 0
-      _mCrit: 0
-      _speed: 0
-      _shieldDef: 0
-      _shieldDefRate: 0
-      _pAvoid: 0
-      _mAvoid: 0
-    _itemgrp:
-      _objectId: 0
-      _dropModel: 
-      _dropTexture: 
-      _icon: 
-      _weight: 0
-      _material: 0
-      _dropSound: 
-      _grade: 0
-      _equipSound: 
-      _inventoryType: 
-      _crystallizable: 0
+  allBone:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
   _rightHandType: 0
   _rightHandBone: {fileID: 0}
   _rightHand: {fileID: 0}

@@ -9,6 +9,7 @@ public enum WeaponType : byte {
     blunt,
     bigblunt,
     bow,
+    arrow,
     dagger,
     fist,
     dual,
