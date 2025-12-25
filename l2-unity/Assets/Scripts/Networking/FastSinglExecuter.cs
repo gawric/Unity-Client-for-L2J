@@ -92,11 +92,11 @@ public class FastSinglExecuter : MonoBehaviour
     {
         if (attakerEntity.GetType() == typeof(PlayerEntity))
         {
-            //TimeUtils.PrintFullTime("Attack Packet Time Packet 1 ");
+            if (attakerEntity == null | targetEntity == null) return;
             if (attakerEntity.IsDead() == true | targetEntity.IsDead() == true) return;
-            //TimeUtils.PrintFullTime("Attack Packet Time Packet 2 ");
+       
             PlayerStateMachine.Instance.ChangeIntention(Intention.INTENTION_ATTACK, attackPacket);
-            //TimeUtils.PrintFullTime("Attack Packet Time Packet 3 ");
+           
             OnEventPlaVsMonster(attakerEntity, targetEntity);
         }
     }

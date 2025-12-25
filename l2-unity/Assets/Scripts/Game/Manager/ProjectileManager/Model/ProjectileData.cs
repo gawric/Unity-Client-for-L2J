@@ -12,6 +12,7 @@ public class ProjectileData
         targetTransform = null;
         speed = 8f;
         lifetime = 5f;
+        flytime = 5f;
         //speedCurve = AnimationCurve.Linear(0, 1, 1, 1);
         speedCurve = GetDefaultCurve();
         startTime = 0f;
@@ -30,6 +31,7 @@ public class ProjectileData
         targetTransform = endPos;
         speed = 8f;
         lifetime = 5f;
+        flytime = 5f;
         //speedCurve = AnimationCurve.Linear(0, 1, 1, 1);
         speedCurve = GetDefaultCurve();
         startTime = 0f;
@@ -56,6 +58,7 @@ public class ProjectileData
             distance = other.distance;
             useGravity = other.useGravity;
             gravityScale = other.gravityScale;
+            flytime = other.flytime;
             isActive = other.isActive;
         }
 
@@ -64,12 +67,11 @@ public class ProjectileData
     private AnimationCurve GetDefaultCurve()
     {
         return new AnimationCurve(
-            new Keyframe(0, 0.3f, 0, 0.5f),     // Начало: 30% скорости, плавный старт
-            new Keyframe(0.3f, 0.5f, 0, 1f),     // 30% пути: 50% скорости
-            new Keyframe(0.6f, 0.6f, 0, 1.5f),   // 60% пути: 70% скорости
-            new Keyframe(0.8f, 0.9f, 0, 2f),     // 80% пути: 90% скорости
-            new Keyframe(0.9f, 0.95f, 0, 1f),   // 90% пути: 95% скорости
-            new Keyframe(1, 1f, 0, 0)           // Конец: 100% скорости
+            new Keyframe(0, 0.3f, 0, 0.5f),     // Start: 30% speed, smooth start
+            new Keyframe(0.25f, 0.5f, 0, 1f),    // 25% journey: 50% speed
+            new Keyframe(0.5f, 1f, 0, 0),        // Middle: 100% speed (no acceleration)
+            new Keyframe(0.75f, 1f, 0, 0),       // 75% journey: 100% speed (constant)
+            new Keyframe(1, 1f, 0, 0)           // End: 100% speed
         );
     }
 
@@ -90,8 +92,9 @@ public class ProjectileData
     public bool isActive;
     public Vector3 hitPoint;
     public Vector3 hitNormal;
-
+    public float flytime;
     public Vector3 hitPointCollider;
     public Vector3 hitNormalCollider;
     public Vector3 hitDirection;
+    public BoxCollider arrowCollider;
 }

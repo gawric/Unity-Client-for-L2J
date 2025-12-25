@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Xml;
+using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using static StatusUpdatePacket;
 using static UnityEngine.EventSystems.EventTrigger;
@@ -29,11 +30,11 @@ public class WorldCombat : MonoBehaviour {
         ApplyDamage(target, damage, criticalHit);
     }
 
-    public void InflictAttack(Transform attacker, Transform target) {
+    public void InflictAttack(Vector3 hitPoint, Vector3 impactDirection) {
         //ApplyDamage(target, damage, criticalHit);
 
         // Instantiate hit particle
-        ParticleImpact(attacker, target);
+        ParticleImpact(hitPoint, impactDirection);
     }
 
     private void ApplyDamage(Transform target, int damage, bool criticalHit) {
@@ -54,23 +55,18 @@ public class WorldCombat : MonoBehaviour {
             st.ChangeState(MonsterState.IDLE);
         }
     }
-    private void ParticleImpact(Transform attacker, Transform target) {
-        // Calculate the position and rotation based on attacker
-        var heading = attacker.position - target.position;
-        float angle = Vector3.Angle(heading, target.forward);
-        Vector3 cross = Vector3.Cross(heading, target.forward);
-        if(cross.y >= 0) angle = -angle;
-        Vector3 direction = Quaternion.Euler(0, angle, 0) * target.forward;
-
-        float particleHeight = target.GetComponent<Entity>().Appearance.CollisionHeight * 1.25f;
+    private void ParticleImpact(Vector3 hitPoint, Vector3 impactDirection)
+    {
+        // Use the actual impact point instead of calculating a new position
         GameObject go = (GameObject)Instantiate(
-            _impactParticle, 
-            target.position + direction * 0.15f + Vector3.up * particleHeight, 
+            _impactParticle,
+            hitPoint,  // Use the exact impact point from collision detection
             Quaternion.identity);
 
-        go.transform.LookAt(attacker);
-        go.transform.eulerAngles = new Vector3(0, go.transform.eulerAngles.y + 180f, 0);
+        // Use the provided impact direction to orient the particle
+        go.transform.rotation = Quaternion.LookRotation(impactDirection);
     }
+
 
     public void StatusUpdate(Entity entity,  PlayerInterludeStats pis , PlayerStatusInterlude psi , int id)
     {

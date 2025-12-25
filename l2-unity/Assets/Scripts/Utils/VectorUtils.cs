@@ -132,12 +132,28 @@ public class VectorUtils : MonoBehaviour {
 
     public static Vector3 GetCollision(Vector3 attacker, Transform target)
     {
+        // Get target's collision height
+        float particleHeight = target.GetComponent<Entity>().Appearance.CollisionHeight * 1.25f;
+
+        // Calculate distance to target
+        float distanceToAttacker = Vector3.Distance(attacker, target.position);
+
+        // If target is very close, aim for the center
+        if (distanceToAttacker < 5.0f) // Adjust this threshold as needed
+        {
+            // Just return the center of the target at the collision height
+            return target.position + Vector3.up * particleHeight;
+        }
+
+        // For normal distances, use the original calculation
         var heading = attacker - target.position;
         float angle = Vector3.Angle(heading, target.forward);
-        float particleHeight = target.GetComponent<Entity>().Appearance.CollisionHeight * 1.25f;
+        float particleHeight1 = target.GetComponent<Entity>().Appearance.CollisionHeight * 1.25f;
         Vector3 direction = Quaternion.Euler(0, angle, 0) * target.forward;
-        return target.position + direction * 0.15f + Vector3.up * particleHeight;
+        return target.position + direction * 0.15f + Vector3.up * particleHeight1;
     }
+
+
 
     public static Vector3 ConvertToUnityUnscaled(Vector3 ueVector) {
         return new Vector3(ueVector.y, ueVector.z, ueVector.x);

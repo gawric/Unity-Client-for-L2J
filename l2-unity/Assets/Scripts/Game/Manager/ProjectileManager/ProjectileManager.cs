@@ -1,13 +1,15 @@
+
 using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.ProBuilder;
 
-public class ProjectileManager : AbstractProjectile , IProjectileManager
+
+public class ProjectileManager : AbstractProjectile, IProjectileManager
 {
     [SerializeField] public ProjectileData defaultSettings;
-    public event Action<GameObject , Transform, Vector3, Vector3> OnHitMonster;
-    public event Action<Transform, Vector3, Vector3> OnHitCollider;
+    public event Action<GameObject, Transform, Vector3, Vector3> OnHitMonster;
+    private Vector3 _lastPosition = Vector3.zero;
 
     private Dictionary<int, ProjectileData> activeProjectiles = new Dictionary<int, ProjectileData>();
     private int nextId = 0;
@@ -40,47 +42,31 @@ public class ProjectileManager : AbstractProjectile , IProjectileManager
         ClearParentObject(readyProjectile);
 
         Vector3 adjustedTarget = VectorUtils.GetCollision(startPos, target);
-        float distance = Vector3.Distance(startPos, adjustedTarget);
-        float flightTime = CalculateFlightTime(distance);
-        float requiredSpeed = distance / flightTime;
 
+        float distance = Vector3.Distance(startPos, adjustedTarget);
+        float speed = GetSpeed(distance);
+        float flightTime = CalculateFlightTime(distance, speed);
+        float requiredSpeed = distance / flightTime;
+        _lastPosition = Vector3.zero;
         int projectileId = nextId++;
+
         ProjectileData projectileData = CreateData(projectileId, distance, readyProjectile, startPos, target,
             adjustedTarget, requiredSpeed, settings, defaultSettings);
 
-        if (distance <= 4f)
-        {
-            projectileData.speedCurve = AnimationCurve.Linear(0, 1, 1, 1);
-        }
 
-        readyProjectile.transform.position = startPos;
-        Vector3 direction = adjustedTarget - startPos;
-        Quaternion rotation = Quaternion.LookRotation(direction);
-        rotation *= Quaternion.Euler(0, 90, 0);
-        readyProjectile.transform.rotation = rotation;
-
+        projectileData.flytime = flightTime;
+        SetPosition(readyProjectile, startPos);
+        var rotation = GetRotation(adjustedTarget, startPos);
+        SetRotation(readyProjectile, rotation);
+ 
         activeProjectiles[projectileId] = projectileData;
         return projectileId;
     }
 
 
-
-    public void StopProjectile(int projectileId)
-    {
-        if (activeProjectiles.TryGetValue(projectileId, out ProjectileData projectile))
-        {
-            projectile.isActive = false;
-            if (projectile.prefab != null)
-            {
-                //Destroy(projectile.prefab);
-            }
-            activeProjectiles.Remove(projectileId);
-        }
-    }
-
     private void Update()
     {
-       
+
         List<int> projectilesToRemove = new List<int>();
 
         foreach (var pair in activeProjectiles)
@@ -120,90 +106,81 @@ public class ProjectileManager : AbstractProjectile , IProjectileManager
     {
         if (!projectile.isActive) return false;
 
-        if (projectile.targetTransform != null)
+       
+        CalcNewTargetPosition(projectile);
+
+        float baseJourneyProgress = (Time.time - projectile.startTime) / projectile.flytime;
+
+
+        float speedMultiplier = 0.3f;
+        speedMultiplier = GetCurveSpeed(projectile, baseJourneyProgress , speedMultiplier);
+
+
+
+        float journeyProgress = baseJourneyProgress * speedMultiplier;
+
+
+        journeyProgress = Mathf.Clamp01(journeyProgress);
+
+        Vector3 currentPosition = GetCurrentPosition(projectile, journeyProgress);
+  
+        RefreshHitPosition(projectile);
+
+        if (journeyProgress >= 1f)
         {
-            projectile.targetPosition = VectorUtils.GetCollision(projectile.transform.position, projectile.targetTransform);
-        }
-
-        float flightTime = CalculateFlightTime(projectile.distance);
-        float fractionOfJourney = (Time.time - projectile.startTime) / flightTime;
-        Vector3 currentPosition = Vector3.Lerp(
-            projectile.startPosition,
-            projectile.targetPosition,
-            fractionOfJourney
-        );
-
-        // Check for collision
-        CheckProjectileCollision(projectile, currentPosition);
-
-        if (fractionOfJourney >= 1f)
-        {
-
-            projectile.hitPoint = projectile.targetPosition;
-            projectile.hitNormal = Vector3.up;
-            projectile.hitDirection = VectorUtils.CalcHitDirection(currentPosition, projectile.startPosition);
+            CheckProjectileCollision(projectile, currentPosition, _lastPosition);
+            SetPosition(projectile, projectile.targetPosition);
+            _lastPosition = currentPosition;
+            RefreshHitPosition(projectile);
 
 
-            if (projectile.prefab == null & projectile.targetTransform == null)
-            {
-                Debug.LogError("Prefab is null before OnHit invoke");
-                return false;
-            }
-
-            OnHitMonster?.Invoke(projectile.prefab, projectile.targetTransform, projectile.hitPointCollider, projectile.hitDirection);
+            OnHitMonster?.Invoke(projectile.prefab, projectile.targetTransform, projectile.hitPoint, projectile.hitDirection);
             return false;
         }
 
-        projectile.transform.position = currentPosition;
+        CheckProjectileCollision(projectile, currentPosition, _lastPosition);
+        SetPosition(projectile, currentPosition);
 
         if (projectile.targetTransform != null)
         {
-            Vector3 direction = projectile.targetPosition - projectile.transform.position;
-            Quaternion rotation = Quaternion.LookRotation(direction);
+            Vector3 dir = projectile.targetPosition - projectile.transform.position;
+            Quaternion rotation = Quaternion.LookRotation(dir);
             rotation *= Quaternion.Euler(0, 90, 0);
-            projectile.transform.rotation = rotation;
+            SetRotation(projectile , rotation);
         }
 
+
+
+        _lastPosition = currentPosition;
         return true;
     }
 
-    private void CheckProjectileCollision(ProjectileData projectile, Vector3 currentPosition)
+  
+
+
+    public void StopProjectile(int projectileId)
     {
-        if (projectile.targetTransform == null || projectile.hitPointCollider != Vector3.zero)
-            return;
-
-        Vector3 rayDirection = (currentPosition - projectile.startPosition).normalized;
-        float distanceToTarget = Vector3.Distance(currentPosition, projectile.targetPosition);
-
-
-            RaycastHit hit;
-     
-            if (Physics.Raycast(
-                currentPosition,
-                rayDirection,
-                out hit,
-                distanceToTarget,
-                _entityMask))
+        if (activeProjectiles.TryGetValue(projectileId, out ProjectileData projectile))
+        {
+            projectile.isActive = false;
+            if (projectile.prefab != null)
             {
-                GameObject gameObject = hit.transform.parent.gameObject;
-                Entity entity = gameObject.GetComponent<Entity>();
-
-                GameObject targetGameObject = projectile.targetTransform.gameObject;
-                Entity targetEntity = targetGameObject.GetComponent<Entity>();
-
-                if (targetEntity == null | entity == null) return;
-
-                if (entity.IdentityInterlude.Id == targetEntity.IdentityInterlude.Id)
-                {
-                    projectile.hitPointCollider = hit.point;
-                    projectile.hitNormalCollider = hit.normal;
-                    projectile.hitDirection = VectorUtils.CalcHitDirection(hit.point, projectile.startPosition);
-                    OnHitCollider?.Invoke(projectile.targetTransform , projectile.hitPointCollider , projectile.hitDirection);
-                }
-            
+                //Destroy(projectile.prefab);
+            }
+            activeProjectiles.Remove(projectileId);
         }
     }
 
-   
+
 
 }
+
+
+
+
+
+
+
+
+
+

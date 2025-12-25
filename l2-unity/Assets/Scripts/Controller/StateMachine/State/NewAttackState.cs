@@ -106,9 +106,10 @@ public class NewAttackState : StateBase
         HitManager.Instance.HandleHitBody(prefab, target, hitPointCollider, hitDirection);
     }
 
-    private void OnHitColliderMonster(Transform target, Vector3 hitPointCollider, Vector3 hitDirection)
+    private void OnHitColliderMonster(Transform attacker , Transform target, Vector3 hitPointCollider, Vector3 hitDirection)
     {
-        //HitManager.Instance.HandleHitCollider(target, hitPointCollider, hitDirection);
+        Debug.Log("Hit colliders on");
+        HitManager.Instance.HandleHitCollider(attacker , target, hitPointCollider, hitDirection);
     }
 
 

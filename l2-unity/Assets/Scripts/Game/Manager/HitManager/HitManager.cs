@@ -29,7 +29,7 @@ public class HitManager : MonoBehaviour
         
         string sourceNameLower = source.name.ToLower();
         string etcNameLower = ETC_NAME.ToLower();
-        HandleHitCollider(target, hitPointCollider, hitDirection);
+        //HandleHitCollider(target, hitPointCollider, hitDirection);
 
         if (sourceNameLower.IndexOf(etcNameLower) > -1)
         {
@@ -43,18 +43,21 @@ public class HitManager : MonoBehaviour
 
     }
 
-    public void HandleHitCollider(Transform target, Vector3 hitCollider, Vector3 hitColliderDirection)
+    public void HandleHitCollider(Transform attacker , Transform target, Vector3 hitCollider, Vector3 hitColliderDirection)
     {
         GameObject targetGameObject = target.gameObject;
 
         if(targetGameObject != null)
         {
             MonsterStateMachine targetStateMachine = targetGameObject.GetComponent<MonsterStateMachine>();
-
-            if(targetStateMachine != null & targetStateMachine.State == MonsterState.IDLE)
+            if (targetStateMachine != null & targetStateMachine.State == MonsterState.IDLE)
             {
                 targetStateMachine.NotifyEvent(Event.HIT_REACTION);
+                Debug.Log("Hit colliders on HIT_REACTION");
             }
+
+            WorldCombat.Instance.InflictAttack(hitCollider, hitColliderDirection);
+
         }
 
     }

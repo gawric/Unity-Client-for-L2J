@@ -31,6 +31,11 @@ public class DrawLine : MonoBehaviour
         newLine.startWidth = 0.01f;
         newLine.endWidth = 0.01f;
 
+        if (newLine.material != null)
+        {
+            newLine.material.color = color;
+        }
+
         // Устанавливаем позиции
         newLine.SetPosition(0, point1);
         newLine.SetPosition(1, point2);

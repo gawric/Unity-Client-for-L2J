@@ -339,7 +339,7 @@ public class PlayerController : MonoBehaviour
         if (PlayerEntity.Instance.TargetId == moveToPawnPacket.TarObjid)
         {
             Entity tarPos = World.Instance.GetEntityNoLockSync(moveToPawnPacket.TarObjid);
-            DebugLineDraw.ShowDrawLineDebug(moveToPawnPacket.ObjId, moveToPawnPacket.ObjPos, tarPos.transform.position, Color.green);
+            //DebugLineDraw.ShowDrawLineDebug(moveToPawnPacket.ObjId, moveToPawnPacket.ObjPos, tarPos.transform.position, Color.green);
             if (PlayerEntity.Instance.Target != null) ThinkMoveToPawn(new ModelMovePawn(PlayerEntity.Instance, tarPos,  moveToPawnPacket.Distance));
         }
         else

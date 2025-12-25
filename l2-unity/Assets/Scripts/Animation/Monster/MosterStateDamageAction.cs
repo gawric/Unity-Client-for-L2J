@@ -53,7 +53,7 @@ public class MonsterStateDamageACtion : MonsterStateBase
 
         // Применение скорости к анимации
         SetAnimationSpeed(animator, currentSpeed);
-        Debug.Log($"Current speed {currentSpeed} timeanimation {_remainingTime} ");
+        //Debug.Log($"Current speed {currentSpeed} timeanimation {_remainingTime} ");
         // Проверка завершения состояния
         if (timeOut >= _endTime)
         {
