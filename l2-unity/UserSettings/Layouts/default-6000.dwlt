@@ -19,7 +19,7 @@ MonoBehaviour:
     width: 1920
     height: 989
   m_ShowMode: 4
-  m_Title: Game
+  m_Title: Console
   m_RootView: {fileID: 2}
   m_MinSize: {x: 875, y: 300}
   m_MaxSize: {x: 10000, y: 10000}
@@ -119,7 +119,7 @@ MonoBehaviour:
   m_MinSize: {x: 300, y: 100}
   m_MaxSize: {x: 24288, y: 16192}
   vertical: 0
-  controlID: 45
+  controlID: 41
   draggingID: 0
 --- !u!114 &6
 MonoBehaviour:
@@ -140,12 +140,12 @@ MonoBehaviour:
     serializedVersion: 2
     x: 0
     y: 0
-    width: 1402
+    width: 1399
     height: 933
   m_MinSize: {x: 200, y: 100}
   m_MaxSize: {x: 16192, y: 16192}
   vertical: 1
-  controlID: 46
+  controlID: 42
   draggingID: 0
 --- !u!114 &7
 MonoBehaviour:
@@ -166,12 +166,12 @@ MonoBehaviour:
     serializedVersion: 2
     x: 0
     y: 0
-    width: 1402
+    width: 1399
     height: 635
   m_MinSize: {x: 200, y: 50}
   m_MaxSize: {x: 16192, y: 8096}
   vertical: 0
-  controlID: 47
+  controlID: 43
   draggingID: 0
 --- !u!114 &8
 MonoBehaviour:
@@ -216,7 +216,7 @@ MonoBehaviour:
     serializedVersion: 2
     x: 368
     y: 0
-    width: 1034
+    width: 1031
     height: 635
   m_MinSize: {x: 202, y: 226}
   m_MaxSize: {x: 4002, y: 4026}
@@ -244,7 +244,7 @@ MonoBehaviour:
     serializedVersion: 2
     x: 0
     y: 635
-    width: 1402
+    width: 1399
     height: 298
   m_MinSize: {x: 100, y: 100}
   m_MaxSize: {x: 4000, y: 4000}
@@ -270,9 +270,9 @@ MonoBehaviour:
   m_Children: []
   m_Position:
     serializedVersion: 2
-    x: 1402
+    x: 1399
     y: 0
-    width: 518
+    width: 521
     height: 933
   m_MinSize: {x: 276, y: 76}
   m_MaxSize: {x: 4001, y: 4026}
@@ -465,9 +465,9 @@ MonoBehaviour:
   m_SceneHierarchy:
     m_TreeViewState:
       scrollPos: {x: 0, y: 0}
-      m_SelectedIDs: 608d0000
+      m_SelectedIDs: 16990000
       m_LastClickedID: 0
-      m_ExpandedIDs: 
+      m_ExpandedIDs: ee2a91fe
       m_RenameOverlay:
         m_UserAcceptedRename: 0
         m_Name: 
@@ -513,9 +513,9 @@ MonoBehaviour:
     m_TextWithWhitespace: "Scene\u200B"
   m_Pos:
     serializedVersion: 2
-    x: -31632
-    y: -31964
-    width: 1032
+    x: 368
+    y: 79
+    width: 1029
     height: 609
   m_SerializedDataModeController:
     m_DataMode: 0
@@ -1151,7 +1151,7 @@ MonoBehaviour:
     serializedVersion: 2
     x: 368
     y: 79
-    width: 1032
+    width: 1029
     height: 609
   m_SerializedDataModeController:
     m_DataMode: 0
@@ -1172,7 +1172,7 @@ MonoBehaviour:
   m_ShowGizmos: 0
   m_TargetDisplay: 0
   m_ClearColor: {r: 0, g: 0, b: 0, a: 0}
-  m_TargetSize: {x: 1032, y: 588}
+  m_TargetSize: {x: 1029, y: 588}
   m_TextureFilterMode: 0
   m_TextureHideFlags: 61
   m_RenderIMGUI: 1
@@ -1187,8 +1187,8 @@ MonoBehaviour:
     m_VRangeLocked: 0
     hZoomLockedByDefault: 0
     vZoomLockedByDefault: 0
-    m_HBaseRangeMin: -516
-    m_HBaseRangeMax: 516
+    m_HBaseRangeMin: -514.5
+    m_HBaseRangeMax: 514.5
     m_VBaseRangeMin: -294
     m_VBaseRangeMax: 294
     m_HAllowExceedBaseRangeMin: 1
@@ -1208,23 +1208,23 @@ MonoBehaviour:
       serializedVersion: 2
       x: 0
       y: 21
-      width: 1032
+      width: 1029
       height: 588
     m_Scale: {x: 1, y: 1}
-    m_Translation: {x: 516, y: 294}
+    m_Translation: {x: 514.5, y: 294}
     m_MarginLeft: 0
     m_MarginRight: 0
     m_MarginTop: 0
     m_MarginBottom: 0
     m_LastShownAreaInsideMargins:
       serializedVersion: 2
-      x: -516
+      x: -514.5
       y: -294
-      width: 1032
+      width: 1029
       height: 588
     m_MinimalGUI: 1
   m_defaultScale: 1
-  m_LastWindowPixelSize: {x: 1032, y: 609}
+  m_LastWindowPixelSize: {x: 1029, y: 609}
   m_ClearInEditMode: 1
   m_NoCameraWarning: 1
   m_LowResolutionForAspectRatios: 01000000000000000000
@@ -1277,7 +1277,7 @@ MonoBehaviour:
     m_SkipHidden: 0
     m_SearchArea: 1
     m_Folders:
-    - Assets/Scripts/Controller/StateMachineMonster/Abstract
+    - Assets/Scripts/Combat/Gear
     m_Globs: []
     m_ProductIds: 
     m_AnyWithAssetOrigin: 0
@@ -1287,16 +1287,16 @@ MonoBehaviour:
   m_ViewMode: 1
   m_StartGridSize: 16
   m_LastFolders:
-  - Assets/Scripts/Controller/StateMachineMonster/Abstract
+  - Assets/Scripts/Combat/Gear
   m_LastFoldersGridSize: 16
   m_LastProjectPath: C:\unity\l2 client\l2-git-interlude\Unity-Client-for-L2J\l2-unity
   m_LockTracker:
     m_IsLocked: 0
   m_FolderTreeState:
     scrollPos: {x: 0, y: 1480}
-    m_SelectedIDs: 16dc0d00
-    m_LastClickedID: 908310
-    m_ExpandedIDs: 000000000a5602000c5602000e56020010560200125602001456020016560200185602001a5602001c5602001e56020020560200225602002456020026560200285602002a5602002c5602002e56020030560200325602003456020036560200385602003a5602003c5602003e56020040560200425602004456020046560200485602004a5602004c5602004e56020050560200525602005456020056560200585602005a5602005c5602005e56020060560200625602006456020066560200685602006a5602006c5602006e56020070560200725602007456020076560200785602007a5602007c5602007e56020080560200825602008456020000ca9a3b
+    m_SelectedIDs: 5c560200
+    m_LastClickedID: 153180
+    m_ExpandedIDs: 000000000a5602000c5602000e56020010560200125602001456020016560200185602001a5602001c5602001e56020020560200225602002456020026560200285602002a5602002c5602002e56020030560200325602003456020036560200385602003a5602003c5602003e56020040560200425602004456020046560200485602004a5602004c5602004e56020050560200525602005456020056560200585602005a5602005c5602005e56020060560200625602006456020066560200685602006a5602006c5602006e56020070560200725602007456020076560200785602007a5602007c5602007e560200805602008256020084560200c057020000ca9a3b
     m_RenameOverlay:
       m_UserAcceptedRename: 0
       m_Name: 
@@ -1351,8 +1351,8 @@ MonoBehaviour:
       m_Icon: {fileID: 0}
       m_ResourceFile: 
   m_ListAreaState:
-    m_SelectedInstanceIDs: 608d0000
-    m_LastClickedInstanceID: 36192
+    m_SelectedInstanceIDs: 16990000
+    m_LastClickedInstanceID: 39190
     m_HadKeyboardFocusLastEvent: 1
     m_ExpandedInstanceIDs: c6230000d4cc00006ac40000daf20000702a020036420200f0b8020028551600383a0100483a0100f4821c00503a0100d8180100e608010082c80000963101009e3c01004a190100ce2613007829010034170100261c2f00763b0200b8ed00003045020076280100eced00001a1301005042020050dc0000c0410200f2020000b041010094e600000000000034be0000d6d50000a6bc0000301e0100401e0100561e0100621e010066350100
     m_RenameOverlay:
@@ -1406,7 +1406,7 @@ MonoBehaviour:
     serializedVersion: 2
     x: 0
     y: 714
-    width: 1401
+    width: 1398
     height: 272
   m_SerializedDataModeController:
     m_DataMode: 0
@@ -1440,9 +1440,9 @@ MonoBehaviour:
     m_TextWithWhitespace: "Inspector\u200B"
   m_Pos:
     serializedVersion: 2
-    x: 1402
+    x: 1399
     y: 79
-    width: 517
+    width: 520
     height: 907
   m_SerializedDataModeController:
     m_DataMode: 0

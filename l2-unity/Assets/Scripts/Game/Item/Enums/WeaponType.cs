@@ -92,6 +92,8 @@ public class WeaponTypeParser {
                 return WeaponType.fist;
             case "bow":
                 return WeaponType.bow;
+            case "arrow":
+                return WeaponType.arrow;
             default:
                 return WeaponType.hand;
         }

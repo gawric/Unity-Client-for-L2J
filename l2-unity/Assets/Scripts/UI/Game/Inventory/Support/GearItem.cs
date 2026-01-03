@@ -1,3 +1,4 @@
+using System.Runtime.InteropServices.WindowsRuntime;
 using UnityEngine.UIElements;
 
 public class GearItem
@@ -79,6 +80,9 @@ public class GearItem
         return _gearSlot.ItemId;
     }
 
+    public bool IsBow() => _gearSlot.GetUseElement() is ItemInstance item && item.IsBow();
+
+    public bool IsArrow() => _gearSlot.GetUseElement() is ItemInstance item && item.IsArrow();
     public int GetObjectId()
     {
         return _gearSlot.ObjectId;

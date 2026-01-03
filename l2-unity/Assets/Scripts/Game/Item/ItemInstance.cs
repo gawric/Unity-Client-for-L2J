@@ -1,4 +1,7 @@
+using FMOD.Studio;
+using NUnit.Framework;
 using UnityEngine;
+using UnityEngine.XR;
 
 public class ItemInstance : AbstractServerItem
 {
@@ -150,10 +153,14 @@ public class ItemInstance : AbstractServerItem
             return hash;
         }
     }
-
-    public bool EqualsBodyPart(ItemSlot bodyPartSource)
+    
+    //We pass the IsBow bool so that when the server receives information about what needs to be changed,
+    //it doesn't select the first element in its LR hands. This is usually the left hand, which usually contains arrows,
+    //so we specifically select only the bow from the right hand.
+    public bool EqualsBodyPart(ItemSlot bodyPartSource , bool isBow = false )
     {
-        if (IsLRHand(bodyPartSource))
+ 
+        if (IsLRHand(bodyPartSource , isBow))
         {
             return true;
         }
@@ -173,16 +180,60 @@ public class ItemInstance : AbstractServerItem
 
 
 
-    private bool IsLRHand(ItemSlot bodyPartSource)
+    private bool IsLRHand(ItemSlot bodyPartSource , bool isBow)
     {
+        if (isBow)
+        {
+
+
+            //Event Bow delete left hand arrow
+            //if (!IsBow() & _bodyPart == ItemSlot.lrhand) return false;
+
+            //Event Bow Replace -> Sword
+            //if (!IsBow() & bodyPartSource == ItemSlot.lrhand & _bodyPart == ItemSlot.rhand) return true;
+            //Event Sword -> Replace Bow
+            //return isBow == IsBow();
+
+
+
+            // Event Bow delete left hand arrow
+            if (ShouldDeleteArrowWhenBowUnequipped())
+                return false;
+
+            // Event Bow Replace -> Sword
+            if (ShouldReplaceBowWithSword(bodyPartSource))
+                return true;
+
+            // Event Sword -> Replace Bow
+            return ShouldReplaceSwordWithBow(isBow);
+        }
+
         if (_bodyPart == ItemSlot.lrhand)
         {
-            if (bodyPartSource == ItemSlot.rhand | bodyPartSource == ItemSlot.lhand)
+            if (IsTwoHandedDelArrow(bodyPartSource))
+            {
+                return false;
+            }
+
+            if (IsRightHand(bodyPartSource))
             {
                 return true;
             }
+
+            //if (bodyPartSource == ItemSlot.lhand)
+            //{
+            //    return false;
+            //}
+
+            //if (bodyPartSource == ItemSlot.rhand)
+            //{
+            //    return true;
+            //}
         }else if (bodyPartSource == ItemSlot.lrhand)
         {
+            //Event Replace Arrow need delete no replace
+            if (IsArrow()) return false;
+
             if (_bodyPart == ItemSlot.rhand | _bodyPart == ItemSlot.lhand)
             {
                 return true;
@@ -190,6 +241,27 @@ public class ItemInstance : AbstractServerItem
         }
 
         return false;
+    }
+
+    private bool IsTwoHandedDelArrow(ItemSlot bodyPartSource) =>
+      _bodyPart == ItemSlot.lrhand && bodyPartSource == ItemSlot.lhand;
+
+    private bool IsRightHand(ItemSlot bodyPartSource) =>
+        _bodyPart == ItemSlot.lrhand && bodyPartSource == ItemSlot.rhand;
+
+    private bool ShouldDeleteArrowWhenBowUnequipped()
+    {
+        return !IsBow() && _bodyPart == ItemSlot.lrhand;
+    }
+
+    private bool ShouldReplaceBowWithSword(ItemSlot bodyPartSource)
+    {
+        return !IsBow() && bodyPartSource == ItemSlot.lrhand && _bodyPart == ItemSlot.rhand;
+    }
+
+    private bool ShouldReplaceSwordWithBow(bool isBow)
+    {
+        return isBow == IsBow();
     }
 
     private bool IsFullPlate(ItemSlot bodyPartSource)

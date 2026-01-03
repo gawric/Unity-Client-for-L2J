@@ -99,4 +99,17 @@ public abstract class AbstractEquip
         }
         return 0;
     }
+
+    protected bool GearSlotByIsBow(ItemSlot slotType)
+    {
+        if (_gearAnchors.ContainsKey(slotType))
+        {
+            return _gearAnchors[slotType].IsBow();
+        }
+        return false;
+    }
+
+    protected bool GearSlotByIsArrow(ItemSlot slotType) =>
+      _gearAnchors.TryGetValue(slotType, out var anchor) && anchor.IsArrow();
+
 }

@@ -286,7 +286,8 @@ public class PlayerInventory : MonoBehaviour
         if (playerEquipInventory.ContainsKey(item.ObjectId) & !item.Equipped)
         {
            
-            ItemInstance del_item_replace = listEquip.FirstOrDefault(itemEquip => itemEquip.EqualsBodyPart(item.BodyPart));
+            ItemInstance del_item_replace = listEquip.FirstOrDefault(itemEquip => itemEquip.EqualsBodyPart(item.BodyPart , item.IsBow()));
+
             if (del_item_replace != null)
             {
                 GearReplaceSlot(playerEquipInventory, del_item_replace, item);
@@ -355,11 +356,15 @@ public class PlayerInventory : MonoBehaviour
 
     private void RemoveGearInventory(Dictionary<int, ItemInstance> playerEquipInventory, ItemInstance del_item)
     {
-        ///_obsoleteItemsGear.Add(del_item);
+
         _changeInventoryData.AddRemoveGear(del_item);
-       // playerEquipInventory.Remove(del_item.ObjectId);
-        if (playerEquipInventory.ContainsKey(del_item.ObjectId)) playerEquipInventory.Remove(del_item.ObjectId);
-        //RefreshPosition(playerEquipInventory);
+
+        if (playerEquipInventory.ContainsKey(del_item.ObjectId))
+        {
+            playerEquipInventory.Remove(del_item.ObjectId);
+        }
+
+
     }
 
     private void GearReplaceSlot(Dictionary<int, ItemInstance> playerEquipInventory, ItemInstance sourceItem , ItemInstance gearItem)

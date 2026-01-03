@@ -67,6 +67,7 @@ public class InventorySlot : L2DraggableSlot
     }
 
 
+
     public void RefreshPosition(int newPosition)
     {
         Position = newPosition;

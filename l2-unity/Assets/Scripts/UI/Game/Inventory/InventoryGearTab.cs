@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -80,19 +81,27 @@ public class InventoryGearTab : L2Tab
         {
             EquipEmptyAll();
         }
-
-         for(int i = 0; i < modified.Count; i++)
-         {
-            ItemInstance currentSlotEquip = modified[i];
-
-            if(currentSlotEquip.Equipped == true)
+        try
+        {
+            for (int i = 0; i < modified.Count; i++)
             {
-                if (currentSlotEquip == null) return;
-                if (changeInventoryData.IsReplaceSourceItem(currentSlotEquip.ObjectId)) return;
-                EquipItem(currentSlotEquip);
-                EventBus.Instance.Equipped(currentSlotEquip , userId);
+                ItemInstance currentSlotEquip = modified[i];
+
+                if (currentSlotEquip.Equipped == true)
+                {
+                    if (currentSlotEquip == null) continue;
+                    bool isReplace = changeInventoryData.IsReplaceSourceItem(currentSlotEquip.ObjectId);
+                    if (changeInventoryData.IsReplaceSourceItem(currentSlotEquip.ObjectId)) continue;
+                    EquipItem(currentSlotEquip);
+                    EventBus.Instance.Equipped(currentSlotEquip, userId);
+                }
             }
         }
+        catch (Exception ex)
+        {
+            Debug.LogError($"InventoryGearTab> UpdateEquipList : {ex.Message}");
+        }
+
     }
     public void SetEquipList(List<ItemInstance> equipItems , int userId)
     {
@@ -127,9 +136,6 @@ public class InventoryGearTab : L2Tab
    
     private void EquipItem(ItemInstance item)
     {
-
-
-
         switch (item.BodyPart)
         {
             case ItemSlot.lrhand:
@@ -165,42 +171,6 @@ public class InventoryGearTab : L2Tab
     }
 
 
-    public void GetGearToSlot(ItemInstance item)
-    {
-        //Debug.Log("Body part staff " + item.BodyPart);
-        switch (item.BodyPart)
-        {
-            case ItemSlot.lrhand:
-                _equip.LRHand(item);
-                break;
-
-            case ItemSlot.fullarmor:
-                _equip.FullArmor(item);
-                break;
-            case ItemSlot.lfinger:
-                _equip.LFinger(item);
-                break;
-
-            case ItemSlot.lear:
-                _equip.Lear(item);
-                break;
-            case ItemSlot.rhand:
-                _equip.RHand(item);
-                break;
-            case ItemSlot.lhand:
-                _equip.LHand(item);
-                break;
-            case ItemSlot.chest:
-                _equip.Chest(item);
-                break;
-            case ItemSlot.legs:
-                _equip.Legs(item);
-                break;
-            default:
-                _equip.DefaultAssign(item);
-                break;
-        }
-    }
 
 
 

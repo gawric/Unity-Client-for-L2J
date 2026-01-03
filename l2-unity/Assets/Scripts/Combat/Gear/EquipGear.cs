@@ -51,8 +51,9 @@ public class EquipGear : AbstractEquip
         //AddGearEmptySlot(ItemSlot.rhand);
         if(GearSlotGetItemSlot(ItemSlot.rhand) == ItemSlot.lrhand || GearSlotGetItemSlot(ItemSlot.lhand) == ItemSlot.lrhand)
         {
+
             AddGearEmptySlot(ItemSlot.lhand);
-            AddGearEmptySlot(ItemSlot.rhand);
+            if (!GearSlotByIsBow(ItemSlot.rhand)) AddGearEmptySlot(ItemSlot.rhand);
         }
         AddGearSlotAssign(ItemSlot.lhand, item);
     }
@@ -70,7 +71,18 @@ public class EquipGear : AbstractEquip
 
     public void LRHand(ItemInstance item)
     {
-        AddGearSlotAssignAlpha(ItemSlot.lhand, item, 0.8f);
+        if (item.IsBow())
+        {
+            if (!GearSlotByIsArrow(ItemSlot.lhand))
+            {
+                AddGearSlotAssignAlpha(ItemSlot.lhand, item, 0.8f);
+            }
+        }
+        else
+        {
+            AddGearSlotAssignAlpha(ItemSlot.lhand, item, 0.8f);
+        }
+
         AddGearSlotAssign(ItemSlot.rhand, item);
     }
 
@@ -166,8 +178,8 @@ public class EquipGear : AbstractEquip
         switch (bodyPart)
         {
             case ItemSlot.lrhand:
-                AddGearEmptySlot(ItemSlot.lhand);
-                AddGearEmptySlot(ItemSlot.rhand);
+                AddGearEmptySlotIfItemIdEquals(ItemSlot.lhand , item.ItemId);
+                AddGearEmptySlotIfItemIdEquals(ItemSlot.rhand, item.ItemId);
                 break;
 
             case ItemSlot.fullarmor:
@@ -176,15 +188,6 @@ public class EquipGear : AbstractEquip
                 break;
 
             case ItemSlot.lfinger:
-
-                //if (!GearSlotIsEmpty(bodyPart))
-                //{
-                //    AddGearEmptySlot(ItemSlot.lfinger);
-               // }
-               // else
-                //{
-                   // AddGearEmptySlot(ItemSlot.rfinger);
-                //}
                 GearItem gearSlotFinger = GetSlotByObjectId(item.ObjectId);
                 if (gearSlotFinger != null)
                 {
@@ -236,6 +239,18 @@ public class EquipGear : AbstractEquip
         if (_gearAnchors.ContainsKey(slotType))
         {
             _gearAnchors[slotType].AssignEmpty();
+        }
+    }
+
+    public void AddGearEmptySlotIfItemIdEquals(ItemSlot slotType , int itemId)
+    {
+        if (_gearAnchors.ContainsKey(slotType))
+        {
+            GearItem gearItem = _gearAnchors[slotType];
+            if(gearItem.GetItemId() == itemId)
+            {
+                _gearAnchors[slotType].AssignEmpty();
+            }
         }
     }
 

@@ -399,13 +399,11 @@ public class InventoryWindow : L2PopupWindow
 
         foreach (ItemInstance item in obsoleteItemsInventory)
         {
-            if (!obsoleteItemsGearReplace.Any(replaceData => replaceData.GetGear().EqualsBodyPart(item.BodyPart)))
+            if (!obsoleteItemsGearReplace.Any(replaceData => replaceData.GetGear().EqualsBodyPart(item.BodyPart , item.IsBow())))
             {
                 _tabs[0].ModifiedRemove(item);
             }
         }
-
-        //obsoleteItemsGear.ForEach(item=>_gearTab.ModifiedRemove(item.BodyPart , item));
 
         obsoleteItemsGear.ForEach(item =>
         {

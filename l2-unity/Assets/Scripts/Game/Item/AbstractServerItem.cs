@@ -139,6 +139,9 @@ public abstract class AbstractServerItem
 
     public bool IsBow() => WeapongrpTable.Instance.GetWeapon(itemId)?.WeaponType == WeaponType.bow;
 
+    public bool IsArrow() => WeaponTypeParser.Parse(EtcItemgrpTable.Instance.GetEtcItem(itemId)?.EtcItemType) == WeaponType.arrow;
+
+
     public bool IsDual() => WeapongrpTable.Instance.GetWeapon(itemId)?.WeaponType == WeaponType.dual;
 
     public string GetDescription()
