@@ -8,6 +8,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: -8907485796259161071, guid: cce2d4837b3bc484c8ddc67b45cbe007, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: c27d94aa0e2a06841a5a208e343570e4, type: 2}
     - target: {fileID: -8679921383154817045, guid: cce2d4837b3bc484c8ddc67b45cbe007, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -51,6 +55,30 @@ PrefabInstance:
     - target: {fileID: 919132149155446097, guid: cce2d4837b3bc484c8ddc67b45cbe007, type: 3}
       propertyPath: m_Name
       value: Mon_zombie_laborer_sword_m00_wp
+      objectReference: {fileID: 0}
+    - target: {fileID: 4175035961466448914, guid: cce2d4837b3bc484c8ddc67b45cbe007, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4175035961466448914, guid: cce2d4837b3bc484c8ddc67b45cbe007, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4175035961466448914, guid: cce2d4837b3bc484c8ddc67b45cbe007, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4175035961466448914, guid: cce2d4837b3bc484c8ddc67b45cbe007, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4175035961466448914, guid: cce2d4837b3bc484c8ddc67b45cbe007, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4175035961466448914, guid: cce2d4837b3bc484c8ddc67b45cbe007, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

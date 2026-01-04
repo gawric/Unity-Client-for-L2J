@@ -48,9 +48,65 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -7386007312805478738, guid: aa18ddf39c499184db0e822604cb7a1d, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: a96bf775b5ca8444792bc6e080335e85, type: 2}
+    - target: {fileID: -7386007312805478738, guid: aa18ddf39c499184db0e822604cb7a1d, type: 3}
+      propertyPath: 'm_Materials.Array.data[1]'
+      value: 
+      objectReference: {fileID: 2100000, guid: a96bf775b5ca8444792bc6e080335e85, type: 2}
+    - target: {fileID: -623199366731561914, guid: aa18ddf39c499184db0e822604cb7a1d, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -623199366731561914, guid: aa18ddf39c499184db0e822604cb7a1d, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -623199366731561914, guid: aa18ddf39c499184db0e822604cb7a1d, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -623199366731561914, guid: aa18ddf39c499184db0e822604cb7a1d, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -623199366731561914, guid: aa18ddf39c499184db0e822604cb7a1d, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -623199366731561914, guid: aa18ddf39c499184db0e822604cb7a1d, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: aa18ddf39c499184db0e822604cb7a1d, type: 3}
       propertyPath: m_Name
       value: skeleton_buckler_m00_sh
+      objectReference: {fileID: 0}
+    - target: {fileID: 2435684688974545407, guid: aa18ddf39c499184db0e822604cb7a1d, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2435684688974545407, guid: aa18ddf39c499184db0e822604cb7a1d, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2435684688974545407, guid: aa18ddf39c499184db0e822604cb7a1d, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2435684688974545407, guid: aa18ddf39c499184db0e822604cb7a1d, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2435684688974545407, guid: aa18ddf39c499184db0e822604cb7a1d, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2435684688974545407, guid: aa18ddf39c499184db0e822604cb7a1d, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

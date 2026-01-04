@@ -48,9 +48,61 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -3323366715076482338, guid: 102ebcf2c20676747a0aa7eeee927316, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -3323366715076482338, guid: 102ebcf2c20676747a0aa7eeee927316, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -3323366715076482338, guid: 102ebcf2c20676747a0aa7eeee927316, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -3323366715076482338, guid: 102ebcf2c20676747a0aa7eeee927316, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -3323366715076482338, guid: 102ebcf2c20676747a0aa7eeee927316, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -3323366715076482338, guid: 102ebcf2c20676747a0aa7eeee927316, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 102ebcf2c20676747a0aa7eeee927316, type: 3}
       propertyPath: m_Name
       value: Mon_lidia_von_helmann_sword_m00_wp
+      objectReference: {fileID: 0}
+    - target: {fileID: 973326602040660882, guid: 102ebcf2c20676747a0aa7eeee927316, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 6c0bfb35786b5954eb0142d378dcfb50, type: 2}
+    - target: {fileID: 1229853130951181435, guid: 102ebcf2c20676747a0aa7eeee927316, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1229853130951181435, guid: 102ebcf2c20676747a0aa7eeee927316, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1229853130951181435, guid: 102ebcf2c20676747a0aa7eeee927316, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1229853130951181435, guid: 102ebcf2c20676747a0aa7eeee927316, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1229853130951181435, guid: 102ebcf2c20676747a0aa7eeee927316, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1229853130951181435, guid: 102ebcf2c20676747a0aa7eeee927316, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

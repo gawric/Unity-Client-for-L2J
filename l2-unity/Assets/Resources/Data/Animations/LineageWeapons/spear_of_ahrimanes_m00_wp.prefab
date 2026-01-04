@@ -48,10 +48,62 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -5487465153986344324, guid: d23fac79e4e10e44e9a0af0b8afc1312, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -5487465153986344324, guid: d23fac79e4e10e44e9a0af0b8afc1312, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -5487465153986344324, guid: d23fac79e4e10e44e9a0af0b8afc1312, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -5487465153986344324, guid: d23fac79e4e10e44e9a0af0b8afc1312, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -5487465153986344324, guid: d23fac79e4e10e44e9a0af0b8afc1312, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -5487465153986344324, guid: d23fac79e4e10e44e9a0af0b8afc1312, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: d23fac79e4e10e44e9a0af0b8afc1312, type: 3}
       propertyPath: m_Name
       value: spear_of_ahrimanes_m00_wp
       objectReference: {fileID: 0}
+    - target: {fileID: 8489514304650384496, guid: d23fac79e4e10e44e9a0af0b8afc1312, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8489514304650384496, guid: d23fac79e4e10e44e9a0af0b8afc1312, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8489514304650384496, guid: d23fac79e4e10e44e9a0af0b8afc1312, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8489514304650384496, guid: d23fac79e4e10e44e9a0af0b8afc1312, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8489514304650384496, guid: d23fac79e4e10e44e9a0af0b8afc1312, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8489514304650384496, guid: d23fac79e4e10e44e9a0af0b8afc1312, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 9192824848656076727, guid: d23fac79e4e10e44e9a0af0b8afc1312, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: ca6185b51dfb54747b187c70010a5db3, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

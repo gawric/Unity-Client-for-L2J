@@ -48,6 +48,58 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -7806405550098067668, guid: e5141e334d6c7c342a4397976e6ed741, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 9b9a81a49bd7d9f4ba687d4ea99bbad9, type: 2}
+    - target: {fileID: -5348107875467814327, guid: e5141e334d6c7c342a4397976e6ed741, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -5348107875467814327, guid: e5141e334d6c7c342a4397976e6ed741, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -5348107875467814327, guid: e5141e334d6c7c342a4397976e6ed741, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -5348107875467814327, guid: e5141e334d6c7c342a4397976e6ed741, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -5348107875467814327, guid: e5141e334d6c7c342a4397976e6ed741, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -5348107875467814327, guid: e5141e334d6c7c342a4397976e6ed741, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -1974032178967006063, guid: e5141e334d6c7c342a4397976e6ed741, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -1974032178967006063, guid: e5141e334d6c7c342a4397976e6ed741, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -1974032178967006063, guid: e5141e334d6c7c342a4397976e6ed741, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -1974032178967006063, guid: e5141e334d6c7c342a4397976e6ed741, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -1974032178967006063, guid: e5141e334d6c7c342a4397976e6ed741, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -1974032178967006063, guid: e5141e334d6c7c342a4397976e6ed741, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: e5141e334d6c7c342a4397976e6ed741, type: 3}
       propertyPath: m_Name
       value: stormbringer_m00_wp

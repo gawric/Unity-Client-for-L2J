@@ -52,6 +52,58 @@ PrefabInstance:
       propertyPath: m_Name
       value: twohanded_sword_m00_wp
       objectReference: {fileID: 0}
+    - target: {fileID: 4877809747391884545, guid: 910f8e715cd170647a56244175ba5181, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 1a98523bf91630047a3952e17cf81519, type: 2}
+    - target: {fileID: 7198142929596369911, guid: 910f8e715cd170647a56244175ba5181, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7198142929596369911, guid: 910f8e715cd170647a56244175ba5181, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7198142929596369911, guid: 910f8e715cd170647a56244175ba5181, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7198142929596369911, guid: 910f8e715cd170647a56244175ba5181, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7198142929596369911, guid: 910f8e715cd170647a56244175ba5181, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7198142929596369911, guid: 910f8e715cd170647a56244175ba5181, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8784294267427272716, guid: 910f8e715cd170647a56244175ba5181, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8784294267427272716, guid: 910f8e715cd170647a56244175ba5181, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8784294267427272716, guid: 910f8e715cd170647a56244175ba5181, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8784294267427272716, guid: 910f8e715cd170647a56244175ba5181, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8784294267427272716, guid: 910f8e715cd170647a56244175ba5181, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8784294267427272716, guid: 910f8e715cd170647a56244175ba5181, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

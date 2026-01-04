@@ -48,6 +48,62 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -5077878790412347680, guid: a48c3b779d5695d4ea75adf97ab20405, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -5077878790412347680, guid: a48c3b779d5695d4ea75adf97ab20405, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -5077878790412347680, guid: a48c3b779d5695d4ea75adf97ab20405, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -5077878790412347680, guid: a48c3b779d5695d4ea75adf97ab20405, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -5077878790412347680, guid: a48c3b779d5695d4ea75adf97ab20405, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -5077878790412347680, guid: a48c3b779d5695d4ea75adf97ab20405, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -2146372361760406175, guid: a48c3b779d5695d4ea75adf97ab20405, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -2146372361760406175, guid: a48c3b779d5695d4ea75adf97ab20405, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -2146372361760406175, guid: a48c3b779d5695d4ea75adf97ab20405, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -2146372361760406175, guid: a48c3b779d5695d4ea75adf97ab20405, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -2146372361760406175, guid: a48c3b779d5695d4ea75adf97ab20405, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -2146372361760406175, guid: a48c3b779d5695d4ea75adf97ab20405, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 212368505330860376, guid: a48c3b779d5695d4ea75adf97ab20405, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: f666a943a1169bd4eb82f1b39a336412, type: 2}
+    - target: {fileID: 212368505330860376, guid: a48c3b779d5695d4ea75adf97ab20405, type: 3}
+      propertyPath: 'm_Materials.Array.data[1]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 8832f17a4e325e5479f4ddd82df1ae38, type: 2}
     - target: {fileID: 919132149155446097, guid: a48c3b779d5695d4ea75adf97ab20405, type: 3}
       propertyPath: m_Name
       value: full_plate_shield_m00_sh

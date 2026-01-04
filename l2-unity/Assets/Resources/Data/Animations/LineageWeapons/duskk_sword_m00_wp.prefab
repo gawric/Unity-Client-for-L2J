@@ -48,10 +48,62 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -803502199817916301, guid: 010eb2777cbd2f74dafb6e479479ebea, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -803502199817916301, guid: 010eb2777cbd2f74dafb6e479479ebea, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -803502199817916301, guid: 010eb2777cbd2f74dafb6e479479ebea, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -803502199817916301, guid: 010eb2777cbd2f74dafb6e479479ebea, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -803502199817916301, guid: 010eb2777cbd2f74dafb6e479479ebea, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -803502199817916301, guid: 010eb2777cbd2f74dafb6e479479ebea, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -731532149931280979, guid: 010eb2777cbd2f74dafb6e479479ebea, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -731532149931280979, guid: 010eb2777cbd2f74dafb6e479479ebea, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -731532149931280979, guid: 010eb2777cbd2f74dafb6e479479ebea, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -731532149931280979, guid: 010eb2777cbd2f74dafb6e479479ebea, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -731532149931280979, guid: 010eb2777cbd2f74dafb6e479479ebea, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -731532149931280979, guid: 010eb2777cbd2f74dafb6e479479ebea, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 010eb2777cbd2f74dafb6e479479ebea, type: 3}
       propertyPath: m_Name
       value: duskk_sword_m00_wp
       objectReference: {fileID: 0}
+    - target: {fileID: 4206929808801184346, guid: 010eb2777cbd2f74dafb6e479479ebea, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 93479de77ae26ae44bad044dd8cf5207, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

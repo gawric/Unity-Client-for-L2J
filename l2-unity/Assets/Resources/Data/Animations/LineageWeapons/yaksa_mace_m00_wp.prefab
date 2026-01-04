@@ -48,6 +48,58 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -7594923076420817549, guid: 483d4939bd146f249bf943a64848f6f7, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: cf851fadfefeda44994dd33f31c1e33d, type: 2}
+    - target: {fileID: -4433807054877034990, guid: 483d4939bd146f249bf943a64848f6f7, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -4433807054877034990, guid: 483d4939bd146f249bf943a64848f6f7, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -4433807054877034990, guid: 483d4939bd146f249bf943a64848f6f7, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -4433807054877034990, guid: 483d4939bd146f249bf943a64848f6f7, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -4433807054877034990, guid: 483d4939bd146f249bf943a64848f6f7, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -4433807054877034990, guid: 483d4939bd146f249bf943a64848f6f7, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -987605845645131545, guid: 483d4939bd146f249bf943a64848f6f7, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -987605845645131545, guid: 483d4939bd146f249bf943a64848f6f7, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -987605845645131545, guid: 483d4939bd146f249bf943a64848f6f7, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -987605845645131545, guid: 483d4939bd146f249bf943a64848f6f7, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -987605845645131545, guid: 483d4939bd146f249bf943a64848f6f7, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -987605845645131545, guid: 483d4939bd146f249bf943a64848f6f7, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 483d4939bd146f249bf943a64848f6f7, type: 3}
       propertyPath: m_Name
       value: yaksa_mace_m00_wp

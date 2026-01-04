@@ -52,6 +52,58 @@ PrefabInstance:
       propertyPath: m_Name
       value: war_hammer_m00_wp
       objectReference: {fileID: 0}
+    - target: {fileID: 1771824868099116933, guid: e1fc46f3202855b498a1b2b15b7e2480, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1771824868099116933, guid: e1fc46f3202855b498a1b2b15b7e2480, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1771824868099116933, guid: e1fc46f3202855b498a1b2b15b7e2480, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1771824868099116933, guid: e1fc46f3202855b498a1b2b15b7e2480, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1771824868099116933, guid: e1fc46f3202855b498a1b2b15b7e2480, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1771824868099116933, guid: e1fc46f3202855b498a1b2b15b7e2480, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4285443905257571125, guid: e1fc46f3202855b498a1b2b15b7e2480, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 8bb0278a8f245cf44bf7711b2d2a5e5c, type: 2}
+    - target: {fileID: 8873423658938236518, guid: e1fc46f3202855b498a1b2b15b7e2480, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8873423658938236518, guid: e1fc46f3202855b498a1b2b15b7e2480, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8873423658938236518, guid: e1fc46f3202855b498a1b2b15b7e2480, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8873423658938236518, guid: e1fc46f3202855b498a1b2b15b7e2480, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8873423658938236518, guid: e1fc46f3202855b498a1b2b15b7e2480, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8873423658938236518, guid: e1fc46f3202855b498a1b2b15b7e2480, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

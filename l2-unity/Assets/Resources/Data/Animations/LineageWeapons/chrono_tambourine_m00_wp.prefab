@@ -48,10 +48,62 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -153457161216259965, guid: 497ce77d26d23d648a04e13edf738343, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -153457161216259965, guid: 497ce77d26d23d648a04e13edf738343, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -153457161216259965, guid: 497ce77d26d23d648a04e13edf738343, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -153457161216259965, guid: 497ce77d26d23d648a04e13edf738343, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -153457161216259965, guid: 497ce77d26d23d648a04e13edf738343, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -153457161216259965, guid: 497ce77d26d23d648a04e13edf738343, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 497ce77d26d23d648a04e13edf738343, type: 3}
       propertyPath: m_Name
       value: chrono_tambourine_m00_wp
       objectReference: {fileID: 0}
+    - target: {fileID: 2028780474344286622, guid: 497ce77d26d23d648a04e13edf738343, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2028780474344286622, guid: 497ce77d26d23d648a04e13edf738343, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2028780474344286622, guid: 497ce77d26d23d648a04e13edf738343, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2028780474344286622, guid: 497ce77d26d23d648a04e13edf738343, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2028780474344286622, guid: 497ce77d26d23d648a04e13edf738343, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2028780474344286622, guid: 497ce77d26d23d648a04e13edf738343, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6384014822785039234, guid: 497ce77d26d23d648a04e13edf738343, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 735b983b7cf4b7540bc97f6c10c91287, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

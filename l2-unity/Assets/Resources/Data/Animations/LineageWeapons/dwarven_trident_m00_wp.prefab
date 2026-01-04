@@ -48,6 +48,58 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -6192140083325980570, guid: fec6fdfefc0c25d4f969441a724b3e56, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -6192140083325980570, guid: fec6fdfefc0c25d4f969441a724b3e56, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -6192140083325980570, guid: fec6fdfefc0c25d4f969441a724b3e56, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -6192140083325980570, guid: fec6fdfefc0c25d4f969441a724b3e56, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -6192140083325980570, guid: fec6fdfefc0c25d4f969441a724b3e56, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -6192140083325980570, guid: fec6fdfefc0c25d4f969441a724b3e56, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -1905828626932201626, guid: fec6fdfefc0c25d4f969441a724b3e56, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: f8aab0443393f744b9775e73dae02144, type: 2}
+    - target: {fileID: -1883342269186653636, guid: fec6fdfefc0c25d4f969441a724b3e56, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -1883342269186653636, guid: fec6fdfefc0c25d4f969441a724b3e56, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -1883342269186653636, guid: fec6fdfefc0c25d4f969441a724b3e56, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -1883342269186653636, guid: fec6fdfefc0c25d4f969441a724b3e56, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -1883342269186653636, guid: fec6fdfefc0c25d4f969441a724b3e56, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -1883342269186653636, guid: fec6fdfefc0c25d4f969441a724b3e56, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: fec6fdfefc0c25d4f969441a724b3e56, type: 3}
       propertyPath: m_Name
       value: dwarven_trident_m00_wp

@@ -48,6 +48,58 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -4483968780550647795, guid: d622bfba3c8e91e4caf14bc51c55b9a5, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -4483968780550647795, guid: d622bfba3c8e91e4caf14bc51c55b9a5, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -4483968780550647795, guid: d622bfba3c8e91e4caf14bc51c55b9a5, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -4483968780550647795, guid: d622bfba3c8e91e4caf14bc51c55b9a5, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -4483968780550647795, guid: d622bfba3c8e91e4caf14bc51c55b9a5, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -4483968780550647795, guid: d622bfba3c8e91e4caf14bc51c55b9a5, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -1438915352224572368, guid: d622bfba3c8e91e4caf14bc51c55b9a5, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -1438915352224572368, guid: d622bfba3c8e91e4caf14bc51c55b9a5, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -1438915352224572368, guid: d622bfba3c8e91e4caf14bc51c55b9a5, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -1438915352224572368, guid: d622bfba3c8e91e4caf14bc51c55b9a5, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -1438915352224572368, guid: d622bfba3c8e91e4caf14bc51c55b9a5, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -1438915352224572368, guid: d622bfba3c8e91e4caf14bc51c55b9a5, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 105388204342659138, guid: d622bfba3c8e91e4caf14bc51c55b9a5, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 98a7c5b5a70d1f94a9547adf3ae431ec, type: 2}
     - target: {fileID: 919132149155446097, guid: d622bfba3c8e91e4caf14bc51c55b9a5, type: 3}
       propertyPath: m_Name
       value: orcish_poleaxe_m00_wp

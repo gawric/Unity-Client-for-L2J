@@ -48,10 +48,62 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -5412286034401087995, guid: e7283e4583c614b41a45b53cc4180cbe, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -5412286034401087995, guid: e7283e4583c614b41a45b53cc4180cbe, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -5412286034401087995, guid: e7283e4583c614b41a45b53cc4180cbe, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -5412286034401087995, guid: e7283e4583c614b41a45b53cc4180cbe, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -5412286034401087995, guid: e7283e4583c614b41a45b53cc4180cbe, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -5412286034401087995, guid: e7283e4583c614b41a45b53cc4180cbe, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -4879703314878090040, guid: e7283e4583c614b41a45b53cc4180cbe, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -4879703314878090040, guid: e7283e4583c614b41a45b53cc4180cbe, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -4879703314878090040, guid: e7283e4583c614b41a45b53cc4180cbe, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -4879703314878090040, guid: e7283e4583c614b41a45b53cc4180cbe, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -4879703314878090040, guid: e7283e4583c614b41a45b53cc4180cbe, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -4879703314878090040, guid: e7283e4583c614b41a45b53cc4180cbe, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: e7283e4583c614b41a45b53cc4180cbe, type: 3}
       propertyPath: m_Name
       value: cursed_staff_m00_wp
       objectReference: {fileID: 0}
+    - target: {fileID: 1270436248110092094, guid: e7283e4583c614b41a45b53cc4180cbe, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 60cc66287065a8648be3981f76d4cf19, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

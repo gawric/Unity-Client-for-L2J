@@ -48,6 +48,62 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -8127705822269459166, guid: 01c580771e10f674da9227461a28d5d1, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -8127705822269459166, guid: 01c580771e10f674da9227461a28d5d1, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -8127705822269459166, guid: 01c580771e10f674da9227461a28d5d1, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -8127705822269459166, guid: 01c580771e10f674da9227461a28d5d1, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -8127705822269459166, guid: 01c580771e10f674da9227461a28d5d1, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8127705822269459166, guid: 01c580771e10f674da9227461a28d5d1, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -5089374019103503111, guid: 01c580771e10f674da9227461a28d5d1, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 93247b5de7cdfa1409764b1fa7984a8b, type: 2}
+    - target: {fileID: -5089374019103503111, guid: 01c580771e10f674da9227461a28d5d1, type: 3}
+      propertyPath: 'm_Materials.Array.data[1]'
+      value: 
+      objectReference: {fileID: 2100000, guid: f5572e256cf70aa4b990ba5a219c38e2, type: 2}
+    - target: {fileID: 273080462268437702, guid: 01c580771e10f674da9227461a28d5d1, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 273080462268437702, guid: 01c580771e10f674da9227461a28d5d1, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 273080462268437702, guid: 01c580771e10f674da9227461a28d5d1, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 273080462268437702, guid: 01c580771e10f674da9227461a28d5d1, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 273080462268437702, guid: 01c580771e10f674da9227461a28d5d1, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 273080462268437702, guid: 01c580771e10f674da9227461a28d5d1, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 01c580771e10f674da9227461a28d5d1, type: 3}
       propertyPath: m_Name
       value: implosion_shield_m00_sh

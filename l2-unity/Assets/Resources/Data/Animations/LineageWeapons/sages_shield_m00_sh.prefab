@@ -52,6 +52,62 @@ PrefabInstance:
       propertyPath: m_Name
       value: sages_shield_m00_sh
       objectReference: {fileID: 0}
+    - target: {fileID: 2271841784012543744, guid: 89c00990b70b87c49af85882603cc659, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 1ea28244d35a73e44ad35cbe78b5b6cf, type: 2}
+    - target: {fileID: 2271841784012543744, guid: 89c00990b70b87c49af85882603cc659, type: 3}
+      propertyPath: 'm_Materials.Array.data[1]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 7e5f585375676b14a941f97d508eec66, type: 2}
+    - target: {fileID: 2870445744823666094, guid: 89c00990b70b87c49af85882603cc659, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2870445744823666094, guid: 89c00990b70b87c49af85882603cc659, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2870445744823666094, guid: 89c00990b70b87c49af85882603cc659, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2870445744823666094, guid: 89c00990b70b87c49af85882603cc659, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2870445744823666094, guid: 89c00990b70b87c49af85882603cc659, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2870445744823666094, guid: 89c00990b70b87c49af85882603cc659, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2870887267700905655, guid: 89c00990b70b87c49af85882603cc659, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2870887267700905655, guid: 89c00990b70b87c49af85882603cc659, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2870887267700905655, guid: 89c00990b70b87c49af85882603cc659, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2870887267700905655, guid: 89c00990b70b87c49af85882603cc659, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2870887267700905655, guid: 89c00990b70b87c49af85882603cc659, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2870887267700905655, guid: 89c00990b70b87c49af85882603cc659, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

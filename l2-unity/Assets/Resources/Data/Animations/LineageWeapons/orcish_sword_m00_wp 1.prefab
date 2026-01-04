@@ -48,10 +48,66 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -5654793489731058558, guid: a5d7cd80648a4a64e809c18facdaceee, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -5654793489731058558, guid: a5d7cd80648a4a64e809c18facdaceee, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -5654793489731058558, guid: a5d7cd80648a4a64e809c18facdaceee, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -5654793489731058558, guid: a5d7cd80648a4a64e809c18facdaceee, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -5654793489731058558, guid: a5d7cd80648a4a64e809c18facdaceee, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -5654793489731058558, guid: a5d7cd80648a4a64e809c18facdaceee, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: a5d7cd80648a4a64e809c18facdaceee, type: 3}
       propertyPath: m_Name
       value: orcish_sword_m00_wp 1
       objectReference: {fileID: 0}
+    - target: {fileID: 6047480716230105886, guid: a5d7cd80648a4a64e809c18facdaceee, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6047480716230105886, guid: a5d7cd80648a4a64e809c18facdaceee, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6047480716230105886, guid: a5d7cd80648a4a64e809c18facdaceee, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6047480716230105886, guid: a5d7cd80648a4a64e809c18facdaceee, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6047480716230105886, guid: a5d7cd80648a4a64e809c18facdaceee, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6047480716230105886, guid: a5d7cd80648a4a64e809c18facdaceee, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6047480716230105886, guid: a5d7cd80648a4a64e809c18facdaceee, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7325755894840848194, guid: a5d7cd80648a4a64e809c18facdaceee, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 65783fbce22528f47b7b1fafe788e0b5, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

@@ -48,9 +48,61 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -1127636530502679147, guid: 7e2145ff722926b4eb0d2239fb6e297d, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -1127636530502679147, guid: 7e2145ff722926b4eb0d2239fb6e297d, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -1127636530502679147, guid: 7e2145ff722926b4eb0d2239fb6e297d, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -1127636530502679147, guid: 7e2145ff722926b4eb0d2239fb6e297d, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -1127636530502679147, guid: 7e2145ff722926b4eb0d2239fb6e297d, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -1127636530502679147, guid: 7e2145ff722926b4eb0d2239fb6e297d, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 7e2145ff722926b4eb0d2239fb6e297d, type: 3}
       propertyPath: m_Name
       value: Mon_heretic_priest_sickle_m00_wp
+      objectReference: {fileID: 0}
+    - target: {fileID: 6401085625378744250, guid: 7e2145ff722926b4eb0d2239fb6e297d, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 13aa214b5e1d3e84da36641f8e2e7d6a, type: 2}
+    - target: {fileID: 6524385225030622589, guid: 7e2145ff722926b4eb0d2239fb6e297d, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6524385225030622589, guid: 7e2145ff722926b4eb0d2239fb6e297d, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6524385225030622589, guid: 7e2145ff722926b4eb0d2239fb6e297d, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6524385225030622589, guid: 7e2145ff722926b4eb0d2239fb6e297d, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6524385225030622589, guid: 7e2145ff722926b4eb0d2239fb6e297d, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6524385225030622589, guid: 7e2145ff722926b4eb0d2239fb6e297d, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

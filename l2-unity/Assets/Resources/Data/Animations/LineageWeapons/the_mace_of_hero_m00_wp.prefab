@@ -48,6 +48,58 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -2776712903140072994, guid: 5354f0a8945987440971aa860ce76fd4, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: e9d530a586c33eb47b55c4e966a542e1, type: 2}
+    - target: {fileID: -2388139768218825991, guid: 5354f0a8945987440971aa860ce76fd4, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -2388139768218825991, guid: 5354f0a8945987440971aa860ce76fd4, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -2388139768218825991, guid: 5354f0a8945987440971aa860ce76fd4, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -2388139768218825991, guid: 5354f0a8945987440971aa860ce76fd4, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -2388139768218825991, guid: 5354f0a8945987440971aa860ce76fd4, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -2388139768218825991, guid: 5354f0a8945987440971aa860ce76fd4, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -1438202235727478392, guid: 5354f0a8945987440971aa860ce76fd4, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -1438202235727478392, guid: 5354f0a8945987440971aa860ce76fd4, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -1438202235727478392, guid: 5354f0a8945987440971aa860ce76fd4, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -1438202235727478392, guid: 5354f0a8945987440971aa860ce76fd4, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -1438202235727478392, guid: 5354f0a8945987440971aa860ce76fd4, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -1438202235727478392, guid: 5354f0a8945987440971aa860ce76fd4, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 5354f0a8945987440971aa860ce76fd4, type: 3}
       propertyPath: m_Name
       value: the_mace_of_hero_m00_wp

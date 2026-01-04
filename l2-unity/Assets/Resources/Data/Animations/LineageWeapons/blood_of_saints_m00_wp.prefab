@@ -48,6 +48,54 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -4429562679493684774, guid: a42e7ea3a5cb90e4ebebf7d6955d295b, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: ed4a657a2d2302f4fa0512b51b9436c7, type: 2}
+    - target: {fileID: -980446706011296385, guid: a42e7ea3a5cb90e4ebebf7d6955d295b, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -980446706011296385, guid: a42e7ea3a5cb90e4ebebf7d6955d295b, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -980446706011296385, guid: a42e7ea3a5cb90e4ebebf7d6955d295b, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -980446706011296385, guid: a42e7ea3a5cb90e4ebebf7d6955d295b, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -980446706011296385, guid: a42e7ea3a5cb90e4ebebf7d6955d295b, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 199452102191390452, guid: a42e7ea3a5cb90e4ebebf7d6955d295b, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 199452102191390452, guid: a42e7ea3a5cb90e4ebebf7d6955d295b, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 199452102191390452, guid: a42e7ea3a5cb90e4ebebf7d6955d295b, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 199452102191390452, guid: a42e7ea3a5cb90e4ebebf7d6955d295b, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 199452102191390452, guid: a42e7ea3a5cb90e4ebebf7d6955d295b, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 199452102191390452, guid: a42e7ea3a5cb90e4ebebf7d6955d295b, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: a42e7ea3a5cb90e4ebebf7d6955d295b, type: 3}
       propertyPath: m_Name
       value: blood_of_saints_m00_wp

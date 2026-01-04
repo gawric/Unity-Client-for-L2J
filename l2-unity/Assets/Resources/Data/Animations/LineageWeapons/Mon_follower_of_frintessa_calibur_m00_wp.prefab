@@ -48,9 +48,61 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -8110945115868937454, guid: 3e54e52d40b52744f82ae7eb85305dda, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: af6717f2bf32db94a9e377c2cf42783f, type: 2}
+    - target: {fileID: -2292214906922365944, guid: 3e54e52d40b52744f82ae7eb85305dda, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -2292214906922365944, guid: 3e54e52d40b52744f82ae7eb85305dda, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -2292214906922365944, guid: 3e54e52d40b52744f82ae7eb85305dda, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -2292214906922365944, guid: 3e54e52d40b52744f82ae7eb85305dda, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -2292214906922365944, guid: 3e54e52d40b52744f82ae7eb85305dda, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -2292214906922365944, guid: 3e54e52d40b52744f82ae7eb85305dda, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 3e54e52d40b52744f82ae7eb85305dda, type: 3}
       propertyPath: m_Name
       value: Mon_follower_of_frintessa_calibur_m00_wp
+      objectReference: {fileID: 0}
+    - target: {fileID: 2917346031308317204, guid: 3e54e52d40b52744f82ae7eb85305dda, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2917346031308317204, guid: 3e54e52d40b52744f82ae7eb85305dda, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2917346031308317204, guid: 3e54e52d40b52744f82ae7eb85305dda, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2917346031308317204, guid: 3e54e52d40b52744f82ae7eb85305dda, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2917346031308317204, guid: 3e54e52d40b52744f82ae7eb85305dda, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2917346031308317204, guid: 3e54e52d40b52744f82ae7eb85305dda, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

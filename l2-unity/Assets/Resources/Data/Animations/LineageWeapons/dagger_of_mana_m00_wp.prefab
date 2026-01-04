@@ -48,6 +48,58 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -8104506687071876897, guid: dab2c02a2c828ef46ab96288043c7294, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 2cf69569cc64cf54c99cdb9adaf02e81, type: 2}
+    - target: {fileID: -6358144015405327839, guid: dab2c02a2c828ef46ab96288043c7294, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -6358144015405327839, guid: dab2c02a2c828ef46ab96288043c7294, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -6358144015405327839, guid: dab2c02a2c828ef46ab96288043c7294, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -6358144015405327839, guid: dab2c02a2c828ef46ab96288043c7294, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -6358144015405327839, guid: dab2c02a2c828ef46ab96288043c7294, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -6358144015405327839, guid: dab2c02a2c828ef46ab96288043c7294, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -2569058102160981958, guid: dab2c02a2c828ef46ab96288043c7294, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -2569058102160981958, guid: dab2c02a2c828ef46ab96288043c7294, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -2569058102160981958, guid: dab2c02a2c828ef46ab96288043c7294, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -2569058102160981958, guid: dab2c02a2c828ef46ab96288043c7294, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -2569058102160981958, guid: dab2c02a2c828ef46ab96288043c7294, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -2569058102160981958, guid: dab2c02a2c828ef46ab96288043c7294, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: dab2c02a2c828ef46ab96288043c7294, type: 3}
       propertyPath: m_Name
       value: dagger_of_mana_m00_wp

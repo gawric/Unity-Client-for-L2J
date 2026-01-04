@@ -48,9 +48,61 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -6119628529247173981, guid: 6987eb33950d7e94793e011af1844182, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: f09a2d13acc8ce444b736aa3cfe1f059, type: 2}
+    - target: {fileID: -5759257298407765614, guid: 6987eb33950d7e94793e011af1844182, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -5759257298407765614, guid: 6987eb33950d7e94793e011af1844182, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -5759257298407765614, guid: 6987eb33950d7e94793e011af1844182, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -5759257298407765614, guid: 6987eb33950d7e94793e011af1844182, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -5759257298407765614, guid: 6987eb33950d7e94793e011af1844182, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -5759257298407765614, guid: 6987eb33950d7e94793e011af1844182, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 6987eb33950d7e94793e011af1844182, type: 3}
       propertyPath: m_Name
       value: chakram_m00_wp
+      objectReference: {fileID: 0}
+    - target: {fileID: 2792362067178249571, guid: 6987eb33950d7e94793e011af1844182, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2792362067178249571, guid: 6987eb33950d7e94793e011af1844182, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2792362067178249571, guid: 6987eb33950d7e94793e011af1844182, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2792362067178249571, guid: 6987eb33950d7e94793e011af1844182, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2792362067178249571, guid: 6987eb33950d7e94793e011af1844182, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2792362067178249571, guid: 6987eb33950d7e94793e011af1844182, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

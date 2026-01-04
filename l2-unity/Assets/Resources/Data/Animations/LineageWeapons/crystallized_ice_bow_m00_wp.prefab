@@ -48,6 +48,58 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -8094794709824553991, guid: 48151abc9ceac9140a697dd0e3ce480d, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -8094794709824553991, guid: 48151abc9ceac9140a697dd0e3ce480d, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -8094794709824553991, guid: 48151abc9ceac9140a697dd0e3ce480d, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -8094794709824553991, guid: 48151abc9ceac9140a697dd0e3ce480d, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -8094794709824553991, guid: 48151abc9ceac9140a697dd0e3ce480d, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8094794709824553991, guid: 48151abc9ceac9140a697dd0e3ce480d, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -3236710007074592606, guid: 48151abc9ceac9140a697dd0e3ce480d, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: f8be39359fbc38c43ab740f57bbffe4c, type: 2}
+    - target: {fileID: -471184315520056668, guid: 48151abc9ceac9140a697dd0e3ce480d, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -471184315520056668, guid: 48151abc9ceac9140a697dd0e3ce480d, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -471184315520056668, guid: 48151abc9ceac9140a697dd0e3ce480d, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -471184315520056668, guid: 48151abc9ceac9140a697dd0e3ce480d, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -471184315520056668, guid: 48151abc9ceac9140a697dd0e3ce480d, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -471184315520056668, guid: 48151abc9ceac9140a697dd0e3ce480d, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 48151abc9ceac9140a697dd0e3ce480d, type: 3}
       propertyPath: m_Name
       value: crystallized_ice_bow_m00_wp

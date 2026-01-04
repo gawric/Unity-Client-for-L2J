@@ -48,10 +48,62 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -7253280542153977148, guid: a6e9bcceb7a7d804caedd5cc3038cfb9, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -7253280542153977148, guid: a6e9bcceb7a7d804caedd5cc3038cfb9, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -7253280542153977148, guid: a6e9bcceb7a7d804caedd5cc3038cfb9, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -7253280542153977148, guid: a6e9bcceb7a7d804caedd5cc3038cfb9, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -7253280542153977148, guid: a6e9bcceb7a7d804caedd5cc3038cfb9, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -7253280542153977148, guid: a6e9bcceb7a7d804caedd5cc3038cfb9, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -641738198660326750, guid: a6e9bcceb7a7d804caedd5cc3038cfb9, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -641738198660326750, guid: a6e9bcceb7a7d804caedd5cc3038cfb9, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -641738198660326750, guid: a6e9bcceb7a7d804caedd5cc3038cfb9, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -641738198660326750, guid: a6e9bcceb7a7d804caedd5cc3038cfb9, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -641738198660326750, guid: a6e9bcceb7a7d804caedd5cc3038cfb9, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -641738198660326750, guid: a6e9bcceb7a7d804caedd5cc3038cfb9, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: a6e9bcceb7a7d804caedd5cc3038cfb9, type: 3}
       propertyPath: m_Name
       value: club_of_nature_m00_wp
       objectReference: {fileID: 0}
+    - target: {fileID: 1037677062099327482, guid: a6e9bcceb7a7d804caedd5cc3038cfb9, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 300329f36cdb13c47a926ec2340554d0, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

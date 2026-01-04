@@ -48,6 +48,58 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -7781557535380008613, guid: 800e3364becac1c43b86029d9c05c8ec, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -7781557535380008613, guid: 800e3364becac1c43b86029d9c05c8ec, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -7781557535380008613, guid: 800e3364becac1c43b86029d9c05c8ec, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -7781557535380008613, guid: 800e3364becac1c43b86029d9c05c8ec, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -7781557535380008613, guid: 800e3364becac1c43b86029d9c05c8ec, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -7781557535380008613, guid: 800e3364becac1c43b86029d9c05c8ec, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -5128418879826431987, guid: 800e3364becac1c43b86029d9c05c8ec, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -5128418879826431987, guid: 800e3364becac1c43b86029d9c05c8ec, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -5128418879826431987, guid: 800e3364becac1c43b86029d9c05c8ec, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -5128418879826431987, guid: 800e3364becac1c43b86029d9c05c8ec, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -5128418879826431987, guid: 800e3364becac1c43b86029d9c05c8ec, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -5128418879826431987, guid: 800e3364becac1c43b86029d9c05c8ec, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -2306171476555697070, guid: 800e3364becac1c43b86029d9c05c8ec, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 9d11a883de5117b43bbac6ba4f61a770, type: 2}
     - target: {fileID: 919132149155446097, guid: 800e3364becac1c43b86029d9c05c8ec, type: 3}
       propertyPath: m_Name
       value: soul_bow_m00_wp

@@ -8,6 +8,30 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: -8706603616286603014, guid: 7d358811015a1c44abc363a95d254b08, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -8706603616286603014, guid: 7d358811015a1c44abc363a95d254b08, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -8706603616286603014, guid: 7d358811015a1c44abc363a95d254b08, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -8706603616286603014, guid: 7d358811015a1c44abc363a95d254b08, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -8706603616286603014, guid: 7d358811015a1c44abc363a95d254b08, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8706603616286603014, guid: 7d358811015a1c44abc363a95d254b08, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 7d358811015a1c44abc363a95d254b08, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -52,6 +76,38 @@ PrefabInstance:
       propertyPath: m_Name
       value: knight_shield_m00_sh
       objectReference: {fileID: 0}
+    - target: {fileID: 1308473719694436520, guid: 7d358811015a1c44abc363a95d254b08, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1308473719694436520, guid: 7d358811015a1c44abc363a95d254b08, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1308473719694436520, guid: 7d358811015a1c44abc363a95d254b08, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1308473719694436520, guid: 7d358811015a1c44abc363a95d254b08, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1308473719694436520, guid: 7d358811015a1c44abc363a95d254b08, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1308473719694436520, guid: 7d358811015a1c44abc363a95d254b08, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2564303782373734201, guid: 7d358811015a1c44abc363a95d254b08, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: cfabb95ae0f6f07418e5d5e37e7586b1, type: 2}
+    - target: {fileID: 2564303782373734201, guid: 7d358811015a1c44abc363a95d254b08, type: 3}
+      propertyPath: 'm_Materials.Array.data[1]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 5a39db1ec494ac544b800e85792e0abe, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

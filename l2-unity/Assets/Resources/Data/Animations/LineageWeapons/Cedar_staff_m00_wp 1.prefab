@@ -8,6 +8,34 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: -8815864698077820342, guid: c47d6f91b95ce19409166b5d3295b9c9, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -8815864698077820342, guid: c47d6f91b95ce19409166b5d3295b9c9, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -8815864698077820342, guid: c47d6f91b95ce19409166b5d3295b9c9, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -8815864698077820342, guid: c47d6f91b95ce19409166b5d3295b9c9, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -8815864698077820342, guid: c47d6f91b95ce19409166b5d3295b9c9, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8815864698077820342, guid: c47d6f91b95ce19409166b5d3295b9c9, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8815864698077820342, guid: c47d6f91b95ce19409166b5d3295b9c9, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: c47d6f91b95ce19409166b5d3295b9c9, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -48,9 +76,37 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -4252339310835291796, guid: c47d6f91b95ce19409166b5d3295b9c9, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 8570c256e5638194c994846e61787cc0, type: 2}
     - target: {fileID: 919132149155446097, guid: c47d6f91b95ce19409166b5d3295b9c9, type: 3}
       propertyPath: m_Name
       value: Cedar_staff_m00_wp 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7570094561670649658, guid: c47d6f91b95ce19409166b5d3295b9c9, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7570094561670649658, guid: c47d6f91b95ce19409166b5d3295b9c9, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7570094561670649658, guid: c47d6f91b95ce19409166b5d3295b9c9, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7570094561670649658, guid: c47d6f91b95ce19409166b5d3295b9c9, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7570094561670649658, guid: c47d6f91b95ce19409166b5d3295b9c9, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7570094561670649658, guid: c47d6f91b95ce19409166b5d3295b9c9, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

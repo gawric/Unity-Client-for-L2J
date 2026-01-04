@@ -48,9 +48,49 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -7919938406164814243, guid: 826db855118314249bf3f7f6893a1c0f, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -7919938406164814243, guid: 826db855118314249bf3f7f6893a1c0f, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -7919938406164814243, guid: 826db855118314249bf3f7f6893a1c0f, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -7919938406164814243, guid: 826db855118314249bf3f7f6893a1c0f, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -7919938406164814243, guid: 826db855118314249bf3f7f6893a1c0f, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -7919938406164814243, guid: 826db855118314249bf3f7f6893a1c0f, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 826db855118314249bf3f7f6893a1c0f, type: 3}
       propertyPath: m_Name
       value: morning_star_m00_wp
+      objectReference: {fileID: 0}
+    - target: {fileID: 943691005088462072, guid: 826db855118314249bf3f7f6893a1c0f, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: acb95c16d9c668e4c9b4d577f3065c81, type: 2}
+    - target: {fileID: 9063730156622856264, guid: 826db855118314249bf3f7f6893a1c0f, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 9063730156622856264, guid: 826db855118314249bf3f7f6893a1c0f, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 9063730156622856264, guid: 826db855118314249bf3f7f6893a1c0f, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

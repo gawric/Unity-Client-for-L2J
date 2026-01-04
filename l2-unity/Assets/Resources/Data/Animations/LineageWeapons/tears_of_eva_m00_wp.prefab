@@ -52,6 +52,58 @@ PrefabInstance:
       propertyPath: m_Name
       value: tears_of_eva_m00_wp
       objectReference: {fileID: 0}
+    - target: {fileID: 1113792841576190047, guid: 46179a3bcaa8f35478c6f2d963b79a9d, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: b556199944576c34b89075a870e94950, type: 2}
+    - target: {fileID: 1242079672386105951, guid: 46179a3bcaa8f35478c6f2d963b79a9d, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1242079672386105951, guid: 46179a3bcaa8f35478c6f2d963b79a9d, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1242079672386105951, guid: 46179a3bcaa8f35478c6f2d963b79a9d, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1242079672386105951, guid: 46179a3bcaa8f35478c6f2d963b79a9d, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1242079672386105951, guid: 46179a3bcaa8f35478c6f2d963b79a9d, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1242079672386105951, guid: 46179a3bcaa8f35478c6f2d963b79a9d, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7283932701188263200, guid: 46179a3bcaa8f35478c6f2d963b79a9d, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7283932701188263200, guid: 46179a3bcaa8f35478c6f2d963b79a9d, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7283932701188263200, guid: 46179a3bcaa8f35478c6f2d963b79a9d, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7283932701188263200, guid: 46179a3bcaa8f35478c6f2d963b79a9d, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7283932701188263200, guid: 46179a3bcaa8f35478c6f2d963b79a9d, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7283932701188263200, guid: 46179a3bcaa8f35478c6f2d963b79a9d, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

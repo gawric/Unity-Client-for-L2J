@@ -48,10 +48,38 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -5722093416721982085, guid: f92dea586e40d9e4ca35070182ba939c, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -5722093416721982085, guid: f92dea586e40d9e4ca35070182ba939c, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -5722093416721982085, guid: f92dea586e40d9e4ca35070182ba939c, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -5722093416721982085, guid: f92dea586e40d9e4ca35070182ba939c, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -5722093416721982085, guid: f92dea586e40d9e4ca35070182ba939c, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -5722093416721982085, guid: f92dea586e40d9e4ca35070182ba939c, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: f92dea586e40d9e4ca35070182ba939c, type: 3}
       propertyPath: m_Name
       value: sword_of_damascus_m00_wp
       objectReference: {fileID: 0}
+    - target: {fileID: 5179715937098553570, guid: f92dea586e40d9e4ca35070182ba939c, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 1c04b78444b4cca418aa207a79106437, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

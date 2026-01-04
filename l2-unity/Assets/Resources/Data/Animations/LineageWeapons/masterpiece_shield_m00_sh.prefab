@@ -8,6 +8,30 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: -8817809281763795671, guid: 8829166269d93c847942af4df00f35b3, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -8817809281763795671, guid: 8829166269d93c847942af4df00f35b3, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -8817809281763795671, guid: 8829166269d93c847942af4df00f35b3, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -8817809281763795671, guid: 8829166269d93c847942af4df00f35b3, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -8817809281763795671, guid: 8829166269d93c847942af4df00f35b3, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8817809281763795671, guid: 8829166269d93c847942af4df00f35b3, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 8829166269d93c847942af4df00f35b3, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -48,9 +72,41 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -4567083021141695504, guid: 8829166269d93c847942af4df00f35b3, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: dac4be4986685ec468dbe01194756345, type: 2}
+    - target: {fileID: -4567083021141695504, guid: 8829166269d93c847942af4df00f35b3, type: 3}
+      propertyPath: 'm_Materials.Array.data[1]'
+      value: 
+      objectReference: {fileID: 2100000, guid: aa6d7a28f0bb5e345b8337bdbf0e3310, type: 2}
     - target: {fileID: 919132149155446097, guid: 8829166269d93c847942af4df00f35b3, type: 3}
       propertyPath: m_Name
       value: masterpiece_shield_m00_sh
+      objectReference: {fileID: 0}
+    - target: {fileID: 8560769298039341947, guid: 8829166269d93c847942af4df00f35b3, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8560769298039341947, guid: 8829166269d93c847942af4df00f35b3, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8560769298039341947, guid: 8829166269d93c847942af4df00f35b3, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8560769298039341947, guid: 8829166269d93c847942af4df00f35b3, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8560769298039341947, guid: 8829166269d93c847942af4df00f35b3, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8560769298039341947, guid: 8829166269d93c847942af4df00f35b3, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

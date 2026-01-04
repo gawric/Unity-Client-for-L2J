@@ -52,6 +52,62 @@ PrefabInstance:
       propertyPath: m_Name
       value: sages_staff_m00_wp
       objectReference: {fileID: 0}
+    - target: {fileID: 2764649321605250004, guid: 372854961150f6441964ae7b90bdf2ca, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2764649321605250004, guid: 372854961150f6441964ae7b90bdf2ca, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2764649321605250004, guid: 372854961150f6441964ae7b90bdf2ca, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2764649321605250004, guid: 372854961150f6441964ae7b90bdf2ca, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2764649321605250004, guid: 372854961150f6441964ae7b90bdf2ca, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2764649321605250004, guid: 372854961150f6441964ae7b90bdf2ca, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2764649321605250004, guid: 372854961150f6441964ae7b90bdf2ca, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3228229405503069520, guid: 372854961150f6441964ae7b90bdf2ca, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 32e9ce5388359f645b39c86c16329e2b, type: 2}
+    - target: {fileID: 5304589960707402558, guid: 372854961150f6441964ae7b90bdf2ca, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5304589960707402558, guid: 372854961150f6441964ae7b90bdf2ca, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5304589960707402558, guid: 372854961150f6441964ae7b90bdf2ca, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5304589960707402558, guid: 372854961150f6441964ae7b90bdf2ca, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5304589960707402558, guid: 372854961150f6441964ae7b90bdf2ca, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5304589960707402558, guid: 372854961150f6441964ae7b90bdf2ca, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

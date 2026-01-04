@@ -48,6 +48,58 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -4984075975373769382, guid: 7a0ceb1d5e0709f4e8b02966e2ae38bc, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -4984075975373769382, guid: 7a0ceb1d5e0709f4e8b02966e2ae38bc, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -4984075975373769382, guid: 7a0ceb1d5e0709f4e8b02966e2ae38bc, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -4984075975373769382, guid: 7a0ceb1d5e0709f4e8b02966e2ae38bc, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -4984075975373769382, guid: 7a0ceb1d5e0709f4e8b02966e2ae38bc, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -4984075975373769382, guid: 7a0ceb1d5e0709f4e8b02966e2ae38bc, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -3117418172700824500, guid: 7a0ceb1d5e0709f4e8b02966e2ae38bc, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -3117418172700824500, guid: 7a0ceb1d5e0709f4e8b02966e2ae38bc, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -3117418172700824500, guid: 7a0ceb1d5e0709f4e8b02966e2ae38bc, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -3117418172700824500, guid: 7a0ceb1d5e0709f4e8b02966e2ae38bc, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -3117418172700824500, guid: 7a0ceb1d5e0709f4e8b02966e2ae38bc, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -3117418172700824500, guid: 7a0ceb1d5e0709f4e8b02966e2ae38bc, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -2232300442904782193, guid: 7a0ceb1d5e0709f4e8b02966e2ae38bc, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 572b38c72e56f1d4991e93570449ffc3, type: 2}
     - target: {fileID: 919132149155446097, guid: 7a0ceb1d5e0709f4e8b02966e2ae38bc, type: 3}
       propertyPath: m_Name
       value: inferno_staff_m00_wp

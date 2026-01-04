@@ -48,9 +48,61 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -796585570936858663, guid: ed1c2ec849dcc7e4489ca460fb4b1e4b, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -796585570936858663, guid: ed1c2ec849dcc7e4489ca460fb4b1e4b, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -796585570936858663, guid: ed1c2ec849dcc7e4489ca460fb4b1e4b, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -796585570936858663, guid: ed1c2ec849dcc7e4489ca460fb4b1e4b, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -796585570936858663, guid: ed1c2ec849dcc7e4489ca460fb4b1e4b, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -796585570936858663, guid: ed1c2ec849dcc7e4489ca460fb4b1e4b, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: ed1c2ec849dcc7e4489ca460fb4b1e4b, type: 3}
       propertyPath: m_Name
       value: mystery_sword_m00_wp
+      objectReference: {fileID: 0}
+    - target: {fileID: 5288177732263043932, guid: ed1c2ec849dcc7e4489ca460fb4b1e4b, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: cd584b437b9ea7b4393f83638943bb97, type: 2}
+    - target: {fileID: 7832073271638246793, guid: ed1c2ec849dcc7e4489ca460fb4b1e4b, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7832073271638246793, guid: ed1c2ec849dcc7e4489ca460fb4b1e4b, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7832073271638246793, guid: ed1c2ec849dcc7e4489ca460fb4b1e4b, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7832073271638246793, guid: ed1c2ec849dcc7e4489ca460fb4b1e4b, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7832073271638246793, guid: ed1c2ec849dcc7e4489ca460fb4b1e4b, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7832073271638246793, guid: ed1c2ec849dcc7e4489ca460fb4b1e4b, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

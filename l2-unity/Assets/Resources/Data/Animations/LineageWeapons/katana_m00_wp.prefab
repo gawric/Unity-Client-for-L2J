@@ -48,9 +48,61 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -8320525100533751996, guid: 0a27f6f2af8ea0a4db2b17113241bb93, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 7038e2417b9ccd146933238a5be21148, type: 2}
+    - target: {fileID: -1552249442739502876, guid: 0a27f6f2af8ea0a4db2b17113241bb93, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -1552249442739502876, guid: 0a27f6f2af8ea0a4db2b17113241bb93, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -1552249442739502876, guid: 0a27f6f2af8ea0a4db2b17113241bb93, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -1552249442739502876, guid: 0a27f6f2af8ea0a4db2b17113241bb93, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -1552249442739502876, guid: 0a27f6f2af8ea0a4db2b17113241bb93, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -1552249442739502876, guid: 0a27f6f2af8ea0a4db2b17113241bb93, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 0a27f6f2af8ea0a4db2b17113241bb93, type: 3}
       propertyPath: m_Name
       value: katana_m00_wp
+      objectReference: {fileID: 0}
+    - target: {fileID: 8172272507842798905, guid: 0a27f6f2af8ea0a4db2b17113241bb93, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8172272507842798905, guid: 0a27f6f2af8ea0a4db2b17113241bb93, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8172272507842798905, guid: 0a27f6f2af8ea0a4db2b17113241bb93, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8172272507842798905, guid: 0a27f6f2af8ea0a4db2b17113241bb93, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8172272507842798905, guid: 0a27f6f2af8ea0a4db2b17113241bb93, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8172272507842798905, guid: 0a27f6f2af8ea0a4db2b17113241bb93, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

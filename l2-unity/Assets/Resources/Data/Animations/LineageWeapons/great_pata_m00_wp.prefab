@@ -52,6 +52,58 @@ PrefabInstance:
       propertyPath: m_Name
       value: great_pata_m00_wp
       objectReference: {fileID: 0}
+    - target: {fileID: 2484184493579211212, guid: 255ec5882977e5640936bf5e43834f83, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2484184493579211212, guid: 255ec5882977e5640936bf5e43834f83, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2484184493579211212, guid: 255ec5882977e5640936bf5e43834f83, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2484184493579211212, guid: 255ec5882977e5640936bf5e43834f83, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2484184493579211212, guid: 255ec5882977e5640936bf5e43834f83, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2484184493579211212, guid: 255ec5882977e5640936bf5e43834f83, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5781781052677760183, guid: 255ec5882977e5640936bf5e43834f83, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 6297b7cf6a5b0e5419e9700e62fcd033, type: 2}
+    - target: {fileID: 9115419803625247571, guid: 255ec5882977e5640936bf5e43834f83, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 9115419803625247571, guid: 255ec5882977e5640936bf5e43834f83, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 9115419803625247571, guid: 255ec5882977e5640936bf5e43834f83, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 9115419803625247571, guid: 255ec5882977e5640936bf5e43834f83, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 9115419803625247571, guid: 255ec5882977e5640936bf5e43834f83, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 9115419803625247571, guid: 255ec5882977e5640936bf5e43834f83, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

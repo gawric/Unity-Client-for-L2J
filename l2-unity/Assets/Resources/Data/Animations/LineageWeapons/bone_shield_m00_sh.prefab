@@ -48,6 +48,62 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -5053219251026032254, guid: 957cbcb7bd410b24c85ec03e0489e1d3, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 8add60aa859ce6844ab30fe091de9bab, type: 2}
+    - target: {fileID: -5053219251026032254, guid: 957cbcb7bd410b24c85ec03e0489e1d3, type: 3}
+      propertyPath: 'm_Materials.Array.data[1]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 998f7a9f611e8c4409245e057f883db9, type: 2}
+    - target: {fileID: -1004107329783424233, guid: 957cbcb7bd410b24c85ec03e0489e1d3, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -1004107329783424233, guid: 957cbcb7bd410b24c85ec03e0489e1d3, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -1004107329783424233, guid: 957cbcb7bd410b24c85ec03e0489e1d3, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -1004107329783424233, guid: 957cbcb7bd410b24c85ec03e0489e1d3, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -1004107329783424233, guid: 957cbcb7bd410b24c85ec03e0489e1d3, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -1004107329783424233, guid: 957cbcb7bd410b24c85ec03e0489e1d3, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -814890304515437755, guid: 957cbcb7bd410b24c85ec03e0489e1d3, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -814890304515437755, guid: 957cbcb7bd410b24c85ec03e0489e1d3, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -814890304515437755, guid: 957cbcb7bd410b24c85ec03e0489e1d3, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -814890304515437755, guid: 957cbcb7bd410b24c85ec03e0489e1d3, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -814890304515437755, guid: 957cbcb7bd410b24c85ec03e0489e1d3, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -814890304515437755, guid: 957cbcb7bd410b24c85ec03e0489e1d3, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 957cbcb7bd410b24c85ec03e0489e1d3, type: 3}
       propertyPath: m_Name
       value: bone_shield_m00_sh

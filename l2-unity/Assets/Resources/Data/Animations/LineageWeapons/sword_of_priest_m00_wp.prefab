@@ -48,10 +48,62 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -2281678065889129806, guid: b1f14d80c1c8e5e4c850aff14ed04bea, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -2281678065889129806, guid: b1f14d80c1c8e5e4c850aff14ed04bea, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -2281678065889129806, guid: b1f14d80c1c8e5e4c850aff14ed04bea, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -2281678065889129806, guid: b1f14d80c1c8e5e4c850aff14ed04bea, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -2281678065889129806, guid: b1f14d80c1c8e5e4c850aff14ed04bea, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -2281678065889129806, guid: b1f14d80c1c8e5e4c850aff14ed04bea, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: b1f14d80c1c8e5e4c850aff14ed04bea, type: 3}
       propertyPath: m_Name
       value: sword_of_priest_m00_wp
       objectReference: {fileID: 0}
+    - target: {fileID: 4776451060542151217, guid: b1f14d80c1c8e5e4c850aff14ed04bea, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4776451060542151217, guid: b1f14d80c1c8e5e4c850aff14ed04bea, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4776451060542151217, guid: b1f14d80c1c8e5e4c850aff14ed04bea, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4776451060542151217, guid: b1f14d80c1c8e5e4c850aff14ed04bea, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4776451060542151217, guid: b1f14d80c1c8e5e4c850aff14ed04bea, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4776451060542151217, guid: b1f14d80c1c8e5e4c850aff14ed04bea, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7458809374406526989, guid: b1f14d80c1c8e5e4c850aff14ed04bea, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: a4a346bd0e66ede4e88dade21a4a74e8, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

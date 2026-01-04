@@ -48,9 +48,61 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -8176160907962225349, guid: 27f941449f03f1647914805f45bc10a4, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -8176160907962225349, guid: 27f941449f03f1647914805f45bc10a4, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -8176160907962225349, guid: 27f941449f03f1647914805f45bc10a4, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -8176160907962225349, guid: 27f941449f03f1647914805f45bc10a4, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -8176160907962225349, guid: 27f941449f03f1647914805f45bc10a4, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8176160907962225349, guid: 27f941449f03f1647914805f45bc10a4, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 27f941449f03f1647914805f45bc10a4, type: 3}
       propertyPath: m_Name
       value: dagger_of_magicflame_m00_wp
+      objectReference: {fileID: 0}
+    - target: {fileID: 4210665745646275368, guid: 27f941449f03f1647914805f45bc10a4, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 06abf998699adfc4f964e9bb543f7f27, type: 2}
+    - target: {fileID: 7673124902071910916, guid: 27f941449f03f1647914805f45bc10a4, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7673124902071910916, guid: 27f941449f03f1647914805f45bc10a4, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7673124902071910916, guid: 27f941449f03f1647914805f45bc10a4, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7673124902071910916, guid: 27f941449f03f1647914805f45bc10a4, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7673124902071910916, guid: 27f941449f03f1647914805f45bc10a4, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7673124902071910916, guid: 27f941449f03f1647914805f45bc10a4, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

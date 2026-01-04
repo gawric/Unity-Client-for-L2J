@@ -48,6 +48,58 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -3032793418935771088, guid: c8dede526ee58084db19311f36b355bd, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -3032793418935771088, guid: c8dede526ee58084db19311f36b355bd, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -3032793418935771088, guid: c8dede526ee58084db19311f36b355bd, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -3032793418935771088, guid: c8dede526ee58084db19311f36b355bd, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -3032793418935771088, guid: c8dede526ee58084db19311f36b355bd, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -3032793418935771088, guid: c8dede526ee58084db19311f36b355bd, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -2494110251077621167, guid: c8dede526ee58084db19311f36b355bd, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 322d234fe9aa18148be70f51eeb449a2, type: 2}
+    - target: {fileID: 271154440040090802, guid: c8dede526ee58084db19311f36b355bd, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 271154440040090802, guid: c8dede526ee58084db19311f36b355bd, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 271154440040090802, guid: c8dede526ee58084db19311f36b355bd, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 271154440040090802, guid: c8dede526ee58084db19311f36b355bd, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 271154440040090802, guid: c8dede526ee58084db19311f36b355bd, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 271154440040090802, guid: c8dede526ee58084db19311f36b355bd, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: c8dede526ee58084db19311f36b355bd, type: 3}
       propertyPath: m_Name
       value: training_gloves_m00_wp

@@ -52,6 +52,58 @@ PrefabInstance:
       propertyPath: m_Name
       value: doom_crusher_m00_wp
       objectReference: {fileID: 0}
+    - target: {fileID: 1765915629374276778, guid: 34f45968e0f1e6542a7bb2ec538ad14a, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1765915629374276778, guid: 34f45968e0f1e6542a7bb2ec538ad14a, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1765915629374276778, guid: 34f45968e0f1e6542a7bb2ec538ad14a, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1765915629374276778, guid: 34f45968e0f1e6542a7bb2ec538ad14a, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1765915629374276778, guid: 34f45968e0f1e6542a7bb2ec538ad14a, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1765915629374276778, guid: 34f45968e0f1e6542a7bb2ec538ad14a, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8443548544614231747, guid: 34f45968e0f1e6542a7bb2ec538ad14a, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8443548544614231747, guid: 34f45968e0f1e6542a7bb2ec538ad14a, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8443548544614231747, guid: 34f45968e0f1e6542a7bb2ec538ad14a, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8443548544614231747, guid: 34f45968e0f1e6542a7bb2ec538ad14a, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8443548544614231747, guid: 34f45968e0f1e6542a7bb2ec538ad14a, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8443548544614231747, guid: 34f45968e0f1e6542a7bb2ec538ad14a, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8676269728206636625, guid: 34f45968e0f1e6542a7bb2ec538ad14a, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: bf4ff5b5f1480a2458391cf0f958d47e, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

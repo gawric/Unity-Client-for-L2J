@@ -48,10 +48,62 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -6115927949416905634, guid: cafb48cd880e18041bb8d05446ed52be, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -6115927949416905634, guid: cafb48cd880e18041bb8d05446ed52be, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -6115927949416905634, guid: cafb48cd880e18041bb8d05446ed52be, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -6115927949416905634, guid: cafb48cd880e18041bb8d05446ed52be, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -6115927949416905634, guid: cafb48cd880e18041bb8d05446ed52be, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -6115927949416905634, guid: cafb48cd880e18041bb8d05446ed52be, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -3503802321248572195, guid: cafb48cd880e18041bb8d05446ed52be, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -3503802321248572195, guid: cafb48cd880e18041bb8d05446ed52be, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -3503802321248572195, guid: cafb48cd880e18041bb8d05446ed52be, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -3503802321248572195, guid: cafb48cd880e18041bb8d05446ed52be, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -3503802321248572195, guid: cafb48cd880e18041bb8d05446ed52be, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -3503802321248572195, guid: cafb48cd880e18041bb8d05446ed52be, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: cafb48cd880e18041bb8d05446ed52be, type: 3}
       propertyPath: m_Name
       value: dark_legions_edge_m00_wp
       objectReference: {fileID: 0}
+    - target: {fileID: 8884295177971581736, guid: cafb48cd880e18041bb8d05446ed52be, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: e958c5f49929f584b97a20725c038ce4, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

@@ -52,6 +52,58 @@ PrefabInstance:
       propertyPath: m_Name
       value: staff_of_magicpower_m00_wp
       objectReference: {fileID: 0}
+    - target: {fileID: 2493046374919502975, guid: b9aa9c7633028b340864b5413ea40f41, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2493046374919502975, guid: b9aa9c7633028b340864b5413ea40f41, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2493046374919502975, guid: b9aa9c7633028b340864b5413ea40f41, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2493046374919502975, guid: b9aa9c7633028b340864b5413ea40f41, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2493046374919502975, guid: b9aa9c7633028b340864b5413ea40f41, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2493046374919502975, guid: b9aa9c7633028b340864b5413ea40f41, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4716127304073036991, guid: b9aa9c7633028b340864b5413ea40f41, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4716127304073036991, guid: b9aa9c7633028b340864b5413ea40f41, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4716127304073036991, guid: b9aa9c7633028b340864b5413ea40f41, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4716127304073036991, guid: b9aa9c7633028b340864b5413ea40f41, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4716127304073036991, guid: b9aa9c7633028b340864b5413ea40f41, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4716127304073036991, guid: b9aa9c7633028b340864b5413ea40f41, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7696181967447931347, guid: b9aa9c7633028b340864b5413ea40f41, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 38ab5ade0f3b7e44b83c49a297165284, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

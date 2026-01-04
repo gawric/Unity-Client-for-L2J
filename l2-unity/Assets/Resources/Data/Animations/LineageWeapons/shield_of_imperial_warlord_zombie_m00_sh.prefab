@@ -48,9 +48,61 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -8394665772710680058, guid: 05974a49519542242b36c19d73b1d110, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -8394665772710680058, guid: 05974a49519542242b36c19d73b1d110, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -8394665772710680058, guid: 05974a49519542242b36c19d73b1d110, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -8394665772710680058, guid: 05974a49519542242b36c19d73b1d110, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -8394665772710680058, guid: 05974a49519542242b36c19d73b1d110, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8394665772710680058, guid: 05974a49519542242b36c19d73b1d110, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -458144061797224840, guid: 05974a49519542242b36c19d73b1d110, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 38d5a9b582f7e68488773e57faad1178, type: 2}
     - target: {fileID: 919132149155446097, guid: 05974a49519542242b36c19d73b1d110, type: 3}
       propertyPath: m_Name
       value: shield_of_imperial_warlord_zombie_m00_sh
+      objectReference: {fileID: 0}
+    - target: {fileID: 6573640700589618438, guid: 05974a49519542242b36c19d73b1d110, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6573640700589618438, guid: 05974a49519542242b36c19d73b1d110, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6573640700589618438, guid: 05974a49519542242b36c19d73b1d110, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6573640700589618438, guid: 05974a49519542242b36c19d73b1d110, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6573640700589618438, guid: 05974a49519542242b36c19d73b1d110, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6573640700589618438, guid: 05974a49519542242b36c19d73b1d110, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

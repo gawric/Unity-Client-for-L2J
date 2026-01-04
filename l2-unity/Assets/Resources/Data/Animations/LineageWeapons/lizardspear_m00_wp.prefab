@@ -48,6 +48,58 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -2543248263881257400, guid: b5b5f10ce8d22b942971c2bbc0ec189c, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -2543248263881257400, guid: b5b5f10ce8d22b942971c2bbc0ec189c, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -2543248263881257400, guid: b5b5f10ce8d22b942971c2bbc0ec189c, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -2543248263881257400, guid: b5b5f10ce8d22b942971c2bbc0ec189c, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -2543248263881257400, guid: b5b5f10ce8d22b942971c2bbc0ec189c, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -2543248263881257400, guid: b5b5f10ce8d22b942971c2bbc0ec189c, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -1048561900773891041, guid: b5b5f10ce8d22b942971c2bbc0ec189c, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -1048561900773891041, guid: b5b5f10ce8d22b942971c2bbc0ec189c, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -1048561900773891041, guid: b5b5f10ce8d22b942971c2bbc0ec189c, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -1048561900773891041, guid: b5b5f10ce8d22b942971c2bbc0ec189c, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -1048561900773891041, guid: b5b5f10ce8d22b942971c2bbc0ec189c, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -1048561900773891041, guid: b5b5f10ce8d22b942971c2bbc0ec189c, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -865177549418477185, guid: b5b5f10ce8d22b942971c2bbc0ec189c, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: e2f6f9533cfdd9d42b10670afae7ff58, type: 2}
     - target: {fileID: 919132149155446097, guid: b5b5f10ce8d22b942971c2bbc0ec189c, type: 3}
       propertyPath: m_Name
       value: lizardspear_m00_wp

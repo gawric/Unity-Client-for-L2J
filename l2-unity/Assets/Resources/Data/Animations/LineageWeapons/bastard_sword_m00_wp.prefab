@@ -52,6 +52,58 @@ PrefabInstance:
       propertyPath: m_Name
       value: bastard_sword_m00_wp
       objectReference: {fileID: 0}
+    - target: {fileID: 2339919284741443230, guid: 6e3e0e84e8622b044991095d28be65b1, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 64fc2a0d3fe20fd468ade9759bd8cc21, type: 2}
+    - target: {fileID: 6873110594801155621, guid: 6e3e0e84e8622b044991095d28be65b1, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6873110594801155621, guid: 6e3e0e84e8622b044991095d28be65b1, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6873110594801155621, guid: 6e3e0e84e8622b044991095d28be65b1, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6873110594801155621, guid: 6e3e0e84e8622b044991095d28be65b1, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6873110594801155621, guid: 6e3e0e84e8622b044991095d28be65b1, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6873110594801155621, guid: 6e3e0e84e8622b044991095d28be65b1, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8338376133031196652, guid: 6e3e0e84e8622b044991095d28be65b1, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8338376133031196652, guid: 6e3e0e84e8622b044991095d28be65b1, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8338376133031196652, guid: 6e3e0e84e8622b044991095d28be65b1, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8338376133031196652, guid: 6e3e0e84e8622b044991095d28be65b1, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8338376133031196652, guid: 6e3e0e84e8622b044991095d28be65b1, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8338376133031196652, guid: 6e3e0e84e8622b044991095d28be65b1, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

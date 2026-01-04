@@ -52,6 +52,58 @@ PrefabInstance:
       propertyPath: m_Name
       value: eminence_bow_m00_wp
       objectReference: {fileID: 0}
+    - target: {fileID: 4263951751933760929, guid: c2ea225fa155e5e4084d3573d86ce11c, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: dddb2287b067ea6449213e8540e917d6, type: 2}
+    - target: {fileID: 6759835760494977508, guid: c2ea225fa155e5e4084d3573d86ce11c, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6759835760494977508, guid: c2ea225fa155e5e4084d3573d86ce11c, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6759835760494977508, guid: c2ea225fa155e5e4084d3573d86ce11c, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6759835760494977508, guid: c2ea225fa155e5e4084d3573d86ce11c, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6759835760494977508, guid: c2ea225fa155e5e4084d3573d86ce11c, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6759835760494977508, guid: c2ea225fa155e5e4084d3573d86ce11c, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7426638330193245832, guid: c2ea225fa155e5e4084d3573d86ce11c, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7426638330193245832, guid: c2ea225fa155e5e4084d3573d86ce11c, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7426638330193245832, guid: c2ea225fa155e5e4084d3573d86ce11c, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7426638330193245832, guid: c2ea225fa155e5e4084d3573d86ce11c, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7426638330193245832, guid: c2ea225fa155e5e4084d3573d86ce11c, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7426638330193245832, guid: c2ea225fa155e5e4084d3573d86ce11c, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

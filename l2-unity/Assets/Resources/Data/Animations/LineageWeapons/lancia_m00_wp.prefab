@@ -48,9 +48,61 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -6686644954435476192, guid: 8ed995bbc1c0b5741b8bebe78802acaf, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -6686644954435476192, guid: 8ed995bbc1c0b5741b8bebe78802acaf, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -6686644954435476192, guid: 8ed995bbc1c0b5741b8bebe78802acaf, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -6686644954435476192, guid: 8ed995bbc1c0b5741b8bebe78802acaf, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -6686644954435476192, guid: 8ed995bbc1c0b5741b8bebe78802acaf, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -6686644954435476192, guid: 8ed995bbc1c0b5741b8bebe78802acaf, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 8ed995bbc1c0b5741b8bebe78802acaf, type: 3}
       propertyPath: m_Name
       value: lancia_m00_wp
+      objectReference: {fileID: 0}
+    - target: {fileID: 6597058576823259039, guid: 8ed995bbc1c0b5741b8bebe78802acaf, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 79bc9430ee460ac409ec4d7e2df3be2a, type: 2}
+    - target: {fileID: 8275599576853496018, guid: 8ed995bbc1c0b5741b8bebe78802acaf, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8275599576853496018, guid: 8ed995bbc1c0b5741b8bebe78802acaf, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8275599576853496018, guid: 8ed995bbc1c0b5741b8bebe78802acaf, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8275599576853496018, guid: 8ed995bbc1c0b5741b8bebe78802acaf, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8275599576853496018, guid: 8ed995bbc1c0b5741b8bebe78802acaf, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8275599576853496018, guid: 8ed995bbc1c0b5741b8bebe78802acaf, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

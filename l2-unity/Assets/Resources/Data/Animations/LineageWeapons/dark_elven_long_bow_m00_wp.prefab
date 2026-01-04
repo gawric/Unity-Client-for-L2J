@@ -48,6 +48,58 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -6642939796407138946, guid: c21e122259b037b49ae7454a2676da65, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -6642939796407138946, guid: c21e122259b037b49ae7454a2676da65, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -6642939796407138946, guid: c21e122259b037b49ae7454a2676da65, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -6642939796407138946, guid: c21e122259b037b49ae7454a2676da65, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -6642939796407138946, guid: c21e122259b037b49ae7454a2676da65, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -6642939796407138946, guid: c21e122259b037b49ae7454a2676da65, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -3582963709337680151, guid: c21e122259b037b49ae7454a2676da65, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -3582963709337680151, guid: c21e122259b037b49ae7454a2676da65, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -3582963709337680151, guid: c21e122259b037b49ae7454a2676da65, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -3582963709337680151, guid: c21e122259b037b49ae7454a2676da65, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -3582963709337680151, guid: c21e122259b037b49ae7454a2676da65, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -3582963709337680151, guid: c21e122259b037b49ae7454a2676da65, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -3466057052185796156, guid: c21e122259b037b49ae7454a2676da65, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 4c177bb1d0f14854f86b450ef5d8451c, type: 2}
     - target: {fileID: 919132149155446097, guid: c21e122259b037b49ae7454a2676da65, type: 3}
       propertyPath: m_Name
       value: dark_elven_long_bow_m00_wp

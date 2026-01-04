@@ -48,6 +48,62 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -8229880317338433320, guid: 506d962b808aa39479b1283c831039c6, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -8229880317338433320, guid: 506d962b808aa39479b1283c831039c6, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -8229880317338433320, guid: 506d962b808aa39479b1283c831039c6, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -8229880317338433320, guid: 506d962b808aa39479b1283c831039c6, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -8229880317338433320, guid: 506d962b808aa39479b1283c831039c6, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8229880317338433320, guid: 506d962b808aa39479b1283c831039c6, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -6749672204402381464, guid: 506d962b808aa39479b1283c831039c6, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 927d304f4efa3ae45817883b4dcdbb14, type: 2}
+    - target: {fileID: -6749672204402381464, guid: 506d962b808aa39479b1283c831039c6, type: 3}
+      propertyPath: 'm_Materials.Array.data[1]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 927d304f4efa3ae45817883b4dcdbb14, type: 2}
+    - target: {fileID: -4479324045865740409, guid: 506d962b808aa39479b1283c831039c6, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -4479324045865740409, guid: 506d962b808aa39479b1283c831039c6, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -4479324045865740409, guid: 506d962b808aa39479b1283c831039c6, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -4479324045865740409, guid: 506d962b808aa39479b1283c831039c6, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -4479324045865740409, guid: 506d962b808aa39479b1283c831039c6, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -4479324045865740409, guid: 506d962b808aa39479b1283c831039c6, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 506d962b808aa39479b1283c831039c6, type: 3}
       propertyPath: m_Name
       value: sobekk_hurricane_m00_wp

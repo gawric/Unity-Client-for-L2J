@@ -48,6 +48,58 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -4897517181828094933, guid: 3a39863d4a2c53546b9a96dcf7e10fd7, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: cb61174a1f6df8b48bde3ba5890d4257, type: 2}
+    - target: {fileID: -2079623710314491440, guid: 3a39863d4a2c53546b9a96dcf7e10fd7, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -2079623710314491440, guid: 3a39863d4a2c53546b9a96dcf7e10fd7, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -2079623710314491440, guid: 3a39863d4a2c53546b9a96dcf7e10fd7, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -2079623710314491440, guid: 3a39863d4a2c53546b9a96dcf7e10fd7, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -2079623710314491440, guid: 3a39863d4a2c53546b9a96dcf7e10fd7, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -2079623710314491440, guid: 3a39863d4a2c53546b9a96dcf7e10fd7, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -463859308607442555, guid: 3a39863d4a2c53546b9a96dcf7e10fd7, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -463859308607442555, guid: 3a39863d4a2c53546b9a96dcf7e10fd7, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -463859308607442555, guid: 3a39863d4a2c53546b9a96dcf7e10fd7, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -463859308607442555, guid: 3a39863d4a2c53546b9a96dcf7e10fd7, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -463859308607442555, guid: 3a39863d4a2c53546b9a96dcf7e10fd7, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -463859308607442555, guid: 3a39863d4a2c53546b9a96dcf7e10fd7, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 3a39863d4a2c53546b9a96dcf7e10fd7, type: 3}
       propertyPath: m_Name
       value: elysian_m00_wp
