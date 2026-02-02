@@ -23,11 +23,11 @@ public class AttackAction : L2Action
     //         }
     //      }
     //  }
-    // }v
+    // }
 
     public override void UseAction()
     {
-        Debug.LogWarning("Use attack action.");
+        Debug.Log("Use attack action.");
 
         if (TargetManager.Instance.HasTarget())
         {
@@ -37,7 +37,7 @@ public class AttackAction : L2Action
 
                 if (target != null && !target.IsDead())
                 {
-                    Debug.LogWarning("Trying To Attack");
+                    Debug.Log("Trying To Attack");
 
                     var l2jpos = target.Identity.GetL2jPos();
                     ClickAction sendPaket = CreatorPacketsUser.CreateActiont(target.Identity.Id, (int)l2jpos.x, (int)l2jpos.y, (int)l2jpos.z, 0);

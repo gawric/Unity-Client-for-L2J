@@ -1,87 +1,142 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Rendering;
 
-public class LevelServer
+/**
+ * @author AbsolutePower
+ */
+public static class LevelServer
 {
-    public static Dictionary<int, long> dict;
-    public static long GetExp(int lvl)
+    public const int MAX_LEVEL = 81;
+
+    private static readonly long[] LEVEL =
     {
-        if(dict == null)
+        -1L, // level 0 (unreachable)
+        0L,
+        68L,
+        363L,
+        1168L,
+        2884L,
+        6038L,
+        11287L,
+        19423L,
+        31378L,
+        48229L, // level 10
+        71201L,
+        101676L,
+        141192L,
+        191452L,
+        254327L,
+        331864L,
+        426284L,
+        539995L,
+        675590L,
+        835854L, // level 20
+        1023775L,
+        1242536L,
+        1495531L,
+        1786365L,
+        2118860L,
+        2497059L,
+        2925229L,
+        3407873L,
+        3949727L,
+        4555766L, // level 30
+        5231213L,
+        5981539L,
+        6812472L,
+        7729999L,
+        8740372L,
+        9850111L,
+        11066012L,
+        12395149L,
+        13844879L,
+        15422851L, // level 40
+        17137002L,
+        18995573L,
+        21007103L,
+        23180442L,
+        25524751L,
+        28049509L,
+        30764519L,
+        33679907L,
+        36806133L,
+        40153995L, // level 50
+        45524865L,
+        51262204L,
+        57383682L,
+        63907585L,
+        70852742L,
+        80700339L,
+        91162131L,
+        102265326L,
+        114038008L,
+        126509030L, // level 60
+        146307211L,
+        167243291L,
+        189363788L,
+        212716741L,
+        237351413L,
+        271973532L,
+        308441375L,
+        346825235L,
+        387197529L,
+        429632402L, // level 70
+        474205751L,
+        532692055L,
+        606319094L,
+        696376867L,
+        804219972L,
+        931275828L,
+        1151275834L,
+        1511275834L,
+        2099275834L,
+        4200000000L, // level 80
+        6299994999L  // level 81
+    };
+
+    public static long GetExp(int level)
+    {
+        if (!IsValidLevel(level))
+            return -1;
+
+        return LEVEL[level];
+    }
+
+    public static bool IsValidLevel(int level)
+    {
+        return level > 0 && level <= MAX_LEVEL;
+    }
+
+    public static int ClampLevel(int level)
+    {
+        if (level < 1) return 1;
+        if (level > MAX_LEVEL) return MAX_LEVEL;
+        return level;
+    }
+
+    public static int GetLevelFromExp(long totalExp)
+    {
+        if (totalExp < 0)
+            return 1;
+
+        for (int level = 1; level <= MAX_LEVEL; level++)
         {
-            dict = new Dictionary<int , long> ();
-            Init();
+            if (totalExp < LEVEL[level])
+                return level - 1;
         }
 
-        if(dict.ContainsKey(lvl)) return dict[lvl];
-
-        return -1;
+        return MAX_LEVEL;
     }
 
-    private static void Init()
+    public static long GetExpToNextLevel(int level, long currentExp)
     {
-        dict.Add(1 , lvl1);
-        dict.Add(2, lvl2);
-        dict.Add(3, lvl3);
-        dict.Add(4, lvl4);
-        dict.Add(5, lvl5);
-        dict.Add(6, lvl6);
-        dict.Add(7, lvl7);
-        dict.Add(8, lvl8);
-        dict.Add(9, lvl9);
-        dict.Add(10, lvl10);
-        dict.Add(11, lvl11);
-        dict.Add(12, lvl12);
-        dict.Add(13, lvl13);
-        dict.Add(14, lvl14);
-        dict.Add(15, lvl15);
-        dict.Add(16, lvl16);
-        dict.Add(17, lvl17);
-        dict.Add(18, lvl18);
-        dict.Add(19, lvl19);
-        dict.Add(20, lvl20);
-        dict.Add(21, lvl21);
-        dict.Add(22, lvl22);
-        dict.Add(23, lvl23);
-        dict.Add(24, lvl24);
-        dict.Add(25, lvl25);
-        dict.Add(26, lvl26);
-        dict.Add(27, lvl27);
-        dict.Add(28, lvl28);
-        dict.Add(29, lvl29);
-        dict.Add(30, lvl30);
+        level = ClampLevel(level);
 
+        if (level >= MAX_LEVEL)
+            return 0;
+
+        long nextLevelExp = LEVEL[level + 1];
+
+        long remaining = nextLevelExp - currentExp;
+        return remaining > 0 ? remaining : 0;
     }
-
-    public static int lvl1 = 0;
-    public static int lvl2 = 68;
-    public static int lvl3 = 363;
-    public static int lvl4 = 1168;
-    public static int lvl5 = 2884;
-    public static int lvl6 = 6038;
-    public static int lvl7 = 11287;
-    public static int lvl8 = 19423;
-    public static int lvl9 = 31378;
-    public static int lvl10 = 48229;
-    public static int lvl11 = 71201;
-    public static int lvl12 = 101676;
-    public static int lvl13 = 141192;
-    public static int lvl14 = 191452;
-    public static int lvl15 = 254327;
-    public static int lvl16 = 331864;
-    public static int lvl17 = 426284;
-    public static int lvl18 = 539995;
-    public static int lvl19 = 675590;
-    public static int lvl20 = 835854;
-    public static int lvl21 = 1023775;
-    public static int lvl22 = 1242536;
-    public static int lvl23 = 1495531;
-    public static int lvl24 = 1786365;
-    public static int lvl25 = 2118860;
-    public static int lvl26 = 2497059;
-    public static int lvl27 = 2925229;
-    public static int lvl28 = 3407873;
-    public static int lvl29 = 3949727;
-    public static int lvl30 = 4555766;
 }

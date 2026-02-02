@@ -1,85 +1,64 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
+using System.IO;
 using System.Net.Sockets;
-using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
 
 public class LoginClientReceiving
 {
-    private AsynchronousClient _asyncClient;
+    private readonly AsynchronousClient _asyncClient;
+    private const int HeaderSize = 2;
 
-    public LoginClientReceiving(AsynchronousClient asyncClient) { 
-
-        this._asyncClient = asyncClient;
+    public LoginClientReceiving(AsynchronousClient asyncClient)
+    {
+        _asyncClient = asyncClient;
     }
 
-    public void StartReceiving(Socket _socket)
+    public void StartReceiving(Socket socket)
     {
         Debug.Log("Start receiving LoginClient");
-        Task.Run(() => {
-            Receiving(_socket);
-        });
+        Task.Run(() => Receiving(socket));
     }
-     
-    private void Receiving(Socket _socket)
+
+    private void Receiving(Socket socket)
     {
-        using (NetworkStream stream = new NetworkStream(_socket))
+        using (NetworkStream stream = new NetworkStream(socket, ownsSocket: false))
         {
-            int lengthHi;
-            int lengthLo;
-            int length;
             try
             {
-
-                for (; ; )
+                while (_asyncClient.IsConnected)
                 {
-                    if (!_asyncClient.IsConnected)
-                    {
-                        Debug.LogWarning("Disconnected.");
-                        break;
-                    }
+                    int lo = stream.ReadByte();
+                    int hi = stream.ReadByte();
 
-                    lengthLo = stream.ReadByte();
-                    lengthHi = stream.ReadByte();
-                    length = (lengthHi * 256) + lengthLo;
-                    if (lengthHi == -1 || !_asyncClient.IsConnected)
-                    {
-                        Debug.Log("Server terminated the connection.");
-                        _asyncClient.Disconnect();
-                        break;
-                    }
+                    if (lo < 0 || hi < 0)
+                        throw new EndOfStreamException("Server closed connection.");
 
-                    byte[] data = new byte[length];
+                    int totalLen = (hi << 8) | lo;
+                    if (totalLen <= HeaderSize)
+                        throw new EndOfStreamException($"Receiving Exception: totalLen={totalLen}");
 
-                    int bytesRead = 0;
-                    int chunkSize = 1;
-                    while (bytesRead < data.Length && chunkSize > 0)
-                    {
+                    int payloadLen = totalLen - HeaderSize;
 
-                        if (stream.DataAvailable)
-                        {
-                            bytesRead += chunkSize = stream.Read(data, bytesRead, length - bytesRead);
-                        }
-                        else
-                        {
-                            break;
-                        }
-                    }
+                    byte[] payload = new byte[payloadLen];
+                    GameClientReceiving.ReadWholeArray(stream, payload);
 
-                    Array.Resize(ref data, bytesRead);
-
-
-                    IncomingLoginDataQueue.Instance().AddItem(data , _asyncClient.InitPacket , _asyncClient.CryptEnabled);
-
+                    IncomingLoginDataQueue.Instance().AddItem(payload, _asyncClient.InitPacket, _asyncClient.CryptEnabled);
                 }
+            }
+            catch (ObjectDisposedException)
+            {
+            }
+            catch (IOException)
+            {
+            }
+            catch (SocketException)
+            {
             }
             catch (Exception e)
             {
                 Debug.LogException(e);
             }
-
         }
     }
 }

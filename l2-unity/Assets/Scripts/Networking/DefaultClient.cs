@@ -3,7 +3,8 @@ using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Collections;
 
-public abstract class DefaultClient : MonoBehaviour {
+public abstract class DefaultClient : MonoBehaviour
+{
     [SerializeField] protected string _serverIp = SettingServerIp.IpAddressServer;
     [SerializeField] protected int _serverPort = 11000;
     [SerializeField] protected AsynchronousClient _client;
@@ -28,64 +29,78 @@ public abstract class DefaultClient : MonoBehaviour {
     public bool IsConnected { get { return _connected; } }
     public int Ping { get { return _ping; } set { _ping = value; } }
 
-    private void Start() {
-        if(World.Instance != null && World.Instance.OfflineMode) {
+    private void Start()
+    {
+        if (World.Instance != null && World.Instance.OfflineMode)
+        {
             this.enabled = false;
         }
     }
 
-    public async void Connect() {
+    public async void Connect()
+    {
         _connected = false;
-        if(_connecting) {
-            return;
-        }
+        if (_connecting) return;
 
         CreateAsyncClient();
-
         WhileConnecting();
 
         bool connected = await Task.Run(_client.Connect);
-        if(connected) {  
-            _connecting = false;
 
+        _connecting = false;
+
+        if (connected)
+        {
             EventProcessor.Instance.QueueEvent(() => OnConnectionSuccess());
+        }
+        else
+        {
+            EventProcessor.Instance.QueueEvent(() => OnConnectionFailed());
         }
     }
 
-    protected virtual void WhileConnecting() {
+    protected virtual void WhileConnecting()
+    {
         _connecting = true;
     }
 
     protected abstract void CreateAsyncClient();
 
-    protected virtual void OnConnectionSuccess() {
+    protected virtual void OnConnectionSuccess()
+    {
         _connected = true;
     }
 
-    public virtual void OnConnectionFailed() {
+    public virtual void OnConnectionFailed()
+    {
         _connecting = false;
         _connected = false;
     }
 
     public abstract void OnAuthAllowed();
 
-    public void Disconnect() {
+    public void Disconnect()
+    {
         _connected = false;
 
-        if (_client != null) {
+        if (_client != null)
+        {
             _client.Disconnect();
         }
     }
 
-    public virtual void OnDisconnect() {
+    public virtual void OnDisconnect()
+    {
         _connected = false;
         _client = null;
         GameManager.Instance.OnDisconnect();
     }
 
-    void OnApplicationQuit() {
-        if(_client != null) {
+    void OnApplicationQuit()
+    {
+        if (_client != null)
+        {
             _client.Disconnect();
-        }   
+        }
     }
 }

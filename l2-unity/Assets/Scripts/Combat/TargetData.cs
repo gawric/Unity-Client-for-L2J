@@ -17,6 +17,7 @@ public class TargetData
     public NetworkIdentityInterlude Identity { get { return _identity; } }
     public ObjectData Data { get { return _data; } }
     public float Distance { get { return _distance; } set { _distance = value; } }
+    public Entity GetEntity() { return _entity; }
 
     private Entity _entity;
     public StyleColor GetColorName()
@@ -26,39 +27,29 @@ public class TargetData
         ColorUtility.TryParseHtmlString(hexColor, out color);
         styleColor.value = color;
         return styleColor;
-    } 
+    }
+
+    public TargetData(ObjectData target)
+    {
+        _data = target;
+
+        if(_data != null)
+        {
+             _entity  = _data.ObjectTransform.GetComponent<Entity>();
+             _identity = _entity.IdentityInterlude;
+             _status = _entity.Status;
+             _stats = _entity.Stats;
+        }
+    }
 
     public bool IsDead()
     {
        return _entity.IsDead();
     }
+
     public void SetColor(string hexColor)
     {
         this.hexColor = hexColor;
-    }
-    public Entity GetEntity() { return _entity; }
-    public TargetData(ObjectData target) {
-        _data = target;
-        //Entity e = _data.ObjectTransform.GetComponent<Entity>();
-        _entity  = _data.ObjectTransform.GetComponent<Entity>();
-        _identity = _entity.IdentityInterlude;
-
-        //switch (_identity.EntityType) {
-        //    case EntityType.Player:
-        //        _status = _data.ObjectTransform.GetComponent<PlayerEntity>().Status;
-        //        break;
-        //    case EntityType.User:
-        //        _status = _data.ObjectTransform.GetComponent<UserEntity>().Status;
-        //        break;
-        //    case EntityType.NPC:
-        //        _status = _data.ObjectTransform.GetComponent<NpcEntity>().Status;
-        //        break;
-        //    case EntityType.Monster:
-        //        _status = _data.ObjectTransform.GetComponent<MonsterEntity>().Status;
-        //        break;
-        //}
-        _status = _entity.Status;
-        _stats = _entity.Stats;
     }
 
     public TargetData() { }
