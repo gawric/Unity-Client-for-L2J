@@ -31,6 +31,7 @@ public class Entity : MonoBehaviour {
 
     private MonsterStateMachine _targetStateMachine;
 
+    protected MagicCastData _castData;
     protected NetworkAnimationController _networkAnimationReceive;
     protected NetworkTransformReceive _networkTransformReceive;
     protected NetworkCharacterControllerReceive _networkCharacterControllerReceive;
@@ -69,6 +70,8 @@ public class Entity : MonoBehaviour {
 
     protected  void Awake() 
     {
+        _castData = new MagicCastData();
+
         Animator = GetComponent<Animator>();
 
         if (Animator == null)
@@ -485,6 +488,16 @@ public class Entity : MonoBehaviour {
         return _status.GetRemainingHp();
     }
 
+    public void StupTotalCastDuration(float serverHitTimeMs, float flightTimeMs, float[] clipsDurations,float shotEventTime)
+    {
+        if (_castData == null) _castData = new MagicCastData();
 
+        _castData.Setup(serverHitTimeMs, flightTimeMs,  clipsDurations , shotEventTime);
+    }
+
+    public MagicCastData GetMagicCastData()
+    {
+        return _castData;
+    }
 
 }

@@ -165,4 +165,37 @@ public class AnimationManager : BaseAnimationManager , IAnimationManager
     {
        GetPlayerController(objectId)?.SetInt(SP_TIME_ATK , timeAtk);
     }
+
+    public float[] GetOverrideClipsDurations(int objectId, string[]cycle)
+    {
+        IAnimationController controller = GetPlayerController(objectId);
+        float[] durations = new float[cycle.Length];
+
+        for(int i=0; i< cycle.Length; i++)
+        {
+            AnimationClip clip = SkillAnimationDatabase.GetOverrideClip(cycle[i], controller.GetAnimatorName());
+            if(clip != null)
+            {
+                durations[i] = clip.length;
+            }
+        }
+
+        return durations;
+    }
+
+    public float GetOverrideEventTimeByName(int objectId, string[] cycle, string eventName)
+    {
+        IAnimationController controller = GetPlayerController(objectId);
+
+        for (int i = 0; i < cycle.Length; i++)
+        {
+            AnimationClip clip = SkillAnimationDatabase.GetOverrideClip(cycle[i], controller.GetAnimatorName());
+            if (clip != null)
+            {
+                float timeStartEvent = controller.GetEventTimeByName(clip, eventName);
+                if (timeStartEvent != 0) return timeStartEvent;
+            }
+        }
+        return 0;
+    }
 }

@@ -10,6 +10,7 @@ public interface IAnimationController
     public void ToggleAnimationTrigger(string name);
     public void ToggleAnimationCrossFade(string name, float duration = 0.3f);
 
+    public float GetEventTimeByName(AnimationClip clip, string eventName);
     public void ReplaceAnimClip(string animName, string overrideAnimName);
     public bool GetBool(string name);
     public int GetInt(string name);

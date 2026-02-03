@@ -350,4 +350,8 @@ public class BaseAnimationController : AnimationEventsBase, IAnimationController
         return _overrideController[originalClipName] != null;
     }
 
+    public float GetEventTimeByName(AnimationClip clip, string eventName)
+    {
+        return AnimationDataCache.GetEventTimeByName(_animator, clip, eventName);
+    }
 }
