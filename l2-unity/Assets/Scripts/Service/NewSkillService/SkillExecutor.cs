@@ -7,7 +7,7 @@ using UnityEngine.Rendering;
 public class SkillExecutor : MonoBehaviour
 {
     private SkillAnimationRunner _animRunner;
-    private SkillFXEmitter _emitter;
+
     public event Action OnSkillSequenceFinished;
     public static SkillExecutor Instance { get; private set; }
 
@@ -15,7 +15,7 @@ public class SkillExecutor : MonoBehaviour
     public SkillExecutor()
     {
         _animRunner = new SkillAnimationRunner();
-        _emitter = new SkillFXEmitter();
+
     }
     private void Awake()
     {
@@ -34,7 +34,8 @@ public class SkillExecutor : MonoBehaviour
         if (entity == null || animationCombo == null) return;
         int objectId = entity.IdentityInterlude.Id;
 
-        _emitter.SetupActions(actions);
+
+        // _emitter.SetupActions(actions);
 
         string[] cycle = animationCombo.GetAnimCycle();
         _animRunner.StartRun(cycle, objectId , AnimationManager.Instance  , () => OnAllAnimationFinish(actions));
@@ -45,7 +46,8 @@ public class SkillExecutor : MonoBehaviour
         if (entity == null || animationCombo == null) return;
         int objectId = entity.IdentityInterlude.Id;
 
-        _emitter.SetupActions(actions);
+        EffectManager.Instance.PlayEffect(1177, entity.transform , entity.GetMagicCastData());
+        //_emitter.SetupActions(actions);
 
         string[] cycle = animationCombo.GetAnimCycle();
         _animRunner.StartRunOverride(cycle, objectId, AnimationManager.Instance, () => OnAllAnimationFinish(actions));
@@ -54,7 +56,7 @@ public class SkillExecutor : MonoBehaviour
 
     private void OnAllAnimationFinish(AnimationEventsBase actions)
     {
-        _emitter.CleanupActions(actions);
+       // _emitter.CleanupActions(actions);
     }
 
 

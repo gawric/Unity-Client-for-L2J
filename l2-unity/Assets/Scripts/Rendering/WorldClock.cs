@@ -38,14 +38,24 @@ public class WorldClock : MonoBehaviour {
     private static WorldClock _instance;
     public static WorldClock Instance { get { return _instance; } }
 
-    private void Awake() {
-        if (_instance == null) {
+    private void Awake()
+    {
+        if (_instance == null)
+        {
             _instance = this;
-        } else {
-            Destroy(this);
+        }
+        else if (_instance != this)
+        {
+            if (Application.isPlaying)
+            {
+                Destroy(this);
+            }
+            else
+            {
+                DestroyImmediate(this);
+            }
         }
     }
-
     void OnDestroy() {
         _instance = null;
     }

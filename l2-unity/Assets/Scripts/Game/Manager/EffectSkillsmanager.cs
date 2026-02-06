@@ -139,10 +139,10 @@ public class EffectSkillsmanager : MonoBehaviour
         GameObject go = _currentTransfromEffect.gameObject;
         Entity targetEntity = await World.Instance.GetEntityNoLock(targetObjId);
         var _rootBodyEffect = go.transform.Find(S_1177.NAME_BODY_OBJECT);
-        FlyObjectToTarget foToTarget = _rootBodyEffect.gameObject.GetComponent<FlyObjectToTarget>();
+        //FlyObjectToTarget foToTarget = _rootBodyEffect.gameObject.GetComponent<FlyObjectToTarget>();
         //Debug.Log("StartFlyOrActive: OltTime " + oldTime + " dist " + dist);
         //foToTarget.StartFly(targetEntity.transform.position , 10 , oldTime);
-        foToTarget.StartFly(targetEntity, speed, timeToReachTarget);
+        //foToTarget.StartFly(targetEntity, speed, timeToReachTarget);
     }
     public void HideEffect(float elapsedTime , int skillId, float timeToTravel)
     {

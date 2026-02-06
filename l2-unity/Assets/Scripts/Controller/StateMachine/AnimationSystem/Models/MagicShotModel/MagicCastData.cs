@@ -11,13 +11,14 @@ public class MagicCastData
     public float SpeedEnd = 1.0f;
     public float SpeedShot = 1.0f;
     public float shotEventTime;
+    public float serverTimeToShoot;
     public void Setup(float serverHitMs, float flyMs, float[] clipsDurations, float shotEventTime)
     {
         StartTime = Time.time;
         HitTime = serverHitMs / 1000f;
         FlightTime = flyMs / 1000f;
 
-        float serverTimeToShoot = Mathf.Max(0.01f, HitTime - FlightTime);
+        serverTimeToShoot = Mathf.Max(0.01f, HitTime - FlightTime);
 
         float durMid = clipsDurations[0];
         float durEnd = clipsDurations[1];
@@ -46,5 +47,12 @@ public class MagicCastData
             float globalSpeed = totalWork / serverTimeToShoot;
             SpeedMid = SpeedEnd = SpeedShot = globalSpeed;
         }
+    }
+
+    public float GetShotTimeNormalize()
+    {
+        float fadeStartProgress = serverTimeToShoot / HitTime;
+        float shaderFadeStart = Mathf.Max(0, (serverTimeToShoot / HitTime));
+        return shaderFadeStart;
     }
 }

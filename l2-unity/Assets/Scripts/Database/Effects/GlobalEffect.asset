@@ -1,0 +1,39 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0bd3e374df78bf84f86cc51006512137, type: 3}
+  m_Name: GlobalEffect
+  m_EditorClassIdentifier: 
+  effects:
+  - id: 1177
+    prefab: {fileID: 5001561415001021530, guid: 87a0d43ba0915b447a8370030fc8eedc, type: 3}
+    settings:
+      lifeTime: 3
+      showTime: 1
+      hideTime: 1
+      maxAlpha: 0.3
+      stopAlphaShow: 0.3
+      speedRotateMin: 18
+      speedRotateMax: 23
+      useRandomPosition: 1
+      minZ: 0
+      maxZ: -0.02
+      minY: 0
+      maxY: -0.04
+      footerYOffset: 0.2
+      bodyYOffset: 0.15
+      defaultFooterSize: 23
+      defaultBodySize: 10
+      auraDefaultSize: 0.1
+      auraYOffset: 0.019
+      flyJumpHeight: 0.03
+      flyJumpSpeed: 0.05
+      flyAlphaThreshold: 0.3

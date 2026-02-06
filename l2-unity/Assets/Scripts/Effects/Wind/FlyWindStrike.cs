@@ -42,7 +42,7 @@ public class FlyWindStrike : MonoBehaviour
         if (renderer != null)
         {
             fadeOutMaterial = renderer.material;
-            fadeOutMaterial.SetFloat("_Alpha", 0);
+            fadeOutMaterial.SetFloat("_Alpha", 1);
             _originalScale = transform.localScale;
 
             _targetJumpPosition = new Vector3(transform.position.x, transform.position.y + height, transform.position.z);

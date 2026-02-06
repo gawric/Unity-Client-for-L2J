@@ -5,7 +5,7 @@ public class BodyWindStrike : MonoBehaviour
 {
     public Material _fadeOutMaterial;
     private Vector3 _originalScale;
-    private Vector3 _targetJumpPosition;
+   
     public float height = 0.03f; // Максимальная высота, до которой поднимется объект
     private float _speedRotateMin = 23f;
     private float _speedRotateMax = 27f;
@@ -38,17 +38,16 @@ public class BodyWindStrike : MonoBehaviour
     void Awake()
     {
         GameObject targetObject = this.gameObject;
-        //GameObject targetObject = GameObject.Find("windblowin00");
         Renderer renderer = targetObject.GetComponent<Renderer>();
 
         if (renderer != null)
         {
             _fadeOutMaterial = renderer.material;
-            _fadeOutMaterial.SetFloat("_Alpha", 0);
+            _fadeOutMaterial.SetFloat("_Alpha", 1);
             _originalScale = transform.localScale;
             if (_shimmerEffects == null) _shimmerEffects = new ShimmerEffects();
 
-            _targetJumpPosition = new Vector3(transform.position.x, transform.position.y + height, transform.position.z);
+
             _shimmerEffects.SetMaterial(_fadeOutMaterial);
         }
     }
