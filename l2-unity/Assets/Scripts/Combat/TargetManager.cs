@@ -246,16 +246,17 @@ public class TargetManager : MonoBehaviour
 
     public void UnselectedTarget(int objId)
     {
-        //l2j server sends wrong ID
          ClearTarget();
     }
+
     public void ClearTarget()
     {
         if (HasTarget())
         {
             if (PlayerEntity.Instance.TargetId != -1)
             {
-                //GameClient.Instance.ClientPacketHandler.SendRequestSetTarget(-1);
+                bool enable = GameClient.Instance.IsCryptEnabled();
+                SendGameDataQueue.Instance().AddItem(CreatorPacketsUser.CreateRequestTargetCanceld(), enable, enable);
                 PlayerEntity.Instance.TargetId = -1;
                 PlayerEntity.Instance.Target = null;
             }

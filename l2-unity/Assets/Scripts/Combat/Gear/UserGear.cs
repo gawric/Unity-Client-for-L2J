@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem.HID;
 using static ModelTable;
-using static UnityEditor.Progress;
 
 public class UserGear : Gear
 {

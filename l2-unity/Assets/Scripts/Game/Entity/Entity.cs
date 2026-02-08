@@ -1,7 +1,5 @@
 using System;
-using UnityEditorInternal;
 using UnityEngine;
-using static UnityEditor.Progress;
 using static UnityEngine.EventSystems.EventTrigger;
 
 [System.Serializable]

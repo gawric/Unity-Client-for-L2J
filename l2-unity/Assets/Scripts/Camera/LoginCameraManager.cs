@@ -76,18 +76,23 @@ public class LoginCameraManager : MonoBehaviour
         UpdateListenerPosition();
     }
 
-    public void SwitchCamera(string camera) {
+    public void SwitchCamera(string camera)
+     {
         DisableMainCamera();
 
-        if (cameras.TryGetValue(camera, out Camera obj)) {
+        if (cameras.TryGetValue(camera, out Camera obj))
+         {
             Debug.Log(camera + " camera enabled.");
             obj.enabled = true;
             _activeCamera = obj;
 
-            if (camera == "CharSelect") {
+            if (camera == "CharSelect")
+            {
                 LobbyNameplatesManager.Instance.Camera = obj;
                 CharacterSelector.Instance.Camera = obj;
-            } else {
+            }
+            else
+             {
                 if(LobbyNameplatesManager.Instance != null)
                 {
                     LobbyNameplatesManager.Instance.Camera = null;

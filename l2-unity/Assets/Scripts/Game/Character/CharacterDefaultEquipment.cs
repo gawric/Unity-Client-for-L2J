@@ -1,7 +1,6 @@
 using System;
 using UnityEngine;
 using static ModelTable;
-using static UnityEditor.Progress;
 
 public class CharacterDefaultEquipment
 {

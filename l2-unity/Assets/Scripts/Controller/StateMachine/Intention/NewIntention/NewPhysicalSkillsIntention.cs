@@ -1,5 +1,4 @@
 using System;
-using UnityEditorInternal;
 using UnityEngine;
 
 public class NewPhysicalSkillsIntention : IntentionBase

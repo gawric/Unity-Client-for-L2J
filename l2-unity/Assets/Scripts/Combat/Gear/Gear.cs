@@ -5,7 +5,6 @@ using System.Linq;
 using UnityEngine;
 using static ModelTable;
 using static Unity.Burst.Intrinsics.Arm;
-using static UnityEditor.Progress;
 using static UnityEngine.Rendering.DebugUI;
 
 public class Gear : AbstractMeshManager 

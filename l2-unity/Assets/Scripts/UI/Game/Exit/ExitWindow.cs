@@ -114,13 +114,13 @@ public class ExitWindow : L2PopupWindow
     {
         HideWindow();
         //GameClient.Instance.ClientPacketHandler.RequestRestart();
-        Debug.Log("Здесь должен быть рестарт из игры!!!");
+        Debug.Log("Restart pressed");
     }
 
     private void HandleExitButtonClick()
     {
         HideWindow();
-        Debug.Log("Здесь должен быть выход из игры!!!");
+        Debug.Log("Exit pressed");
         //GameClient.Instance.ClientPacketHandler.RequestDisconnect();
     }
 }

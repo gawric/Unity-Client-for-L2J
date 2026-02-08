@@ -39,6 +39,10 @@ public class CreatorPacketsGameLobby
         return new CharacterSelect(slot);
     }
 
+    public static CharacterDelete RequestCharacterDelete(int slot)
+    {
+        return new CharacterDelete(slot);
+    }
 
     private static PlayerTemplates GetByClassId(int classId , List<PlayerTemplates> _playerTemplates)
     {

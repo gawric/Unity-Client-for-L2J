@@ -234,4 +234,9 @@ public class CreatorPacketsUser
         return new RequestSay2(data, message,name);
     }
 
+    public static RequestTargetCanceld CreateRequestTargetCanceld()
+    {
+        return new RequestTargetCanceld();
+    }
+
 }

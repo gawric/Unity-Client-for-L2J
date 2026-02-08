@@ -14,50 +14,51 @@ public class GameClientReceiving
         _asyncClient = asyncClient;
     }
 
-    public void StartReceiving(Socket socket)
+    public Task StartReceiving(Socket socket, System.Threading.CancellationToken token)
     {
         Debug.Log("Start receiving GameClient");
-        Task.Run(() => Receiving(socket));
+        return Task.Run(() => Receiving(socket, token), token);
     }
 
-    private void Receiving(Socket socket)
+    private void Receiving(Socket socket, System.Threading.CancellationToken token)
     {
-        using (NetworkStream stream = new NetworkStream(socket, ownsSocket: false))
+        try
         {
-            try
+            while (!token.IsCancellationRequested && _asyncClient.IsConnected)
             {
-                while (_asyncClient.IsConnected)
+                var stream = _asyncClient._stream;
+                if (stream != null)
                 {
-                    int payloadLen = ReadPacketLength(stream);
-                    if (payloadLen <= 0)
+                    int dataLen = ReadPacketLength(stream);
+                    if (dataLen <= 0)
                         throw new EndOfStreamException("Invalid packet length.");
 
-                    byte[] payload = new byte[payloadLen];
-                    ReadWholeArray(stream, payload);
+                    byte[] data = new byte[dataLen];
+                    ReadWholeArray(stream, data);
 
                     if (!_asyncClient.IsConnected)
                         break;
 
-                    ItemServer item = IncomingGameDataQueue.Instance().CreateItem(payload, _asyncClient.InitPacket, _asyncClient.CryptEnabled);
+                    ItemServer item = IncomingGameDataQueue.Instance().CreateItem(data, _asyncClient.InitPacket, _asyncClient.CryptEnabled);
 
                     IncomingGameCombatQueue.Instance().AddItem(item);
                     IncomingGameDataQueue.Instance().AddItem(item);
                     IncomingGameMessageQueue.Instance().AddItem(item);
                 }
             }
-            catch (ObjectDisposedException)
-            {
-            }
-            catch (IOException)
-            {
-            }
-            catch (SocketException)
-            {
-            }
-            catch (Exception e)
-            {
-                Debug.LogException(e);
-            }
+        }
+        catch (ObjectDisposedException)
+        {
+        }
+        catch (IOException)
+        {
+        }
+        catch (SocketException)
+        {
+        }
+        catch (Exception e)
+        {
+            Debug.LogException(e);
         }
     }
 
@@ -82,6 +83,7 @@ public class GameClientReceiving
         while (remaining > 0)
         {
             int read = stream.Read(data, offset, remaining);
+
             if (read <= 0)
                 throw new EndOfStreamException($"ReadWholeArray: End of stream with {remaining} bytes left");
             remaining -= read;

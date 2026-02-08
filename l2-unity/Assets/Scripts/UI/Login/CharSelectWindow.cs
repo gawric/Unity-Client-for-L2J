@@ -268,9 +268,9 @@ public class CharSelectWindow : L2Window {
     {
         return _selectChar;
     }
-    private void StartGamePressed() {
+    private void StartGamePressed()
+    {
         CharacterSelector.Instance.ConfirmSelection();
-        
     }
 
     private void ReLoginPressed() {
@@ -284,7 +284,9 @@ public class CharSelectWindow : L2Window {
         SendGameDataQueue.Instance().AddItem(CreatorPacketsGameLobby.CreateNewCharacter(), enable, enable);
     }
 
-    private void DeletePressed() {
-
+    private void DeletePressed()
+    {
+        Debug.Log("DeletePressed");
+        CharacterSelector.Instance.TryToDeleteCharacter();
     }
 }

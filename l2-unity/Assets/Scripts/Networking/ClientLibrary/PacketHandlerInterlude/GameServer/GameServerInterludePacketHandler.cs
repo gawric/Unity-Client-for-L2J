@@ -1319,13 +1319,18 @@ public class GameServerInterludePacketHandler : ServerPacketHandler
             }
            
         }
-        
     }
 
     private void OnTargetUnselected(byte[] data)
     {
-        TargetUnselected packet = new TargetUnselected(data);
-        EventProcessor.Instance.QueueEvent(() => TargetManager.Instance.UnselectedTarget(packet.ObjId));
+       // Abso: This packet is responsible for the player's head animation.
+       // When the player selects a target, the head turns toward the target's position,
+       // this packet(TargetUnselected) restores the head back to its normal position.
+       // ObjId will always be the current player's object ID, not the target's ID.
+       // Unselecting a target is implemented using RequestTargetCanceled.
+
+        //TargetUnselected packet = new TargetUnselected(data);
+        //EventProcessor.Instance.QueueEvent(() => TargetManager.Instance.UnselectedTarget(packet.ObjId));
     }
 
 

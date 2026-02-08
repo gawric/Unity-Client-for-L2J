@@ -14,19 +14,20 @@ public class LoginClientReceiving
         _asyncClient = asyncClient;
     }
 
-    public void StartReceiving(Socket socket)
+    public Task StartReceiving(Socket socket, System.Threading.CancellationToken token)
     {
         Debug.Log("Start receiving LoginClient");
-        Task.Run(() => Receiving(socket));
+        return Task.Run(() => Receiving(socket, token), token);
     }
 
-    private void Receiving(Socket socket)
+    private void Receiving(Socket socket, System.Threading.CancellationToken token)
     {
-        using (NetworkStream stream = new NetworkStream(socket, ownsSocket: false))
+        try
         {
-            try
+            while (!token.IsCancellationRequested && _asyncClient.IsConnected)
             {
-                while (_asyncClient.IsConnected)
+                var stream = _asyncClient._stream;
+                if (stream != null)
                 {
                     int lo = stream.ReadByte();
                     int hi = stream.ReadByte();
@@ -38,27 +39,27 @@ public class LoginClientReceiving
                     if (totalLen <= HeaderSize)
                         throw new EndOfStreamException($"Receiving Exception: totalLen={totalLen}");
 
-                    int payloadLen = totalLen - HeaderSize;
+                    int dataLen = totalLen - HeaderSize;
 
-                    byte[] payload = new byte[payloadLen];
-                    GameClientReceiving.ReadWholeArray(stream, payload);
+                    byte[] data = new byte[dataLen];
+                    GameClientReceiving.ReadWholeArray(stream, data);
 
-                    IncomingLoginDataQueue.Instance().AddItem(payload, _asyncClient.InitPacket, _asyncClient.CryptEnabled);
+                    IncomingLoginDataQueue.Instance().AddItem(data, _asyncClient.InitPacket, _asyncClient.CryptEnabled);
                 }
             }
-            catch (ObjectDisposedException)
-            {
-            }
-            catch (IOException)
-            {
-            }
-            catch (SocketException)
-            {
-            }
-            catch (Exception e)
-            {
-                Debug.LogException(e);
-            }
+        }
+        catch (ObjectDisposedException)
+        {
+        }
+        catch (IOException)
+        {
+        }
+        catch (SocketException)
+        {
+        }
+        catch (Exception e)
+        {
+            Debug.LogException(e);
         }
     }
 }

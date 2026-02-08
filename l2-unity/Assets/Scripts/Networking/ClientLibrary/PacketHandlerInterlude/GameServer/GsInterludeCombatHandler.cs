@@ -3,7 +3,6 @@ using System.Threading.Tasks;
 using UnityEngine;
 
 using static StorageVariable;
-using static UnityEditor.ShaderGraph.Internal.KeywordDependentCollection;
 
 
 public class GsInterludeCombatHandler : ServerPacketHandler

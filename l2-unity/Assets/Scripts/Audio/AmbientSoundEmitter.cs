@@ -121,12 +121,15 @@ public class AmbientSoundEmitter : EventHandler {
         return false;
     }
 
-    private bool ShouldStop() {
-        if(ThirdPersonListener.Instance.Player == null) {
-            return true;
-        }
+    private bool ShouldStop()
+    {
+        var listener = ThirdPersonListener.Instance;
+        if (listener == null) return true;
 
-        float distance = Vector3.Distance(transform.position, ThirdPersonListener.Instance.Player.transform.position);
+        var player = listener.Player;
+        if (player == null) return true;
+
+        float distance = Vector3.Distance(transform.position, player.transform.position);
         return distance > MaxDistance;
     }
 

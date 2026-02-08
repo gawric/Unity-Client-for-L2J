@@ -152,7 +152,8 @@ public class CharacterSelector : MonoBehaviour
         }
     }
 
-    public void ConfirmSelection() {
+    public void ConfirmSelection()
+     {
         if (SelectedSlot == -1) {
             Debug.LogWarning("Please select a character");
             return;
@@ -160,6 +161,20 @@ public class CharacterSelector : MonoBehaviour
         bool enable = GameClient.Instance.IsCryptEnabled();
         SendGameDataQueue.Instance().AddItem(CreatorPacketsGameLobby.CharacterSelect(SelectedSlot), enable, enable);
        // GameClient.Instance.ClientPacketHandler.SendRequestSelectCharacter(SelectedSlot);
+    }
+
+    public void TryToDeleteCharacter()
+    {
+          if (SelectedSlot == -1)
+          {
+                Debug.LogWarning("Please select a character");
+                return;
+            }
+
+
+            bool enable = GameClient.Instance.IsCryptEnabled();
+            SendGameDataQueue.Instance().AddItem(CreatorPacketsGameLobby.RequestCharacterDelete(SelectedSlot), enable, enable);
+            Debug.LogWarning("Requesting delete character , slot: " + SelectedSlot);
     }
 
 

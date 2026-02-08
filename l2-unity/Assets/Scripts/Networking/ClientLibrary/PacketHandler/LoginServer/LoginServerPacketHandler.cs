@@ -110,14 +110,27 @@ public class LoginServerPacketHandler : ServerPacketHandler
         GameClient.Instance.PlayKey1 = packet.PlayOk1;
         GameClient.Instance.PlayKey2 = packet.PlayOk2;
 
-        GameManager.Instance.OnLoginServerPlayOk();
+            GameManager.Instance.OnLoginServerPlayOk();
 
-        if (GameManager.Instance.GameState == GameState.READY_TO_CONNECT)
-        {
-            GameClient.Instance.Connect();
-        }
+            if (GameManager.Instance.GameState != GameState.READY_TO_CONNECT)
+                return;
 
-        //EventProcessor.Instance.QueueEvent(() => LoginClient.Instance.OnPlayOk());
+           if (GameManager.Instance.IsSwitchingServer)
+               return;
+
+           GameManager.Instance.IsSwitchingServer = true;
+
+            try
+            {
+                if (_client != null)
+                    _client.Disconnect();
+
+                GameClient.Instance.Connect();
+            }
+            finally
+            {
+                GameManager.Instance.IsSwitchingServer = false;
+            }
     }
 
 }

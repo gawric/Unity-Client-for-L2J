@@ -126,14 +126,6 @@ public class LoginClient : DefaultClient {
         GameManager.Instance.OnLoginServerAuthAllowed();
     }
 
-    public void OnPlayOk() {
-        GameManager.Instance.OnLoginServerPlayOk();
-
-        if (GameManager.Instance.GameState == GameState.READY_TO_CONNECT) {
-            GameClient.Instance.Connect();
-        }
-    }
-
     public void OnServerListReceived(byte lastServer, List<ServerData> serverData, Dictionary<int, int> charsOnServers) {
 
         GameManager.Instance.OnReceivedServerList(lastServer, serverData, charsOnServers);

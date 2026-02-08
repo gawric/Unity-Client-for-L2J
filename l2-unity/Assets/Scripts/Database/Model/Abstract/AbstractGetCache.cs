@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using static ModelTable;
-using static UnityEditor.Progress;
 
 public abstract class AbstractGetCache
 {
