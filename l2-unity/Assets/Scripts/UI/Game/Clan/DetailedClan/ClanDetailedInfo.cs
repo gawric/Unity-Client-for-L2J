@@ -1,4 +1,4 @@
-using FMOD.Studio;
+﻿using FMOD.Studio;
 using NUnit.Framework;
 using System;
 using System.Collections.Generic;
@@ -140,7 +140,7 @@ public class ClanDetailedInfo
     {
         _selectDismiss = memberName;
         SystemMessageWindow.Instance.OnButtonOk += SystemMessageClickOkDismiss;
-        SystemMessageWindow.Instance.OnButtonClosed += On�ancel;
+        SystemMessageWindow.Instance.OnButtonClosed += OnРЎancel;
         SystemMessageWindow.Instance.ShowWindowDialogYesOrNot("Do you want to be kicked from the clan?");
     }
 
@@ -153,7 +153,7 @@ public class ClanDetailedInfo
         CancelEvent();
     }
 
-    private void On�ancel()
+    private void OnРЎancel()
     {
         CancelEvent();
     }
@@ -161,7 +161,7 @@ public class ClanDetailedInfo
     private void CancelEvent()
     {
         SystemMessageWindow.Instance.OnButtonOk -= SystemMessageClickOkDismiss;
-        SystemMessageWindow.Instance.OnButtonClosed -= On�ancel;
+        SystemMessageWindow.Instance.OnButtonClosed -= OnРЎancel;
     }
 
     private void OnClickHide(int id)

@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -80,7 +80,7 @@ public class ByteUtils
             foreach (var f in flags)
             {
                 if (f <= 0 || (f & (f - 1)) != 0)
-                    throw new ArgumentException($"Çíà÷åíèå {f} íå ÿâëÿåòñÿ ñòåïåíüþ äâîéêè.", nameof(flags));
+                    throw new ArgumentException($"Ð—Ð½Ð°Ñ‡ÐµÐ½Ð¸Ðµ {f} Ð½Ðµ ÑÐ²Ð»ÑÐµÑ‚ÑÑ ÑÑ‚ÐµÐ¿ÐµÐ½ÑŒÑŽ Ð´Ð²Ð¾Ð¹ÐºÐ¸.", nameof(flags));
                 mask |= f;
             }
             return mask;
@@ -94,7 +94,7 @@ public class ByteUtils
             foreach (var f in flags)
             {
                 if (f <= 0 || (f & (f - 1)) != 0)
-                    throw new ArgumentException($"Çíà÷åíèå {f} íå ÿâëÿåòñÿ ñòåïåíüþ äâîéêè.", nameof(flags));
+                    throw new ArgumentException($"Ð—Ð½Ð°Ñ‡ÐµÐ½Ð¸Ðµ {f} Ð½Ðµ ÑÐ²Ð»ÑÐµÑ‚ÑÑ ÑÑ‚ÐµÐ¿ÐµÐ½ÑŒÑŽ Ð´Ð²Ð¾Ð¹ÐºÐ¸.", nameof(flags));
                 mask |= f;
             }
             return mask;

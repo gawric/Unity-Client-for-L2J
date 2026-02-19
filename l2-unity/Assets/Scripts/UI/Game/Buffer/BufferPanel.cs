@@ -1,4 +1,4 @@
-using NUnit.Framework;
+Ôªøusing NUnit.Framework;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -110,7 +110,7 @@ public class BufferPanel : L2Window
         }
         else
         {
-            Debug.LogWarning("Buffpanel > AddDataCellToTime: ÕÂ ÍËÚË˜ÂÒÍ‡ˇ Ó¯Ë·Í‡, Ï˚ ÌÂ Ì‡¯ÎË skill id ÔË ÔÓÔ˚ÚÍÂ Ó·ÌÓ‚ËÚ¸ herb effect!!!! skillID " + skillId + " level " + skillLevel);
+            Debug.LogWarning("Buffpanel > AddDataCellToTime: –ù–µ –∫—Ä–∏—Ç–∏—á–µ—Å–∫–∞—è –æ—à–∏–±–∫–∞, –º—ã –Ω–µ –Ω–∞—à–ª–∏ skill id –ø—Ä–∏ –ø–æ–ø—ã—Ç–∫–µ –æ–±–Ω–æ–≤–∏—Ç—å herb effect!!!! skillID " + skillId + " level " + skillLevel);
         }
 
 

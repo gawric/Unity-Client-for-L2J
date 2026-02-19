@@ -1,4 +1,4 @@
-
+п»ї
 using System.Collections.Generic;
 using System.Diagnostics;
 using UnityEngine;
@@ -7,7 +7,7 @@ using Debug = UnityEngine.Debug;
 
 public class PlayerLoopDebugger : MonoBehaviour
 {
-    public Shader shaderToDisable; // Укажите шейдер, который нужно отключить
+    public Shader shaderToDisable; // РЈРєР°Р¶РёС‚Рµ С€РµР№РґРµСЂ, РєРѕС‚РѕСЂС‹Р№ РЅСѓР¶РЅРѕ РѕС‚РєР»СЋС‡РёС‚СЊ
     public bool istest = false;
     void Start()
     {
@@ -50,19 +50,19 @@ public class PlayerLoopDebugger : MonoBehaviour
             return;
         }
 
-        // Находим все рендереры в сцене
+        // РќР°С…РѕРґРёРј РІСЃРµ СЂРµРЅРґРµСЂРµСЂС‹ РІ СЃС†РµРЅРµ
         Renderer[] renderers = FindObjectsOfType<Renderer>();
 
         foreach (var renderer in renderers)
         {
             foreach (var material in renderer.sharedMaterials)
             {
-                // Проверяем, использует ли материал указанный шейдер
+                // РџСЂРѕРІРµСЂСЏРµРј, РёСЃРїРѕР»СЊР·СѓРµС‚ Р»Рё РјР°С‚РµСЂРёР°Р» СѓРєР°Р·Р°РЅРЅС‹Р№ С€РµР№РґРµСЂ
                 if (material != null && material.shader == shader)
                 {
-                    // Отключаем шейдер, заменяя его на Unlit/Texture или другой материал
+                    // РћС‚РєР»СЋС‡Р°РµРј С€РµР№РґРµСЂ, Р·Р°РјРµРЅСЏСЏ РµРіРѕ РЅР° Unlit/Texture РёР»Рё РґСЂСѓРіРѕР№ РјР°С‚РµСЂРёР°Р»
                     material.shader = Shader.Find("Unlit/Texture");
-                    // Или можно использовать: material.shader = Shader.Find("Standard");
+                    // РР»Рё РјРѕР¶РЅРѕ РёСЃРїРѕР»СЊР·РѕРІР°С‚СЊ: material.shader = Shader.Find("Standard");
                     Debug.Log($"Shader {shader.name} disabled on {renderer.gameObject.name}");
                 }
             }

@@ -1,4 +1,4 @@
-public class QuestName
+﻿public class QuestName
 {
     private int _quest_id;
     private int _quest_prog;

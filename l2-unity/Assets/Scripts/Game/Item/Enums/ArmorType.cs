@@ -1,4 +1,4 @@
-public enum ArmorType : byte {
+﻿public enum ArmorType : byte {
     none = 0,
     light = 1,
     heavy = 2,

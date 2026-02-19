@@ -1,4 +1,4 @@
-public enum Intention
+﻿public enum Intention
 {
     INTENTION_IDLE,
     INTENTION_WAITING,

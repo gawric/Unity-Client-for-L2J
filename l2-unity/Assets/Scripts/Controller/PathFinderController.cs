@@ -1,4 +1,4 @@
-using System;
+п»їusing System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -158,7 +158,7 @@ public class PathFinderController : MonoBehaviour
                     //if (_simplifyPath)
                     //{
                         //_path = PathFinder.SmoothPath(callback);
-                     //   Debug.Log(" Не понятный метод PathFinderController он отключен ");
+                     //   Debug.Log(" РќРµ РїРѕРЅСЏС‚РЅС‹Р№ РјРµС‚РѕРґ PathFinderController РѕРЅ РѕС‚РєР»СЋС‡РµРЅ ");
                     //}
                     //else
                    // {
@@ -170,7 +170,7 @@ public class PathFinderController : MonoBehaviour
        // }
        // else
         //{
-            //Debug.Log("Перемещение 1");
+            //Debug.Log("РџРµСЂРµРјРµС‰РµРЅРёРµ 1");
            // _targetNode = null;
 
           //  PlayerController.Instance.SetDestinationVector(_targetDestinationVector, _currentDestinationThreshold);

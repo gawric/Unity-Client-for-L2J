@@ -1,4 +1,4 @@
-using UnityEngine;
+п»їusing UnityEngine;
 using UnityEngine.Rendering;
 using static UnityEngine.EventSystems.EventTrigger;
 
@@ -28,7 +28,7 @@ public class NpcCursorManager : MonoBehaviour
 
     void Update()
     {
-        // Создаём луч из позиции мыши в 3D-пространство
+        // РЎРѕР·РґР°С‘Рј Р»СѓС‡ РёР· РїРѕР·РёС†РёРё РјС‹С€Рё РІ 3D-РїСЂРѕСЃС‚СЂР°РЅСЃС‚РІРѕ
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         RaycastHit hit;
 
@@ -135,7 +135,7 @@ public class NpcCursorManager : MonoBehaviour
             Cursor.SetCursor(_defaultCursor, Vector2.zero, CursorMode.Auto);
         }
            
-        //Debug.Log("Курсор вернулся к стандартному.");
+        //Debug.Log("РљСѓСЂСЃРѕСЂ РІРµСЂРЅСѓР»СЃСЏ Рє СЃС‚Р°РЅРґР°СЂС‚РЅРѕРјСѓ.");
     }
 }
 

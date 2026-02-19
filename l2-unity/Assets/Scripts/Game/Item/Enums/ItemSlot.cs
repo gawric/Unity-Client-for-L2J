@@ -1,4 +1,4 @@
-public enum ItemSlot : byte {
+﻿public enum ItemSlot : byte {
     none = 0,
     head = 1,
     chest = 2,

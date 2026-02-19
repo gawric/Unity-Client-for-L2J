@@ -1,4 +1,4 @@
-public static class ChatTypes
+﻿public static class ChatTypes
 {
     private const int MAX_ID = 18;
 

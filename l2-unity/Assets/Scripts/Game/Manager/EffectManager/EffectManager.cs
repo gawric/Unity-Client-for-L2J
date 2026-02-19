@@ -1,4 +1,4 @@
-using UnityEngine;
+п»їusing UnityEngine;
 
 public class EffectManager : MonoBehaviour
 {
@@ -18,8 +18,8 @@ public class EffectManager : MonoBehaviour
 
         BaseEffect instance = Instantiate(data.prefab, target.position, target.rotation, target);
 
-        // 2. ОБНУЛЯЕМ ТРАНСФОРМ (Критически важно!)
-        // Это посадит эффект точно в центр и сбросит гигантский масштаб
+        // 2. РћР‘РќРЈР›РЇР•Рњ РўР РђРќРЎР¤РћР Рњ (РљСЂРёС‚РёС‡РµСЃРєРё РІР°Р¶РЅРѕ!)
+        // Р­С‚Рѕ РїРѕСЃР°РґРёС‚ СЌС„С„РµРєС‚ С‚РѕС‡РЅРѕ РІ С†РµРЅС‚СЂ Рё СЃР±СЂРѕСЃРёС‚ РіРёРіР°РЅС‚СЃРєРёР№ РјР°СЃС€С‚Р°Р±
         instance.transform.localPosition = Vector3.zero;
         instance.transform.localRotation = Quaternion.identity;
         instance.transform.localScale = new Vector3(0.013f, 0.013f, 0.013f);

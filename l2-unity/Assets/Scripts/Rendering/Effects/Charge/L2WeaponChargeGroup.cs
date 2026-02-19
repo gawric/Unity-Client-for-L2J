@@ -1,4 +1,4 @@
-using UnityEngine;
+п»їusing UnityEngine;
 
 public class L2WeaponChargeGroup : BaseEffectGroup, IWeaponEffect
 {
@@ -11,12 +11,12 @@ public class L2WeaponChargeGroup : BaseEffectGroup, IWeaponEffect
 
         if (_weaponTransform != null)
         {
-            // Ищем объект Sword_Tip в дочерних объектах оружия
+            // РС‰РµРј РѕР±СЉРµРєС‚ Sword_Tip РІ РґРѕС‡РµСЂРЅРёС… РѕР±СЉРµРєС‚Р°С… РѕСЂСѓР¶РёСЏ
             _swordTip = weaponTransform.Find("Sword_Tip");
 
             if (_swordTip == null)
             {
-                // Если не нашли по имени, пробуем найти в глубине (на случай сложной иерархии)
+                // Р•СЃР»Рё РЅРµ РЅР°С€Р»Рё РїРѕ РёРјРµРЅРё, РїСЂРѕР±СѓРµРј РЅР°Р№С‚Рё РІ РіР»СѓР±РёРЅРµ (РЅР° СЃР»СѓС‡Р°Р№ СЃР»РѕР¶РЅРѕР№ РёРµСЂР°СЂС…РёРё)
                 foreach (Transform child in weaponTransform.GetComponentsInChildren<Transform>())
                 {
                     if (child.name == "Sword_Tip")
@@ -49,15 +49,15 @@ public class L2WeaponChargeGroup : BaseEffectGroup, IWeaponEffect
     {
         if (_weaponTransform == null || _swordTip == null) return;
 
-        // Линия вдоль лезвия (Синяя)
+        // Р›РёРЅРёСЏ РІРґРѕР»СЊ Р»РµР·РІРёСЏ (РЎРёРЅСЏСЏ)
         Gizmos.color = Color.blue;
         Gizmos.DrawLine(_weaponTransform.position, _swordTip.position);
 
-        // Сфера в основании (Зеленая)
+        // РЎС„РµСЂР° РІ РѕСЃРЅРѕРІР°РЅРёРё (Р—РµР»РµРЅР°СЏ)
         Gizmos.color = Color.green;
         Gizmos.DrawWireSphere(_weaponTransform.position, 0.02f);
 
-        // Сфера на кончике (Красная)
+        // РЎС„РµСЂР° РЅР° РєРѕРЅС‡РёРєРµ (РљСЂР°СЃРЅР°СЏ)
         Gizmos.color = Color.red;
         Gizmos.DrawWireSphere(_swordTip.position, 0.02f);
     }

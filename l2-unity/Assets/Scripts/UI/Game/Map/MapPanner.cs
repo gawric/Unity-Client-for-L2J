@@ -1,4 +1,4 @@
-using UnityEngine;
+п»їusing UnityEngine;
 using UnityEngine.UIElements;
 
 public class MapPanner 
@@ -42,7 +42,7 @@ public class MapPanner
 
         viewport.RegisterCallback<PointerDownEvent>(evt => {
             dragging = true;
-            lastPointer = evt.localPosition; // инициализируем, чтобы избежать прыжка
+            lastPointer = evt.localPosition; // РёРЅРёС†РёР°Р»РёР·РёСЂСѓРµРј, С‡С‚РѕР±С‹ РёР·Р±РµР¶Р°С‚СЊ РїСЂС‹Р¶РєР°
             viewport.CapturePointer(evt.pointerId);
         });
 

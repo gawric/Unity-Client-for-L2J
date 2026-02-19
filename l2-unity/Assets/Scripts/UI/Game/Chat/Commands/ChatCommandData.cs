@@ -1,4 +1,4 @@
-public sealed class ChatCommandData
+﻿public sealed class ChatCommandData
 {
     public int Id { get; }
     public ChatCommand Type { get; }

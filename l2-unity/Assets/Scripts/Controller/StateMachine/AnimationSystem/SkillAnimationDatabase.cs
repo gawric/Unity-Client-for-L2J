@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+п»їusing System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 
@@ -31,11 +31,11 @@ public class SkillAnimationDatabase
                 _clip = Resources.Load<AnimationClip>(_path);
                 if (_clip != null)
                 {
-                    Debug.Log($"SkillAnimationDatabase> Загрузился ролик анимации  в кэш имя {_name} его путь {_path}");
+                    Debug.Log($"SkillAnimationDatabase> Р—Р°РіСЂСѓР·РёР»СЃСЏ СЂРѕР»РёРє Р°РЅРёРјР°С†РёРё  РІ РєСЌС€ РёРјСЏ {_name} РµРіРѕ РїСѓС‚СЊ {_path}");
                 }
                 else
                 {
-                    Debug.LogWarning($"SkillAnimationDatabase> Не смогли загрузить в кэщ {_name} его путь {_path}");
+                    Debug.LogWarning($"SkillAnimationDatabase> РќРµ СЃРјРѕРіР»Рё Р·Р°РіСЂСѓР·РёС‚СЊ РІ РєСЌС‰ {_name} РµРіРѕ РїСѓС‚СЊ {_path}");
                 }
 
             }
@@ -55,13 +55,13 @@ public class SkillAnimationDatabase
 
     public static void Initialize()
     {
-        //MMagic Эти ролики берет для переиспользования (этот override аниматор)
+        //MMagic Р­С‚Рё СЂРѕР»РёРєРё Р±РµСЂРµС‚ РґР»СЏ РїРµСЂРµРёСЃРїРѕР»СЊР·РѕРІР°РЅРёСЏ (СЌС‚РѕС‚ override Р°РЅРёРјР°С‚РѕСЂ)
         _raceCacheMMagic.Add("CastMid_"+ MMagic, new SkillClips(FOLDER_MMagic, "MMagic_M000_b.ao_CastMid_MMagic"));
         _raceCacheMMagic.Add("CastEnd_"+ MMagic, new SkillClips (FOLDER_MMagic, "MMagic_M000_b.ao_CastEnd_MMagic"));
         _raceCacheMMagic.Add("MagicShot_" + MMagic, new SkillClips (FOLDER_MMagic, "MMagic_M000_b.ao_MagicShot_MMagic"));
         _raceCacheMMagic.Add("MagicThrow_" + MMagic, new SkillClips(FOLDER_MMagic, "MMagic_M000_b.ao_MagicThrow_MMagic"));
 
-        //эти ролики берет для замены на свои (т.е это оригинальный аниматор)
+        //СЌС‚Рё СЂРѕР»РёРєРё Р±РµСЂРµС‚ РґР»СЏ Р·Р°РјРµРЅС‹ РЅР° СЃРІРѕРё (С‚.Рµ СЌС‚Рѕ РѕСЂРёРіРёРЅР°Р»СЊРЅС‹Р№ Р°РЅРёРјР°С‚РѕСЂ)
         //FDarkElf
         _raceCacheFDarkElf.Add("CastMid_" + FDarkElf, new SkillClips(FOLDER_FDarkElf, "FDarkElf_m001_b.ao_CastMid_FDarkElf"));
         _raceCacheFDarkElf.Add("CastEnd_" + FDarkElf, new SkillClips(FOLDER_FDarkElf, "FDarkElf_m001_b.ao_CastEnd_FDarkElf"));

@@ -1,4 +1,4 @@
-using System.Threading;
+﻿using System.Threading;
 using UnityEngine;
 
 public class FastSinglExecuter : MonoBehaviour
@@ -129,8 +129,8 @@ public class FastSinglExecuter : MonoBehaviour
         if (attakerEntity.GetType() == typeof(PlayerEntity) & targetEntity.GetType() == typeof(MonsterEntity))
         {
             // WorldCombat.Instance.InflictAttack(attakerEntity.transform, targetEntity.transform);
-            //���� �� ����� �������� �������� ��� ����� �������� ��-�� ��������� �������. � ���� ����� � ������� ����������� ��������,
-            //� ����� ����� ������ �� ������� � ������ ��������� ������
+            //пїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ-пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ. пїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ,
+            //пїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
             MonsterStateMachine targetMonster = targetEntity.GetComponent<MonsterStateMachine>();
             if (targetMonster.State == MonsterState.RUNNING | targetMonster.State == MonsterState.WALKING)
             {
@@ -188,7 +188,7 @@ public class FastSinglExecuter : MonoBehaviour
     {
         if(stopMovePacket == null)
         {
-            Debug.LogError("FastSinglExecuter->StopMoveUpdate: пришел пакет null");
+            Debug.LogError("FastSinglExecuter->StopMoveUpdate: РїСЂРёС€РµР» РїР°РєРµС‚ null");
             return;
         }
 

@@ -1,4 +1,4 @@
-using UnityEngine;
+п»їusing UnityEngine;
 
 public abstract class BaseEffectGroup : EffectPart
 {
@@ -78,7 +78,7 @@ public abstract class BaseEffectGroup : EffectPart
         _particleIndex++;
     }
 
-    // Этот метод переопределяем в наследниках для специфичных данных
+    // Р­С‚РѕС‚ РјРµС‚РѕРґ РїРµСЂРµРѕРїСЂРµРґРµР»СЏРµРј РІ РЅР°СЃР»РµРґРЅРёРєР°С… РґР»СЏ СЃРїРµС†РёС„РёС‡РЅС‹С… РґР°РЅРЅС‹С…
     protected abstract void ApplyShaderParams(Material m, float now, float seed);
 
     protected void StopEffect()

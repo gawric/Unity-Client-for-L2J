@@ -1,4 +1,4 @@
-using System;
+п»їusing System;
 using System.Collections.Generic;
 using System.Drawing;
 using UnityEngine;
@@ -46,16 +46,16 @@ namespace L2_login
 
         public static byte[]  TestCheckSumUniversal()
         {
-            // offset = 2, total size = 40 (пример)
+            // offset = 2, total size = 40 (РїСЂРёРјРµСЂ)
             int offset = 2;
             int size = 40;
             byte[] raw = new byte[size];
 
-            // Заполняем произвольными данными первые (N-1) слов:
-            int wordsCount = (size / 4) - 1; // число слов, участвующих в XOR (без последнего checksum)
+            // Р—Р°РїРѕР»РЅСЏРµРј РїСЂРѕРёР·РІРѕР»СЊРЅС‹РјРё РґР°РЅРЅС‹РјРё РїРµСЂРІС‹Рµ (N-1) СЃР»РѕРІ:
+            int wordsCount = (size / 4) - 1; // С‡РёСЃР»Рѕ СЃР»РѕРІ, СѓС‡Р°СЃС‚РІСѓСЋС‰РёС… РІ XOR (Р±РµР· РїРѕСЃР»РµРґРЅРµРіРѕ checksum)
             uint[] words = new uint[wordsCount];
 
-            // Заполним первые wordsCount-1 слов случайными или нужными значениями
+            // Р—Р°РїРѕР»РЅРёРј РїРµСЂРІС‹Рµ wordsCount-1 СЃР»РѕРІ СЃР»СѓС‡Р°Р№РЅС‹РјРё РёР»Рё РЅСѓР¶РЅС‹РјРё Р·РЅР°С‡РµРЅРёСЏРјРё
             var rng = new System.Security.Cryptography.RNGCryptoServiceProvider();
             for (int i = 0; i < wordsCount - 1; i++)
             {
@@ -64,12 +64,12 @@ namespace L2_login
                 words[i] = (uint)(b[0] | (b[1] << 8) | (b[2] << 16) | (b[3] << 24));
             }
 
-            // вычислим предпоследнее слово так, чтобы XOR всех слов стал 0
+            // РІС‹С‡РёСЃР»РёРј РїСЂРµРґРїРѕСЃР»РµРґРЅРµРµ СЃР»РѕРІРѕ С‚Р°Рє, С‡С‚РѕР±С‹ XOR РІСЃРµС… СЃР»РѕРІ СЃС‚Р°Р» 0
             uint x = 0;
             for (int i = 0; i < wordsCount - 1; i++) x ^= words[i];
             words[wordsCount - 1] = x;
 
-            // запишем эти слова в raw начиная с offset (little-endian)
+            // Р·Р°РїРёС€РµРј СЌС‚Рё СЃР»РѕРІР° РІ raw РЅР°С‡РёРЅР°СЏ СЃ offset (little-endian)
             for (int w = 0; w < wordsCount; w++)
             {
                 int pos = offset + w * 4;
@@ -80,7 +80,7 @@ namespace L2_login
                 raw[pos + 3] = (byte)((v >> 24) & 0xFF);
             }
 
-            // поле контрольной суммы (последние 4 байта) оставляем нулями
+            // РїРѕР»Рµ РєРѕРЅС‚СЂРѕР»СЊРЅРѕР№ СЃСѓРјРјС‹ (РїРѕСЃР»РµРґРЅРёРµ 4 Р±Р°Р№С‚Р°) РѕСЃС‚Р°РІР»СЏРµРј РЅСѓР»СЏРјРё
             int checksumPos = offset + wordsCount * 4;
             raw[checksumPos + 0] = 0;
             raw[checksumPos + 1] = 0;
@@ -158,16 +158,16 @@ namespace L2_login
             }
             catch (Exception ex)
             {
-                Debug.LogWarning("AppendChecksumWord НЕ Сработал Ошибка! " + ex.ToString());
+                Debug.LogWarning("AppendChecksumWord РќР• РЎСЂР°Р±РѕС‚Р°Р» РћС€РёР±РєР°! " + ex.ToString());
 
             }
         }
 
         /// <summary>
-        /// Вычисляет XOR-слово по словам (little-endian) в buf, начиная с offset с шагом step,
-        /// и добавляет в конец buf ещё step байт с таким значением, чтобы общий XOR включая добавленное слово равнялся 0.
-        /// Если pad=true и длина (buf.Count - offset) не кратна step, буфер дополняется нулями.
-        /// Возвращает записанное значение (ulong).
+        /// Р’С‹С‡РёСЃР»СЏРµС‚ XOR-СЃР»РѕРІРѕ РїРѕ СЃР»РѕРІР°Рј (little-endian) РІ buf, РЅР°С‡РёРЅР°СЏ СЃ offset СЃ С€Р°РіРѕРј step,
+        /// Рё РґРѕР±Р°РІР»СЏРµС‚ РІ РєРѕРЅРµС† buf РµС‰С‘ step Р±Р°Р№С‚ СЃ С‚Р°РєРёРј Р·РЅР°С‡РµРЅРёРµРј, С‡С‚РѕР±С‹ РѕР±С‰РёР№ XOR РІРєР»СЋС‡Р°СЏ РґРѕР±Р°РІР»РµРЅРЅРѕРµ СЃР»РѕРІРѕ СЂР°РІРЅСЏР»СЃСЏ 0.
+        /// Р•СЃР»Рё pad=true Рё РґР»РёРЅР° (buf.Count - offset) РЅРµ РєСЂР°С‚РЅР° step, Р±СѓС„РµСЂ РґРѕРїРѕР»РЅСЏРµС‚СЃСЏ РЅСѓР»СЏРјРё.
+        /// Р’РѕР·РІСЂР°С‰Р°РµС‚ Р·Р°РїРёСЃР°РЅРЅРѕРµ Р·РЅР°С‡РµРЅРёРµ (ulong).
         /// </summary>
 
         public static void appendChecksum(byte[] raw, int offset, int size)

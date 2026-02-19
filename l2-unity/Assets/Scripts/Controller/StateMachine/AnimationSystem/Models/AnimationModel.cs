@@ -1,4 +1,4 @@
-using System;
+п»їusing System;
 using UnityEngine;
 using UnityEngine.InputSystem.XR;
 
@@ -34,7 +34,7 @@ public class AnimationModel
     {
         if (_eventSource != null)
         {
-            // Подписываемся на базовое событие из AnimationEventsBase
+            // РџРѕРґРїРёСЃС‹РІР°РµРјСЃСЏ РЅР° Р±Р°Р·РѕРІРѕРµ СЃРѕР±С‹С‚РёРµ РёР· AnimationEventsBase
             _eventSource.OnAnimationFinished += HandleBaseAnimationFinished;
         }
     }

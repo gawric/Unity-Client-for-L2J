@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using System;
 public class UpdatePositionPacket : ServerPacket {
     public int Id { get; private set; }

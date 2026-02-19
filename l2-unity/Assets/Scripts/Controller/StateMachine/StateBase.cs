@@ -1,4 +1,4 @@
-public abstract class StateBase
+﻿public abstract class StateBase
 {
     protected PlayerStateMachine _stateMachine;
 

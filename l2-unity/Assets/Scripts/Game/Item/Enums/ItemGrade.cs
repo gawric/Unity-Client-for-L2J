@@ -1,4 +1,4 @@
-
+﻿
 public enum ItemGrade : byte
 {
     none = 0,

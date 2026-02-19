@@ -1,4 +1,4 @@
-using UnityEngine;
+п»їusing UnityEngine;
 
 public class PlayerStateSpAtk : StateMachineBehaviour
 {
@@ -8,16 +8,16 @@ public class PlayerStateSpAtk : StateMachineBehaviour
     private float _serverHitTime;
     private bool _isSwitchIdle;
     private bool _hitExecuted;
-    private float _calculatedPostSpeed; // Скорость, которую мы вычислим для выхода
+    private float _calculatedPostSpeed; // РЎРєРѕСЂРѕСЃС‚СЊ, РєРѕС‚РѕСЂСѓСЋ РјС‹ РІС‹С‡РёСЃР»РёРј РґР»СЏ РІС‹С…РѕРґР°
 
     public string motionName;
     public string eventStartHitName; // "hit_start"
     public string eventEndHitName;   // "hit_end"
 
-    [Header("Настройка выхода")]
-    public float postHitSpeed = 2.0f; // Просто фиксированная скорость после удара
-    private float _lastDebugTime; // Для интервала дебага
-    private const float DEBUG_INTERVAL = 0.02f; // 20мс
+    [Header("РќР°СЃС‚СЂРѕР№РєР° РІС‹С…РѕРґР°")]
+    public float postHitSpeed = 2.0f; // РџСЂРѕСЃС‚Рѕ С„РёРєСЃРёСЂРѕРІР°РЅРЅР°СЏ СЃРєРѕСЂРѕСЃС‚СЊ РїРѕСЃР»Рµ СѓРґР°СЂР°
+    private float _lastDebugTime; // Р”Р»СЏ РёРЅС‚РµСЂРІР°Р»Р° РґРµР±Р°РіР°
+    private const float DEBUG_INTERVAL = 0.02f; // 20РјСЃ
    
 
     override public void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
@@ -28,29 +28,29 @@ public class PlayerStateSpAtk : StateMachineBehaviour
 
         _clipLength = AnimationDataCache.GetOverrideLength(animator, motionName);
 
-        // 1. Получаем границы окна удара
+        // 1. РџРѕР»СѓС‡Р°РµРј РіСЂР°РЅРёС†С‹ РѕРєРЅР° СѓРґР°СЂР°
         float startHit = AnimationDataCache.GetEventTimeByName(animator, motionName, eventStartHitName);
         float endHit = AnimationDataCache.GetEventTimeByName(animator, motionName, eventEndHitName);
 
-        // 2. Вычисляем "Золотую середину" — когда меч должен быть внутри монстра
+        // 2. Р’С‹С‡РёСЃР»СЏРµРј "Р—РѕР»РѕС‚СѓСЋ СЃРµСЂРµРґРёРЅСѓ" вЂ” РєРѕРіРґР° РјРµС‡ РґРѕР»Р¶РµРЅ Р±С‹С‚СЊ РІРЅСѓС‚СЂРё РјРѕРЅСЃС‚СЂР°
         _eventHitTimeInClip = (startHit + endHit) / 2f;
 
         int serverTimeMs = animator.GetInteger("sptimeatk");
 
-        // 3. Применяем компенсацию (учитываем пинг и переход)
+        // 3. РџСЂРёРјРµРЅСЏРµРј РєРѕРјРїРµРЅСЃР°С†РёСЋ (СѓС‡РёС‚С‹РІР°РµРј РїРёРЅРі Рё РїРµСЂРµС…РѕРґ)
         float compensation = 0.08f;
         _serverHitTime = (serverTimeMs / 1000f) - compensation;
 
         if (_serverHitTime < 0.1f) _serverHitTime = 0.1f;
 
-        // 4. Скорость: Путь до середины удара / Время до хита от сервера
+        // 4. РЎРєРѕСЂРѕСЃС‚СЊ: РџСѓС‚СЊ РґРѕ СЃРµСЂРµРґРёРЅС‹ СѓРґР°СЂР° / Р’СЂРµРјСЏ РґРѕ С…РёС‚Р° РѕС‚ СЃРµСЂРІРµСЂР°
         float startSpeed = _eventHitTimeInClip / _serverHitTime;
 
         animator.speed = startSpeed;
         animator.Update(0);
 
-        Debug.Log($"<color=cyan>[Sync]</color> Окно хита: {startHit:F2}-{endHit:F2} (Центр: {_eventHitTimeInClip:F2}). " +
-                  $"Скорость: {startSpeed:F2}");
+        Debug.Log($"<color=cyan>[Sync]</color> РћРєРЅРѕ С…РёС‚Р°: {startHit:F2}-{endHit:F2} (Р¦РµРЅС‚СЂ: {_eventHitTimeInClip:F2}). " +
+                  $"РЎРєРѕСЂРѕСЃС‚СЊ: {startSpeed:F2}");
     }
 
     override public void OnStateUpdate(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
@@ -65,7 +65,7 @@ public class PlayerStateSpAtk : StateMachineBehaviour
 
         if (elapsed < _serverHitTime)
         {
-            // Фаза замаха (скорость уже задана в OnStateEnter)
+            // Р¤Р°Р·Р° Р·Р°РјР°С…Р° (СЃРєРѕСЂРѕСЃС‚СЊ СѓР¶Рµ Р·Р°РґР°РЅР° РІ OnStateEnter)
         }
         else
         {
@@ -73,15 +73,15 @@ public class PlayerStateSpAtk : StateMachineBehaviour
             {
                 _hitExecuted = true;
 
-                // Устанавливаем ЖЕСТКУЮ скорость без вычислений времени
+                // РЈСЃС‚Р°РЅР°РІР»РёРІР°РµРј Р–Р•РЎРўРљРЈР® СЃРєРѕСЂРѕСЃС‚СЊ Р±РµР· РІС‹С‡РёСЃР»РµРЅРёР№ РІСЂРµРјРµРЅРё
                 // PlayerAnimationController.Instance.SetPAtkSpeed(postHitSpeed);
-                animator.speed = postHitSpeed; // Меняем системную скорость напрямую
+                animator.speed = postHitSpeed; // РњРµРЅСЏРµРј СЃРёСЃС‚РµРјРЅСѓСЋ СЃРєРѕСЂРѕСЃС‚СЊ РЅР°РїСЂСЏРјСѓСЋ
                 float diff = (elapsed - _serverHitTime) * 1000f;
                 Debug.Log($"<color=yellow>[HIT]</color> Diff: {diff:F1}ms | Switch Speed to: {postHitSpeed}");
             }
 
-            // Выход в Idle, когда анимация в стейте дошла до конца (normalizedTime >= 1)
-            // stateInfo.normalizedTime показывает прогресс текущей анимации от 0 до 1
+            // Р’С‹С…РѕРґ РІ Idle, РєРѕРіРґР° Р°РЅРёРјР°С†РёСЏ РІ СЃС‚РµР№С‚Рµ РґРѕС€Р»Р° РґРѕ РєРѕРЅС†Р° (normalizedTime >= 1)
+            // stateInfo.normalizedTime РїРѕРєР°Р·С‹РІР°РµС‚ РїСЂРѕРіСЂРµСЃСЃ С‚РµРєСѓС‰РµР№ Р°РЅРёРјР°С†РёРё РѕС‚ 0 РґРѕ 1
             if (stateInfo.normalizedTime >= 0.95f)
             {
                 SwitchToIdle(animator);
@@ -94,7 +94,7 @@ public class PlayerStateSpAtk : StateMachineBehaviour
         if (_isSwitchIdle) return;
         _isSwitchIdle = true;
 
-        animator.speed = 1f; // Меняем системную скорость напрямую
+        animator.speed = 1f; // РњРµРЅСЏРµРј СЃРёСЃС‚РµРјРЅСѓСЋ СЃРєРѕСЂРѕСЃС‚СЊ РЅР°РїСЂСЏРјСѓСЋ
         PlayerEntity.Instance.IsAttack = false;
         PlayerStateMachine.Instance.ChangeIntention(Intention.INTENTION_IDLE);
         PlayerStateMachine.Instance.NotifyEvent(Event.WAIT_RETURN);
@@ -102,6 +102,6 @@ public class PlayerStateSpAtk : StateMachineBehaviour
 
     override public void OnStateExit(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
-        animator.speed = 1f; // Меняем системную скорость напрямую
+        animator.speed = 1f; // РњРµРЅСЏРµРј СЃРёСЃС‚РµРјРЅСѓСЋ СЃРєРѕСЂРѕСЃС‚СЊ РЅР°РїСЂСЏРјСѓСЋ
     }
 }

@@ -1,4 +1,4 @@
-public class EnchantResult : ServerPacket
+﻿public class EnchantResult : ServerPacket
 {
     private EnumResult _result;
 

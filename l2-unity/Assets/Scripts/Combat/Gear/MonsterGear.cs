@@ -1,4 +1,4 @@
-using UnityEngine;
+п»їusing UnityEngine;
 using UnityEngine.Diagnostics;
 
 public class MonsterGear : Gear
@@ -85,13 +85,13 @@ public class MonsterGear : Gear
             return selectedBone;
         }
 
-        // Если удар спереди (в сторону "лица")
+        // Р•СЃР»Рё СѓРґР°СЂ СЃРїРµСЂРµРґРё (РІ СЃС‚РѕСЂРѕРЅСѓ "Р»РёС†Р°")
         if (forwardDotProduct > 0)
         {
             Debug.Log("Raycaster hit calculated: Front side (face)");
             return headBone;
         }
-        // Если удар сзади (в сторону "задницы")
+        // Р•СЃР»Рё СѓРґР°СЂ СЃР·Р°РґРё (РІ СЃС‚РѕСЂРѕРЅСѓ "Р·Р°РґРЅРёС†С‹")
         else
         {
             Debug.Log("Raycaster hit calculated: Back side (buttocks)");

@@ -1,4 +1,4 @@
-using UnityEngine;
+п»їusing UnityEngine;
 
 public class PlayerPositionSender 
 {
@@ -8,7 +8,7 @@ public class PlayerPositionSender
 
         if (_currentCount != count)
         {
-            //TimeUtils.PrintFullTime("Отправляем позицию серверу count" + count);
+            //TimeUtils.PrintFullTime("РћС‚РїСЂР°РІР»СЏРµРј РїРѕР·РёС†РёСЋ СЃРµСЂРІРµСЂСѓ count" + count);
             _currentCount = count;
             SendData(playerPosition);
         }
@@ -16,7 +16,7 @@ public class PlayerPositionSender
 
     public void SendServerArrivedPosition(Vector3 playerPosition)
     {
-        //TimeUtils.PrintFullTime("Отправляем позицию серверу StopMove ");
+        //TimeUtils.PrintFullTime("РћС‚РїСЂР°РІР»СЏРµРј РїРѕР·РёС†РёСЋ СЃРµСЂРІРµСЂСѓ StopMove ");
         SendData(playerPosition);
     }
 
@@ -27,6 +27,6 @@ public class PlayerPositionSender
         ValidatePosition sendPaket = CreatorPacketsUser.CreateValidatePosition(playerPosition.x, playerPosition.y, playerPosition.z);
         bool enable = GameClient.Instance.IsCryptEnabled();
         SendGameDataQueue.Instance().AddItem(sendPaket, enable, enable);
-        //Debug.Log("ValidatePosition  отправили данные для синхронизации с сервером");
+        //Debug.Log("ValidatePosition  РѕС‚РїСЂР°РІРёР»Рё РґР°РЅРЅС‹Рµ РґР»СЏ СЃРёРЅС…СЂРѕРЅРёР·Р°С†РёРё СЃ СЃРµСЂРІРµСЂРѕРј");
     }
 }

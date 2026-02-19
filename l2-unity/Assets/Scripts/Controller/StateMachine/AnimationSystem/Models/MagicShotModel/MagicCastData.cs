@@ -1,4 +1,4 @@
-using UnityEngine;
+п»їusing UnityEngine;
 
 public class MagicCastData
 {
@@ -6,7 +6,7 @@ public class MagicCastData
     public float HitTime;
     public float FlightTime;
 
-    // Индивидуальные скорости для каждой фазы
+    // РРЅРґРёРІРёРґСѓР°Р»СЊРЅС‹Рµ СЃРєРѕСЂРѕСЃС‚Рё РґР»СЏ РєР°Р¶РґРѕР№ С„Р°Р·С‹
     public float SpeedMid = 1.0f;
     public float SpeedEnd = 1.0f;
     public float SpeedShot = 1.0f;

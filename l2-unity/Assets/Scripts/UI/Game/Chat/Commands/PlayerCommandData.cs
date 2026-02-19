@@ -1,4 +1,4 @@
-public sealed class PlayerCommandData
+﻿public sealed class PlayerCommandData
 {
     public int Id { get; }
     public PlayerCommand Type { get; }

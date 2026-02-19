@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -253,7 +253,7 @@ public class ClanWindow : L2TwoPanels
         if(_packet != null && !IsLeader(_packet.SubPledgeLeaderName))
         {
             SystemMessageWindow.Instance.OnButtonOk += OkLeave;
-            SystemMessageWindow.Instance.OnButtonClosed += On�ancel;
+            SystemMessageWindow.Instance.OnButtonClosed += OnРЎancel;
             SystemMessageWindow.Instance.ShowWindowDialogYesOrNot("Are you sure you want to leave the clan?");
         }
 
@@ -265,7 +265,7 @@ public class ClanWindow : L2TwoPanels
         {
             SystemMessageWindow.Instance.ShowWindowDialogDropdownYesOrNot(" Select a Unit " , new List<string> { _packet.PledgeName});
             SystemMessageWindow.Instance.OnButtonOk += OkInvite;
-            SystemMessageWindow.Instance.OnButtonClosed += On�ancel;
+            SystemMessageWindow.Instance.OnButtonClosed += OnРЎancel;
         }
 
     }
@@ -420,14 +420,14 @@ public class ClanWindow : L2TwoPanels
         CancelEvent();
     }
 
-    private void On�ancel()
+    private void OnРЎancel()
     {
         CancelEvent();
     }
     private void CancelEvent()
     {
         SystemMessageWindow.Instance.OnButtonOk -= OkLeave;
-        SystemMessageWindow.Instance.OnButtonClosed -= On�ancel;
+        SystemMessageWindow.Instance.OnButtonClosed -= OnРЎancel;
     }
 
 

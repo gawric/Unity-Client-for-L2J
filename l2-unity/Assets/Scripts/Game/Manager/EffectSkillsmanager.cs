@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public class EffectSkillsmanager : MonoBehaviour
 {
@@ -50,7 +50,7 @@ public class EffectSkillsmanager : MonoBehaviour
         GameObject go = _currentTransfromEffect.gameObject;
         go.gameObject.SetActive(true);
 
-        _currentTransfromEffect.position = GetPosition�ollision(footerPosition, S_1177.MOVE_FROM_ORIGINAL_POSITION_FOOTER);
+        _currentTransfromEffect.position = GetPositionРЎollision(footerPosition, S_1177.MOVE_FROM_ORIGINAL_POSITION_FOOTER);
         
 
         string[] effectsFooter = S_1177.NAME_FOOTER_EFFECT;
@@ -60,7 +60,7 @@ public class EffectSkillsmanager : MonoBehaviour
         _rootBodyEffect = go.transform.Find(S_1177.NAME_BODY_OBJECT);
 
         //_rootBodyEffect.position = bodyPosition;
-        //_rootBodyEffect.position = GetPosition�ollision(bodyPosition, S_1177.MOVE_FROM_ORIGINAL_POSITION_FOOTER);
+        //_rootBodyEffect.position = GetPositionРЎollision(bodyPosition, S_1177.MOVE_FROM_ORIGINAL_POSITION_FOOTER);
         _rootBodyEffect.position = bodyPosition;
         //_rootBodyEffect.LookAt(monster.transform);
         foreach (string i in effectsFooter)
@@ -80,7 +80,7 @@ public class EffectSkillsmanager : MonoBehaviour
         return _rootBodyEffect;
     }
 
-    private Vector3 GetPosition�ollision(Vector3 transformPlayer , float pos)
+    private Vector3 GetPositionРЎollision(Vector3 transformPlayer , float pos)
     {
         return new Vector3(transformPlayer.x, transformPlayer.y + pos, transformPlayer.z);
     }

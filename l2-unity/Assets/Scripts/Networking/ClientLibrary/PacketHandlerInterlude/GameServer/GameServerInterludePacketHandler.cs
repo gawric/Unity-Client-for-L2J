@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
 using static UnityEditor.Progress;
@@ -6,7 +6,7 @@ using static UnityEditor.Progress;
 
 public class GameServerInterludePacketHandler : ServerPacketHandler
 {
-    private bool isKeyAuthСompleted = false;
+    private bool isKeyAuthРЎompleted = false;
     public override void HandlePacket(IData itemQueue)
     {
         ItemServer item = (ItemServer)itemQueue;
@@ -316,7 +316,7 @@ public class GameServerInterludePacketHandler : ServerPacketHandler
     private void OnKeyReceive(byte[] data)
     {
         InterludeKeyPacket packet = new InterludeKeyPacket(data);
-        if (!isKeyAuthСompleted)
+        if (!isKeyAuthРЎompleted)
         {
             if (!packet.AuthAllowed)
             {
@@ -348,7 +348,7 @@ public class GameServerInterludePacketHandler : ServerPacketHandler
             SendGameDataQueue.Instance().AddItem(sendPaket, enable, enable);
         }
 
-        isKeyAuthСompleted = true;
+        isKeyAuthРЎompleted = true;
         //_eventProcessor.QueueEvent(() => ((GameClientPacketHandler)_clientPacketHandler).SendAuth());
         //_eventProcessor.QueueEvent(() => ((GameClientPacketHandler)_clientPacketHandler).SendPing());
     }
@@ -473,7 +473,7 @@ public class GameServerInterludePacketHandler : ServerPacketHandler
 
         var sendPaket = CreatorPacketsGameLobby.CreateEnterWorld();
         bool enable = GameClient.Instance.IsCryptEnabled();
-        //Debug.Log("GameServerPacket OnCharUserInfo : �������� ������� ����� EnterWorld!!!! ");
+        //Debug.Log("GameServerPacket OnCharUserInfo : пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ EnterWorld!!!! ");
         SendGameDataQueue.Instance().AddItem(sendPaket, enable, enable);
     }
 
@@ -484,7 +484,7 @@ public class GameServerInterludePacketHandler : ServerPacketHandler
         if (InitPacketsLoadWord.getInstance().IsInit)
         {
             GameClient.Instance.SetDataPreparationCompleted(true);
-            Debug.Log("GameServerPacket OnCharUserInfo : ��������� ��������� ������ UserInfo Init Packet");
+            Debug.Log("GameServerPacket OnCharUserInfo : пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ UserInfo Init Packet");
         }
         else
         {
@@ -493,7 +493,7 @@ public class GameServerInterludePacketHandler : ServerPacketHandler
                 World.Instance.UserInfoUpdateCharacter(userInfo);
                 UserInfoCharacterCombat(userInfo);
             });
-            Debug.Log("GameServerPacket OnCharUserInfo : ��������� ��������� ������ UserInfo noraml packet");
+            Debug.Log("GameServerPacket OnCharUserInfo : пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ UserInfo noraml packet");
         }
 
 
@@ -506,16 +506,16 @@ public class GameServerInterludePacketHandler : ServerPacketHandler
 
     private void OnCharSkillCoolTime(byte[] data)
     {
-        //Debug.Log("GameServerPacket SkillCoolTime : ���������� �� �� ��������� �.� �� ���������� �������� ");
+        //Debug.Log("GameServerPacket SkillCoolTime : пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ.пїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ ");
         SkillCoolTime skillCoolTime = new SkillCoolTime(data);
-        //Debug.Log("GameServerPacket OnCharSkillCoolTime : ��������� ");
+        //Debug.Log("GameServerPacket OnCharSkillCoolTime : пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ ");
 
     }
     private void OnCharMacroList(byte[] data)
     {
-        //Debug.Log("GameServerPacket OnCharMacroList : ���������� �� �� ��������� �.� �� ���������� �������� ");
+        //Debug.Log("GameServerPacket OnCharMacroList : пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ.пїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ ");
         MacroList macroList = new MacroList(data);
-        //Debug.Log("GameServerPacket OnCharMacroList : ��������� ");
+        //Debug.Log("GameServerPacket OnCharMacroList : пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ ");
     }
 
     private void OnNpcHtmlMessage(byte[] data)
@@ -731,22 +731,22 @@ public class GameServerInterludePacketHandler : ServerPacketHandler
 
     private void OnCharShortCutInit(byte[] data)
     {
-        Debug.Log("GameServerPacket OnCharShortCutInit : ������� �����");
+        Debug.Log("GameServerPacket OnCharShortCutInit : пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ");
         ShortCutInit shortCutList = new ShortCutInit(data);
         if (InitPacketsLoadWord.getInstance().IsInit)
         {
             StorageItems.getInstance().AddShortCuts(shortCutList.ShortCuts);
-            Debug.Log("GameServerPacket OnCharShortCutInit : ��������� ���� init �� �������!");
+            Debug.Log("GameServerPacket OnCharShortCutInit : пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ init пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ!");
         }
         else
         {
             //EventProcessor.Instance.QueueEvent(() => SkillbarWindow.Instance.UpdateAllShortcuts(shortCutList.ShortCuts));
             EventProcessor.Instance.QueueEvent(() => PlayerShortcuts.Instance.SetShortcutList(shortCutList.ShortCuts));
-            Debug.Log("GameServerPacket OnCharShortCutInit : �������� �� ����=========");
+            Debug.Log("GameServerPacket OnCharShortCutInit : пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅ=========");
         }
 
 
-        //Debug.Log("GameServerPacket OnCharShortCutInit : ��������� ");
+        //Debug.Log("GameServerPacket OnCharShortCutInit : пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ ");
     }
 
     private void OnCharShortCutRegister(byte[] data)
@@ -796,9 +796,9 @@ public class GameServerInterludePacketHandler : ServerPacketHandler
 
     private void OnCharHennaInfo(byte[] data)
     {
-        //Debug.Log("GameServerPacket HennaInfo : ���������� �� �� ��������� �.� �� ���������� �������� ");
+        //Debug.Log("GameServerPacket HennaInfo : пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ.пїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ ");
         HennaInfo hennaInfo = new HennaInfo(data);
-        //Debug.Log("GameServerPacket HennaInfo : ��������� ");
+        //Debug.Log("GameServerPacket HennaInfo : пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ ");
     }
 
     private void OnCharQuestList(byte[] data)
@@ -910,7 +910,7 @@ public class GameServerInterludePacketHandler : ServerPacketHandler
 
     private void OnCharNpcInfo(byte[] data)
     {
-        //Debug.Log("GameServerPacket NpcInfo  : ������ ��������� ������ ");
+        //Debug.Log("GameServerPacket NpcInfo  : пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ ");
         NpcInfo npcInfo = new NpcInfo(data);
         StorageNpc.getInstance().AddNpcInfo(npcInfo);
 
@@ -949,7 +949,7 @@ public class GameServerInterludePacketHandler : ServerPacketHandler
 
     private void OnMoveToLocation(byte[] data)
     {
-        //Debug.Log("GameServerPacket OnMoveToLocation  : ������ �����");
+        //Debug.Log("GameServerPacket OnMoveToLocation  : пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ");
         CharMoveToLocation charMoveToLocation = new CharMoveToLocation(data);
         if (!InitPacketsLoadWord.getInstance().IsInit)
         {

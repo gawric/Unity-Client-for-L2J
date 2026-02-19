@@ -1,4 +1,4 @@
-using NUnit.Framework;
+п»їusing NUnit.Framework;
 using Org.BouncyCastle.Bcpg;
 using System.Collections;
 using System.Collections.Generic;
@@ -226,7 +226,7 @@ public class InitPacketsLoadWord
         //{
             //nsm.ChangeIntention(NpcIntention.INTENTION_MOVE_TO, moveToLocation);
             npc.transform.position = moveToLocation.NewPosition;
-            Debug.Log("Добавлен пакет перемещаемся есть entity 2 Entity MoveTo Init ");
+            Debug.Log("Р”РѕР±Р°РІР»РµРЅ РїР°РєРµС‚ РїРµСЂРµРјРµС‰Р°РµРјСЃСЏ РµСЃС‚СЊ entity 2 Entity MoveTo Init ");
         //}
 
     }

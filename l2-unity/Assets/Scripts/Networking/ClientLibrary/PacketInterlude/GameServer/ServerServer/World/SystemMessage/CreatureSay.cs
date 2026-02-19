@@ -1,4 +1,4 @@
-public class CreatureSay : ServerPacket
+﻿public class CreatureSay : ServerPacket
 {
     private int objectId = 0;
     private int chatType = 0;

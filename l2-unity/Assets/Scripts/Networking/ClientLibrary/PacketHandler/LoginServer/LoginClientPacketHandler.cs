@@ -1,4 +1,4 @@
-using L2_login;
+п»їusing L2_login;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -62,7 +62,7 @@ public class LoginClientPacketHandler : ClientPacketHandler {
         // Copy shaPass into combined starting after the length indicator and accountBytes
         Array.Copy(shaPass, 0, rsaBlock, accountBytes.Length + 2, shaPass.Length);
 
-        Debug.Log($"До кодировки  РАЗМЕР[{rsaBlock.Length}] и сам блок: {StringUtils.ByteArrayToString(rsaBlock)}");
+        Debug.Log($"Р”Рѕ РєРѕРґРёСЂРѕРІРєРё  Р РђР—РњР•Р [{rsaBlock.Length}] Рё СЃР°Рј Р±Р»РѕРє: {StringUtils.ByteArrayToString(rsaBlock)}");
         // if (LoginClient.Instance.LogCryptography) {
         // Debug output for combined byte array
         //    Debug.Log($"Clear RSA block [{rsaBlock.Length}]: {StringUtils.ByteArrayToString(rsaBlock)}");
@@ -71,7 +71,7 @@ public class LoginClientPacketHandler : ClientPacketHandler {
         rsaBlock = LoginClient.Instance.RSACrypt.EncryptRSANoPadding(rsaBlock);
 
 
-        Debug.Log($"RSA После кодировка : {StringUtils.ByteArrayToString(rsaBlock)}");
+        Debug.Log($"RSA РџРѕСЃР»Рµ РєРѕРґРёСЂРѕРІРєР° : {StringUtils.ByteArrayToString(rsaBlock)}");
 
 
         if (LoginClient.Instance.LogCryptography) {

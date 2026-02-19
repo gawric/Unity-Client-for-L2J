@@ -1,4 +1,4 @@
-using System;
+п»їusing System;
 using UnityEngine;
 
 public class ParseFontColor : IElementsUI
@@ -26,7 +26,7 @@ public class ParseFontColor : IElementsUI
 
     public string ToHex()
     {
-        // Преобразуем цвет в шестнадцатеричный формат
+        // РџСЂРµРѕР±СЂР°Р·СѓРµРј С†РІРµС‚ РІ С€РµСЃС‚РЅР°РґС†Р°С‚РµСЂРёС‡РЅС‹Р№ С„РѕСЂРјР°С‚
         return ColorUtility.ToHtmlStringRGB(GetColor());
     }
 }

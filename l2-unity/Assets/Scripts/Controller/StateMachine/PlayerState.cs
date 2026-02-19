@@ -1,4 +1,4 @@
-public enum PlayerState
+﻿public enum PlayerState
 {
     IDLE,
     ATTACKING,

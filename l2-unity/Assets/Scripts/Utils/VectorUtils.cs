@@ -1,4 +1,4 @@
-using UnityEngine;
+п»їusing UnityEngine;
 
 public class VectorUtils : MonoBehaviour {
     public static Vector3 ConvertPosToUnity(Vector3 ueVector) {
@@ -34,7 +34,7 @@ public class VectorUtils : MonoBehaviour {
     {
         return height;
     }
-    //Высисляет заданная точка движения находится за спиной игрока или нет
+    //Р’С‹СЃРёСЃР»СЏРµС‚ Р·Р°РґР°РЅРЅР°СЏ С‚РѕС‡РєР° РґРІРёР¶РµРЅРёСЏ РЅР°С…РѕРґРёС‚СЃСЏ Р·Р° СЃРїРёРЅРѕР№ РёРіСЂРѕРєР° РёР»Рё РЅРµС‚
     public static bool IsTargetBehindPlayer(Vector3 targetPosition, Transform playerTransform)
     {
         Vector3 playerForward = playerTransform.forward;
@@ -63,18 +63,18 @@ public class VectorUtils : MonoBehaviour {
 
         if (isGrounded)
         {
-            // Если на земле, устанавливаем Y на уровень земли
+            // Р•СЃР»Рё РЅР° Р·РµРјР»Рµ, СѓСЃС‚Р°РЅР°РІР»РёРІР°РµРј Y РЅР° СѓСЂРѕРІРµРЅСЊ Р·РµРјР»Рё
             position.y = hit.point.y;
             _verticalVelocity = 0;
         }
         else
         {
-            // Если не на земле, применяем гравитацию
+            // Р•СЃР»Рё РЅРµ РЅР° Р·РµРјР»Рµ, РїСЂРёРјРµРЅСЏРµРј РіСЂР°РІРёС‚Р°С†РёСЋ
             _verticalVelocity -= _gravity * elapsedTime;
             position.y += _verticalVelocity * elapsedTime;
         }
 
-        // Дополнительно проверяем, не опустился ли игрок ниже уровня земли
+        // Р”РѕРїРѕР»РЅРёС‚РµР»СЊРЅРѕ РїСЂРѕРІРµСЂСЏРµРј, РЅРµ РѕРїСѓСЃС‚РёР»СЃСЏ Р»Рё РёРіСЂРѕРє РЅРёР¶Рµ СѓСЂРѕРІРЅСЏ Р·РµРјР»Рё
         if (position.y < hit.point.y)
         {
             position.y = hit.point.y;
@@ -87,10 +87,10 @@ public class VectorUtils : MonoBehaviour {
 
 
 
-    //Вычисляет сколько процентов игрок повернулся к заданой цели. Процент вычисляет между двумя векторами
+    //Р’С‹С‡РёСЃР»СЏРµС‚ СЃРєРѕР»СЊРєРѕ РїСЂРѕС†РµРЅС‚РѕРІ РёРіСЂРѕРє РїРѕРІРµСЂРЅСѓР»СЃСЏ Рє Р·Р°РґР°РЅРѕР№ С†РµР»Рё. РџСЂРѕС†РµРЅС‚ РІС‹С‡РёСЃР»СЏРµС‚ РјРµР¶РґСѓ РґРІСѓРјСЏ РІРµРєС‚РѕСЂР°РјРё
     public static float InFaceProcent(Vector3 target, Transform transform , float maxAngle)
     {
-        // Если разница между начальным углом и конечным углом меньше 20 градусов, то считаем что объект смотрит в сторону цели
+        // Р•СЃР»Рё СЂР°Р·РЅРёС†Р° РјРµР¶РґСѓ РЅР°С‡Р°Р»СЊРЅС‹Рј СѓРіР»РѕРј Рё РєРѕРЅРµС‡РЅС‹Рј СѓРіР»РѕРј РјРµРЅСЊС€Рµ 20 РіСЂР°РґСѓСЃРѕРІ, С‚Рѕ СЃС‡РёС‚Р°РµРј С‡С‚Рѕ РѕР±СЉРµРєС‚ СЃРјРѕС‚СЂРёС‚ РІ СЃС‚РѕСЂРѕРЅСѓ С†РµР»Рё
         if (maxAngle <= 30) return 100;
 
         Vector3 targetVect = new Vector3(target.x, 0, target.z);
@@ -98,11 +98,11 @@ public class VectorUtils : MonoBehaviour {
         Vector3 directionToTarget = (targetVect - vectr).normalized;
 
         
-        // Угол между текущим направлением объекта и направлением к цели
+        // РЈРіРѕР» РјРµР¶РґСѓ С‚РµРєСѓС‰РёРј РЅР°РїСЂР°РІР»РµРЅРёРµРј РѕР±СЉРµРєС‚Р° Рё РЅР°РїСЂР°РІР»РµРЅРёРµРј Рє С†РµР»Рё
         float angle = Vector3.Angle(transform.forward, directionToTarget);
         if(angle <= 0.5f) return 100;
-       // Debug.Log("Вектор поворта угла " + angle);
-        //Debug.Log("Вектор поворта угла maxAngle " + maxAngle);
+       // Debug.Log("Р’РµРєС‚РѕСЂ РїРѕРІРѕСЂС‚Р° СѓРіР»Р° " + angle);
+        //Debug.Log("Р’РµРєС‚РѕСЂ РїРѕРІРѕСЂС‚Р° СѓРіР»Р° maxAngle " + maxAngle);
 
         float percentage = Mathf.Clamp01(1 - (angle / maxAngle));
 
@@ -121,11 +121,11 @@ public class VectorUtils : MonoBehaviour {
     public static Vector3 GetCollisionEffect(Transform attacker, Transform target , float height , float raduis)
     {
             var heading = target.position - attacker.position;
-            float angle = Vector3.Angle(heading, attacker.forward); // Вычисляем угол между heading и направлением target
-            float particleHeight = height; // Высота частиц
-            Vector3 direction = Quaternion.Euler(0, angle, 0) * attacker.forward; // Вычисляем новое направление с учетом угла
+            float angle = Vector3.Angle(heading, attacker.forward); // Р’С‹С‡РёСЃР»СЏРµРј СѓРіРѕР» РјРµР¶РґСѓ heading Рё РЅР°РїСЂР°РІР»РµРЅРёРµРј target
+            float particleHeight = height; // Р’С‹СЃРѕС‚Р° С‡Р°СЃС‚РёС†
+            Vector3 direction = Quaternion.Euler(0, angle, 0) * attacker.forward; // Р’С‹С‡РёСЃР»СЏРµРј РЅРѕРІРѕРµ РЅР°РїСЂР°РІР»РµРЅРёРµ СЃ СѓС‡РµС‚РѕРј СѓРіР»Р°
 
-            // Возвращаем новую позицию, смещенную от позиции attacker
+            // Р’РѕР·РІСЂР°С‰Р°РµРј РЅРѕРІСѓСЋ РїРѕР·РёС†РёСЋ, СЃРјРµС‰РµРЅРЅСѓСЋ РѕС‚ РїРѕР·РёС†РёРё attacker
             return attacker.position + direction * raduis + Vector3.up * particleHeight;
     }
 
@@ -210,7 +210,7 @@ public class VectorUtils : MonoBehaviour {
     //use npc heading
     public static float HeadingToUnityQuaternionForNpc(float heading)
     {
-        // Преобразуем heading из диапазона [0, 65535] в угол в градусах [0, 360]
+        // РџСЂРµРѕР±СЂР°Р·СѓРµРј heading РёР· РґРёР°РїР°Р·РѕРЅР° [0, 65535] РІ СѓРіРѕР» РІ РіСЂР°РґСѓСЃР°С… [0, 360]
         float angleInDegrees = (heading / 182.04444444444444444444444444444f) % 360;
         return angleInDegrees;
 

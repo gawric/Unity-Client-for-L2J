@@ -1,4 +1,4 @@
-
+п»ї
 
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -37,7 +37,7 @@ public class TooltipManipulator : PointerManipulator
         }
         else
         {
-            Debug.Log("TooltipManipulator: PointerInHandler не критическая ошибка!");
+            Debug.Log("TooltipManipulator: PointerInHandler РЅРµ РєСЂРёС‚РёС‡РµСЃРєР°СЏ РѕС€РёР±РєР°!");
         }
 
     }
@@ -57,7 +57,7 @@ public class TooltipManipulator : PointerManipulator
         }
         else
         {
-            Debug.Log("TooltipManipulator: PointerOutHandler не критическая ошибка!");
+            Debug.Log("TooltipManipulator: PointerOutHandler РЅРµ РєСЂРёС‚РёС‡РµСЃРєР°СЏ РѕС€РёР±РєР°!");
         }
      
     }
@@ -77,7 +77,7 @@ public class TooltipManipulator : PointerManipulator
             }
             else
             {
-                Debug.Log("TooltipManipulator: Clear не критическая ошибка!");
+                Debug.Log("TooltipManipulator: Clear РЅРµ РєСЂРёС‚РёС‡РµСЃРєР°СЏ РѕС€РёР±РєР°!");
             }
             
         }

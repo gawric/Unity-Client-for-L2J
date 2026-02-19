@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using TMPro;
 using UnityEditor;
 using UnityEngine;
@@ -6,7 +6,7 @@ using static S_1177;
 
 public class FlyWindStrike : MonoBehaviour
 {
-    public Material fadeOutMaterial; // Ссылка на материал с вашим шейдером
+    public Material fadeOutMaterial; // РЎСЃС‹Р»РєР° РЅР° РјР°С‚РµСЂРёР°Р» СЃ РІР°С€РёРј С€РµР№РґРµСЂРѕРј
 
     private float elapsedTime = 0f;
   
@@ -26,9 +26,9 @@ public class FlyWindStrike : MonoBehaviour
     private float _sizeTIme = 0;
 
     private FlyWindStrike01 _fws01;
-    public float height = 0.03f; // Максимальная высота, до которой поднимется объект
-    public float speed = 0.05f;   // Скорость подъема
-    private Vector3 _targetJumpPosition; // Целевая позиция для Lerp
+    public float height = 0.03f; // РњР°РєСЃРёРјР°Р»СЊРЅР°СЏ РІС‹СЃРѕС‚Р°, РґРѕ РєРѕС‚РѕСЂРѕР№ РїРѕРґРЅРёРјРµС‚СЃСЏ РѕР±СЉРµРєС‚
+    public float speed = 0.05f;   // РЎРєРѕСЂРѕСЃС‚СЊ РїРѕРґСЉРµРјР°
+    private Vector3 _targetJumpPosition; // Р¦РµР»РµРІР°СЏ РїРѕР·РёС†РёСЏ РґР»СЏ Lerp
     private Vector3 _lastUpdateScale;
     private bool _isRun01 = false;
     private bool _isHide01 = false;
@@ -185,7 +185,7 @@ public class FlyWindStrike : MonoBehaviour
         {
             var vector = Vector3.Lerp(transform.position, _targetJumpPosition, speed * deltaTime);
             transform.position = vector;
-            //Debug.Log(" Медленно перемещаем обьект вверх " + vector);
+            //Debug.Log(" РњРµРґР»РµРЅРЅРѕ РїРµСЂРµРјРµС‰Р°РµРј РѕР±СЊРµРєС‚ РІРІРµСЂС… " + vector);
         }
 
     }

@@ -1,4 +1,4 @@
-public class ChooseInventoryItem : ServerPacket
+﻿public class ChooseInventoryItem : ServerPacket
 {
 
     private int _itemId;

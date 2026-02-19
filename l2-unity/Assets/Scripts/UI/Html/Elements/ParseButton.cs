@@ -1,4 +1,4 @@
-public class ParseButton : IElementsUI
+﻿public class ParseButton : IElementsUI
 {
     public string Value { get; private set; }
     public string Action { get; private set; }

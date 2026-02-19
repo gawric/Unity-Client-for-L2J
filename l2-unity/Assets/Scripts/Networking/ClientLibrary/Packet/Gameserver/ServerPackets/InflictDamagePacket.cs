@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using System;
 public class InflictDamagePacket : ServerPacket {
     private Hit[] _hits;

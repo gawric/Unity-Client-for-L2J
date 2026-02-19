@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using UnityEngine;
 
 public class TimeUtils
@@ -32,27 +32,27 @@ public class TimeUtils
 
        if (seconds < 60)
        {
-                return $"{Mathf.RoundToInt(seconds)} Cåêóíä";
+                return $"{Mathf.RoundToInt(seconds)} CÐµÐºÑƒÐ½Ð´";
        }
 
        float minutes = seconds / 60f;
        if (minutes < 2f)
        {
-            return $"{minutes:F1}".Replace(',', '.') + " Ìèíóòû";
+            return $"{minutes:F1}".Replace(',', '.') + " ÐœÐ¸Ð½ÑƒÑ‚Ñ‹";
         }
 
        if (minutes < 60f)
        {
-                return $"{Mathf.RoundToInt(minutes)} Ìèíóò";
+                return $"{Mathf.RoundToInt(minutes)} ÐœÐ¸Ð½ÑƒÑ‚";
        }
 
        float hours = minutes / 60f;
        if (hours < 24f)
        {
-           return $"{Mathf.RoundToInt(hours)} ×àñîâ";
+           return $"{Mathf.RoundToInt(hours)} Ð§Ð°ÑÐ¾Ð²";
        }
 
        float days = hours / 24f;
-        return $"{Mathf.RoundToInt(days)} Äíåé";
+        return $"{Mathf.RoundToInt(days)} Ð”Ð½ÐµÐ¹";
     }
 }

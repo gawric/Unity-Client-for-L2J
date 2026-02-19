@@ -1,4 +1,4 @@
-public enum NpcAnimationEvent : int
+﻿public enum NpcAnimationEvent : int
 {
     Wait,
     Walk,

@@ -1,4 +1,4 @@
-#if (UNITY_EDITOR) 
+﻿#if (UNITY_EDITOR) 
 using UnityEngine;
 
 public class L2StaticMesh {

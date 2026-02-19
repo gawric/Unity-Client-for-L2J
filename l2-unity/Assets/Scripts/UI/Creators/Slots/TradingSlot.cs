@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using UnityEngine;
 using UnityEngine.UIElements;
 using static L2Slot;
@@ -33,7 +33,7 @@ public class TradingSlot : L2DraggableSlot
         }
         else
         {
-            Debug.LogWarning("TradingSlot> AssignItem: Íå êðèòè÷åñêàÿ îøèáêà íå ñìîãëè íàéòè TradingSlotModel>SlotElement");
+            Debug.LogWarning("TradingSlot> AssignItem: ÐÐµ ÐºÑ€Ð¸Ñ‚Ð¸Ñ‡ÐµÑÐºÐ°Ñ Ð¾ÑˆÐ¸Ð±ÐºÐ° Ð½Ðµ ÑÐ¼Ð¾Ð³Ð»Ð¸ Ð½Ð°Ð¹Ñ‚Ð¸ TradingSlotModel>SlotElement");
         }
     }
 

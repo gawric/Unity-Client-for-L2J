@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+п»їusing System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -66,7 +66,7 @@ public class DropdownFieldUtils
             if (cur.resolvedStyle.display == DisplayStyle.None)
                 return false;
 
-            // Дополнительно можно проверить opacity (нулевая непрозрачность делает невидимым)
+            // Р”РѕРїРѕР»РЅРёС‚РµР»СЊРЅРѕ РјРѕР¶РЅРѕ РїСЂРѕРІРµСЂРёС‚СЊ opacity (РЅСѓР»РµРІР°СЏ РЅРµРїСЂРѕР·СЂР°С‡РЅРѕСЃС‚СЊ РґРµР»Р°РµС‚ РЅРµРІРёРґРёРјС‹Рј)
             if (cur.resolvedStyle.opacity == 0f)
                 return false;
         }

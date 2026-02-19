@@ -1,4 +1,4 @@
-public class RequestRestartPoint : ClientPacket
+﻿public class RequestRestartPoint : ClientPacket
 {
     //_requestedPointType = 0 client
     //_requestedPointType = 1 // to clanhall

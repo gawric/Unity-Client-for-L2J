@@ -1,4 +1,4 @@
-
+п»ї
 using System.Threading;
 using UnityEngine;
 
@@ -27,7 +27,7 @@ public class NewAttackState : AbstractAttackEvents
         switch (evt)
         {
             case Event.READY_TO_ACT:
-                Debug.Log("Attack Sate to Intention> начало новой atk пришел запрос от сервера");
+                Debug.Log("Attack Sate to Intention> РЅР°С‡Р°Р»Рѕ РЅРѕРІРѕР№ atk РїСЂРёС€РµР» Р·Р°РїСЂРѕСЃ РѕС‚ СЃРµСЂРІРµСЂР°");
                 RotateFaceToMonster(_stateMachine.Player);
                 PlayerEntity.Instance.RefreshRandomPAttack();
                 Animation random = PlayerEntity.Instance.RandomName;
@@ -35,7 +35,7 @@ public class NewAttackState : AbstractAttackEvents
 
                 break;
             case Event.CANCEL:
-                Debug.Log("Attack Sate to Intention> Отмена скорее всего запрос пришел из ActionFaild");
+                Debug.Log("Attack Sate to Intention> РћС‚РјРµРЅР° СЃРєРѕСЂРµРµ РІСЃРµРіРѕ Р·Р°РїСЂРѕСЃ РїСЂРёС€РµР» РёР· ActionFaild");
                 PlayerStateMachine.Instance.ChangeIntention(Intention.INTENTION_IDLE);
                 PlayerStateMachine.Instance.NotifyEvent(Event.WAIT_RETURN);
                 PlayerEntity.Instance.LastAtkAnimation = null;
@@ -66,21 +66,21 @@ public class NewAttackState : AbstractAttackEvents
             Vector3 lookDir = (monsterFacePosition - startPoint).normalized;
             float verticalAngle = Mathf.Asin(lookDir.y) * Mathf.Rad2Deg;
 
-            // --- НАСТРОЙКА СПИНЫ ---
-            // Берем 40% от общего угла для естественности
+            // --- РќРђРЎРўР РћР™РљРђ РЎРџРРќР« ---
+            // Р‘РµСЂРµРј 40% РѕС‚ РѕР±С‰РµРіРѕ СѓРіР»Р° РґР»СЏ РµСЃС‚РµСЃС‚РІРµРЅРЅРѕСЃС‚Рё
             float spineAngle = Mathf.Clamp(verticalAngle * 0.4f, -15f, 10f);
             Vector3 spineRotation = new Vector3(0, 0, spineAngle);
 
-            // --- НАСТРОЙКА РУКИ ---
-            // Добавляем еще 30% наклона именно для руки, чтобы она била ниже
+            // --- РќРђРЎРўР РћР™РљРђ Р РЈРљР ---
+            // Р”РѕР±Р°РІР»СЏРµРј РµС‰Рµ 30% РЅР°РєР»РѕРЅР° РёРјРµРЅРЅРѕ РґР»СЏ СЂСѓРєРё, С‡С‚РѕР±С‹ РѕРЅР° Р±РёР»Р° РЅРёР¶Рµ
             float armAngle = Mathf.Clamp(verticalAngle * 0.3f, -20f, 10f);
             Vector3 armRotation = new Vector3(0, 0, armAngle);
-            // ВНИМАНИЕ: Если рука крутится не туда, проверьте ось (возможно, нужна X вместо Z)
+            // Р’РќРРњРђРќРР•: Р•СЃР»Рё СЂСѓРєР° РєСЂСѓС‚РёС‚СЃСЏ РЅРµ С‚СѓРґР°, РїСЂРѕРІРµСЂСЊС‚Рµ РѕСЃСЊ (РІРѕР·РјРѕР¶РЅРѕ, РЅСѓР¶РЅР° X РІРјРµСЃС‚Рѕ Z)
 
-            // 4. Применяем через ваш PlayerEntity и SpineProceduralController
+            // 4. РџСЂРёРјРµРЅСЏРµРј С‡РµСЂРµР· РІР°С€ PlayerEntity Рё SpineProceduralController
             PlayerEntity playerEntity = (PlayerEntity)entity;
 
-            // Применяем к позвоночнику (вы уже настроили это в SetProceduralPose)
+            // РџСЂРёРјРµРЅСЏРµРј Рє РїРѕР·РІРѕРЅРѕС‡РЅРёРєСѓ (РІС‹ СѓР¶Рµ РЅР°СЃС‚СЂРѕРёР»Рё СЌС‚Рѕ РІ SetProceduralPose)
             playerEntity.SetProceduralSpinePose(spineRotation);
             playerEntity.SetProceduralRightUpperArmPose(armRotation);
         });

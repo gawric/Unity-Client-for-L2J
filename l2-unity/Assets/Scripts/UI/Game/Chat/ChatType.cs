@@ -1,4 +1,4 @@
-public enum ChatType
+﻿public enum ChatType
 {
     GENERAL = 0,
     SHOUT = 1,

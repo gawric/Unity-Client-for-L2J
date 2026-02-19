@@ -1,4 +1,4 @@
-public enum ItemCategory : byte
+﻿public enum ItemCategory : byte
 {
     // Item Type 2 : 00-weapon, 01-shield/armor, 02-ring/earring/necklace, 03-questitem, 04-adena, 05-item
     Weapon = 0,

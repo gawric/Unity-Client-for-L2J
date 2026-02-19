@@ -1,4 +1,4 @@
-public enum PlayerAnimationEvent : int
+﻿public enum PlayerAnimationEvent : int
 {
     wait_hand,
     wait_1HS,

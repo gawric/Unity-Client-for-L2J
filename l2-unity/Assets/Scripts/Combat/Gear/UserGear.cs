@@ -1,4 +1,4 @@
-using NUnit.Framework;
+п»їusing NUnit.Framework;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -292,14 +292,14 @@ public class UserGear : Gear
             Destroy(go);
         }
 
-        //Debug.LogWarning("Запрос на удаление. Удаление состоялось размер " + _container.transform.childCount);
+        //Debug.LogWarning("Р—Р°РїСЂРѕСЃ РЅР° СѓРґР°Р»РµРЅРёРµ. РЈРґР°Р»РµРЅРёРµ СЃРѕСЃС‚РѕСЏР»РѕСЃСЊ СЂР°Р·РјРµСЂ " + _container.transform.childCount);
     }
 
     public void OnSyncMash(int status)
     {
-        //Debug.LogWarning("Запрос на удаление. Синхронизация начало");
+        //Debug.LogWarning("Р—Р°РїСЂРѕСЃ РЅР° СѓРґР°Р»РµРЅРёРµ. РЎРёРЅС…СЂРѕРЅРёР·Р°С†РёСЏ РЅР°С‡Р°Р»Рѕ");
         _skinnedMeshSync?.SyncMesh();
-        //Debug.LogWarning("Запрос на удаление. Синхронизация конец");
+        //Debug.LogWarning("Р—Р°РїСЂРѕСЃ РЅР° СѓРґР°Р»РµРЅРёРµ. РЎРёРЅС…СЂРѕРЅРёР·Р°С†РёСЏ РєРѕРЅРµС†");
     }
 
     public void OnAddSyncMash(GameObject add)

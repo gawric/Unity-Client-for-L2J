@@ -1,4 +1,4 @@
-public enum ChatCommand : int
+﻿public enum ChatCommand : int
 {
     SHOUT       = 1,   // !
     WHISPER     = 2,   // "

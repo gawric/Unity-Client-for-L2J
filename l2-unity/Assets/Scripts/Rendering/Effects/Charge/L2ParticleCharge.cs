@@ -1,4 +1,4 @@
-using UnityEngine;
+п»їusing UnityEngine;
 using static UnityEngine.UI.GridLayoutGroup;
 
 public class L2ParticleCharge : BaseEffect
@@ -32,7 +32,7 @@ public class L2ParticleCharge : BaseEffect
 
     public override void SetProgress(float normalizedTime)
     {
-        Debug.Log("L2ParticleCharge>SetProgress: не реализовано");
+        Debug.Log("L2ParticleCharge>SetProgress: РЅРµ СЂРµР°Р»РёР·РѕРІР°РЅРѕ");
         //foreach (var group in _particleGroups)
            // group.SetProgress(normalizedTime);
     }
@@ -44,7 +44,7 @@ public class L2ParticleCharge : BaseEffect
 
         foreach (var group in _particleGroups)
         {
-            // Используем интерфейс IWeaponEffect, о котором говорили ранее
+            // РСЃРїРѕР»СЊР·СѓРµРј РёРЅС‚РµСЂС„РµР№СЃ IWeaponEffect, Рѕ РєРѕС‚РѕСЂРѕРј РіРѕРІРѕСЂРёР»Рё СЂР°РЅРµРµ
             if (group is IWeaponEffect weaponEffect)
             {
                 weaponEffect.SetWeapon(_owner);

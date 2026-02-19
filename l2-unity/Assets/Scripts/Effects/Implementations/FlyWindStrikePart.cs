@@ -1,9 +1,9 @@
-using UnityEngine;
+п»їusing UnityEngine;
 using System.Collections.Generic;
 
 public class FlyWindStrikePart : EffectPart
 {
-    public EffectPart linkedPart; // Ссылка на FlyWindStrike01 (если есть в префабе)
+    public EffectPart linkedPart; // РЎСЃС‹Р»РєР° РЅР° FlyWindStrike01 (РµСЃР»Рё РµСЃС‚СЊ РІ РїСЂРµС„Р°Р±Рµ)
 
     private bool _isActive = false;
     private bool _isHiding = false;

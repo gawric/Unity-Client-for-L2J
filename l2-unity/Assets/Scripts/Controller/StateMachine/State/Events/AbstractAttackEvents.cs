@@ -1,4 +1,4 @@
-using UnityEngine;
+п»їusing UnityEngine;
 
 public abstract class AbstractAttackEvents : StateBase
 {
@@ -66,7 +66,7 @@ public abstract class AbstractAttackEvents : StateBase
         if (target != null & target is MonsterEntity)
         {
             MonsterEntity monsterEntity = (MonsterEntity)target;
-            //Debug.Log("Попали и увидели что монстр уже должен быть мертвым hp  " + monsterEntity.Hp() + " RemainingHP " + monsterEntity.CalculateRemainingHp());
+            //Debug.Log("РџРѕРїР°Р»Рё Рё СѓРІРёРґРµР»Рё С‡С‚Рѕ РјРѕРЅСЃС‚СЂ СѓР¶Рµ РґРѕР»Р¶РµРЅ Р±С‹С‚СЊ РјРµСЂС‚РІС‹Рј hp  " + monsterEntity.Hp() + " RemainingHP " + monsterEntity.CalculateRemainingHp());
 
             if (monsterEntity.IsDead() || monsterEntity.CalculateRemainingHp() <= 0)
             {
@@ -74,7 +74,7 @@ public abstract class AbstractAttackEvents : StateBase
                 MonsterStateMachine stateMachine = monsterEntity.GetStateMachine();
                 stateMachine.ChangeState(MonsterState.DEAD);
                 stateMachine.NotifyEvent(Event.FORCE_DEATH);
-                //Debug.Log("Попали и увидели что монстр уже должен быть мертвым hp запускаем анимацию смерти " + monsterEntity.IsDead());
+                //Debug.Log("РџРѕРїР°Р»Рё Рё СѓРІРёРґРµР»Рё С‡С‚Рѕ РјРѕРЅСЃС‚СЂ СѓР¶Рµ РґРѕР»Р¶РµРЅ Р±С‹С‚СЊ РјРµСЂС‚РІС‹Рј hp Р·Р°РїСѓСЃРєР°РµРј Р°РЅРёРјР°С†РёСЋ СЃРјРµСЂС‚Рё " + monsterEntity.IsDead());
             }
 
 
@@ -97,7 +97,7 @@ public abstract class AbstractAttackEvents : StateBase
                         go == null ||
                         target == null)
                     {
-                        Debug.LogError("NewAttackState->CallBackStartShoot: Критическая ошибка не все компоненты загрузились что-бы отправить стрелу в полет");
+                        Debug.LogError("NewAttackState->CallBackStartShoot: РљСЂРёС‚РёС‡РµСЃРєР°СЏ РѕС€РёР±РєР° РЅРµ РІСЃРµ РєРѕРјРїРѕРЅРµРЅС‚С‹ Р·Р°РіСЂСѓР·РёР»РёСЃСЊ С‡С‚Рѕ-Р±С‹ РѕС‚РїСЂР°РІРёС‚СЊ СЃС‚СЂРµР»Сѓ РІ РїРѕР»РµС‚");
                         return;
                     }
 

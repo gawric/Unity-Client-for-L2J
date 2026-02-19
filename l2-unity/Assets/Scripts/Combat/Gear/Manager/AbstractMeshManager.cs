@@ -1,4 +1,4 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 using static ModelTable;
 using static UnityEngine.EventSystems.EventTrigger;
 
@@ -49,7 +49,7 @@ public class AbstractMeshManager : MonoBehaviour
         }
         catch (System.Exception ex)
         {
-            Debug.LogWarning($"AbstractMeshManager-> LoadMesh íå ñìîãëè çàãðóçèòü íóæíóþ Mesh !!! ArmorID {itemIds[0]} Type {category} error print: ->\n" + ex.ToString());
+            Debug.LogWarning($"AbstractMeshManager-> LoadMesh Ð½Ðµ ÑÐ¼Ð¾Ð³Ð»Ð¸ Ð·Ð°Ð³Ñ€ÑƒÐ·Ð¸Ñ‚ÑŒ Ð½ÑƒÐ¶Ð½ÑƒÑŽ Mesh !!! ArmorID {itemIds[0]} Type {category} error print: ->\n" + ex.ToString());
             return null;
         }
 

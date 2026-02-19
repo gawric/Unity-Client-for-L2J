@@ -1,4 +1,4 @@
-public class RunningNpcState : NpcBase
+﻿public class RunningNpcState : NpcBase
 {
     private NpcEntity npcEntity;
     public RunningNpcState(NpcStateMachine stateMachine) : base(stateMachine) { }

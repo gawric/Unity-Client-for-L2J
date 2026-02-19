@@ -1,12 +1,12 @@
-using UnityEngine;
+п»їusing UnityEngine;
 
 public class PlayerStateSpAtkBow : StateMachineBehaviour
 {
     private float _startTime;
     private float _endTime;
     private float _clipLength;
-    private float _eventTimeInClip; // Время ивента в самом файле (3.22с)
-    private float _targetShootTime; // Когда ивент ДОЛЖЕН сработать в реале (2.3с)
+    private float _eventTimeInClip; // Р’СЂРµРјСЏ РёРІРµРЅС‚Р° РІ СЃР°РјРѕРј С„Р°Р№Р»Рµ (3.22СЃ)
+    private float _targetShootTime; // РљРѕРіРґР° РёРІРµРЅС‚ Р”РћР›Р–Р•Рќ СЃСЂР°Р±РѕС‚Р°С‚СЊ РІ СЂРµР°Р»Рµ (2.3СЃ)
     private bool _isSwitchIdle;
 
     public string parameterName;
@@ -22,26 +22,26 @@ public class PlayerStateSpAtkBow : StateMachineBehaviour
         _startTime = Time.time;
         _animationCurve = CreateNormalizedCurve();
 
-        // 1. Получаем данные клипа и ивента из кэша
+        // 1. РџРѕР»СѓС‡Р°РµРј РґР°РЅРЅС‹Рµ РєР»РёРїР° Рё РёРІРµРЅС‚Р° РёР· РєСЌС€Р°
         _clipLength = AnimationDataCache.GetOverrideLength(animator, motionName);
         _eventTimeInClip = AnimationDataCache.GetEventTimeByName(animator, motionName, eventShootName);
 
-        // 2. Получаем серверное время (3.3с)
+        // 2. РџРѕР»СѓС‡Р°РµРј СЃРµСЂРІРµСЂРЅРѕРµ РІСЂРµРјСЏ (3.3СЃ)
         int serverTimeMs = animator.GetInteger("sptimeatk");
         _endTime = serverTimeMs / 1000f;
 
-        // 3. Рассчитываем время полета и когда ДОЛЖЕН быть выстрел
+        // 3. Р Р°СЃСЃС‡РёС‚С‹РІР°РµРј РІСЂРµРјСЏ РїРѕР»РµС‚Р° Рё РєРѕРіРґР° Р”РћР›Р–Р•Рќ Р±С‹С‚СЊ РІС‹СЃС‚СЂРµР»
         float dist = PlayerEntity.Instance.TargetDistance();
         float[] times = CalcBaseParam.CalculateAttackAndFlightTimes(dist, serverTimeMs);
         float flightTime = times[1] / 1000f;
 
-        // Точка выстрела в реальном времени (например: 3.3 - 1.0 = 2.3с)
+        // РўРѕС‡РєР° РІС‹СЃС‚СЂРµР»Р° РІ СЂРµР°Р»СЊРЅРѕРј РІСЂРµРјРµРЅРё (РЅР°РїСЂРёРјРµСЂ: 3.3 - 1.0 = 2.3СЃ)
         _targetShootTime = _endTime - flightTime;
 
-        // Предохранитель, чтобы не было деления на ноль
+        // РџСЂРµРґРѕС…СЂР°РЅРёС‚РµР»СЊ, С‡С‚РѕР±С‹ РЅРµ Р±С‹Р»Рѕ РґРµР»РµРЅРёСЏ РЅР° РЅРѕР»СЊ
         if (_targetShootTime <= 0) _targetShootTime = _endTime * 0.5f;
 
-        Debug.Log($"[Sync] Клип: {_clipLength}с | Ивент в клипе: {_eventTimeInClip}с | Цель выстрела: {_targetShootTime}с | Цель итог: {_endTime}с");
+        Debug.Log($"[Sync] РљР»РёРї: {_clipLength}СЃ | РРІРµРЅС‚ РІ РєР»РёРїРµ: {_eventTimeInClip}СЃ | Р¦РµР»СЊ РІС‹СЃС‚СЂРµР»Р°: {_targetShootTime}СЃ | Р¦РµР»СЊ РёС‚РѕРі: {_endTime}СЃ");
     }
 
     override public void OnStateUpdate(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
@@ -57,23 +57,23 @@ public class PlayerStateSpAtkBow : StateMachineBehaviour
 
         float progress = Mathf.Clamp01(timeOut / _endTime);
 
-        // Расчет базовой скорости для синхронизации
+        // Р Р°СЃС‡РµС‚ Р±Р°Р·РѕРІРѕР№ СЃРєРѕСЂРѕСЃС‚Рё РґР»СЏ СЃРёРЅС…СЂРѕРЅРёР·Р°С†РёРё
         float baseSpeed;
 
         if (timeOut < _targetShootTime)
         {
-            // ФАЗА 1: До выстрела. Должны пройти путь _eventTimeInClip за время _targetShootTime
+            // Р¤РђР—Рђ 1: Р”Рѕ РІС‹СЃС‚СЂРµР»Р°. Р”РѕР»Р¶РЅС‹ РїСЂРѕР№С‚Рё РїСѓС‚СЊ _eventTimeInClip Р·Р° РІСЂРµРјСЏ _targetShootTime
             baseSpeed = _eventTimeInClip / _targetShootTime;
         }
         else
         {
-            // ФАЗА 2: После выстрела. Должны пройти остаток клипа за остаток времени
+            // Р¤РђР—Рђ 2: РџРѕСЃР»Рµ РІС‹СЃС‚СЂРµР»Р°. Р”РѕР»Р¶РЅС‹ РїСЂРѕР№С‚Рё РѕСЃС‚Р°С‚РѕРє РєР»РёРїР° Р·Р° РѕСЃС‚Р°С‚РѕРє РІСЂРµРјРµРЅРё
             float remainingClip = _clipLength - _eventTimeInClip;
             float remainingTime = _endTime - _targetShootTime;
             baseSpeed = (remainingTime > 0) ? (remainingClip / remainingTime) : 1.0f;
         }
 
-        // Модификатор кривой (slope)
+        // РњРѕРґРёС„РёРєР°С‚РѕСЂ РєСЂРёРІРѕР№ (slope)
         float delta = 0.01f;
         float v1 = _animationCurve.Evaluate(progress);
         float v2 = _animationCurve.Evaluate(Mathf.Min(progress + delta, 1.0f));
@@ -83,16 +83,16 @@ public class PlayerStateSpAtkBow : StateMachineBehaviour
 
         PlayerAnimationController.Instance.SetPAtkSpeed(targetSpeed);
 
-        // Дебаг прогресса выстрела
+        // Р”РµР±Р°Рі РїСЂРѕРіСЂРµСЃСЃР° РІС‹СЃС‚СЂРµР»Р°
         if (timeOut < _targetShootTime)
-            Debug.Log($"[Sync] До выстрела: {(timeOut / _targetShootTime) * 100:F0}% | Скорость: {targetSpeed:F2}");
+            Debug.Log($"[Sync] Р”Рѕ РІС‹СЃС‚СЂРµР»Р°: {(timeOut / _targetShootTime) * 100:F0}% | РЎРєРѕСЂРѕСЃС‚СЊ: {targetSpeed:F2}");
     }
 
     private AnimationCurve CreateNormalizedCurve()
     {
         AnimationCurve curve = new AnimationCurve();
         curve.AddKey(new Keyframe(0f, 0f));
-        curve.AddKey(new Keyframe(1f, 1f)); // Для двухфазной скорости лучше использовать линейную или мягкую кривую
+        curve.AddKey(new Keyframe(1f, 1f)); // Р”Р»СЏ РґРІСѓС…С„Р°Р·РЅРѕР№ СЃРєРѕСЂРѕСЃС‚Рё Р»СѓС‡С€Рµ РёСЃРїРѕР»СЊР·РѕРІР°С‚СЊ Р»РёРЅРµР№РЅСѓСЋ РёР»Рё РјСЏРіРєСѓСЋ РєСЂРёРІСѓСЋ
         for (int i = 0; i < curve.length; i++) curve.SmoothTangents(i, 0);
         return curve;
     }

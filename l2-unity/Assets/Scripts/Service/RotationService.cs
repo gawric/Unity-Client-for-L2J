@@ -1,4 +1,4 @@
-using UnityEngine;
+п»їusing UnityEngine;
 using System;
 
 public class RotationService : MonoBehaviour , IRotation
@@ -28,10 +28,10 @@ public class RotationService : MonoBehaviour , IRotation
         Quaternion targetRotation = Quaternion.LookRotation(direction);
         float angleDiff = Quaternion.Angle(actor.rotation, targetRotation);
 
-        // Если разница уже меньше порога - не крутим, шлем Action
+        // Р•СЃР»Рё СЂР°Р·РЅРёС†Р° СѓР¶Рµ РјРµРЅСЊС€Рµ РїРѕСЂРѕРіР° - РЅРµ РєСЂСѓС‚РёРј, С€Р»РµРј Action
         if (angleDiff <= angleThreshold)
         {
-            actor.rotation = targetRotation; // Доворачиваем точно
+            actor.rotation = targetRotation; // Р”РѕРІРѕСЂР°С‡РёРІР°РµРј С‚РѕС‡РЅРѕ
             onComplete?.Invoke();
             Debug.Log("RotationService: Rotating exit 2 " + targetPoint);
         }

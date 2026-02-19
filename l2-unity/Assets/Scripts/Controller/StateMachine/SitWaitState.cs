@@ -1,4 +1,4 @@
-public class SitWaitState : StateBase
+﻿public class SitWaitState : StateBase
 {
     public SitWaitState(PlayerStateMachine stateMachine) : base(stateMachine) { }
 

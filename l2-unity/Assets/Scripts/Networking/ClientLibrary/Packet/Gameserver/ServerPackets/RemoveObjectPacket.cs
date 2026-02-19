@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using System;
 public class RemoveObjectPacket : ServerPacket {
     public int Id { get; private set; }

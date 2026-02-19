@@ -1,4 +1,4 @@
-using UnityEngine;
+п»їusing UnityEngine;
 
 public class AuraWindStrikePart : EffectPart
 {
@@ -43,22 +43,22 @@ public class AuraWindStrikePart : EffectPart
 
         _elapsedTime += Time.deltaTime;
 
-        // Плавное появление (Твои 3 секунды до 0.3f)
+        // РџР»Р°РІРЅРѕРµ РїРѕСЏРІР»РµРЅРёРµ (РўРІРѕРё 3 СЃРµРєСѓРЅРґС‹ РґРѕ 0.3f)
         if (!_isHiding && _currentAlpha < 0.3f)
         {
             _currentAlpha = Mathf.MoveTowards(_currentAlpha, 0.3f, Time.deltaTime / 3f);
             UpdateShaderFloat(SHADER_PARAMETR_ALPHA, _currentAlpha);
         }
 
-        // Плавное исчезновение (Твои 4 секунды)
+        // РџР»Р°РІРЅРѕРµ РёСЃС‡РµР·РЅРѕРІРµРЅРёРµ (РўРІРѕРё 4 СЃРµРєСѓРЅРґС‹)
         if (_isHiding)
         {
             _currentAlpha = Mathf.MoveTowards(_currentAlpha, 0, Time.deltaTime / 4f);
             //UpdateShaderFloat(SHADER_PARAMETR_ALPHA, _currentAlpha);
 
-            // Твоя специфическая логика скейла при скрытии ауры
+            // РўРІРѕСЏ СЃРїРµС†РёС„РёС‡РµСЃРєР°СЏ Р»РѕРіРёРєР° СЃРєРµР№Р»Р° РїСЂРё СЃРєСЂС‹С‚РёРё Р°СѓСЂС‹
             // UpdateScale(elapsedTime, new Scale(50, 30))
-            float targetSize = _baseSize * 0.3f; // 30% от размера
+            float targetSize = _baseSize * 0.3f; // 30% РѕС‚ СЂР°Р·РјРµСЂР°
             transform.localScale = Vector3.Lerp(transform.localScale, Vector3.one * targetSize, Time.deltaTime);
 
             if (_currentAlpha <= 0)

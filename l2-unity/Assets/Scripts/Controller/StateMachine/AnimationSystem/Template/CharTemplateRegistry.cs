@@ -1,4 +1,4 @@
-using Org.BouncyCastle.Utilities.Encoders;
+п»їusing Org.BouncyCastle.Utilities.Encoders;
 using System.Collections.Generic;
 using Unity.Mathematics;
 using UnityEngine;
@@ -18,7 +18,7 @@ public static class CharTemplateRegistry
         {
             (int)ClassId.MAGE,
             new BaseStatModel(
-                new GenderStats(0.0033f, 0.0047f, 1.8f), // Male (с бонусом 2H)
+                new GenderStats(0.0033f, 0.0047f, 1.8f), // Male (СЃ Р±РѕРЅСѓСЃРѕРј 2H)
                 new GenderStats(0.0035f, 0, 0) // Female
             )
         }
@@ -29,7 +29,7 @@ public static class CharTemplateRegistry
         
         if (Classes.TryGetValue(classId, out var model))
         {
-            var stats = model.GetData(sex); // Берем Male или Female данные
+            var stats = model.GetData(sex); // Р‘РµСЂРµРј Male РёР»Рё Female РґР°РЅРЅС‹Рµ
 
             float speed = serverValue * stats.RunK;
 

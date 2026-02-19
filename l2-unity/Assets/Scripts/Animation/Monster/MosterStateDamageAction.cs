@@ -1,4 +1,4 @@
-using System.Collections;
+п»їusing System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -11,10 +11,10 @@ public class MonsterStateDamageACtion : MonsterStateBase
     private AnimationCurve _speedCurve;
     private float _animationLength;
 
-    // Настройки кривой скорости
-    [SerializeField] private float fastPhaseSpeed = 1.5f;    // Скорость быстрой фазы (подъём)
-    [SerializeField] private float slowPhaseSpeed = 0.5f;     // Скорость медленной фазы (опускание)
-    [SerializeField] private float transitionPoint = 0.5f;    // Точка перехода между фазами (0-1)
+    // РќР°СЃС‚СЂРѕР№РєРё РєСЂРёРІРѕР№ СЃРєРѕСЂРѕСЃС‚Рё
+    [SerializeField] private float fastPhaseSpeed = 1.5f;    // РЎРєРѕСЂРѕСЃС‚СЊ Р±С‹СЃС‚СЂРѕР№ С„Р°Р·С‹ (РїРѕРґСЉС‘Рј)
+    [SerializeField] private float slowPhaseSpeed = 0.5f;     // РЎРєРѕСЂРѕСЃС‚СЊ РјРµРґР»РµРЅРЅРѕР№ С„Р°Р·С‹ (РѕРїСѓСЃРєР°РЅРёРµ)
+    [SerializeField] private float transitionPoint = 0.5f;    // РўРѕС‡РєР° РїРµСЂРµС…РѕРґР° РјРµР¶РґСѓ С„Р°Р·Р°РјРё (0-1)
 
     public string parameterName;
     override public void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
@@ -22,16 +22,16 @@ public class MonsterStateDamageACtion : MonsterStateBase
         LoadComponents(animator);
 
 
-        // Инициализация переменных
+        // РРЅРёС†РёР°Р»РёР·Р°С†РёСЏ РїРµСЂРµРјРµРЅРЅС‹С…
         _startTime = Time.time;
         _animationLength = stateInfo.length;
         _endTime = _animationLength;
         _remainingTime = _endTime;
 
-        // Создание кривой скорости
+        // РЎРѕР·РґР°РЅРёРµ РєСЂРёРІРѕР№ СЃРєРѕСЂРѕСЃС‚Рё
         CreateSpeedCurve();
 
-        // Применение начальной скорости
+        // РџСЂРёРјРµРЅРµРЅРёРµ РЅР°С‡Р°Р»СЊРЅРѕР№ СЃРєРѕСЂРѕСЃС‚Рё
         SetAnimationSpeed(animator, fastPhaseSpeed);
 
         StopAnimationTrigger(animator, parameterName);
@@ -42,19 +42,19 @@ public class MonsterStateDamageACtion : MonsterStateBase
         float currentTime = Time.time;
         float timeOut = currentTime - _startTime;
 
-        // Обновление оставшегося времени
+        // РћР±РЅРѕРІР»РµРЅРёРµ РѕСЃС‚Р°РІС€РµРіРѕСЃСЏ РІСЂРµРјРµРЅРё
         _remainingTime = Mathf.Max(0, _endTime - timeOut);
 
-        // Расчет нормализованного времени (0-1)
+        // Р Р°СЃС‡РµС‚ РЅРѕСЂРјР°Р»РёР·РѕРІР°РЅРЅРѕРіРѕ РІСЂРµРјРµРЅРё (0-1)
         float normalizedTime = timeOut / _endTime;
 
-        // Получение скорости из кривой
+        // РџРѕР»СѓС‡РµРЅРёРµ СЃРєРѕСЂРѕСЃС‚Рё РёР· РєСЂРёРІРѕР№
         float currentSpeed = _speedCurve.Evaluate(normalizedTime);
 
-        // Применение скорости к анимации
+        // РџСЂРёРјРµРЅРµРЅРёРµ СЃРєРѕСЂРѕСЃС‚Рё Рє Р°РЅРёРјР°С†РёРё
         SetAnimationSpeed(animator, currentSpeed);
         //Debug.Log($"Current speed {currentSpeed} timeanimation {_remainingTime} ");
-        // Проверка завершения состояния
+        // РџСЂРѕРІРµСЂРєР° Р·Р°РІРµСЂС€РµРЅРёСЏ СЃРѕСЃС‚РѕСЏРЅРёСЏ
         if (timeOut >= _endTime)
         {
             SwitchToIdle(animator, stateInfo);
@@ -63,7 +63,7 @@ public class MonsterStateDamageACtion : MonsterStateBase
 
     override public void OnStateExit(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
-        // Сброс скорости анимации
+        // РЎР±СЂРѕСЃ СЃРєРѕСЂРѕСЃС‚Рё Р°РЅРёРјР°С†РёРё
         SetAnimationSpeed(animator, 1f);
     }
 
@@ -71,21 +71,21 @@ public class MonsterStateDamageACtion : MonsterStateBase
     {
         _speedCurve = new AnimationCurve();
 
-        // Создание ключей кривой
+        // РЎРѕР·РґР°РЅРёРµ РєР»СЋС‡РµР№ РєСЂРёРІРѕР№
         Keyframe startKey = new Keyframe(0f, fastPhaseSpeed);
         Keyframe transitionKey = new Keyframe(transitionPoint, fastPhaseSpeed);
         Keyframe endKey = new Keyframe(1f, slowPhaseSpeed);
 
-        // Добавление ключей в кривую
+        // Р”РѕР±Р°РІР»РµРЅРёРµ РєР»СЋС‡РµР№ РІ РєСЂРёРІСѓСЋ
         _speedCurve.AddKey(startKey);
         _speedCurve.AddKey(transitionKey);
         _speedCurve.AddKey(endKey);
 
-        // Настройка обертки и сглаживания
+        // РќР°СЃС‚СЂРѕР№РєР° РѕР±РµСЂС‚РєРё Рё СЃРіР»Р°Р¶РёРІР°РЅРёСЏ
         _speedCurve.preWrapMode = WrapMode.ClampForever;
         _speedCurve.postWrapMode = WrapMode.ClampForever;
 
-        // Сглаживание кривой
+        // РЎРіР»Р°Р¶РёРІР°РЅРёРµ РєСЂРёРІРѕР№
         _speedCurve.SmoothTangents(0, 0.2f);
         _speedCurve.SmoothTangents(1, 0.2f);
         _speedCurve.SmoothTangents(2, 0.2f);
@@ -101,13 +101,13 @@ public class MonsterStateDamageACtion : MonsterStateBase
 
     private void SwitchToIdle(Animator animator, AnimatorStateInfo stateInfo)
     {
-        // Проверка, что анимация почти завершена
+        // РџСЂРѕРІРµСЂРєР°, С‡С‚Рѕ Р°РЅРёРјР°С†РёСЏ РїРѕС‡С‚Рё Р·Р°РІРµСЂС€РµРЅР°
         if (stateInfo.normalizedTime > 0.9f)
         {
-            // Возврат к скорости 1f при выходе из состояния
+            // Р’РѕР·РІСЂР°С‚ Рє СЃРєРѕСЂРѕСЃС‚Рё 1f РїСЂРё РІС‹С…РѕРґРµ РёР· СЃРѕСЃС‚РѕСЏРЅРёСЏ
             SetAnimationSpeed(animator, 1f);
 
-            // Здесь можно добавить логику для переключения в состояние ожидания
+            // Р—РґРµСЃСЊ РјРѕР¶РЅРѕ РґРѕР±Р°РІРёС‚СЊ Р»РѕРіРёРєСѓ РґР»СЏ РїРµСЂРµРєР»СЋС‡РµРЅРёСЏ РІ СЃРѕСЃС‚РѕСЏРЅРёРµ РѕР¶РёРґР°РЅРёСЏ
             // PlayerStateMachine.Instance.ChangeIntention(Intention.INTENTION_IDLE);
         }
     }

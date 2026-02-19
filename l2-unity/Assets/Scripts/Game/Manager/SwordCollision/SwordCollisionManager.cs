@@ -1,4 +1,4 @@
-using System;
+п»їusing System;
 using System.Collections.Generic;
 
 using UnityEngine;
@@ -61,7 +61,7 @@ public class SwordCollisionService : MonoBehaviour
     public void UnregisterSword(Transform swordBase)
     {
         TrackedSword sword = activeSwords.Find(s => s.basePt == swordBase);
-        //Debug.Log("SwordCollisionManager: Удаление RegisterSword");
+        //Debug.Log("SwordCollisionManager: РЈРґР°Р»РµРЅРёРµ RegisterSword");
         if (sword != null)
         {
             activeSwords.Remove(sword);
@@ -89,7 +89,7 @@ public class SwordCollisionService : MonoBehaviour
                 Vector3 prevBase = lastPositions[sword.basePt];
                 Vector3 prevTip = lastPositions[sword.tipPt];
 
-                // ГЛАВНЫЙ МЕТОД: Проверка "полотна" взмаха
+                // Р“Р›РђР’РќР«Р™ РњР•РўРћР”: РџСЂРѕРІРµСЂРєР° "РїРѕР»РѕС‚РЅР°" РІР·РјР°С…Р°
                 CheckSwordSwingPanel(prevBase, prevTip, currentBase, currentTip, sword , _warningDetele);
             }
 
@@ -110,8 +110,8 @@ public class SwordCollisionService : MonoBehaviour
     private void CheckSwordSwingPanel(Vector3 prevBase, Vector3 prevTip, Vector3 currBase, Vector3 currTip, TrackedSword sword , TrackedSword[] warningDetele)
     {
         int rayCount = 6;
-        float swordThickness = 0.5f; // Радиус сферы (толщина лезвия)
-        float forwardReach = 0.4f;   // На сколько ПЕРЕД мечом мы ищем цель (те самые 20-30 см)
+        float swordThickness = 0.5f; // Р Р°РґРёСѓСЃ СЃС„РµСЂС‹ (С‚РѕР»С‰РёРЅР° Р»РµР·РІРёСЏ)
+        float forwardReach = 0.4f;   // РќР° СЃРєРѕР»СЊРєРѕ РџР•Р Р•Р” РјРµС‡РѕРј РјС‹ РёС‰РµРј С†РµР»СЊ (С‚Рµ СЃР°РјС‹Рµ 20-30 СЃРј)
 
         for (int i = 0; i <= rayCount; i++)
         {
@@ -120,9 +120,9 @@ public class SwordCollisionService : MonoBehaviour
             Vector3 start = Vector3.Lerp(prevBase, prevTip, t);
             Vector3 end = Vector3.Lerp(currBase, currTip, t);
 
-            // Направление движения этой точки меча
+            // РќР°РїСЂР°РІР»РµРЅРёРµ РґРІРёР¶РµРЅРёСЏ СЌС‚РѕР№ С‚РѕС‡РєРё РјРµС‡Р°
             Vector3 movementDir = (end - start).normalized;
-            // Расстояние, которое прошла точка + запас вперед
+            // Р Р°СЃСЃС‚РѕСЏРЅРёРµ, РєРѕС‚РѕСЂРѕРµ РїСЂРѕС€Р»Р° С‚РѕС‡РєР° + Р·Р°РїР°СЃ РІРїРµСЂРµРґ
             float dist = Vector3.Distance(start, end) + forwardReach;
 
             if (dist > 0.01f)
@@ -173,14 +173,14 @@ public class SwordCollisionService : MonoBehaviour
                 }
                 else
                 {
-                    // Рисуем желтую линию — это то, где мы искали
+                    // Р РёСЃСѓРµРј Р¶РµР»С‚СѓСЋ Р»РёРЅРёСЋ вЂ” СЌС‚Рѕ С‚Рѕ, РіРґРµ РјС‹ РёСЃРєР°Р»Рё
                    // DebugLineDraw.ShowDrawLineDebugNpc(sword.basePt.GetInstanceID(), start, start + movementDir * dist, Color.yellow);
                 }
             }
         }
     }
 
-    // Вспомогательный метод для реестра попаданий (чтобы один взмах не бил 100 раз по одной цели)
+    // Р’СЃРїРѕРјРѕРіР°С‚РµР»СЊРЅС‹Р№ РјРµС‚РѕРґ РґР»СЏ СЂРµРµСЃС‚СЂР° РїРѕРїР°РґР°РЅРёР№ (С‡С‚РѕР±С‹ РѕРґРёРЅ РІР·РјР°С… РЅРµ Р±РёР» 100 СЂР°Р· РїРѕ РѕРґРЅРѕР№ С†РµР»Рё)
     private bool RegisterHit(Transform swordBase, int targetID)
     {
         if (!hitRegistry.ContainsKey(swordBase)) hitRegistry[swordBase] = new HashSet<int>();

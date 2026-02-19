@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using static AttackingState;
 
 public class AttackIntention : IntentionBase

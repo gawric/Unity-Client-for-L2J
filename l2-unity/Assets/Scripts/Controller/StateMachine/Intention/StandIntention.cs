@@ -1,4 +1,4 @@
-
+п»ї
 
 using UnityEngine;
 
@@ -12,7 +12,7 @@ public class StandIntention : IntentionBase
         //if (!_stateMachine.WaitingForServerReply)
         //{
           //  _stateMachine.SetWaitingForServerReply(true);
-          //  Debug.Log("Здесь должно сработать Stand Intention");
+          //  Debug.Log("Р—РґРµСЃСЊ РґРѕР»Р¶РЅРѕ СЃСЂР°Р±РѕС‚Р°С‚СЊ Stand Intention");
            // GameClient.Instance.ClientPacketHandler.RequestActionUse((int)ActionType.Sit);
         //}
         //else

@@ -1,4 +1,4 @@
-using UnityEngine;
+Ôªøusing UnityEngine;
 using System.Collections.Generic;
 
 public class FlyWindStrikePart01 : EffectPart
@@ -71,13 +71,13 @@ public class FlyWindStrikePart01 : EffectPart
         else if (progress >= 0.8f) target = 20;
         else if (progress >= 0.6f) target = 21;
 
-        // œÎ‡‚ÌÓ ÔË·ÎËÊ‡ÂÏ ÚÂÍÛ˘ËÈ ‡ÁÏÂ Í ˆÂÎË (ÒÍÓÓÒÚ¸ 50 Â‰ËÌËˆ ‚ ÒÂÍÛÌ‰Û)
+        // –ü–ª–∞–≤–Ω–æ –ø—Ä–∏–±–ª–∏–∂–∞–µ–º —Ç–µ–∫—É—â–∏–π —Ä–∞–∑–º–µ—Ä –∫ —Ü–µ–ª–∏ (—Å–∫–æ—Ä–æ—Å—Ç—å 50 –µ–¥–∏–Ω–∏—Ü –≤ —Å–µ–∫—É–Ω–¥—É)
         _dynamicEndSize = Mathf.MoveTowards(_dynamicEndSize, target, 50f * Time.deltaTime);
         Debug.Log("[FlyWindStrikePart01 Load ] > _AnimProgress _dynamicEndSize > " + _dynamicEndSize);
         UpdateShaderFloat(SHADER_PARAMETR_SCALE_END_SIZE, _dynamicEndSize);
 
 
-        // 3. À≈√ Œ≈ œ≈–≈Ã≈Ÿ≈Õ»≈ ¬¬≈–’-¬Õ»« (Bobbing effect)
+        // 3. –õ–ï–ì–ö–û–ï –ü–ï–†–ï–ú–ï–©–ï–ù–ò–ï –í–í–ï–†–•-–í–ù–ò–ó (Bobbing effect)
         float bobbingOffset = Mathf.Sin(Time.time * 1f) * 0.02f;
 
         transform.position = new Vector3(

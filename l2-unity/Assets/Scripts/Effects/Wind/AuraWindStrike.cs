@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using static S_1177;
 
 
@@ -75,7 +75,7 @@ public class AuraWindStrike : MonoBehaviour
 
     private void DisableCollision()
     {
-        Vector3 vector = GetPosition�ollision(transform.position, GetGround());
+        Vector3 vector = GetPositionРЎollision(transform.position, GetGround());
         transform.localPosition = vector;
     }
 
@@ -84,7 +84,7 @@ public class AuraWindStrike : MonoBehaviour
         return -Mathf.Abs(number); 
     }
 
-    private Vector3 GetPosition�ollision(Vector3 transformPlayer, float pos)
+    private Vector3 GetPositionРЎollision(Vector3 transformPlayer, float pos)
     {
         return new Vector3(0,  pos, 0);
     }

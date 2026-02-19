@@ -1,4 +1,4 @@
-using UnityEngine;
+п»їusing UnityEngine;
 
 public class L2ChargeGroup : EffectPart
 {
@@ -47,7 +47,7 @@ public class L2ChargeGroup : EffectPart
 
         float now = Now();
 
-        // Таймер завершения
+        // РўР°Р№РјРµСЂ Р·Р°РІРµСЂС€РµРЅРёСЏ
         if (_hasFixedDuration && (now - _lastEnable > _duration))
         {
             _stopped = true;
@@ -55,7 +55,7 @@ public class L2ChargeGroup : EffectPart
             return;
         }
 
-        // Обычный спаун (если мы НЕ активировали всё сразу в ResetTimer)
+        // РћР±С‹С‡РЅС‹Р№ СЃРїР°СѓРЅ (РµСЃР»Рё РјС‹ РќР• Р°РєС‚РёРІРёСЂРѕРІР°Р»Рё РІСЃС‘ СЃСЂР°Р·Сѓ РІ ResetTimer)
         if (_countPerSecond <= _maxCount && _countPerSecond > 0)
         {
             if (now - _lastLoop >= 1f / _countPerSecond)
@@ -137,15 +137,15 @@ public class L2ChargeGroup : EffectPart
             if (SurfaceNormal != Vector3.zero)
                 m.SetVector("_SurfaceNormals", SurfaceNormal);
 
-            // --- НОВЫЙ КОД (Синхронизация времени жизни) ---
-            // Получаем задержку из материала (если она есть)
+            // --- РќРћР’Р«Р™ РљРћР” (РЎРёРЅС…СЂРѕРЅРёР·Р°С†РёСЏ РІСЂРµРјРµРЅРё Р¶РёР·РЅРё) ---
+            // РџРѕР»СѓС‡Р°РµРј Р·Р°РґРµСЂР¶РєСѓ РёР· РјР°С‚РµСЂРёР°Р»Р° (РµСЃР»Рё РѕРЅР° РµСЃС‚СЊ)
             float initialDelay = m.GetVector("_InitialDelayRange").y;
 
-            // Устанавливаем время жизни равным нашему duration (например, 0.4 для даггера)
-            // Это заставит шейдер проиграть анимацию быстрее
+            // РЈСЃС‚Р°РЅР°РІР»РёРІР°РµРј РІСЂРµРјСЏ Р¶РёР·РЅРё СЂР°РІРЅС‹Рј РЅР°С€РµРјСѓ duration (РЅР°РїСЂРёРјРµСЂ, 0.4 РґР»СЏ РґР°РіРіРµСЂР°)
+            // Р­С‚Рѕ Р·Р°СЃС‚Р°РІРёС‚ С€РµР№РґРµСЂ РїСЂРѕРёРіСЂР°С‚СЊ Р°РЅРёРјР°С†РёСЋ Р±С‹СЃС‚СЂРµРµ
             m.SetVector("_LifetimeRange", new Vector4(_duration + initialDelay, _duration + initialDelay, 0, 0));
 
-            // Настраиваем плавное исчезновение (Fadeout) на 90% пути
+            // РќР°СЃС‚СЂР°РёРІР°РµРј РїР»Р°РІРЅРѕРµ РёСЃС‡РµР·РЅРѕРІРµРЅРёРµ (Fadeout) РЅР° 90% РїСѓС‚Рё
             m.SetFloat("_FadeoutStartTime", (_duration + initialDelay) * 0.90f);
         }
 

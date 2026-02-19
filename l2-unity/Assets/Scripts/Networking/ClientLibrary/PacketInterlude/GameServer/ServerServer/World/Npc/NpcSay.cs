@@ -1,4 +1,4 @@
-using System.Security.Principal;
+п»їusing System.Security.Principal;
 using UnityEngine;
 
 public class NpcSay : ServerPacket
@@ -22,7 +22,7 @@ public class NpcSay : ServerPacket
 
     public override void Parse()
     {
-        //Debug.Log("Пришел пакет NpcSay 1" + " text " + _textMessage);
+        //Debug.Log("РџСЂРёС€РµР» РїР°РєРµС‚ NpcSay 1" + " text " + _textMessage);
         _objectId = ReadI();
         _textType = ReadI(); //chatType
         _npcId = ReadI() - 1000000; // npctype id (-1000000)
@@ -34,7 +34,7 @@ public class NpcSay : ServerPacket
             senderName = npcName.Name;
         }
         CreateMessage(_textType, _textMessage, senderName);
-        //Debug.Log("Пришел пакет NpcSay " + senderName + " text " + _textMessage);
+        //Debug.Log("РџСЂРёС€РµР» РїР°РєРµС‚ NpcSay " + senderName + " text " + _textMessage);
     }
 
     private void CreateMessage(int chatType , string text , string senderName)

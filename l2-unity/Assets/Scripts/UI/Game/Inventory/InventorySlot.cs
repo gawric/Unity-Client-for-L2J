@@ -1,4 +1,4 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 using UnityEngine.UIElements;
 
 public class InventorySlot : L2DraggableSlot
@@ -158,7 +158,7 @@ public class InventorySlot : L2DraggableSlot
         }
         else
         {
-            Debug.Log("Íå êðèòè÷åñêàÿ îøèáêà íå ñìîãëè íàéòè InventorySlot>SlotElement");
+            Debug.Log("ÐÐµ ÐºÑ€Ð¸Ñ‚Ð¸Ñ‡ÐµÑÐºÐ°Ñ Ð¾ÑˆÐ¸Ð±ÐºÐ° Ð½Ðµ ÑÐ¼Ð¾Ð³Ð»Ð¸ Ð½Ð°Ð¹Ñ‚Ð¸ InventorySlot>SlotElement");
         }
     }
 
@@ -183,7 +183,7 @@ public class InventorySlot : L2DraggableSlot
         }
         else
         {
-            Debug.Log("Íå êðèòè÷åñêàÿ îøèáêà íå ñìîãëè íàéòè InventorySlot>SlotElement");
+            Debug.Log("ÐÐµ ÐºÑ€Ð¸Ñ‚Ð¸Ñ‡ÐµÑÐºÐ°Ñ Ð¾ÑˆÐ¸Ð±ÐºÐ° Ð½Ðµ ÑÐ¼Ð¾Ð³Ð»Ð¸ Ð½Ð°Ð¹Ñ‚Ð¸ InventorySlot>SlotElement");
         }
     }
 
@@ -208,7 +208,7 @@ public class InventorySlot : L2DraggableSlot
         }
         else
         {
-            Debug.Log("Íå êðèòè÷åñêàÿ îøèáêà íå ñìîãëè íàéòè InventorySlot>SlotElement");
+            Debug.Log("ÐÐµ ÐºÑ€Ð¸Ñ‚Ð¸Ñ‡ÐµÑÐºÐ°Ñ Ð¾ÑˆÐ¸Ð±ÐºÐ° Ð½Ðµ ÑÐ¼Ð¾Ð³Ð»Ð¸ Ð½Ð°Ð¹Ñ‚Ð¸ InventorySlot>SlotElement");
         }
     }
 

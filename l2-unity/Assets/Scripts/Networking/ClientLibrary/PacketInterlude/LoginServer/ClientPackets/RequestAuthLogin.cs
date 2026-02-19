@@ -1,12 +1,12 @@
-using System;
+п»їusing System;
 using System.Text;
 using UnityEngine;
 
 public class RequestAuthLogin : ClientPacket
 {
-    // Настройте эти значения под ваш протокол:
-    // Например: если у вас RSA-блок фиксированного размера TestRsaSize,
-    // и в нём поля расположены последовательно, то
+    // РќР°СЃС‚СЂРѕР№С‚Рµ СЌС‚Рё Р·РЅР°С‡РµРЅРёСЏ РїРѕРґ РІР°С€ РїСЂРѕС‚РѕРєРѕР»:
+    // РќР°РїСЂРёРјРµСЂ: РµСЃР»Рё Сѓ РІР°СЃ RSA-Р±Р»РѕРє С„РёРєСЃРёСЂРѕРІР°РЅРЅРѕРіРѕ СЂР°Р·РјРµСЂР° TestRsaSize,
+    // Рё РІ РЅС‘Рј РїРѕР»СЏ СЂР°СЃРїРѕР»РѕР¶РµРЅС‹ РїРѕСЃР»РµРґРѕРІР°С‚РµР»СЊРЅРѕ, С‚Рѕ
     // MaxAccountBytes + MaxPasswordBytes <= TestRsaSize - reservedBytes.
     private const int TestRsaSize = 113;
     private const int MaxAccountBytes = 15;   
@@ -58,17 +58,17 @@ public class RequestAuthLogin : ClientPacket
 
         if (accountBytes.Length > MaxAccountBytes)
         {
-            errorMessage = $"Имя аккаунта слишком длинное: {accountBytes.Length} байт (максимум {MaxAccountBytes} байт).";
-            // Вызов UI/логирования (по желанию). Замените на ваш способ показа ошибок пользователю:
+            errorMessage = $"РРјСЏ Р°РєРєР°СѓРЅС‚Р° СЃР»РёС€РєРѕРј РґР»РёРЅРЅРѕРµ: {accountBytes.Length} Р±Р°Р№С‚ (РјР°РєСЃРёРјСѓРј {MaxAccountBytes} Р±Р°Р№С‚).";
+            // Р’С‹Р·РѕРІ UI/Р»РѕРіРёСЂРѕРІР°РЅРёСЏ (РїРѕ Р¶РµР»Р°РЅРёСЋ). Р—Р°РјРµРЅРёС‚Рµ РЅР° РІР°С€ СЃРїРѕСЃРѕР± РїРѕРєР°Р·Р° РѕС€РёР±РѕРє РїРѕР»СЊР·РѕРІР°С‚РµР»СЋ:
             Debug.LogWarning(errorMessage);
-            // Например, если есть менеджер UI:
+            // РќР°РїСЂРёРјРµСЂ, РµСЃР»Рё РµСЃС‚СЊ РјРµРЅРµРґР¶РµСЂ UI:
             // LoginClient.Instance.ShowError(errorMessage);
             return false;
         }
 
         if (passwordBytes.Length > MaxPasswordBytes)
         {
-            errorMessage = $"Пароль слишком длинный: {passwordBytes.Length} байт (максимум {MaxPasswordBytes} байт).";
+            errorMessage = $"РџР°СЂРѕР»СЊ СЃР»РёС€РєРѕРј РґР»РёРЅРЅС‹Р№: {passwordBytes.Length} Р±Р°Р№С‚ (РјР°РєСЃРёРјСѓРј {MaxPasswordBytes} Р±Р°Р№С‚).";
             Debug.LogWarning(errorMessage);
             // LoginClient.Instance.ShowError(errorMessage);
             return false;

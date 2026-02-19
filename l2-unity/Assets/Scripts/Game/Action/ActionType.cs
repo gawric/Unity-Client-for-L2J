@@ -1,4 +1,4 @@
-public enum ActionType : int
+﻿public enum ActionType : int
 {
     Sit = 0,
     WalkRun = 1,

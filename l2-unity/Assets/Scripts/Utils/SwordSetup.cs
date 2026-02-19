@@ -1,4 +1,4 @@
-using UnityEngine;
+п»їusing UnityEngine;
 
 public class SwordSetup : MonoBehaviour
 {
@@ -30,21 +30,21 @@ public class SwordSetup : MonoBehaviour
         
             minPoint = new Vector3(bounds.min.x, 0, 0);
             maxPoint = new Vector3(bounds.max.x, 0, 0);
-            Debug.Log("Определена ориентация: Горизонтально (X)");
+            Debug.Log("РћРїСЂРµРґРµР»РµРЅР° РѕСЂРёРµРЅС‚Р°С†РёСЏ: Р“РѕСЂРёР·РѕРЅС‚Р°Р»СЊРЅРѕ (X)");
         }
         else if (sizeZ > sizeX && sizeZ > sizeY)
         {
 
             minPoint = new Vector3(0, 0, bounds.min.z);
             maxPoint = new Vector3(0, 0, bounds.max.z);
-            Debug.Log("Определена ориентация: Горизонтально (Z)");
+            Debug.Log("РћРїСЂРµРґРµР»РµРЅР° РѕСЂРёРµРЅС‚Р°С†РёСЏ: Р“РѕСЂРёР·РѕРЅС‚Р°Р»СЊРЅРѕ (Z)");
         }
         else
         {
   
             minPoint = new Vector3(0, bounds.min.y, 0);
             maxPoint = new Vector3(0, bounds.max.y, 0);
-            Debug.Log("Определена ориентация: Вертикально (Y)");
+            Debug.Log("РћРїСЂРµРґРµР»РµРЅР° РѕСЂРёРµРЅС‚Р°С†РёСЏ: Р’РµСЂС‚РёРєР°Р»СЊРЅРѕ (Y)");
         }
 
         swordBase.localPosition = minPoint;

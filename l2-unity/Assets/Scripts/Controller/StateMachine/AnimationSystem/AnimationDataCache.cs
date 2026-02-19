@@ -1,9 +1,9 @@
-using System.Collections.Generic;
+п»їusing System.Collections.Generic;
 using UnityEngine;
 
 public static class AnimationDataCache
 {
-    // Кэшируем сам объект клипа: [ControllerName_OriginalMotionName] -> AnimationClip
+    // РљСЌС€РёСЂСѓРµРј СЃР°Рј РѕР±СЉРµРєС‚ РєР»РёРїР°: [ControllerName_OriginalMotionName] -> AnimationClip
     private static readonly Dictionary<string, AnimationClip> _clipCache = new Dictionary<string, AnimationClip>();
 
     public static AnimationClip GetOverrideClip(Animator animator, string originalMotionName)
@@ -23,10 +23,10 @@ public static class AnimationDataCache
 
         if (overrideController != null)
         {
-            // Прямой доступ через индексатор (самый быстрый)
+            // РџСЂСЏРјРѕР№ РґРѕСЃС‚СѓРї С‡РµСЂРµР· РёРЅРґРµРєСЃР°С‚РѕСЂ (СЃР°РјС‹Р№ Р±С‹СЃС‚СЂС‹Р№)
             finalClip = overrideController[originalMotionName];
 
-            // Если через индексатор не вышло, ищем в списке переопределений
+            // Р•СЃР»Рё С‡РµСЂРµР· РёРЅРґРµРєСЃР°С‚РѕСЂ РЅРµ РІС‹С€Р»Рѕ, РёС‰РµРј РІ СЃРїРёСЃРєРµ РїРµСЂРµРѕРїСЂРµРґРµР»РµРЅРёР№
             if (finalClip == null)
             {
                 var overrides = new List<KeyValuePair<AnimationClip, AnimationClip>>(overrideController.overridesCount);
@@ -58,14 +58,14 @@ public static class AnimationDataCache
         return finalClip;
     }
 
-    // Получить длину клипа
+    // РџРѕР»СѓС‡РёС‚СЊ РґР»РёРЅСѓ РєР»РёРїР°
     public static float GetOverrideLength(Animator animator, string originalMotionName)
     {
         AnimationClip clip = GetOverrideClip(animator, originalMotionName);
         return clip != null ? clip.length : 1.0f;
     }
 
-    // Получить время эвента по имени
+    // РџРѕР»СѓС‡РёС‚СЊ РІСЂРµРјСЏ СЌРІРµРЅС‚Р° РїРѕ РёРјРµРЅРё
     public static float GetEventTimeByName(Animator animator, string originalMotionName, string eventName)
     {
         AnimationClip clip = GetOverrideClip(animator, originalMotionName);
@@ -79,7 +79,7 @@ public static class AnimationDataCache
             }
         }
 
-        Debug.LogWarning($"[AnimCache] Event '{eventName}' не найден в клипе {clip.name}");
+        Debug.LogWarning($"[AnimCache] Event '{eventName}' РЅРµ РЅР°Р№РґРµРЅ РІ РєР»РёРїРµ {clip.name}");
         return 0f;
     }
 
@@ -89,7 +89,7 @@ public static class AnimationDataCache
 
         AnimatorClipInfo[] clipInfo;
 
-        // Если аниматор в процессе перехода, нам нужен клип, К КОТОРОМУ мы идем
+        // Р•СЃР»Рё Р°РЅРёРјР°С‚РѕСЂ РІ РїСЂРѕС†РµСЃСЃРµ РїРµСЂРµС…РѕРґР°, РЅР°Рј РЅСѓР¶РµРЅ РєР»РёРї, Рљ РљРћРўРћР РћРњРЈ РјС‹ РёРґРµРј
         if (animator.IsInTransition(layerIndex))
         {
             clipInfo = animator.GetNextAnimatorClipInfo(layerIndex);
@@ -101,7 +101,7 @@ public static class AnimationDataCache
 
         if (clipInfo.Length > 0)
         {
-            // Возвращает именно тот клип, который подставлен в OverrideController
+            // Р’РѕР·РІСЂР°С‰Р°РµС‚ РёРјРµРЅРЅРѕ С‚РѕС‚ РєР»РёРї, РєРѕС‚РѕСЂС‹Р№ РїРѕРґСЃС‚Р°РІР»РµРЅ РІ OverrideController
             return clipInfo[0].clip;
         }
 
@@ -120,7 +120,7 @@ public static class AnimationDataCache
             }
         }
 
-        Debug.LogWarning($"[AnimCache] Event '{eventName}' не найден в клипе {clip.name}");
+        Debug.LogWarning($"[AnimCache] Event '{eventName}' РЅРµ РЅР°Р№РґРµРЅ РІ РєР»РёРїРµ {clip.name}");
         return 0f;
     }
 

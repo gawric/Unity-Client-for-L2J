@@ -1,11 +1,11 @@
-using System.Collections.Generic;
+Ôªøusing System.Collections.Generic;
 using UnityEngine;
 
 public class SpineProceduralController : MonoBehaviour
 {
     private Dictionary<Transform, BoneModification> _activeModifications = new Dictionary<Transform, BoneModification>();
     private List<Transform> _bonesToRemove = new();
-    public float fadeSpeed = 10f; // —ÍÓÓÒÚ¸ Á‡ÚÛı‡ÌËˇ (˜ÂÏ ‚˚¯Â, ÚÂÏ ·˚ÒÚÂÂ ‚ÂÌÂÚÒˇ)
+    public float fadeSpeed = 10f; // –°–∫–æ—Ä–æ—Å—Ç—å –∑–∞—Ç—É—Ö–∞–Ω–∏—è (—á–µ–º –≤—ã—à–µ, —Ç–µ–º –±—ã—Å—Ç—Ä–µ–µ –≤–µ—Ä–Ω–µ—Ç—Å—è)
 
     public static SpineProceduralController Instance { get; private set; }
 
@@ -35,7 +35,7 @@ public class SpineProceduralController : MonoBehaviour
     {
         if (bone == null)
         {
-            Debug.LogWarning("SpineProceduralController>RemoveBoneMod ÌÂ Ì‡È‰ÂÌ‡ ÍÓÒÚ¸ ");
+            Debug.LogWarning("SpineProceduralController>RemoveBoneMod –Ω–µ –Ω–∞–π–¥–µ–Ω–∞ –∫–æ—Å—Ç—å ");
             return;
         }
 
@@ -62,13 +62,13 @@ public class SpineProceduralController : MonoBehaviour
 
             if (bone != null)
             {
-                // 1. œËÏÂÌˇÂÏ ÒÏÂ˘ÂÌËÂ (Position) Ò Û˜ÂÚÓÏ ‚ÂÒ‡
+                // 1. –ü—Ä–∏–º–µ–Ω—è–µ–º —Å–º–µ—â–µ–Ω–∏–µ (Position) —Å —É—á–µ—Ç–æ–º –≤–µ—Å–∞
                 if (mod.PositionOffset != Vector3.zero)
                 {
                     bone.localPosition += mod.PositionOffset * mod.Weight;
                 }
 
-                // 2. œËÏÂÌˇÂÏ ÔÓ‚ÓÓÚ (Rotation) Ò Û˜ÂÚÓÏ ‚ÂÒ‡
+                // 2. –ü—Ä–∏–º–µ–Ω—è–µ–º –ø–æ–≤–æ—Ä–æ—Ç (Rotation) —Å —É—á–µ—Ç–æ–º –≤–µ—Å–∞
                 if (mod.RotationOffset != Vector3.zero)
                 {
                     Quaternion targetRotation = Quaternion.Euler(mod.RotationOffset);
@@ -101,7 +101,7 @@ public class SpineProceduralController : MonoBehaviour
                 {
                     _activeModifications.Remove(bone);
                     _bonesToRemove.RemoveAt(i);
-                    Debug.Log("SpineProceduralController: -> stop rotate ”ƒ¿À≈Õ»≈ " + "size _activeModifications " + _activeModifications.Count);
+                    Debug.Log("SpineProceduralController: -> stop rotate –£–î–ê–õ–ï–ù–ò–ï " + "size _activeModifications " + _activeModifications.Count);
                 }
             }
             else

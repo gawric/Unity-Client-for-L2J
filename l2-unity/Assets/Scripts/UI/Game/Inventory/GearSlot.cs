@@ -1,4 +1,4 @@
-
+п»ї
 using System;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -57,7 +57,7 @@ public class GearSlot : InventorySlot
         overlay.style.left = 0;
         overlay.style.width = new Length(100, LengthUnit.Percent);
         overlay.style.height = new Length(100, LengthUnit.Percent);
-        overlay.style.backgroundColor = new Color(0, 0, 0, 0.7f); // Черный цвет с 50% прозрачностью
+        overlay.style.backgroundColor = new Color(0, 0, 0, 0.7f); // Р§РµСЂРЅС‹Р№ С†РІРµС‚ СЃ 50% РїСЂРѕР·СЂР°С‡РЅРѕСЃС‚СЊСЋ
         return overlay;
     }
 

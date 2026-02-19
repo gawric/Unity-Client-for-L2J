@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Security.Principal;
 using System.Threading.Tasks;
@@ -163,8 +163,8 @@ public class World : MonoBehaviour {
         player.UpdateWalkSpeed(statsIntr.WalkRealSpeed);
       
 
-        //416 - ���������� �����
-        //554 - � ����������
+        //416 - пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
+        //554 - пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
         player.UpdatePAtkSpeedPlayer((int)statsIntr.BasePAtkSpeed);
       
         player.UpdateMAtkSpeed((int)statsIntr.MAtkSpd);
@@ -220,7 +220,7 @@ public class World : MonoBehaviour {
         {
 
             Debug.Log("Name NPC " + npcName.Name);
-            //Debug ����� ��������� ������ 1 �������� � ��� !!!!
+            //Debug пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ 1 пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅ !!!!
            //if (isSinglSpawn | !npcName.Name.Equals("Elder Keltir")) return;
 
            // if (!isSinglSpawn)

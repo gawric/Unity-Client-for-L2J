@@ -1,4 +1,4 @@
-public enum AttackType : byte {
+﻿public enum AttackType : byte {
     AutoAttack,
     FallDamage
 }

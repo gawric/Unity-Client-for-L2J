@@ -1,4 +1,4 @@
-public enum CharacterSoundEvent : int {
+﻿public enum CharacterSoundEvent : int {
     Step,
     Wait,
     Death,

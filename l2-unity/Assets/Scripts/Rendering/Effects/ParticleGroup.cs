@@ -1,4 +1,4 @@
-using UnityEngine;
+п»їusing UnityEngine;
 using UnityEngine.UIElements;
 
 // [ExecuteInEditMode]
@@ -53,9 +53,9 @@ public class ParticleGroup : EffectPart
             _stopped = true;
 
             float actualTime = now - _lastEnable;
-            Debug.Log($"[EffectDebug] Эффект {gameObject.name} завершен. " +
-                      $"Ожидаемая длительность: {_duration}с, " +
-                      $"Фактическое время жизни: {actualTime:F3}с");
+            Debug.Log($"[EffectDebug] Р­С„С„РµРєС‚ {gameObject.name} Р·Р°РІРµСЂС€РµРЅ. " +
+                      $"РћР¶РёРґР°РµРјР°СЏ РґР»РёС‚РµР»СЊРЅРѕСЃС‚СЊ: {_duration}СЃ, " +
+                      $"Р¤Р°РєС‚РёС‡РµСЃРєРѕРµ РІСЂРµРјСЏ Р¶РёР·РЅРё: {actualTime:F3}СЃ");
 
             if (_instantKillAtCastEnd)
             {
@@ -107,7 +107,7 @@ public class ParticleGroup : EffectPart
         if (duration > 0.1f)
         {
             _duration = duration;
-            _hasFixedDuration = true; // Теперь эффект ВСЕГДА будет иметь лимит по времени
+            _hasFixedDuration = true; // РўРµРїРµСЂСЊ СЌС„С„РµРєС‚ Р’РЎР•Р“Р”Рђ Р±СѓРґРµС‚ РёРјРµС‚СЊ Р»РёРјРёС‚ РїРѕ РІСЂРµРјРµРЅРё
         }
 
 
@@ -206,9 +206,9 @@ public class ParticleGroup : EffectPart
             targetWidth = controller.radius * 2f;
         }
 
-        // Если радиус 0.15, то диаметр 0.3. 
-        // Чтобы получить масштаб эффекта ~1.2 (красивая ширина), 
-        // нам нужен множитель: 1.2 / 0.3 = 4.0
+        // Р•СЃР»Рё СЂР°РґРёСѓСЃ 0.15, С‚Рѕ РґРёР°РјРµС‚СЂ 0.3. 
+        // Р§С‚РѕР±С‹ РїРѕР»СѓС‡РёС‚СЊ РјР°СЃС€С‚Р°Р± СЌС„С„РµРєС‚Р° ~1.2 (РєСЂР°СЃРёРІР°СЏ С€РёСЂРёРЅР°), 
+        // РЅР°Рј РЅСѓР¶РµРЅ РјРЅРѕР¶РёС‚РµР»СЊ: 1.2 / 0.3 = 4.0
         float widthFactor = 4.0f;
 
         float finalScale = targetWidth * widthFactor;
@@ -216,7 +216,7 @@ public class ParticleGroup : EffectPart
 
         transform.localScale = new Vector3(finalScale, 1f, finalScale);
 
-        Debug.Log($"[CC-Scale] Radius: {controller?.radius}, Итоговый Scale: {finalScale}");
+        Debug.Log($"[CC-Scale] Radius: {controller?.radius}, РС‚РѕРіРѕРІС‹Р№ Scale: {finalScale}");
     }
     public override void Setup(EffectSettings settings, MagicCastData castData)
     {

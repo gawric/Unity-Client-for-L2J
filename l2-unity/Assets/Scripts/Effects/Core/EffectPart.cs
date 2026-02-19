@@ -1,11 +1,11 @@
-using UnityEngine;
+п»їusing UnityEngine;
 
 public enum EffectPartType { Body, Footer, Aura , Fly , FlySub }
 
 //[RequireComponent(typeof(Renderer))]
 public abstract class EffectPart : MonoBehaviour
 {
-    [Header("Настройки части")]
+    [Header("РќР°СЃС‚СЂРѕР№РєРё С‡Р°СЃС‚Рё")]
     public EffectPartType partType;
 
     protected Renderer targetRenderer;
@@ -47,13 +47,13 @@ public abstract class EffectPart : MonoBehaviour
     {
         if (targetRenderer != null)
         {
-            // Сначала получаем текущий блок из рендерера
+            // РЎРЅР°С‡Р°Р»Р° РїРѕР»СѓС‡Р°РµРј С‚РµРєСѓС‰РёР№ Р±Р»РѕРє РёР· СЂРµРЅРґРµСЂРµСЂР°
             targetRenderer.GetPropertyBlock(propBlock);
 
-            // Устанавливаем значение
+            // РЈСЃС‚Р°РЅР°РІР»РёРІР°РµРј Р·РЅР°С‡РµРЅРёРµ
             propBlock.SetFloat(name, value);
 
-            // ПРИНУДИТЕЛЬНО отдаем его обратно
+            // РџР РРќРЈР”РРўР•Р›Р¬РќРћ РѕС‚РґР°РµРј РµРіРѕ РѕР±СЂР°С‚РЅРѕ
             targetRenderer.SetPropertyBlock(propBlock);
         }
 

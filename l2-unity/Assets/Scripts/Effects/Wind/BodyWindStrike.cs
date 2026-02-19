@@ -1,4 +1,4 @@
-using UnityEngine;
+п»їusing UnityEngine;
 using static S_1177;
 
 public class BodyWindStrike : MonoBehaviour
@@ -6,7 +6,7 @@ public class BodyWindStrike : MonoBehaviour
     public Material _fadeOutMaterial;
     private Vector3 _originalScale;
    
-    public float height = 0.03f; // Максимальная высота, до которой поднимется объект
+    public float height = 0.03f; // РњР°РєСЃРёРјР°Р»СЊРЅР°СЏ РІС‹СЃРѕС‚Р°, РґРѕ РєРѕС‚РѕСЂРѕР№ РїРѕРґРЅРёРјРµС‚СЃСЏ РѕР±СЉРµРєС‚
     private float _speedRotateMin = 23f;
     private float _speedRotateMax = 27f;
     private Vector3 _lastUpdateScale;

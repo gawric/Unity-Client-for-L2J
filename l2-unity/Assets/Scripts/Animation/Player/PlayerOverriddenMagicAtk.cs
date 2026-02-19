@@ -1,4 +1,4 @@
-using UnityEngine;
+п»їusing UnityEngine;
 
 public class PlayerOverriddenMagicAtk : StateMachineBehaviour
 {
@@ -25,7 +25,7 @@ public class PlayerOverriddenMagicAtk : StateMachineBehaviour
 
         animator.speed = targetSpeed;
 
-        // ПОЛУЧАЕМ ВРЕМЯ ИВЕНТА
+        // РџРћР›РЈР§РђР•Рњ Р’Р Р•РњРЇ РР’Р•РќРўРђ
         AnimationClip clip = AnimationDataCache.GetActiveClip(animator, layerIndex);
         if (clip != null)
         {
@@ -33,7 +33,7 @@ public class PlayerOverriddenMagicAtk : StateMachineBehaviour
         }
 
         StopAnimationTrigger(animator, parameterName);
-        _eventLogged = false; // Сбрасываем флаг при входе в стейт
+        _eventLogged = false; // РЎР±СЂР°СЃС‹РІР°РµРј С„Р»Р°Рі РїСЂРё РІС…РѕРґРµ РІ СЃС‚РµР№С‚
     }
 
     override public void OnStateUpdate(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
@@ -45,20 +45,20 @@ public class PlayerOverriddenMagicAtk : StateMachineBehaviour
         float globalElapsed = Time.time - _castData.StartTime;
          Debug.Log($"[AnimLog] {parameterName} | Local: {localElapsed:F3}s | Global: {globalElapsed:F3}s");
 
-        // Проверяем, наступил ли момент выстрела (только для финального стейта)
+        // РџСЂРѕРІРµСЂСЏРµРј, РЅР°СЃС‚СѓРїРёР» Р»Рё РјРѕРјРµРЅС‚ РІС‹СЃС‚СЂРµР»Р° (С‚РѕР»СЊРєРѕ РґР»СЏ С„РёРЅР°Р»СЊРЅРѕРіРѕ СЃС‚РµР№С‚Р°)
         if (isFinalShotState && !_eventLogged)
         {
-            // Вычисляем текущее время ВНУТРИ клипа с учетом скорости
+            // Р’С‹С‡РёСЃР»СЏРµРј С‚РµРєСѓС‰РµРµ РІСЂРµРјСЏ Р’РќРЈРўР Р РєР»РёРїР° СЃ СѓС‡РµС‚РѕРј СЃРєРѕСЂРѕСЃС‚Рё
             float localElapsed1 = Time.time - _stateEnterTime;
             float currentClipTime = localElapsed1 * animator.speed;
 
-            // Если мы прошли точку ивента (например, 0.541с)
+            // Р•СЃР»Рё РјС‹ РїСЂРѕС€Р»Рё С‚РѕС‡РєСѓ РёРІРµРЅС‚Р° (РЅР°РїСЂРёРјРµСЂ, 0.541СЃ)
             if (currentClipTime >= _eventTimeInClip)
             {
                 _eventLogged = true;
-                Debug.Log($"<color=cyan>[FIRE_SYNC]</color> ВЫСТРЕЛ! " +
-                          $"Global: {globalElapsed:F3}s (Цель: {_castData.HitTime - _castData.FlightTime:F3}s) | " +
-                          $"Разница: {globalElapsed - (_castData.HitTime - _castData.FlightTime):F4}s");
+                Debug.Log($"<color=cyan>[FIRE_SYNC]</color> Р’Р«РЎРўР Р•Р›! " +
+                          $"Global: {globalElapsed:F3}s (Р¦РµР»СЊ: {_castData.HitTime - _castData.FlightTime:F3}s) | " +
+                          $"Р Р°Р·РЅРёС†Р°: {globalElapsed - (_castData.HitTime - _castData.FlightTime):F4}s");
             }
         }
 

@@ -1,20 +1,20 @@
-using System;
+п»їusing System;
 using UnityEngine;
 
 public class CalcBaseParam
 {
 
-    // Константы для расчета скорости
-    private const float SPEED_RANGE_1 = 8f;     // Скорость до 4 метров
-    private const float SPEED_RANGE_2_MAX = 11f; // Максимальная скорость во втором диапазоне
-    private const float SPEED_RANGE_3_MAX = 12f; // Максимальная скорость в третьем диапазоне
+    // РљРѕРЅСЃС‚Р°РЅС‚С‹ РґР»СЏ СЂР°СЃС‡РµС‚Р° СЃРєРѕСЂРѕСЃС‚Рё
+    private const float SPEED_RANGE_1 = 8f;     // РЎРєРѕСЂРѕСЃС‚СЊ РґРѕ 4 РјРµС‚СЂРѕРІ
+    private const float SPEED_RANGE_2_MAX = 11f; // РњР°РєСЃРёРјР°Р»СЊРЅР°СЏ СЃРєРѕСЂРѕСЃС‚СЊ РІРѕ РІС‚РѕСЂРѕРј РґРёР°РїР°Р·РѕРЅРµ
+    private const float SPEED_RANGE_3_MAX = 12f; // РњР°РєСЃРёРјР°Р»СЊРЅР°СЏ СЃРєРѕСЂРѕСЃС‚СЊ РІ С‚СЂРµС‚СЊРµРј РґРёР°РїР°Р·РѕРЅРµ
 
-    private const float DISTANCE_SPLIT_1 = 4f;  // Первая точка разделения дистанции
-    private const float DISTANCE_SPLIT_2 = 8f;  // Вторая точка разделения дистанции
-    private const float DISTANCE_SPLIT_3 = 12f; // Третья точка разделения дистанции
+    private const float DISTANCE_SPLIT_1 = 4f;  // РџРµСЂРІР°СЏ С‚РѕС‡РєР° СЂР°Р·РґРµР»РµРЅРёСЏ РґРёСЃС‚Р°РЅС†РёРё
+    private const float DISTANCE_SPLIT_2 = 8f;  // Р’С‚РѕСЂР°СЏ С‚РѕС‡РєР° СЂР°Р·РґРµР»РµРЅРёСЏ РґРёСЃС‚Р°РЅС†РёРё
+    private const float DISTANCE_SPLIT_3 = 12f; // РўСЂРµС‚СЊСЏ С‚РѕС‡РєР° СЂР°Р·РґРµР»РµРЅРёСЏ РґРёСЃС‚Р°РЅС†РёРё
 
-    // Константы для времени атаки
-    private const float MAX_ATTACK_TIME = 1000f; // Максимальное время атаки в миллисекундах
+    // РљРѕРЅСЃС‚Р°РЅС‚С‹ РґР»СЏ РІСЂРµРјРµРЅРё Р°С‚Р°РєРё
+    private const float MAX_ATTACK_TIME = 1000f; // РњР°РєСЃРёРјР°Р»СЊРЅРѕРµ РІСЂРµРјСЏ Р°С‚Р°РєРё РІ РјРёР»Р»РёСЃРµРєСѓРЅРґР°С…
 
     public static  float CalculateTimeL2j(float patkSpeed)
     {
@@ -29,7 +29,7 @@ public class CalcBaseParam
    
     public static float[] CalculateAttackAndFlightTimes(float distance, float baseAttackTimeMs)
     {
-        // Определяем скорость в зависимости от дистанции
+        // РћРїСЂРµРґРµР»СЏРµРј СЃРєРѕСЂРѕСЃС‚СЊ РІ Р·Р°РІРёСЃРёРјРѕСЃС‚Рё РѕС‚ РґРёСЃС‚Р°РЅС†РёРё
         float speed;
         if (distance <= DISTANCE_SPLIT_1)
         {
@@ -37,13 +37,13 @@ public class CalcBaseParam
         }
         else if (distance <= DISTANCE_SPLIT_2)
         {
-            // Пропорция от 8 до 11 м/с между 4 и 8 метрами
+            // РџСЂРѕРїРѕСЂС†РёСЏ РѕС‚ 8 РґРѕ 11 Рј/СЃ РјРµР¶РґСѓ 4 Рё 8 РјРµС‚СЂР°РјРё
             speed = SPEED_RANGE_1 + (distance - DISTANCE_SPLIT_1) *
                    ((SPEED_RANGE_2_MAX - SPEED_RANGE_1) / (DISTANCE_SPLIT_2 - DISTANCE_SPLIT_1));
         }
         else if (distance <= DISTANCE_SPLIT_3)
         {
-            // Пропорция от 11 до 12 м/с между 8 и 12 метрами
+            // РџСЂРѕРїРѕСЂС†РёСЏ РѕС‚ 11 РґРѕ 12 Рј/СЃ РјРµР¶РґСѓ 8 Рё 12 РјРµС‚СЂР°РјРё
             speed = SPEED_RANGE_2_MAX + (distance - DISTANCE_SPLIT_2) *
                    ((SPEED_RANGE_3_MAX - SPEED_RANGE_2_MAX) / (DISTANCE_SPLIT_3 - DISTANCE_SPLIT_2));
         }

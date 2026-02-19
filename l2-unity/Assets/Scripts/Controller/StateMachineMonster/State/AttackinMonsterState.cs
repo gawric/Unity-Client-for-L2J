@@ -1,4 +1,4 @@
-public class AttackinMonsterState : MonsterBase
+﻿public class AttackinMonsterState : MonsterBase
 {
     public AttackinMonsterState(MonsterStateMachine stateMachine) : base(stateMachine) { }
     public override void Enter() { }

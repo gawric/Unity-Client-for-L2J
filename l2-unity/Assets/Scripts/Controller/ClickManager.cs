@@ -1,4 +1,4 @@
-using UnityEngine;
+п»їusing UnityEngine;
 using UnityEngine.UIElements;
 
 
@@ -119,11 +119,11 @@ public class ClickManager : MonoBehaviour
         var panel = uiDocument.rootVisualElement.panel;
         if (panel == null) return false;
 
-        // Переводим из screen coords (0,0 = низ) в panel coords (0,0 = верх)
+        // РџРµСЂРµРІРѕРґРёРј РёР· screen coords (0,0 = РЅРёР·) РІ panel coords (0,0 = РІРµСЂС…)
         Vector2 panelPos = new Vector2(Input.mousePosition.x, Screen.height - Input.mousePosition.y);
 
         var picked = panel.Pick(panelPos);
-        return picked != null; // true, если под курсором найден визуальный элемент
+        return picked != null; // true, РµСЃР»Рё РїРѕРґ РєСѓСЂСЃРѕСЂРѕРј РЅР°Р№РґРµРЅ РІРёР·СѓР°Р»СЊРЅС‹Р№ СЌР»РµРјРµРЅС‚
     }
 
     private void StopFollow()

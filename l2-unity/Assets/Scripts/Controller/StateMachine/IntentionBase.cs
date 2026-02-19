@@ -1,4 +1,4 @@
-
+﻿
 public abstract class IntentionBase
 {
     protected PlayerStateMachine _stateMachine;

@@ -1,4 +1,4 @@
-using UnityEngine;
+п»їusing UnityEngine;
 
 public class DefaultEffect : BaseEffect
 {
@@ -28,7 +28,7 @@ public class DefaultEffect : BaseEffect
             part.PlayPart();
         }
 
-        // Используем метод из базового класса (или где он у вас объявлен)
+        // РСЃРїРѕР»СЊР·СѓРµРј РјРµС‚РѕРґ РёР· Р±Р°Р·РѕРІРѕРіРѕ РєР»Р°СЃСЃР° (РёР»Рё РіРґРµ РѕРЅ Сѓ РІР°СЃ РѕР±СЉСЏРІР»РµРЅ)
         DestoryEffect(_settings, _castData);
     }
 

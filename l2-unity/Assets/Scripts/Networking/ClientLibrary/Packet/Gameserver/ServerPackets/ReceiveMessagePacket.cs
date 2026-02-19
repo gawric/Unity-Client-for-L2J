@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using System;
 public class ReceiveMessagePacket : ServerPacket {
     public string Text { get; private set; }

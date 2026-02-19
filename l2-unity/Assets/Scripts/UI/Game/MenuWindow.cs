@@ -1,4 +1,4 @@
-using System.Collections;
+Ôªøusing System.Collections;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -76,7 +76,7 @@ public class MenuWindow : L2Window
         //var dragAreaEle = _windowEle.Q<VisualElement>(null, "drag-area");
         //DragManipulator drag = new DragManipulator(dragAreaEle, _windowEle);
         //dragAreaEle.AddManipulator(drag);
-        //Debug.Log("«¿¿¿¿√–”«»À—ﬂ » œŒÿ≈À  ¬—≈≈≈≈≈");
+        //Debug.Log("–ó–ê–ê–ê–ê–ì–†–£–ó–ò–õ–°–Ø –ò –ü–û–®–ï–õ  –í–°–ï–ï–ï–ï–ï");
     }
 
     public Vector2 GetWindowPosition()

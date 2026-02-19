@@ -1,4 +1,4 @@
-using UnityEngine;
+п»їusing UnityEngine;
 using UnityEngine.Rendering;
 
 public class CameraPreRenderUpdater : MonoBehaviour
@@ -11,7 +11,7 @@ public class CameraPreRenderUpdater : MonoBehaviour
 
     void OnEnable()
     {
-        // Кэшируем текущую Main Camera (если есть)
+        // РљСЌС€РёСЂСѓРµРј С‚РµРєСѓС‰СѓСЋ Main Camera (РµСЃР»Рё РµСЃС‚СЊ)
         _mainCam = Camera.main;
         if (_mainCam != null)
         {
@@ -29,10 +29,10 @@ public class CameraPreRenderUpdater : MonoBehaviour
 
     void OnBeginCameraRendering(ScriptableRenderContext context, Camera camera)
     {
-        // Игнорируем все камеры, кроме Main Camera
+        // РРіРЅРѕСЂРёСЂСѓРµРј РІСЃРµ РєР°РјРµСЂС‹, РєСЂРѕРјРµ Main Camera
         if (camera != _mainCam)
         {
-            // Если Main Camera сменилась — обновляем кэш и продолжаем
+            // Р•СЃР»Рё Main Camera СЃРјРµРЅРёР»Р°СЃСЊ вЂ” РѕР±РЅРѕРІР»СЏРµРј РєСЌС€ Рё РїСЂРѕРґРѕР»Р¶Р°РµРј
             if (camera == Camera.main)
             {
                 _mainCam = camera;
@@ -59,7 +59,7 @@ public class CameraPreRenderUpdater : MonoBehaviour
             _lastRot = rot;
         }
 
-        // Вызываем всех зарегистрированных билбордов
+        // Р’С‹Р·С‹РІР°РµРј РІСЃРµС… Р·Р°СЂРµРіРёСЃС‚СЂРёСЂРѕРІР°РЅРЅС‹С… Р±РёР»Р±РѕСЂРґРѕРІ
         RegisteredBillboards.InvokeAll(_mainCam);
     }
 }

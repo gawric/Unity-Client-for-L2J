@@ -1,4 +1,4 @@
-public enum PlayerCommand : int
+﻿public enum PlayerCommand : int
 {
     LOC                     = 0,    // /loc
     GM                      = 1,    // /GM

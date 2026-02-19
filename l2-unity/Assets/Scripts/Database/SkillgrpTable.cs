@@ -1,4 +1,4 @@
-using FMOD;
+﻿using FMOD;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -242,9 +242,9 @@ public class SkillgrpTable
 
                   if (!_animationsCombo.ContainsKey(tag))
                     {
-                        string anim_name1 = �learCombo(ids[1]);
-                        string anim_name2 = �learCombo(ids[2]);
-                        string anim_name3 = �learCombo(ids[3]);
+                        string anim_name1 = РЎlearCombo(ids[1]);
+                        string anim_name2 = РЎlearCombo(ids[2]);
+                        string anim_name3 = РЎlearCombo(ids[3]);
                         var arr = new string[3] { anim_name1  , anim_name2 , anim_name3 };
                         string unk0 = ids[4];
                         var combo  = new AnimationCombo(tag, arr , unk0);
@@ -260,7 +260,7 @@ public class SkillgrpTable
  
     }
 
-    private string �learCombo(string anim_name)
+    private string РЎlearCombo(string anim_name)
     {
         string anim_name1 = anim_name.Replace("a," , "");
         string anim_name2 = anim_name1.Replace("\\0", "");

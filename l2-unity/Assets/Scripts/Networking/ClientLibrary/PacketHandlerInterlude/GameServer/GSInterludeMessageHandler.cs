@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
@@ -47,7 +47,7 @@ public class GSInterludeMessageHandler : ServerPacketHandler
     private void OnMessage(byte[] data)
     {
         //SystemMessageInterlude packet = new SystemMessageInterlude(data);
-        //Debug.Log("������ ��������� �� ����������� � ����� ������ !!!! " + 1);
+        //Debug.Log("пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ !!!! " + 1);
         SystemMessagePacket packet = new SystemMessagePacket(data);
         try
         {
@@ -62,7 +62,7 @@ public class GSInterludeMessageHandler : ServerPacketHandler
         }
         catch (Exception ex)
         {
-            Debug.Log("GSInterludeMessageHandler: ����������� ������ � ������� ���������!!!!! " + ex.ToString());
+            Debug.Log("GSInterludeMessageHandler: пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ!!!!! " + ex.ToString());
         }
 
 
@@ -103,7 +103,7 @@ public class GSInterludeMessageHandler : ServerPacketHandler
     private void OnNpcSay(byte[] data)
     {
         //SystemMessageInterlude packet = new SystemMessageInterlude(data);
-        //Debug.Log("������ ��������� �� ����������� � ����� ������ !!!! " + 1);
+        //Debug.Log("пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ !!!! " + 1);
         NpcSay packet = new NpcSay(data);
         if (packet.NpcMessage != null)
         {
@@ -125,7 +125,7 @@ public class GSInterludeMessageHandler : ServerPacketHandler
     {
         SMParam[] smParams = packet.Params;
         int messageId = packet.Id;
-        //Debug.Log("��������� TRY ADD" + messageId);
+        //Debug.Log("пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ TRY ADD" + messageId);
         SystemMessageDat messageData = SystemMessageTable.Instance.GetSystemMessage(messageId);
         OpenMessageWindow(messageId, messageData, smParams);
 

@@ -1,4 +1,4 @@
-using System.Collections;
+п»їusing System.Collections;
 using UnityEngine;
 using UnityEngine.UIElements;
 using static L2Slot;
@@ -102,7 +102,7 @@ public class SkillbarSlot : L2ClickableSlot
 
         string key = PlayerShortcuts.Instance.GetKeybindForShortcut(_skillbarId, _slot);
 
-        //Debug.Log("UpdateInputInfo поиску по KeyImageTable");
+        //Debug.Log("UpdateInputInfo РїРѕРёСЃРєСѓ РїРѕ KeyImageTable");
         Texture2D inputTexture = KeyImageTable.Instance.LoadTextureByKey(key);
 
         if (inputTexture != null)

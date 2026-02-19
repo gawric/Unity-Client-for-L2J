@@ -1,4 +1,4 @@
-public static class ChatCommands
+﻿public static class ChatCommands
 {
     private const int MAX_ID = 9;
     private static readonly ChatCommandData[] _byId;

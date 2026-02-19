@@ -1,4 +1,4 @@
-public class NewWalkingState : StateBase
+﻿public class NewWalkingState : StateBase
 {
     public NewWalkingState(PlayerStateMachine stateMachine) : base(stateMachine)
     {

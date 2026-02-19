@@ -1,4 +1,4 @@
-using UnityEngine;
+п»їusing UnityEngine;
 using static UnityEngine.EventSystems.EventTrigger;
 
 public class DeadMosterState : MonsterBase
@@ -18,7 +18,7 @@ public class DeadMosterState : MonsterBase
             case Event.DEAD:
                 //Protects against early death before you can strike, but the mob is already dead, or vice versa.If this happens, a FORCE_DEAD event occurs when the sword hits the monster.
                 if (PlayerEntity.Instance.IsAttack || PlayerStateMachine.Instance.State == PlayerState.ATTACKING) return;
-                Debug.Log("Попали и увидели что монстр уже должен быть мертвым и мы не в состоянии атаки! " + PlayerEntity.Instance.IsAttack  + " PlayerStateMachine " + PlayerStateMachine.Instance.State);
+                Debug.Log("РџРѕРїР°Р»Рё Рё СѓРІРёРґРµР»Рё С‡С‚Рѕ РјРѕРЅСЃС‚СЂ СѓР¶Рµ РґРѕР»Р¶РµРЅ Р±С‹С‚СЊ РјРµСЂС‚РІС‹Рј Рё РјС‹ РЅРµ РІ СЃРѕСЃС‚РѕСЏРЅРёРё Р°С‚Р°РєРё! " + PlayerEntity.Instance.IsAttack  + " PlayerStateMachine " + PlayerStateMachine.Instance.State);
                 UseDead((MonsterEntity)_stateMachine.Entity);
                 break;
 
@@ -30,7 +30,7 @@ public class DeadMosterState : MonsterBase
 
     private void UseDead(MonsterEntity entity)
     {
-        Debug.Log("Попали и увидели что монстр уже должен быть мертвым пришел пакет на помереть 1");
+        Debug.Log("РџРѕРїР°Р»Рё Рё СѓРІРёРґРµР»Рё С‡С‚Рѕ РјРѕРЅСЃС‚СЂ СѓР¶Рµ РґРѕР»Р¶РµРЅ Р±С‹С‚СЊ РјРµСЂС‚РІС‹Рј РїСЂРёС€РµР» РїР°РєРµС‚ РЅР° РїРѕРјРµСЂРµС‚СЊ 1");
         AnimationManager.Instance.PlayMonsterAnimation(entity.IdentityInterlude.Id, AnimationNames.DEAD.ToString());
         ResetAttackIfMonsterDead();
     }

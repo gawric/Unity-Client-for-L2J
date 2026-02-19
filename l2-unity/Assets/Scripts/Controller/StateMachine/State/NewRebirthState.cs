@@ -1,4 +1,4 @@
-public class NewRebirthState : StateBase
+﻿public class NewRebirthState : StateBase
 {
     public NewRebirthState(PlayerStateMachine stateMachine) : base(stateMachine) { }
 

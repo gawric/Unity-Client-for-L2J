@@ -1,4 +1,4 @@
-public class NetworkEntity : Entity
+﻿public class NetworkEntity : Entity
 {
     public override float UpdateMAtkSpeed(int mAtkSpd)
     {

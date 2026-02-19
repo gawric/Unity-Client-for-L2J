@@ -1,4 +1,4 @@
-using System;
+п»їusing System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -35,7 +35,7 @@ public class BaseAnimationController : AnimationEventsBase, IAnimationController
         _base_motion.Add("CastEnd", BASE_MOTION_END);
         _base_motion.Add("MagicShoot", BASE_MOTION_MAGIC_SHOOT);
 
-        // Создаем экземпляр оверрайда на основе текущего контроллера
+        // РЎРѕР·РґР°РµРј СЌРєР·РµРјРїР»СЏСЂ РѕРІРµСЂСЂР°Р№РґР° РЅР° РѕСЃРЅРѕРІРµ С‚РµРєСѓС‰РµРіРѕ РєРѕРЅС‚СЂРѕР»Р»РµСЂР°
         if (_animator.runtimeAnimatorController is not AnimatorOverrideController)
         {
             _overrideController = new AnimatorOverrideController(_animator.runtimeAnimatorController);
@@ -52,7 +52,7 @@ public class BaseAnimationController : AnimationEventsBase, IAnimationController
 
     protected override void HandleQueueAnimation(string animationName)
     {
-        Debug.Log($"AnimationManager> start name убираем из ожидания и запускаем {animationName}");
+        Debug.Log($"AnimationManager> start name СѓР±РёСЂР°РµРј РёР· РѕР¶РёРґР°РЅРёСЏ Рё Р·Р°РїСѓСЃРєР°РµРј {animationName}");
         SetBool(animationName, true, "player");
     }
 
@@ -157,7 +157,7 @@ public class BaseAnimationController : AnimationEventsBase, IAnimationController
             IfAnimationNeedsWait( _priorityAnimations, name);
 
             if (value) return;
-            Debug.Log($"AnimationManager> start name player  добавление в список ожидания {name} статус {value} продолжение return ");
+            Debug.Log($"AnimationManager> start name player  РґРѕР±Р°РІР»РµРЅРёРµ РІ СЃРїРёСЃРѕРє РѕР¶РёРґР°РЅРёСЏ {name} СЃС‚Р°С‚СѓСЃ {value} РїСЂРѕРґРѕР»Р¶РµРЅРёРµ return ");
         }
 
 
@@ -193,7 +193,7 @@ public class BaseAnimationController : AnimationEventsBase, IAnimationController
         if (!_priorityAnimations.ContainsKey(animName))
         {
             _animationQueue.Enqueue(animName);
-            Debug.Log($"AnimationManager> start name player  добавление в список ожидания {animName} испольнение return ");
+            Debug.Log($"AnimationManager> start name player  РґРѕР±Р°РІР»РµРЅРёРµ РІ СЃРїРёСЃРѕРє РѕР¶РёРґР°РЅРёСЏ {animName} РёСЃРїРѕР»СЊРЅРµРЅРёРµ return ");
         }
     }
 
@@ -346,7 +346,7 @@ public class BaseAnimationController : AnimationEventsBase, IAnimationController
 
     public bool HasClip(string originalClipName)
     {
-        // Проверяем, есть ли вообще такой "слот" для замены
+        // РџСЂРѕРІРµСЂСЏРµРј, РµСЃС‚СЊ Р»Рё РІРѕРѕР±С‰Рµ С‚Р°РєРѕР№ "СЃР»РѕС‚" РґР»СЏ Р·Р°РјРµРЅС‹
         return _overrideController[originalClipName] != null;
     }
 

@@ -1,4 +1,4 @@
-
+﻿
 public class WalkingMonsterState : MonsterBase
 {
     public WalkingMonsterState(MonsterStateMachine stateMachine) : base(stateMachine) { }

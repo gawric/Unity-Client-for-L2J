@@ -1,4 +1,4 @@
-using Newtonsoft.Json.Bson;
+ï»¿using Newtonsoft.Json.Bson;
 using System;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -121,7 +121,7 @@ public class SkillSlot : L2DraggableSlot
             ResetIcon();
         }
 
-        // Îòêëþ÷àåì drag
+        // ÐžÑ‚ÐºÐ»ÑŽÑ‡Ð°ÐµÐ¼ drag
         if (_slotDragManipulator != null)
             _slotDragManipulator.enabled = false;
     }

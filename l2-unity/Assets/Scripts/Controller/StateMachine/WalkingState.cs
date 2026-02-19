@@ -1,4 +1,4 @@
-using static AttackingState;
+﻿using static AttackingState;
 
 public class WalkingState : StateBase
 {

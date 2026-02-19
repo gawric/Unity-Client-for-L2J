@@ -1,4 +1,4 @@
-using System;
+Ôªøusing System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -156,7 +156,7 @@ public class AnimationManager : BaseAnimationManager , IAnimationManager
         }
         else
         {
-            Debug.LogWarning($"AnimationManager->StopMonsterCurrentAnimation: ÕÂ ÍËÚË˜ÂÒÍ‡ˇ Ó¯Ë·Í‡ - animator not found for monster {objectId}. Animation: {animationName}");
+            Debug.LogWarning($"AnimationManager->StopMonsterCurrentAnimation: –ù–µ –∫—Ä–∏—Ç–∏—á–µ—Å–∫–∞—è –æ—à–∏–±–∫–∞ - animator not found for monster {objectId}. Animation: {animationName}");
         }
     }
 

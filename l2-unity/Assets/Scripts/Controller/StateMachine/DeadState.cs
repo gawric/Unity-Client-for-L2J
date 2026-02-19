@@ -1,4 +1,4 @@
-public class DeadState : StateBase
+﻿public class DeadState : StateBase
 {
     public DeadState(PlayerStateMachine stateMachine) : base(stateMachine) { }
 

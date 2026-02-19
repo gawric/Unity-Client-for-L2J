@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 public class FpsLimiter : MonoBehaviour {
     [SerializeField] private int focusedFrameRate = 60;
     [SerializeField] private int unfocusedFrameRate = 5;

@@ -1,4 +1,4 @@
-using System.Threading;
+п»їusing System.Threading;
 using UnityEngine;
 
 
@@ -26,7 +26,7 @@ public class NewPhysicalSkillsState : AbstractAttackEvents
                 SkillExecutor.Instance.ExecuteSkill(_stateMachine.Player, animComboAct, _events);
                 break;
             case Event.CANCEL:
-                Debug.Log("NewPhysicalSkillsState Use Sate> Отмена скорее всего запрос пришел из ActionFaild");
+                Debug.Log("NewPhysicalSkillsState Use Sate> РћС‚РјРµРЅР° СЃРєРѕСЂРµРµ РІСЃРµРіРѕ Р·Р°РїСЂРѕСЃ РїСЂРёС€РµР» РёР· ActionFaild");
 
                 break;
             case Event.APPLY_SELF_SKILL:
@@ -68,21 +68,21 @@ public class NewPhysicalSkillsState : AbstractAttackEvents
             Vector3 lookDir = (monsterFacePosition - startPoint).normalized;
             float verticalAngle = Mathf.Asin(lookDir.y) * Mathf.Rad2Deg;
 
-            // --- НАСТРОЙКА СПИНЫ ---
-            // Берем 40% от общего угла для естественности
+            // --- РќРђРЎРўР РћР™РљРђ РЎРџРРќР« ---
+            // Р‘РµСЂРµРј 40% РѕС‚ РѕР±С‰РµРіРѕ СѓРіР»Р° РґР»СЏ РµСЃС‚РµСЃС‚РІРµРЅРЅРѕСЃС‚Рё
             float spineAngle = Mathf.Clamp(verticalAngle * 0.4f, -15f, 10f);
             Vector3 spineRotation = new Vector3(0, 0, spineAngle);
 
-            // --- НАСТРОЙКА РУКИ ---
-            // Добавляем еще 30% наклона именно для руки, чтобы она била ниже
+            // --- РќРђРЎРўР РћР™РљРђ Р РЈРљР ---
+            // Р”РѕР±Р°РІР»СЏРµРј РµС‰Рµ 30% РЅР°РєР»РѕРЅР° РёРјРµРЅРЅРѕ РґР»СЏ СЂСѓРєРё, С‡С‚РѕР±С‹ РѕРЅР° Р±РёР»Р° РЅРёР¶Рµ
             float armAngle = Mathf.Clamp(verticalAngle * 0.3f, -20f, 10f);
             Vector3 armRotation = new Vector3(0, 0, armAngle);
-            // ВНИМАНИЕ: Если рука крутится не туда, проверьте ось (возможно, нужна X вместо Z)
+            // Р’РќРРњРђРќРР•: Р•СЃР»Рё СЂСѓРєР° РєСЂСѓС‚РёС‚СЃСЏ РЅРµ С‚СѓРґР°, РїСЂРѕРІРµСЂСЊС‚Рµ РѕСЃСЊ (РІРѕР·РјРѕР¶РЅРѕ, РЅСѓР¶РЅР° X РІРјРµСЃС‚Рѕ Z)
 
-            // 4. Применяем через ваш PlayerEntity и SpineProceduralController
+            // 4. РџСЂРёРјРµРЅСЏРµРј С‡РµСЂРµР· РІР°С€ PlayerEntity Рё SpineProceduralController
             PlayerEntity playerEntity = (PlayerEntity)entity;
 
-            // Применяем к позвоночнику (вы уже настроили это в SetProceduralPose)
+            // РџСЂРёРјРµРЅСЏРµРј Рє РїРѕР·РІРѕРЅРѕС‡РЅРёРєСѓ (РІС‹ СѓР¶Рµ РЅР°СЃС‚СЂРѕРёР»Рё СЌС‚Рѕ РІ SetProceduralPose)
             playerEntity.SetProceduralSpinePose(spineRotation);
             playerEntity.SetProceduralRightUpperArmPose(armRotation);
         });

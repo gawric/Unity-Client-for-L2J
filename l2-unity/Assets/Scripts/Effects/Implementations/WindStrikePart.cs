@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+п»їusing System.Collections.Generic;
 using UnityEngine;
 
 
@@ -17,19 +17,19 @@ public class WindStrikePart : EffectPart
         if (settings is Effect1177Settings wind1177Settings)
         {
 
-            // Базовая инициализация из родительского класса EffectPart
-            // (Определяем рендерер и создаем PropertyBlock)
+            // Р‘Р°Р·РѕРІР°СЏ РёРЅРёС†РёР°Р»РёР·Р°С†РёСЏ РёР· СЂРѕРґРёС‚РµР»СЊСЃРєРѕРіРѕ РєР»Р°СЃСЃР° EffectPart
+            // (РћРїСЂРµРґРµР»СЏРµРј СЂРµРЅРґРµСЂРµСЂ Рё СЃРѕР·РґР°РµРј PropertyBlock)
             float baseSize = (partType == EffectPartType.Body) ? wind1177Settings.defaultBodySize : wind1177Settings.defaultFooterSize;
             base.Initialize(settings, baseSize);
 
-            // Присваиваем список шагов анимации
+            // РџСЂРёСЃРІР°РёРІР°РµРј СЃРїРёСЃРѕРє С€Р°РіРѕРІ Р°РЅРёРјР°С†РёРё
             //_scaleSteps = (partType == EffectPartType.Body) ? wind1177Settings.bodyScales : wind1177Settings.footerScales;
 
-            // 1. Позиционирование (твои офсеты)
+            // 1. РџРѕР·РёС†РёРѕРЅРёСЂРѕРІР°РЅРёРµ (С‚РІРѕРё РѕС„СЃРµС‚С‹)
             float yOffset = (partType == EffectPartType.Body) ? wind1177Settings.bodyYOffset : wind1177Settings.footerYOffset;
             transform.localPosition = new Vector3(0, yOffset, 0);
 
-            // 2. Рандомные смещения (как в твоем старом коде)
+            // 2. Р Р°РЅРґРѕРјРЅС‹Рµ СЃРјРµС‰РµРЅРёСЏ (РєР°Рє РІ С‚РІРѕРµРј СЃС‚Р°СЂРѕРј РєРѕРґРµ)
             if (wind1177Settings.useRandomPosition)
             {
                 float rZ = Random.Range(wind1177Settings.minZ, wind1177Settings.maxZ);
@@ -37,12 +37,12 @@ public class WindStrikePart : EffectPart
                 transform.localPosition += new Vector3(0, rY, rZ);
             }
 
-            // 3. Настройка шейдера (скорость вращения)
+            // 3. РќР°СЃС‚СЂРѕР№РєР° С€РµР№РґРµСЂР° (СЃРєРѕСЂРѕСЃС‚СЊ РІСЂР°С‰РµРЅРёСЏ)
             float randSpeed = Random.Range(settings.speedRotateMin, settings.speedRotateMax);
             UpdateShaderFloat(SHADER_PARAMETR_SPEED, randSpeed);
-            UpdateShaderFloat(SHADER_PARAMETR_ALPHA, 1); // Начинаем с прозрачного
+            UpdateShaderFloat(SHADER_PARAMETR_ALPHA, 1); // РќР°С‡РёРЅР°РµРј СЃ РїСЂРѕР·СЂР°С‡РЅРѕРіРѕ
 
-            // 4. Установка начального масштаба
+            // 4. РЈСЃС‚Р°РЅРѕРІРєР° РЅР°С‡Р°Р»СЊРЅРѕРіРѕ РјР°СЃС€С‚Р°Р±Р°
             transform.localScale = Vector3.one * baseSize;
 
             _elapsedTime = 0;
@@ -70,16 +70,16 @@ public class WindStrikePart : EffectPart
 
         _elapsedTime += Time.deltaTime;
 
-        // --- ЛОГИКА ПРОЯВЛЕНИЯ (Show/Hide) ---
+        // --- Р›РћР“РРљРђ РџР РћРЇР’Р›Р•РќРРЇ (Show/Hide) ---
         if (!_isHiding && _currentAlpha < _settings.stopAlphaShow)
         {
-            // Плавное появление до stopAlphaShow
+            // РџР»Р°РІРЅРѕРµ РїРѕСЏРІР»РµРЅРёРµ РґРѕ stopAlphaShow
             _currentAlpha = Mathf.MoveTowards(_currentAlpha, _settings.stopAlphaShow, Time.deltaTime / _settings.showTime);
             UpdateShaderFloat("_Alpha", _currentAlpha);
         }
         else if (_isHiding)
         {
-            // Плавное исчезновение до 0
+            // РџР»Р°РІРЅРѕРµ РёСЃС‡РµР·РЅРѕРІРµРЅРёРµ РґРѕ 0
             _currentAlpha = Mathf.MoveTowards(_currentAlpha, 0, Time.deltaTime / _settings.hideTime);
             UpdateShaderFloat("_Alpha", _currentAlpha);
             if (_currentAlpha <= 0)
@@ -89,7 +89,7 @@ public class WindStrikePart : EffectPart
             }
         }
 
-        // --- ЛОГИКА МАСШТАБА (Твои ScaleSteps) ---
+        // --- Р›РћР“РРљРђ РњРђРЎРЁРўРђР‘Рђ (РўРІРѕРё ScaleSteps) ---
         UpdateScaleAnimation();
     }
 
@@ -97,19 +97,19 @@ public class WindStrikePart : EffectPart
     {
         if (_scaleSteps == null || _scaleSteps.Count == 0) return;
 
-        // Вычисляем текущий процент времени жизни эффекта
-        // (Для простоты берем время от старта, деленное на общую длительность)
+        // Р’С‹С‡РёСЃР»СЏРµРј С‚РµРєСѓС‰РёР№ РїСЂРѕС†РµРЅС‚ РІСЂРµРјРµРЅРё Р¶РёР·РЅРё СЌС„С„РµРєС‚Р°
+        // (Р”Р»СЏ РїСЂРѕСЃС‚РѕС‚С‹ Р±РµСЂРµРј РІСЂРµРјСЏ РѕС‚ СЃС‚Р°СЂС‚Р°, РґРµР»РµРЅРЅРѕРµ РЅР° РѕР±С‰СѓСЋ РґР»РёС‚РµР»СЊРЅРѕСЃС‚СЊ)
         float lifePercent = (_elapsedTime / _settings.defaultLifeTime) * 100f;
 
         foreach (var step in _scaleSteps)
         {
-            // Если мы подошли к временной отметке шага
+            // Р•СЃР»Рё РјС‹ РїРѕРґРѕС€Р»Рё Рє РІСЂРµРјРµРЅРЅРѕР№ РѕС‚РјРµС‚РєРµ С€Р°РіР°
             if (lifePercent >= step.timePercent)
             {
                 float targetSize = _baseSize * (step.scalePercent / 100f);
                 Vector3 targetScale = Vector3.one * targetSize;
 
-                // Используем Lerp для плавности, как в твоем коде
+                // РСЃРїРѕР»СЊР·СѓРµРј Lerp РґР»СЏ РїР»Р°РІРЅРѕСЃС‚Рё, РєР°Рє РІ С‚РІРѕРµРј РєРѕРґРµ
                 transform.localScale = Vector3.Lerp(transform.localScale, targetScale, Time.deltaTime * 5f);
             }
         }

@@ -1,4 +1,4 @@
-using System;
+Ôªøusing System;
 using UnityEngine;
 
 public class NewMagicSkillsState  : AbstractAttackEvents
@@ -31,7 +31,7 @@ public class NewMagicSkillsState  : AbstractAttackEvents
                 SkillExecutor.Instance.ExecuteSkillOverride(useSkill.SkillGrp , entity, readyCombo, _events);
                 break;
             case Event.CANCEL:
-                Debug.Log("NewMagicSkillsState Use Sate> ŒÚÏÂÌ‡ ÒÍÓÂÂ ‚ÒÂ„Ó Á‡ÔÓÒ ÔË¯ÂÎ ËÁ ActionFaild");
+                Debug.Log("NewMagicSkillsState Use Sate> –û—Ç–º–µ–Ω–∞ —Å–∫–æ—Ä–µ–µ –≤—Å–µ–≥–æ –∑–∞–ø—Ä–æ—Å –ø—Ä–∏—à–µ–ª –∏–∑ ActionFaild");
                 break;
             case Event.APPLY_SELF_SKILL:
                 AnimationCombo selfCombo = SkillgrpTable.Instance.GetAnimComboBySkillId(useSkill.SkillId, useSkill.SkillLvl);

@@ -1,4 +1,4 @@
-using AtmosphericHeightFog;
+﻿using AtmosphericHeightFog;
 using System;
 using UnityEngine;
 

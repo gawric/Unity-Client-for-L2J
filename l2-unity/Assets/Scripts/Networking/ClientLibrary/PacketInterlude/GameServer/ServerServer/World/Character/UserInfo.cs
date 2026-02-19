@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using static StorageVariable;
 
 public class UserInfo : ServerPacket
@@ -271,7 +271,7 @@ public class UserInfo : ServerPacket
         int titleColor = ReadI();
         int isCursedWeaponEquipped = ReadI();
         StorageVariable.getInstance().ResumeShowDelayMessage((int)MessageID.ADD_EXP_SP);
-        Debug.Log("USERRRR INFO �������� ��������!!!! ");
+        Debug.Log("USERRRR INFO пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ!!!! ");
     }
 
     private float GetRealSpeed(int baseSpeed , float speedMultiplier)

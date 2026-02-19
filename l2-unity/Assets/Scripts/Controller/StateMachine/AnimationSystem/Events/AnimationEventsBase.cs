@@ -1,4 +1,4 @@
-using System;
+Ôªøusing System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -65,7 +65,7 @@ public abstract class AnimationEventsBase : MonoBehaviour
 
                 foreach(string animName in _animationQueue)
                 {
-                    Debug.Log($"AnimationManager> start name Û·Ë‡ÂÏ ‚ ÎËÒÚÂ ÓÊË‰‡ÌËÈ iteration animName " +animName+ " _animationQueue  " + _animationQueue.Count);
+                    Debug.Log($"AnimationManager> start name —É–±–∏—Ä–∞–µ–º –≤ –ª–∏—Å—Ç–µ –æ–∂–∏–¥–∞–Ω–∏–π iteration animName " +animName+ " _animationQueue  " + _animationQueue.Count);
                 }
                 
 

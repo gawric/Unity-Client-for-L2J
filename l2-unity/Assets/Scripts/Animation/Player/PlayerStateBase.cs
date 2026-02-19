@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using static UnityEngine.Rendering.DebugUI;
 
 public class PlayerStateBase : StateMachineBehaviour
