@@ -15,76 +15,62 @@ public class CharacterBuilder : MonoBehaviour
 
     // Load player animations, face and hair
     public GameObject BuildCharacterBase(CharacterRaceAnimation raceId, PlayerAppearance appearance, EntityType entityType) {
-
         //Debug.Log($"Building character: Race:{raceId} Sex:{appearance.Sex} Face:{appearance.Face} Hair:{appearance.HairStyle} HairC:{appearance.HairColor}");
 
-        GameObject entity = Instantiate(ModelTable.Instance.GetContainer(raceId, entityType));
-        GameObject face = Instantiate(ModelTable.Instance.GetFace(raceId, appearance.Face));
-        GameObject hair1 = Instantiate(ModelTable.Instance.GetHair(raceId, appearance.HairStyle, appearance.HairColor, false));
-        GameObject hair2 = Instantiate(ModelTable.Instance.GetHair(raceId, appearance.HairStyle, appearance.HairColor, true));
-
-        Transform container = entity.transform;
-        if (entityType != EntityType.Player) {
-            container = entity.transform.GetChild(0);
+        GameObject prototype = ModelTable.Instance.GetContainer(raceId, entityType);
+        if (prototype == null) {
+            // m0nster: временная заглушка, пока не реализованы все персонажи
+            return null;
         }
-
-        face.transform.SetParent(container.transform, false);
-        hair1.transform.SetParent(container.transform, false);
-        hair2.transform.SetParent(container.transform, false);
+        
+        GameObject entity = Instantiate(prototype);
+        Transform container = entityType != EntityType.Player ? 
+            entity.transform.GetChild(0) : 
+            entity.transform;
+        GameObject face = Instantiate(ModelTable.Instance.GetFace(raceId, appearance.Face), container, false);
+        GameObject hair1 = Instantiate(ModelTable.Instance.GetHair(raceId, appearance.HairStyle, appearance.HairColor, false), container, false);
+        GameObject hair2 = Instantiate(ModelTable.Instance.GetHair(raceId, appearance.HairStyle, appearance.HairColor, true), container, false);
 
         UserGear gear = entity.GetComponent<UserGear>();
-        AddUserGearLink(gear, face, hair1, hair2);
+        gear.AddUserGearLink(face, hair1, hair2);
 
         return entity;
     }
 
-    private void AddUserGearLink(UserGear gear , GameObject face , GameObject hair1 , GameObject hair2)
-    {
-        gear.SetFace(face);
-        gear.SetHair1(hair1);
-        gear.SetHair2(hair2);
-    }
-
-    public GameObject ReplaceNewPawnFace(CharacterRaceAnimation raceId , byte _face , byte hairColor , byte hairStyle)
-    {
+    public GameObject ReplaceNewPawnFace(CharacterRaceAnimation raceId , byte _face , byte hairColor , byte hairStyle) {
         //Debug.Log($"Building character: Race:{raceId} Sex:{appearance.Sex} Face:{appearance.Face} Hair:{appearance.HairStyle} HairC:{appearance.HairColor}");
-        GameObject gameObj = ModelTable.Instance.GetContainer(raceId, EntityType.Pawn);
-        GameObject entity = Instantiate(gameObj);
-        GameObject face = Instantiate(ModelTable.Instance.GetFace(raceId, _face));
-        GameObject hair1 = Instantiate(ModelTable.Instance.GetHair(raceId, hairStyle, hairColor, false));
-        GameObject hair2 = Instantiate(ModelTable.Instance.GetHair(raceId, hairStyle, hairColor, true));
-
+        GameObject entity = Instantiate(ModelTable.Instance.GetContainer(raceId, EntityType.Pawn));
+        
         Transform container = entity.transform;
-
-
-        face.transform.SetParent(container.transform, false);
-        hair1.transform.SetParent(container.transform, false);
-        hair2.transform.SetParent(container.transform, false);
+        Instantiate(ModelTable.Instance.GetFace(raceId, _face), container, false);
+        Instantiate(ModelTable.Instance.GetHair(raceId, hairStyle, hairColor, false), container, false);
+        Instantiate(ModelTable.Instance.GetHair(raceId, hairStyle, hairColor, true), container, false);
 
         return entity;
     }
-    public GameObject BuildCharacterBaseInterlude(CharacterRaceAnimation raceId, PlayerInterludeAppearance appearance, EntityType entityType)
-    {
-
+    
+    public GameObject BuildCharacterBaseInterlude(CharacterRaceAnimation raceId, PlayerInterludeAppearance appearance, EntityType entityType) {
         //Debug.Log($"Building character: Race:{raceId} Sex:{appearance.Sex} Face:{appearance.Face} Hair:{appearance.HairStyle} HairC:{appearance.HairColor}");
-        GameObject gameObj = ModelTable.Instance.GetContainer(raceId, entityType);
-        GameObject entity = Instantiate(gameObj);
-        GameObject face = Instantiate(ModelTable.Instance.GetFace(raceId, appearance.FaceByte));
-        GameObject hair1 = Instantiate(ModelTable.Instance.GetHair(raceId, appearance.HairStyleByte, appearance.HairColorByte, false));
-        GameObject hair2 = Instantiate(ModelTable.Instance.GetHair(raceId, appearance.HairStyleByte, appearance.HairColorByte, true));
-
-        Transform container = entity.transform;
-        if (entityType != EntityType.Player)
-        {
-            container = entity.transform.GetChild(0);
+        GameObject prototype = ModelTable.Instance.GetContainer(raceId, entityType);
+        if (prototype == null) {
+            // m0nster: временная заглушка, пока не реализованы все персонажи
+            return null;
         }
-
-        face.transform.SetParent(container.transform, false);
-        hair1.transform.SetParent(container.transform, false);
-        hair2.transform.SetParent(container.transform, false);
+        
+        GameObject entity = Instantiate(prototype);
+        Transform container = entityType != EntityType.Player ? 
+            entity.transform.GetChild(0) : 
+            entity.transform;
+        
+        Instantiate(ModelTable.Instance.GetFace(raceId, appearance.FaceByte), container, false);
+        Instantiate(ModelTable.Instance.GetHair(raceId, appearance.HairStyleByte, appearance.HairColorByte, false), container, false);
+        Instantiate(ModelTable.Instance.GetHair(raceId, appearance.HairStyleByte, appearance.HairColorByte, true), container, false);
 
         return entity;
     }
 
+    private GameObject GetHair() {
+        return null;
+    }
  
 }

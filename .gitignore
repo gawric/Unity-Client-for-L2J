@@ -46,8 +46,6 @@ l2-unity/Assets/Resources/Data/Animations/Fighter/FFighter/Models/experiment/new
 l2-unity/Assets/Resources/Data/Animations/Fighter/FFighter/Models/experiment/new_00_anim.meta
 l2-unity/Assets/Resources/Data/Animations/Fighter/MFighter/Models/MFighter_m000_b_ao_full.fbx
 l2-unity/Assets/Resources/Data/Animations/Fighter/MFighter/Models/MFighter_m000_b_ao_full.meta
-l2-unity/Assets/Resources/Data/Animations/Fighter/FFighter/Models/experiment/new_00_anim.fbx
-l2-unity/Assets/Resources/Data/Animations/Fighter/FFighter/Models/experiment/new_00_anim.meta
 l2-unity/Assets/Resources/Data/Animations/Magic/FMagic/Models/FMagic_m000_b_ao_full.fbx
 l2-unity/Assets/Resources/Data/Animations/Magic/FMagic/Models/FMagic_m000_b_ao_full.meta
 l2-unity/Assets/Resources/Data/Animations/Magic/MMagic/Models/MMagic_m000_b_ao_full.fbx
@@ -77,6 +75,11 @@ terraindata.dat
 default-2022.dwlt
 default-2023.dwlt
 
+# Unity personal configuration
+l2-unity/UserSettings/
 
 # FMOD Studio crash reports
 *.dmp
+
+# Rider
+.idea/

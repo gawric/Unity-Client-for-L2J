@@ -37,7 +37,7 @@ public class CharacterArmorDresser : AbstractArmorDresser
             if (IsFullPlateEquipped(ItemSlot.fullarmor))
             {
                 ResetFullArmor(ItemSlot.fullarmor, slot, defaultArmor, defaultGo);
-                //OnSyncMash?.Invoke(1);
+                //OnSyncMesh?.Invoke(1);
             }
             else
             {

@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -16,16 +17,14 @@ public class LogongrpTable {
         }
     }
 
-    private List<Logongrp> _logongrps;
-
-    public List<Logongrp> Logongrps { get { return _logongrps; } }
+    public List<Logongrp> LogonGrps { get; private set; }
 
     public void Initialize() {
         Readgrps();
     }
 
     private void Readgrps() {
-        _logongrps = new List<Logongrp> ();
+        LogonGrps = new List<Logongrp>();
         string dataPath = Path.Combine(Application.streamingAssetsPath, "Data/Meta/Logongrp.txt");
         if (!File.Exists(dataPath)) {
             Debug.LogWarning("File not found: " + dataPath);
@@ -36,7 +35,7 @@ public class LogongrpTable {
             string line;
             while ((line = reader.ReadLine()) != null) {
                 Logongrp logongrp = new Logongrp();
-
+                
                 string[] keyvals = line.Split('\t');
 
                 for (int i = 0; i < keyvals.Length; i++) {
@@ -49,6 +48,11 @@ public class LogongrpTable {
                     string value = keyval[1];
 
                     switch (key) {
+                        case "raceId":
+                            logongrp.RaceId = value.Length > 0 ? 
+                                (CharacterRaceAnimation) Enum.Parse(typeof(CharacterRaceAnimation), value) : 
+                                CharacterRaceAnimation.FFighter;
+                            break;
                         case "x":
                             logongrp.X = int.Parse(value);
                             break;
@@ -61,7 +65,6 @@ public class LogongrpTable {
                         case "yaw":
                             logongrp.Yaw = int.Parse(value);
                             break;
-
                     }
 
                 }
@@ -71,10 +74,10 @@ public class LogongrpTable {
                 logongrp.Z = NumberUtils.FromIntToFLoat((int) logongrp.Z);
                 logongrp.Yaw = NumberUtils.FromIntToFLoat((int) logongrp.Yaw);
 
-                _logongrps.Add(logongrp);
+                LogonGrps.Add(logongrp);
             }
 
-            Debug.Log($"Successfully imported {_logongrps.Count} logongrp(s)");
+            Debug.Log($"Successfully imported {LogonGrps.Count} logongrp(s)");
         }
     }
 }

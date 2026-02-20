@@ -1,11 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using static ModelTable;
 
 public abstract class AbstractGetCache
 {
-    public static int RACE_COUNT = 14;
+    public static int RACE_COUNT = Enum.GetValues(typeof(CharacterRaceAnimation)).Length;
     protected static int FACE_COUNT = 6;
     protected static int HAIR_STYLE_COUNT = 6;
     protected static int HAIR_COLOR_COUNT = 4;
@@ -200,55 +201,40 @@ public abstract class AbstractGetCache
         return go;
     }
 
-    public GameObject GetFace(CharacterRaceAnimation raceId, byte face)
-    {
+    public GameObject GetFace(CharacterRaceAnimation raceId, byte face) {
         GameObject go = _faces[(byte)raceId, face];
-        if (go == null)
-        {
+        if (go == null) {
             Debug.LogError($"Can't find face {face} for race {raceId} at index {raceId},{face}");
         }
 
         return go;
     }
 
-    public GameObject GetHair(CharacterRaceAnimation raceId, byte hairStyle, byte hairColor, bool bh)
-    {
+    public GameObject GetHair(CharacterRaceAnimation raceId, byte hairStyle, byte hairColor, bool bh) {
         byte index = (byte)(hairStyle * 8 + hairColor * 2);
-        index = BugFix(raceId, index);
-        if (bh)
-        {
+        index = GetRemappedIndex(raceId, index);
+        if (bh) {
             index += 1;
         }
 
         //Debug.Log($"Loading hair[{index}] Race:{raceId} Model:{hairStyle}_{hairColor}_{(bh ? "bh" : "ah")}");
 
         GameObject go = _hair[(byte)raceId, index];
-        if (go == null)
-        {
+        if (go == null) {
             Debug.LogError($"Can't find hairstyle {hairStyle} haircolor {hairColor} for race {raceId} at index {raceId},{index}");
         }
-
-
 
         return go;
     }
 
-    public byte BugFix(CharacterRaceAnimation raceId, byte index)
-    {
-        if (CharacterRaceAnimation.FFighter == raceId)
-        {
-            if (index == 8)
-            {
-                return (byte)6;
-            }
-            else if (index == 10)
-            {
-                return (byte)8;
-            }
-            else if (index == 12)
-            {
-                return (byte)10;
-            }
+    private byte GetRemappedIndex(CharacterRaceAnimation raceId, byte index) {
+        if (CharacterRaceAnimation.FFighter == raceId) {
+            return index switch {
+                8 => 6,
+                10 => 8,
+                12 => 10,
+                _ => index
+            };
         }
         return index;
     }
@@ -257,6 +243,7 @@ public abstract class AbstractGetCache
     {
         L2Npc npc = null;
         _npcs.TryGetValue(meshname, out npc);
+        
         if (npc == null)
         {
             Debug.LogWarning($"Can't find npc {meshname} model in ModelTable.");
@@ -264,8 +251,7 @@ public abstract class AbstractGetCache
         }
 
         AddMaterial(npc);
-
-
+        
         return npc.baseModel;
     }
 

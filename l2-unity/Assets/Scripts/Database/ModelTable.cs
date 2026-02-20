@@ -89,11 +89,6 @@ public class ModelTable : AbstractCache
             CharacterRaceAnimation raceId = (CharacterRaceAnimation)r;
             CharacterRace race = CharacterRaceParser.ParseRace(raceId);
 
-            if(raceId == CharacterRaceAnimation.FElf)
-            {
-                Debug.Log("");
-            }
-
             string path = $"Data/Animations/{race}/{raceId}/Pawn_{raceId}";
             _pawnContainers[r] = Resources.Load<GameObject>(path);
             //  Debug.Log($"Loading user container {r} [{path}]");

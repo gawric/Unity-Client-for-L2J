@@ -46,7 +46,7 @@ public class CharacterSelector : MonoBehaviour
         }
 
         _characters = characters;
-        _pawnData = LogongrpTable.Instance.Logongrps;
+        _pawnData = LogongrpTable.Instance.LogonGrps;
         _characterGameObjects = new List<GameObject>();
         _selectedCharacterSlot = -1;
 
@@ -70,7 +70,7 @@ public class CharacterSelector : MonoBehaviour
         }
 
         _charactersInterlude = characters;
-        _pawnData = LogongrpTable.Instance.Logongrps;
+        _pawnData = LogongrpTable.Instance.LogonGrps;
         _characterGameObjects = new List<GameObject>();
         _selectedCharacterSlot = -1;
 

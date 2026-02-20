@@ -47,7 +47,7 @@ public class CharacterCreator : MonoBehaviour
     }
 
     public void SpawnAllPawns() {
-        List<Logongrp> pawnData = LogongrpTable.Instance.Logongrps;
+        List<Logongrp> pawnData = LogongrpTable.Instance.LogonGrps;
 
         _pawnContainer = new GameObject("Pawns");
 
@@ -60,194 +60,44 @@ public class CharacterCreator : MonoBehaviour
 
     public void SpawnAllCharCreatePawns()
     {
-        List<Logongrp> pawnData = LogongrpTable.Instance.Logongrps;
-
         _pawnContainer = new GameObject("Pawns");
 
+        List<Logongrp> pawnData = LogongrpTable.Instance.LogonGrps;
         for (var i = 8; i < pawnData.Count; i++)
         {
-            //MFigther
-            if (i == 8)
-            {
-                GameObject pawnObject = CreatePawn(CharacterRaceAnimation.MFighter, new PlayerAppearance());
-                pawns[i] = pawnObject;
-                PlacePawn(pawnObject, pawnData[i], "Pawn" + i, _pawnContainer);
-                //SetSpeed(pawnObject);
-            }else if (i == 9)
-                //FFigther
-            {
-                GameObject pawnObject = CreatePawn(CharacterRaceAnimation.FFighter, new PlayerAppearance());
-                pawns[i] = pawnObject;
-                PlacePawn(pawnObject, pawnData[i], "Pawn" + i, _pawnContainer);
-                //SetSpeed(pawnObject);
+            Logongrp logonGrp = pawnData[i];
+            GameObject pawnObject = CreatePawn(logonGrp.RaceId, new PlayerAppearance());
+            if (pawnObject == null) {
+                pawnObject = FallbackPawn();
             }
-            else if (i == 10)
-            //MMagic
-            {
-                GameObject pawnObject = CreatePawn(CharacterRaceAnimation.MMagic, new PlayerAppearance());
-                pawns[i] = pawnObject;
-                PlacePawn(pawnObject, pawnData[i], "Pawn" + i, _pawnContainer);
-                //SetSpeed(pawnObject);
-            }
-            else if (i == 11)
-            {
-                GameObject pawnObject = CreatePawn(CharacterRaceAnimation.FMagic, new PlayerAppearance());
-                pawns[i] = pawnObject;
-                PlacePawn(pawnObject, pawnData[i], "Pawn" + i, _pawnContainer);
-                //SetSpeed(pawnObject);
-            }
-            else if (i == 12)
-            {
-                GameObject pawnObject = CreatePawn(CharacterRaceAnimation.MElf, new PlayerAppearance());
-                pawns[i] = pawnObject;
-                PlacePawn(pawnObject, pawnData[i], "Pawn" + i, _pawnContainer);
-                //SetSpeed(pawnObject);
-            }
-            else if (i == 13)
-            {
-                GameObject pawnObject = CreatePawn(CharacterRaceAnimation.FElf, new PlayerAppearance());
-                pawns[i] = pawnObject;
-                PlacePawn(pawnObject, pawnData[i], "Pawn" + i, _pawnContainer);
-                //SetSpeed(pawnObject);
-            }
-            else if (i == 14)
-            {
-                GameObject pawnObject = CreatePawn(CharacterRaceAnimation.MElf, new PlayerAppearance());
-                pawns[i] = pawnObject;
-                PlacePawn(pawnObject, pawnData[i], "Pawn" + i, _pawnContainer);
-                //SetSpeed(pawnObject);
-            }
-            else if (i == 15)
-            {
-                GameObject pawnObject = CreatePawn(CharacterRaceAnimation.FElf, new PlayerAppearance());
-                pawns[i] = pawnObject;
-                PlacePawn(pawnObject, pawnData[i], "Pawn" + i, _pawnContainer);
-                //SetSpeed(pawnObject);
-            }
-            else if (i == 16)
-            {
-                GameObject pawnObject = CreatePawn(CharacterRaceAnimation.MDarkElf, new PlayerAppearance());
-                pawns[i] = pawnObject;
-                PlacePawn(pawnObject, pawnData[i], "Pawn" + i, _pawnContainer);
-                //SetSpeed(pawnObject);
-            }
-            else if (i == 18)
-            {
-                GameObject pawnObject = CreatePawn(CharacterRaceAnimation.MDarkElf, new PlayerAppearance());
-                pawns[i] = pawnObject;
-                PlacePawn(pawnObject, pawnData[i], "Pawn" + i, _pawnContainer);
-                //SetSpeed(pawnObject);
-            }
-            else if (i == 19)
-            {
-                GameObject pawnObject = CreatePawn(CharacterRaceAnimation.FDarkElf, new PlayerAppearance());
-                pawns[i] = pawnObject;
-                PlacePawn(pawnObject, pawnData[i], "Pawn" + i, _pawnContainer);
-                //SetSpeed(pawnObject);
-            }
-            else if (i == 24)
-            {
-                GameObject pawnObject = CreatePawn(CharacterRaceAnimation.MDwarf, new PlayerAppearance());
-                pawns[i] = pawnObject;
-                PlacePawn(pawnObject, pawnData[i], "Pawn" + i, _pawnContainer);
-                //SetSpeed(pawnObject);
-            }
-            else if (i == 25)
-            {
-                GameObject pawnObject = CreatePawn(CharacterRaceAnimation.FDwarf, new PlayerAppearance());
-                pawns[i] = pawnObject;
-                PlacePawn(pawnObject, pawnData[i], "Pawn" + i, _pawnContainer);
-                //SetSpeed(pawnObject);
-            }
-            else
-            {
-                GameObject pawnObject = CreatePawn(CharacterRaceAnimation.FDarkElf, new PlayerAppearance());
-                pawns[i] = pawnObject;
-                PlacePawn(pawnObject, pawnData[i], "Pawn" + i, _pawnContainer);
-            }
-
+            
+            pawns[i] = pawnObject;
+            PlacePawn(pawnObject, logonGrp, "Pawn" + i, _pawnContainer);
         }
     }
 
-    public GameObject SpawnPawnWithAppearance(CharacterRaceAnimation race_id , int id , PlayerAppearance appearance)
-    {
-        List<Logongrp> pawnData = LogongrpTable.Instance.Logongrps;
+    public GameObject SpawnPawnWithAppearance(CharacterRaceAnimation raceId , int id , PlayerAppearance appearance) {
+        List<Logongrp> pawnData = LogongrpTable.Instance.LogonGrps;
 
-        GameObject pawnObject = CreatePawn(race_id, appearance);
-
-        // pawnObject.SetActive(false);
+        GameObject pawnObject = CreatePawn(raceId, appearance);
         PlacePawn(pawnObject, pawnData[id], "Pawn" + id, _pawnContainer);
         pawnObject.SetActive(false);
+        
         return pawnObject;
     }
 
     public void SpawnPawnWithId(int id) {
-        List<Logongrp> pawnData = LogongrpTable.Instance.Logongrps;
+        Logongrp pawnData = LogongrpTable.Instance.LogonGrps[id];
+        GameObject pawnObject = CreatePawn(pawnData.RaceId, new PlayerAppearance());
+        if (pawnObject == null) {
+            pawnObject = FallbackPawn();
+        }
 
-        GameObject pawnObject = CreatePawn(GetRaceAnimator(id), new PlayerAppearance());
-
-        PlacePawn(pawnObject, pawnData[id], "Pawn" + id, _pawnContainer);
+        PlacePawn(pawnObject, pawnData, "Pawn" + id, _pawnContainer);
     }
 
-    public CharacterRaceAnimation GetRaceAnimator(int id)
-    {
-        if (id == 8)
-        {
-            return CharacterRaceAnimation.MFighter;
-        }
-        else if (id == 9)
-        {
-            return CharacterRaceAnimation.FFighter;
-        }
-        else if (id == 10)
-        {
-            return CharacterRaceAnimation.MMagic;
-        }
-        else if (id == 11)
-        {
-            return CharacterRaceAnimation.FMagic;
-        }
-        else if (id == 12)
-        {
-            return CharacterRaceAnimation.MElf;
-        }
-        else if (id == 13)
-        {
-            return CharacterRaceAnimation.FElf;
-        }
-        else if (id == 14)
-        {
-            return CharacterRaceAnimation.MElf;
-        }
-        else if (id == 15)
-        {
-            return CharacterRaceAnimation.FElf;
-        }
-        else if (id == 16)
-        {
-            return CharacterRaceAnimation.MDarkElf;
-        }
-        else if (id == 18)
-        {
-            return CharacterRaceAnimation.MDarkElf;
-        }
-        else if (id == 19)
-        {
-            return CharacterRaceAnimation.FDarkElf;
-        }
-        else if (id == 24)
-        {
-            return CharacterRaceAnimation.MDwarf;
-        }
-        else if (id == 25)
-        {
-
-            return CharacterRaceAnimation.FDwarf;
-        }
-        else
-        {
-            return CharacterRaceAnimation.FDarkElf;
-        }
+    public CharacterRaceAnimation GetRaceAnimator(int id) {
+        return LogongrpTable.Instance.LogonGrps[id].RaceId;
     }
 
     public void SelectPawn(string race, string pawnClass, string gender) {
@@ -293,10 +143,13 @@ public class CharacterCreator : MonoBehaviour
         currentPawn = null;
         currentPawnIndex = -1;
     }
-
-
+    
     public GameObject CreatePawn(CharacterRaceAnimation raceId, PlayerAppearance appearance) {
         GameObject pawnObject = CharacterBuilder.Instance.BuildCharacterBase(raceId, appearance, EntityType.Pawn);
+        if (pawnObject == null) {
+            // m0nster: временная заглушка, пока не реализованы все персонажи
+            return null;
+        }
 
         UserGear gear = pawnObject.GetComponent<UserGear>();
 
@@ -333,35 +186,28 @@ public class CharacterCreator : MonoBehaviour
             gear.EquipWeapon(appearance.RHand, false);
         }
 
-
         return pawnObject;
     }
-
-
-
 
     public GameObject CreatePawnInterlude(CharacterRaceAnimation raceId, PlayerInterludeAppearance appearance)
     {
         GameObject pawnObject = CharacterBuilder.Instance.BuildCharacterBaseInterlude(raceId, appearance, EntityType.Pawn);
-
+        if (pawnObject == null) {
+            // m0nster: временная заглушка, пока не реализованы все персонажи
+            return null;
+        }
+        
         UserGear gear = pawnObject.GetComponent<UserGear>();
-
         gear.Initialize(-1, raceId);
         CharacterDefaultEquipment.EquipStarterGear(gear, appearance);
+        
         return pawnObject;
     }
-
-
-
-
-
+    
     public void PlacePawn(GameObject pawnObject, Logongrp pawnData, string name, GameObject container) {
-
         UpdatePawnPosAndRot(pawnObject, pawnData);
         pawnObject.transform.name = name;
-
         pawnObject.transform.parent = container.transform;
-
         pawnObject.SetActive(true);
 
         UserGear gear = pawnObject.GetComponent<UserGear>();
@@ -371,8 +217,6 @@ public class CharacterCreator : MonoBehaviour
         animController.SetBool("wait_" + gear.WeaponAnim, true);
         //animController.SetWaitSpeedLobby("wait_" + gear.WeaponAnim, 0.1f);
     }
-
-
 
     public void UpdatePawnPosAndRot(GameObject pawnObject, Logongrp pawnData) {
         Vector3 pawnPosition = new Vector3(pawnData.X, pawnData.Y, pawnData.Z);
@@ -420,6 +264,10 @@ public class CharacterCreator : MonoBehaviour
             }
 
         }
+    }
+
+    public GameObject FallbackPawn() {
+        return CreatePawn(CharacterRaceAnimation.FFighter, new PlayerAppearance());
     }
 
 

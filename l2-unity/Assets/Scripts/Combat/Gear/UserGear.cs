@@ -11,14 +11,15 @@ public class UserGear : Gear
     [Header("Armors")]
     [Header("Meta")]
 
-    //private GameObject _face;
     [Header("Models")]
     [SerializeField] private GameObject _container;
 
-    private GameObject _hair1;
-    private GameObject _face;
-    private GameObject _hair2;
+    [System.NonSerialized] public GameObject Hair1;
+    [System.NonSerialized] public GameObject Hair2;
+    [System.NonSerialized] public GameObject Face;
+    
     private CharacterArmorDresser _armorDresser;
+    
     public override void Initialize(int ownderId, CharacterRaceAnimation raceId) {
         base.Initialize(ownderId, raceId);
 
@@ -28,21 +29,13 @@ public class UserGear : Gear
             _container = transform.GetChild(0).gameObject;
         }
 
-
-
         _armorDresser = new CharacterArmorDresser(_container.transform);
         _armorDresser.OnDestroyGameObject += OnDestroyGameObject;
-        _armorDresser.OnSyncMash += OnSyncMash;
-        _armorDresser.OnAddSyncMash += OnAddSyncMash;
+        _armorDresser.OnSyncMash += OnSyncMesh;
+        _armorDresser.OnAddSyncMash += OnAddSyncMesh;
         _armorDresser.OnEquipArmor += OnEquipArmor;
         _skinnedMeshSync = _container.GetComponentInChildren<SkinnedMeshSync>();
-
-        for (int i = 0; i < _skinnedMeshSync.transform.childCount; i++)
-        {
-            var children = _skinnedMeshSync.transform.GetChild(i);
-        }
     }
-
 
     public void UnequipArmor(int itemId, ItemSlot slot)
     {
@@ -56,15 +49,9 @@ public class UserGear : Gear
 
     }
 
-
-
-
-
     public void EquipArmor(int itemId, ItemSlot slot)
     {
-
         Armor armor = ItemTable.Instance.GetArmor(itemId);
-
         if (armor == null)
         {
             Debug.LogWarning($"Can't find armor {itemId} in ItemTable");
@@ -72,54 +59,47 @@ public class UserGear : Gear
         }
 
         ItemSlot slotArmor = _armorDresser.GetExtendedOrGetCurrentArmorPart(slot);
-        if (ItemSlot.fullarmor != slotArmor)
-        {
+        if (ItemSlot.fullarmor != slotArmor) {
             EquipSingleArmor(armor, slotArmor, itemId);
-        }
-        else if (ItemSlot.fullarmor == slotArmor)
-        {
+        } else {
             EquipFullArmor(armor, slotArmor, itemId);
         }
     }
 
     private void EquipFullArmor(Armor armor, ItemSlot slotArmor, int itemId)
     {
-            if (_armorDresser.IsArmorEquipped(armor, slotArmor))
+        if (_armorDresser.IsArmorEquipped(armor, slotArmor))
+        {
+            return;
+        }
+
+        L2ArmorPiece armorPiece = (L2ArmorPiece)LoadMesh(EquipmentCategory.FullArmor, itemId, (int)_raceId);
+        if (!ValidateArmorPieceFullArmor(armorPiece, itemId))
+        {
+            return;
+        }
+
+        try
+        {
+            GameObject[] listGo = CreateListArmorMesh(armorPiece.baseAllModels, armorPiece.allMaterials);
+
+            if (listGo.Length == 2)
             {
-                return;
+                GameObject goChest = listGo[0];
+                GameObject goLegs = listGo[1];
 
+                _armorDresser.SetFullArmor(false , armor, goChest, ItemSlot.chest);
+                _armorDresser.SetFullArmor(true , armor, goLegs, ItemSlot.legs);
             }
-
-            L2ArmorPiece armorPiece = (L2ArmorPiece)LoadMesh(EquipmentCategory.FullArmor, itemId, (int)_raceId);
-
-
-            if (!ValidateArmorPieceFullArmor(armorPiece, itemId))
+            else
             {
-                return;
+                Debug.LogWarning("UserGear->EquipFullArmor: Not Found GameObject FullPlateArmor!");
             }
-
-            try
-            {
-                GameObject[] listGo = CreateListArmorMesh(armorPiece.baseAllModels, armorPiece.allMaterials);
-
-                if (listGo.Length == 2)
-                {
-                    GameObject goChest = listGo[0];
-                    GameObject goLegs = listGo[1];
-
-                    _armorDresser.SetFullArmor(false , armor, goChest, ItemSlot.chest);
-                    _armorDresser.SetFullArmor(true , armor, goLegs, ItemSlot.legs);
-                }
-                else
-                {
-                    Debug.LogWarning("UserGear->EquipFullArmor: Not Found GameObject FullPlateArmor!");
-                }
-            }
-            catch (System.Exception e)
-            {
-                Debug.LogError($"UserGear-> EquipFullArmor: Error equipping armor {itemId}: {e.Message}");
-            }
-        
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogError($"UserGear-> EquipFullArmor: Error equipping armor {itemId}: {e.Message}");
+        }
     }
 
     private void EquipSingleArmor(Armor armor , ItemSlot slotArmor , int itemId)
@@ -130,14 +110,10 @@ public class UserGear : Gear
         }
 
         L2ArmorPiece armorPiece = (L2ArmorPiece)LoadMesh(EquipmentCategory.Armor, itemId, (int)_raceId);
-
-
-
         if (!ValidateArmorPiece(armorPiece, itemId))
         {
             return;
         }
-
 
         try
         {
@@ -155,10 +131,6 @@ public class UserGear : Gear
             Debug.LogError($"UserGear-> Error equipping armor {itemId}: {e.Message}");
         }
     }
-
-
-
-
 
     /// <summary>
     /// Validates the armor piece data
@@ -182,8 +154,7 @@ public class UserGear : Gear
         }
         return true;
     }
-
-
+    
     private GameObject[] CreateListArmorMesh(GameObject[] baseListArmorModel, Material[] materials)
     {
         GameObject[] listGo = new GameObject[baseListArmorModel.Length];
@@ -196,9 +167,6 @@ public class UserGear : Gear
         }
         return listGo;
     }
-
-
-
 
     protected override Transform GetLeftHandBone() {
         if (_leftHandBone == null) {
@@ -222,58 +190,42 @@ public class UserGear : Gear
         return _shieldBone;
     }
 
-
-
-    public void SetFace(GameObject facePiece)
-    {
-        _face = facePiece;
-    }
-    public void SetHair1(GameObject hair1Piece)
-    {
-        _hair1 = hair1Piece;
-    }
-
-    public void SetHair2(GameObject hair2Piece)
-    {
-        _hair2 = hair2Piece;
-    }
-
-
     public void EquipHair(GameObject hair1Piece, GameObject hair2Piece)
     {
         EquipHairTest(hair1Piece, hair2Piece);
     }
+    
     public void EquipHairTest(GameObject hair1Piece , GameObject hair2Piece)
     {
-        if (_hair1 != null)
+        if (Hair1 != null)
         {
-            DestroyImmediate(_hair1);
-            DestroyImmediate(_hair2);
+            DestroyImmediate(Hair1);
+            DestroyImmediate(Hair2);
 
-            _hair1 = null;
-            _hair2 = null;
+            Hair1 = null;
+            Hair2 = null;
 
         }
         var tr = _container.transform;
-        _hair1 = hair1Piece;
-        _hair1.transform.SetParent(tr, false);
+        Hair1 = hair1Piece;
+        Hair1.transform.SetParent(tr, false);
 
-        _hair2 = hair2Piece;
-        _hair2.transform.SetParent(tr, false);
+        Hair2 = hair2Piece;
+        Hair2.transform.SetParent(tr, false);
 
         _skinnedMeshSync.SyncMesh();
     }
 
     public void EquipFace(GameObject facePiece)
     {
-        if (_face != null)
+        if (Face != null)
         {
-            Destroy(_face);
+            Destroy(Face);
             //_torsoMeta = null;
         }
         var tr = _container.transform;
-        _face = facePiece;
-        _face.transform.SetParent(tr, false);
+        Face = facePiece;
+        Face.transform.SetParent(tr, false);
 
        _skinnedMeshSync.SyncMesh();
     }
@@ -295,26 +247,25 @@ public class UserGear : Gear
         //Debug.LogWarning("Запрос на удаление. Удаление состоялось размер " + _container.transform.childCount);
     }
 
-    public void OnSyncMash(int status)
+    public void OnSyncMesh(int status)
     {
         //Debug.LogWarning("Запрос на удаление. Синхронизация начало");
         _skinnedMeshSync?.SyncMesh();
         //Debug.LogWarning("Запрос на удаление. Синхронизация конец");
     }
 
-    public void OnAddSyncMash(GameObject add)
-    {
+    public void OnAddSyncMesh(GameObject add) {
         _skinnedMeshSync?.AddObjectToQueue(add);
-
     }
 
-
-
-    public void OnEquipArmor(int naked, ItemSlot slot)
-    {
+    public void OnEquipArmor(int naked, ItemSlot slot) {
         EquipArmor(naked , slot);
     }
 
-
+    public void AddUserGearLink(GameObject face, GameObject hair1, GameObject hair2) {
+        Face = face;
+        Hair1 = hair1;
+        Hair2 = hair2;
+    }
 
 }
