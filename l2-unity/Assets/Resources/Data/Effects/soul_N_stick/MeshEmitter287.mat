@@ -71,6 +71,7 @@ Material:
     - _ColorScale9Time: 5
     - _ColorScaleRepeats: 0
     - _Debug: 0
+    - _EmissionStrength: 500
     - _FadeIn: 0
     - _FadeInEndTime: 0
     - _Fadeout: 1
@@ -94,6 +95,8 @@ Material:
     - _UseSizeScale: 1
     m_Colors:
     - _Acceleration: {r: 0, g: 0, b: 0, a: 0}
+    - _Color: {r: 0, g: 0, b: 0, a: 0}
+    - _ColorEmission: {r: 0.16177751, g: 3.3744805, b: 34.29675, a: 1}
     - _ColorMultiplierRangeB: {r: 0.3, g: 0.5, b: 0, a: 0}
     - _ColorMultiplierRangeG: {r: 0.2, g: 0.4, b: 0, a: 0}
     - _ColorMultiplierRangeR: {r: 0.3, g: 0.5, b: 0, a: 0}
