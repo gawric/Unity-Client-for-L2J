@@ -23,6 +23,9 @@
         },
         {
             "m_Id": "88917c34e10642fdb90c5957caddfc35"
+        },
+        {
+            "m_Id": "13b39b4cc2134ad0a3bf8f6211c16311"
         }
     ],
     "m_Keywords": [],
@@ -143,6 +146,9 @@
         },
         {
             "m_Id": "a4918722cd98484a81c50963ab9f2e1b"
+        },
+        {
+            "m_Id": "ae8235d3d6064192b56810b7a4de9d83"
         }
     ],
     "m_GroupDatas": [
@@ -1105,6 +1111,34 @@
 }
 
 {
+    "m_SGVersion": 1,
+    "m_Type": "UnityEditor.ShaderGraph.Internal.Vector2ShaderProperty",
+    "m_ObjectId": "13b39b4cc2134ad0a3bf8f6211c16311",
+    "m_Guid": {
+        "m_GuidSerialized": "c2468b12-b95e-4001-8996-ca92b2786dfc"
+    },
+    "m_Name": "SizeTrail",
+    "m_DefaultRefNameVersion": 1,
+    "m_RefNameGeneratedByDisplayName": "SizeTrail",
+    "m_DefaultReferenceName": "_SizeTrail",
+    "m_OverrideReferenceName": "",
+    "m_GeneratePropertyBlock": true,
+    "m_UseCustomSlotLabel": false,
+    "m_CustomSlotLabel": "",
+    "m_DismissedVersion": 0,
+    "m_Precision": 0,
+    "overrideHLSLDeclaration": false,
+    "hlslDeclarationOverride": 0,
+    "m_Hidden": false,
+    "m_Value": {
+        "x": 0.019999999552965165,
+        "y": 0.03999999910593033,
+        "z": 0.0,
+        "w": 0.0
+    }
+}
+
+{
     "m_SGVersion": 0,
     "m_Type": "UnityEditor.ShaderGraph.Vector3MaterialSlot",
     "m_ObjectId": "13c1aaa4deb84d519caac970e21e7f23",
@@ -1903,8 +1937,8 @@
     "m_ObjectId": "450e8884629440a38970872604faaa48",
     "m_Title": "Добавляем угол закручивания для mash",
     "m_Position": {
-        "x": -52.99997329711914,
-        "y": -214.0
+        "x": -53.0,
+        "y": -213.99998474121095
     }
 }
 
@@ -2764,7 +2798,7 @@
     "m_Title": "Длина Меша и количество витков. Чем короче mash тем выше количество витков требуется (Сейчас длинна 0.01 а количество витков 200)",
     "m_Position": {
         "x": -2335.999755859375,
-        "y": -216.99993896484376
+        "y": -216.99998474121095
     }
 }
 
@@ -2951,6 +2985,9 @@
         },
         {
             "m_Id": "88917c34e10642fdb90c5957caddfc35"
+        },
+        {
+            "m_Id": "13b39b4cc2134ad0a3bf8f6211c16311"
         }
     ]
 }
@@ -3886,6 +3923,42 @@
 
 {
     "m_SGVersion": 0,
+    "m_Type": "UnityEditor.ShaderGraph.PropertyNode",
+    "m_ObjectId": "ae8235d3d6064192b56810b7a4de9d83",
+    "m_Group": {
+        "m_Id": ""
+    },
+    "m_Name": "Property",
+    "m_DrawState": {
+        "m_Expanded": true,
+        "m_Position": {
+            "serializedVersion": "2",
+            "x": -2581.0,
+            "y": 43.99998474121094,
+            "width": 120.0,
+            "height": 34.00000762939453
+        }
+    },
+    "m_Slots": [
+        {
+            "m_Id": "dcd84b8dd80541cdb8c1275d1fa87ff9"
+        }
+    ],
+    "synonyms": [],
+    "m_Precision": 0,
+    "m_PreviewExpanded": true,
+    "m_DismissedVersion": 0,
+    "m_PreviewMode": 0,
+    "m_CustomColors": {
+        "m_SerializableColors": []
+    },
+    "m_Property": {
+        "m_Id": "13b39b4cc2134ad0a3bf8f6211c16311"
+    }
+}
+
+{
+    "m_SGVersion": 0,
     "m_Type": "UnityEditor.ShaderGraph.DynamicVectorMaterialSlot",
     "m_ObjectId": "afd9fb04983d404fb8a70eb809db58d1",
     "m_Id": 1,
@@ -4080,9 +4153,9 @@
         "m_Expanded": true,
         "m_Position": {
             "serializedVersion": "2",
-            "x": 610.0000610351563,
-            "y": -730.9999389648438,
-            "width": 207.9998779296875,
+            "x": 505.9999694824219,
+            "y": -720.0,
+            "width": 208.00003051757813,
             "height": 302.0
         }
     },
@@ -4205,7 +4278,7 @@
     "m_ObjectId": "c67a76c465cb4ce384be25cd74b57977",
     "m_Title": "Растягивание mash в зависимости от времени жизни частицы",
     "m_Position": {
-        "x": -776.0,
+        "x": -775.999755859375,
         "y": 440.0
     }
 }
@@ -4727,6 +4800,27 @@
     "m_StageCapability": 3,
     "m_Value": 0.0,
     "m_DefaultValue": 0.0,
+    "m_Labels": []
+}
+
+{
+    "m_SGVersion": 0,
+    "m_Type": "UnityEditor.ShaderGraph.Vector2MaterialSlot",
+    "m_ObjectId": "dcd84b8dd80541cdb8c1275d1fa87ff9",
+    "m_Id": 0,
+    "m_DisplayName": "SizeTrail",
+    "m_SlotType": 1,
+    "m_Hidden": false,
+    "m_ShaderOutputName": "Out",
+    "m_StageCapability": 3,
+    "m_Value": {
+        "x": 0.0,
+        "y": 0.0
+    },
+    "m_DefaultValue": {
+        "x": 0.0,
+        "y": 0.0
+    },
     "m_Labels": []
 }
 

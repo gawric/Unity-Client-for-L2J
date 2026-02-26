@@ -54,10 +54,19 @@ VisualEffect:
       - m_Value: 0.95
         m_Name: LifetimeRange
         m_Overridden: 1
+      - m_Value: 0.7
+        m_Name: Opacity
+        m_Overridden: 1
     m_Vector2f:
       m_Array: []
     m_Vector3f:
-      m_Array: []
+      m_Array:
+      - m_Value: {x: 0, y: 0.02, z: 0}
+        m_Name: StartLocationRange_start
+        m_Overridden: 1
+      - m_Value: {x: 0, y: -0.1, z: 0}
+        m_Name: StartLocationRange_end
+        m_Overridden: 1
     m_Vector4f:
       m_Array: []
     m_Uint:

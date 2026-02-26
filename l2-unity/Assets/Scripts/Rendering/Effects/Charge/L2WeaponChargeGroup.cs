@@ -50,7 +50,7 @@ public class L2WeaponChargeGroup : BaseEffectGroup, IWeaponEffect
         }
         else if (component is VisualEffect vfx)
         {
-            vfx.SetFloat("LifetimeRange", _duration);
+            vfx.SetFloat("LifetimeRange", 1f);
             vfx.Play();
         }
     }
