@@ -38,6 +38,9 @@
         },
         {
             "m_Id": "93705f78bdd94d0483baaa5d4cc5f5c8"
+        },
+        {
+            "m_Id": "be4e59061ca342e5a07ad521ff45ccd6"
         }
     ],
     "m_Keywords": [],
@@ -251,6 +254,9 @@
         },
         {
             "m_Id": "bc4149e0d59942418b3e3a3b89690f3b"
+        },
+        {
+            "m_Id": "338224dd72314d71bf3b0d935a7433c9"
         }
     ],
     "m_GroupDatas": [
@@ -530,6 +536,20 @@
                     "m_Id": "faeec45f28484c75ab954982bd5a4f33"
                 },
                 "m_SlotId": 1
+            }
+        },
+        {
+            "m_OutputSlot": {
+                "m_Node": {
+                    "m_Id": "338224dd72314d71bf3b0d935a7433c9"
+                },
+                "m_SlotId": 0
+            },
+            "m_InputSlot": {
+                "m_Node": {
+                    "m_Id": "bc4149e0d59942418b3e3a3b89690f3b"
+                },
+                "m_SlotId": 537440460
             }
         },
         {
@@ -2480,6 +2500,21 @@
 
 {
     "m_SGVersion": 0,
+    "m_Type": "UnityEditor.ShaderGraph.Vector1MaterialSlot",
+    "m_ObjectId": "2eac61b1bddc462fa8ed3c36725a7107",
+    "m_Id": 537440460,
+    "m_DisplayName": "TurnsPerSecond",
+    "m_SlotType": 0,
+    "m_Hidden": false,
+    "m_ShaderOutputName": "_TurnsPerSecond",
+    "m_StageCapability": 3,
+    "m_Value": 1.5,
+    "m_DefaultValue": 0.0,
+    "m_Labels": []
+}
+
+{
+    "m_SGVersion": 0,
     "m_Type": "UnityEditor.ShaderGraph.DynamicValueMaterialSlot",
     "m_ObjectId": "2efdb7751717442c8d579488c6ad1d0f",
     "m_Id": 0,
@@ -2657,6 +2692,42 @@
         "y": 0.0,
         "z": 0.0,
         "w": 0.0
+    }
+}
+
+{
+    "m_SGVersion": 0,
+    "m_Type": "UnityEditor.ShaderGraph.PropertyNode",
+    "m_ObjectId": "338224dd72314d71bf3b0d935a7433c9",
+    "m_Group": {
+        "m_Id": ""
+    },
+    "m_Name": "Property",
+    "m_DrawState": {
+        "m_Expanded": true,
+        "m_Position": {
+            "serializedVersion": "2",
+            "x": 2139.0,
+            "y": -369.0,
+            "width": 161.0,
+            "height": 34.0
+        }
+    },
+    "m_Slots": [
+        {
+            "m_Id": "dd0919e9e7bd4abebbbffd36fa95278f"
+        }
+    ],
+    "synonyms": [],
+    "m_Precision": 0,
+    "m_PreviewExpanded": true,
+    "m_DismissedVersion": 0,
+    "m_PreviewMode": 0,
+    "m_CustomColors": {
+        "m_SerializableColors": []
+    },
+    "m_Property": {
+        "m_Id": "be4e59061ca342e5a07ad521ff45ccd6"
     }
 }
 
@@ -4058,6 +4129,9 @@
         },
         {
             "m_Id": "93705f78bdd94d0483baaa5d4cc5f5c8"
+        },
+        {
+            "m_Id": "be4e59061ca342e5a07ad521ff45ccd6"
         }
     ]
 }
@@ -5067,7 +5141,7 @@
     "m_Title": "Добавляем угол закручивания для mash",
     "m_Position": {
         "x": 2139.0,
-        "y": -594.9998168945313
+        "y": -595.0
     }
 }
 
@@ -5181,7 +5255,7 @@
     "m_Title": "Длина Меша и количество витков. Чем короче mash тем выше количество витков требуется (Сейчас длинна 0.01 а количество витков 200)",
     "m_Position": {
         "x": 2139.0,
-        "y": -624.9998779296875
+        "y": -625.0
     }
 }
 
@@ -5633,7 +5707,7 @@
     "m_Title": "Мерцание цветов пока 2 цвета",
     "m_Position": {
         "x": -3010.0,
-        "y": -238.999755859375
+        "y": -239.0
     }
 }
 
@@ -5644,7 +5718,7 @@
     "m_Title": "Alpha Test Animtime Server (Begin/End Alpha)(Backup Lineal)",
     "m_Position": {
         "x": -877.0,
-        "y": 808.000244140625
+        "y": 808.0
     }
 }
 
@@ -7084,6 +7158,9 @@
             "m_Id": "620d4d20e9cf40bf9ec74d7afc6d416f"
         },
         {
+            "m_Id": "2eac61b1bddc462fa8ed3c36725a7107"
+        },
+        {
             "m_Id": "af8ce4cd0a7f4417bf6fb27cfc70b0a0"
         }
     ],
@@ -7102,7 +7179,8 @@
         "310e933d-6aef-470d-b4af-b1e6ee506edf",
         "21bdcf03-c60b-47d5-96da-0d883d0ff289",
         "ca58cbff-fb89-428d-96da-9dbde144a852",
-        "8ddfc9bc-44be-4e80-8a78-c712d94428ee"
+        "8ddfc9bc-44be-4e80-8a78-c712d94428ee",
+        "62ef828d-e574-43c3-bb05-09b28ed22db3"
     ],
     "m_PropertyIds": [
         2118292502,
@@ -7110,7 +7188,8 @@
         1339819656,
         1738005667,
         1742777857,
-        1068544337
+        1068544337,
+        537440460
     ],
     "m_Dropdowns": [],
     "m_DropdownSelectedEntries": []
@@ -7161,6 +7240,34 @@
         "z": 0.0
     },
     "m_Labels": []
+}
+
+{
+    "m_SGVersion": 1,
+    "m_Type": "UnityEditor.ShaderGraph.Internal.Vector1ShaderProperty",
+    "m_ObjectId": "be4e59061ca342e5a07ad521ff45ccd6",
+    "m_Guid": {
+        "m_GuidSerialized": "c6787321-5966-48da-b7ac-01ccd65e92f3"
+    },
+    "m_Name": "TurnsPerSecond",
+    "m_DefaultRefNameVersion": 1,
+    "m_RefNameGeneratedByDisplayName": "TurnsPerSecond",
+    "m_DefaultReferenceName": "_TurnsPerSecond",
+    "m_OverrideReferenceName": "",
+    "m_GeneratePropertyBlock": true,
+    "m_UseCustomSlotLabel": false,
+    "m_CustomSlotLabel": "",
+    "m_DismissedVersion": 0,
+    "m_Precision": 0,
+    "overrideHLSLDeclaration": false,
+    "hlslDeclarationOverride": 0,
+    "m_Hidden": false,
+    "m_Value": 1.5,
+    "m_FloatType": 0,
+    "m_RangeValues": {
+        "x": 0.0,
+        "y": 1.0
+    }
 }
 
 {
@@ -7573,7 +7680,7 @@
     "m_Title": "2 цвета 1 по краям другой в центре",
     "m_Position": {
         "x": -2535.0,
-        "y": -1851.9998779296875
+        "y": -1852.0
     }
 }
 
@@ -7775,7 +7882,7 @@
     "m_Title": "Закручивание mash в спираль",
     "m_Position": {
         "x": 1360.0,
-        "y": -3067.999755859375
+        "y": -3068.0
     }
 }
 
@@ -7971,7 +8078,7 @@
     "m_Title": "ColorScale изменяем цвет в зависимости от AGE",
     "m_Position": {
         "x": -3105.0,
-        "y": 337.000244140625
+        "y": 337.0
     }
 }
 
@@ -8190,6 +8297,21 @@
 {
     "m_SGVersion": 0,
     "m_Type": "UnityEditor.ShaderGraph.Vector1MaterialSlot",
+    "m_ObjectId": "dd0919e9e7bd4abebbbffd36fa95278f",
+    "m_Id": 0,
+    "m_DisplayName": "TurnsPerSecond",
+    "m_SlotType": 1,
+    "m_Hidden": false,
+    "m_ShaderOutputName": "Out",
+    "m_StageCapability": 3,
+    "m_Value": 0.0,
+    "m_DefaultValue": 0.0,
+    "m_Labels": []
+}
+
+{
+    "m_SGVersion": 0,
+    "m_Type": "UnityEditor.ShaderGraph.Vector1MaterialSlot",
     "m_ObjectId": "dd4faef7ecc44aa4a594cfea7675e129",
     "m_Id": 0,
     "m_DisplayName": "Out",
@@ -8248,7 +8370,7 @@
     "m_Title": "Случайное мерцание",
     "m_Position": {
         "x": -2720.0,
-        "y": 780.000244140625
+        "y": 780.0
     }
 }
 

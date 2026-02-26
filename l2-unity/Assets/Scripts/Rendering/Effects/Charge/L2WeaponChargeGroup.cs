@@ -1,9 +1,20 @@
-﻿using UnityEngine;
+﻿using Unity.Collections.LowLevel.Unsafe;
+using UnityEngine;
+using UnityEngine.VFX;
 
 public class L2WeaponChargeGroup : BaseEffectGroup, IWeaponEffect
 {
     private Transform _weaponTransform;
     private Transform _swordTip;
+
+
+    private static readonly int StartTimeID = Shader.PropertyToID("_StartTime");
+    private static readonly int SeedID = Shader.PropertyToID("_Seed");
+    private static readonly int LifetimeRangeID = Shader.PropertyToID("_LifetimeRange");
+    private static readonly int FadeoutStartTimeID = Shader.PropertyToID("_FadeoutStartTime");
+    private static readonly int InitialDelayRangeID = Shader.PropertyToID("_InitialDelayRange");
+
+    private MaterialPropertyBlock _propBlock;
 
     public void SetWeapon(Transform weaponTransform)
     {
@@ -29,21 +40,46 @@ public class L2WeaponChargeGroup : BaseEffectGroup, IWeaponEffect
         }
     }
 
-    protected override void ApplyShaderParams(Material m, float now, float seed)
+    protected override void ApplyShaderParams(Component component, float now, float seed)
+    {
+        if (component == null) return;
+
+        if (component is Renderer renderer)
+        {
+            ApplyMaterialsParams(renderer, now, seed);
+        }
+        else if (component is VisualEffect vfx)
+        {
+            vfx.SetFloat("LifetimeRange", _duration);
+            vfx.Play();
+        }
+    }
+
+    private void ApplyMaterialsParams(Renderer renderer, float now, float seed)
     {
 
-       // bool isRing = gameObject.name.Contains("Ring") ||
-        //      (transform.parent != null && transform.parent.name.Contains("Ring"));
+        if (_propBlock == null) _propBlock = new MaterialPropertyBlock();
 
-        m.SetFloat("_StartTime", now);
-        m.SetFloat("_Seed", seed);
 
-     
-        float initialDelay = m.GetVector("_InitialDelayRange").y;
-        float totalLife = _duration + initialDelay;
-        m.SetVector("_LifetimeRange", new Vector2(totalLife, totalLife));
-        m.SetFloat("_FadeoutStartTime", totalLife * 0.7f);
+        renderer.GetPropertyBlock(_propBlock);
+
+
+        Vector4 delayRange = renderer.sharedMaterial.GetVector(InitialDelayRangeID);
+        float totalLife = _duration + delayRange.y;
+
+
+        _propBlock.SetFloat(StartTimeID, now);
+        _propBlock.SetFloat(SeedID, seed);
+        _propBlock.SetVector(LifetimeRangeID, new Vector2(totalLife, totalLife));
+        _propBlock.SetFloat(FadeoutStartTimeID, totalLife * 0.7f);
+
+
+        renderer.SetPropertyBlock(_propBlock);
     }
+
+
+
+
 
     private void OnDrawGizmos()
     {

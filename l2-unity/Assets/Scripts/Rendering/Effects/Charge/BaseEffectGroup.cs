@@ -3,7 +3,8 @@
 public abstract class BaseEffectGroup : EffectPart
 {
     [Header("Base Spawning")]
-    [SerializeField] protected Renderer[] _particles;
+    [SerializeField] protected EffectInstance[] _effectInstances;
+
     [SerializeField] protected int _countPerSecond = 20;
     [SerializeField] protected int _maxCount = 20;
     [SerializeField] protected float _duration = 1f;
@@ -23,11 +24,12 @@ public abstract class BaseEffectGroup : EffectPart
         _particleIndex = 0;
         _stopped = false;
 
-        if (_particles == null || _particles.Length == 0)
-            _particles = GetComponentsInChildren<Renderer>(true);
+        if (_effectInstances == null || _effectInstances.Length == 0)
+        {
+            return;
+        }
 
-        foreach (var p in _particles) p.gameObject.SetActive(false);
-
+        foreach (var inst in _effectInstances) inst.Deactivate();
 
         if (_countPerSecond > _maxCount)
         {
@@ -39,11 +41,9 @@ public abstract class BaseEffectGroup : EffectPart
     {
         if (_stopped) return;
 
-
         if (_followTarget != null)
         {
-            transform.position = _followTarget.position;
-            transform.rotation = _followTarget.rotation;
+            transform.SetPositionAndRotation(_followTarget.position, _followTarget.rotation);
         }
 
         float now = Now();
@@ -65,33 +65,28 @@ public abstract class BaseEffectGroup : EffectPart
 
     protected virtual void ActivateParticle(float now)
     {
+        if (_effectInstances == null || _effectInstances.Length == 0) return;
         if (_particleIndex >= _maxCount) _particleIndex = 0;
 
-        GameObject go = _particles[_particleIndex].gameObject;
-        go.SetActive(true);
+        float seed = UnityEngine.Random.Range(-100f, 100f);
 
-        float seed = Random.Range(-100f, 100f);
-        foreach (Material m in _particles[_particleIndex].materials)
-        {
-            ApplyShaderParams(m, now, seed);
-        }
+        // Просто вызываем метод обертки
+        _effectInstances[_particleIndex].Activate(now, seed , ApplyShaderParams);
+
         _particleIndex++;
     }
 
-    // Этот метод переопределяем в наследниках для специфичных данных
-    protected abstract void ApplyShaderParams(Material m, float now, float seed);
+    protected abstract void ApplyShaderParams(Component source, float now, float seed);
 
     protected void StopEffect()
     {
         _stopped = true;
-        foreach (var p in _particles) p.gameObject.SetActive(false);
+        if (_effectInstances == null) return;
+        foreach (var inst in _effectInstances) inst.Deactivate();
     }
 
     protected float Now() => Application.isPlaying ? Time.time : Time.realtimeSinceStartup;
-
-
     public override void PlayPart() => _stopped = false;
-
     public override void StopPart() => StopEffect();
 
     public override void Setup(EffectSettings settings, MagicCastData castData)
