@@ -612,7 +612,9 @@ MonoBehaviour:
   - component: {fileID: 5073117067996754218}
   _countPerSecond: 1000
   _maxCount: 1
-  _duration: 2
+  _duration: 1
+  useFixedLifetime: 0
+  minLifeTime: 0
 --- !u!1 &3503987303337432418
 GameObject:
   m_ObjectHideFlags: 0
@@ -1066,7 +1068,9 @@ MonoBehaviour:
   - component: {fileID: 3910204057054228491}
   _countPerSecond: 400
   _maxCount: 12
-  _duration: 5
+  _duration: 1
+  useFixedLifetime: 0
+  minLifeTime: 0
 --- !u!1 &5741550227584836121
 GameObject:
   m_ObjectHideFlags: 0
@@ -1756,7 +1760,9 @@ MonoBehaviour:
   - component: {fileID: 2772935637158563746}
   _countPerSecond: 10000
   _maxCount: 5
-  _duration: 5
+  _duration: 1
+  useFixedLifetime: 0
+  minLifeTime: 0
 --- !u!1 &7318513629380064613
 GameObject:
   m_ObjectHideFlags: 0
@@ -2134,7 +2140,9 @@ MonoBehaviour:
   - component: {fileID: 832366012156906236}
   _countPerSecond: 1000
   _maxCount: 1
-  _duration: 5
+  _duration: 1
+  useFixedLifetime: 0
+  minLifeTime: 0
 --- !u!1001 &4133180192227506626
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2143,6 +2151,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 4017549085049835808}
     m_Modifications:
+    - target: {fileID: 3893913288256223831, guid: 0d92f89f7608f624cb3c7a74ae31af3f, type: 3}
+      propertyPath: m_PropertySheet.m_Float.m_Array.Array.data[1].m_Value
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 3893913288256223831, guid: 0d92f89f7608f624cb3c7a74ae31af3f, type: 3}
       propertyPath: m_PropertySheet.m_Float.m_Array.Array.data[0].m_Overridden
       value: 1

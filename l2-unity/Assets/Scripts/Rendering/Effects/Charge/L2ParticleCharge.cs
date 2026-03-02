@@ -1,5 +1,5 @@
 ﻿using UnityEngine;
-using static UnityEngine.UI.GridLayoutGroup;
+
 
 public class L2ParticleCharge : BaseEffect
 {
@@ -51,7 +51,7 @@ public class L2ParticleCharge : BaseEffect
             }
 
   
-            group.ResetTimer(0.95f, _owner != null ? _owner.transform : _owner);
+            group.ResetTimer(duration, _owner != null ? _owner.transform : _owner);
         }
     }
 

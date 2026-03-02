@@ -1,4 +1,4 @@
-﻿using Unity.Collections.LowLevel.Unsafe;
+﻿
 using UnityEngine;
 using UnityEngine.VFX;
 
@@ -6,13 +6,15 @@ public class L2WeaponChargeGroup : BaseEffectGroup, IWeaponEffect
 {
     private Transform _weaponTransform;
     private Transform _swordTip;
-
-
+    private float adjustedLife;
+    private const float ReferenceWeaponLength = 0.3550376f;
+    private float _timeMultiplier = 1;
     private static readonly int StartTimeID = Shader.PropertyToID("_StartTime");
     private static readonly int SeedID = Shader.PropertyToID("_Seed");
     private static readonly int LifetimeRangeID = Shader.PropertyToID("_LifetimeRange");
     private static readonly int FadeoutStartTimeID = Shader.PropertyToID("_FadeoutStartTime");
     private static readonly int InitialDelayRangeID = Shader.PropertyToID("_InitialDelayRange");
+
 
     private MaterialPropertyBlock _propBlock;
 
@@ -24,7 +26,9 @@ public class L2WeaponChargeGroup : BaseEffectGroup, IWeaponEffect
         {
             // Ищем объект Sword_Tip в дочерних объектах оружия
             _swordTip = weaponTransform.Find("Sword_Tip");
-
+            float currentLength = Vector3.Distance(_weaponTransform.position, _swordTip.position);
+            
+            
             if (_swordTip == null)
             {
                 // Если не нашли по имени, пробуем найти в глубине (на случай сложной иерархии)
@@ -37,6 +41,20 @@ public class L2WeaponChargeGroup : BaseEffectGroup, IWeaponEffect
                     }
                 }
             }
+
+           float maxMultiplierFor2Meters = 2.0f / ReferenceWeaponLength;
+           _timeMultiplier= Mathf.Min(maxMultiplierFor2Meters, currentLength / ReferenceWeaponLength);
+           
+           // Если оружие короче эталонного (timeMultiplier < 1), 
+           // используем квадратичное уменьшение, чтобы эффект быстрее проигрывался на коротком оружии
+           if (_timeMultiplier < 1.0f)
+           {
+               _timeMultiplier = _timeMultiplier * _timeMultiplier;
+           }
+           
+           // Ограничиваем итоговое время жизни снизу нашим порогом minLifeTime
+           adjustedLife = Mathf.Max(minLifeTime, _duration * _timeMultiplier);
+           Debug.Log($"_swordTip размер меча: {currentLength} , {_timeMultiplier} , {adjustedLife}");
         }
     }
 
@@ -50,8 +68,42 @@ public class L2WeaponChargeGroup : BaseEffectGroup, IWeaponEffect
         }
         else if (component is VisualEffect vfx)
         {
-            vfx.SetFloat("LifetimeRange", 1f);
-            vfx.Play();
+            Debug.Log($"VFX USE COMPONENT!: {_duration}");
+            
+            // Защита от деления на ноль
+            float safeDuration = Mathf.Max(0.001f, _duration);
+            
+            if (useFixedLifetime)
+            {
+                Debug.Log($"_swordTip размер меча fx1: {_duration}");
+                vfx.SetFloat("LifetimeRange", _duration);
+                vfx.Play();
+            }
+            else
+            {
+                // Компенсируем закрутку (ForwardOffset): чтобы шаг спирали выглядел одинаково,
+                // на длинном оружии нужно больше витков закрутки, а на коротком - меньше.
+                // Допустим, 3.5f - это базовая закрутка для эталонного оружия.
+                float baseForwardOffset = 3.5f;
+                // Для короткого оружия ограничиваем снизу, чтобы витков не было слишком мало
+                float forwardOffset = Mathf.Max(3.5f, baseForwardOffset * _timeMultiplier);
+                
+                // --- СПЕЦИАЛЬНОЕ УСЛОВИЕ ДЛЯ КОРОТКОГО ОРУЖИЯ ---
+                // Если оружие короче эталонного пока отключаем смотриться странно Glow пролетает быстро, а этот эффект задерживается
+                //if (_timeMultiplier < 1.0f)
+                //{
+                 //   adjustedLife = 1.5f;       
+                //    forwardOffset = 1.3f;      
+                 //   float turnsPerSecond = 0.5f;
+                 //   vfx.SetFloat("TurnsPerSecond", turnsPerSecond);
+                //}
+                
+                vfx.SetFloat("ForwardOffset", forwardOffset);
+                vfx.SetFloat("LifetimeRange", adjustedLife);
+                Debug.Log($"_swordTip размер меча fx2: {adjustedLife} , {forwardOffset}");
+                vfx.Play();
+            }
+ 
         }
     }
 
@@ -67,18 +119,26 @@ public class L2WeaponChargeGroup : BaseEffectGroup, IWeaponEffect
         Vector4 delayRange = renderer.sharedMaterial.GetVector(InitialDelayRangeID);
         float totalLife = _duration + delayRange.y;
 
-
-        _propBlock.SetFloat(StartTimeID, now);
-        _propBlock.SetFloat(SeedID, seed);
-        _propBlock.SetVector(LifetimeRangeID, new Vector2(totalLife, totalLife));
-        _propBlock.SetFloat(FadeoutStartTimeID, totalLife * 0.7f);
+        if (useFixedLifetime)
+        {
+            _propBlock.SetFloat(StartTimeID, now);
+            _propBlock.SetFloat(SeedID, seed);
+            _propBlock.SetVector(LifetimeRangeID, new Vector2(_duration, _duration));
+            _propBlock.SetFloat(FadeoutStartTimeID, _duration * 0.7f);
+            Debug.Log($"ApplyMaterialsParams fixed: {now}, {seed}, {_duration}, {totalLife * 0.7f}");
+        }
+        else
+        {
+            _propBlock.SetFloat(StartTimeID, now);
+            _propBlock.SetFloat(SeedID, seed);
+            _propBlock.SetVector(LifetimeRangeID, new Vector2(adjustedLife, adjustedLife));
+            _propBlock.SetFloat(FadeoutStartTimeID, totalLife * 0.7f);
+            Debug.Log($"ApplyMaterialsParams calc: {now}, {seed}, {adjustedLife}, {totalLife * 0.7f}");
+        }
 
 
         renderer.SetPropertyBlock(_propBlock);
     }
-
-
-
 
 
     private void OnDrawGizmos()

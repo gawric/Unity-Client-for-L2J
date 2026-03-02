@@ -8,7 +8,8 @@ public abstract class BaseEffectGroup : EffectPart
     [SerializeField] protected int _countPerSecond = 20;
     [SerializeField] protected int _maxCount = 20;
     [SerializeField] protected float _duration = 1f;
-
+    [SerializeField] protected bool useFixedLifetime = false;
+    [SerializeField] protected float minLifeTime = 0;
     protected bool _stopped = true;
     protected float _lastEnable;
     protected float _lastLoop;
@@ -17,7 +18,7 @@ public abstract class BaseEffectGroup : EffectPart
 
     public virtual void ResetTimer(float duration, Transform followTarget = null)
     {
-        _duration = duration;
+        //_duration = duration;
         _followTarget = followTarget;
         _lastEnable = Now();
         _lastLoop = 0;
@@ -70,7 +71,7 @@ public abstract class BaseEffectGroup : EffectPart
 
         float seed = UnityEngine.Random.Range(-100f, 100f);
 
-        // Просто вызываем метод обертки
+        Debug.Log($"ActivateParticle: {_particleIndex}");
         _effectInstances[_particleIndex].Activate(now, seed , ApplyShaderParams);
 
         _particleIndex++;
@@ -93,6 +94,6 @@ public abstract class BaseEffectGroup : EffectPart
     {
         _settings = settings;
         _castData = castData;
-        if (settings != null) _duration = settings.defaultLifeTime;
+        //if (settings != null) _duration = settings.defaultLifeTime;
     }
 }
