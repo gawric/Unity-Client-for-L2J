@@ -21,18 +21,28 @@ public class EffectManager : MonoBehaviour
 
         BaseEffect instance = Instantiate(data.prefab, target.position, target.rotation, target);
 
+        instance.gameObject.SetActive(true);
+        instance.Setup(data.settings, castData, target);
+        instance.Play();
+    }
+    public void PlayerImpactEffect(int id, Vector3 point, MagicCastData castData = null)
+    {
+        var data = database.effects.Find(e => e.id == id);
 
-        instance.transform.localPosition = Vector3.zero;
-        instance.transform.localRotation = Quaternion.identity;
-        instance.transform.localScale = new Vector3(0.013f, 0.013f, 0.013f);
+        if (data == null || data.prefab == null || _activeEffectsContainer == null)
+        {
+            Debug.LogWarning($"EffectManager: PlayEffect data == null || data.prefab == null || _activeEffectsContainer == null");
+            return;
+        }
 
+        GameObject dummy = new GameObject("HitPointProxy");
+        dummy.transform.position = point;
+
+        BaseEffect instance = Instantiate(data.prefab, point, Quaternion.identity, dummy.transform);
 
         instance.gameObject.SetActive(true);
-
-
-        instance.Setup(data.settings, castData, target);
-
-
+        instance.Setup(data.settings, castData, dummy.transform);
         instance.Play();
+
     }
 }

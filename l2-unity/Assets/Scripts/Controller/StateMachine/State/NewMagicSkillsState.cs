@@ -26,7 +26,7 @@ public class NewMagicSkillsState  : AbstractAttackEvents
                 AnimationCombo readyCombo = SkillgrpTable.Instance.GetAnimComboBySkillId(useSkill.SkillId, useSkill.SkillLvl);
                 float[] durations = AnimationManager.Instance.GetOverrideClipsDurations(objectId, readyCombo.GetAnimCycle());
                 float shotEventTime = AnimationManager.Instance.GetOverrideEventTimeByName(objectId, readyCombo.GetAnimCycle(), "OnAnimationShoot");
-                entity.StupTotalCastDuration(useSkill.HitTime, 1000f, durations, shotEventTime);
+                entity.SetupTotalCastDuration(useSkill.HitTime, 1000f, durations, shotEventTime);
                 
                 SkillExecutor.Instance.ExecuteSkillOverride(useSkill.SkillGrp , entity, readyCombo, _events);
                 break;

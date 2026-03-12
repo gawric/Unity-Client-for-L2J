@@ -60,6 +60,10 @@ public abstract class EffectPart : MonoBehaviour
     }
 
 
+    public virtual Vector3 SurfaceNormal { get; set; }
+    public virtual Transform FollowTarget { get; set; }
+    public virtual Transform OwnerTarget { get; set; }
+
     public abstract void Setup(EffectSettings settings , MagicCastData castData);
     public abstract void PlayPart();
     public abstract void StopPart();

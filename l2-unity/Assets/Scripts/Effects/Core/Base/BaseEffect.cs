@@ -25,7 +25,15 @@ public abstract class BaseEffect : MonoBehaviour
         float fadeOutTime = Mathf.Max(0, settings.defaultLifeTime - settings.hideTime);
 
         Invoke(nameof(BeginFadeOut), fadeOutTime);
+        
+        // Удаляем сам эффект через заданное время
         Destroy(gameObject, settings.defaultLifeTime);
+        
+        // Проверяем, есть ли родитель с именем HitPointProxy и удаляем его тоже
+        if (transform.parent != null && transform.parent.name == "HitPointProxy")
+        {
+            Destroy(transform.parent.gameObject, settings.defaultLifeTime);
+        }
     }
 
     protected void BeginFadeOut()

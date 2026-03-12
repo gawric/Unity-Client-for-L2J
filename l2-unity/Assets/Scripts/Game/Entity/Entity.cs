@@ -486,7 +486,7 @@ public class Entity : MonoBehaviour {
         return _status.GetRemainingHp();
     }
 
-    public void StupTotalCastDuration(float serverHitTimeMs, float flightTimeMs, float[] clipsDurations,float shotEventTime)
+    public void SetupTotalCastDuration(float serverHitTimeMs, float flightTimeMs, float[] clipsDurations,float shotEventTime)
     {
         if (_castData == null) _castData = new MagicCastData();
 

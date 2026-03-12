@@ -5,7 +5,7 @@ public class L2Particle : BaseEffect
 
     [SerializeField] private Vector3 _surfaceNormal;
     [SerializeField] private PooledEffect _pooledEffect;
-    [SerializeField] private ParticleGroup[] _particleGroups;
+    [SerializeField] private EffectPart[] _particleGroups;
     private EffectSettings _settings;
     private MagicCastData _castData;
     public PooledEffect PooledEffect { get { return _pooledEffect; } }
@@ -51,33 +51,30 @@ public class L2Particle : BaseEffect
     {
         if (_particleGroups == null || _particleGroups.Length == 0)
         {
-            _particleGroups = GetComponentsInChildren<ParticleGroup>();
+            _particleGroups = GetComponentsInChildren<EffectPart>();
         }
 
         for (int i = 0; i < _particleGroups.Length; i++)
         {
             if (_owner != null)
             {
-                _particleGroups[i].OwnerPosition = _owner.position;
+                _particleGroups[i].OwnerTarget = _owner;
             }
 
-            if(_settings != null)
+            if(_settings == null)
             {
-                _particleGroups[i].ResetTimer(
-                     0.5f,
-                                    _owner,
-                     _settings.isFollowCaster ? _owner : null
-                );
+                Debug.Log("L2Particle>ResetTimer _settings is null");
+                return ;
+            }
+            
+            _particleGroups[i].FollowTarget = _settings.isFollowCaster ? _owner : null;
 
-                if (!_settings.isFollowCaster)
-                {
-                    _particleGroups[i].SurfaceNormal = _surfaceNormal;
-                }
-            }
-            else
+            if (!_settings.isFollowCaster)
             {
-                _particleGroups[i].ResetTimer(1f, null);
+                _particleGroups[i].SurfaceNormal = _surfaceNormal;
             }
+
+            _particleGroups[i].PlayPart();
         }
     }
 

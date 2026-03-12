@@ -44,8 +44,7 @@ public class HitManager : MonoBehaviour
 
     public void HandleHitCollider(Transform attacker , MonsterStateMachine targetStateMachine, Vector3 hitCollider, Vector3 hitColliderDirection)
     {
-        
-
+    
         if(targetStateMachine != null)
         {
             if (targetStateMachine != null & targetStateMachine.State == MonsterState.IDLE)
@@ -53,7 +52,8 @@ public class HitManager : MonoBehaviour
                 targetStateMachine.NotifyEvent(Event.HIT_REACTION);
             }
 
-            WorldCombat.Instance.InflictAttack(hitCollider, hitColliderDirection);
+            //WorldCombat.Instance.InflictAttack(hitCollider, hitColliderDirection);
+            EffectManager.Instance.PlayerImpactEffect(99998, hitCollider);
         }
 
     }

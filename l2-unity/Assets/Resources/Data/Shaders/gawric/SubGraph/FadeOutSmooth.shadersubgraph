@@ -12,7 +12,11 @@
     ],
     "m_Keywords": [],
     "m_Dropdowns": [],
-    "m_CategoryData": [],
+    "m_CategoryData": [
+        {
+            "m_Id": "e2343730bcb84c879df4063d0b2d98a4"
+        }
+    ],
     "m_Nodes": [
         {
             "m_Id": "1ee511604c9e4e48918ab9d7f6cc8c21"
@@ -1111,8 +1115,8 @@
     "m_ObjectId": "aa55cb6ce4444890aef2504ecdd3ffa6",
     "m_Title": "Плавное исчезновение обьекта",
     "m_Position": {
-        "x": 76.99980926513672,
-        "y": -1098.0
+        "x": -677.0000610351563,
+        "y": -473.0000305175781
     }
 }
 
@@ -1563,6 +1567,21 @@
         "z": 0.0,
         "w": 0.0
     }
+}
+
+{
+    "m_SGVersion": 0,
+    "m_Type": "UnityEditor.ShaderGraph.CategoryData",
+    "m_ObjectId": "e2343730bcb84c879df4063d0b2d98a4",
+    "m_Name": "",
+    "m_ChildObjectList": [
+        {
+            "m_Id": "f3cf68acc34d4ba3a4b849adf9679384"
+        },
+        {
+            "m_Id": "662924422c72409080b916a12e64d42e"
+        }
+    ]
 }
 
 {

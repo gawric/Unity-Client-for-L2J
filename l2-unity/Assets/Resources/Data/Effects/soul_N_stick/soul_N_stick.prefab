@@ -612,9 +612,9 @@ MonoBehaviour:
   - component: {fileID: 5073117067996754218}
   _countPerSecond: 1000
   _maxCount: 1
-  _duration: 1
+  _duration: 0.7
   useFixedLifetime: 0
-  minLifeTime: 0
+  minLifeTime: 0.8
 --- !u!1 &3503987303337432418
 GameObject:
   m_ObjectHideFlags: 0
@@ -778,6 +778,7 @@ MonoBehaviour:
   - {fileID: 562392202250582017}
   - {fileID: 2884654235230686938}
   - {fileID: 2462637293784526818}
+  _baseScale: 0.012
 --- !u!1 &3573775833034083336
 GameObject:
   m_ObjectHideFlags: 0
@@ -1068,9 +1069,9 @@ MonoBehaviour:
   - component: {fileID: 3910204057054228491}
   _countPerSecond: 400
   _maxCount: 12
-  _duration: 1
+  _duration: 0.6
   useFixedLifetime: 0
-  minLifeTime: 0
+  minLifeTime: 0.4
 --- !u!1 &5741550227584836121
 GameObject:
   m_ObjectHideFlags: 0
@@ -1761,7 +1762,7 @@ MonoBehaviour:
   _countPerSecond: 10000
   _maxCount: 5
   _duration: 1
-  useFixedLifetime: 0
+  useFixedLifetime: 1
   minLifeTime: 0
 --- !u!1 &7318513629380064613
 GameObject:
@@ -2141,7 +2142,7 @@ MonoBehaviour:
   _countPerSecond: 1000
   _maxCount: 1
   _duration: 1
-  useFixedLifetime: 0
+  useFixedLifetime: 1
   minLifeTime: 0
 --- !u!1001 &4133180192227506626
 PrefabInstance:
