@@ -25,6 +25,7 @@ public class EffectManager : MonoBehaviour
         instance.Setup(data.settings, castData, target);
         instance.Play();
     }
+
     public void PlayerImpactEffect(int id, Vector3 point, MagicCastData castData = null)
     {
         var data = database.effects.Find(e => e.id == id);

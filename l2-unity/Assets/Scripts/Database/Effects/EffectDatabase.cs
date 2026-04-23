@@ -17,12 +17,17 @@ public class EffectDatabase : ScriptableObject
         public BaseEffect prefab;
         public string comment = "";
         public EffectSettings settings;
-
     }
 
     public BaseEffect GetPrefab(int id)
     {
         var data = effects.Find(e => e.id == id);
         return data != null ? data.prefab : null;
+    }
+
+    public bool TryGetEffectData(int id, out EffectData data)
+    {
+        data = effects.Find(e => e.id == id);
+        return data != null && data.prefab != null;
     }
 }

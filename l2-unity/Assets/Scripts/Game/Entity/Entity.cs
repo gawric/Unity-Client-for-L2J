@@ -34,6 +34,7 @@ public class Entity : MonoBehaviour {
     protected NetworkTransformReceive _networkTransformReceive;
     protected NetworkCharacterControllerReceive _networkCharacterControllerReceive;
     protected Gear _gear;
+    public Gear Gear => _gear;
     public bool Running { get { return _running; } set { _running = value; } }
     
     public float GetWeaponRage() { return _gear.GetWeaponRange(); }

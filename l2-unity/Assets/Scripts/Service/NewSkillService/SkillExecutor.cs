@@ -43,12 +43,10 @@ public class SkillExecutor : MonoBehaviour
 
     public async Task ExecuteSkillOverride(Skillgrp skill , Entity entity, AnimationCombo animationCombo, AnimationEventsBase actions)
     {
-        //EffectManager.Instance.PlayEffect((int)SpecialSkillType.LevelUp, entity.transform);
-
         if (entity == null || animationCombo == null) return;
         int objectId = entity.IdentityInterlude.Id;
 
-        EffectManager.Instance.PlayEffect(skill.Id, entity.transform , entity.GetMagicCastData());
+        EffectManager.Instance.PlayEffect(skill.Id, entity.transform, entity.GetMagicCastData());
         //_emitter.SetupActions(actions);
 
         string[] cycle = animationCombo.GetAnimCycle();

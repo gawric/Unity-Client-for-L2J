@@ -51,7 +51,7 @@ public class ParticleGroup : EffectPart
                     anyActive = true;
                     if (now - _particleSpawnTimes[i] >= _duration)
                     {
-                        Debug.Log($"<color=orange>[Particle DIE]</color> {gameObject.name} слот [{i}] выключен.");
+                        //Debug.Log($"<color=orange>[Particle DIE]</color> {gameObject.name} слот [{i}] выключен.");
                         _particles[i].gameObject.SetActive(false);
                         _isParticleActive[i] = false;
                     }
@@ -65,7 +65,7 @@ public class ParticleGroup : EffectPart
             if (_isBurstSpawning)
             {
                 // Если это Burst - выстреливаем всё сразу ОДИН РАЗ после задержки
-                Debug.Log($"<color=yellow>[Burst SPAWN]</color> {gameObject.name}: Мгновенный запуск {_maxCount} частиц через {_startDelay}с.");
+                //Debug.Log($"<color=yellow>[Burst SPAWN]</color> {gameObject.name}: Мгновенный запуск {_maxCount} частиц через {_startDelay}с.");
                 for (int i = 0; i < _maxCount; i++)
                 {
                     ActivateParticle(now);
@@ -87,7 +87,7 @@ public class ParticleGroup : EffectPart
         else if (!anyActive)
         {
             _stopped = true;
-            Debug.Log($"<color=red>[Effect STOP]</color> {gameObject.name} полностью завершен.");
+            //Debug.Log($"<color=red>[Effect STOP]</color> {gameObject.name} полностью завершен.");
         }
     }
 
@@ -111,12 +111,12 @@ public class ParticleGroup : EffectPart
         // Эмуляция прогрева (Warmup)
         float shaderStartTime = now - _relativeWarmupTime;
 
-        Debug.Log($"<color=green>[Particle SPAWN]</color> {gameObject.name} слот [{_particleIndex}] в {now:F3}с.");
+        //Debug.Log($"<color=green>[Particle SPAWN]</color> {gameObject.name} слот [{_particleIndex}] в {now:F3}с.");
 
         float seed = Random.Range(-100f, 100f);
         foreach (Material m in _particles[_particleIndex].materials)
         {
-            Debug.Log("Set Start Time " + shaderStartTime + " Seed " + seed + "name " + m.name);
+           // Debug.Log("Set Start Time " + shaderStartTime + " Seed " + seed + "name " + m.name);
             m.SetFloat("_StartTime", shaderStartTime);
             m.SetFloat("_Seed", seed);
             if (SurfaceNormal != Vector3.zero)
@@ -147,7 +147,7 @@ public class ParticleGroup : EffectPart
         for (int i = 0; i < _particles.Length; i++)
             if (_particles[i] != null) _particles[i].gameObject.SetActive(false);
 
-        Debug.Log($"<color=cyan>[Effect START]</color> {gameObject.name}. Ожидание старта: {_startDelay}с.");
+        //Debug.Log($"<color=cyan>[Effect START]</color> {gameObject.name}. Ожидание старта: {_startDelay}с.");
     }
 
     private float GetLifeTimeFromMaterial()

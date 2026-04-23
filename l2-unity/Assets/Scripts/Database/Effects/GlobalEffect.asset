@@ -13,23 +13,33 @@ MonoBehaviour:
   m_Name: GlobalEffect
   m_EditorClassIdentifier: 
   effects:
-  - id: 1177
+  - id: -1
     prefab: {fileID: 6218837199439611435, guid: 87a0d43ba0915b447a8370030fc8eedc, type: 3}
-    comment: WndStrike
+    comment: WndStrike(OldVersion_Disabled)
     settings: {fileID: 11400000, guid: c02f996917eecba46986a49309d210d1, type: 2}
+    is_composite: 0
   - id: 99999
     prefab: {fileID: 8500736706040560274, guid: 60f4bfabf7d4afa40887a508ef09dcb7, type: 3}
     comment: LevelUp
     settings: {fileID: 11400000, guid: 19c27f6b5bdc15f438b14170676fbf4b, type: 2}
+    is_composite: 0
   - id: 2039
     prefab: {fileID: -3189580720888355194, guid: 774acae02234dc14d94f0308a71c24e9, type: 3}
     comment: soulshot-ng
     settings: {fileID: 11400000, guid: 525f3348611dff143bfa0da70228506f, type: 2}
+    is_composite: 0
   - id: 2061
     prefab: {fileID: 4380878508081750752, guid: 4ccf38bff8b76e94a968cc862bebb021, type: 3}
     comment: spiritshot-ng
     settings: {fileID: 11400000, guid: 1ffc492d749ea054f9c03ebb11d95032, type: 2}
+    is_composite: 0
   - id: 99998
     prefab: {fileID: 143770393737063303, guid: 05e266bb1af97c64db23e079e5cba7ed, type: 3}
     comment: soulshot-fog
     settings: {fileID: 11400000, guid: 1ffc492d749ea054f9c03ebb11d95032, type: 2}
+    is_composite: 0
+  - id: 1177
+    prefab: {fileID: 7332513459391841777, guid: 7e4bddd3c30f0504c91b922211faa2fe, type: 3}
+    comment: wind-strike-composite-effect
+    settings: {fileID: 11400000, guid: c02f996917eecba46986a49309d210d1, type: 2}
+    is_composite: 1

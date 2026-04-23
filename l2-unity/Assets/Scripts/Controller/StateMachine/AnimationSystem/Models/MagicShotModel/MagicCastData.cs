@@ -18,6 +18,12 @@ public class MagicCastData
         HitTime = serverHitMs / 1000f;
         FlightTime = flyMs / 1000f;
 
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        Debug.Log(
+            $"[MagicCastData] serverHitMs={serverHitMs:F1}ms hitTime={HitTime:F3}s " +
+            $"flyMs={flyMs:F1}ms flightTime={FlightTime:F3}s shotEventTime={shotEventTime:F3}s");
+#endif
+
         serverTimeToShoot = Mathf.Max(0.01f, HitTime - FlightTime);
 
         float durMid = clipsDurations[0];
