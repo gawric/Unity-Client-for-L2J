@@ -9,6 +9,9 @@ public class AnimationManager : BaseAnimationManager , IAnimationManager
    
     private static AnimationManager _instance;
     private const string SP_TIME_ATK = "sptimeatk";
+    private const string CAST_TRIGGER_MID = "CastMid";
+    private const string CAST_TRIGGER_END = "CastEnd";
+    private const string CAST_TRIGGER_SHOT = "MagicShot";
     public static IAnimationManager Instance
     {
         get
@@ -128,9 +131,25 @@ public class AnimationManager : BaseAnimationManager , IAnimationManager
 
         Entity entity = GetEntity(objectId);
         DesableLastPlayerAnimationElseTrue(objectId , controller);
+
+        if (IsMagicCastTrigger(animationName))
+        {
+            // Prevent stale cast triggers from keeping previous cast states alive.
+            controller.ResetAnimationTrigger(CAST_TRIGGER_MID);
+            controller.ResetAnimationTrigger(CAST_TRIGGER_END);
+            controller.ResetAnimationTrigger(CAST_TRIGGER_SHOT);
+        }
+
         controller.ToggleAnimationTrigger(animationName);
 
         Debug.Log($"AnimationManager> start Async AnimationTrigger(  {entity} animation  {animationName}");
+    }
+
+    private static bool IsMagicCastTrigger(string animationName)
+    {
+        return animationName == CAST_TRIGGER_MID ||
+               animationName == CAST_TRIGGER_END ||
+               animationName == CAST_TRIGGER_SHOT;
     }
 
 

@@ -76,7 +76,8 @@ public class L2WeaponChargeGroup : BaseEffectGroup, IWeaponEffect
             if (useFixedLifetime)
             {
                 Debug.Log($"_swordTip размер меча fx1: {_duration}");
-                vfx.SetFloat("LifetimeRange", _duration);
+                TrySetVfxFloat(vfx, "LifetimeRange", _duration);
+                TrySetVfxFloat(vfx, "_LifetimeRange", _duration);
                 vfx.Play();
             }
             else
@@ -98,12 +99,26 @@ public class L2WeaponChargeGroup : BaseEffectGroup, IWeaponEffect
                  //   vfx.SetFloat("TurnsPerSecond", turnsPerSecond);
                 //}
                 
-                vfx.SetFloat("ForwardOffset", forwardOffset);
-                vfx.SetFloat("LifetimeRange", adjustedLife);
+                TrySetVfxFloat(vfx, "ForwardOffset", forwardOffset);
+                TrySetVfxFloat(vfx, "LifetimeRange", adjustedLife);
+                TrySetVfxFloat(vfx, "_LifetimeRange", adjustedLife);
                 Debug.Log($"_swordTip размер меча fx2: {adjustedLife} , {forwardOffset}");
                 vfx.Play();
             }
  
+        }
+    }
+
+    private void TrySetVfxFloat(VisualEffect vfx, string propertyName, float value)
+    {
+        if (vfx == null || string.IsNullOrEmpty(propertyName))
+        {
+            return;
+        }
+
+        if (vfx.HasFloat(propertyName))
+        {
+            vfx.SetFloat(propertyName, value);
         }
     }
 

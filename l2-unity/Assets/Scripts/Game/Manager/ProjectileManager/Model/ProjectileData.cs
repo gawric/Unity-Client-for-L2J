@@ -1,5 +1,12 @@
 ﻿using UnityEngine;
 
+public enum ProjectileImpactType
+{
+    ArrowStick = 0,
+    EffectOnly = 1
+}
+
+[System.Serializable]
 public class ProjectileData
 {
     public ProjectileData()
@@ -20,6 +27,7 @@ public class ProjectileData
         useGravity = false;
         gravityScale = 1f;
         isActive = true;
+        impactType = ProjectileImpactType.ArrowStick;
     }
 
     public ProjectileData(GameObject prefabGo , Transform transform1 , Vector3 startPos , Transform endPos)
@@ -39,6 +47,7 @@ public class ProjectileData
         useGravity = false;
         gravityScale = 1f;
         isActive = true;
+        impactType = ProjectileImpactType.ArrowStick;
     }
 
     public ProjectileData(ProjectileData other)
@@ -60,6 +69,7 @@ public class ProjectileData
             gravityScale = other.gravityScale;
             flytime = other.flytime;
             isActive = other.isActive;
+            impactType = other.impactType;
         }
 
     }
@@ -97,4 +107,10 @@ public class ProjectileData
     public Vector3 hitNormalCollider;
     public Vector3 hitDirection;
     public BoxCollider arrowCollider;
+    public ProjectileImpactType impactType;
+    public Vector3 lastPosition;
+    public float castStartTimeSnapshot;
+    public float castServerShootSnapshot;
+    public float castServerHitSnapshot;
+    public float projectileLaunchGlobalFromCast;
 }

@@ -52,6 +52,14 @@ public class MagicCastData
             float globalSpeed = totalWork / serverTimeToShoot;
             SpeedMid = SpeedEnd = SpeedShot = globalSpeed;
         }
+
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        Debug.Log(
+            $"[CastTimingSetup] hit={HitTime:F3}s flight={FlightTime:F3}s shootTarget={serverTimeToShoot:F3}s " +
+            $"durMid={durMid:F3}s durEnd={durEnd:F3}s durShotToEvent={durShotToEvent:F3}s shotEventRaw={this.shotEventTime:F3}s " +
+            $"fixedWork={fixedWorkTime:F3}s timeLeftForEnd={timeLeftForEnd:F3}s " +
+            $"speedMid={SpeedMid:F3} speedEnd={SpeedEnd:F3} speedShot={SpeedShot:F3}");
+#endif
     }
 
     public float GetShotTimeNormalize()

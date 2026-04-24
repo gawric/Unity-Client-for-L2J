@@ -143,6 +143,11 @@ public class BaseAnimationController : AnimationEventsBase, IAnimationController
         _animator.SetTrigger(name);
     }
 
+    public void ResetAnimationTrigger(string name)
+    {
+        _animator.ResetTrigger(name);
+    }
+
     public void ToggleAnimationCrossFade(string name , float duration)
     {
         IfSpecialAnimationsCreateProcessQueue(name, ref _isProcessingQueue, _priorityAnimations, true);

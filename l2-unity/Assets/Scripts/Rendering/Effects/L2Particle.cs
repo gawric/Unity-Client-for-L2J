@@ -56,6 +56,8 @@ public class L2Particle : BaseEffect
 
         for (int i = 0; i < _particleGroups.Length; i++)
         {
+            _particleGroups[i].Setup(_settings, _castData);
+
             if (_owner != null)
             {
                 _particleGroups[i].OwnerTarget = _owner;

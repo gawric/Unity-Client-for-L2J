@@ -8,6 +8,7 @@ public interface IAnimationController
     public string GetAnimatorName();
     public void SetInt(string name, int value);
     public void ToggleAnimationTrigger(string name);
+    public void ResetAnimationTrigger(string name);
     public void ToggleAnimationCrossFade(string name, float duration = 0.3f);
 
     public float GetEventTimeByName(AnimationClip clip, string eventName);

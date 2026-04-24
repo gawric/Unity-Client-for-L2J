@@ -28,6 +28,7 @@ public class SkillAnimationRunner
 
     public async Task StartRunOverride(string[] cycle, int objectId, IAnimationManager animationManager, Action onComplete = null)
     {
+        float chainStartTime = Time.time;
         for (int i=0; i < cycle.Length; i++)
         {
             string animName = cycle[i];
@@ -37,12 +38,18 @@ public class SkillAnimationRunner
                 string triggerName = GetTriggerName(i);
                 string overrideAnimName = cycle[i];
 
-                Debug.Log("SkillAnimationRunner>StartRunOverride: animName " + animName + " overrideAnimName " + overrideAnimName);
+                Debug.Log(
+                    $"[SkillRunOverride] BEFORE await idx={i} trigger='{triggerName}' override='{overrideAnimName}' " +
+                    $"sinceChainStart={Time.time - chainStartTime:F3}s objectId={objectId}");
                 await animationManager.AsyncPlayAnimationRaceOverrides(objectId, triggerName  , overrideAnimName);
+                Debug.Log(
+                    $"[SkillRunOverride] AFTER await idx={i} trigger='{triggerName}' override='{overrideAnimName}' " +
+                    $"sinceChainStart={Time.time - chainStartTime:F3}s objectId={objectId}");
             }
 
         }
 
+        Debug.Log($"[SkillRunOverride] COMPLETE sinceChainStart={Time.time - chainStartTime:F3}s objectId={objectId}");
         onComplete?.Invoke();
     }
 

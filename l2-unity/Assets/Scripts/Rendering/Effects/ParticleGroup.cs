@@ -21,14 +21,20 @@ public class ParticleGroup : EffectPart
     [SerializeField] private bool _instantKillAtCastEnd;
     [SerializeField] private bool _fitToBounds;
 
-    private bool _stopped;
+    // Prevent auto-running in scene before explicit PlayPart/Setup.
+    private bool _stopped = true;
     private float _lastEnable;
     private float _lastLoop;
     private int _particleIndex = 0;
     private int _spawnedCount = 0;
+    private float _debugPlayStartedAt;
 
     private float[] _particleSpawnTimes;
     private bool[] _isParticleActive;
+    private float _baseShaderLifetime = -1f;
+    private bool _runtimeContinuousLoop;
+    private bool _hasRuntimeContinuousLoopOverride;
+    private bool _runtimeContinuousLoopOverrideValue;
 
     public void FixedUpdate()
     {
@@ -60,9 +66,10 @@ public class ParticleGroup : EffectPart
         }
 
         // 3. ЛОГИКА СПАВНА
-        if (_spawnedCount < _maxCount || _forceContinuousSpawning)
+        bool shouldLoopContinuously = _forceContinuousSpawning || _runtimeContinuousLoop;
+        if (_spawnedCount < _maxCount || shouldLoopContinuously)
         {
-            if (_isBurstSpawning)
+            if (_isBurstSpawning && !shouldLoopContinuously)
             {
                 // Если это Burst - выстреливаем всё сразу ОДИН РАЗ после задержки
                 //Debug.Log($"<color=yellow>[Burst SPAWN]</color> {gameObject.name}: Мгновенный запуск {_maxCount} частиц через {_startDelay}с.");
@@ -87,7 +94,15 @@ public class ParticleGroup : EffectPart
         else if (!anyActive)
         {
             _stopped = true;
-            //Debug.Log($"<color=red>[Effect STOP]</color> {gameObject.name} полностью завершен.");
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            float elapsed = now - _debugPlayStartedAt;
+            Debug.Log(
+                $"[ParticleGroupStop] group='{name}' elapsed={elapsed:F3}s duration={_duration:F3}s " +
+                $"spawned={_spawnedCount}/{_maxCount} forceContinuous={_forceContinuousSpawning} " +
+                $"burst={_isBurstSpawning} castHit={(_castData != null ? _castData.HitTime : -1f):F3}s " +
+                $"settingsLife={(_settings != null ? _settings.defaultLifeTime : -1f):F3}s " +
+                $"effectRoot='{(_owner != null ? _owner.name : "null")}' settings='{(_settings != null ? _settings.name : "null")}'.");
+#endif
         }
     }
 
@@ -114,13 +129,33 @@ public class ParticleGroup : EffectPart
         //Debug.Log($"<color=green>[Particle SPAWN]</color> {gameObject.name} слот [{_particleIndex}] в {now:F3}с.");
 
         float seed = Random.Range(-100f, 100f);
-        foreach (Material m in _particles[_particleIndex].materials)
+        Material[] runtimeMaterials = _particles[_particleIndex].materials;
+        Material[] sharedMaterials = _particles[_particleIndex].sharedMaterials;
+        for (int materialIndex = 0; materialIndex < runtimeMaterials.Length; materialIndex++)
         {
-           // Debug.Log("Set Start Time " + shaderStartTime + " Seed " + seed + "name " + m.name);
+            Material m = runtimeMaterials[materialIndex];
+            if (m == null)
+            {
+                continue;
+            }
+
+            // Keep alpha exactly as configured in shared material.
+            if (m.HasProperty("_Alpha") && sharedMaterials != null && materialIndex < sharedMaterials.Length)
+            {
+                Material shared = sharedMaterials[materialIndex];
+                if (shared != null && shared.HasProperty("_Alpha"))
+                {
+                    m.SetFloat("_Alpha", shared.GetFloat("_Alpha"));
+                }
+            }
+
+            // Debug.Log("Set Start Time " + shaderStartTime + " Seed " + seed + "name " + m.name);
             m.SetFloat("_StartTime", shaderStartTime);
             m.SetFloat("_Seed", seed);
             if (SurfaceNormal != Vector3.zero)
+            {
                 m.SetVector("_SurfaceNormals", SurfaceNormal);
+            }
         }
 
         _particleIndex++;
@@ -135,6 +170,7 @@ public class ParticleGroup : EffectPart
         _particleIndex = 0;
         _spawnedCount = 0;
         _stopped = false;
+        _debugPlayStartedAt = _lastEnable;
 
         if (_duration < 0.01f) _duration = GetLifeTimeFromMaterial();
 
@@ -143,6 +179,12 @@ public class ParticleGroup : EffectPart
 
         _particleSpawnTimes = new float[_particles.Length];
         _isParticleActive = new bool[_particles.Length];
+        _baseShaderLifetime = Mathf.Max(0.01f, GetLifeTimeFromMaterial());
+        _runtimeContinuousLoop = !_hasFixedDuration && _duration > _baseShaderLifetime + 0.05f;
+        if (_hasRuntimeContinuousLoopOverride)
+        {
+            _runtimeContinuousLoop = _runtimeContinuousLoopOverrideValue;
+        }
 
         for (int i = 0; i < _particles.Length; i++)
             if (_particles[i] != null) _particles[i].gameObject.SetActive(false);
@@ -162,6 +204,12 @@ public class ParticleGroup : EffectPart
 
     private float Now() => Application.isPlaying ? Time.time : Time.realtimeSinceStartup;
 
+    public void SetRuntimeContinuousLoopOverride(bool hasOverride, bool value)
+    {
+        _hasRuntimeContinuousLoopOverride = hasOverride;
+        _runtimeContinuousLoopOverrideValue = value;
+    }
+
     public void FitToOwnerWidth(Transform target)
     {
         if (target == null) return;
@@ -171,6 +219,53 @@ public class ParticleGroup : EffectPart
         transform.localScale = new Vector3(targetWidth * 4f, 1f, targetWidth * 4f);
     }
 
-    public override void Setup(EffectSettings s, MagicCastData c) { }
-    public override void StopPart() { _stopped = true; }
+    public override void Setup(EffectSettings s, MagicCastData c)
+    {
+        _settings = s;
+        _castData = c;
+        float durationBefore = _duration;
+
+        // For non-fixed groups keep emitter alive up to the largest runtime target:
+        // - cast hit timing
+        // - runtime settings lifetime (may include additional tail)
+        if (!_hasFixedDuration)
+        {
+            float castHitDuration = (_castData != null && _castData.HitTime > 0f) ? _castData.HitTime : 0f;
+            float settingsDuration = (_settings != null && _settings.defaultLifeTime > 0f) ? _settings.defaultLifeTime : 0f;
+            float legacyHitDuration = 0f;
+            if (castHitDuration <= 0f && settingsDuration <= 0f && EffectSkillsmanager.Instance != null)
+            {
+                float legacyHitTimeMs = EffectSkillsmanager.Instance.HitTime();
+                if (legacyHitTimeMs > 0f)
+                {
+                    legacyHitDuration = legacyHitTimeMs / 1000f;
+                }
+            }
+
+            _duration = Mathf.Max(_duration, castHitDuration, settingsDuration, legacyHitDuration);
+        }
+
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        Debug.Log(
+            $"[ParticleGroupSetup] group='{name}' fixedDuration={_hasFixedDuration} " +
+            $"durationBefore={durationBefore:F3}s durationAfter={_duration:F3}s " +
+            $"settingsLife={(_settings != null ? _settings.defaultLifeTime : -1f):F3}s " +
+            $"castHit={(_castData != null ? _castData.HitTime : -1f):F3}s castFlight={(_castData != null ? _castData.FlightTime : -1f):F3}s " +
+            $"legacyHit={((EffectSkillsmanager.Instance != null) ? EffectSkillsmanager.Instance.HitTime() / 1000f : -1f):F3}s " +
+            $"baseShaderLife={_baseShaderLifetime:F3}s runtimeLoop={_runtimeContinuousLoop} " +
+            $"loopOverride={_hasRuntimeContinuousLoopOverride}:{_runtimeContinuousLoopOverrideValue}");
+#endif
+    }
+    public override void StopPart()
+    {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        float now = Now();
+        float elapsed = _debugPlayStartedAt > 0f ? now - _debugPlayStartedAt : -1f;
+        Debug.Log(
+            $"[ParticleGroupStopPart] group='{name}' elapsed={elapsed:F3}s duration={_duration:F3}s " +
+            $"castHit={(_castData != null ? _castData.HitTime : -1f):F3}s settingsLife={(_settings != null ? _settings.defaultLifeTime : -1f):F3}s " +
+            $"effectRoot='{(_owner != null ? _owner.name : "null")}' settings='{(_settings != null ? _settings.name : "null")}'.");
+#endif
+        _stopped = true;
+    }
 }

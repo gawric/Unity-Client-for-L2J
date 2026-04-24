@@ -2,24 +2,23 @@ using UnityEngine;
 
 public static class CompositeEffectUtilities
 {
-    public static float ResolveSpawnDelay(CompositePartSpawnTiming timing, float manualDelaySeconds, MagicCastData castData)
+    public static float ResolveSpawnDelay(CompositePartSpawnTiming timing, MagicCastData castData)
     {
-        float baseDelay = Mathf.Max(0f, manualDelaySeconds);
         if (castData == null)
         {
-            return baseDelay;
+            return 0f;
         }
 
         switch (timing)
         {
             case CompositePartSpawnTiming.OnServerShootTime:
-                return Mathf.Max(baseDelay, Mathf.Max(0f, castData.serverTimeToShoot));
+                return Mathf.Max(0f, castData.serverTimeToShoot);
             case CompositePartSpawnTiming.OnFlightTimeElapsed:
-                return Mathf.Max(baseDelay, Mathf.Max(0f, castData.FlightTime));
+                return Mathf.Max(0f, castData.FlightTime);
             case CompositePartSpawnTiming.OnHitTime:
-                return Mathf.Max(baseDelay, Mathf.Max(0f, castData.HitTime));
+                return Mathf.Max(0f, castData.HitTime);
             default:
-                return baseDelay;
+                return 0f;
         }
     }
 

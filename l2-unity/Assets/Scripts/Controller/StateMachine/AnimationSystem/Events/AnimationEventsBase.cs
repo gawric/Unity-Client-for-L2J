@@ -5,6 +5,8 @@ using UnityEngine;
 
 public abstract class AnimationEventsBase : MonoBehaviour
 {
+    public static event Action<int, AnimationEventsBase, string> OnAnyAnimationShoot;
+
     public event Action<string> OnAnimationFinished;
     public event Action<string> OnAnimationStartShoot;
     public event Action<string> OnAnimationStartHit;
@@ -84,7 +86,28 @@ public abstract class AnimationEventsBase : MonoBehaviour
     }
     public void OnAnimationShoot(string animationName)
     {
+        int objectId = ResolveAnimatorObjectId();
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        Debug.Log($"[AnimationEventsBase] OnAnimationShoot animation='{animationName}' object='{name}' instanceId={GetInstanceID()} objectId={objectId}.");
+#endif
+        OnAnyAnimationShoot?.Invoke(objectId, this, animationName);
         OnAnimationStartShoot?.Invoke(animationName);
+    }
+
+    private int ResolveAnimatorObjectId()
+    {
+        Animator animator = GetComponent<Animator>();
+        if (animator == null)
+        {
+            animator = GetComponentInParent<Animator>();
+        }
+
+        if (animator != null)
+        {
+            return animator.GetInteger(AnimatorUtils.OBJECT_ID);
+        }
+
+        return 0;
     }
 
     public void OnAnimationHit(string animationName)
