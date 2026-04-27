@@ -8,10 +8,13 @@ public class AnimationManager : BaseAnimationManager , IAnimationManager
 {
    
     private static AnimationManager _instance;
+    private readonly HashSet<int> _awaitSubscribedObjectIds = new HashSet<int>();
+    private readonly Dictionary<int, string> _expectedFinishNameByObjectId = new Dictionary<int, string>();
     private const string SP_TIME_ATK = "sptimeatk";
     private const string CAST_TRIGGER_MID = "CastMid";
     private const string CAST_TRIGGER_END = "CastEnd";
     private const string CAST_TRIGGER_SHOT = "MagicShot";
+    private const string SHOT_SOURCE_RUNNER = "Runner";
     public static IAnimationManager Instance
     {
         get
@@ -54,6 +57,8 @@ public class AnimationManager : BaseAnimationManager , IAnimationManager
     //Async Wait End Event
     public async Task AsyncPlayAnimationTrigger(int objectId, string triggerName)
     {
+        float startedAt = Time.time;
+        string expectedFinishName = GetFinalNameAnim(objectId, triggerName);
 
       
         if (_tcsMap.TryGetValue(objectId, out var oldTcs))
@@ -64,19 +69,25 @@ public class AnimationManager : BaseAnimationManager , IAnimationManager
     
         var tcs = new TaskCompletionSource<bool>();
         _tcsMap[objectId] = tcs;
+        _expectedFinishNameByObjectId[objectId] = expectedFinishName;
 
         AnimationModel model = GetModel(objectId);
 
-        ReturnAwait(model);
+        EnsureAwaitSubscribed(objectId, model);
 
+        Debug.Log($"[AnimAwait] START objectId={objectId} trigger='{triggerName}' mode=default now={Time.time:F3}");
         PlayerAnimationTrigger(objectId, triggerName);
 
   
         await tcs.Task;
+        _expectedFinishNameByObjectId.Remove(objectId);
+        Debug.Log($"[AnimAwait] END objectId={objectId} trigger='{triggerName}' mode=default elapsed={Time.time - startedAt:F3}s now={Time.time:F3}");
     }
 
     public async Task AsyncPlayAnimationRaceOverrides(int objectId, string triggerName , string overrideAnimationName)
     {
+        float startedAt = Time.time;
+        string expectedFinishName = triggerName;
         if (_tcsMap.TryGetValue(objectId, out var oldTcs))
         {
             oldTcs.TrySetResult(false);
@@ -84,13 +95,14 @@ public class AnimationManager : BaseAnimationManager , IAnimationManager
 
         var tcs = new TaskCompletionSource<bool>();
         _tcsMap[objectId] = tcs;
+        _expectedFinishNameByObjectId[objectId] = expectedFinishName;
         AnimationModel model = GetModel(objectId);
         //Root Animator FDarkElf
         string animName = SkillAnimationDatabase.GetAnimationClipName(triggerName, "FDarkElf");
 
         model.GetController().ReplaceAnimClip(animName , overrideAnimationName);
 
-        ReturnAwait(model);
+        EnsureAwaitSubscribed(objectId, model);
 
 
         PlayerAnimationTrigger(objectId, triggerName , false);
@@ -98,26 +110,40 @@ public class AnimationManager : BaseAnimationManager , IAnimationManager
 
 
         await tcs.Task;
+        _expectedFinishNameByObjectId.Remove(objectId);
+        Debug.Log(
+            $"[AnimAwait] END objectId={objectId} trigger='{triggerName}' override='{overrideAnimationName}' " +
+            $"mode=override elapsed={Time.time - startedAt:F3}s now={Time.time:F3}");
     }
 
 
-    private void ReturnAwait(AnimationModel model)
+    private void EnsureAwaitSubscribed(int objectId, AnimationModel model)
     {
+        if (_awaitSubscribedObjectIds.Contains(objectId))
+        {
+            return;
+        }
+
         model.SubscribeToInternalEvents();
         model.OnAnimationFinishedWithId += OnAnimationFinished;
+        _awaitSubscribedObjectIds.Add(objectId);
     }
     public void OnAnimationFinished(string name, int objectId)
     {
+        Debug.Log($"[AnimFinishedEvent] objectId={objectId} finishedName='{name}' now={Time.time:F3}");
+
+        if (_expectedFinishNameByObjectId.TryGetValue(objectId, out string expectedName))
+        {
+            if (!string.Equals(name, expectedName, StringComparison.Ordinal))
+            {
+                Debug.Log(
+                    $"[AnimFinishedEvent] IGNORE objectId={objectId} finishedName='{name}' expected='{expectedName}' now={Time.time:F3}");
+                return;
+            }
+        }
+
         if (_tcsMap.TryGetValue(objectId, out var tcs))
         {
-
-            AnimationModel model = GetModel(objectId);
-            if (model != null)
-            {
-                model.OnAnimationFinishedWithId -= OnAnimationFinished;
-            }
-
-
             _tcsMap.Remove(objectId);
 
             tcs.TrySetResult(true);
@@ -131,6 +157,19 @@ public class AnimationManager : BaseAnimationManager , IAnimationManager
 
         Entity entity = GetEntity(objectId);
         DesableLastPlayerAnimationElseTrue(objectId , controller);
+
+        bool isMagicShotTrigger = IsMagicShotTrigger(animationName);
+        if (isMagicShotTrigger)
+        {
+            MagicCastData castData = entity != null ? entity.GetMagicCastData() : null;
+            if (!MagicShotCoordinator.TryStartShot(objectId, castData, SHOT_SOURCE_RUNNER, out string coordinatorMessage))
+            {
+                Debug.Log($"{coordinatorMessage} trigger='{animationName}' action=skip");
+                return;
+            }
+
+            Debug.Log($"{coordinatorMessage} trigger='{animationName}' action=run");
+        }
 
         if (IsMagicCastTrigger(animationName))
         {
@@ -150,6 +189,11 @@ public class AnimationManager : BaseAnimationManager , IAnimationManager
         return animationName == CAST_TRIGGER_MID ||
                animationName == CAST_TRIGGER_END ||
                animationName == CAST_TRIGGER_SHOT;
+    }
+
+    private static bool IsMagicShotTrigger(string animationName)
+    {
+        return animationName == CAST_TRIGGER_SHOT || animationName.StartsWith(CAST_TRIGGER_SHOT, StringComparison.Ordinal);
     }
 
 

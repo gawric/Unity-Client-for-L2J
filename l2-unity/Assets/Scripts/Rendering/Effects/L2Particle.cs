@@ -2,12 +2,14 @@
 
 public class L2Particle : BaseEffect
 {
+    private const string LifetimeTraceEffectName = "el_wind_strike_ta";
 
     [SerializeField] private Vector3 _surfaceNormal;
     [SerializeField] private PooledEffect _pooledEffect;
     [SerializeField] private EffectPart[] _particleGroups;
     private EffectSettings _settings;
     private MagicCastData _castData;
+    private float _playStartedAt = -1f;
     public PooledEffect PooledEffect { get { return _pooledEffect; } }
     public Vector3 SurfaceNormal { get { return _surfaceNormal; } set { _surfaceNormal = value; } }
 
@@ -33,6 +35,20 @@ public class L2Particle : BaseEffect
             //_settings.defaultLifeTime = castData.HitTime;
         }
 
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        if (ShouldTraceLifetime())
+        {
+            Debug.Log(
+                $"[TA_LIFETIME_SETUP] effect='{name}' now={Time.time:F3}s " +
+                $"settingsLife={(_settings != null ? _settings.defaultLifeTime : -1f):F3}s " +
+                $"hideTime={(_settings != null ? _settings.hideTime : -1f):F3}s " +
+                $"castStart={(_castData != null ? _castData.StartTime : -1f):F3}s " +
+                $"castHit={(_castData != null ? _castData.HitTime : -1f):F3}s " +
+                $"castFlight={(_castData != null ? _castData.FlightTime : -1f):F3}s " +
+                $"owner='{(_owner != null ? _owner.name : "null")}'.");
+        }
+#endif
+
     }
 
 
@@ -43,8 +59,18 @@ public class L2Particle : BaseEffect
 
     public override void Play()
     {
+        _playStartedAt = Time.time;
         ResetTimer();
         DestoryEffect(_settings,  _castData);
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        if (ShouldTraceLifetime())
+        {
+            Debug.Log(
+                $"[TA_LIFETIME_PLAY] effect='{name}' playAt={_playStartedAt:F3}s " +
+                $"scheduledLife={(_settings != null ? _settings.defaultLifeTime : -1f):F3}s " +
+                $"scheduledHide={(_settings != null ? _settings.hideTime : -1f):F3}s.");
+        }
+#endif
     }
 
     public void ResetTimer()
@@ -80,5 +106,25 @@ public class L2Particle : BaseEffect
         }
     }
 
+    protected override void OnDestroy()
+    {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        if (ShouldTraceLifetime())
+        {
+            float now = Time.time;
+            float elapsed = _playStartedAt > 0f ? now - _playStartedAt : -1f;
+            Debug.Log(
+                $"[TA_LIFETIME_DESTROY] effect='{name}' now={now:F3}s elapsedSincePlay={elapsed:F3}s " +
+                $"configuredLife={(_settings != null ? _settings.defaultLifeTime : -1f):F3}s " +
+                $"castHit={(_castData != null ? _castData.HitTime : -1f):F3}s.");
+        }
+#endif
+        base.OnDestroy();
+    }
+
+    private bool ShouldTraceLifetime()
+    {
+        return !string.IsNullOrEmpty(name) && name.IndexOf(LifetimeTraceEffectName, System.StringComparison.OrdinalIgnoreCase) >= 0;
+    }
 
 }

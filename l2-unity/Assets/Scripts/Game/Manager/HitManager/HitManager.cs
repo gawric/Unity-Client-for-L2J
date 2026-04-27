@@ -2,10 +2,12 @@
 using UnityEngine;
 using UnityEngine.ProBuilder;
 using static ChangeWaitTypePacket;
+using System;
 
 public class HitManager : MonoBehaviour
 {
     public static HitManager Instance { get; private set; }
+    public event Action<Transform, MonsterStateMachine, Vector3, Vector3> OnHitColliderHandled;
     private const string ETC_NAME = "etc_";
 
 
@@ -53,8 +55,11 @@ public class HitManager : MonoBehaviour
             }
 
             //WorldCombat.Instance.InflictAttack(hitCollider, hitColliderDirection);
+            //Эффект рабочий просто для теста off
             EffectManager.Instance.PlayerImpactEffect(99998, hitCollider);
         }
+
+        OnHitColliderHandled?.Invoke(attacker, targetStateMachine, hitCollider, hitColliderDirection);
 
     }
 

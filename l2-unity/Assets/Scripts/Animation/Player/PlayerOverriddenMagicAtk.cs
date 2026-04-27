@@ -6,6 +6,7 @@ public class PlayerOverriddenMagicAtk : StateMachineBehaviour
     private const string TriggerCastEnd = "CastEnd";
     private const string TriggerMagicShot = "MagicShot";
     private const float ShotBlendCompensationSeconds = 0.06f;
+    private const string ShotSourceForceSync = "ForceSync";
 
     private MagicCastData _castData;
     private bool _isSwitchIdle;
@@ -26,9 +27,12 @@ public class PlayerOverriddenMagicAtk : StateMachineBehaviour
 
         _castData = PlayerEntity.Instance.GetMagicCastData();
         float targetSpeed = 1.0f;
-        if (stateIndex == 0) targetSpeed = _castData.SpeedMid;
-        else if (stateIndex == 1) targetSpeed = _castData.SpeedEnd;
-        else if (stateIndex == 2) targetSpeed = _castData.SpeedShot;
+        if (_castData != null)
+        {
+            if (stateIndex == 0) targetSpeed = _castData.SpeedMid;
+            else if (stateIndex == 1) targetSpeed = _castData.SpeedEnd;
+            else if (stateIndex == 2) targetSpeed = _castData.SpeedShot;
+        }
 
         animator.speed = targetSpeed;
 
@@ -42,24 +46,35 @@ public class PlayerOverriddenMagicAtk : StateMachineBehaviour
         StopAnimationTrigger(animator, parameterName);
         _eventLogged = false; // Сбрасываем флаг при входе в стейт
 
+        Debug.Log(
+            $"[MAGIC_ENTER] state={parameterName} idx={stateIndex} final={isFinalShotState} " +
+            $"now={Time.time:F3} castDataNull={(_castData == null)} " +
+            $"castDataHash={(_castData != null ? _castData.GetHashCode().ToString() : "null")} " +
+            $"start={(_castData != null ? _castData.StartTime.ToString("F3") : "null")} " +
+            $"hit={(_castData != null ? _castData.HitTime.ToString("F3") : "null")} " +
+            $"flight={(_castData != null ? _castData.FlightTime.ToString("F3") : "null")} " +
+            $"shootAt={(_castData != null ? _castData.serverTimeToShoot.ToString("F3") : "null")} " +
+            $"globalAtEnter={(_castData != null ? (Time.time - _castData.StartTime).ToString("F3") : "null")} " +
+            $"animSpeed={animator.speed:F3} animId={animator.GetInstanceID()}");
+
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
         float globalSinceCastStart = (_castData != null) ? (Time.time - _castData.StartTime) : -1f;
         string clipName = (clip != null) ? clip.name : "null";
         if (_castData != null)
         {
-           // Debug.Log(
-           //     $"[CastDataSnapshot] state='{parameterName}' idx={stateIndex} " +
-           //     $"startTime={_castData.StartTime:F3}s now={Time.time:F3}s globalSinceStart={globalSinceCastStart:F3}s " +
-           //     $"hit={_castData.HitTime:F3}s flight={_castData.FlightTime:F3}s serverShoot={_castData.serverTimeToShoot:F3}s " +
-           //     $"shotEvent={_castData.shotEventTime:F3}s speedMid={_castData.SpeedMid:F3} " +
-           //     $"speedEnd={_castData.SpeedEnd:F3} speedShot={_castData.SpeedShot:F3}.");
+            Debug.Log(
+                $"[CastDataSnapshot] state='{parameterName}' idx={stateIndex} " +
+                $"startTime={_castData.StartTime:F3}s now={Time.time:F3}s globalSinceStart={globalSinceCastStart:F3}s " +
+                $"hit={_castData.HitTime:F3}s flight={_castData.FlightTime:F3}s serverShoot={_castData.serverTimeToShoot:F3}s " +
+                $"shotEvent={_castData.shotEventTime:F3}s speedMid={_castData.SpeedMid:F3} " +
+                $"speedEnd={_castData.SpeedEnd:F3} speedShot={_castData.SpeedShot:F3}.");
         }
 
-        //Debug.Log(
-         //   $"[AnimStateEnter] state='{parameterName}' idx={stateIndex} final={isFinalShotState} " +
-         //   $"globalSinceCastStart={globalSinceCastStart:F3}s speed={animator.speed:F3} " +
-         //   $"eventTimeInClip={_eventTimeInClip:F3}s clip='{clipName}' normalized={stateInfo.normalizedTime:F3} " +
-         //   $"layer={layerIndex} animatorInstanceId={animator.GetInstanceID()}");
+        Debug.Log(
+            $"[AnimStateEnter] state='{parameterName}' idx={stateIndex} final={isFinalShotState} " +
+            $"globalSinceCastStart={globalSinceCastStart:F3}s speed={animator.speed:F3} " +
+            $"eventTimeInClip={_eventTimeInClip:F3}s clip='{clipName}' normalized={stateInfo.normalizedTime:F3} " +
+            $"layer={layerIndex} animatorInstanceId={animator.GetInstanceID()}");
 #endif
     }
 
@@ -70,28 +85,47 @@ public class PlayerOverriddenMagicAtk : StateMachineBehaviour
 
         float localElapsed = Time.time - _stateEnterTime;
         float globalElapsed = Time.time - _castData.StartTime;
-         //Debug.Log($"[AnimLog] {parameterName} | Local: {localElapsed:F3}s | Global: {globalElapsed:F3}s | Layer: {layerIndex} | Animator: {animator.GetInstanceID()}");
+         Debug.Log($"[AnimLog] {parameterName} | Local: {localElapsed:F3}s | Global: {globalElapsed:F3}s | Layer: {layerIndex} | Animator: {animator.GetInstanceID()}");
 
         if (!_forcedShotTriggered && stateIndex == 1 && !isFinalShotState)
         {
             float rawShootAt = Mathf.Max(0.01f, _castData.serverTimeToShoot);
-            float compensatedShootAt = Mathf.Max(0.01f, rawShootAt - ShotBlendCompensationSeconds);
+            float shotEventLeadTime = Mathf.Max(0f, _castData.shotEventTime);
+            float compensatedShootAt = Mathf.Max(0.01f, rawShootAt - shotEventLeadTime - ShotBlendCompensationSeconds);
+            Debug.Log(
+                $"[MAGIC_CHECK] now={Time.time:F3} state={parameterName} idx={stateIndex} " +
+                $"global={globalElapsed:F3} rawShootAt={rawShootAt:F3} shotEventLead={shotEventLeadTime:F3} compShootAt={compensatedShootAt:F3} " +
+                $"ready={(globalElapsed >= compensatedShootAt)} forced={_forcedShotTriggered}");
             if (globalElapsed >= compensatedShootAt)
             {
                 _forcedShotTriggered = true;
                 // Global animator slowdown (CastEnd speed) also slows state transitions.
                 // Restore normal speed right before forcing MagicShot to avoid delayed transition.
                 animator.speed = 1.0f;
-                animator.ResetTrigger(TriggerCastMid);
-                animator.ResetTrigger(TriggerCastEnd);
-                animator.ResetTrigger(TriggerMagicShot);
-                animator.SetTrigger(TriggerMagicShot);
+                int objectId = animator.GetInteger(AnimatorUtils.OBJECT_ID);
+                if (MagicShotCoordinator.TryStartShot(objectId, _castData, ShotSourceForceSync, out string coordinatorMessage))
+                {
+                    animator.ResetTrigger(TriggerCastMid);
+                    animator.ResetTrigger(TriggerCastEnd);
+                    animator.ResetTrigger(TriggerMagicShot);
+                    animator.SetTrigger(TriggerMagicShot);
+                    Debug.Log(
+                        $"[MAGIC_TRIGGER] now={Time.time:F3} global={globalElapsed:F3} " +
+                        $"targetRaw={rawShootAt:F3} shotEventLead={shotEventLeadTime:F3} targetComp={compensatedShootAt:F3} " +
+                        $"deltaRaw={(globalElapsed - rawShootAt):F3} deltaComp={(globalElapsed - compensatedShootAt):F3} " +
+                        $"castDataHash={_castData.GetHashCode()} animId={animator.GetInstanceID()} objectId={objectId}");
+                    Debug.Log($"{coordinatorMessage} action=run");
+                }
+                else
+                {
+                    Debug.Log($"{coordinatorMessage} action=skip");
+                }
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-               // Debug.Log(
-               //     $"[ForceShotSync] Triggered MagicShot from CastEnd at global={globalElapsed:F3}s " +
-               //     $"targetRaw={rawShootAt:F3}s targetComp={compensatedShootAt:F3}s comp={ShotBlendCompensationSeconds:F3}s " +
-               //     $"deltaRaw={globalElapsed - rawShootAt:F3}s deltaComp={globalElapsed - compensatedShootAt:F3}s " +
-               //     $"animatorSpeedNow={animator.speed:F3} animatorInstanceId={animator.GetInstanceID()}.");
+                Debug.Log(
+                    $"[ForceShotSync] Triggered MagicShot from CastEnd at global={globalElapsed:F3}s " +
+                    $"targetRaw={rawShootAt:F3}s shotEventLead={shotEventLeadTime:F3}s targetComp={compensatedShootAt:F3}s comp={ShotBlendCompensationSeconds:F3}s " +
+                    $"deltaRaw={globalElapsed - rawShootAt:F3}s deltaComp={globalElapsed - compensatedShootAt:F3}s " +
+                    $"animatorSpeedNow={animator.speed:F3} animatorInstanceId={animator.GetInstanceID()}.");
 #endif
             }
         }
@@ -107,9 +141,9 @@ public class PlayerOverriddenMagicAtk : StateMachineBehaviour
             if (currentClipTime >= _eventTimeInClip)
             {
                 _eventLogged = true;
-               // Debug.Log($"<color=cyan>[FIRE_SYNC]</color> ВЫСТРЕЛ! " +
-                //          $"Global: {globalElapsed:F3}s (Цель: {_castData.HitTime - _castData.FlightTime:F3}s) | " +
-               //           $"Разница: {globalElapsed - (_castData.HitTime - _castData.FlightTime):F4}s");
+                Debug.Log($"<color=cyan>[FIRE_SYNC]</color> ВЫСТРЕЛ! " +
+                          $"Global: {globalElapsed:F3}s (Цель: {_castData.HitTime - _castData.FlightTime:F3}s) | " +
+                          $"Разница: {globalElapsed - (_castData.HitTime - _castData.FlightTime):F4}s");
             }
         }
 
@@ -126,10 +160,15 @@ public class PlayerOverriddenMagicAtk : StateMachineBehaviour
 
         float finalLocalTime = Time.time - _stateEnterTime;
         float globalSinceCastStart = (_castData != null) ? (Time.time - _castData.StartTime) : -1f;
-       // Debug.Log(
-       //     $"[AnimLog] EXIT {parameterName} | Total Local: {finalLocalTime:F3}s | " +
-       //     $"Global: {globalSinceCastStart:F3}s | normalized: {stateInfo.normalizedTime:F3} | " +
-       //     $"Layer: {layerIndex} | Animator: {animator.GetInstanceID()}");
+        Debug.Log(
+            $"[MAGIC_EXIT] state={parameterName} idx={stateIndex} now={Time.time:F3} " +
+            $"globalAtExit={(_castData != null ? (Time.time - _castData.StartTime).ToString("F3") : "null")} " +
+            $"normalized={stateInfo.normalizedTime:F3} animSpeed={animator.speed:F3} animId={animator.GetInstanceID()}");
+        Debug.Log(
+            $"[AnimLog] EXIT {parameterName} | Total Local: {finalLocalTime:F3}s | " +
+            $"Global: {globalSinceCastStart:F3}s | normalized: {stateInfo.normalizedTime:F3} | " +
+            $"Layer: {layerIndex} | Animator: {animator.GetInstanceID()}");
+
     }
 
     private void SwitchToIdle()

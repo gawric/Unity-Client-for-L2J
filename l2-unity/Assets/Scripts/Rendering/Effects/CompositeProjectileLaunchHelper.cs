@@ -3,6 +3,45 @@ using System.Collections.Generic;
 
 public static class CompositeProjectileLaunchHelper
 {
+    public static void ApplyPreShootVisibility(CompositePrefabPart part, BaseEffect spawned, string debugPrefix)
+    {
+        if (part == null || spawned == null || !ShouldHideUntilShoot(part))
+        {
+            return;
+        }
+
+        SetVisualsVisible(spawned.transform, false);
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        Debug.Log($"{debugPrefix} HidePartUntilShoot part='{part.name}' launchMode=OnAnimationShoot.");
+#endif
+    }
+
+    public static void RevealOnShootParts(
+        CompositePrefabPart[] parts,
+        Dictionary<CompositePrefabPart, BaseEffect> spawnedPartInstances)
+    {
+        if (parts == null || spawnedPartInstances == null)
+        {
+            return;
+        }
+
+        for (int i = 0; i < parts.Length; i++)
+        {
+            CompositePrefabPart part = parts[i];
+            if (part == null || !ShouldHideUntilShoot(part))
+            {
+                continue;
+            }
+
+            if (!spawnedPartInstances.TryGetValue(part, out BaseEffect spawned) || spawned == null)
+            {
+                continue;
+            }
+
+            SetVisualsVisible(spawned.transform, true);
+        }
+    }
+
     public static bool RequiresAnimationShootLaunch(CompositePrefabPart[] parts)
     {
         if (parts == null)
@@ -23,12 +62,19 @@ public static class CompositeProjectileLaunchHelper
 
     public static bool ShouldLaunchOnShoot(CompositePrefabPart part)
     {
+       var lauchMode =  GetLaunchMode(part);
         return GetLaunchMode(part) == ProjectileLaunchMode.OnAnimationShoot;
     }
 
     public static bool ShouldLaunchImmediately(CompositePrefabPart part)
     {
         return GetLaunchMode(part) == ProjectileLaunchMode.Immediate;
+    }
+
+    public static bool IsProjectilePart(CompositePrefabPart part)
+    {
+        ProjectileLaunchMode mode = GetLaunchMode(part);
+        return mode == ProjectileLaunchMode.Immediate || mode == ProjectileLaunchMode.OnAnimationShoot;
     }
 
     public static bool TryLaunch(
@@ -126,6 +172,18 @@ public static class CompositeProjectileLaunchHelper
         return GetProjectileConfig(part).launchMode;
     }
 
+    private static bool ShouldHideUntilShoot(CompositePrefabPart part)
+    {
+        if (part != null && part.spawnTiming == CompositePartSpawnTiming.OnHitCollider)
+        {
+            // Parts spawned on collider hit appear after shoot event, so pre-shoot hide/reveal flow must not apply.
+            return false;
+        }
+
+        CompositeProjectileConfig config = GetProjectileConfig(part);
+        return config.launchMode == ProjectileLaunchMode.OnAnimationShoot && !config.showBeforeAnimationShoot;
+    }
+
     private static ProjectileImpactType GetImpactType(CompositePrefabPart part)
     {
         return GetProjectileConfig(part).impactType;
@@ -134,5 +192,34 @@ public static class CompositeProjectileLaunchHelper
     private static CompositeProjectileConfig GetProjectileConfig(CompositePrefabPart part)
     {
         return part != null && part.projectile != null ? part.projectile : new CompositeProjectileConfig();
+    }
+
+    private static void SetVisualsVisible(Transform root, bool visible)
+    {
+        if (root == null)
+        {
+            return;
+        }
+
+        Renderer[] renderers = root.GetComponentsInChildren<Renderer>(true);
+        for (int i = 0; i < renderers.Length; i++)
+        {
+            renderers[i].enabled = visible;
+        }
+
+        ParticleSystem[] particleSystems = root.GetComponentsInChildren<ParticleSystem>(true);
+        for (int i = 0; i < particleSystems.Length; i++)
+        {
+            ParticleSystem system = particleSystems[i];
+            if (visible)
+            {
+                system.Play(true);
+            }
+            else
+            {
+                system.Pause(true);
+                system.Clear(true);
+            }
+        }
     }
 }

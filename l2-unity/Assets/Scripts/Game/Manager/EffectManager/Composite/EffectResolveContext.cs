@@ -15,4 +15,6 @@ public class EffectResolveContext
 
     public bool HasHitPoint;
     public Vector3 HitPoint;
+    public bool HasHitDirection;
+    public Vector3 HitDirection;
 }

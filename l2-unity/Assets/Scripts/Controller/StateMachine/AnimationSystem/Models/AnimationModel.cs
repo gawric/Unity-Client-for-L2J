@@ -8,6 +8,7 @@ public class AnimationModel
     private Entity _entity;
     private Type _typeController;
     private AnimationEventsBase _eventSource;
+    private bool _isSubscribedToInternalEvents;
 
     public event Action<string, int> OnAnimationFinishedWithId;
 
@@ -32,10 +33,16 @@ public class AnimationModel
 
     public void SubscribeToInternalEvents()
     {
+        if (_isSubscribedToInternalEvents)
+        {
+            return;
+        }
+
         if (_eventSource != null)
         {
             // Подписываемся на базовое событие из AnimationEventsBase
             _eventSource.OnAnimationFinished += HandleBaseAnimationFinished;
+            _isSubscribedToInternalEvents = true;
         }
     }
 
@@ -48,9 +55,10 @@ public class AnimationModel
 
     public void Dispose()
     {
-        if (_eventSource != null)
+        if (_eventSource != null && _isSubscribedToInternalEvents)
         {
             _eventSource.OnAnimationFinished -= HandleBaseAnimationFinished;
+            _isSubscribedToInternalEvents = false;
         }
     }
 

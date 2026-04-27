@@ -28,16 +28,6 @@ public class NewMagicSkillsState  : AbstractAttackEvents
                 float shotEventTime = AnimationManager.Instance.GetOverrideEventTimeByName(objectId, readyCombo.GetAnimCycle(), "OnAnimationShoot");
                 float flightTimeMs = ResolveMagicFlightTimeMs(entity);
                 entity.SetupTotalCastDuration(useSkill.HitTime, flightTimeMs, durations, shotEventTime);
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
-                MagicCastData castData = entity.GetMagicCastData();
-                if (castData != null)
-                {
-                    Debug.Log(
-                        $"[MagicCastTimeline] castStart={castData.StartTime:F3}s now={Time.time:F3}s " +
-                        $"globalSinceStart={Time.time - castData.StartTime:F3}s serverShoot={castData.serverTimeToShoot:F3}s " +
-                        $"serverHit={castData.HitTime:F3}s configuredFlightMs={flightTimeMs:F1} shotEvent={shotEventTime:F3}s.");
-                }
-#endif
 
                 SkillExecutor.Instance.ExecuteSkillOverride(useSkill.SkillGrp, entity, readyCombo, _events);
                 break;
@@ -55,20 +45,35 @@ public class NewMagicSkillsState  : AbstractAttackEvents
     private static float ResolveMagicFlightTimeMs(PlayerEntity entity)
     {
         const float fallbackFlightMs = 1000f;
+        const float projectileHitOffsetSeconds = 0.3f;
+        const float minFlightMs = 350f;
+
+        if (entity == null || entity.Target == null)
+        {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            Debug.Log($"[MagicFlightResolve] distance=-1 resolvedFlightMs={fallbackFlightMs:F1} mode=fallback_no_target");
+#endif
+            return fallbackFlightMs;
+        }
+
+        float distance = entity.TargetDistance();
+        if (distance <= 0f)
+        {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            Debug.Log($"[MagicFlightResolve] distance={distance:F3} resolvedFlightMs={fallbackFlightMs:F1} mode=fallback_non_positive_distance");
+#endif
+            return fallbackFlightMs;
+        }
+
+        float speed = ProjectileFlightTimeCalculator.GetSpeed(distance);
+        float flightSeconds = ProjectileFlightTimeCalculator.CalculateFlightTime(distance, speed, projectileHitOffsetSeconds);
+        float resolvedFlightMs = Mathf.Max(minFlightMs, flightSeconds * 1000f);
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-        if (entity != null && entity.Target != null)
-        {
-            float distance = entity.TargetDistance();
-            Debug.Log(
-                $"[MagicFlightResolve] distance={distance:F3}m resolvedFlightMs={fallbackFlightMs:F1} " +
-                $"mode=fixed_for_sync");
-        }
-        else
-        {
-            Debug.Log($"[MagicFlightResolve] distance=-1 resolvedFlightMs={fallbackFlightMs:F1} mode=fixed_for_sync");
-        }
+        Debug.Log(
+            $"[MagicFlightResolve] distance={distance:F3}m speed={speed:F3}mps flightSeconds={flightSeconds:F3} " +
+            $"resolvedFlightMs={resolvedFlightMs:F1} mode=projectile_calculator_sync");
 #endif
-        return fallbackFlightMs;
+        return resolvedFlightMs;
     }
 }

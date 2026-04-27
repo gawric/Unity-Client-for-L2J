@@ -58,22 +58,13 @@ MonoBehaviour:
     _hitEffectIndex: 0
     _caster: {fileID: 0}
     _target: {fileID: 0}
-    _skill:
-      _skillId: 0
-      _skillEffect:
-        _skillId: 0
-        _castingActions: []
-        _shotActions: []
-        _explosionActions: []
     _startingPosition: {x: 0, y: 0, z: 0}
     _endPosition: {x: 0, y: 0, z: 0}
     _hitTime: 0
     _hitSuccess: 0
     _isArrow: 0
   _particleGroups:
-  - {fileID: 3570568590019566582}
   - {fileID: 8870774309594017449}
-  - {fileID: 2250743051474933688}
 --- !u!1 &1858303559828223552
 GameObject:
   m_ObjectHideFlags: 0
@@ -120,16 +111,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9d6d14ae56a466245bff1789fbd03a5b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  partType: 0
   _owner: {fileID: 7042530700687733667}
   _particles:
   - {fileID: 1339101344224664644}
   - {fileID: 3801284479605335647}
+  _startDelay: 0
   _countPerSecond: 2000
   _maxCount: 2
-  _hasCastDuration: 0
-  _hasFixedDuration: 0
-  _duration: 5
+  _forceContinuousSpawning: 0
+  _isBurstSpawning: 1
+  _relativeWarmupTime: 0
+  _duration: 0.5
+  _hasFixedDuration: 1
   _instantKillAtCastEnd: 0
+  _fitToBounds: 0
 --- !u!1 &3307200288083047120
 GameObject:
   m_ObjectHideFlags: 0
@@ -450,7 +446,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &7210566450821015352
 Transform:
   m_ObjectHideFlags: 0
@@ -479,15 +475,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9d6d14ae56a466245bff1789fbd03a5b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  partType: 0
   _owner: {fileID: 7042530700687733667}
   _particles:
   - {fileID: 8170601986771594705}
+  _startDelay: 0
   _countPerSecond: 10000
   _maxCount: 1
-  _hasCastDuration: 0
-  _hasFixedDuration: 0
+  _forceContinuousSpawning: 0
+  _isBurstSpawning: 0
+  _relativeWarmupTime: 0
   _duration: 5
+  _hasFixedDuration: 0
   _instantKillAtCastEnd: 0
+  _fitToBounds: 0
 --- !u!1 &7943093038856268527
 GameObject:
   m_ObjectHideFlags: 0
@@ -619,12 +620,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9d6d14ae56a466245bff1789fbd03a5b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  partType: 0
   _owner: {fileID: 7042530700687733667}
   _particles:
   - {fileID: 4604237019934192816}
+  _startDelay: 0
   _countPerSecond: 2000
   _maxCount: 1
-  _hasCastDuration: 0
+  _forceContinuousSpawning: 0
+  _isBurstSpawning: 0
+  _relativeWarmupTime: 0
+  _duration: 0.5
   _hasFixedDuration: 0
-  _duration: 5
   _instantKillAtCastEnd: 0
+  _fitToBounds: 0

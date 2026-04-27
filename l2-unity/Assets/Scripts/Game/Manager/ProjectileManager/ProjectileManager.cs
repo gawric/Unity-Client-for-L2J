@@ -133,6 +133,14 @@ public class ProjectileManager : AbstractProjectile, IProjectileManager
                 Debug.LogError($"Error updating projectile {projectileId}: {ex.Message}");
                 projectilesToRemove.Add(projectileId);
             }
+            catch (MissingReferenceException ex)
+            {
+                Debug.LogError(
+                    $"[ProjectileUpdateException] MissingReference id={projectileId} " +
+                    $"prefabNull={(projectile?.prefab == null)} transformNull={(projectile?.transform == null)} " +
+                    $"targetNull={(projectile?.targetTransform == null)} msg={ex.Message}");
+                projectilesToRemove.Add(projectileId);
+            }
 
 
         }
@@ -153,6 +161,13 @@ public class ProjectileManager : AbstractProjectile, IProjectileManager
     private bool UpdateProjectile(ProjectileData projectile)
     {
         if (!projectile.isActive) return false;
+        if (projectile.transform == null)
+        {
+            Debug.LogWarning(
+                $"[ProjectileUpdate] destroyed transform id={projectile.id} prefabNull={(projectile.prefab == null)} " +
+                $"targetNull={(projectile.targetTransform == null)} impactType={projectile.impactType} now={Time.time:F3}");
+            return false;
+        }
 
        
         CalcNewTargetPosition(projectile);

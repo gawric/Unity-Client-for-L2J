@@ -3,6 +3,7 @@ using UnityEngine;
 
 public class ParticleGroup : EffectPart
 {
+    private const string DebugTraceEffectName = "el_wind_strike_ta";
     [SerializeField] private L2Particle _owner;
     [SerializeField] private Renderer[] _particles;
     [Header("Spawning (Настройки появления)")]
@@ -35,6 +36,7 @@ public class ParticleGroup : EffectPart
     private bool _runtimeContinuousLoop;
     private bool _hasRuntimeContinuousLoopOverride;
     private bool _runtimeContinuousLoopOverrideValue;
+    private bool _debugFirstSpawnLogged;
 
     public void FixedUpdate()
     {
@@ -123,6 +125,19 @@ public class ParticleGroup : EffectPart
         _particleSpawnTimes[_particleIndex] = now;
         _isParticleActive[_particleIndex] = true;
 
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        if (ShouldTraceDebug() && !_debugFirstSpawnLogged)
+        {
+            _debugFirstSpawnLogged = true;
+            float sincePlay = _debugPlayStartedAt > 0f ? now - _debugPlayStartedAt : -1f;
+            float sinceEnable = now - _lastEnable;
+            Debug.Log(
+                $"[TA_PARTICLE_FIRST_SPAWN] group='{name}' now={now:F3}s sincePlay={sincePlay:F3}s sinceEnable={sinceEnable:F3}s " +
+                $"startDelay={_startDelay:F3}s burst={_isBurstSpawning} countPerSec={_countPerSecond} maxCount={_maxCount} " +
+                $"duration={_duration:F3}s fixedDuration={_hasFixedDuration} runtimeLoop={_runtimeContinuousLoop}.");
+        }
+#endif
+
         // Эмуляция прогрева (Warmup)
         float shaderStartTime = now - _relativeWarmupTime;
 
@@ -171,6 +186,7 @@ public class ParticleGroup : EffectPart
         _spawnedCount = 0;
         _stopped = false;
         _debugPlayStartedAt = _lastEnable;
+        _debugFirstSpawnLogged = false;
 
         if (_duration < 0.01f) _duration = GetLifeTimeFromMaterial();
 
@@ -190,6 +206,15 @@ public class ParticleGroup : EffectPart
             if (_particles[i] != null) _particles[i].gameObject.SetActive(false);
 
         //Debug.Log($"<color=cyan>[Effect START]</color> {gameObject.name}. Ожидание старта: {_startDelay}с.");
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        if (ShouldTraceDebug())
+        {
+            Debug.Log(
+                $"[TA_PARTICLE_PLAYPART] group='{name}' playAt={_debugPlayStartedAt:F3}s startDelay={_startDelay:F3}s " +
+                $"burst={_isBurstSpawning} countPerSec={_countPerSecond} maxCount={_maxCount} " +
+                $"duration={_duration:F3}s fixedDuration={_hasFixedDuration} forceContinuous={_forceContinuousSpawning}.");
+        }
+#endif
     }
 
     private float GetLifeTimeFromMaterial()
@@ -267,5 +292,12 @@ public class ParticleGroup : EffectPart
             $"effectRoot='{(_owner != null ? _owner.name : "null")}' settings='{(_settings != null ? _settings.name : "null")}'.");
 #endif
         _stopped = true;
+    }
+
+    private bool ShouldTraceDebug()
+    {
+        return _owner != null &&
+               !string.IsNullOrEmpty(_owner.name) &&
+               _owner.name.IndexOf(DebugTraceEffectName, System.StringComparison.OrdinalIgnoreCase) >= 0;
     }
 }

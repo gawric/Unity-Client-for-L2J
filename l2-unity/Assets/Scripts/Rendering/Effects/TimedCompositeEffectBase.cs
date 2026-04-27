@@ -26,26 +26,28 @@ public abstract class TimedCompositeEffectBase : BaseEffect
         _rootRuntimeSettings = CreateRuntimeSettings(settings);
     }
 
-    protected EffectSettings CreateRuntimeSettings(EffectSettings sourceSettings)
+    protected EffectSettings CreateRuntimeSettings(EffectSettings sourceSettings, bool applyTimedLifetime = true)
     {
         if (sourceSettings == null)
         {
             return null;
         }
 
-        if (_castData == null || _castData.HitTime <= 0f)
+        EffectSettings runtime = Instantiate(sourceSettings);
+        _runtimeSettings.Add(runtime);
+
+        if (!applyTimedLifetime || _castData == null || _castData.HitTime <= 0f)
         {
-            return sourceSettings;
+            return runtime;
         }
 
-        EffectSettings runtime = Instantiate(sourceSettings);
         runtime.defaultLifeTime = _castData.HitTime + Mathf.Max(0f, RuntimeLifeTimeTailSeconds);
         runtime.hideTime = Mathf.Min(runtime.hideTime, runtime.defaultLifeTime);
-        _runtimeSettings.Add(runtime);
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
         Debug.Log(
             $"{DebugPrefix} Runtime settings cloned. Source='{sourceSettings.name}' " +
+            $"timed={applyTimedLifetime} " +
             $"hitTime={_castData.HitTime:F3}s tail={RuntimeLifeTimeTailSeconds:F3}s " +
             $"lifeTime={runtime.defaultLifeTime:F3}s hideTime={runtime.hideTime:F3}s.");
 #endif
@@ -87,8 +89,8 @@ public abstract class TimedCompositeEffectBase : BaseEffect
         List<AnimationEventsBase> shootEventSources,
         Action<string> onAnimationShootHandler,
         ref AnimationEventsBase animationEvents,
-        ref bool isSubscribedToAnyShoot,
-        Action<int, AnimationEventsBase, string> onAnyAnimationShootHandler)
+        ref bool isSubscribedToAnyShoot
+       )
     {
         if (shootEventSources != null)
         {
@@ -97,6 +99,7 @@ public abstract class TimedCompositeEffectBase : BaseEffect
                 AnimationEventsBase source = shootEventSources[i];
                 if (source != null)
                 {
+                    Debug.Log("UnsubscribeShootEventSources: use un");
                     source.OnAnimationStartShoot -= onAnimationShootHandler;
                 }
             }
@@ -108,7 +111,7 @@ public abstract class TimedCompositeEffectBase : BaseEffect
 
         if (isSubscribedToAnyShoot)
         {
-            AnimationEventsBase.OnAnyAnimationShoot -= onAnyAnimationShootHandler;
+            //AnimationEventsBase.OnAnyAnimationShoot -= onAnyAnimationShootHandler;
             isSubscribedToAnyShoot = false;
         }
     }

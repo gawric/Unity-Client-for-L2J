@@ -17,6 +17,9 @@ public static class CompositeEffectUtilities
                 return Mathf.Max(0f, castData.FlightTime);
             case CompositePartSpawnTiming.OnHitTime:
                 return Mathf.Max(0f, castData.HitTime);
+            case CompositePartSpawnTiming.OnHitCollider:
+                // Spawned by runtime collider-hit event, not by time delay.
+                return float.PositiveInfinity;
             default:
                 return 0f;
         }

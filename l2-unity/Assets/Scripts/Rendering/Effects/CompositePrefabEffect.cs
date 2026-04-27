@@ -14,6 +14,8 @@ public enum ProjectileLaunchMode
 public class CompositeProjectileConfig
 {
     public ProjectileLaunchMode launchMode = ProjectileLaunchMode.Disabled;
+    // If false and launchMode=OnAnimationShoot, part stays hidden until shoot event.
+    public bool showBeforeAnimationShoot = true;
     public ProjectileImpactType impactType = ProjectileImpactType.EffectOnly;
     public ProjectileData settingsOverride;
 }
@@ -35,6 +37,8 @@ public class CompositePrefabPart
     public bool followResolvedTransform = true;
     public bool inheritRotation = true;
     public bool passCastDataToPart = true;
+    // If false, part keeps its own prefab/settings lifetime and is not stretched to cast HitTime.
+    public bool useCastTimedLifetime = true;
     public bool overrideContinuousLoop = false;
     public bool continuousLoop = false;
     public bool disableShaderLifetime = false;
@@ -54,6 +58,7 @@ public class CompositePrefabEffect : TimedCompositeEffectBase
     private readonly IEffectAttachmentResolver _resolver = new DefaultEffectAttachmentResolver();
     private EffectResolveContext _context;
     private readonly List<PendingCompositePart> _pendingParts = new List<PendingCompositePart>();
+    private readonly List<CompositePrefabPart> _pendingHitColliderParts = new List<CompositePrefabPart>();
     private readonly Dictionary<CompositePrefabPart, BaseEffect> _spawnedPartInstances = new Dictionary<CompositePrefabPart, BaseEffect>();
     private readonly HashSet<CompositePrefabPart> _launchedProjectileParts = new HashSet<CompositePrefabPart>();
     private readonly List<AnimationEventsBase> _shootEventSources = new List<AnimationEventsBase>();
@@ -73,7 +78,9 @@ public class CompositePrefabEffect : TimedCompositeEffectBase
         _context = CompositeEffectUtilities.BuildContext(owner, castData);
         _spawnedPartInstances.Clear();
         _launchedProjectileParts.Clear();
+        _pendingHitColliderParts.Clear();
         SubscribeShootEventIfNeeded();
+        SubscribeProjectileHitEventIfNeeded();
     }
 
     public override void Play()
@@ -94,7 +101,8 @@ public class CompositePrefabEffect : TimedCompositeEffectBase
 
         QueueImmediateAndDelayedParts();
         StartPendingPartsRoutineIfNeeded();
-        StartShootFallbackRoutineIfNeeded();
+        //??????? ?? ???????: ????? ????? ?? ??????? - ????? ?????? = ????? ???????. ?? ?????? ?? ?????????? ?????? ?? event ????????
+        //StartShootFallbackRoutineIfNeeded();
         DestroyCompositeByLifetime();
     }
 
@@ -136,6 +144,7 @@ public class CompositePrefabEffect : TimedCompositeEffectBase
         instance.Setup(partSettings, partCastData, setupOwner);
         ApplyPartLoopOverrides(part, instance.transform);
         instance.Play();
+        CompositeProjectileLaunchHelper.ApplyPreShootVisibility(part, instance, DebugPrefix);
         _spawnedPartInstances[part] = instance;
         StartFinalShaderLifetimeRoutineIfNeeded(part, instance.transform, partSettings);
         TryLaunchPartAsProjectileImmediately(part, instance);
@@ -146,42 +155,25 @@ public class CompositePrefabEffect : TimedCompositeEffectBase
     private void SubscribeShootEventIfNeeded()
     {
         UnsubscribeShootEvent();
-        if (!RequiresAnimationShootLaunch() || _context?.CasterEntity?.IdentityInterlude == null)
+        var test1 = RequiresAnimationShootLaunch();
+        var entity = _context?.CasterEntity;
+        if (RequiresAnimationShootLaunch() || _context?.CasterEntity?.IdentityInterlude == null)
         {
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
-            Debug.LogWarning(
-                $"{DebugPrefix} Shoot subscription skipped. requiresLaunch={RequiresAnimationShootLaunch()} " +
-                $"casterIdMissing={_context?.CasterEntity?.IdentityInterlude == null}.");
-#endif
-            return;
-        }
+            int casterId = _context.CasterEntity.IdentityInterlude.Id;
+            _animationEvents = AnimationManager.Instance.GetAnimationEvents(casterId);
+            TrySubscribeShootSource(_animationEvents, "AnimationManager");
 
-        int casterId = _context.CasterEntity.IdentityInterlude.Id;
-        _animationEvents = AnimationManager.Instance.GetAnimationEvents(casterId);
-        TrySubscribeShootSource(_animationEvents, "AnimationManager");
 
-        AnimationEventsBase hierarchySource = _context.CasterEntity.GetComponentInChildren<AnimationEventsBase>(true);
-        TrySubscribeShootSource(hierarchySource, "CasterHierarchy");
 
-        if (!_isSubscribedToAnyShoot)
-        {
-            AnimationEventsBase.OnAnyAnimationShoot += HandleAnyAnimationShoot;
-            _isSubscribedToAnyShoot = true;
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
-            Debug.Log($"{DebugPrefix} Subscribed to global OnAnyAnimationShoot fallback.");
-#endif
+            if (!_isSubscribedToAnyShoot)
+            {
+                _isSubscribedToAnyShoot = true;
+            }
         }
     }
 
     private void TrySubscribeShootSource(AnimationEventsBase source, string sourceName)
     {
-        if (source == null)
-        {
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
-            Debug.LogWarning($"{DebugPrefix} Shoot source '{sourceName}' is null.");
-#endif
-            return;
-        }
 
         if (_shootEventSources.Contains(source))
         {
@@ -190,9 +182,6 @@ public class CompositePrefabEffect : TimedCompositeEffectBase
 
         source.OnAnimationStartShoot += HandleAnimationShoot;
         _shootEventSources.Add(source);
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
-        Debug.Log($"{DebugPrefix} Subscribed to '{sourceName}' shoot source name='{source.name}' instanceId={source.GetInstanceID()} casterId={_context?.CasterEntity?.IdentityInterlude?.Id ?? 0}.");
-#endif
     }
 
     private bool RequiresAnimationShootLaunch()
@@ -205,44 +194,12 @@ public class CompositePrefabEffect : TimedCompositeEffectBase
         ProcessShootEvent("direct");
     }
 
-    private void HandleAnyAnimationShoot(int objectId, AnimationEventsBase source, string animationName)
-    {
-        if (source == null || _context?.CasterEntity?.IdentityInterlude == null)
-        {
-            return;
-        }
-        int casterId = _context.CasterEntity.IdentityInterlude.Id;
-        if (objectId != casterId)
-        {
-            return;
-        }
-
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
-        Debug.Log($"{DebugPrefix} Global shoot fallback matched objectId={objectId} animation='{animationName}' instanceId={source.GetInstanceID()}.");
-#endif
-        ProcessShootEvent("global");
-    }
 
     private void ProcessShootEvent(string channel)
     {
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
-        float now = Time.time;
-        float elapsed = _playStartedAt > 0f ? now - _playStartedAt : -1f;
-        Debug.Log(
-            $"{DebugPrefix} OnAnimationShoot[{channel}] at={now:F3}s elapsed={elapsed:F3}s " +
-            $"hit={(_castData != null ? _castData.HitTime : -1f):F3}s flight={(_castData != null ? _castData.FlightTime : -1f):F3}s " +
-            $"serverShoot={(_castData != null ? _castData.serverTimeToShoot : -1f):F3}s target='{(_context?.TargetTransform != null ? _context.TargetTransform.name : "null")}'.");
-#endif
-
-        if (_parts == null || _context?.TargetTransform == null || ProjectileManager.Instance == null)
-        {
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
-            Debug.LogWarning(
-                $"{DebugPrefix} OnAnimationShoot skipped. partsNull={_parts == null} " +
-                $"targetNull={_context?.TargetTransform == null} projectileManagerNull={ProjectileManager.Instance == null}.");
-#endif
-            return;
-        }
+        CompositeProjectileLaunchHelper.RevealOnShootParts(
+            _parts,
+            _spawnedPartInstances);
 
         CompositeProjectileLaunchHelper.ProcessShootLaunches(
             _parts,
@@ -251,6 +208,46 @@ public class CompositePrefabEffect : TimedCompositeEffectBase
             _context.TargetTransform,
             _playStartedAt,
             DebugPrefix);
+    }
+
+    private void HandleHitManagerCollider(Transform attacker, MonsterStateMachine targetStateMachine, Vector3 hitPointCollider, Vector3 hitDirection)
+    {
+        if (_pendingHitColliderParts.Count == 0 || attacker == null)
+        {
+            return;
+        }
+
+        if (!IsFromLaunchedCompositeProjectile(attacker))
+        {
+            return;
+        }
+
+        bool hadHitPoint = _context != null && _context.HasHitPoint;
+        Vector3 previousHitPoint = hadHitPoint ? _context.HitPoint : Vector3.zero;
+        bool hadHitDirection = _context != null && _context.HasHitDirection;
+        Vector3 previousHitDirection = hadHitDirection ? _context.HitDirection : Vector3.forward;
+        if (_context != null)
+        {
+            _context.HasHitPoint = true;
+            _context.HitPoint = hitPointCollider;
+            _context.HasHitDirection = hitDirection.sqrMagnitude > 0.0001f;
+            _context.HitDirection = _context.HasHitDirection ? hitDirection.normalized : Vector3.forward;
+        }
+
+        for (int i = 0; i < _pendingHitColliderParts.Count; i++)
+        {
+            SpawnPart(_pendingHitColliderParts[i]);
+        }
+
+        if (_context != null)
+        {
+            _context.HasHitPoint = hadHitPoint;
+            _context.HitPoint = previousHitPoint;
+            _context.HasHitDirection = hadHitDirection;
+            _context.HitDirection = previousHitDirection;
+        }
+
+        _pendingHitColliderParts.Clear();
     }
 
     private void TryLaunchPartAsProjectileImmediately(CompositePrefabPart part, BaseEffect spawned)
@@ -333,7 +330,7 @@ public class CompositePrefabEffect : TimedCompositeEffectBase
             resolvedTransform,
             worldPosition,
             adjustedOffset);
-        Quaternion rotation = CompositeEffectUtilities.ResolveSpawnRotation(part.inheritRotation, resolvedTransform);
+        Quaternion rotation = ResolvePartSpawnRotation(part, resolvedTransform);
 
         // Spawn without parent first, then attach with worldPositionStays=true.
         // This prevents inheriting oversized bone scale when following transforms.
@@ -345,6 +342,20 @@ public class CompositePrefabEffect : TimedCompositeEffectBase
         ApplyShaderLifetimeOverride(part, instance.transform);
 
         return instance;
+    }
+
+    private Quaternion ResolvePartSpawnRotation(CompositePrefabPart part, Transform resolvedTransform)
+    {
+        if (part != null &&
+            part.attachmentPoint == EffectAttachmentPoint.WorldHitPoint &&
+            _context != null &&
+            _context.HasHitDirection &&
+            _context.HitDirection.sqrMagnitude > 0.0001f)
+        {
+            return Quaternion.LookRotation(_context.HitDirection.normalized);
+        }
+
+        return CompositeEffectUtilities.ResolveSpawnRotation(part != null && part.inheritRotation, resolvedTransform);
     }
 
     private void StartFinalShaderLifetimeRoutineIfNeeded(CompositePrefabPart part, Transform instanceTransform, EffectSettings partSettings)
@@ -401,7 +412,7 @@ public class CompositePrefabEffect : TimedCompositeEffectBase
     private bool TryResolvePartSettings(CompositePrefabPart part, out EffectSettings partSettings)
     {
         EffectSettings sourceSettings = part.settingsOverride != null ? part.settingsOverride : _settings;
-        partSettings = CreateRuntimeSettings(sourceSettings);
+        partSettings = CreateRuntimeSettings(sourceSettings, part.useCastTimedLifetime);
         if (partSettings != null)
         {
             return true;
@@ -436,7 +447,41 @@ public class CompositePrefabEffect : TimedCompositeEffectBase
 
     private void QueueImmediateAndDelayedParts()
     {
-        QueueImmediateAndDelayedParts(_parts, _pendingParts, _castData, SpawnPart);
+        _pendingParts.Clear();
+        _pendingHitColliderParts.Clear();
+
+        if (_parts == null)
+        {
+            return;
+        }
+
+        for (int i = 0; i < _parts.Length; i++)
+        {
+            CompositePrefabPart part = _parts[i];
+            if (part == null || part.prefab == null)
+            {
+                continue;
+            }
+
+            if (part.spawnTiming == CompositePartSpawnTiming.OnHitCollider)
+            {
+                _pendingHitColliderParts.Add(part);
+                continue;
+            }
+
+            float delay = CompositeEffectUtilities.ResolveSpawnDelay(part.spawnTiming, _castData);
+            if (delay <= 0f)
+            {
+                SpawnPart(part);
+                continue;
+            }
+
+            _pendingParts.Add(new PendingCompositePart
+            {
+                Part = part,
+                SpawnAtTime = Time.time + delay
+            });
+        }
     }
 
     private void StartPendingPartsRoutineIfNeeded()
@@ -489,11 +534,13 @@ public class CompositePrefabEffect : TimedCompositeEffectBase
     protected override void OnTimedCompositeDestroy()
     {
         UnsubscribeShootEvent();
+        UnsubscribeProjectileHitEvent();
         StopAndClearCoroutine(ref _pendingSpawnRoutine);
         StopAndClearCoroutine(ref _fallbackShootRoutine);
         StopAndClearCoroutine(ref _visibilityProbeRoutine);
 
         _pendingParts.Clear();
+        _pendingHitColliderParts.Clear();
         _spawnedPartInstances.Clear();
         _launchedProjectileParts.Clear();
     }
@@ -504,7 +551,75 @@ public class CompositePrefabEffect : TimedCompositeEffectBase
             _shootEventSources,
             HandleAnimationShoot,
             ref _animationEvents,
-            ref _isSubscribedToAnyShoot,
-            HandleAnyAnimationShoot);
+            ref _isSubscribedToAnyShoot);
+    }
+
+    private void SubscribeProjectileHitEventIfNeeded()
+    {
+        if (!RequiresHitColliderSpawn())
+        {
+            return;
+        }
+
+        if (HitManager.Instance == null)
+        {
+            return;
+        }
+
+        HitManager.Instance.OnHitColliderHandled -= HandleHitManagerCollider;
+        HitManager.Instance.OnHitColliderHandled += HandleHitManagerCollider;
+    }
+
+    private void UnsubscribeProjectileHitEvent()
+    {
+        if (HitManager.Instance == null)
+        {
+            return;
+        }
+
+        HitManager.Instance.OnHitColliderHandled -= HandleHitManagerCollider;
+    }
+
+    private bool RequiresHitColliderSpawn()
+    {
+        if (_parts == null)
+        {
+            return false;
+        }
+
+        for (int i = 0; i < _parts.Length; i++)
+        {
+            if (_parts[i] != null && _parts[i].spawnTiming == CompositePartSpawnTiming.OnHitCollider)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private bool IsFromLaunchedCompositeProjectile(Transform attacker)
+    {
+        foreach (KeyValuePair<CompositePrefabPart, BaseEffect> pair in _spawnedPartInstances)
+        {
+            if (!CompositeProjectileLaunchHelper.IsProjectilePart(pair.Key))
+            {
+                continue;
+            }
+
+            BaseEffect spawned = pair.Value;
+            if (spawned == null)
+            {
+                continue;
+            }
+
+            Transform spawnedTransform = spawned.transform;
+            if (attacker == spawnedTransform || attacker.IsChildOf(spawnedTransform))
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 }
