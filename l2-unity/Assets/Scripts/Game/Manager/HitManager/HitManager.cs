@@ -1,13 +1,9 @@
-﻿using Org.BouncyCastle.Security;
+﻿using System;
 using UnityEngine;
-using UnityEngine.ProBuilder;
-using static ChangeWaitTypePacket;
-using System;
 
 public class HitManager : MonoBehaviour
 {
     public static HitManager Instance { get; private set; }
-    public event Action<Transform, MonsterStateMachine, Vector3, Vector3> OnHitColliderHandled;
     private const string ETC_NAME = "etc_";
 
 
@@ -44,7 +40,7 @@ public class HitManager : MonoBehaviour
 
     }
 
-    public void HandleHitCollider(Transform attacker , MonsterStateMachine targetStateMachine, Vector3 hitCollider, Vector3 hitColliderDirection)
+    public void HandleHitCollider(Entity attaker ,  Transform attacker , MonsterStateMachine targetStateMachine, Vector3 hitCollider, Vector3 hitColliderDirection)
     {
     
         if(targetStateMachine != null)
@@ -53,14 +49,66 @@ public class HitManager : MonoBehaviour
             {
                 targetStateMachine.NotifyEvent(Event.HIT_REACTION);
             }
-
+            if (attaker.IsSoulshotCharged)
+            {
+                EffectManager.Instance.PlayerImpactEffect(99998, hitCollider);
+                attaker.IsSoulshotCharged = false;
+            }
+            else
+            {
+                WorldCombat.Instance.InflictAttack(hitCollider, hitColliderDirection);
+            }
             //WorldCombat.Instance.InflictAttack(hitCollider, hitColliderDirection);
             //Эффект рабочий просто для теста off
-            EffectManager.Instance.PlayerImpactEffect(99998, hitCollider);
+
+        }
+    }
+
+    public bool TryPrepareProjectileEffectHit(
+        GameObject projectilePrefab,
+        Vector3 hitPoint,
+        Vector3 hitDirection,
+        int attackerEntityId,
+        Func<Transform, bool> isFromTrackedProjectile,
+        out Vector3 resolvedHitPoint,
+        out Vector3 resolvedHitDirection)
+    {
+        resolvedHitPoint = hitPoint;
+        resolvedHitDirection = Vector3.forward;
+
+        if (projectilePrefab == null || isFromTrackedProjectile == null)
+        {
+            return false;
         }
 
-        OnHitColliderHandled?.Invoke(attacker, targetStateMachine, hitCollider, hitColliderDirection);
+        Transform attacker = projectilePrefab.transform;
+        if (attacker == null || !isFromTrackedProjectile(attacker))
+        {
+            return false;
+        }
 
+        resolvedHitDirection = hitDirection.sqrMagnitude > 0.0001f
+            ? hitDirection.normalized
+            : Vector3.forward;
+
+        Entity attackerEntity = ResolveEntityFromWorld(attackerEntityId);
+        if (attackerEntity != null && attackerEntity.IsSoulshotCharged)
+        {
+            EffectManager.Instance.PlayerImpactEffect(99998, resolvedHitPoint);
+            attackerEntity.IsSoulshotCharged = false;
+        }
+
+        return true;
+    }
+
+    private Entity ResolveEntityFromWorld(int entityId)
+    {
+        if (entityId <= 0 || World.Instance == null)
+        {
+            return null;
+        }
+
+        return World.Instance.GetEntityNoLockSync(entityId);
     }
 
 

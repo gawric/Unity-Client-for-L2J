@@ -46,6 +46,7 @@ public class Entity : MonoBehaviour {
 
     public NetworkIdentityInterlude IdentityInterlude { get => _identityInterlude; set => _identityInterlude = value; }
 
+    public bool IsSoulshotCharged {get;set;}
     public int TargetId { get => _targetId; set => _targetId = value; }
 
     public Transform LastTarget { get { return _lastTarget; } set { _lastTarget = value; } }

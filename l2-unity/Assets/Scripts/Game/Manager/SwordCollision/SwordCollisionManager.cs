@@ -1,23 +1,96 @@
 ﻿using System;
 using System.Collections.Generic;
-
 using UnityEngine;
-using UnityEngine.ProBuilder;
-using UnityEngine.Rendering;
-
 
 public class SwordCollisionService : MonoBehaviour
 {
+    private const string TIMER_LOG = "[SWORD_TIMER]";
+    private const float DEFAULT_HIT_FRACTION = 0.88f;
+    private const float DEFAULT_HIT_DELAY_SEC = 0.3f;
+    private const float DEFAULT_ATTACK_DURATION_MS = 1000f;
+
+    private sealed class AttackTimingContext
+    {
+        public int EntityId;
+        public int TargetEntityId;
+        public Transform AttackerTransform;
+        public Transform TargetTransform;
+        public float StartTimeSec;
+        public float DurationMs;
+        public float HitFraction;
+        public float LastElapsedMs;
+    }
+
+    private sealed class TimedSwordHit
+    {
+        public TrackedSword Tracked;
+        public int AttackerEntityId;
+        public int TargetEntityId;
+        public float StartTimeSec;
+        public float HitAtSec;
+        public bool Fired;
+
+        public TimedSwordHit(TrackedSword tracked, int attackerEntityId, int targetEntityId, float startTimeSec, float hitAtSec)
+        {
+            Tracked = tracked;
+            AttackerEntityId = attackerEntityId;
+            TargetEntityId = targetEntityId;
+            StartTimeSec = startTimeSec;
+            HitAtSec = hitAtSec;
+            Fired = false;
+        }
+    }
+
     public static SwordCollisionService Instance { get; private set; }
 
     public LayerMask _entityMask;
-    private List<TrackedSword> activeSwords = new List<TrackedSword>();
-    private Dictionary<Transform, Vector3> lastPositions = new Dictionary<Transform, Vector3>();
-    private Dictionary<Transform, HashSet<int>> hitRegistry = new Dictionary<Transform, HashSet<int>>();
-    private TrackedSword[] _warningDetele = new TrackedSword[3] { null, null, null};
-    //public event Action<RaycastHit, Transform, Transform> OnHitCollider;
+    private readonly List<TimedSwordHit> _activeTimedHits = new List<TimedSwordHit>();
+    private readonly Dictionary<Transform, HashSet<int>> _hitRegistry = new Dictionary<Transform, HashSet<int>>();
+    private readonly Dictionary<int, AttackTimingContext> _attackContextsByEntityId = new Dictionary<int, AttackTimingContext>();
 
     public event Action<Transform, Transform, Vector3, Vector3> OnHitCollider;
+
+    public void BeginAttack(int entityId, int targetEntityId, Transform attacker, Transform target, float attackDurationMs, float hitFraction = DEFAULT_HIT_FRACTION)
+    {
+        if (entityId <= 0) return;
+
+        float normalizedDurationMs = attackDurationMs > 0f ? attackDurationMs : DEFAULT_ATTACK_DURATION_MS;
+        float normalizedHitFraction = Mathf.Clamp01(hitFraction);
+        _attackContextsByEntityId[entityId] = new AttackTimingContext
+        {
+            EntityId = entityId,
+            TargetEntityId = targetEntityId,
+            AttackerTransform = attacker,
+            TargetTransform = target,
+            StartTimeSec = Time.time,
+            DurationMs = normalizedDurationMs,
+            HitFraction = normalizedHitFraction,
+            LastElapsedMs = 0f
+        };
+
+        string attackerName = attacker != null ? attacker.name : "null";
+        string targetName = target != null ? target.name : "null";
+        Debug.Log($"{TIMER_LOG} BeginAttack entityId={entityId} attacker={attackerName} target={targetName} durationMs={normalizedDurationMs:F1} hitFraction={normalizedHitFraction:F2}");
+    }
+
+    public void BeginAttack(int entityId, Transform attacker, Transform target, float attackDurationMs)
+    {
+        BeginAttack(entityId, 0, attacker, target, attackDurationMs);
+    }
+
+    public void UpdateAttackProgress(int entityId, float elapsedMs)
+    {
+        if (entityId <= 0) return;
+        if (!_attackContextsByEntityId.TryGetValue(entityId, out AttackTimingContext context)) return;
+        if (elapsedMs < 0f) return;
+        context.LastElapsedMs = elapsedMs;
+    }
+
+    public void EndAttack(int entityId)
+    {
+        if (entityId <= 0) return;
+        _attackContextsByEntityId.Remove(entityId);
+    }
 
     private void Awake()
     {
@@ -26,275 +99,146 @@ public class SwordCollisionService : MonoBehaviour
         _entityMask = LayerMask.GetMask("EntityClick");
     }
 
-
-    public void RegisterSword(Transform swordBase, Transform swordTip , Transform target , float extraRange)
+    public void RegisterSword(Transform swordBase, Transform swordTip, Transform target, float extraRange)
     {
-        if (swordBase == null || swordTip == null) return;
-
-        if(target == null)
-        {
-            Debug.LogWarning("SwordCollisionManager: RegisterSword: target == null mob is Dead?");
-            return;
-        }
-
-        if (activeSwords.Exists(s => s.basePt == swordBase))
-        {
-            ResetHitRegistry(swordBase);
-            return;
-        }
-
-
-        //Debug.Log("SwordCollisionManager: RegisterSword");
-        activeSwords.Add(new TrackedSword(swordBase, swordTip , target ,  extraRange));
-        lastPositions[swordBase] = swordBase.position;
-        lastPositions[swordTip] = swordTip.position;
-        ResetHitRegistry(swordBase);
+        Debug.LogWarning($"{TIMER_LOG} RegisterSword without entity ids is deprecated. Use RegisterSwordByEntityId.");
+        RegisterSwordByEntityId(0, 0, swordBase, swordTip, target, extraRange);
     }
 
+    public void RegisterSwordByEntityId(int attackerEntityId, int targetEntityId, Transform swordBase, Transform swordTip, Transform target, float extraRange)
+    {
+        if (swordBase == null || swordTip == null) return;
+        if (target == null)
+        {
+            Debug.LogWarning("SwordCollisionService: RegisterSword target is null");
+            return;
+        }
+
+        if (_activeTimedHits.Exists(s => s.Tracked.basePt == swordBase))
+        {
+            ResetHitRegistry(swordBase);
+            RecreateTimedHit(attackerEntityId, targetEntityId, swordBase, swordTip, target, extraRange);
+            return;
+        }
+
+        ResetHitRegistry(swordBase);
+        CreateTimedHit(attackerEntityId, targetEntityId, swordBase, swordTip, target, extraRange);
+    }
 
     public void ResetHitRegistry(Transform swordBase)
     {
-        if (!hitRegistry.ContainsKey(swordBase)) hitRegistry[swordBase] = new HashSet<int>();
-        hitRegistry[swordBase].Clear();
+        if (!_hitRegistry.ContainsKey(swordBase)) _hitRegistry[swordBase] = new HashSet<int>();
+        _hitRegistry[swordBase].Clear();
     }
 
     public void UnregisterSword(Transform swordBase)
     {
-        TrackedSword sword = activeSwords.Find(s => s.basePt == swordBase);
-        //Debug.Log("SwordCollisionManager: Удаление RegisterSword");
-        if (sword != null)
+        int idx = _activeTimedHits.FindIndex(s => s.Tracked.basePt == swordBase);
+        if (idx >= 0)
         {
-            activeSwords.Remove(sword);
-            lastPositions.Remove(sword.basePt);
-            lastPositions.Remove(sword.tipPt);
-            hitRegistry.Remove(swordBase);
+            _activeTimedHits.RemoveAt(idx);
+            _hitRegistry.Remove(swordBase);
         }
     }
 
-    void LateUpdate()
+    private void LateUpdate()
     {
-        if (activeSwords.Count == 0) return;
+        if (_activeTimedHits.Count == 0) return;
 
-        for (int i = activeSwords.Count - 1; i >= 0; i--)
+        float now = Time.time;
+        for (int i = _activeTimedHits.Count - 1; i >= 0; i--)
         {
-            var sword = activeSwords[i];
-            if (sword.basePt == null || sword.tipPt == null) continue;
-
-            Vector3 currentBase = sword.basePt.position;
-            Vector3 currentTip = sword.tipPt.position;
-
-  
-            if (lastPositions.ContainsKey(sword.basePt) && lastPositions.ContainsKey(sword.tipPt))
+            TimedSwordHit timed = _activeTimedHits[i];
+            Transform swordBase = timed.Tracked.basePt;
+            Transform target = timed.Tracked.target;
+            if (swordBase == null || target == null)
             {
-                Vector3 prevBase = lastPositions[sword.basePt];
-                Vector3 prevTip = lastPositions[sword.tipPt];
-
-                // ГЛАВНЫЙ МЕТОД: Проверка "полотна" взмаха
-                CheckSwordSwingPanel(prevBase, prevTip, currentBase, currentTip, sword , _warningDetele);
+                UnregisterSword(swordBase);
+                continue;
             }
 
-            if (_warningDetele[0] != null)
-            {
-                UnregisterSword(_warningDetele[0].basePt);
-                _warningDetele[0] = null;
+            if (timed.Fired || now < timed.HitAtSec) continue;
 
-                Debug.LogWarning("SwordCollisionManager: Sword was deleted " + PlayerEntity.Instance.RandomName);
-            }
-      
-            lastPositions[sword.basePt] = currentBase;
-            lastPositions[sword.tipPt] = currentTip;
+            EmitTimedHit(timed);
+            timed.Fired = true;
+            UnregisterSword(swordBase);
         }
     }
 
-
-    private void CheckSwordSwingPanel(Vector3 prevBase, Vector3 prevTip, Vector3 currBase, Vector3 currTip, TrackedSword sword , TrackedSword[] warningDetele)
+    private bool RegisterHit(Transform swordBase, int targetId)
     {
-        int rayCount = 6;
-        float swordThickness = 0.5f; // Радиус сферы (толщина лезвия)
-        float forwardReach = 0.4f;   // На сколько ПЕРЕД мечом мы ищем цель (те самые 20-30 см)
+        if (!_hitRegistry.ContainsKey(swordBase)) _hitRegistry[swordBase] = new HashSet<int>();
+        if (_hitRegistry[swordBase].Contains(targetId)) return false;
 
-        for (int i = 0; i <= rayCount; i++)
-        {
-            float t = (float)i / rayCount;
-
-            Vector3 start = Vector3.Lerp(prevBase, prevTip, t);
-            Vector3 end = Vector3.Lerp(currBase, currTip, t);
-
-            // Направление движения этой точки меча
-            Vector3 movementDir = (end - start).normalized;
-            // Расстояние, которое прошла точка + запас вперед
-            float dist = Vector3.Distance(start, end) + forwardReach;
-
-            if (dist > 0.01f)
-            {
-
-
- 
-                if (start == null)
-                {
-                    Debug.LogError("SwordCollisionService: 'start' reference is null (object destroyed)");
-                    return;
-                }
-
-        
-                if (swordThickness <= 0)
-                {
-                    Debug.LogError("SwordCollisionService: 'swordThickness' is invalid (value: " + swordThickness + ")");
-                    return;
-                }
-
-           
-                if (movementDir == null || movementDir.sqrMagnitude == 0)
-                {
-                    Debug.LogError("SwordCollisionService: 'movementDir' is null or zero vector");
-                    warningDetele[0] = sword;
-                    return;
-                }
-
-                if (Physics.SphereCast(start, swordThickness, movementDir, out RaycastHit hit, dist, _entityMask))
-                {
-                    Debug.Log("ON HIT! 1");
-                    if (RegisterHit(sword.basePt, hit.collider.GetInstanceID()))
-                    {
-                        try
-                        {
-                            Debug.Log("ON HIT! 2");
-                            OnHit(hit, sword);
-                            //OnHitCollider?.Invoke(hit, sword.basePt.parent, sword.tipPt);
-                            Debug.Log("SwordCollisionService: HIT Monster!");
-                            //DebugLineDraw.ShowDrawLineDebugNpc(sword.basePt.GetInstanceID(), start, hit.point, Color.red);
-                        }
-                        catch (Exception e) { 
-                            Debug.LogError(e);
-                        }
-
-
-                    }
-                }
-                else
-                {
-                    // Рисуем желтую линию — это то, где мы искали
-                   // DebugLineDraw.ShowDrawLineDebugNpc(sword.basePt.GetInstanceID(), start, start + movementDir * dist, Color.yellow);
-                }
-            }
-        }
-    }
-
-    // Вспомогательный метод для реестра попаданий (чтобы один взмах не бил 100 раз по одной цели)
-    private bool RegisterHit(Transform swordBase, int targetID)
-    {
-        if (!hitRegistry.ContainsKey(swordBase)) hitRegistry[swordBase] = new HashSet<int>();
-
-        if (hitRegistry[swordBase].Contains(targetID)) return false;
-
-        hitRegistry[swordBase].Add(targetID);
+        _hitRegistry[swordBase].Add(targetId);
         return true;
     }
 
-
-
-
-
-    private void OnHit(RaycastHit hit, TrackedSword sword)
+    private void CreateTimedHit(int attackerEntityId, int targetEntityId, Transform swordBase, Transform swordTip, Transform target, float extraRange)
     {
-        // Check if hit.transform is valid
-        Debug.Log("ON HIT! 3");
-        if (hit.transform == null)
-        {
-            Debug.LogError("OnHit: hit.transform is null");
-            return;
-        }
-
-        // Check if hit.transform.parent is valid
-        Debug.Log("ON HIT! 4");
-        if (hit.transform.parent == null)
-        {
-            Debug.LogError("OnHit: hit.transform.parent is null");
-            return;
-        }
-
-        Debug.Log("ON HIT! 5");
-        GameObject gameObject = hit.transform.parent.gameObject;
-        Debug.Log("ON HIT! 6");
-        Entity entity = gameObject.GetComponent<Entity>();
-        Debug.Log("ON HIT! 7");
-        // Check if sword is valid
-        if (sword == null)
-        {
-            Debug.Log("ON HIT! 8");
-            Debug.LogError("OnHit: sword is null");
-            return;
-        }
-
-        Debug.Log("ON HIT! 9");
-        // Check if sword.target is valid
-        if (sword.target == null)
-        {
-            Debug.Log("ON HIT! 10");
-            Debug.LogError("OnHit: sword.target is null");
-            return;
-        }
-
-        Debug.Log("ON HIT! 11");
-        GameObject targetGameObject = sword.target.gameObject;
-        Debug.Log("ON HIT! 12");
-        Entity targetEntity = targetGameObject.GetComponent<Entity>();
-
-        Debug.Log("ON HIT! 13");
-        if (targetEntity == null || entity == null)
-        {
-            Debug.Log("ON HIT! 14");
-            Debug.LogWarning("OnHit: Either targetEntity or entity is null");
-            return;
-        }
-
-        Debug.Log("ON HIT! 15");
-        // Check if sword.basePt is valid
-        if (sword.basePt == null)
-        {
-            Debug.Log("ON HIT! 16");
-            Debug.LogError("OnHit: sword.basePt is null");
-            return;
-        }
-
-        Debug.Log("ON HIT! 17");
-        if (sword.basePt.parent == null)
-        {
-            Debug.LogError("OnHit: sword.basePt.parent is null");
-            return;
-        }
-
-        Debug.Log("ON HIT! 18");
-        if (entity.IdentityInterlude.Id == targetEntity.IdentityInterlude.Id)
-        {
-            Debug.Log("ON HIT! 19");
-            Vector3 startPos = sword.basePt.position;
-
-            // Check if hit.point is valid
-            if (hit.point == null)
-            {
-                Debug.Log("ON HIT! 20");
-                Debug.LogError("OnHit: hit.point is null");
-                return;
-            }
-
-            Debug.Log("ON HIT! 21");
-            var hitDirection = VectorUtils.CalcHitDirection(hit.point, startPos);
-
-            // Check if OnHitCollider is valid before invoking
-            if (OnHitCollider != null)
-            {
-                Debug.Log("ON HIT! 22");
-                OnHitCollider?.Invoke(sword.basePt.parent, sword.target, hit.point, hitDirection);
-            }
-            else
-            {
-                Debug.Log("ON HIT! 23");
-                Debug.LogWarning("OnHit: OnHitCollider event is null");
-            }
-        }
+        float now = Time.time;
+        float delaySec = ResolveHitDelaySec(swordBase, attackerEntityId, targetEntityId, extraRange);
+        var tracked = new TrackedSword(swordBase, swordTip, target, extraRange);
+        _activeTimedHits.Add(new TimedSwordHit(tracked, attackerEntityId, targetEntityId, now, now + delaySec));
+        Debug.Log($"{TIMER_LOG} Register attacker={swordBase.name} target={target.name} delayMs={(delaySec * 1000f):F1}");
     }
 
+    private void RecreateTimedHit(int attackerEntityId, int targetEntityId, Transform swordBase, Transform swordTip, Transform target, float extraRange)
+    {
+        int idx = _activeTimedHits.FindIndex(s => s.Tracked.basePt == swordBase);
+        if (idx >= 0)
+        {
+            _activeTimedHits.RemoveAt(idx);
+        }
+        CreateTimedHit(attackerEntityId, targetEntityId, swordBase, swordTip, target, extraRange);
+    }
 
+    private float ResolveHitDelaySec(Transform swordBase, int attackerEntityId, int targetEntityId, float extraRange)
+    {
+        // Keep API-compatible override path: caller may pass custom delay in seconds.
+        if (extraRange > 0f) return extraRange;
+        if (swordBase == null) return DEFAULT_HIT_DELAY_SEC;
+
+        if (attackerEntityId > 0 && _attackContextsByEntityId.TryGetValue(attackerEntityId, out AttackTimingContext context))
+        {
+            if (targetEntityId > 0) context.TargetEntityId = targetEntityId;
+
+            float hitMomentMs = context.DurationMs * context.HitFraction;
+            float elapsedMs = Mathf.Max(0f, Mathf.Max(context.LastElapsedMs, (Time.time - context.StartTimeSec) * 1000f));
+            float remainingMs = Mathf.Max(0f, hitMomentMs - elapsedMs);
+            return TimeUtils.ConvertMsToSec(remainingMs);
+        }
+
+        return TimeUtils.ConvertMsToSec(DEFAULT_ATTACK_DURATION_MS * DEFAULT_HIT_FRACTION);
+    }
+
+    private void EmitTimedHit(TimedSwordHit timed)
+    {
+        Transform swordBase = timed.Tracked.basePt;
+        Transform target = timed.Tracked.target;
+        if (swordBase == null || target == null) return;
+
+        Entity attackerEntity = GetEntityById(timed.AttackerEntityId);
+        Entity targetEntity = GetEntityById(timed.TargetEntityId);
+        Transform attackerAnchor = attackerEntity != null ? attackerEntity.transform : swordBase;
+        Transform targetAnchor = targetEntity != null ? targetEntity.transform : target;
+        Transform hitAnchor = HitAnchorResolver.ResolveHitAnchor(targetEntity, targetAnchor);
+        int targetId = targetAnchor.GetInstanceID();
+        if (!RegisterHit(swordBase, targetId)) return;
+
+        Vector3 hitPoint = hitAnchor != null ? hitAnchor.position : targetAnchor.position;
+        Vector3 hitDirection = VectorUtils.CalcHitDirection(hitPoint, swordBase.position);
+
+        OnHitCollider?.Invoke(attackerAnchor, targetAnchor, hitPoint, hitDirection);
+
+        float elapsedMs = (Time.time - timed.StartTimeSec) * 1000f;
+        Debug.Log($"{TIMER_LOG} Hit attacker={attackerAnchor.name} target={targetAnchor.name} elapsedMs={elapsedMs:F1} hitPoint={hitPoint}");
+    }
+
+    private Entity GetEntityById(int entityId)
+    {
+        if (entityId <= 0 || World.Instance == null) return null;
+        return World.Instance.GetEntityNoLockSync(entityId);
+    }
 
 }

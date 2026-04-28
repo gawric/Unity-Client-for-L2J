@@ -7,9 +7,10 @@ using UnityEngine.ProBuilder;
 
 public class ProjectileManager : AbstractProjectile, IProjectileManager
 {
+    private const string PROJECTILE_TIMER_LOG = "[PROJECTILE_TIMER]";
     [SerializeField] public ProjectileData defaultSettings;
     public event Action<GameObject, Transform, Vector3, Vector3> OnHitMonster;
-    public event Action<GameObject, Transform, Vector3, Vector3> OnHitEffectProjectile;
+    public event Action<GameObject, Transform, Vector3, Vector3, int> OnHitEffectProjectile;
 
     private Dictionary<int, ProjectileData> activeProjectiles = new Dictionary<int, ProjectileData>();
     private int nextId = 0;
@@ -39,6 +40,7 @@ public class ProjectileManager : AbstractProjectile, IProjectileManager
             return -1;
         }
         HIT_OFFSET = offset;
+        int attackerEntityId = ResolveProjectileAttackerEntityId(readyProjectile);
         ClearParentObject(readyProjectile);
 
         Vector3 adjustedTarget = VectorUtils.GetCollision(startPos, target);
@@ -54,6 +56,7 @@ public class ProjectileManager : AbstractProjectile, IProjectileManager
 
         ProjectileData projectileData = CreateData(projectileId, distance, readyProjectile, startPos, target,
             adjustedTarget, requiredSpeed, settings, defaultSettings);
+        projectileData.attackerEntityId = attackerEntityId;
 
 
         projectileData.flytime = flightTime;
@@ -191,15 +194,35 @@ public class ProjectileManager : AbstractProjectile, IProjectileManager
 
         if (journeyProgress >= 1f)
         {
-            CheckProjectileCollision(projectile, currentPosition, projectile.lastPosition);
+            if (projectile.impactType != ProjectileImpactType.EffectOnly)
+            {
+                CheckProjectileCollision(projectile, currentPosition, projectile.lastPosition);
+            }
             SetPosition(projectile, projectile.targetPosition);
             projectile.lastPosition = currentPosition;
-            RefreshHitPosition(projectile);
+            if (projectile.impactType == ProjectileImpactType.EffectOnly)
+            {
+                RefreshHitPositionFromAnchor(projectile);
+            }
+            else
+            {
+                RefreshHitPosition(projectile);
+            }
             LogProjectileImpactTiming(projectile);
 
             if (projectile.impactType == ProjectileImpactType.EffectOnly)
             {
-                OnHitEffectProjectile?.Invoke(projectile.prefab, projectile.targetTransform, projectile.hitPoint, projectile.hitDirection);
+                bool hasSubscribers = OnHitEffectProjectile != null;
+                Debug.Log(
+                    $"{PROJECTILE_TIMER_LOG} EffectOnlyTimeHit id={projectile.id} " +
+                    $"elapsedSec={(Time.time - projectile.startTime):F3} flyTimeSec={projectile.flytime:F3} " +
+                    $"eventSubscribers={hasSubscribers} hitPoint={projectile.hitPoint}");
+                OnHitEffectProjectile?.Invoke(
+                    projectile.prefab,
+                    projectile.targetTransform,
+                    projectile.hitPoint,
+                    projectile.hitDirection,
+                    projectile.attackerEntityId);
             }
             else
             {
@@ -208,7 +231,10 @@ public class ProjectileManager : AbstractProjectile, IProjectileManager
             return false;
         }
 
-        CheckProjectileCollision(projectile, currentPosition, projectile.lastPosition);
+        if (projectile.impactType != ProjectileImpactType.EffectOnly)
+        {
+            CheckProjectileCollision(projectile, currentPosition, projectile.lastPosition);
+        }
         SetPosition(projectile, currentPosition);
 
         if (projectile.targetTransform != null)
@@ -223,6 +249,44 @@ public class ProjectileManager : AbstractProjectile, IProjectileManager
 
         projectile.lastPosition = currentPosition;
         return true;
+    }
+
+    private int ResolveProjectileAttackerEntityId(GameObject projectilePrefab)
+    {
+        if (projectilePrefab == null)
+        {
+            return 0;
+        }
+
+        Entity ownerEntity = projectilePrefab.GetComponentInParent<Entity>();
+        if (ownerEntity != null && ownerEntity.IdentityInterlude != null)
+        {
+            return ownerEntity.IdentityInterlude.Id;
+        }
+
+        if (PlayerEntity.Instance != null && PlayerEntity.Instance.IdentityInterlude != null)
+        {
+            return PlayerEntity.Instance.IdentityInterlude.Id;
+        }
+
+        return 0;
+    }
+
+    private void RefreshHitPositionFromAnchor(ProjectileData projectile)
+    {
+        if (projectile == null)
+        {
+            return;
+        }
+
+        Transform fallbackTarget = projectile.targetTransform;
+        Entity targetEntity = fallbackTarget != null ? fallbackTarget.GetComponentInParent<Entity>() : null;
+        Transform anchor = HitAnchorResolver.ResolveHitAnchor(targetEntity, fallbackTarget);
+        Vector3 hitPoint = anchor != null ? anchor.position : projectile.targetPosition;
+
+        projectile.hitPoint = hitPoint;
+        projectile.hitNormal = Vector3.up;
+        projectile.hitDirection = VectorUtils.CalcHitDirection(hitPoint, projectile.startPosition);
     }
 
     private void LogProjectileImpactTiming(ProjectileData projectile)

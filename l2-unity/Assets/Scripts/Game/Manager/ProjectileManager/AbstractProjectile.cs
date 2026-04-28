@@ -118,9 +118,11 @@ public class AbstractProjectile : MonoBehaviour
             projectile.hitNormalCollider = hit.normal;
             projectile.hitDirection = VectorUtils.CalcHitDirection(hit.point, projectile.startPosition);
 
-
-
-            OnHitCollider?.Invoke(projectile.prefab.transform, projectile.targetTransform, projectile.hitPointCollider, projectile.hitDirection);
+            // Effect-only projectile hit is time-based at end-of-flight, not collider-based.
+            if (projectile.impactType != ProjectileImpactType.EffectOnly)
+            {
+                OnHitCollider?.Invoke(projectile.prefab.transform, projectile.targetTransform, projectile.hitPointCollider, projectile.hitDirection);
+            }
         }
     }
 

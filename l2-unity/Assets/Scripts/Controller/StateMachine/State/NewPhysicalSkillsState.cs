@@ -1,4 +1,5 @@
 ﻿using System.Threading;
+using UnityEditorInternal;
 using UnityEngine;
 
 
@@ -35,7 +36,9 @@ public class NewPhysicalSkillsState : AbstractAttackEvents
                 SkillExecutor.Instance.ExecuteSkill(_stateMachine.Player, combo , _events);
                 break;
             case Event.APPLY_SOULSHOT_CHARGED:
+                Debug.Log("NewPhysicalSkillsState Charge sulshots");
                 Transform transform = _stateMachine.Player.GetWeaponTransform();
+                _stateMachine.Player.IsSoulshotCharged = true;
                 EffectManager.Instance.PlayEffect(useSkill.SkillId , transform);
                 break;
 

@@ -52,6 +52,7 @@ public class CompositePrefabPart
 
 public class CompositePrefabEffect : TimedCompositeEffectBase
 {
+    private const float HIT_DIRECTION_YAW_OFFSET_DEGREES = 90f;
     [SerializeField] private CompositePrefabPart[] _parts;
     [SerializeField] private float _serverHitLifetimeTailSeconds = 0f;
 
@@ -68,6 +69,7 @@ public class CompositePrefabEffect : TimedCompositeEffectBase
     private AnimationEventsBase _animationEvents;
     private float _playStartedAt;
     private bool _isSubscribedToAnyShoot;
+    private bool _isSubscribedToProjectileEffectHit;
     protected override string DebugPrefix => "[CompositePrefabEffect]";
     protected override float RuntimeLifeTimeTailSeconds => _serverHitLifetimeTailSeconds;
 
@@ -210,14 +212,26 @@ public class CompositePrefabEffect : TimedCompositeEffectBase
             DebugPrefix);
     }
 
-    private void HandleHitManagerCollider(Transform attacker, MonsterStateMachine targetStateMachine, Vector3 hitPointCollider, Vector3 hitDirection)
+    private void HandleProjectileEffectHit(GameObject projectilePrefab, Transform target, Vector3 hitPoint, Vector3 hitDirection, int attackerEntityId)
     {
-        if (_pendingHitColliderParts.Count == 0 || attacker == null)
+        if (_pendingHitColliderParts.Count == 0 || projectilePrefab == null)
         {
             return;
         }
 
-        if (!IsFromLaunchedCompositeProjectile(attacker))
+        if (HitManager.Instance == null)
+        {
+            return;
+        }
+
+        if (!HitManager.Instance.TryPrepareProjectileEffectHit(
+                projectilePrefab,
+                hitPoint,
+                hitDirection,
+                attackerEntityId,
+                IsFromLaunchedCompositeProjectile,
+                out Vector3 resolvedHitPoint,
+                out Vector3 resolvedHitDirection))
         {
             return;
         }
@@ -226,12 +240,13 @@ public class CompositePrefabEffect : TimedCompositeEffectBase
         Vector3 previousHitPoint = hadHitPoint ? _context.HitPoint : Vector3.zero;
         bool hadHitDirection = _context != null && _context.HasHitDirection;
         Vector3 previousHitDirection = hadHitDirection ? _context.HitDirection : Vector3.forward;
+
         if (_context != null)
         {
             _context.HasHitPoint = true;
-            _context.HitPoint = hitPointCollider;
-            _context.HasHitDirection = hitDirection.sqrMagnitude > 0.0001f;
-            _context.HitDirection = _context.HasHitDirection ? hitDirection.normalized : Vector3.forward;
+            _context.HitPoint = resolvedHitPoint;
+            _context.HasHitDirection = true;
+            _context.HitDirection = resolvedHitDirection;
         }
 
         for (int i = 0; i < _pendingHitColliderParts.Count; i++)
@@ -352,7 +367,10 @@ public class CompositePrefabEffect : TimedCompositeEffectBase
             _context.HasHitDirection &&
             _context.HitDirection.sqrMagnitude > 0.0001f)
         {
-            return Quaternion.LookRotation(_context.HitDirection.normalized);
+            // Impact VFX meshes are authored with local forward offset from Unity Z forward.
+            // Apply yaw compensation so hit flashes face the incoming hit direction visually.
+            return Quaternion.LookRotation(_context.HitDirection.normalized) *
+                   Quaternion.Euler(0f, HIT_DIRECTION_YAW_OFFSET_DEGREES, 0f);
         }
 
         return CompositeEffectUtilities.ResolveSpawnRotation(part != null && part.inheritRotation, resolvedTransform);
@@ -561,23 +579,20 @@ public class CompositePrefabEffect : TimedCompositeEffectBase
             return;
         }
 
-        if (HitManager.Instance == null)
+        if (ProjectileManager.Instance != null && !_isSubscribedToProjectileEffectHit)
         {
-            return;
+            ProjectileManager.Instance.OnHitEffectProjectile += HandleProjectileEffectHit;
+            _isSubscribedToProjectileEffectHit = true;
         }
-
-        HitManager.Instance.OnHitColliderHandled -= HandleHitManagerCollider;
-        HitManager.Instance.OnHitColliderHandled += HandleHitManagerCollider;
     }
 
     private void UnsubscribeProjectileHitEvent()
     {
-        if (HitManager.Instance == null)
+        if (ProjectileManager.Instance != null && _isSubscribedToProjectileEffectHit)
         {
-            return;
+            ProjectileManager.Instance.OnHitEffectProjectile -= HandleProjectileEffectHit;
+            _isSubscribedToProjectileEffectHit = false;
         }
-
-        HitManager.Instance.OnHitColliderHandled -= HandleHitManagerCollider;
     }
 
     private bool RequiresHitColliderSpawn()

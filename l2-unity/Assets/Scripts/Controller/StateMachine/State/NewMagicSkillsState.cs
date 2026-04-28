@@ -50,18 +50,12 @@ public class NewMagicSkillsState  : AbstractAttackEvents
 
         if (entity == null || entity.Target == null)
         {
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
-            Debug.Log($"[MagicFlightResolve] distance=-1 resolvedFlightMs={fallbackFlightMs:F1} mode=fallback_no_target");
-#endif
             return fallbackFlightMs;
         }
 
         float distance = entity.TargetDistance();
         if (distance <= 0f)
         {
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
-            Debug.Log($"[MagicFlightResolve] distance={distance:F3} resolvedFlightMs={fallbackFlightMs:F1} mode=fallback_non_positive_distance");
-#endif
             return fallbackFlightMs;
         }
 
@@ -69,11 +63,6 @@ public class NewMagicSkillsState  : AbstractAttackEvents
         float flightSeconds = ProjectileFlightTimeCalculator.CalculateFlightTime(distance, speed, projectileHitOffsetSeconds);
         float resolvedFlightMs = Mathf.Max(minFlightMs, flightSeconds * 1000f);
 
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
-        Debug.Log(
-            $"[MagicFlightResolve] distance={distance:F3}m speed={speed:F3}mps flightSeconds={flightSeconds:F3} " +
-            $"resolvedFlightMs={resolvedFlightMs:F1} mode=projectile_calculator_sync");
-#endif
         return resolvedFlightMs;
     }
 }

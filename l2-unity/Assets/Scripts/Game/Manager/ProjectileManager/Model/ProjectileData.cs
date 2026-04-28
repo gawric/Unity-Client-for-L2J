@@ -28,6 +28,7 @@ public class ProjectileData
         gravityScale = 1f;
         isActive = true;
         impactType = ProjectileImpactType.ArrowStick;
+        attackerEntityId = 0;
     }
 
     public ProjectileData(GameObject prefabGo , Transform transform1 , Vector3 startPos , Transform endPos)
@@ -48,6 +49,7 @@ public class ProjectileData
         gravityScale = 1f;
         isActive = true;
         impactType = ProjectileImpactType.ArrowStick;
+        attackerEntityId = 0;
     }
 
     public ProjectileData(ProjectileData other)
@@ -70,6 +72,7 @@ public class ProjectileData
             flytime = other.flytime;
             isActive = other.isActive;
             impactType = other.impactType;
+            attackerEntityId = other.attackerEntityId;
         }
 
     }
@@ -113,4 +116,5 @@ public class ProjectileData
     public float castServerShootSnapshot;
     public float castServerHitSnapshot;
     public float projectileLaunchGlobalFromCast;
+    public int attackerEntityId;
 }

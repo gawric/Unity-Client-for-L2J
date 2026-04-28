@@ -1,5 +1,4 @@
 ﻿
-using System.Threading;
 using UnityEngine;
 
 
@@ -28,7 +27,21 @@ public class NewAttackState : AbstractAttackEvents
         {
             case Event.READY_TO_ACT:
                 Debug.Log("Attack Sate to Intention> начало новой atk пришел запрос от сервера");
-                RotateFaceToMonster(_stateMachine.Player);
+                AttackTimingHelper.RotateFaceToMonster(_stateMachine.Player);
+                Entity targetEntity = _stateMachine.Player.GetTargetEntity();
+
+                int targetEntityId = targetEntity != null && targetEntity.IdentityInterlude != null ? targetEntity.IdentityInterlude.Id : 0;
+                float attackDurationMs = AttackTimingHelper.ResolveServerLikeAttackDurationMs(_stateMachine.Player);
+                float hitFraction = AttackTimingHelper.ResolveHitFractionByWeapon(_stateMachine.Player);
+               
+                SwordCollisionService.Instance.BeginAttack(
+                    _stateMachine.Player.IdentityInterlude.Id,
+                    targetEntityId,
+                    _stateMachine.Player.transform,
+                    targetEntity != null ? targetEntity.transform : _stateMachine.Player.Target,
+                    attackDurationMs,
+                    hitFraction);
+
                 PlayerEntity.Instance.RefreshRandomPAttack();
                 Animation random = PlayerEntity.Instance.RandomName;
                 AnimationManager.Instance.PlayAnimationTrigger(_stateMachine.GetObjectId() , random.ToString());
@@ -43,55 +56,4 @@ public class NewAttackState : AbstractAttackEvents
 
         }
     }
-
-
-
-
-
-
-
-
-    private void RotateFaceToMonster(Entity entity)
-    {
-        Transform monster = PlayerEntity.Instance.Target;
-        if (monster == null) return;
-
-  
-        RotationService.Instance.RotateTowards(entity.transform, monster.position,  () =>
-        {
-            float monsterHeight = monster.GetComponent<Entity>().Appearance.CollisionHeight;
-            Vector3 monsterFacePosition = monster.position + Vector3.up * (monsterHeight * 0.8f);
-
-            Vector3 startPoint = entity.transform.position + Vector3.up * 1.5f;
-            Vector3 lookDir = (monsterFacePosition - startPoint).normalized;
-            float verticalAngle = Mathf.Asin(lookDir.y) * Mathf.Rad2Deg;
-
-            // --- НАСТРОЙКА СПИНЫ ---
-            // Берем 40% от общего угла для естественности
-            float spineAngle = Mathf.Clamp(verticalAngle * 0.4f, -15f, 10f);
-            Vector3 spineRotation = new Vector3(0, 0, spineAngle);
-
-            // --- НАСТРОЙКА РУКИ ---
-            // Добавляем еще 30% наклона именно для руки, чтобы она била ниже
-            float armAngle = Mathf.Clamp(verticalAngle * 0.3f, -20f, 10f);
-            Vector3 armRotation = new Vector3(0, 0, armAngle);
-            // ВНИМАНИЕ: Если рука крутится не туда, проверьте ось (возможно, нужна X вместо Z)
-
-            // 4. Применяем через ваш PlayerEntity и SpineProceduralController
-            PlayerEntity playerEntity = (PlayerEntity)entity;
-
-            // Применяем к позвоночнику (вы уже настроили это в SetProceduralPose)
-            playerEntity.SetProceduralSpinePose(spineRotation);
-            playerEntity.SetProceduralRightUpperArmPose(armRotation);
-        });
-
-        //DebugLineDraw.ShowDrawLineDebugNpc(-1, startPoint, lookDir * 3f, Color.black);
-    }
-
-
-
-
-
-
-
 }

@@ -3,21 +3,70 @@
 public abstract class AbstractAttackEvents : StateBase
 {
     private const int WOODEN_ARROW = 17;
+    private const string PROJECTILE_CHAIN_LOG = "[PROJECTILE_CHAIN]";
     protected AnimationEventsBase _events;
     private Animation[] _specialsBows;
+    private bool _isSubscribed;
     public AbstractAttackEvents(int objectId , Animation[] specialsBows, PlayerStateMachine stateMachine = null ) : base(stateMachine)
     {
         _specialsBows = specialsBows;
         _events = AnimationManager.Instance.GetAnimationEvents(objectId);
-        _events.OnAnimationFinished += CallBackAnimationFinish;
-        _events.OnAnimationStartShoot += CallBackStartShoot;
-        _events.OnAnimationFinishedHit += CallBackFinishedHit;
-        _events.OnAnimationStartLoadArrow += CallBackLoadArrow;
-        _events.OnAnimationStartHit += CallBackStartHit;
+    }
 
-        ProjectileManager.Instance.OnHitMonster += OnHitBodyMonster;
-        ProjectileManager.Instance.OnHitCollider += OnHitColliderMonster;
-        SwordCollisionService.Instance.OnHitCollider += OnHitColliderMonster;
+    public override void Enter()
+    {
+        base.Enter();
+        if (_isSubscribed) return;
+
+        if (_events != null)
+        {
+            _events.OnAnimationFinished += CallBackAnimationFinish;
+            _events.OnAnimationStartShoot += CallBackStartShoot;
+            _events.OnAnimationFinishedHit += CallBackFinishedHit;
+            _events.OnAnimationStartLoadArrow += CallBackLoadArrow;
+            _events.OnAnimationStartHit += CallBackStartHit;
+        }
+
+        if (ProjectileManager.Instance != null)
+        {
+            ProjectileManager.Instance.OnHitMonster += OnHitBodyMonster;
+            ProjectileManager.Instance.OnHitCollider += OnHitColliderMonster;
+            ProjectileManager.Instance.OnHitEffectProjectile += OnHitEffectProjectile;
+        }
+        if (SwordCollisionService.Instance != null)
+        {
+            SwordCollisionService.Instance.OnHitCollider += OnHitColliderMonster;
+        }
+
+        _isSubscribed = true;
+    }
+
+    public override void Exit()
+    {
+        base.Exit();
+        if (!_isSubscribed) return;
+
+        if (_events != null)
+        {
+            _events.OnAnimationFinished -= CallBackAnimationFinish;
+            _events.OnAnimationStartShoot -= CallBackStartShoot;
+            _events.OnAnimationFinishedHit -= CallBackFinishedHit;
+            _events.OnAnimationStartLoadArrow -= CallBackLoadArrow;
+            _events.OnAnimationStartHit -= CallBackStartHit;
+        }
+
+        if (ProjectileManager.Instance != null)
+        {
+            ProjectileManager.Instance.OnHitMonster -= OnHitBodyMonster;
+            ProjectileManager.Instance.OnHitCollider -= OnHitColliderMonster;
+            ProjectileManager.Instance.OnHitEffectProjectile -= OnHitEffectProjectile;
+        }
+        if (SwordCollisionService.Instance != null)
+        {
+            SwordCollisionService.Instance.OnHitCollider -= OnHitColliderMonster;
+        }
+
+        _isSubscribed = false;
     }
 
 
@@ -147,8 +196,11 @@ public abstract class AbstractAttackEvents : StateBase
         {
             Transform swordBase = swordBasePoints[0];
             Transform swordTip = swordBasePoints[1];
-            Transform target = PlayerEntity.Instance.Target;
-            SwordCollisionService.Instance.RegisterSword(swordBase, swordTip, target, 0);
+            Entity targetEntity = entity.GetTargetEntity();
+            Transform target = targetEntity != null ? targetEntity.transform : PlayerEntity.Instance.Target;
+            int attackerEntityId = entity.IdentityInterlude != null ? entity.IdentityInterlude.Id : 0;
+            int targetEntityId = targetEntity != null && targetEntity.IdentityInterlude != null ? targetEntity.IdentityInterlude.Id : 0;
+            SwordCollisionService.Instance.RegisterSwordByEntityId(attackerEntityId, targetEntityId, swordBase, swordTip, target, 0);
         }
     }
 
@@ -168,11 +220,18 @@ public abstract class AbstractAttackEvents : StateBase
             if (!_stateMachine.Player.HitIsMissed())
             {
                 
-                HitManager.Instance.HandleHitCollider(attacker, monster.GetStateMachine(), hitPointCollider, hitDirection);
+                HitManager.Instance.HandleHitCollider(PlayerEntity.Instance , attacker, monster.GetStateMachine(), hitPointCollider, hitDirection);
             }
 
             IfMonsterDead(PlayerEntity.Instance.GetTargetEntity());
         }
 
+    }
+
+    private void OnHitEffectProjectile(GameObject prefab, Transform target, Vector3 hitPointCollider, Vector3 hitDirection, int attackerEntityId)
+    {
+        string prefabName = prefab != null ? prefab.name : "null";
+        string targetName = target != null ? target.name : "null";
+        Debug.Log($"{PROJECTILE_CHAIN_LOG} OnHitEffectProjectile prefab={prefabName} target={targetName} attackerId={attackerEntityId} point={hitPointCollider} dir={hitDirection}");
     }
 }
