@@ -6,7 +6,18 @@ public class PlayerOverriddenMagicAtk : StateMachineBehaviour
     private const string TriggerCastEnd = "CastEnd";
     private const string TriggerMagicShot = "MagicShot";
     private const float ShotBlendCompensationSeconds = 0.06f;
+    /// <summary>
+    /// Принудительный MagicShot по wall-clock во время CastEnd (включено только при EnableForceSync = true и HitTime пороге ниже).
+    /// Сейчас выключено — только SkillAnimationRunner.
+    /// </summary>
+    private const bool EnableForceSync = false;
+
+    /// <summary>
+    /// ForceSync только когда server HitTime >= этого порога (сек). Короче 2 с — только runner, без принудительного MagicShot.
+    /// </summary>
+    private const float ForceSyncMinServerHitTimeSeconds = 2f;
     private const string ShotSourceForceSync = "ForceSync";
+    private const string MagicSpeedTraceTag = "[MAGIC_SPEED_TRACE]";
 
     private MagicCastData _castData;
     private bool _isSwitchIdle;
@@ -68,6 +79,26 @@ public class PlayerOverriddenMagicAtk : StateMachineBehaviour
                 $"hit={_castData.HitTime:F3}s flight={_castData.FlightTime:F3}s serverShoot={_castData.serverTimeToShoot:F3}s " +
                 $"shotEvent={_castData.shotEventTime:F3}s speedMid={_castData.SpeedMid:F3} " +
                 $"speedEnd={_castData.SpeedEnd:F3} speedShot={_castData.SpeedShot:F3}.");
+
+            Debug.Log(
+                $"{MagicSpeedTraceTag} ENTER state={parameterName} idx={stateIndex} final={isFinalShotState} " +
+                $"appliedSpeed={targetSpeed:F3} speedMid={_castData.SpeedMid:F3} speedEnd={_castData.SpeedEnd:F3} speedShot={_castData.SpeedShot:F3} " +
+                $"shootAt={_castData.serverTimeToShoot:F3}s shotEvent={_castData.shotEventTime:F3}s");
+
+            if (stateIndex == 1)
+            {
+                if (!EnableForceSync)
+                {
+                    Debug.Log(
+                        $"{MagicSpeedTraceTag} ForceSync OFF globally (runner-only); serverHit={_castData.HitTime:F3}s.");
+                }
+                else if (!IsHitTimeInsideForceSyncBand(_castData))
+                {
+                    Debug.Log(
+                        $"{MagicSpeedTraceTag} ForceSync skipped serverHit={_castData.HitTime:F3}s " +
+                        $"(need HitTime>={ForceSyncMinServerHitTimeSeconds:F0}s); runner-only.");
+                }
+            }
         }
 
         Debug.Log(
@@ -87,7 +118,7 @@ public class PlayerOverriddenMagicAtk : StateMachineBehaviour
         float globalElapsed = Time.time - _castData.StartTime;
          Debug.Log($"[AnimLog] {parameterName} | Local: {localElapsed:F3}s | Global: {globalElapsed:F3}s | Layer: {layerIndex} | Animator: {animator.GetInstanceID()}");
 
-        if (!_forcedShotTriggered && stateIndex == 1 && !isFinalShotState)
+        if (!_forcedShotTriggered && stateIndex == 1 && !isFinalShotState && ShouldUseForceSync(_castData))
         {
             float rawShootAt = Mathf.Max(0.01f, _castData.serverTimeToShoot);
             float shotEventLeadTime = Mathf.Max(0f, _castData.shotEventTime);
@@ -101,7 +132,11 @@ public class PlayerOverriddenMagicAtk : StateMachineBehaviour
                 _forcedShotTriggered = true;
                 // Global animator slowdown (CastEnd speed) also slows state transitions.
                 // Restore normal speed right before forcing MagicShot to avoid delayed transition.
+                float speedBeforeForce = animator.speed;
                 animator.speed = 1.0f;
+                Debug.Log(
+                    $"{MagicSpeedTraceTag} FORCE_SYNC state={parameterName} global={globalElapsed:F3}s " +
+                    $"speedBeforeForce={speedBeforeForce:F3} speedAfterForce={animator.speed:F3} rawShootAt={rawShootAt:F3}s compShootAt={compensatedShootAt:F3}s");
                 int objectId = animator.GetInteger(AnimatorUtils.OBJECT_ID);
                 if (MagicShotCoordinator.TryStartShot(objectId, _castData, ShotSourceForceSync, out string coordinatorMessage))
                 {
@@ -144,6 +179,9 @@ public class PlayerOverriddenMagicAtk : StateMachineBehaviour
                 Debug.Log($"<color=cyan>[FIRE_SYNC]</color> ВЫСТРЕЛ! " +
                           $"Global: {globalElapsed:F3}s (Цель: {_castData.HitTime - _castData.FlightTime:F3}s) | " +
                           $"Разница: {globalElapsed - (_castData.HitTime - _castData.FlightTime):F4}s");
+                Debug.Log(
+                    $"{MagicSpeedTraceTag} FIRE_SYNC state={parameterName} local={localElapsed1:F3}s clipTime={currentClipTime:F3}s " +
+                    $"eventTime={_eventTimeInClip:F3}s animSpeed={animator.speed:F3}");
             }
         }
 
@@ -156,7 +194,14 @@ public class PlayerOverriddenMagicAtk : StateMachineBehaviour
 
     override public void OnStateExit(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
-        animator.speed = 1.0f;
+        // Only reset animator.speed when leaving MagicShot (stateIndex 2). Intermediate exits
+        // (CastMid / CastEnd) must not set speed=1: Unity can call the next state's OnStateEnter
+        // before the previous state's OnStateExit, so Exit would overwrite SpeedShot and
+        // OnAnimationShoot runs at animSpeed=1 (FIRE_SYNC vs CastTimingSetup mismatch).
+        if (stateIndex == 2)
+        {
+            animator.speed = 1.0f;
+        }
 
         float finalLocalTime = Time.time - _stateEnterTime;
         float globalSinceCastStart = (_castData != null) ? (Time.time - _castData.StartTime) : -1f;
@@ -179,6 +224,16 @@ public class PlayerOverriddenMagicAtk : StateMachineBehaviour
         PlayerEntity.Instance.IsAttack = false;
         PlayerStateMachine.Instance.ChangeIntention(Intention.INTENTION_IDLE);
         PlayerStateMachine.Instance.NotifyEvent(Event.WAIT_RETURN);
+    }
+
+    private static bool ShouldUseForceSync(MagicCastData castData)
+    {
+        return castData != null && EnableForceSync && IsHitTimeInsideForceSyncBand(castData);
+    }
+
+    private static bool IsHitTimeInsideForceSyncBand(MagicCastData castData)
+    {
+        return castData != null && castData.HitTime >= ForceSyncMinServerHitTimeSeconds;
     }
 
     private void StopAnimationTrigger(Animator animator, string parameterName)

@@ -4,6 +4,9 @@ using UnityEngine;
 public class ParticleGroup : EffectPart
 {
     private const string DebugTraceEffectName = "el_wind_strike_ta";
+    private const string IceBoltTaEffectName = "el_ice_bolt_ta";
+    private const string IcebergGroupName = "iceberg";
+    private const string IcefragGroupName = "icefrag";
     [SerializeField] private L2Particle _owner;
     [SerializeField] private Renderer[] _particles;
     [Header("Spawning (Настройки появления)")]
@@ -37,6 +40,9 @@ public class ParticleGroup : EffectPart
     private bool _hasRuntimeContinuousLoopOverride;
     private bool _runtimeContinuousLoopOverrideValue;
     private bool _debugFirstSpawnLogged;
+    private int _icebergPlayCount;
+    private int _icebergSlotOnCount;
+    private int _icebergSlotAutoOffCount;
 
     public void FixedUpdate()
     {
@@ -59,6 +65,23 @@ public class ParticleGroup : EffectPart
                     anyActive = true;
                     if (now - _particleSpawnTimes[i] >= _duration)
                     {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+                        if (ShouldTraceIcefrag())
+                        {
+                            Debug.Log(
+                                $"[ICEFRAG_SLOT_AUTO_OFF] group='{name}' slot={i} now={now:F3}s " +
+                                $"aliveFor={(now - _particleSpawnTimes[i]):F3}s duration={_duration:F3}s.");
+                        }
+
+                        if (ShouldTraceIcebergDuration())
+                        {
+                            _icebergSlotAutoOffCount += 1;
+                            Debug.Log(
+                                $"[ICEBERG_SLOT_AUTO_OFF] group='{name}' slot={i} now={now:F3}s " +
+                                $"aliveFor={(now - _particleSpawnTimes[i]):F3}s duration={_duration:F3}s " +
+                                $"slotAutoOffCount={_icebergSlotAutoOffCount} frame={Time.frameCount}.");
+                        }
+#endif
                         //Debug.Log($"<color=orange>[Particle DIE]</color> {gameObject.name} слот [{i}] выключен.");
                         _particles[i].gameObject.SetActive(false);
                         _isParticleActive[i] = false;
@@ -126,6 +149,23 @@ public class ParticleGroup : EffectPart
         _isParticleActive[_particleIndex] = true;
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
+        if (ShouldTraceIcefrag())
+        {
+            Debug.Log(
+                $"[ICEFRAG_SLOT_ON] group='{name}' slot={_particleIndex} now={now:F3}s " +
+                $"activeSelf={pObj.activeSelf} duration={_duration:F3}s spawnedCount={_spawnedCount + 1}/{_maxCount} " +
+                $"countPerSec={_countPerSecond} startDelay={_startDelay:F3}s mat={BuildMaterialLifetimeSnapshot(_particles[_particleIndex])}.");
+        }
+
+        if (ShouldTraceIcebergDuration())
+        {
+            _icebergSlotOnCount += 1;
+            Debug.Log(
+                $"[ICEBERG_SLOT_ON] group='{name}' slot={_particleIndex} now={now:F3}s " +
+                $"duration={_duration:F3}s spawnedCount={_spawnedCount + 1}/{_maxCount} " +
+                $"countPerSec={_countPerSecond} slotOnCount={_icebergSlotOnCount} frame={Time.frameCount}.");
+        }
+
         if (ShouldTraceDebug() && !_debugFirstSpawnLogged)
         {
             _debugFirstSpawnLogged = true;
@@ -214,6 +254,26 @@ public class ParticleGroup : EffectPart
                 $"burst={_isBurstSpawning} countPerSec={_countPerSecond} maxCount={_maxCount} " +
                 $"duration={_duration:F3}s fixedDuration={_hasFixedDuration} forceContinuous={_forceContinuousSpawning}.");
         }
+
+        if (ShouldTraceIcebergDuration())
+        {
+            _icebergPlayCount += 1;
+            _icebergSlotOnCount = 0;
+            _icebergSlotAutoOffCount = 0;
+            Debug.Log(
+                $"[ICEBERG_DURATION_START] group='{name}' playAt={_debugPlayStartedAt:F3}s " +
+                $"configuredDuration={_duration:F3}s startDelay={_startDelay:F3}s " +
+                $"fixedDuration={_hasFixedDuration} countPerSec={_countPerSecond} maxCount={_maxCount} " +
+                $"playCount={_icebergPlayCount} frame={Time.frameCount} instanceId={GetInstanceID()} owner='{(_owner != null ? _owner.name : "null")}'.");
+        }
+
+        if (ShouldTraceIcefrag())
+        {
+            Debug.Log(
+                $"[ICEFRAG_DURATION_START] group='{name}' playAt={_debugPlayStartedAt:F3}s " +
+                $"duration={_duration:F3}s startDelay={_startDelay:F3}s countPerSec={_countPerSecond} maxCount={_maxCount} " +
+                $"fixedDuration={_hasFixedDuration} owner='{(_owner != null ? _owner.name : "null")}'.");
+        }
 #endif
     }
 
@@ -290,6 +350,24 @@ public class ParticleGroup : EffectPart
             $"[ParticleGroupStopPart] group='{name}' elapsed={elapsed:F3}s duration={_duration:F3}s " +
             $"castHit={(_castData != null ? _castData.HitTime : -1f):F3}s settingsLife={(_settings != null ? _settings.defaultLifeTime : -1f):F3}s " +
             $"effectRoot='{(_owner != null ? _owner.name : "null")}' settings='{(_settings != null ? _settings.name : "null")}'.");
+
+        if (ShouldTraceIcebergDuration())
+        {
+            Debug.Log(
+                $"[ICEBERG_DURATION_STOP] group='{name}' elapsed={elapsed:F3}s " +
+                $"duration={_duration:F3}s startDelay={_startDelay:F3}s " +
+                $"castHit={(_castData != null ? _castData.HitTime : -1f):F3}s " +
+                $"settingsLife={(_settings != null ? _settings.defaultLifeTime : -1f):F3}s " +
+                $"playCount={_icebergPlayCount} slotOnCount={_icebergSlotOnCount} " +
+                $"slotAutoOffCount={_icebergSlotAutoOffCount} frame={Time.frameCount}.");
+        }
+
+        if (ShouldTraceIcefrag())
+        {
+            Debug.Log(
+                $"[ICEFRAG_DURATION_STOP] group='{name}' elapsed={elapsed:F3}s duration={_duration:F3}s " +
+                $"castHit={(_castData != null ? _castData.HitTime : -1f):F3}s settingsLife={(_settings != null ? _settings.defaultLifeTime : -1f):F3}s.");
+        }
 #endif
         _stopped = true;
     }
@@ -299,5 +377,46 @@ public class ParticleGroup : EffectPart
         return _owner != null &&
                !string.IsNullOrEmpty(_owner.name) &&
                _owner.name.IndexOf(DebugTraceEffectName, System.StringComparison.OrdinalIgnoreCase) >= 0;
+    }
+
+    private bool ShouldTraceIcebergDuration()
+    {
+        if (_owner == null || string.IsNullOrEmpty(_owner.name) || string.IsNullOrEmpty(name))
+        {
+            return false;
+        }
+
+        return _owner.name.IndexOf(IceBoltTaEffectName, System.StringComparison.OrdinalIgnoreCase) >= 0 &&
+               name.IndexOf(IcebergGroupName, System.StringComparison.OrdinalIgnoreCase) >= 0;
+    }
+
+    private bool ShouldTraceIcefrag()
+    {
+        if (_owner == null || string.IsNullOrEmpty(_owner.name) || string.IsNullOrEmpty(name))
+        {
+            return false;
+        }
+
+        return _owner.name.IndexOf(IceBoltTaEffectName, System.StringComparison.OrdinalIgnoreCase) >= 0 &&
+               name.IndexOf(IcefragGroupName, System.StringComparison.OrdinalIgnoreCase) >= 0;
+    }
+
+    private string BuildMaterialLifetimeSnapshot(Renderer renderer)
+    {
+        if (renderer == null || renderer.sharedMaterials == null || renderer.sharedMaterials.Length == 0)
+        {
+            return "no_material";
+        }
+
+        Material mat = renderer.sharedMaterials[0];
+        if (mat == null)
+        {
+            return "null_material";
+        }
+
+        Vector4 initialDelay = mat.HasProperty("_InitialDelayRange") ? mat.GetVector("_InitialDelayRange") : Vector4.zero;
+        Vector4 lifetime = mat.HasProperty("_LifetimeRange") ? mat.GetVector("_LifetimeRange") : Vector4.zero;
+        float hasLifetime = mat.HasProperty("_HasLifetime") ? mat.GetFloat("_HasLifetime") : -1f;
+        return $"{mat.name}:initDelay=({initialDelay.x:F3},{initialDelay.y:F3}) life=({lifetime.x:F3},{lifetime.y:F3}) hasLifetime={hasLifetime:F3}";
     }
 }

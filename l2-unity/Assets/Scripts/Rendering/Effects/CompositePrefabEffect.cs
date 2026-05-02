@@ -28,6 +28,8 @@ public class CompositePrefabPart
     public EffectSettings settingsOverride;
     public EffectAttachmentPoint attachmentPoint = EffectAttachmentPoint.CasterRoot;
     public CompositePartSpawnTiming spawnTiming = CompositePartSpawnTiming.Immediate;
+    // Spawns hit-timed part earlier than castData.HitTime (seconds).
+    public float hitLeadSeconds = 0f;
     // Local offset from resolved attachment point (in attachment transform space if available).
     public Vector3 positionOffset = Vector3.zero;
     // Scales positionOffset by model height to keep visual placement consistent across races.
@@ -199,6 +201,22 @@ public class CompositePrefabEffect : TimedCompositeEffectBase
 
     private void ProcessShootEvent(string channel)
     {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        if (_castData != null)
+        {
+            float globalSinceCast = Time.time - _castData.StartTime;
+            Debug.Log(
+                "[MAGIC_PROJECTILE_SYNC] ShootEvent " +
+                $"channel={channel} globalSinceCast={globalSinceCast:F3}s hit={_castData.HitTime:F3}s " +
+                $"flight={_castData.FlightTime:F3}s serverShoot={_castData.serverTimeToShoot:F3}s " +
+                $"deltaGlobalToShoot={globalSinceCast - _castData.serverTimeToShoot:F3}s " +
+                $"deltaGlobalToHit={globalSinceCast - _castData.HitTime:F3}s sincePlayStarted={Time.time - _playStartedAt:F3}s");
+        }
+        else
+        {
+            Debug.Log($"[MAGIC_PROJECTILE_SYNC] ShootEvent channel={channel} castData=null sincePlayStarted={Time.time - _playStartedAt:F3}s");
+        }
+#endif
         CompositeProjectileLaunchHelper.RevealOnShootParts(
             _parts,
             _spawnedPartInstances);
@@ -487,7 +505,7 @@ public class CompositePrefabEffect : TimedCompositeEffectBase
                 continue;
             }
 
-            float delay = CompositeEffectUtilities.ResolveSpawnDelay(part.spawnTiming, _castData);
+            float delay = CompositeEffectUtilities.ResolveSpawnDelay(part.spawnTiming, _castData, part.hitLeadSeconds);
             if (delay <= 0f)
             {
                 SpawnPart(part);

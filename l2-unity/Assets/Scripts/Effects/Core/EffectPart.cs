@@ -5,8 +5,6 @@ public enum EffectPartType { Body, Footer, Aura , Fly , FlySub }
 //[RequireComponent(typeof(Renderer))]
 public abstract class EffectPart : MonoBehaviour
 {
-    [Header("Настройки части")]
-    public EffectPartType partType;
 
     protected Renderer targetRenderer;
     protected MaterialPropertyBlock propBlock;

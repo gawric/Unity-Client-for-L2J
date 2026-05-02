@@ -492,7 +492,7 @@ public class Entity : MonoBehaviour {
     {
         if (_castData == null) _castData = new MagicCastData();
 
-        _castData.Setup(serverHitTimeMs, flightTimeMs,  clipsDurations , shotEventTime);
+        _castData.Setup(serverHitTimeMs, flightTimeMs, clipsDurations, shotEventTime);
     }
 
     public MagicCastData GetMagicCastData()

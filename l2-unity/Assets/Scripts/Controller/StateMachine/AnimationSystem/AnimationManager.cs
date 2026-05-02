@@ -15,6 +15,21 @@ public class AnimationManager : BaseAnimationManager , IAnimationManager
     private const string CAST_TRIGGER_END = "CastEnd";
     private const string CAST_TRIGGER_SHOT = "MagicShot";
     private const string SHOT_SOURCE_RUNNER = "Runner";
+
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+    /// <summary>
+    /// Телеметрия: откуда пришёл shoot (параметр ивента на клипе) и что реально играет на animator layer0.
+    /// Вызывается из <see cref="BaseAnimationController.OnAnimationShoot"/>.
+    /// </summary>
+    public static void LogAnimationShootFromAnimator(int objectId, string decision, string eventArg, string animatorDetail)
+    {
+        Debug.Log(
+            "[ANIM_SHOOT_EVENT] " + decision +
+            $" objectId={objectId} eventArg='{eventArg}' {animatorDetail} " +
+            $"now={Time.time:F3}s frame={Time.frameCount}");
+    }
+#endif
+
     public static IAnimationManager Instance
     {
         get
@@ -182,6 +197,21 @@ public class AnimationManager : BaseAnimationManager , IAnimationManager
         controller.ToggleAnimationTrigger(animationName);
 
         Debug.Log($"AnimationManager> start Async AnimationTrigger(  {entity} animation  {animationName}");
+
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        if (IsMagicShotTrigger(animationName) && entity != null)
+        {
+            MagicCastData cd = entity.GetMagicCastData();
+            if (cd != null)
+            {
+                float globalSinceCast = Time.time - cd.StartTime;
+                Debug.Log(
+                    "[MAGIC_PROJECTILE_SYNC] AnimatorTriggerMagicShot " +
+                    $"globalSinceCast={globalSinceCast:F3}s serverShoot={cd.serverTimeToShoot:F3}s " +
+                    $"deltaToShoot={globalSinceCast - cd.serverTimeToShoot:F3}s trigger={animationName}");
+            }
+        }
+#endif
     }
 
     private static bool IsMagicCastTrigger(string animationName)

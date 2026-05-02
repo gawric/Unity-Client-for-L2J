@@ -16,6 +16,18 @@ public abstract class AnimationEventsBase : MonoBehaviour
     protected Queue<string> _animationQueue = new Queue<string>();
     protected bool _isProcessingQueue = false;
 
+    // Клипы иногда содержат несколько одинаковых Animation Events на одном времени —
+    // на длинных MagicShot один кадр вызывал OnAnimationComplete 10+, ломая await/переходы.
+    private int _lastDuplicateCompleteFrame = int.MinValue;
+    private string _lastDuplicateCompleteAnim;
+
+    /// <summary>
+    /// Два CastEnd/CastMid подряд с разницей в несколько сотен ms (blend/два слоя/оверрайд) —
+    /// второй всё равно вызывает OnAnimationFinished и HandleQueueAnimation → обрыв MagicShot.
+    /// </summary>
+    private readonly Dictionary<string, float> _lastPriorityCompleteRealtime = new Dictionary<string, float>();
+    private const float PriorityCompleteDebounceSeconds = 0.35f;
+
 
     public void InitializePriority()
     {
@@ -54,6 +66,22 @@ public abstract class AnimationEventsBase : MonoBehaviour
     {
         if (_priorityAnimations.ContainsKey(animationName))
         {
+            if (Time.frameCount == _lastDuplicateCompleteFrame &&
+                string.Equals(_lastDuplicateCompleteAnim, animationName, StringComparison.Ordinal))
+            {
+                return;
+            }
+
+            float nowRt = Time.time;
+            if (_lastPriorityCompleteRealtime.TryGetValue(animationName, out float prevRt) &&
+                nowRt - prevRt < PriorityCompleteDebounceSeconds)
+            {
+                return;
+            }
+
+            _lastDuplicateCompleteFrame = Time.frameCount;
+            _lastDuplicateCompleteAnim = animationName;
+            _lastPriorityCompleteRealtime[animationName] = nowRt;
 
             _priorityAnimations[animationName] = false;
             _isProcessingQueue = false;
@@ -82,7 +110,11 @@ public abstract class AnimationEventsBase : MonoBehaviour
     {
         // Base implementation does nothing, derived class will implement it
     }
-    public void OnAnimationShoot(string animationName)
+    /// <summary>
+    /// Вызывается из Unity Animation Event на клипе. Базовая реализация только диспатчит подписчикам;
+    /// у игрока/монстров переопределено в <see cref="BaseAnimationController"/> (лог + дедуп дублей).
+    /// </summary>
+    public virtual void OnAnimationShoot(string animationName)
     {
         OnAnimationStartShoot?.Invoke(animationName);
     }

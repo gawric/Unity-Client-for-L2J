@@ -2,7 +2,10 @@ using UnityEngine;
 
 public static class CompositeEffectUtilities
 {
-    public static float ResolveSpawnDelay(CompositePartSpawnTiming timing, MagicCastData castData)
+    public static float ResolveSpawnDelay(
+        CompositePartSpawnTiming timing,
+        MagicCastData castData,
+        float hitLeadSeconds = 0f)
     {
         if (castData == null)
         {
@@ -16,7 +19,7 @@ public static class CompositeEffectUtilities
             case CompositePartSpawnTiming.OnFlightTimeElapsed:
                 return Mathf.Max(0f, castData.FlightTime);
             case CompositePartSpawnTiming.OnHitTime:
-                return Mathf.Max(0f, castData.HitTime);
+                return Mathf.Max(0f, castData.HitTime - Mathf.Max(0f, hitLeadSeconds));
             case CompositePartSpawnTiming.OnHitCollider:
                 // Spawned by runtime collider-hit event, not by time delay.
                 return float.PositiveInfinity;

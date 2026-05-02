@@ -21,7 +21,7 @@ public class ProjectileData
         lifetime = 5f;
         flytime = 5f;
         //speedCurve = AnimationCurve.Linear(0, 1, 1, 1);
-        speedCurve = GetDefaultCurve();
+        speedCurve = CreateDefaultSpeedCurve();
         startTime = 0f;
         distance = 0f;
         useGravity = false;
@@ -42,7 +42,7 @@ public class ProjectileData
         lifetime = 5f;
         flytime = 5f;
         //speedCurve = AnimationCurve.Linear(0, 1, 1, 1);
-        speedCurve = GetDefaultCurve();
+        speedCurve = CreateDefaultSpeedCurve();
         startTime = 0f;
         distance = 0f;
         useGravity = false;
@@ -64,7 +64,7 @@ public class ProjectileData
             speed = other.speed;
             damage = other.damage;
             lifetime = other.lifetime;
-            speedCurve = other.speedCurve;
+            speedCurve = other.speedCurve != null ? other.speedCurve : CreateDefaultSpeedCurve();
             startTime = other.startTime;
             distance = other.distance;
             useGravity = other.useGravity;
@@ -77,15 +77,14 @@ public class ProjectileData
 
     }
 
-    private AnimationCurve GetDefaultCurve()
+    public static AnimationCurve CreateDefaultSpeedCurve()
     {
         return new AnimationCurve(
             new Keyframe(0, 0.3f, 0, 0.5f),     // Start: 30% speed, smooth start
             new Keyframe(0.25f, 0.5f, 0, 1f),    // 25% journey: 50% speed
             new Keyframe(0.5f, 1f, 0, 0),        // Middle: 100% speed (no acceleration)
             new Keyframe(0.75f, 1f, 0, 0),       // 75% journey: 100% speed (constant)
-            new Keyframe(1, 1f, 0, 0)           // End: 100% speed
-        );
+            new Keyframe(1, 1f, 0, 0));          // End: 100% speed
     }
 
     public int id;
