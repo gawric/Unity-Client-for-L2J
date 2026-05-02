@@ -1,4 +1,4 @@
-using UnityEngine;
+п»їusing UnityEngine;
 
 public class WalkRunAction : L2Action
 {
@@ -11,7 +11,7 @@ public class WalkRunAction : L2Action
         {
             return;
         }
-        Debug.Log("Нужно создать пакет доя обработки RequestActionUse WalkRun");
+        Debug.Log("РќСѓР¶РЅРѕ СЃРѕР·РґР°С‚СЊ РїР°РєРµС‚ РґРѕСЏ РѕР±СЂР°Р±РѕС‚РєРё RequestActionUse WalkRun");
         //GameClient.Instance.ClientPacketHandler.RequestActionUse((int)ActionType.WalkRun);
     }
 }

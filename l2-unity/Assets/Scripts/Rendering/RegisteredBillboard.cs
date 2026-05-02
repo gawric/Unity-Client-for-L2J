@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+п»їusing System.Collections.Generic;
 using UnityEngine;
 
 public static class RegisteredBillboards
@@ -19,7 +19,7 @@ public static class RegisteredBillboards
 
     public static void InvokeAll(Camera camera)
     {
-        // Итерируем по копии или по индексу, чтобы не ломалось при динамической регистрации/удалении
+        // РС‚РµСЂРёСЂСѓРµРј РїРѕ РєРѕРїРёРё РёР»Рё РїРѕ РёРЅРґРµРєСЃСѓ, С‡С‚РѕР±С‹ РЅРµ Р»РѕРјР°Р»РѕСЃСЊ РїСЂРё РґРёРЅР°РјРёС‡РµСЃРєРѕР№ СЂРµРіРёСЃС‚СЂР°С†РёРё/СѓРґР°Р»РµРЅРёРё
         for (int i = 0; i < s_items.Count; i++)
         {
             s_items[i].OnCameraPreRender(camera);

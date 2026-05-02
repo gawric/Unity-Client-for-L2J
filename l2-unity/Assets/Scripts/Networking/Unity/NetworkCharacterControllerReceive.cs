@@ -1,4 +1,4 @@
-using System.Collections;
+п»їusing System.Collections;
 using System.Collections.Generic;
 using UnityEngine; 
 
@@ -41,7 +41,7 @@ public class NetworkCharacterControllerReceive : MonoBehaviour
         _direction = Vector3.zero;
         _destination = Vector3.zero;
     }
-    //Скорость и гравитация (пока работает только на мобах!)
+    //РЎРєРѕСЂРѕСЃС‚СЊ Рё РіСЂР°РІРёС‚Р°С†РёСЏ (РїРѕРєР° СЂР°Р±РѕС‚Р°РµС‚ С‚РѕР»СЊРєРѕ РЅР° РјРѕР±Р°С…!)
     private void FixedUpdate() {
 
         if (!_networkTransformReceive.IsPositionSynced()) {

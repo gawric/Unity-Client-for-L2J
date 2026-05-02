@@ -1,4 +1,4 @@
-using System;
+п»їusing System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -84,12 +84,12 @@ public class ItemList : ServerPacket
             //items[i] = new ItemInstance(objectId , displayId , location , i, count , category, equipped == 1, slot , enchant, 9999);
         }
         _adenaCount = GetAdenaCount(items.Values.ToList());
-        //Debug.Log(" AssignItem конец итерации размер входной размер >" + items.Count);
+        //Debug.Log(" AssignItem РєРѕРЅРµС† РёС‚РµСЂР°С†РёРё СЂР°Р·РјРµСЂ РІС…РѕРґРЅРѕР№ СЂР°Р·РјРµСЂ >" + items.Count);
     }
 
     private void PrintItems()
     {
-        foreach (var (key, val) in items)  // раскладываем объект на свойства
+        foreach (var (key, val) in items)  // СЂР°СЃРєР»Р°РґС‹РІР°РµРј РѕР±СЉРµРєС‚ РЅР° СЃРІРѕР№СЃС‚РІР°
         {
             Console.WriteLine($"key: {key}  value item id: {val.ItemId} value: {val.Count}");
         }

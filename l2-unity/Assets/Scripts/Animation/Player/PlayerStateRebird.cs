@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public class PlayerStateRebird : PlayerStateAction
 {
@@ -24,7 +24,7 @@ public class PlayerStateRebird : PlayerStateAction
     {
         if (animator.GetBool(parameterName) != false)
         {
-            AnimationManager.Instance.StopCurrentAnimation(parameterName);
+            AnimationManager.Instance.StopCurrentAnimation(animator.GetInteger(AnimatorUtils.OBJECT_ID), parameterName);
         }
 
     }

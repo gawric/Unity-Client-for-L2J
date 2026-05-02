@@ -1,4 +1,4 @@
-public class NewStopMoveIntention : IntentionBase
+п»їpublic class NewStopMoveIntention : IntentionBase
 {
     public NewStopMoveIntention(PlayerStateMachine stateMachine) : base(stateMachine)
     {
@@ -15,13 +15,13 @@ public class NewStopMoveIntention : IntentionBase
 
             PlayerStateMachine.Instance.IsMoveToPawn = false;
             PlayerController.Instance.StopMove();
-            //Debug.Log("IsMoveToPawn Двигаемся к цели stopmove1");
+            //Debug.Log("IsMoveToPawn Р”РІРёРіР°РµРјСЃСЏ Рє С†РµР»Рё stopmove1");
 
-            //когда мы не успеваем добежать до точки и находимся в состоянии бега нам нужно предупредить RunningState о том что мы прибежали на место и нам нужно отключить анимацию бега
-            //и после этого перейти в режим idle или по другому режим wait ждем дальнейших указаний
+            //РєРѕРіРґР° РјС‹ РЅРµ СѓСЃРїРµРІР°РµРј РґРѕР±РµР¶Р°С‚СЊ РґРѕ С‚РѕС‡РєРё Рё РЅР°С…РѕРґРёРјСЃСЏ РІ СЃРѕСЃС‚РѕСЏРЅРёРё Р±РµРіР° РЅР°Рј РЅСѓР¶РЅРѕ РїСЂРµРґСѓРїСЂРµРґРёС‚СЊ RunningState Рѕ С‚РѕРј С‡С‚Рѕ РјС‹ РїСЂРёР±РµР¶Р°Р»Рё РЅР° РјРµСЃС‚Рѕ Рё РЅР°Рј РЅСѓР¶РЅРѕ РѕС‚РєР»СЋС‡РёС‚СЊ Р°РЅРёРјР°С†РёСЋ Р±РµРіР°
+            //Рё РїРѕСЃР»Рµ СЌС‚РѕРіРѕ РїРµСЂРµР№С‚Рё РІ СЂРµР¶РёРј idle РёР»Рё РїРѕ РґСЂСѓРіРѕРјСѓ СЂРµР¶РёРј wait Р¶РґРµРј РґР°Р»СЊРЅРµР№С€РёС… СѓРєР°Р·Р°РЅРёР№
             if (PlayerStateMachine.Instance.State == PlayerState.RUNNING)
             {
-                //Debug.Log("IsMoveToPawn Двигаемся к цели stopmove2");
+                //Debug.Log("IsMoveToPawn Р”РІРёРіР°РµРјСЃСЏ Рє С†РµР»Рё stopmove2");
 
                 _stateMachine.NotifyEvent(Event.ARRIVED);
                 _stateMachine.ChangeIntention(Intention.INTENTION_IDLE);

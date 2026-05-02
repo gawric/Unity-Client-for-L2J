@@ -1,4 +1,4 @@
-using FMOD.Studio;
+﻿using FMOD.Studio;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -222,6 +222,21 @@ public class CreatorPacketsUser
     public static RequestBypassToServer CreateByPassPacket(string bypasscommand)
     {
         return new RequestBypassToServer(bypasscommand);
+    }
+
+    public static RequestSay2 CreateSendMessage(ChatTypeData data, string message)
+    {
+        return new RequestSay2(data,message, "");
+    }
+
+    public static RequestSay2 CreateSendWhisperMessage(ChatTypeData data,string message,string name)
+    {
+        return new RequestSay2(data, message,name);
+    }
+
+    public static RequestTargetCanceld CreateRequestTargetCanceld()
+    {
+        return new RequestTargetCanceld();
     }
 
 }

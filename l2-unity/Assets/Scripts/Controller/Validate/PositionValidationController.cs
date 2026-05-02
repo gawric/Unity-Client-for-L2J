@@ -1,10 +1,10 @@
-using System.Collections.Generic;
+п»їusing System.Collections.Generic;
 using UnityEngine;
 
 public class PositionValidationController : MonoBehaviour
 {
-    //<197 unit - он передвигается пешком(игнорирует если он двигается)
-    //>197 unit он прыгает останавливая движение и возвращая его когда будет перемещен
+    //<197 unit - РѕРЅ РїРµСЂРµРґРІРёРіР°РµС‚СЃСЏ РїРµС€РєРѕРј(РёРіРЅРѕСЂРёСЂСѓРµС‚ РµСЃР»Рё РѕРЅ РґРІРёРіР°РµС‚СЃСЏ)
+    //>197 unit РѕРЅ РїСЂС‹РіР°РµС‚ РѕСЃС‚Р°РЅР°РІР»РёРІР°СЏ РґРІРёР¶РµРЅРёРµ Рё РІРѕР·РІСЂР°С‰Р°СЏ РµРіРѕ РєРѕРіРґР° Р±СѓРґРµС‚ РїРµСЂРµРјРµС‰РµРЅ
 
     private List<ValidateLocation> _validateList;
     private List<ValidateLocation> _validateRemove;
@@ -103,12 +103,13 @@ public class PositionValidationController : MonoBehaviour
 
         }else if (entity.GetType() == typeof(PlayerEntity))
         {
-            Dictionary<string, float> floatValues  = AnimationManager.Instance.PlayerGetAllFloat();
+            int objectId = entity.IdentityInterlude.Id;
+            Dictionary<string, float> floatValues  = AnimationManager.Instance.PlayerGetAllFloat(objectId);
             entity.HideObject();
             NewCalcGravity(PlayerController.Instance , newPosition);
             entity.ShowObject();
 
-            AnimationManager.Instance.PlayerSetAllFloat(floatValues);
+            AnimationManager.Instance.PlayerSetAllFloat(objectId , floatValues);
             ReStartAnimationPlayer(PlayerStateMachine.Instance);
 
         }else if (entity.GetType() == typeof(NpcEntity))

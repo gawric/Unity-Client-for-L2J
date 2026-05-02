@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+п»їusing System.Collections.Generic;
 using UnityEngine;
 
 public class DeadManager : MonoBehaviour, IDead
@@ -7,7 +7,7 @@ public class DeadManager : MonoBehaviour, IDead
     public static IDead Instance { get { return _instance; } }
 
     private Dictionary<int, DeadData> _dict;
-    public float speed = 0.000001f; // Скорость движения вверх
+    public float speed = 0.000001f; // РЎРєРѕСЂРѕСЃС‚СЊ РґРІРёР¶РµРЅРёСЏ РІРІРµСЂС…
     List<int> _remove = new List<int>();
 
     private void Awake()
@@ -44,8 +44,7 @@ public class DeadManager : MonoBehaviour, IDead
                 data.SetCurrentPos(zeroPosition - zeroPosition * 2);
                 data.SetZeroPos(data.GetCurrentPos());
                 data.SetCurrentPos(data.GetCurrentPos() + 0.5f);
-                //float lerp = Mathf.Lerp(transform.position.y, 0.5f, speed * Time.deltaTime);
-               // _monsterRenderer = gameObject.GetComponentsInChildren<Renderer>();
+
                 data.SetRefresh(true);
                 data.SetAntiGravity(false);
     
@@ -113,7 +112,7 @@ public class DeadManager : MonoBehaviour, IDead
 
             if (material.HasProperty("_Surface"))
             {
-                material.SetFloat("_Surface", 1); // 1 для Transparent, 0 для Opaque
+                material.SetFloat("_Surface", 1); // 1 РґР»СЏ Transparent, 0 РґР»СЏ Opaque
             }
 
             if (material != null)
@@ -131,12 +130,10 @@ public class DeadManager : MonoBehaviour, IDead
             Material material = monsterRenderer[0].material;
             if (material != null)
             {
-                // need change setting material manual _Surface = 1, RenderType = Transperenty
-                material.SetFloat("_Surface", 1); // 1 = Transparent, 0 = Opaque
+
+                material.SetFloat("_Surface", 1); 
                 material.SetOverrideTag("RenderType", "Transparent");
                 material.renderQueue = (int)UnityEngine.Rendering.RenderQueue.Transparent;
-
-                // Изменяем цвет и устанавливаем прозрачность
                 Color color = material.color;
                 color.a = opacity;
                 material.color = color;

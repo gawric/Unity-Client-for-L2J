@@ -1,6 +1,5 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
-using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using static ModelTable;
 
@@ -38,7 +37,7 @@ public class CharacterArmorDresser : AbstractArmorDresser
             if (IsFullPlateEquipped(ItemSlot.fullarmor))
             {
                 ResetFullArmor(ItemSlot.fullarmor, slot, defaultArmor, defaultGo);
-                //OnSyncMash?.Invoke(1);
+                //OnSyncMesh?.Invoke(1);
             }
             else
             {

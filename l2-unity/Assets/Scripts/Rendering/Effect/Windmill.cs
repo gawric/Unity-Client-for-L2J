@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public class Windmill : MonoBehaviour {
     public float rotateSpeed = 1f;

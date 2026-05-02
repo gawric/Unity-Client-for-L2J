@@ -1,4 +1,4 @@
-public class ErrorType
+﻿public class ErrorType
 {
     public static readonly int REASON_CREATION_FAILED = 0x00; // "Your character creation has failed."
     public static readonly int REASON_TOO_MANY_CHARACTERS = 0x01; // "You cannot create another character. Please delete the existing character and try again." Removes all settings that were selected (race, class, etc).

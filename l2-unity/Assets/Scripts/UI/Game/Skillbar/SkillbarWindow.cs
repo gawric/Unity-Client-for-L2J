@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -21,7 +21,7 @@ public class SkillbarWindow : L2PopupWindow
     private VisualTreeAsset _barSlotTemplate;
     private List<AbstractSkillbar> _skillbars;
     private static SkillbarWindow _instance;
-
+    private CooldownAnimationService _cooldownAnimationService;
     public bool Locked { get { return _locked; } set { _locked = value; } }
     public bool Vertical { get { return _vertical; } set { _vertical = value; } }
     public bool TooltipDisabled { get { return _tooltipDisabled; } set { _tooltipDisabled = value; } }
@@ -33,6 +33,7 @@ public class SkillbarWindow : L2PopupWindow
         if (_instance == null)
         {
             _instance = this;
+            _cooldownAnimationService = new CooldownAnimationService();
         }
         else
         {
@@ -41,6 +42,7 @@ public class SkillbarWindow : L2PopupWindow
 
         _expandCoroutines = new List<Coroutine>();
         _minimizeCoroutines = new List<Coroutine>();
+
     }
 
     private void OnDestroy()
@@ -75,37 +77,7 @@ public class SkillbarWindow : L2PopupWindow
         _skillbars = new List<AbstractSkillbar>();
 
         InitializeSkillbars();
-        //backup
-        //for (int x = 0; x < 2; x++)
-        //{
-        // for (int i = 0; i < PlayerShortcuts.MAXIMUM_SKILLBAR_COUNT; i++)
-        //{
-        // AbstractSkillbar skillbar;
-
-        // bool mainBar = i == 0;
-        //bool horizontalBar = x == 0;
-
-        // if (mainBar)
-        // {
-        //     skillbar = new SkillbarMain(_windowEle, i, i, horizontalBar);
-        // }
-        //else
-        // {
-        //     skillbar = new SkillbarMin(_windowEle, i, i, horizontalBar);
-        // }
-
-        // if (horizontalBar)
-        // {
-        //     StartCoroutine(skillbar.BuildWindow(_skillbarHorizontalTemplate, _skillbarContainerHorizontal));
-        // }
-        // else
-        // {
-        //    StartCoroutine(skillbar.BuildWindow(_skillbarVerticalTemplate, _skillbarContainerVertical));
-        // }
-
-        // _skillbars.Add(skillbar);
-        //}
-        // }
+       
 
         yield return new WaitForEndOfFrame();
 
@@ -114,9 +86,7 @@ public class SkillbarWindow : L2PopupWindow
             AddSkillbar();
         }
 
-#if UNITY_EDITOR
-        // DebugData();
-#endif
+
     }
 
 
@@ -331,48 +301,84 @@ public class SkillbarWindow : L2PopupWindow
         int pagePosition = skillbarListPosition / PlayerShortcuts.MAXIMUM_SHORTCUTS_PER_BAR;
 
         AbstractSkillbar skillbar = _skillbars[pagePosition];
+        //backup
+        //foreach (var slot in skillbar.BarSlots)
+        //{
+        //  if (slot.Position == slotPosition)
+        // {
+        //     return slot.Shortcut;
+        // }
+        //}
 
+       
+        return GetSlotByPosition(skillbar, slotPosition)?.Shortcut;
+
+        //Debug.LogError($"No skill found at position {skillbarListPosition}");
+        //return null;
+    }
+
+    private SkillbarSlot GetSlotBySkillId(List<AbstractSkillbar> skillbars, int skillId, int type)
+    {
+        foreach (var skillbar in skillbars)
+        {
+            foreach (var slot in skillbar.BarSlots)
+            {
+                if (slot.Shortcut?.Type == type && slot.Shortcut?.Id == skillId)
+                {
+                    return slot;
+                }
+            }
+        }
+        return null;
+    }
+
+    //backup
+    //private SkillbarSlot GetSlotBySkillId(List<AbstractSkillbar> skillbars , int skilId , int type)
+    //{
+    //for(int i =0; i < skillbars.Count; i++)
+    //{
+    // AbstractSkillbar skillBar = skillbars[0];
+
+    //for (int b = 0; b < skillBar.BarSlots.Count; b++)
+    //{
+    // SkillbarSlot slot = skillBar.BarSlots[b];
+
+    //if(slot.Shortcut != null)
+    // {
+    // if (slot.Shortcut.Type == type && slot.Shortcut.Id == skilId)
+    //{
+    //   return slot;
+    //}
+    //}
+
+    //}
+    // }
+
+    //return null;
+    // }
+
+    private SkillbarSlot GetSlotByPosition(AbstractSkillbar skillbar, int slotPosition)
+    {
         foreach (var slot in skillbar.BarSlots)
         {
             if (slot.Position == slotPosition)
             {
-                return slot.Shortcut;
+                return slot;
             }
         }
-
-        Debug.LogError($"No skill found at position {skillbarListPosition}");
         return null;
     }
 
-
-
-
-#if UNITY_EDITOR
-    private void DebugData()
+    public void ShowCooldown(int skillId , int shortcutType , int reuseDelay)
     {
-        StartCoroutine(DelayDebug());
-    }
+        SkillbarSlot skillbarSlot = GetSlotBySkillId(_skillbars, skillId, shortcutType);
 
-    private IEnumerator DelayDebug()
-    {
-        yield return new WaitForSeconds(1);
-
-        List<Shortcut> shortcuts = new List<Shortcut>();
-        for (int i = 0; i < PlayerShortcuts.MAXIMUM_SHORTCUTS_PER_BAR; i++)
+        if(skillbarSlot != null)
         {
-            Shortcut shortcut = new Shortcut(i, 0, Shortcut.TYPE_ACTION, (int)ActionType.Attack, -1);
-            shortcuts.Add(shortcut);
-        }
-        for (int i = 0; i < PlayerShortcuts.MAXIMUM_SHORTCUTS_PER_BAR; i++)
-        {
-            Shortcut shortcut = new Shortcut(i, 1, Shortcut.TYPE_ACTION, (int)ActionType.Pickup, -1);
-            shortcuts.Add(shortcut);
+            StartCoroutine(_cooldownAnimationService.CooldownCoroutine(skillbarSlot.GetReuseElement(), skillbarSlot.GetRechargeMaskElement(), reuseDelay));
         }
 
-        PlayerShortcuts.Instance.SetShortcutList(shortcuts);
 
-        //UpdateShortcuts(shortcuts);
     }
-#endif
 
 }

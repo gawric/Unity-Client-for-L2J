@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -88,11 +88,6 @@ public class ModelTable : AbstractCache
         for (int r = 0; r < RACE_COUNT; r++) {
             CharacterRaceAnimation raceId = (CharacterRaceAnimation)r;
             CharacterRace race = CharacterRaceParser.ParseRace(raceId);
-
-            if(raceId == CharacterRaceAnimation.FElf)
-            {
-                Debug.Log("");
-            }
 
             string path = $"Data/Animations/{race}/{raceId}/Pawn_{raceId}";
             _pawnContainers[r] = Resources.Load<GameObject>(path);

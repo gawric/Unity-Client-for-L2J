@@ -1,4 +1,4 @@
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
 
 public class NativeFunctions {
     [DllImport("user32.dll")]

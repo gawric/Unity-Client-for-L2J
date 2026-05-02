@@ -1,4 +1,4 @@
-public enum GameClientPacketType : byte
+﻿public enum GameClientPacketType : byte
 {
     Ping = 0x00,
     ProtocolVersion = 0x01,

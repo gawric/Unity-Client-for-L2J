@@ -1,0 +1,201 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!319 &31900000
+AvatarMask:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: UpperBodyMask
+  m_Mask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
+  m_Elements:
+  - m_Path: 
+    m_Weight: 1
+  - m_Path: MFighter_m000_b.ao
+    m_Weight: 1
+  - m_Path: MFighter_m000_b.ao/bip01
+    m_Weight: 1
+  - m_Path: MFighter_m000_b.ao/bip01/Bip01_Pelvis
+    m_Weight: 1
+  - m_Path: MFighter_m000_b.ao/bip01/Bip01_Pelvis/bip01_spine
+    m_Weight: 1
+  - m_Path: MFighter_m000_b.ao/bip01/Bip01_Pelvis/bip01_spine/Bip01_L_Thigh
+    m_Weight: 1
+  - m_Path: MFighter_m000_b.ao/bip01/Bip01_Pelvis/bip01_spine/Bip01_L_Thigh/Bip01_L_Calf
+    m_Weight: 1
+  - m_Path: MFighter_m000_b.ao/bip01/Bip01_Pelvis/bip01_spine/Bip01_L_Thigh/Bip01_L_Calf/bip01_l_foot
+    m_Weight: 1
+  - m_Path: MFighter_m000_b.ao/bip01/Bip01_Pelvis/bip01_spine/Bip01_L_Thigh/Bip01_L_Calf/bip01_l_foot/Bip01_L_Toe0
+    m_Weight: 1
+  - m_Path: MFighter_m000_b.ao/bip01/Bip01_Pelvis/bip01_spine/Bip01_L_Thigh/Bip01_L_Calf/bip01_l_foot/Bip01_L_Toe0/Bip01_L_Toe0Nub
+    m_Weight: 1
+  - m_Path: MFighter_m000_b.ao/bip01/Bip01_Pelvis/bip01_spine/Bip01_L_Thigh/Bip01_L_Calf/bip01_l_foot/Bip01_L_Toe0/Bip01_L_Toe0Nub/Bip01_L_Toe0Nub_end
+    m_Weight: 1
+  - m_Path: MFighter_m000_b.ao/bip01/Bip01_Pelvis/bip01_spine/Bip01_R_Thigh
+    m_Weight: 1
+  - m_Path: MFighter_m000_b.ao/bip01/Bip01_Pelvis/bip01_spine/Bip01_R_Thigh/Bip01_R_Calf
+    m_Weight: 0
+  - m_Path: MFighter_m000_b.ao/bip01/Bip01_Pelvis/bip01_spine/Bip01_R_Thigh/Bip01_R_Calf/bip01_r_foot
+    m_Weight: 1
+  - m_Path: MFighter_m000_b.ao/bip01/Bip01_Pelvis/bip01_spine/Bip01_R_Thigh/Bip01_R_Calf/bip01_r_foot/Bip01_R_Toe0
+    m_Weight: 1
+  - m_Path: MFighter_m000_b.ao/bip01/Bip01_Pelvis/bip01_spine/Bip01_R_Thigh/Bip01_R_Calf/bip01_r_foot/Bip01_R_Toe0/Bip01_R_Toe0Nub
+    m_Weight: 1
+  - m_Path: MFighter_m000_b.ao/bip01/Bip01_Pelvis/bip01_spine/Bip01_R_Thigh/Bip01_R_Calf/bip01_r_foot/Bip01_R_Toe0/Bip01_R_Toe0Nub/Bip01_R_Toe0Nub_end
+    m_Weight: 1
+  - m_Path: MFighter_m000_b.ao/bip01/Bip01_Pelvis/bip01_spine/Bip01_Spine1
+    m_Weight: 1
+  - m_Path: MFighter_m000_b.ao/bip01/Bip01_Pelvis/bip01_spine/Bip01_Spine1/bip01_spine2
+    m_Weight: 1
+  - m_Path: MFighter_m000_b.ao/bip01/Bip01_Pelvis/bip01_spine/Bip01_Spine1/bip01_spine2/Bip01_Neck
+    m_Weight: 1
+  - m_Path: MFighter_m000_b.ao/bip01/Bip01_Pelvis/bip01_spine/Bip01_Spine1/bip01_spine2/Bip01_Neck/Bip01_head
+    m_Weight: 1
+  - m_Path: MFighter_m000_b.ao/bip01/Bip01_Pelvis/bip01_spine/Bip01_Spine1/bip01_spine2/Bip01_Neck/Bip01_head/Bip01_HeadNub
+    m_Weight: 1
+  - m_Path: MFighter_m000_b.ao/bip01/Bip01_Pelvis/bip01_spine/Bip01_Spine1/bip01_spine2/Bip01_Neck/Bip01_head/Bip01_HeadNub/Bip01_HeadNub_end
+    m_Weight: 1
+  - m_Path: MFighter_m000_b.ao/bip01/Bip01_Pelvis/bip01_spine/Bip01_Spine1/bip01_spine2/Bip01_Neck/Bip01_L_Clavicle
+    m_Weight: 1
+  - m_Path: MFighter_m000_b.ao/bip01/Bip01_Pelvis/bip01_spine/Bip01_Spine1/bip01_spine2/Bip01_Neck/Bip01_L_Clavicle/Bip01_L_UpperArm
+    m_Weight: 1
+  - m_Path: MFighter_m000_b.ao/bip01/Bip01_Pelvis/bip01_spine/Bip01_Spine1/bip01_spine2/Bip01_Neck/Bip01_L_Clavicle/Bip01_L_UpperArm/Bip01_L_Forearm
+    m_Weight: 1
+  - m_Path: MFighter_m000_b.ao/bip01/Bip01_Pelvis/bip01_spine/Bip01_Spine1/bip01_spine2/Bip01_Neck/Bip01_L_Clavicle/Bip01_L_UpperArm/Bip01_L_Forearm/Bip01_L_Hand
+    m_Weight: 1
+  - m_Path: MFighter_m000_b.ao/bip01/Bip01_Pelvis/bip01_spine/Bip01_Spine1/bip01_spine2/Bip01_Neck/Bip01_L_Clavicle/Bip01_L_UpperArm/Bip01_L_Forearm/Bip01_L_Hand/Bip01_L_Finger0
+    m_Weight: 1
+  - m_Path: MFighter_m000_b.ao/bip01/Bip01_Pelvis/bip01_spine/Bip01_Spine1/bip01_spine2/Bip01_Neck/Bip01_L_Clavicle/Bip01_L_UpperArm/Bip01_L_Forearm/Bip01_L_Hand/Bip01_L_Finger0/Bip01_L_Finger01
+    m_Weight: 1
+  - m_Path: MFighter_m000_b.ao/bip01/Bip01_Pelvis/bip01_spine/Bip01_Spine1/bip01_spine2/Bip01_Neck/Bip01_L_Clavicle/Bip01_L_UpperArm/Bip01_L_Forearm/Bip01_L_Hand/Bip01_L_Finger0/Bip01_L_Finger01/Bip01_L_Finger0Nub
+    m_Weight: 1
+  - m_Path: MFighter_m000_b.ao/bip01/Bip01_Pelvis/bip01_spine/Bip01_Spine1/bip01_spine2/Bip01_Neck/Bip01_L_Clavicle/Bip01_L_UpperArm/Bip01_L_Forearm/Bip01_L_Hand/Bip01_L_Finger0/Bip01_L_Finger01/Bip01_L_Finger0Nub/Bip01_L_Finger0Nub_end
+    m_Weight: 1
+  - m_Path: MFighter_m000_b.ao/bip01/Bip01_Pelvis/bip01_spine/Bip01_Spine1/bip01_spine2/Bip01_Neck/Bip01_L_Clavicle/Bip01_L_UpperArm/Bip01_L_Forearm/Bip01_L_Hand/Bip01_L_Finger1
+    m_Weight: 1
+  - m_Path: MFighter_m000_b.ao/bip01/Bip01_Pelvis/bip01_spine/Bip01_Spine1/bip01_spine2/Bip01_Neck/Bip01_L_Clavicle/Bip01_L_UpperArm/Bip01_L_Forearm/Bip01_L_Hand/Bip01_L_Finger1/Bip01_L_Finger11
+    m_Weight: 1
+  - m_Path: MFighter_m000_b.ao/bip01/Bip01_Pelvis/bip01_spine/Bip01_Spine1/bip01_spine2/Bip01_Neck/Bip01_L_Clavicle/Bip01_L_UpperArm/Bip01_L_Forearm/Bip01_L_Hand/Bip01_L_Finger1/Bip01_L_Finger11/Bip01_L_Finger1Nub
+    m_Weight: 1
+  - m_Path: MFighter_m000_b.ao/bip01/Bip01_Pelvis/bip01_spine/Bip01_Spine1/bip01_spine2/Bip01_Neck/Bip01_L_Clavicle/Bip01_L_UpperArm/Bip01_L_Forearm/Bip01_L_Hand/Bip01_L_Finger1/Bip01_L_Finger11/Bip01_L_Finger1Nub/Bip01_L_Finger1Nub_end
+    m_Weight: 1
+  - m_Path: MFighter_m000_b.ao/bip01/Bip01_Pelvis/bip01_spine/Bip01_Spine1/bip01_spine2/Bip01_Neck/Bip01_L_Clavicle/Bip01_L_UpperArm/Bip01_L_Forearm/Bip01_L_Hand/Shield_L_Bone
+    m_Weight: 1
+  - m_Path: MFighter_m000_b.ao/bip01/Bip01_Pelvis/bip01_spine/Bip01_Spine1/bip01_spine2/Bip01_Neck/Bip01_L_Clavicle/Bip01_L_UpperArm/Bip01_L_Forearm/Bip01_L_Hand/Shield_L_Bone/Shield_L_Bone_end
+    m_Weight: 1
+  - m_Path: MFighter_m000_b.ao/bip01/Bip01_Pelvis/bip01_spine/Bip01_Spine1/bip01_spine2/Bip01_Neck/Bip01_L_Clavicle/Bip01_L_UpperArm/Bip01_L_Forearm/Bip01_L_Hand/Weapon_L_Bone
+    m_Weight: 1
+  - m_Path: MFighter_m000_b.ao/bip01/Bip01_Pelvis/bip01_spine/Bip01_Spine1/bip01_spine2/Bip01_Neck/Bip01_L_Clavicle/Bip01_L_UpperArm/Bip01_L_Forearm/Bip01_L_Hand/Weapon_L_Bone/Weapon_L_Bone_end
+    m_Weight: 1
+  - m_Path: MFighter_m000_b.ao/bip01/Bip01_Pelvis/bip01_spine/Bip01_Spine1/bip01_spine2/Bip01_Neck/Bip01_L_Clavicle/Shoulder_L_Bone
+    m_Weight: 1
+  - m_Path: MFighter_m000_b.ao/bip01/Bip01_Pelvis/bip01_spine/Bip01_Spine1/bip01_spine2/Bip01_Neck/Bip01_L_Clavicle/Shoulder_L_Bone/Shoulder_L_Bone_Dummy
+    m_Weight: 1
+  - m_Path: MFighter_m000_b.ao/bip01/Bip01_Pelvis/bip01_spine/Bip01_Spine1/bip01_spine2/Bip01_Neck/Bip01_L_Clavicle/Shoulder_L_Bone/Shoulder_L_Bone_Dummy/Shoulder_L_Bone_Dummy_end
+    m_Weight: 1
+  - m_Path: MFighter_m000_b.ao/bip01/Bip01_Pelvis/bip01_spine/Bip01_Spine1/bip01_spine2/Bip01_Neck/Bip01_R_Clavicle
+    m_Weight: 1
+  - m_Path: MFighter_m000_b.ao/bip01/Bip01_Pelvis/bip01_spine/Bip01_Spine1/bip01_spine2/Bip01_Neck/Bip01_R_Clavicle/Bip01_R_UpperArm
+    m_Weight: 1
+  - m_Path: MFighter_m000_b.ao/bip01/Bip01_Pelvis/bip01_spine/Bip01_Spine1/bip01_spine2/Bip01_Neck/Bip01_R_Clavicle/Bip01_R_UpperArm/Bip01_R_Forearm
+    m_Weight: 1
+  - m_Path: MFighter_m000_b.ao/bip01/Bip01_Pelvis/bip01_spine/Bip01_Spine1/bip01_spine2/Bip01_Neck/Bip01_R_Clavicle/Bip01_R_UpperArm/Bip01_R_Forearm/Bip01_R_Hand
+    m_Weight: 1
+  - m_Path: MFighter_m000_b.ao/bip01/Bip01_Pelvis/bip01_spine/Bip01_Spine1/bip01_spine2/Bip01_Neck/Bip01_R_Clavicle/Bip01_R_UpperArm/Bip01_R_Forearm/Bip01_R_Hand/Bip01_R_Finger0
+    m_Weight: 1
+  - m_Path: MFighter_m000_b.ao/bip01/Bip01_Pelvis/bip01_spine/Bip01_Spine1/bip01_spine2/Bip01_Neck/Bip01_R_Clavicle/Bip01_R_UpperArm/Bip01_R_Forearm/Bip01_R_Hand/Bip01_R_Finger0/Bip01_R_Finger01
+    m_Weight: 1
+  - m_Path: MFighter_m000_b.ao/bip01/Bip01_Pelvis/bip01_spine/Bip01_Spine1/bip01_spine2/Bip01_Neck/Bip01_R_Clavicle/Bip01_R_UpperArm/Bip01_R_Forearm/Bip01_R_Hand/Bip01_R_Finger0/Bip01_R_Finger01/Bip01_R_Finger0Nub
+    m_Weight: 1
+  - m_Path: MFighter_m000_b.ao/bip01/Bip01_Pelvis/bip01_spine/Bip01_Spine1/bip01_spine2/Bip01_Neck/Bip01_R_Clavicle/Bip01_R_UpperArm/Bip01_R_Forearm/Bip01_R_Hand/Bip01_R_Finger0/Bip01_R_Finger01/Bip01_R_Finger0Nub/Bip01_R_Finger0Nub_end
+    m_Weight: 1
+  - m_Path: MFighter_m000_b.ao/bip01/Bip01_Pelvis/bip01_spine/Bip01_Spine1/bip01_spine2/Bip01_Neck/Bip01_R_Clavicle/Bip01_R_UpperArm/Bip01_R_Forearm/Bip01_R_Hand/Bip01_R_Finger1
+    m_Weight: 1
+  - m_Path: MFighter_m000_b.ao/bip01/Bip01_Pelvis/bip01_spine/Bip01_Spine1/bip01_spine2/Bip01_Neck/Bip01_R_Clavicle/Bip01_R_UpperArm/Bip01_R_Forearm/Bip01_R_Hand/Bip01_R_Finger1/Bip01_R_Finger11
+    m_Weight: 1
+  - m_Path: MFighter_m000_b.ao/bip01/Bip01_Pelvis/bip01_spine/Bip01_Spine1/bip01_spine2/Bip01_Neck/Bip01_R_Clavicle/Bip01_R_UpperArm/Bip01_R_Forearm/Bip01_R_Hand/Bip01_R_Finger1/Bip01_R_Finger11/Bip01_R_Finger1Nub
+    m_Weight: 1
+  - m_Path: MFighter_m000_b.ao/bip01/Bip01_Pelvis/bip01_spine/Bip01_Spine1/bip01_spine2/Bip01_Neck/Bip01_R_Clavicle/Bip01_R_UpperArm/Bip01_R_Forearm/Bip01_R_Hand/Bip01_R_Finger1/Bip01_R_Finger11/Bip01_R_Finger1Nub/Bip01_R_Finger1Nub_end
+    m_Weight: 1
+  - m_Path: MFighter_m000_b.ao/bip01/Bip01_Pelvis/bip01_spine/Bip01_Spine1/bip01_spine2/Bip01_Neck/Bip01_R_Clavicle/Bip01_R_UpperArm/Bip01_R_Forearm/Bip01_R_Hand/Shield_R_Bone
+    m_Weight: 1
+  - m_Path: MFighter_m000_b.ao/bip01/Bip01_Pelvis/bip01_spine/Bip01_Spine1/bip01_spine2/Bip01_Neck/Bip01_R_Clavicle/Bip01_R_UpperArm/Bip01_R_Forearm/Bip01_R_Hand/Shield_R_Bone/Shield_R_Bone_end
+    m_Weight: 1
+  - m_Path: MFighter_m000_b.ao/bip01/Bip01_Pelvis/bip01_spine/Bip01_Spine1/bip01_spine2/Bip01_Neck/Bip01_R_Clavicle/Bip01_R_UpperArm/Bip01_R_Forearm/Bip01_R_Hand/Weapon_R_Bone
+    m_Weight: 1
+  - m_Path: MFighter_m000_b.ao/bip01/Bip01_Pelvis/bip01_spine/Bip01_Spine1/bip01_spine2/Bip01_Neck/Bip01_R_Clavicle/Bip01_R_UpperArm/Bip01_R_Forearm/Bip01_R_Hand/Weapon_R_Bone/Weapon_R_Bone_end
+    m_Weight: 1
+  - m_Path: MFighter_m000_b.ao/bip01/Bip01_Pelvis/bip01_spine/Bip01_Spine1/bip01_spine2/Bip01_Neck/Bip01_R_Clavicle/Shoulder_R_Bone
+    m_Weight: 1
+  - m_Path: MFighter_m000_b.ao/bip01/Bip01_Pelvis/bip01_spine/Bip01_Spine1/bip01_spine2/Bip01_Neck/Bip01_R_Clavicle/Shoulder_R_Bone/Shoulder_R_Bone_Dummy
+    m_Weight: 1
+  - m_Path: MFighter_m000_b.ao/bip01/Bip01_Pelvis/bip01_spine/Bip01_Spine1/bip01_spine2/Bip01_Neck/Bip01_R_Clavicle/Shoulder_R_Bone/Shoulder_R_Bone_Dummy/Shoulder_R_Bone_Dummy_end
+    m_Weight: 1
+  - m_Path: MFighter_m000_b.ao/bip01/Bip01_Pelvis/bip01_spine/Bip01_Spine1/bip01_spine2/Cape_Bone
+    m_Weight: 1
+  - m_Path: MFighter_m000_b.ao/bip01/Bip01_Pelvis/bip01_spine/Bip01_Spine1/bip01_spine2/Cape_Bone/Cape_Bone_Dummy
+    m_Weight: 1
+  - m_Path: MFighter_m000_b.ao/bip01/Bip01_Pelvis/bip01_spine/Bip01_Spine1/bip01_spine2/Cape_Bone/Cape_Bone_Dummy/Cape_Bone_Dummy_end
+    m_Weight: 1
+  - m_Path: MFighter_m000_b.ao/bip01/Bip01_Pelvis/bip01_spine/Bone08
+    m_Weight: 1
+  - m_Path: MFighter_m000_b.ao/bip01/Bip01_Pelvis/bip01_spine/Bone08/Bone02
+    m_Weight: 1
+  - m_Path: MFighter_m000_b.ao/bip01/Bip01_Pelvis/bip01_spine/Bone08/Bone02/Bone04
+    m_Weight: 1
+  - m_Path: MFighter_m000_b.ao/bip01/Bip01_Pelvis/bip01_spine/Bone08/Bone02/Bone04/Dummy01
+    m_Weight: 1
+  - m_Path: MFighter_m000_b.ao/bip01/Bip01_Pelvis/bip01_spine/Bone08/Bone02/Bone04/Dummy01/Dummy01_end
+    m_Weight: 1
+  - m_Path: MFighter_m000_b.ao/bip01/Bip01_Pelvis/bip01_spine/Bone08/Bone06
+    m_Weight: 1
+  - m_Path: MFighter_m000_b.ao/bip01/Bip01_Pelvis/bip01_spine/Bone08/Bone06/Bone07
+    m_Weight: 1
+  - m_Path: MFighter_m000_b.ao/bip01/Bip01_Pelvis/bip01_spine/Bone08/Bone06/Bone07/Dummy12
+    m_Weight: 1
+  - m_Path: MFighter_m000_b.ao/bip01/Bip01_Pelvis/bip01_spine/Bone08/Bone06/Bone07/Dummy12/Dummy12_end
+    m_Weight: 1
+  - m_Path: MFighter_m000_b.ao/bip01/Bip01_Pelvis/bip01_spine/Bone08/Bone09
+    m_Weight: 1
+  - m_Path: MFighter_m000_b.ao/bip01/Bip01_Pelvis/bip01_spine/Bone08/Bone09/Bone09_end
+    m_Weight: 1
+  - m_Path: MFighter_m000_b.ao/bip01/Bip01_Pelvis/bip01_spine/Bone08/Bone17
+    m_Weight: 1
+  - m_Path: MFighter_m000_b.ao/bip01/Bip01_Pelvis/bip01_spine/Bone08/Bone17/Bone18
+    m_Weight: 1
+  - m_Path: MFighter_m000_b.ao/bip01/Bip01_Pelvis/bip01_spine/Bone08/Bone17/Bone18/Dummy11
+    m_Weight: 1
+  - m_Path: MFighter_m000_b.ao/bip01/Bip01_Pelvis/bip01_spine/Bone08/Bone17/Bone18/Dummy11/Dummy11_end
+    m_Weight: 1
+  - m_Path: MFighter_m000_b.ao/bip01/Bip01_Pelvis/bip01_spine/Bone08/Bone19
+    m_Weight: 1
+  - m_Path: MFighter_m000_b.ao/bip01/Bip01_Pelvis/bip01_spine/Bone08/Bone19/Bone20
+    m_Weight: 1
+  - m_Path: MFighter_m000_b.ao/bip01/Bip01_Pelvis/bip01_spine/Bone08/Bone19/Bone20/Dummy14
+    m_Weight: 1
+  - m_Path: MFighter_m000_b.ao/bip01/Bip01_Pelvis/bip01_spine/Bone08/Bone19/Bone20/Dummy14/Dummy14_end
+    m_Weight: 1
+  - m_Path: MFighter_m000_b.ao/bip01/Bip01_Pelvis/bip01_spine/Bone08/Bone21
+    m_Weight: 1
+  - m_Path: MFighter_m000_b.ao/bip01/Bip01_Pelvis/bip01_spine/Bone08/Bone21/Bone22
+    m_Weight: 1
+  - m_Path: MFighter_m000_b.ao/bip01/Bip01_Pelvis/bip01_spine/Bone08/Bone21/Bone22/Dummy15
+    m_Weight: 1
+  - m_Path: MFighter_m000_b.ao/bip01/Bip01_Pelvis/bip01_spine/Bone08/Bone21/Bone22/Dummy15/Dummy15_end
+    m_Weight: 1
+  - m_Path: MFighter_m000_b.ao/bip01/Bip01_Pelvis/bip01_spine/Bone08/Bone23
+    m_Weight: 1
+  - m_Path: MFighter_m000_b.ao/bip01/Bip01_Pelvis/bip01_spine/Bone08/Bone23/Bone24
+    m_Weight: 1
+  - m_Path: MFighter_m000_b.ao/bip01/Bip01_Pelvis/bip01_spine/Bone08/Bone23/Bone24/Dummy16
+    m_Weight: 1
+  - m_Path: MFighter_m000_b.ao/bip01/Bip01_Pelvis/bip01_spine/Bone08/Bone23/Bone24/Dummy16/Dummy16_end
+    m_Weight: 1
+  - m_Path: MFighter_m000_b.ao/bip01/Bip01_Pelvis/bip01_spine/Sheath_L_Bone
+    m_Weight: 1
+  - m_Path: MFighter_m000_b.ao/bip01/Bip01_Pelvis/bip01_spine/Sheath_L_Bone/Sheath_L_Bone_Dummy
+    m_Weight: 1
+  - m_Path: MFighter_m000_b.ao/bip01/Bip01_Pelvis/bip01_spine/Sheath_L_Bone/Sheath_L_Bone_Dummy/Sheath_L_Bone_Dummy_end
+    m_Weight: 1
+  - m_Path: MFighter_m000_b.mo
+    m_Weight: 1

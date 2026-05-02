@@ -74439,6 +74439,20 @@ AnimationClip:
   m_HasGenericRootTransform: 0
   m_HasMotionFloatCurves: 0
   m_Events:
+  - time: 1
+    functionName: OnAnimationHit
+    data: jatk02_pole
+    objectReferenceParameter: {fileID: 0}
+    floatParameter: 0
+    intParameter: 0
+    messageOptions: 0
+  - time: 1.375
+    functionName: OnAnimationAttackHitEnd
+    data: jatk03_pole
+    objectReferenceParameter: {fileID: 0}
+    floatParameter: 0
+    intParameter: 0
+    messageOptions: 0
   - time: 1.875
     functionName: OnAnimationComplete
     data: jatk02_pole

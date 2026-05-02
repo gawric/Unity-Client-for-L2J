@@ -1,4 +1,4 @@
-using L2_login;
+﻿using L2_login;
 using UnityEngine;
 
 public class ItemLogin : IData

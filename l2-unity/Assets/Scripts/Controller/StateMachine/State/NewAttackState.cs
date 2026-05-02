@@ -1,17 +1,18 @@
-
+п»ї
 using UnityEngine;
 
 
-public class NewAttackState : StateBase
+
+public class NewAttackState : AbstractAttackEvents
 {
-    private const int WOODEN_ARROW = 17;
-    public NewAttackState(PlayerStateMachine stateMachine) : base(stateMachine)
+
+  
+    public NewAttackState(PlayerStateMachine stateMachine) :
+        base(stateMachine.GetObjectId() , 
+        SpecialAnimationNames.GetSpecialsAttackAnimations() , 
+        stateMachine)
     {
-        AnimationManager.Instance.OnAnimationFinished += CallBackAnimationFinish;
-        AnimationManager.Instance.OnAnimationStartShoot += CallBackStartShoot;
-        AnimationManager.Instance.OnAnimationLoadArrow += CallBackLoadArrow;
-        ProjectileManager.Instance.OnHitMonster += OnHitBodyMonster;
-        ProjectileManager.Instance.OnHitCollider += OnHitColliderMonster;
+
     }
 
 
@@ -20,20 +21,34 @@ public class NewAttackState : StateBase
 
     }
 
-    public override void HandleEvent(Event evt)
+    public override void HandleEvent(Event evt , object payload = null)
     {
         switch (evt)
         {
             case Event.READY_TO_ACT:
-                Debug.Log("Attack Sate to Intention> начало новой atk пришел запрос от сервера");
+                Debug.Log("Attack Sate to Intention> РЅР°С‡Р°Р»Рѕ РЅРѕРІРѕР№ atk РїСЂРёС€РµР» Р·Р°РїСЂРѕСЃ РѕС‚ СЃРµСЂРІРµСЂР°");
+                AttackTimingHelper.RotateFaceToMonster(_stateMachine.Player);
+                Entity targetEntity = _stateMachine.Player.GetTargetEntity();
+
+                int targetEntityId = targetEntity != null && targetEntity.IdentityInterlude != null ? targetEntity.IdentityInterlude.Id : 0;
+                float attackDurationMs = AttackTimingHelper.ResolveServerLikeAttackDurationMs(_stateMachine.Player);
+                float hitFraction = AttackTimingHelper.ResolveHitFractionByWeapon(_stateMachine.Player);
+               
+                SwordCollisionService.Instance.BeginAttack(
+                    _stateMachine.Player.IdentityInterlude.Id,
+                    targetEntityId,
+                    _stateMachine.Player.transform,
+                    targetEntity != null ? targetEntity.transform : _stateMachine.Player.Target,
+                    attackDurationMs,
+                    hitFraction);
 
                 PlayerEntity.Instance.RefreshRandomPAttack();
                 Animation random = PlayerEntity.Instance.RandomName;
-                AnimationManager.Instance.PlayAnimation(random.ToString(), true);
+                AnimationManager.Instance.PlayAnimationTrigger(_stateMachine.GetObjectId() , random.ToString());
 
                 break;
             case Event.CANCEL:
-                Debug.Log("Attack Sate to Intention> Отмена скорее всего запрос пришел из ActionFaild");
+                Debug.Log("Attack Sate to Intention> РћС‚РјРµРЅР° СЃРєРѕСЂРµРµ РІСЃРµРіРѕ Р·Р°РїСЂРѕСЃ РїСЂРёС€РµР» РёР· ActionFaild");
                 PlayerStateMachine.Instance.ChangeIntention(Intention.INTENTION_IDLE);
                 PlayerStateMachine.Instance.NotifyEvent(Event.WAIT_RETURN);
                 PlayerEntity.Instance.LastAtkAnimation = null;
@@ -41,76 +56,4 @@ public class NewAttackState : StateBase
 
         }
     }
-
-
-
-    private void CallBackAnimationFinish(string animName)
-    {
-        Animation[] specials = SpecialAnimationNames.GetSpecialsAttackAnimations();
-
-        foreach (Animation special in specials)
-        {
-            if (animName == special.ToString())
-            {
-                PlayerStateMachine.Instance.ChangeIntention(Intention.INTENTION_IDLE);
-                PlayerStateMachine.Instance.NotifyEvent(Event.WAIT_RETURN);
-                break;
-            }
-        }
-    }
-
-    private void CallBackStartShoot(string animName , float remainingAtkTime)
-    {
-        Animation[] specials = SpecialAnimationNames.GetSpecialsAttackAnimations();
-
-        foreach (Animation special in specials)
-        {
-            if (animName == special.ToString())
-            {
-
-
-                GameObject go = PlayerEntity.Instance.GetGoEtcItem();
-                Transform target = PlayerEntity.Instance.Target;
-
-                if (PlayerEntity.Instance == null ||
-                    go == null ||
-                    target == null)
-                {
-                    Debug.LogError("NewAttackState->CallBackStartShoot: Критическая ошибка не все компоненты загрузились что-бы отправить стрелу в полет");
-                    return;
-                }
-
-                Vector3 startPos = PlayerEntity.Instance.GetPositionRightHand();
-
-                float baseAttackTime = CalcBaseParam.CalculateTimeL2j(PlayerEntity.Instance.Stats.BasePAtkSpeed);
-                float targetDistance = PlayerEntity.Instance.TargetDistance();
-                float[] timeAndFlye = CalcBaseParam.CalculateAttackAndFlightTimes(targetDistance, baseAttackTime);
-                var timeAtk = TimeUtils.ConvertMsToSec(timeAndFlye[1]);
-
-                ProjectileData settings = new ProjectileData(go, target, startPos, target);
-                settings.lifetime = timeAtk;
-
-                ProjectileManager.Instance.LaunchProjectile(go,  startPos, target , settings);
-                break;
-            }
-        }
-    }
-
-    private void CallBackLoadArrow(string animName)
-    {
-        PlayerEntity.Instance.EquipArrow(WOODEN_ARROW);
-    }
-
-    private void OnHitBodyMonster(GameObject prefab, Transform target, Vector3 hitPointCollider, Vector3 hitDirection)
-    {
-        HitManager.Instance.HandleHitBody(prefab, target, hitPointCollider, hitDirection);
-    }
-
-    private void OnHitColliderMonster(Transform attacker , Transform target, Vector3 hitPointCollider, Vector3 hitDirection)
-    {
-        Debug.Log("Hit colliders on");
-        HitManager.Instance.HandleHitCollider(attacker , target, hitPointCollider, hitDirection);
-    }
-
-
 }

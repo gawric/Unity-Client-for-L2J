@@ -1,4 +1,4 @@
-public class InventoryOrder
+﻿public class InventoryOrder
 {
     public int ObjectId { get; }
     public int Slot { get; }

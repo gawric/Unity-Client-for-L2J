@@ -1,10 +1,11 @@
-using System;
+﻿using System;
 using UnityEngine;
 
 public interface IProjectileManager
 {
-    public int LaunchProjectile(GameObject readyProjectile, Vector3 startPos, Transform target, ProjectileData settings = null);
+    public int LaunchProjectile(GameObject readyProjectile, Vector3 startPos, Transform target, ProjectileData settings = null, float offset = 0.3f);
     public void StopProjectile(int projectileId);
     public event Action<GameObject, Transform, Vector3, Vector3> OnHitMonster;
+    public event Action<GameObject, Transform, Vector3, Vector3, int> OnHitEffectProjectile;
     public event Action<Transform , Transform, Vector3, Vector3> OnHitCollider;
 }

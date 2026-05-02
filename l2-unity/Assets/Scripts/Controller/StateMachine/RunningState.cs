@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public class RunningState : StateBase
 {
@@ -6,7 +6,7 @@ public class RunningState : StateBase
 
 
 
-    public override void HandleEvent(Event evt)
+    public override void HandleEvent(Event evt, object payload = null)
     {
         switch (evt)
         {

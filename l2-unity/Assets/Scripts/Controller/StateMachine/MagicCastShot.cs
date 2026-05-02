@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public class MagicCastShot : StateBase
 {
@@ -12,7 +12,7 @@ public class MagicCastShot : StateBase
 
     }
 
-    public override void HandleEvent(Event evt)
+    public override void HandleEvent(Event evt, object payload = null)
     {
         switch (evt)
         {

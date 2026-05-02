@@ -1,8 +1,7 @@
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Xml;
-using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using static StatusUpdatePacket;
 using static UnityEngine.EventSystems.EventTrigger;
@@ -47,14 +46,6 @@ public class WorldCombat : MonoBehaviour {
 
 
 
-
-    public void ChageStateIDLE(MonsterEntity mEntity , MonsterStateMachine st)
-    {
-        if (!mEntity.IsDead())
-        {
-            st.ChangeState(MonsterState.IDLE);
-        }
-    }
     private void ParticleImpact(Vector3 hitPoint, Vector3 impactDirection)
     {
         // Use the actual impact point instead of calculating a new position
@@ -72,9 +63,6 @@ public class WorldCombat : MonoBehaviour {
     {
         PlayerStatusInterlude status = (PlayerStatusInterlude)entity.Status;
         PlayerInterludeStats stats = (PlayerInterludeStats) entity.Stats;
-
-        //Debug.Log("Stats sssssssssssssss+++ " + stats.Exp);
-        //Debug.Log("pis sssssssssssssss+++ " + pis.Exp);
 
         stats.Exp = pis.Exp;
         stats.Str = pis.Str;

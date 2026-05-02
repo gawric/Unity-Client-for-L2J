@@ -1,4 +1,4 @@
-public class StartTalkingIntention : NpcIntentionBase
+﻿public class StartTalkingIntention : NpcIntentionBase
 {
     public StartTalkingIntention(NpcStateMachine stateMachine) : base(stateMachine) { }
 

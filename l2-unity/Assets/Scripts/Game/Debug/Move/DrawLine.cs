@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+п»їusing System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Experimental.GlobalIllumination;
 
@@ -23,11 +23,11 @@ public class DrawLine : MonoBehaviour
         LineRenderer newLine = Instantiate(lineRenderer);
         newLine.positionCount = 2;
 
-        // Задаем цвета линии
+        // Р—Р°РґР°РµРј С†РІРµС‚Р° Р»РёРЅРёРё
         newLine.startColor = color;
         newLine.endColor = color;
 
-        // Задаем ширину линии
+        // Р—Р°РґР°РµРј С€РёСЂРёРЅСѓ Р»РёРЅРёРё
         newLine.startWidth = 0.01f;
         newLine.endWidth = 0.01f;
 
@@ -36,11 +36,11 @@ public class DrawLine : MonoBehaviour
             newLine.material.color = color;
         }
 
-        // Устанавливаем позиции
+        // РЈСЃС‚Р°РЅР°РІР»РёРІР°РµРј РїРѕР·РёС†РёРё
         newLine.SetPosition(0, point1);
         newLine.SetPosition(1, point2);
 
-        // Добавляем новую линию в список
+        // Р”РѕР±Р°РІР»СЏРµРј РЅРѕРІСѓСЋ Р»РёРЅРёСЋ РІ СЃРїРёСЃРѕРє
         lineRenderers.Add(new LineModel(entity_id , newLine , point1 , point2));
     }
 

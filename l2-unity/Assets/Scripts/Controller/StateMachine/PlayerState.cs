@@ -1,15 +1,12 @@
-public enum PlayerState
+﻿public enum PlayerState
 {
     IDLE,
-    MAGIC_CAST,
-    MAGIC_CAST_SHOT,
     ATTACKING,
+    PHYSICAL_SKILLS,
+    MAGIC_SKILLS,
     ANIMATION_LOCKED,
-    CASTING,
     RUNNING,
     WALKING,
-    UNCONTROLLABLE,
-    EMOTING,
     SITTING,
     SIT_WAIT,
     STANDING,

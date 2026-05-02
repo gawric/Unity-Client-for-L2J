@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
@@ -19,7 +19,7 @@ public class GSInterludeMessageHandler : ServerPacketHandler
         _cancelTokenSource = new CancellationTokenSource();
         _token = _cancelTokenSource.Token;
         StorageVariable.getInstance().SetManualMessage(_ewh);
-       // WaitDelayMessage();
+        // WaitDelayMessage();
     }
     public override void HandlePacket(IData itemQueue)
     {
@@ -47,7 +47,7 @@ public class GSInterludeMessageHandler : ServerPacketHandler
     private void OnMessage(byte[] data)
     {
         //SystemMessageInterlude packet = new SystemMessageInterlude(data);
-        //Debug.Log("������ ��������� �� ����������� � ����� ������ !!!! " + 1);
+        //Debug.Log("пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ !!!! " + 1);
         SystemMessagePacket packet = new SystemMessagePacket(data);
         try
         {
@@ -62,18 +62,20 @@ public class GSInterludeMessageHandler : ServerPacketHandler
         }
         catch (Exception ex)
         {
-            Debug.Log("GSInterludeMessageHandler: ����������� ������ � ������� ���������!!!!! " + ex.ToString());
+            Debug.Log("GSInterludeMessageHandler: пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ!!!!! " + ex.ToString());
         }
-     
+
 
     }
 
     private void OnCreatureSay(byte[] data)
     {
-        //SystemMessageInterlude packet = new SystemMessageInterlude(data);
-        //Debug.Log("������ ��������� �� ����������� � ����� ������ !!!! " + 1);
+
         CreatureSay packet = new CreatureSay(data);
-        if(packet.Message != null)
+
+        CreatureMessage message = packet.Message;
+
+        if (message != null)
         {
             if (InitPacketsLoadWord.getInstance().IsInit)
             {
@@ -81,17 +83,27 @@ public class GSInterludeMessageHandler : ServerPacketHandler
             }
             else
             {
-                SendShowClient(packet.Message);
+                EventProcessor.Instance.QueueEvent(() =>
+                {
+                    try
+                    {
+                        ChatWindow.Instance.ReceiveChatMessage(message);
+                    }
+                    catch (Exception)
+                    {
+                        Debug.LogError("CreatureSay: Critical error now show SystemMessage");
+                        SendShowClient(message);
+                    }
+
+                });
             }
         }
-       
-
     }
 
     private void OnNpcSay(byte[] data)
     {
         //SystemMessageInterlude packet = new SystemMessageInterlude(data);
-        //Debug.Log("������ ��������� �� ����������� � ����� ������ !!!! " + 1);
+        //Debug.Log("пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ !!!! " + 1);
         NpcSay packet = new NpcSay(data);
         if (packet.NpcMessage != null)
         {
@@ -113,15 +125,15 @@ public class GSInterludeMessageHandler : ServerPacketHandler
     {
         SMParam[] smParams = packet.Params;
         int messageId = packet.Id;
-        //Debug.Log("��������� TRY ADD" + messageId);
+        //Debug.Log("пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ TRY ADD" + messageId);
         SystemMessageDat messageData = SystemMessageTable.Instance.GetSystemMessage(messageId);
-        OpenMessageWindow(messageId, messageData , smParams);
+        OpenMessageWindow(messageId, messageData, smParams);
 
         if (messageData != null)
         {
-                SystemMessage systemMessage = new SystemMessage(smParams, messageData);
+            SystemMessage systemMessage = new SystemMessage(smParams, messageData);
 
-                
+
             UnityMainThreadDispatcher.Instance().Enqueue(() =>
             {
                 ChatWindow.Instance.ReceiveSystemMessage(systemMessage);
@@ -133,9 +145,9 @@ public class GSInterludeMessageHandler : ServerPacketHandler
         }
     }
     //279 - You do not have enough Adena
-    private void OpenMessageWindow(int messageId , SystemMessageDat messageData , SMParam[] smParams)
+    private void OpenMessageWindow(int messageId, SystemMessageDat messageData, SMParam[] smParams)
     {
-        if(messageId == (int)StorageVariable.MessageID.NOT_HAVE_ADENA & messageData != null 
+        if (messageId == (int)StorageVariable.MessageID.NOT_HAVE_ADENA & messageData != null
             | messageId == (int)StorageVariable.MessageID.ITEM_MISSING_TO_LEARN_SKILL
             | messageId == (int)StorageVariable.MessageID.NOT_ENOUGH_SP_TO_LEARN_SKILL
             | messageId == (int)StorageVariable.MessageID.NO_ITEM_DEPOSITED_IN_WH)
@@ -144,86 +156,29 @@ public class GSInterludeMessageHandler : ServerPacketHandler
         }
         else if (messageId == (int)StorageVariable.MessageID.LEARNED_SKILL_S1 & messageData != null)
         {
-            if(smParams[0].Type == SMParamType.TYPE_SKILL_NAME)
+            if (smParams[0].Type == SMParamType.TYPE_SKILL_NAME)
             {
                 int[] param = smParams[0].GetIntArrayValue();
 
-                if(smParams[0].GetIntArrayValue() != null)
+                if (smParams[0].GetIntArrayValue() != null)
                 {
                     int skillId = param[0];
                     int skilllvl = param[1];
 
-                    
+
                     SkillNameData sNameData = SkillNameTable.Instance.GetName(skillId, skilllvl);
                     string text = messageData.AddSkillName(sNameData.Name);
 
                     EventProcessor.Instance.QueueEvent(() => SystemMessageWindow.Instance.ShowWindow(text));
                 }
-          
+
             }
-       
+
         }
 
     }
 
-   
 
-    //public void WaitDelayMessage()
-   // {
-
-      //  Task.Run(() =>
-      //  {
-          //  int exit = 0;
-          //  while (true)
-          //  {
-              //  _ewh.WaitOne();
-              //  Debug.Log("DELAAAAAAAAAY MESSSSSSSSSSAAAAAAAAGEEEEEEE ");
-              //  if (_token.IsCancellationRequested)
-              //  {
-              //  }
-
-              //  if(exit == 300)
-              //  {
-               //     Block();
-               // }
-               // Thread.Sleep(10);
-               // if (_delayMessage.Count > 0)
-              //  {
-                    //int messageId = StorageVariable.getInstance().GetMessageIdResume();
-
-                    //SystemMessage messageDelay;
-                    //SystemMessage messageDelay = _delayMessage[messageId];
-                    //if (messageDelay != null)
-                    //{
-                        //SystemMessageDat newText = SystemMessageTable.Instance.GetSystemMessage(messageDelay.MessageDat.Id);
-                       // SystemMessage newMessage = new SystemMessage(messageDelay.Params, newText);
-                        //EventProcessor.Instance.QueueEvent(() => ChatWindow.Instance.ReceiveSystemMessage(newMessage));
-                        //_delayMessage.Remove(messageId , out messageDelay);
-                        //Debug.Log("�������� �� ����� � �������!" + messageId);
-                       // exit = 0;
-                       // Block();
-                   // }
-                   // else
-                   // {
-                    //    Debug.Log("GSInterludeMessageHandler DelayMessage: ���� ��������� ��� ������ �� �����!!! ");
-                  //  }
-               // }
-              //  else
-              //  {
-                  //  Block();
-              //  }
-
-             //   exit++;
-          //  }
-      //  });
-   // }
-
- 
-    private void Block()
-    {
-        _ewh.Reset();
-       // _refreshMessageId = -1;
-    }
 
     private void SendShowClient(SystemMessage message)
     {
@@ -239,8 +194,8 @@ public class GSInterludeMessageHandler : ServerPacketHandler
                 {
                     Debug.LogError("NpcSay: Critical error now show SystemMessage");
                 }
-                
-            }); 
+
+            });
         }
         else
         {
@@ -256,11 +211,11 @@ public class GSInterludeMessageHandler : ServerPacketHandler
                 }
 
             });
-          
+
         }
     }
 
-    
+
     protected override byte[] DecryptPacket(byte[] data)
     {
         throw new System.NotImplementedException();

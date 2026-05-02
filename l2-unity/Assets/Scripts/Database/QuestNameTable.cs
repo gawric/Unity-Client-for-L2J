@@ -1,4 +1,4 @@
-using NUnit.Framework;
+п»їusing NUnit.Framework;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -159,8 +159,8 @@ public class QuestNameTable
         {
             foreach(QuestName name in entry.Value)
             {
-                //EntityName берем последнего из списка он и будет Клиентом в форме или источником
-                Debug.Log(" ID Номер quest " + entry.Key + " value " + name.Main_name + " entityName " + name.EntityName + " questType " + name.Repeat);
+                //EntityName Р±РµСЂРµРј РїРѕСЃР»РµРґРЅРµРіРѕ РёР· СЃРїРёСЃРєР° РѕРЅ Рё Р±СѓРґРµС‚ РљР»РёРµРЅС‚РѕРј РІ С„РѕСЂРјРµ РёР»Рё РёСЃС‚РѕС‡РЅРёРєРѕРј
+                Debug.Log(" ID РќРѕРјРµСЂ quest " + entry.Key + " value " + name.Main_name + " entityName " + name.EntityName + " questType " + name.Repeat);
             }
             
         }

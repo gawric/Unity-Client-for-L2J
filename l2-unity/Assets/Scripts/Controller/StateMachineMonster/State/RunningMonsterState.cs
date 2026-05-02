@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public class RunningMonsterState : MonsterBase
 {
@@ -21,7 +21,7 @@ public class RunningMonsterState : MonsterBase
             case Event.ARRIVED:
                 _stateMachine.ChangeState(MonsterState.IDLE);
                 _stateMachine.NotifyEvent(Event.ARRIVED);
-                DebugLineDraw.RemoveDrawLineDebug(monsterEntity.IdentityInterlude.Id);
+                //DebugLineDraw.RemoveDrawLineDebug(_stateMachine.GetObjectId());
                 break;
             case Event.CANCEL:
                 Debug.Log("CANCEL Running MONSTER TO POINT!");
@@ -30,7 +30,7 @@ public class RunningMonsterState : MonsterBase
                 break;
             case Event.MOVE_TO:
                 // Debug.Log("MosterAnimation State Walk > start animation");
-                AnimationManager.Instance.PlayMonsterAnimation(monsterEntity.IdentityInterlude.Id, nac, AnimationNames.MONSTER_RUN.ToString());
+                AnimationManager.Instance.PlayMonsterAnimation(_stateMachine.GetObjectId(), AnimationNames.MONSTER_RUN.ToString());
                 break;
         }
     }

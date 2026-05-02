@@ -1,4 +1,4 @@
-using UnityEngine;
+п»їusing UnityEngine;
 using UnityEngine.UIElements;
 
 public abstract class AbstractDataFunction
@@ -104,7 +104,7 @@ public abstract class AbstractDataFunction
         }
         else
         {
-            if (groupElement == null) { Debug.LogWarning(" ToolTipDataProvider: Не критическая ошибка мы не нашли элемент tooltips "); return; }
+            if (groupElement == null) { Debug.LogWarning(" ToolTipDataProvider: РќРµ РєСЂРёС‚РёС‡РµСЃРєР°СЏ РѕС€РёР±РєР° РјС‹ РЅРµ РЅР°С€Р»Рё СЌР»РµРјРµРЅС‚ tooltips "); return; }
             groupElement.style.display = DisplayStyle.None;
             labelData.text = "";
         }
@@ -119,7 +119,7 @@ public abstract class AbstractDataFunction
         }
         else
         {
-            if (groupElement == null) { Debug.LogWarning(" ToolTipDataProvider: Не критическая ошибка мы не нашли элемент tooltips "); return; }
+            if (groupElement == null) { Debug.LogWarning(" ToolTipDataProvider: РќРµ РєСЂРёС‚РёС‡РµСЃРєР°СЏ РѕС€РёР±РєР° РјС‹ РЅРµ РЅР°С€Р»Рё СЌР»РµРјРµРЅС‚ tooltips "); return; }
             groupElement.style.display = DisplayStyle.None;
             labelData.text = "";
         }
@@ -134,7 +134,7 @@ public abstract class AbstractDataFunction
         }
         else
         {
-            if (groupElement == null) { Debug.LogWarning(" ToolTipDataProvider: Не критическая ошибка мы не нашли элемент tooltips "); return; }
+            if (groupElement == null) { Debug.LogWarning(" ToolTipDataProvider: РќРµ РєСЂРёС‚РёС‡РµСЃРєР°СЏ РѕС€РёР±РєР° РјС‹ РЅРµ РЅР°С€Р»Рё СЌР»РµРјРµРЅС‚ tooltips "); return; }
             groupElement.style.visibility = Visibility.Hidden;
             labelData.text = "";
         }

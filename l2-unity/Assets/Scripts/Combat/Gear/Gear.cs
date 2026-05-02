@@ -5,7 +5,6 @@ using System.Linq;
 using UnityEngine;
 using static ModelTable;
 using static Unity.Burst.Intrinsics.Arm;
-using static UnityEditor.Progress;
 using static UnityEngine.Rendering.DebugUI;
 
 public class Gear : AbstractMeshManager 
@@ -23,7 +22,6 @@ public class Gear : AbstractMeshManager
     private Weapon _rightHandWeapon;
     private Weapon _leftHandWeapon;
     private Weapon _leftHandShield;
-    private string _origWeaponPrefabName = "";
     private string _origShieldPrefabName = "";
  
     public Action<int, Weapon>  OnEquipAnimationRefresh;
@@ -39,6 +37,8 @@ public class Gear : AbstractMeshManager
     [Header("LeftHand")]
     [SerializeField] private WeaponType _leftHandType;
     [SerializeField] protected Transform _leftHandBone;
+    protected Transform _spineBone;
+    protected Transform _rightUpperArm;
     [SerializeField] protected Transform _shieldBone;
     [SerializeField] protected Transform _leftHand;
     [SerializeField] protected string _weaponAnim;
@@ -109,7 +109,7 @@ public class Gear : AbstractMeshManager
 
         GameObject weaponPrefab = (GameObject)LoadMesh(EquipmentCategory.Weapon, weaponId);
         if (weaponPrefab == null) return;
-        _origWeaponPrefabName = weaponPrefab.name;
+
         var weaponNameAndId = weaponName + weaponId;
         WeaponType type = weapon.Weapongrp.WeaponType;
         RefreshData(leftSlot, weapon);
@@ -175,7 +175,7 @@ public class Gear : AbstractMeshManager
         GameObject weaponPrefab = (GameObject)LoadMesh(EquipmentCategory.Weapon, weaponId);
         //GameObject weaponPrefabRight = (GameObject)LoadMesh(EquipmentCategory.Weapon, weaponId);
 
-        _origWeaponPrefabName = weaponPrefab.name;
+        //_origWeaponPrefabName = weaponPrefab.name;
         WeaponType type = weapon.Weapongrp.WeaponType;
         var weaponNameAndId = weaponName + weaponId;
         RefreshData(false, weapon);
@@ -255,6 +255,29 @@ public class Gear : AbstractMeshManager
         return _leftHandBone;
     }
 
+    public Transform GetSpineBone()
+    {
+        if (_spineBone == null)
+        {
+            _spineBone = transform.FindRecursive("Bip01_Spine1");
+        }
+        return _spineBone;
+    }
+
+    public Transform GetRightUpperArm()
+    {
+        if (_rightUpperArm == null)
+        {
+            _rightUpperArm = transform.FindRecursive("Bip01_R_UpperArm");
+        }
+        return _rightUpperArm;
+    }
+
+    public Transform GetTransformRightHandBone()
+    {
+        return GetRightHandBone();
+    }
+
     protected virtual Transform GetRightHandBone() {
         if (_rightHandBone == null) {
             _rightHandBone = transform.FindRecursive("Sword Bone");
@@ -269,16 +292,16 @@ public class Gear : AbstractMeshManager
         return _shieldBone;
     }
 
+
+    
     
 
     public float GetWeaponRange() {
         return VectorUtils.ConvertL2jDistance(_weaponRange);
     }
 
-    private Transform[] destroy = new Transform[2];
     public  void UnequipWeapon(bool leftSlot , int weaponId, bool lrDestroy = false)
     {
-
         string weapondNameId = weaponName + weaponId;
 
         if (lrDestroy)
@@ -446,13 +469,13 @@ public class Gear : AbstractMeshManager
     {
         if (parent == null) yield break;
 
-        // Check current transform
+    
         if (parent.name.Contains(pattern))
         {
             yield return parent;
         }
 
-        // Recursively check all children
+ 
         foreach (Transform child in parent)
         {
             foreach (Transform match in FindTransformsWithName(child, pattern))
@@ -487,5 +510,29 @@ public class Gear : AbstractMeshManager
         return transform.FindRecursive(boneName);
     }
 
+    public Transform[] GetAllTransformByRightHand(string[] arrNameGameObject)
+    {
+        Transform[] transfroms = new Transform[arrNameGameObject.Length];
+        for (int i=0; i < arrNameGameObject.Length; i++)
+        {
+            string name =  arrNameGameObject[i];
+            IEnumerable<Transform> result = FindTransformsWithName(GetRightHandBone(), name);
+            if (result.GetEnumerator().MoveNext())
+            {
+                transfroms[i] = result.First();
+            }
+
+        }
+
+        return transfroms;
+    }
+
+    public bool IsTwoHandedEquipped()
+    {
+        return _rightHandType == WeaponType.bigword || 
+               _rightHandType == WeaponType.pole ||    
+               _rightHandType == WeaponType.staff ||  
+               _rightHandType == WeaponType.bigblunt;  
+    }
 
 }

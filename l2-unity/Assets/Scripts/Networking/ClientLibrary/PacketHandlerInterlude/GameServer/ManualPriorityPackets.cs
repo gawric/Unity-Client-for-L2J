@@ -1,4 +1,4 @@
-using System.Collections;
+Ôªøusing System.Collections;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -24,7 +24,7 @@ public class ManualPriorityPackets
         return instance;
     }
 
-    public bool Is—losePacketArrived { get; set; }
+    public bool IsClosePacketArrived { get; set; }
 
     public void AddPacketsDelay(ServerPacket packet)
     {

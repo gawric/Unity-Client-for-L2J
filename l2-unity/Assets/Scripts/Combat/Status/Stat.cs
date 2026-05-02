@@ -1,4 +1,4 @@
-public enum Stat : byte
+﻿public enum Stat : byte
 {
     RUN_SPEED_MONSTER,
     SPEED,

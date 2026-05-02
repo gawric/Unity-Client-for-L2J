@@ -1,4 +1,4 @@
-using FMOD.Studio;
+﻿using FMOD.Studio;
 using NUnit.Framework;
 using System;
 using System.Collections.Generic;

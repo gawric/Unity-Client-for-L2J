@@ -1,4 +1,4 @@
-public class CreatureSay : ServerPacket
+﻿public class CreatureSay : ServerPacket
 {
     private int objectId = 0;
     private int chatType = 0;
@@ -8,7 +8,6 @@ public class CreatureSay : ServerPacket
     public CreatureMessage Message { get { return message; } }
     public CreatureSay(byte[] d) : base(d)
     {
-        
         Parse();
     }
 
@@ -16,16 +15,27 @@ public class CreatureSay : ServerPacket
     {
         objectId = ReadI();
         chatType = ReadI();
-        if (chatType == (int)ChatType.GENERAL)
+
+        ChatTypeData data = ChatTypes.GetById(chatType);
+
+        if(data != null)
         {
-            senderName = ReadOtherS();
-            text = ReadOtherS();
-            message = new CreatureMessage(senderName , text , "#dcd9dc");
-        }else if ( chatType == (int)ChatType.ANNOUNCEMENT | chatType == (int)ChatType.CRITICAL_ANNOUNCE)
-        {
-            senderName = ReadOtherS();
-            text = ReadOtherS();
-            message = new CreatureMessage("Announcements", text , "#80fbff");
+              senderName = ReadOtherS();
+
+              ReadI();//High Five NPCString ID
+
+              text = ReadOtherS();
+
+              int dataType = data.Type;
+
+              if(dataType == 10 || dataType == 18)
+              {
+                message = new CreatureMessage("Announcements", text , data);
+              }
+              else
+              {
+                   message = new CreatureMessage(senderName , text , data);
+              }
         }
     }
 }

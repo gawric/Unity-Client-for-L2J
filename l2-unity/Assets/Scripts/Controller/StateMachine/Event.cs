@@ -1,7 +1,8 @@
-public enum Event
+﻿public enum Event
 {
     THINK,
     DEAD,
+    FORCE_DEATH,
     REBIRTH,
     ARRIVED,
     MOVE_TO,
@@ -10,6 +11,8 @@ public enum Event
     ATTACKED,
     FORGET_OBJECT,
     READY_TO_ACT,
+    APPLY_SELF_SKILL,
+    APPLY_SOULSHOT_CHARGED,
     CANCEL,
     WAIT_RETURN,
     MY_TARGET_SELECT,

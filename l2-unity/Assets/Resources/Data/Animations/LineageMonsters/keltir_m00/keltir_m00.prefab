@@ -28,8 +28,8 @@ Transform:
   m_GameObject: {fileID: 6465989369284829546}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0.004, y: 0.199, z: 0}
-  m_LocalScale: {x: 0.2, y: 0.4, z: 0.6}
+  m_LocalPosition: {x: 0.004, y: 0.21, z: 0}
+  m_LocalScale: {x: 0.25, y: 0.4, z: 0.6}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 6704099348175243365}
@@ -618,10 +618,10 @@ MonoBehaviour:
     _scaledWalkSpeed: 0
     _basePAtkSpeed: 0
   _appearance:
-    _collisonHeight: 0
-    _collisionRadius: 0
-    _lhand: 0
-    _rhand: 0
+    CollisionHeight: 0
+    CollisionRadius: 0
+    LHand: 0
+    RHand: 0
   _running: 0
   _dead: 0
   _race: 0

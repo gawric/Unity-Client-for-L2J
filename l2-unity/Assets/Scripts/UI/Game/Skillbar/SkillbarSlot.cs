@@ -1,3 +1,4 @@
+Ôªøusing System.Collections;
 using UnityEngine;
 using UnityEngine.UIElements;
 using static L2Slot;
@@ -10,6 +11,8 @@ public class SkillbarSlot : L2ClickableSlot
     private int _skillbarId;
     private int _slot;
     private VisualElement _keyElement;
+    private VisualElement _reuseElement;
+    private VisualElement _rechargeMaskBg;
 
     public SkillbarSlot(VisualElement slotElement, int position, int skillbarId, int slot) : base(slotElement, position, SlotType.SkillBar, true, false)
     {
@@ -18,6 +21,20 @@ public class SkillbarSlot : L2ClickableSlot
         _skillbarId = skillbarId;
         _slot = slot;
         _keyElement = _slotElement.Q<VisualElement>("Key");
+        _reuseElement = _slotElement.Q<VisualElement>("ReuseBg");
+        _rechargeMaskBg = _slotElement.Q<VisualElement>("RechargeMaskBg");
+    }
+
+
+    public VisualElement GetReuseElement()
+    {
+        return _reuseElement;
+    }
+
+
+    public VisualElement GetRechargeMaskElement()
+    {
+        return _rechargeMaskBg;
     }
 
     public Shortcut Shortcut
@@ -85,7 +102,7 @@ public class SkillbarSlot : L2ClickableSlot
 
         string key = PlayerShortcuts.Instance.GetKeybindForShortcut(_skillbarId, _slot);
 
-        //Debug.Log("UpdateInputInfo ÔÓËÒÍÛ ÔÓ KeyImageTable");
+        //Debug.Log("UpdateInputInfo –ø–æ–∏—Å–∫—É –ø–æ KeyImageTable");
         Texture2D inputTexture = KeyImageTable.Instance.LoadTextureByKey(key);
 
         if (inputTexture != null)
@@ -94,6 +111,12 @@ public class SkillbarSlot : L2ClickableSlot
             _keyElement.style.width = inputTexture.width;
         }
     }
+
+   
+
+
+
+
 
     public override void ClearManipulators()
     {

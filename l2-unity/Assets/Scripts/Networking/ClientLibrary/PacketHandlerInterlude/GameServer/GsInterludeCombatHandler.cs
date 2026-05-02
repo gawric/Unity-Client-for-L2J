@@ -1,4 +1,4 @@
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
 
@@ -132,9 +132,19 @@ public class GsInterludeCombatHandler : ServerPacketHandler
 
     private void MagicSkillUse(byte[] data)
     {
-        MagicSkillUse magicSkill = new MagicSkillUse(data);
-        PlayerStateMachine.Instance.ChangeIntention(Intention.INTENTION_MAGIC_ATTACK, magicSkill);
-        SaveS1(magicSkill.SkillId, magicSkill.SkillLvl);
+        var magicSkill = new MagicSkillUse(data);
+        if (magicSkill == null) return;
+
+        EventProcessor.Instance.QueueEvent(() =>
+        {
+            SkillbarWindow.Instance.ShowCooldown(magicSkill.SkillId, Shortcut.TYPE_SKILL , magicSkill.Reusedelay);
+
+            PlayerStateMachine.Instance.ChangeIntention(
+                magicSkill.SkillGrp.IsMagic == 1 ?
+                    Intention.INTENTION_MAGIC_ATTACK :
+                    Intention.INTENTION_PHYSICAL_SKILLS_ATTACK,
+                magicSkill);
+        });
 
     }
 
@@ -153,15 +163,7 @@ public class GsInterludeCombatHandler : ServerPacketHandler
 
     }
 
-    private void SaveS1(int skillId , int skillLvl)
-    {
-        SkillNameData skillData = SkillNameTable.Instance.GetName(skillId, skillLvl);
-        if (skillData != null)
-        {
-            //StorageVariable.getInstance().AddS1Items(new VariableItem(skillData.Name, skillId));
-            //StorageVariable.getInstance().ResumeShowDelayMessage((int)MessageID.USE_SKILL);
-        }
-    }
+
 
     public void AutoAttackStart(byte[] data)
     {

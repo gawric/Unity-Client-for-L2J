@@ -222,8 +222,20 @@ public class PlayerController : MonoBehaviour
             if (!switchWalkToRun)
             {
                 switchWalkToRun = true;
-                PlayerStateMachine.Instance.ChangeState(PlayerState.RUNNING);
-                PlayerStateMachine.Instance.NotifyEvent(Event.MOVE_TO);
+
+                if (_movementTarget.IsRunningServer())
+                {
+                    Debug.Log("PlayerController->SwitchWalkToRun: Run? " + _movementTarget.IsRunningServer());
+                    PlayerStateMachine.Instance.ChangeState(PlayerState.RUNNING);
+                    PlayerStateMachine.Instance.NotifyEvent(Event.MOVE_TO);
+                }
+                else
+                {
+                    Debug.Log("PlayerController->SwitchWalkToRun: Run? " + _movementTarget.IsRunningServer());
+                    PlayerStateMachine.Instance.ChangeState(PlayerState.WALKING);
+                    PlayerStateMachine.Instance.NotifyEvent(Event.MOVE_TO);
+                }
+
             }
         }
 

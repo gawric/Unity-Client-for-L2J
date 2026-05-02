@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 public class IconManager
@@ -15,6 +15,7 @@ public class IconManager
 
     private Dictionary<int, Texture2D> _icons = new Dictionary<int, Texture2D>();
     private Dictionary<int, Texture2D[]> _otherIcons = new Dictionary<int, Texture2D[]>();
+    private Dictionary<int, Texture2D> _otherIconsCooltime = new Dictionary<int, Texture2D>();
     private Dictionary<string, Texture2D> _interfaceIcon = new Dictionary<string, Texture2D>();
 
 
@@ -72,11 +73,18 @@ public class IconManager
 
     public void CacheOtherIcons()
     {
+
+        LoadAllOther();
+        LoadAllCoolTime();
+    }
+
+    private void LoadAllOther()
+    {
         foreach (Armor armor in ItemTable.Instance.Armors.Values)
         {
             string[] otherIcon = armor.Itemgrp.OtherIcon;
 
-            if(otherIcon != null)
+            if (otherIcon != null)
             {
                 Texture2D[] arrayIcon = new Texture2D[otherIcon.Length];
 
@@ -90,8 +98,39 @@ public class IconManager
                     _otherIcons.Add(armor.Id, arrayIcon);
                 }
             }
-   
+
         }
+    }
+
+    private void LoadAllCoolTime()
+    {
+        int cooldownImageCount = 356;
+        string cooldownPath = "Data/UI/ShortCut/Skill_Time";
+        string coolTimeName = "cooltime";
+
+        for (int i = 1; i <= cooldownImageCount; i++)
+        {
+            string iconName = $"{coolTimeName}{i}";
+            Texture2D icon = LoadTextureByName(iconName , cooldownPath);
+
+            if(icon.name == "NOIMAGE")
+            {
+                continue;
+            }
+
+            if (icon != null)
+            {
+                if (!_otherIconsCooltime.ContainsKey(i)) 
+                {
+                    _otherIconsCooltime.Add(i, icon);
+                }
+            }
+        }
+    }
+
+    public int GetSizeOtherCoolTime()
+    {
+        return _otherIconsCooltime.Count;
     }
 
     public void CacheInterfaceIcons()
@@ -117,9 +156,12 @@ public class IconManager
         return _noImageIcon;
     }
 
-    public Texture2D LoadTextureByName(string name)
+    public Texture2D LoadTextureByName(string name , string iconFolder = null)
     {
-        string icon = _iconFolder + "\\" + CleanIconName(name);
+        var folder = (iconFolder == null) ? _iconFolder : iconFolder;
+
+        string icon = folder + "\\" + CleanIconName(name);
+
         var result = Resources.Load<Texture2D>(icon);
 
         //Debug.Log($"Loading icon {name}.");
@@ -205,18 +247,20 @@ public class IconManager
         return null;
     }
 
+    // type 0 - cooltime
+    public Texture2D GetOtherIconByType(int id , int type)
+    {
+        return type == 0 && _otherIconsCooltime.TryGetValue(id, out Texture2D icon) ? icon : null;
+    }
+
+ 
+
 
     private Texture2D GetNoImageIcon()
     {
         return Resources.Load<Texture2D>(_iconFolder + "\\" + "NOIMAGE");
     }
 
-    private string CleanIconName(string name)
-    {
-        if(name != null)
-        {
-            return name.Replace("icon.", "");
-        }
-        return "";
-    }
+    private string CleanIconName(string name) => name?.Replace("icon.", "") ?? "";
+
 }

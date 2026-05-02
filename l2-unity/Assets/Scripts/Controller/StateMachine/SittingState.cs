@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public class SittingState : StateBase
 {
@@ -6,7 +6,7 @@ public class SittingState : StateBase
     public const float SIT_ANIM_LENGTH_SEC = 4.5f;
     private bool _sitting = false;
 
-    public override void HandleEvent(Event evt)
+    public override void HandleEvent(Event evt  , object payload = null)
     {
         switch (evt)
         {

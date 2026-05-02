@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public class PlayerStateRun : StateMachineBehaviour
 {
@@ -21,7 +21,7 @@ public class PlayerStateRun : StateMachineBehaviour
         //    _audioHandler.PlaySoundAtRatio(CharacterSoundEvent.Step, ratio);
         //}
 
-        AnimationManager.Instance.StopCurrentAnimation(parameterName);
+        AnimationManager.Instance.StopCurrentAnimation(animator.GetInteger(AnimatorUtils.OBJECT_ID), parameterName);
     }
 
     override public void OnStateUpdate(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)

@@ -1,4 +1,4 @@
-
+п»ї
 
 using UnityEngine;
 
@@ -198,7 +198,7 @@ public class PlayerStateAction : PlayerStateBase
     {
        if (PlayerStateMachine.Instance.State == PlayerState.WAIT_RETURN)
        {
-            Debug.Log(" Attack Sate to Intention TIMEOUT Запуск atk " + PlayerStateMachine.Instance.State + " startTime " + Time.time);
+            Debug.Log(" Attack Sate to Intention TIMEOUT Р—Р°РїСѓСЃРє atk " + PlayerStateMachine.Instance.State + " startTime " + Time.time);
             SetBool("atkwait", true, true, false);
             return true;
        }

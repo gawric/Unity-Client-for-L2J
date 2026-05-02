@@ -1,4 +1,4 @@
-using System;
+п»їusing System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -146,7 +146,7 @@ public class AbstractSkills
         //const int skillsPerPanel = 7;
         List<VisualElement> toDelete = new List<VisualElement>();
 
-        // Собираем все SkillSlot из всех панелей
+        // РЎРѕР±РёСЂР°РµРј РІСЃРµ SkillSlot РёР· РІСЃРµС… РїР°РЅРµР»РµР№
         List<VisualElement> allSlots = new List<VisualElement>();
         foreach (var panel in rowPanels)
         {
@@ -186,7 +186,7 @@ public class AbstractSkills
         {
             VisualElement targetPanel = null;
 
-            // Если панелей нет, создаём первую
+            // Р•СЃР»Рё РїР°РЅРµР»РµР№ РЅРµС‚, СЃРѕР·РґР°С‘Рј РїРµСЂРІСѓСЋ
             if (rowPanels.Count == 0)
             {
                 targetPanel = ToolTipsUtils.CloneOne(templatePanel8x1);
@@ -196,13 +196,13 @@ public class AbstractSkills
             }
             else
             {
-                // Берём последнюю панель
+                // Р‘РµСЂС‘Рј РїРѕСЃР»РµРґРЅСЋСЋ РїР°РЅРµР»СЊ
                 targetPanel = rowPanels[rowPanels.Count - 1];
-                // Считаем количество ячеек в RowsVirtual
+                // РЎС‡РёС‚Р°РµРј РєРѕР»РёС‡РµСЃС‚РІРѕ СЏС‡РµРµРє РІ RowsVirtual
                 var rowNameVirtual = targetPanel.Q(_rowNameInnerPanel);
                 int currentCount = rowNameVirtual != null ? rowNameVirtual.childCount : 0;
 
-                // Если панель заполнена, создаём новую
+                // Р•СЃР»Рё РїР°РЅРµР»СЊ Р·Р°РїРѕР»РЅРµРЅР°, СЃРѕР·РґР°С‘Рј РЅРѕРІСѓСЋ
                 if (currentCount >= skillsPerPanel)
                 {
                     targetPanel = ToolTipsUtils.CloneOne(templatePanel8x1);
@@ -212,7 +212,7 @@ public class AbstractSkills
                 }
             }
 
-            // Добавляем слот в панель
+            // Р”РѕР±Р°РІР»СЏРµРј СЃР»РѕС‚ РІ РїР°РЅРµР»СЊ
             var rowNameVirtualAdd = targetPanel.Q(_rowNameInnerPanel);
             var slotElement = ToolTipsUtils.CloneOne(templateSlotSkill);
             var skillSlot = new SkillSlot(slotElement, skill.SkillID, SlotType.SkillWindow);

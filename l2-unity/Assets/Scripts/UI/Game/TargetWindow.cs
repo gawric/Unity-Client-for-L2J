@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Security.Principal;
@@ -75,12 +75,14 @@ public class TargetWindow : L2Window {
         _windowEle.style.top = 0;
     }
 
-    private void FixedUpdate() {
+    private void FixedUpdate()
+     {
         if(_windowEle == null) {
             return;
         }
 
-        if(TargetManager.Instance.HasTarget()) {
+        if(TargetManager.Instance.HasTarget())
+        {
             ShowWindow();
 
             TargetData targetData = TargetManager.Instance.Target;
@@ -89,6 +91,7 @@ public class TargetWindow : L2Window {
                 _nameLabel.style.color = targetData.GetColorName();
             }
             if(_HPBarBG != null && _HPBar != null) {
+
                 float hpRatio = (float)targetData.Status.GetHp() / targetData.Stats.MaxHp;
                 float bgWidth = _HPBarBG.resolvedStyle.width;
                 float barWidth = bgWidth * hpRatio;

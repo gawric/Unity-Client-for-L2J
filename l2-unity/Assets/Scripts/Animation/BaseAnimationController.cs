@@ -1,11 +1,12 @@
-using System;
+Ôªøusing System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 using UnityEngine;
 using static UnityEngine.Rendering.DebugUI;
 
-public class BaseAnimationController : MonoBehaviour
+public class BaseAnimationController : AnimationEventsBase, IAnimationController
 {
     [SerializeField] protected Animator _animator;
     [SerializeField] protected bool _resetStateOnReceive = false;
@@ -14,80 +15,62 @@ public class BaseAnimationController : MonoBehaviour
     private string _lastAnimationVariableName;
     private float _lastAtkClipLength;
     private float _pAtkSpd;
-    private Dictionary<string, bool> _priorityAnimations = new Dictionary<string, bool>();
-    private Queue<string> _animationQueue = new Queue<string>();
-    private bool _isProcessingQueue = false;
-    public Action<string> OnAnimationFinished;
-    public Action<string> OnAnimationStartShoot;
-    public Action<string> OnAnimationStartLoadArrow;
+
+    private readonly Dictionary<string, string> _base_motion = new Dictionary<string, string>(3);
+
+    private const string BASE_MOTION_CAST_MID = "FDarkElf_m001_b.ao_CastMid_FDarkElf";
+    private const string BASE_MOTION_END = "FDarkElf_m001_b.ao_CastEnd_FDarkElf";
+    private const string BASE_MOTION_MAGIC_SHOOT = "FDarkElf_m001_b.ao_MagicShot_A_FDarkElf";
+
+    private AnimatorOverrideController _overrideController;
+
     public virtual void Initialize()
     {
         _animator = gameObject.GetComponentInChildren<Animator>(true);
         _lastAnimationVariableName = "wait_hand";
-        _priorityAnimations = new Dictionary<string, bool>
+        InitializePriority();
+        SkillAnimationDatabase.LoadRaceAnimations(_animator?.runtimeAnimatorController.name);
+
+        _base_motion.Add("CastMid" , BASE_MOTION_CAST_MID);
+        _base_motion.Add("CastEnd", BASE_MOTION_END);
+        _base_motion.Add("MagicShoot", BASE_MOTION_MAGIC_SHOOT);
+
+        // –°–æ–∑–¥–∞–µ–º —ç–∫–∑–µ–º–ø–ª—è—Ä –æ–≤–µ—Ä—Ä–∞–π–¥–∞ –Ω–∞ –æ—Å–Ω–æ–≤–µ —Ç–µ–∫—É—â–µ–≥–æ –∫–æ–Ω—Ç—Ä–æ–ª–ª–µ—Ä–∞
+        if (_animator.runtimeAnimatorController is not AnimatorOverrideController)
         {
-            { "jatk01_bow", false },
-            { "jatk02_bow", false },
-            { "jatk03_bow", false },
+            _overrideController = new AnimatorOverrideController(_animator.runtimeAnimatorController);
+            _animator.runtimeAnimatorController = _overrideController;
+        }
+        else
+        {
+            _overrideController = (AnimatorOverrideController)_animator.runtimeAnimatorController;
+        }
 
-            { "jatk01_dual", false },
-            { "jatk02_dual", false },
-            { "jatk03_dual", false },
+    }
 
-            { "jatk01_2HS", false },
-            { "jatk02_2HS", false },
-            { "jatk03_2HS", false },
+  
 
-            { "jatk01_1HS", false },
-            { "jatk02_1HS", false },
-            { "jatk03_1HS", false },
- 
-            { "jatk01_pole", false },
-            { "jatk02_pole", false },
-            { "jatk03_pole", false },
-        };
-
+    protected override void HandleQueueAnimation(string animationName)
+    {
+        Debug.Log($"AnimationManager> start name —É–±–∏—Ä–∞–µ–º –∏–∑ –æ–∂–∏–¥–∞–Ω–∏—è –∏ –∑–∞–ø—É—Å–∫–∞–µ–º {animationName}");
+        SetBool(animationName, true, "player");
     }
 
     public void SetRunSpeed(float value)
     {
+        Debug.Log("SetRun speed test " + value);
         _animator.SetFloat("run_speed", value);
     }
 
     public void SetWalkSpeed(float value)
     {
+        Debug.Log("SetWalk speed test " + value);
         _animator.SetFloat("walk_speed", value);
     }
 
     public void SetWalkSpeedLobby(float value) => _animator.SetFloat("walk_speed", value);
 
-    public void OnAnimationComplete(string animationName)
-    {
-        if (_priorityAnimations.ContainsKey(animationName)){
 
-            _priorityAnimations[animationName] = false;
-            _isProcessingQueue = false;
-            OnAnimationFinished?.Invoke(animationName);
-
-            if (_animationQueue.Count > 0)
-            {
-                var lastAnimation = _animationQueue.Last();
-                SetBool(lastAnimation, true , "player");
-            }
-
-        }
-
-    }
-
-    public void OnAnimationShoot(string animationName)
-    {
-        OnAnimationStartShoot?.Invoke(animationName);
-    }
-
-    public void OnAnimationLoadArrow(string animationName)
-    {
-        OnAnimationStartLoadArrow?.Invoke(animationName);
-    }
     public void SetPAtkSpd(float value)
     {
         //Debug.Log("Update Patak speed set " + value);
@@ -154,16 +137,32 @@ public class BaseAnimationController : MonoBehaviour
     }
 
 
+    public void ToggleAnimationTrigger(string name)
+    {
+        IfSpecialAnimationsCreateProcessQueue(name, ref _isProcessingQueue, _priorityAnimations, true);
+        _animator.SetTrigger(name);
+    }
 
+    public void ResetAnimationTrigger(string name)
+    {
+        _animator.ResetTrigger(name);
+    }
+
+    public void ToggleAnimationCrossFade(string name , float duration)
+    {
+        IfSpecialAnimationsCreateProcessQueue(name, ref _isProcessingQueue, _priorityAnimations, true);
+        _animator.CrossFade(name, duration, 0);
+    }
 
     public void SetBool(string name, bool value , string entityName = "")
     {
+        
         if(_isProcessingQueue && value == true)
         {
             IfAnimationNeedsWait( _priorityAnimations, name);
 
             if (value) return;
-            Debug.Log($"AnimationManager> start name player  ‰Ó·‡‚ÎÂÌËÂ ‚ ÒÔËÒÓÍ ÓÊË‰‡ÌËˇ {name} ÒÚ‡ÚÛÒ {value} ÔÓ‰ÓÎÊÂÌËÂ return ");
+            Debug.Log($"AnimationManager> start name player  –¥–æ–±–∞–≤–ª–µ–Ω–∏–µ –≤ —Å–ø–∏—Å–æ–∫ –æ–∂–∏–¥–∞–Ω–∏—è {name} —Å—Ç–∞—Ç—É—Å {value} –ø—Ä–æ–¥–æ–ª–∂–µ–Ω–∏–µ return ");
         }
 
 
@@ -199,25 +198,12 @@ public class BaseAnimationController : MonoBehaviour
         if (!_priorityAnimations.ContainsKey(animName))
         {
             _animationQueue.Enqueue(animName);
-            Debug.Log($"AnimationManager> start name player  ‰Ó·‡‚ÎÂÌËÂ ‚ ÒÔËÒÓÍ ÓÊË‰‡ÌËˇ {animName} ËÒÔÓÎ¸ÌÂÌËÂ return ");
+            Debug.Log($"AnimationManager> start name player  –¥–æ–±–∞–≤–ª–µ–Ω–∏–µ –≤ —Å–ø–∏—Å–æ–∫ –æ–∂–∏–¥–∞–Ω–∏—è {animName} –∏—Å–ø–æ–ª—å–Ω–µ–Ω–∏–µ return ");
         }
     }
 
 
-public void debugPrint()
-    {
-        AnimatorControllerParameter[] parameters = _animator.parameters;
 
-        // œÓıÓ‰ËÏ ÔÓ ‚ÒÂÏ Ô‡‡ÏÂÚ‡Ï Ë ‚˚‚Ó‰ËÏ ÚÓÎ¸ÍÓ bool ÔÂÂÏÂÌÌ˚Â
-        foreach (var parameter in parameters)
-        {
-            if (parameter.type == AnimatorControllerParameterType.Bool)
-            {
-                bool value = _animator.GetBool(parameter.name);
-                Debug.Log($"œ‡‡ÏÂÚ: {parameter.name}, «Ì‡˜ÂÌËÂ: {value}");
-            }
-        }
-    }
 
     public void SetBoolDisabledOther(string nameAnim  , bool value, string[] disableds)
     {
@@ -322,4 +308,55 @@ public void debugPrint()
         return 0f;
     }
 
+    public void SetFloat(string name, float value)
+    {
+        _animator.SetFloat(name, value);
+    }
+
+    public float GetFloat(string name)
+    {
+        return  _animator.GetFloat(_animator.name);
+    }
+
+    public void SetInt(string name, int value)
+    {
+        _animator.SetInteger(name, value);
+    }
+
+    public int GetInt(string name)
+    {
+        return _animator.GetInteger(_animator.name);
+    }
+
+    public string GetAnimatorName()
+    {
+       return _animator?.runtimeAnimatorController.name;
+    }
+
+    public void ReplaceAnimClip(string animName , string overrideAnimName)
+    {
+        string raceName = _animator?.runtimeAnimatorController.name;
+        AnimationClip clip = SkillAnimationDatabase.GetOverrideClip(overrideAnimName , raceName);
+        if (HasClip(animName))
+        {
+            _overrideController[animName] = clip;
+            Debug.Log("BaseAnimationController>ReplaceAnimClip clip orig   " + animName + " replace name " + clip.name);
+        }
+        else
+        {
+            Debug.LogWarning("BaseAnimationController>ReplaceAnimClip not found replace anim  " + animName);
+        }
+
+    }
+
+    public bool HasClip(string originalClipName)
+    {
+        // –ü—Ä–æ–≤–µ—Ä—è–µ–º, –µ—Å—Ç—å –ª–∏ –≤–æ–æ–±—â–µ —Ç–∞–∫–æ–π "—Å–ª–æ—Ç" –¥–ª—è –∑–∞–º–µ–Ω—ã
+        return _overrideController[originalClipName] != null;
+    }
+
+    public float GetEventTimeByName(AnimationClip clip, string eventName)
+    {
+        return AnimationDataCache.GetEventTimeByName(_animator, clip, eventName);
+    }
 }

@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using System.Security.Principal;
 using UnityEngine;
@@ -36,7 +36,7 @@ public class NpcInfo : ServerPacket
         Status.SetHp(100);
         Stats.MaxHp = 100;
 
-        //Debug.Log("�������� ��������� ������ NPCINFOOO");
+        //Debug.Log("пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ NPCINFOOO");
         int objectId = ReadI();
         Identity.Id = objectId;
         Identity.NpcId = ReadI() - 1000000; // npctype id (-1000000)
@@ -120,7 +120,7 @@ public class NpcInfo : ServerPacket
             Debug.Log(" object NpcInfo  object 3 " + objectId);
         }
 
-        //Debug.Log("��������� ��������� ������ NPCINFOOO NPCID " + Identity.NpcId);
+        //Debug.Log("пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ NPCINFOOO NPCID " + Identity.NpcId);
     }
 
     private float GetRealSpeed(int baseSpeed, float speedMultiplier)

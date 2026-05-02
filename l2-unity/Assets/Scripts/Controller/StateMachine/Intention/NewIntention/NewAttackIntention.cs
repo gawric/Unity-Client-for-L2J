@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public class NewAttackIntention : IntentionBase
 {
@@ -22,12 +22,15 @@ public class NewAttackIntention : IntentionBase
             Attack myModel = (Attack)arg0;
             int targetId = myModel.TargetId;
 
-            Entity entity = World.Instance.GetEntityNoLockSync(targetId);
+            Entity targetEntity = World.Instance.GetEntityNoLockSync(targetId);
 
 
-            PlayerController.Instance.RotateToAttacker(entity.transform.position);
+            PlayerController.Instance.RotateToAttacker(targetEntity.transform.position);
+            Hit playerHit = myModel.FirstHit;
 
+            targetEntity.SetDamage(playerHit.Damage);
             PlayerEntity.Instance.IsAttack = true;
+            PlayerEntity.Instance.SetSelfHit(playerHit);
 
             _stateMachine.ChangeState(PlayerState.ATTACKING);
             _stateMachine.NotifyEvent(Event.READY_TO_ACT);

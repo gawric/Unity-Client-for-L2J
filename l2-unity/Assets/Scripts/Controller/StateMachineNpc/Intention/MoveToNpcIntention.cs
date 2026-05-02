@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public class MoveToNpcIntention : NpcIntentionBase
 {
@@ -18,17 +18,17 @@ public class MoveToNpcIntention : NpcIntentionBase
                 //DebugLineDraw.ShowDrawLineDebugNpc(PlayerEntity.Instance.IdentityInterlude.Id, packet.OldPosition, packet.NewPosition, Color.red);
 
                 //Debug.Log("object position 3 " + npcEntity.transform.position + " go name " + npcEntity.name);
-                MovementTarget movementTarget = new MovementTarget(packet.NewPosition, 0.1f);
+                MovementTarget movementTarget = new MovementTarget(packet.NewPosition, 0.1f , npcEntity.Running);
                 MoveAllCharacters.Instance.AddMoveData(id, new MovementData(npcEntity, movementTarget));
 
-            if (npcEntity.Running)
-            {
-                _stateMachine.ChangeState(NpcState.RUNNING);
-            }
-            else
-            {
-                _stateMachine.ChangeState(NpcState.WALKING);
-            }
+                if (npcEntity.Running)
+                {
+                    _stateMachine.ChangeState(NpcState.RUNNING);
+                }
+                else
+                {
+                    _stateMachine.ChangeState(NpcState.WALKING);
+                }
            // }
         }
         //Debug.Log("Debug EVENT =========== MoveToMonsterIntention");

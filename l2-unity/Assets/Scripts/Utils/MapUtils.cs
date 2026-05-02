@@ -1,16 +1,16 @@
-using UnityEngine;
+п»їusing UnityEngine;
 using UnityEngine.UIElements;
 
 public static class MapUtils
 {
-    // worldPos: позиция в мировых координатах
-    // bottomLeft, topRight: две точки углов (могут быть в любом порядке)
-    // mapSize: размер UI-карты в пикселях/единицах (width, height)
-    // useXZ: если мир в XZ плоскости, поставьте true (использует x и z)
-    // invertYForUI: если в UI ноль вверху (top-left origin), поставьте true
+    // worldPos: РїРѕР·РёС†РёСЏ РІ РјРёСЂРѕРІС‹С… РєРѕРѕСЂРґРёРЅР°С‚Р°С…
+    // bottomLeft, topRight: РґРІРµ С‚РѕС‡РєРё СѓРіР»РѕРІ (РјРѕРіСѓС‚ Р±С‹С‚СЊ РІ Р»СЋР±РѕРј РїРѕСЂСЏРґРєРµ)
+    // mapSize: СЂР°Р·РјРµСЂ UI-РєР°СЂС‚С‹ РІ РїРёРєСЃРµР»СЏС…/РµРґРёРЅРёС†Р°С… (width, height)
+    // useXZ: РµСЃР»Рё РјРёСЂ РІ XZ РїР»РѕСЃРєРѕСЃС‚Рё, РїРѕСЃС‚Р°РІСЊС‚Рµ true (РёСЃРїРѕР»СЊР·СѓРµС‚ x Рё z)
+    // invertYForUI: РµСЃР»Рё РІ UI РЅРѕР»СЊ РІРІРµСЂС…Сѓ (top-left origin), РїРѕСЃС‚Р°РІСЊС‚Рµ true
     public static Vector2 WorldToMap(Vector3 worldPos, Vector3 cornerA, Vector3 cornerB, Vector2 mapSize, bool useXZ = false, bool invertYForUI = true)
     {
-        // определяем min/max по осям
+        // РѕРїСЂРµРґРµР»СЏРµРј min/max РїРѕ РѕСЃСЏРј
         float minX = Mathf.Min(cornerA.x, cornerB.x);
         float maxX = Mathf.Max(cornerA.x, cornerB.x);
 
@@ -27,7 +27,7 @@ public static class MapUtils
         float wx = worldPos.x;
         float wy = useXZ ? worldPos.z : worldPos.y;
 
-        // нормализация в [0,1]
+        // РЅРѕСЂРјР°Р»РёР·Р°С†РёСЏ РІ [0,1]
         float nx = (wx - minX) / worldWidth;
         float ny = (wy - minY) / worldHeight;
 
@@ -37,7 +37,7 @@ public static class MapUtils
         if (invertYForUI)
             ny = 1f - ny;
 
-        // масштабируем на размеры UI
+        // РјР°СЃС€С‚Р°Р±РёСЂСѓРµРј РЅР° СЂР°Р·РјРµСЂС‹ UI
         float mapX = nx * mapSize.x;
         float mapY = ny * mapSize.y;
 
@@ -50,7 +50,7 @@ public static class MapUtils
         float uiMapW = map.layout.width;
         float uiMapH = map.layout.height;
 
-        // защитные проверки
+        // Р·Р°С‰РёС‚РЅС‹Рµ РїСЂРѕРІРµСЂРєРё
         if (uiMapW <= 0f || uiMapH <= 0f) return false;
         if (mapSizeFromWorldToMap.x <= 0f || mapSizeFromWorldToMap.y <= 0f) return false;
 
@@ -62,7 +62,7 @@ public static class MapUtils
 
         if (worldYIsBottom)
         {
-            // инвертируем Y, если world Y отсчитывается снизу
+            // РёРЅРІРµСЂС‚РёСЂСѓРµРј Y, РµСЃР»Рё world Y РѕС‚СЃС‡РёС‚С‹РІР°РµС‚СЃСЏ СЃРЅРёР·Сѓ
             y = uiMapH - y;
         }
 
@@ -72,9 +72,9 @@ public static class MapUtils
         float left = x - mw * markerPivotX;
         float top = y - mh * markerPivotY;
 
-        // --- проверка: если текущее положение уже равно целевому, ничего не делаем ---
-        // используем небольшую толерантность для сравнения float
-        const float eps = 0.5f; // подберите по необходимости (пиксели)
+        // --- РїСЂРѕРІРµСЂРєР°: РµСЃР»Рё С‚РµРєСѓС‰РµРµ РїРѕР»РѕР¶РµРЅРёРµ СѓР¶Рµ СЂР°РІРЅРѕ С†РµР»РµРІРѕРјСѓ, РЅРёС‡РµРіРѕ РЅРµ РґРµР»Р°РµРј ---
+        // РёСЃРїРѕР»СЊР·СѓРµРј РЅРµР±РѕР»СЊС€СѓСЋ С‚РѕР»РµСЂР°РЅС‚РЅРѕСЃС‚СЊ РґР»СЏ СЃСЂР°РІРЅРµРЅРёСЏ float
+        const float eps = 0.5f; // РїРѕРґР±РµСЂРёС‚Рµ РїРѕ РЅРµРѕР±С…РѕРґРёРјРѕСЃС‚Рё (РїРёРєСЃРµР»Рё)
         float currentLeft = marker.layout.x;
         float currentTop = marker.layout.y;
 
@@ -89,9 +89,9 @@ public static class MapUtils
         return true;
     }
 
-    // map: VisualElement, содержащая карту (ширина map.layout.width)
-    // viewport: VisualElement, видимая область (viewport.layout.width/height)
-    // marker: VisualElement маркера внутри map
+    // map: VisualElement, СЃРѕРґРµСЂР¶Р°С‰Р°СЏ РєР°СЂС‚Сѓ (С€РёСЂРёРЅР° map.layout.width)
+    // viewport: VisualElement, РІРёРґРёРјР°СЏ РѕР±Р»Р°СЃС‚СЊ (viewport.layout.width/height)
+    // marker: VisualElement РјР°СЂРєРµСЂР° РІРЅСѓС‚СЂРё map
 
     public static void PanViewportToMarker(ref Vector2 offset , VisualElement map, VisualElement viewport, VisualElement marker, float padding = 0f)
     {

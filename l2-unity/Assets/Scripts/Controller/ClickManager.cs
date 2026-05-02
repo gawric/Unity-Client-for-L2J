@@ -1,4 +1,4 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 using UnityEngine.UIElements;
 
 
@@ -77,7 +77,7 @@ public class ClickManager : MonoBehaviour
                 {
                     _targetObjectData = _hoverObjectData;
 
-                    if (_entityMask == (_entityMask | (1 << hitLayer)) && _targetObjectData.ObjectTag != "Player")
+                    if (_entityMask == (_entityMask | (1 << hitLayer)))
                     {
                         OnClickOnEntity();
                     }
@@ -119,11 +119,11 @@ public class ClickManager : MonoBehaviour
         var panel = uiDocument.rootVisualElement.panel;
         if (panel == null) return false;
 
-        // Ïåðåâîäèì èç screen coords (0,0 = íèç) â panel coords (0,0 = âåðõ)
+        // ÐŸÐµÑ€ÐµÐ²Ð¾Ð´Ð¸Ð¼ Ð¸Ð· screen coords (0,0 = Ð½Ð¸Ð·) Ð² panel coords (0,0 = Ð²ÐµÑ€Ñ…)
         Vector2 panelPos = new Vector2(Input.mousePosition.x, Screen.height - Input.mousePosition.y);
 
         var picked = panel.Pick(panelPos);
-        return picked != null; // true, åñëè ïîä êóðñîðîì íàéäåí âèçóàëüíûé ýëåìåíò
+        return picked != null; // true, ÐµÑÐ»Ð¸ Ð¿Ð¾Ð´ ÐºÑƒÑ€ÑÐ¾Ñ€Ð¾Ð¼ Ð½Ð°Ð¹Ð´ÐµÐ½ Ð²Ð¸Ð·ÑƒÐ°Ð»ÑŒÐ½Ñ‹Ð¹ ÑÐ»ÐµÐ¼ÐµÐ½Ñ‚
     }
 
     private void StopFollow()
@@ -141,13 +141,16 @@ public class ClickManager : MonoBehaviour
 
     public void OnClickOnEntity()
     {
-        Debug.Log("Hit entity");
-        TargetData _target = new TargetData(_targetObjectData);
-        var l2jpos = _target.Identity.GetL2jPos();
-        ClickAction sendPaket = CreatorPacketsUser.CreateActiont(_target.Identity.Id , (int)l2jpos.x , (int)l2jpos.y , (int)l2jpos.z , 0);
-        bool enable = GameClient.Instance.IsCryptEnabled();
+            Debug.Log("Hit entity");
+            TargetData _target = new TargetData(_targetObjectData);
+        if (_target != null)
+        {
+            var l2jpos = _target.Identity.GetL2jPos();
+            ClickAction sendPaket = CreatorPacketsUser.CreateActiont(_target.Identity.Id, (int)l2jpos.x, (int)l2jpos.y, (int)l2jpos.z, 0);
+            bool enable = GameClient.Instance.IsCryptEnabled();
 
-        SendGameDataQueue.Instance().AddItem(sendPaket, enable, enable);
+            SendGameDataQueue.Instance().AddItem(sendPaket, enable, enable);
+        }
     }
 
 

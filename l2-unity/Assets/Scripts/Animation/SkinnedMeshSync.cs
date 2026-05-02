@@ -1,4 +1,4 @@
-using System.Collections;
+п»їusing System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -51,7 +51,7 @@ public class SkinnedMeshSync : MonoBehaviour {
         HideRenderers(newObject);
         _waitingObjects.Enqueue(newObject);
 
-        // Если процесс не идет, начинаем его
+        // Р•СЃР»Рё РїСЂРѕС†РµСЃСЃ РЅРµ РёРґРµС‚, РЅР°С‡РёРЅР°РµРј РµРіРѕ
         if (!_isProcessing)
         {
             StartCoroutine(ProcessWaitingObjects());
@@ -74,7 +74,7 @@ public class SkinnedMeshSync : MonoBehaviour {
             var currentObject = _waitingObjects.Dequeue();
             yield return StartCoroutine(AddNewObjectWithWait(currentObject));
 
-            // Небольшая задержка между добавлениями
+            // РќРµР±РѕР»СЊС€Р°СЏ Р·Р°РґРµСЂР¶РєР° РјРµР¶РґСѓ РґРѕР±Р°РІР»РµРЅРёСЏРјРё
             yield return new WaitForSeconds(0.1f);
         }
 
@@ -99,13 +99,13 @@ public class SkinnedMeshSync : MonoBehaviour {
             }
             else
             {
-                Debug.LogWarning("Не удалось дождаться изменения количества дочерних объектов");
+                Debug.LogWarning("РќРµ СѓРґР°Р»РѕСЃСЊ РґРѕР¶РґР°С‚СЊСЃСЏ РёР·РјРµРЅРµРЅРёСЏ РєРѕР»РёС‡РµСЃС‚РІР° РґРѕС‡РµСЂРЅРёС… РѕР±СЉРµРєС‚РѕРІ");
                 ShowRenderers(newObject);
             }
         }
         else
         {
-            Debug.LogWarning("Достигнут лимит дочерних объектов (8). Невозможно добавить новый объект.");
+            Debug.LogWarning("Р”РѕСЃС‚РёРіРЅСѓС‚ Р»РёРјРёС‚ РґРѕС‡РµСЂРЅРёС… РѕР±СЉРµРєС‚РѕРІ (8). РќРµРІРѕР·РјРѕР¶РЅРѕ РґРѕР±Р°РІРёС‚СЊ РЅРѕРІС‹Р№ РѕР±СЉРµРєС‚.");
             yield return false;
         }
     }

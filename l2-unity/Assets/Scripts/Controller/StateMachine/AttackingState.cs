@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using UnityEngine;
 
 public class AttackingState : StateBase
@@ -19,7 +19,7 @@ public class AttackingState : StateBase
         }
     }
 
-    public override void HandleEvent(Event evt)
+    public override void HandleEvent(Event evt, object payload = null)
     {
         switch (evt)
         {

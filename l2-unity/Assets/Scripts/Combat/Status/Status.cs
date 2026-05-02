@@ -1,43 +1,44 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 [System.Serializable]
 public class Status {
-    //object locker = new();
+
 
      private double _hp;
      private double _mp;
-    //public double Hp { get => _hp; set => _hp = value; }
+     private int _myDamage;
+     private double _remainingHp = 1;
 
     public double GetHp()
     {
-        //lock (locker)
-        //{
-            return _hp;
-        //}
+         return _hp;
     }
 
-    public void SetHp(double Hp)
+    public void SetHp(double hp)
     {
-        //lock (locker)
-        //{
-            this._hp = Hp;
-        //}
+       _hp = hp;
     }
 
     public double GetMp()
     {
-        //lock (locker)
-        //{
         return _mp;
-        //}
     }
 
-    public void SetMp(double Hp)
+    public void SetMp(double mp)
     {
-        //lock (locker)
-        //{
-        this._mp = Hp;
-        //}
+        _mp = mp;
     }
-    //public double Mp { get => _mp; set => _mp = value; }
+
+    public void SetDamage(int damage)
+    {
+        _myDamage = damage;
+        _remainingHp = _hp - _myDamage;
+    }
+
+
+    public double GetRemainingHp()
+    {
+        return _remainingHp;
+    }
+
 }

@@ -1,11 +1,21 @@
-using Newtonsoft.Json.Linq;
-using System;
+﻿using System;
+using System.Linq;
 using UnityEngine;
-using static UnityEngine.Rendering.DebugUI;
+
 
 public class PlayerEntity : Entity
 {
+
+
     private CharacterAnimationAudioHandler _characterAnimationAudioHandler;
+
+    private float _lastServerRunSpeed = 0;
+
+    private const string SWORD_BASE = "Sword_Base";
+
+    private const string SWORD_TIP = "Sword_Tip";
+
+    private readonly string[] BASE_SWORD_POINT_NAME = { SWORD_BASE, SWORD_TIP };
 
     private static PlayerEntity _instance;
     public Animation RandomName { get; set; }
@@ -26,7 +36,8 @@ public class PlayerEntity : Entity
 
     //default combo name
     private readonly Animation[] pAtkList = { AnimationNames.ATK01, AnimationNames.ATK02, AnimationNames.ATK03 };
-  
+
+    //private readonly Animation[] pAtkList = {  AnimationNames.ATK01 };
 
     private void Awake()
     {
@@ -35,6 +46,7 @@ public class PlayerEntity : Entity
             _instance = this;
             RandomName = pAtkList[0];
             CountAtk = 2;
+
         }
         else
         {
@@ -114,7 +126,6 @@ public class PlayerEntity : Entity
     protected override void OnDeath()
     {
         base.OnDeath();
-        //Debug.Log("Player on death _networkAnimationReceive:" + _networkAnimationReceive);
         PlayerStateMachine.Instance.NotifyEvent(Event.DEAD);
     }
 
@@ -158,44 +169,38 @@ public class PlayerEntity : Entity
          PlayerAnimationController.Instance.SetPAtkSpeed(speedAnim);
     }
 
-  
 
-    public override float UpdateRunSpeed(float speed)
+
+    public override float UpdateRunSpeed(float serverValue)
     {
-        float converted = base.UpdateRunSpeed(speed);
-        float anim_converted = GetAnimSpeed(_appearance, speed);
+        float converted = base.UpdateRunSpeed(serverValue);
+        PlayerInterludeAppearance playerApperance = (PlayerInterludeAppearance)_appearance;
+
+        float anim_converted = CharTemplateRegistry.GetRunSpeed(playerApperance.BaseClass,
+            playerApperance.Sex, 
+            serverValue, 
+            _gear.IsTwoHandedEquipped());
+
         PlayerAnimationController.Instance.SetRunSpeed(anim_converted);
         PlayerController.Instance.UpdateRunSpeed(converted);
-
+        _lastServerRunSpeed = serverValue;
         return converted;
     }
 
-
-    private float GetAnimSpeed(Appearance appearance , float speed)
+    public void RefreshRunSpeed()
     {
-        if (appearance.GetType() == typeof(PlayerInterludeAppearance))
-        {
-            PlayerInterludeAppearance pia = (PlayerInterludeAppearance)appearance;
-            if (pia.BaseClass == (int)BaseClass.MMagic)
-            {
-                return UpdateAnimRunMagicSpeed(speed);
-            }
-            else
-            {
-               return  UpdateAnimRunSpeed(speed);
-
-            }
-        }
-
-        return UpdateAnimRunSpeed(speed);
+        PlayerInterludeAppearance playerApperance = (PlayerInterludeAppearance)_appearance;
+        float anim_converted = CharTemplateRegistry.GetRunSpeed(playerApperance.BaseClass, playerApperance.Sex, _lastServerRunSpeed, _gear.IsTwoHandedEquipped());
+        PlayerAnimationController.Instance.SetRunSpeed(anim_converted);
     }
 
-    public override float UpdateWalkSpeed(float speed)
+    public override float UpdateWalkSpeed(float serverValue)
     {
-        float converted = base.UpdateWalkSpeed(speed);
-        //float anim = UpdateAnimRunSpeed(speed);
-        //default speed anim to human fighter
-        PlayerAnimationController.Instance.SetWalkSpeed(0.45f);
+        float converted = base.UpdateWalkSpeed(serverValue);
+        PlayerInterludeAppearance playerApperance = (PlayerInterludeAppearance)_appearance;
+        float anim_converted = CharTemplateRegistry.GetWalkSpeed(playerApperance.BaseClass, playerApperance.Sex, serverValue, _gear.IsTwoHandedEquipped());
+        PlayerAnimationController.Instance.SetWalkSpeed(anim_converted);
+        //PlayerAnimationController.Instance.SetWalkSpeed(0.45f);
         PlayerController.Instance.UpdateWalkSpeed(converted);
 
         return converted;
@@ -230,16 +235,17 @@ public class PlayerEntity : Entity
         }
     }
 
-    public string GetLastAnimName()
-    {
-        return _gear.LastWeaponAnim;
-    }
+  
 
     public string GetCurrentAnimName()
     {
         return _gear.WeaponAnim;
     }
 
+    public Transform GetWeaponTransform()
+    {
+        return _gear.GetAllTransformByRightHand(new string[1] { "weapon_" }).FirstOrDefault();
+    }
     public Vector3 GetPositionRightHand()
     {
         return _gear.GetPositionRightHand();
@@ -250,11 +256,53 @@ public class PlayerEntity : Entity
         return _gear.GetGoEtcItem();
     }
 
+
+    public Transform[] GetSwordBasePoints()
+    {
+        return _gear.GetAllTransformByRightHand(BASE_SWORD_POINT_NAME);
+    }
     public float TargetDistance()
     {
         Vector3 startPos = GetPositionRightHand();
         Transform target = PlayerEntity.Instance.Target;
 
         return VectorUtils.Distance2D(startPos , target.position);
+    }
+
+    public void SetProceduralSpinePose(Vector3 rotation)
+    {
+        try
+        {
+            Transform bone = _gear.GetSpineBone();
+            SpineProceduralController.Instance.SetBoneMod(bone, new BoneModification(rotation, Vector3.zero, 1.0f));
+        }
+        catch(Exception ex)
+        {
+            Debug.LogError("");
+        }
+
+
+    }
+
+    public void SetProceduralRightUpperArmPose(Vector3 rotation)
+    {
+        try
+        {
+            Transform upperArm = _gear.GetRightUpperArm();
+            SpineProceduralController.Instance.SetBoneMod(upperArm, new BoneModification(rotation, Vector3.zero, 1.0f));
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError("");
+        }
+
+    }
+
+    public void RemoveProceduralPose()
+    {
+        Transform bone = _gear.GetSpineBone();
+        Transform upperArm = _gear.GetRightUpperArm();
+        SpineProceduralController.Instance.RemoveBoneMod(bone);
+        SpineProceduralController.Instance.RemoveBoneMod(upperArm);
     }
 }

@@ -1,4 +1,4 @@
-public class Die : ServerPacket
+﻿public class Die : ServerPacket
 {
     private int _objectId;
     public bool _canTeleport;

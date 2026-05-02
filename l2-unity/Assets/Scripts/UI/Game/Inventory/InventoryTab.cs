@@ -1,4 +1,4 @@
-using Newtonsoft.Json.Linq;
+﻿using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -264,7 +264,7 @@ public class InventoryTab : L2Tab
 
     private void UpdateSlot(InventorySlot slot , ItemInstance currentItem)
     {
-        PrintAllInventoryObjectIds();
+
         if (slot != null)
         {
             _inventorySlots[slot.Position].AssignItem(currentItem);
@@ -276,28 +276,13 @@ public class InventoryTab : L2Tab
 
     public InventorySlot GetInventorySlot(int objectId)
     {
-        PrintAllInventoryObjectIds();
+
         return _inventorySlots?
                                .Where(slot => slot != null && slot.ObjectId == objectId)
                                .FirstOrDefault();
     }
 
-    public void PrintAllInventoryObjectIds()
-    {
-        if (_inventorySlots == null)
-        {
-            Debug.Log("Inventory slots is null");
-            return;
-        }
-
-        Debug.Log($"Total inventory slots: {_inventorySlots.Length}");
-
-        for (int i = 0; i < _inventorySlots.Length; i++)
-        {
-            var slot = _inventorySlots[i];
-            Debug.Log($"Slot {i}: ObjectId = {(slot != null ? slot.ObjectId.ToString() : "null")}");
-        }
-    }
+ 
 
 
     public ItemInstance GetInventorySlotByPosition(int position)

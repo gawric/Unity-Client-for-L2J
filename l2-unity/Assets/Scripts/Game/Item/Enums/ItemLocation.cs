@@ -1,4 +1,4 @@
-public enum ItemLocation : byte
+﻿public enum ItemLocation : byte
 {
     Void = 0,
     Equipped = 1,

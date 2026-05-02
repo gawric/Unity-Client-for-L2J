@@ -1,10 +1,10 @@
-using UnityEngine;
+п»їusing UnityEngine;
 
 public class DeadMonster : MonoBehaviour
 {
     //fly setting
     private bool _useAntiGravity = false;
-    public float speed = 0.000001f; // Скорость движения вверх
+    public float speed = 0.000001f; // РЎРєРѕСЂРѕСЃС‚СЊ РґРІРёР¶РµРЅРёСЏ РІРІРµСЂС…
     private float zeroPos = 0;
     private bool _isRefresh = false;
 
@@ -77,7 +77,7 @@ public class DeadMonster : MonoBehaviour
                 material.SetOverrideTag("RenderType", "Transparent");
                 material.renderQueue = (int)UnityEngine.Rendering.RenderQueue.Transparent;
 
-                // Изменяем цвет и устанавливаем прозрачность
+                // РР·РјРµРЅСЏРµРј С†РІРµС‚ Рё СѓСЃС‚Р°РЅР°РІР»РёРІР°РµРј РїСЂРѕР·СЂР°С‡РЅРѕСЃС‚СЊ
                 Color color = material.color;
                 color.a = opacity; 
                 material.color = color;

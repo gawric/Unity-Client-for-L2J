@@ -1,4 +1,4 @@
-using UnityEngine;
+п»їusing UnityEngine;
 
 public class StopMoveMonsterIntention : MonsterIntentionBase
 {
@@ -11,7 +11,7 @@ public class StopMoveMonsterIntention : MonsterIntentionBase
         {
             StopMove stopMovePacket = (StopMove)arg0;
 
-            Debug.Log("Move Monstr посылаем запрос на остановку!   ");
+            Debug.Log("Move Monstr РїРѕСЃС‹Р»Р°РµРј Р·Р°РїСЂРѕСЃ РЅР° РѕСЃС‚Р°РЅРѕРІРєСѓ!   ");
             //_stateMachine.MoveMonster.CancelMove();
             MoveAllCharacters.Instance.CancelMove(_stateMachine.Entity.IdentityInterlude.Id);
             _stateMachine.ChangeState(MonsterState.IDLE);

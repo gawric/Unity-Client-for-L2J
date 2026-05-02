@@ -1,4 +1,4 @@
-using System;
+п»їusing System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -218,7 +218,7 @@ public class PlayerShortcuts : MonoBehaviour
     {
         if(locRemove) RemoveShotcutLocally(oldSlot);
 
-        Debug.Log("Нужно реализовать удаление shortcut");
+        Debug.Log("РќСѓР¶РЅРѕ СЂРµР°Р»РёР·РѕРІР°С‚СЊ СѓРґР°Р»РµРЅРёРµ shortcut");
         //GameClient.Instance.ClientPacketHandler.RequestRemoveShortcut(oldSlot);
         var sendPaket = CreatorPacketsUser.CreateDestroyShortCut(oldSlot);
         bool enable = GameClient.Instance.IsCryptEnabled();

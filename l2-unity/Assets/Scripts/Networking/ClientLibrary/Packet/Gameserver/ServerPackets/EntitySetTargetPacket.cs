@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using UnityEngine;
 
 public class EntitySetTargetPacket : ServerPacket {

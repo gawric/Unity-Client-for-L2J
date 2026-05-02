@@ -1,4 +1,4 @@
-using System.Collections;
+п»їusing System.Collections;
 using System.Collections.Generic;
 using System.Security.Principal;
 using System.Threading;
@@ -15,12 +15,12 @@ public class GameClientInterludePacketHandler : ClientPacketHandler
 
     public void SendRequestSetTarget()
     {
-        Debug.Log("GameClientInterludePacketHandler: Не реализовано нужно смотреть что тут ");
+        Debug.Log("GameClientInterludePacketHandler: РќРµ СЂРµР°Р»РёР·РѕРІР°РЅРѕ РЅСѓР¶РЅРѕ СЃРјРѕС‚СЂРµС‚СЊ С‡С‚Рѕ С‚СѓС‚ ");
     }
 
     public void SendRequestSetTarget(int id)
     {
-        Debug.Log("GameClientInterludePacketHandler: Не реализовано нужно смотреть что тут ");
+        Debug.Log("GameClientInterludePacketHandler: РќРµ СЂРµР°Р»РёР·РѕРІР°РЅРѕ РЅСѓР¶РЅРѕ СЃРјРѕС‚СЂРµС‚СЊ С‡С‚Рѕ С‚СѓС‚ ");
        // RequestAutoAttackPacket packet = new RequestAutoAttackPacket();
         //SendPacket(packet);
     }
@@ -29,7 +29,7 @@ public class GameClientInterludePacketHandler : ClientPacketHandler
 
    public void SendRequestSelectCharacter(int id)
     {
-        Debug.Log("GameClientInterludePacketHandler: Не реализовано нужно смотреть что тут ");
+        Debug.Log("GameClientInterludePacketHandler: РќРµ СЂРµР°Р»РёР·РѕРІР°РЅРѕ РЅСѓР¶РЅРѕ СЃРјРѕС‚СЂРµС‚СЊ С‡С‚Рѕ С‚СѓС‚ ");
        // RequestCharSelectPacket packet = new RequestCharSelectPacket(slot);
        // SendPacket(packet);
     }
@@ -37,19 +37,19 @@ public class GameClientInterludePacketHandler : ClientPacketHandler
 
     public void UpdateMoveDirection(Vector3 v3)
     {
-       //Debug.Log("GameClientInterludePacketHandler: Не реализовано нужно смотреть что тут ");
+       //Debug.Log("GameClientInterludePacketHandler: РќРµ СЂРµР°Р»РёР·РѕРІР°РЅРѕ РЅСѓР¶РЅРѕ СЃРјРѕС‚СЂРµС‚СЊ С‡С‚Рѕ С‚СѓС‚ ");
         //RequestMoveDirectionPacket packet = new RequestMoveDirectionPacket(direction);
         //SendPacket(packet);
     }
 
     public void InflictAttack(int id, AttackType type)
     {
-        Debug.Log("GameClientInterludePacketHandler: Не реализовано нужно смотреть что тут InflictAttack");
+        Debug.Log("GameClientInterludePacketHandler: РќРµ СЂРµР°Р»РёР·РѕРІР°РЅРѕ РЅСѓР¶РЅРѕ СЃРјРѕС‚СЂРµС‚СЊ С‡С‚Рѕ С‚СѓС‚ InflictAttack");
     }
 
     public void SendRequestAutoAttack()
     {
-        Debug.Log("GameClientInterludePacketHandler: Не реализовано нужно смотреть что тут SendRequestAutoAttack");
+        Debug.Log("GameClientInterludePacketHandler: РќРµ СЂРµР°Р»РёР·РѕРІР°РЅРѕ РЅСѓР¶РЅРѕ СЃРјРѕС‚СЂРµС‚СЊ С‡С‚Рѕ С‚СѓС‚ SendRequestAutoAttack");
     }
     
 
@@ -60,7 +60,7 @@ public class GameClientInterludePacketHandler : ClientPacketHandler
         
         var sendPaket = CreatorPacketsUser.CreatSkillCoolTime();
         bool enable = GameClient.Instance.IsCryptEnabled();
-        Debug.Log("GameClientInterlude EndLoadWorld отправка пакетов");
+        Debug.Log("GameClientInterlude EndLoadWorld РѕС‚РїСЂР°РІРєР° РїР°РєРµС‚РѕРІ");
         SendGameDataQueue.Instance().AddItem(sendPaket, enable, enable);
     }
 
@@ -68,21 +68,21 @@ public class GameClientInterludePacketHandler : ClientPacketHandler
     {
         //RequestMovePacket packet = new RequestMovePacket(position);
         //SendPacket(packet);
-        //Debug.Log("GameClientInterludePacketHandler: Не реализовано нужно смотреть что тут UpdatePosition");
+        //Debug.Log("GameClientInterludePacketHandler: РќРµ СЂРµР°Р»РёР·РѕРІР°РЅРѕ РЅСѓР¶РЅРѕ СЃРјРѕС‚СЂРµС‚СЊ С‡С‚Рѕ С‚СѓС‚ UpdatePosition");
     }
 
     public void UpdateRotation(float y)
     {
-        Debug.Log("GameClientInterludePacketHandler: Не реализовано нужно смотреть что тут UpdateRotation");
+        Debug.Log("GameClientInterludePacketHandler: РќРµ СЂРµР°Р»РёР·РѕРІР°РЅРѕ РЅСѓР¶РЅРѕ СЃРјРѕС‚СЂРµС‚СЊ С‡С‚Рѕ С‚СѓС‚ UpdateRotation");
     }
     public void UpdateAnimation(byte id, float value)
     {
-        Debug.Log("GameClientInterludePacketHandler: Не реализовано нужно смотреть что тут UpdateAnimation");
+        Debug.Log("GameClientInterludePacketHandler: РќРµ СЂРµР°Р»РёР·РѕРІР°РЅРѕ РЅСѓР¶РЅРѕ СЃРјРѕС‚СЂРµС‚СЊ С‡С‚Рѕ С‚СѓС‚ UpdateAnimation");
     }
 
     public void SendMessage(string text)
     {
-        Debug.Log("GameClientInterludePacketHandler: Не реализовано нужно смотреть что тут SendMessage");
+        Debug.Log("GameClientInterludePacketHandler: РќРµ СЂРµР°Р»РёР·РѕРІР°РЅРѕ РЅСѓР¶РЅРѕ СЃРјРѕС‚СЂРµС‚СЊ С‡С‚Рѕ С‚СѓС‚ SendMessage");
     }
  
 }

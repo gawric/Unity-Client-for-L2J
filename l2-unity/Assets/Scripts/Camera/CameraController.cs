@@ -96,6 +96,10 @@ public class CameraController : MonoBehaviour
     public void SetTarget(GameObject go)
     {
         _target = go.transform;
+        _targetPos = _target.position + _camOffset;
+        //transform.position = _targetPos;
+
+        _lerpTargetPos = _targetPos;
         transform.position = _targetPos;
 
         _rootBone = _target.transform.FindRecursive(child => child.tag == "Root");
@@ -115,6 +119,7 @@ public class CameraController : MonoBehaviour
     {
         RaycastHit hit;
         Vector3[] cameraClips = _collisionDetector.GetCameraViewPortPoints();
+        if (cameraClips.Length == 0) return false;
         bool visible = false;
         for (int i = 0; i < cameraClips.Length; i++)
         {
@@ -198,7 +203,7 @@ public class CameraController : MonoBehaviour
         Vector3 adjustedPosition = rotation * (Vector3.forward * -_currentDistance) + _lerpTargetPos;
 
         //Debug.Log("Update position  camera pos x " + _x + " pos y " + _y);
-
+        if (float.IsNaN(adjustedPosition.x)) return;
         transform.position = adjustedPosition;
     }
 

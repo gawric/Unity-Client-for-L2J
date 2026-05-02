@@ -1,4 +1,4 @@
-public class ChangeWaitTypePacket : ServerPacket
+﻿public class ChangeWaitTypePacket : ServerPacket
 {
     public int Owner { get; private set; }
     public WaitType MoveType { get; private set; }

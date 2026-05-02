@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public class MoveToIntention : IntentionBase
 {
@@ -34,7 +34,7 @@ public class MoveToIntention : IntentionBase
             if(PlayerStateMachine.Instance.IsMoveToPawn) PlayerStateMachine.Instance.IsMoveToPawn = false;
             //Debug.Log("Runninin PathFindedController -2");
             //PathFinderController.Instance.MoveTo((Vector3)arg0 , 0.1f);
-            PlayerController.Instance.MoveToPoint(new MovementTarget((Vector3)arg0 , 0.1f));
+            PlayerController.Instance.MoveToPoint(new MovementTarget((Vector3)arg0 , 0.1f , PlayerStateMachine.Instance.Player.Running));
         }
 
  

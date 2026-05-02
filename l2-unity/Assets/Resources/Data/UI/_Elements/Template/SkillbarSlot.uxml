@@ -2,8 +2,10 @@
     <Style src="project://database/Assets/Resources/Data/UI/_Elements/L2StyleSheet.uss?fileID=7433441132597879392&amp;guid=72e99cc94b130bf4ba100dceaa830b13&amp;type=3#L2StyleSheet" />
     <ui:Button name="slot" class="l2-slot skillbar-slot empty">
         <ui:VisualElement name="BgContainer" picking-mode="Ignore" class="slot-bg-container">
-            <ui:VisualElement name="SlotBg" picking-mode="Ignore" class="slot-bg" style="background-color: rgba(0, 0, 0, 0.05); border-left-color: rgba(0, 0, 0, 0.65); border-right-color: rgba(0, 0, 0, 0.65); border-top-color: rgba(0, 0, 0, 0.65); border-bottom-color: rgba(0, 0, 0, 0.65);" />
-            <ui:VisualElement name="Key" picking-mode="Ignore" class="shortcut-key" />
+            <ui:VisualElement name="SlotBg" picking-mode="Ignore" class="slot-bg" style="background-color: rgba(0, 0, 0, 0.05); border-left-color: rgba(0, 0, 0, 0.65); border-right-color: rgba(0, 0, 0, 0.65); border-top-color: rgba(0, 0, 0, 0.65); border-bottom-color: rgba(0, 0, 0, 0.65); display: flex;" />
+            <ui:VisualElement name="Key" picking-mode="Ignore" class="shortcut-key" style="display: none;" />
+            <ui:VisualElement name="ReuseBg" picking-mode="Ignore" class="slot-bg" style="background-color: rgba(0, 0, 0, 0.1); border-left-color: rgba(0, 0, 0, 0.65); border-right-color: rgba(0, 0, 0, 0.65); border-top-color: rgba(0, 0, 0, 0.65); border-bottom-color: rgba(0, 0, 0, 0.65); position: absolute; display: none; background-image: resource(&apos;Data/SysTextures/Icon/Icon_dualcap&apos;);" />
+            <ui:VisualElement name="RechargeMaskBg" picking-mode="Ignore" class="slot-bg" style="background-color: rgba(0, 0, 0, 0.05); border-left-color: rgba(0, 0, 0, 0.65); border-right-color: rgba(0, 0, 0, 0.65); border-top-color: rgba(0, 0, 0, 0.65); border-bottom-color: rgba(0, 0, 0, 0.65); position: absolute; display: none; background-image: resource(&apos;Data/UI/ShortCut/Click/item_click&apos;);" />
         </ui:VisualElement>
     </ui:Button>
 </ui:UXML>

@@ -1,25 +1,31 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.Tracing;
+using System.Threading.Tasks;
 using UnityEngine;
 
 public interface IAnimationManager
 {
-    void SetAnimationManager(PlayerAnimationController controller , PlayerEntity Player);
-    void PlayAnimation(string animationName , bool disableTriggerAfterStart);
-    void PlayOriginalAnimation(string animationName);
-    string GetCurrentAnimationName();
-    string GetLastAnimationName();
-    void StopCurrentAnimation(string paramName , string runName = "");
-    void PlayMonsterAnimation(int objId, NetworkAnimationController controllerAnimator, string animationName);
-    void StopMonsterCurrentAnimation(Animator animator, string animationName);
-    Dictionary<string, float> PlayerGetAllFloat();
-    void PlayerSetAllFloat(Dictionary<string, float> floatValues);
-    void UpdateRemainingAtkTime(float remainingAtkTime);
-    float GetRemainingAtkTime();
+    public void RegisterController(int objectId, IAnimationController controller, Entity entity);
 
-    public event Action<string> OnAnimationFinished;
+    void PlayAnimation(int objectId , string animationName , bool disableTriggerAfterStart);
+    public void PlayAnimationTrigger(int objectId , string triggerName);
 
-    public event Action<string , float> OnAnimationStartShoot;
-    public event Action<string> OnAnimationLoadArrow;
-   
+    Task AsyncPlayAnimationTrigger(int objectId, string animationName);
+    Task AsyncPlayAnimationRaceOverrides(int objectId, string tiggerName , string overrideAnimationName);
+
+    public float[] GetOverrideClipsDurations(int objectId, string[] cycle);
+    public float GetOverrideEventTimeByName(int objectId, string[] cycle , string eventName);
+    void PlayOriginalAnimation(int objectId , string animationName);
+    string GetCurrentAnimationName(int objectId);
+    string GetLastAnimationName(int objectId);
+    void StopCurrentAnimation(int objectId , string paramName , string runName = "");
+    void PlayMonsterAnimation(int objectId, string animationName);
+    void StopMonsterCurrentAnimation(int objectId, string animationName);
+    Dictionary<string, float> PlayerGetAllFloat(int objectId);
+    void PlayerSetAllFloat(int objectId , Dictionary<string, float> floatValues);
+    public AnimationEventsBase  GetAnimationEvents(int objectId);
+    public void SetSpTimeAtk(int objectId , int timeAtk);
+
+
 }

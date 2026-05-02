@@ -1,14 +1,12 @@
-using System.Collections;
+﻿
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Rendering.Universal.Internal;
-using UnityEngine.UIElements;
+
 
 public class MapClassId
 {
     private static Dictionary<int, ClassIdTemplate> dict = new Dictionary<int, ClassIdTemplate>();
     private static readonly string Fighter = "Fighter";
-
     private static readonly string Human = "Human";
     private static readonly string Ork = "Orc";
     private static readonly string Dwarf = "Dwarf";
@@ -129,7 +127,6 @@ public class MapClassId
 
     public static void AddClassId(int pId, bool mage , InterludeRace race, ClassIdTemplate pParent)
     {
-        //TemplateClassId tamplate = new TemplateClassId(pId, mage, race, pParent);
         dict.Add(pId, new ClassIdTemplate(pId, mage, race, pParent));
     }
 

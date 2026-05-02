@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 57bfe28e79a5f70469310eb316dfa054, type: 3}
+  m_Name: Effect2039
+  m_EditorClassIdentifier: 
+  defaultLifeTime: 15
+  isFollowCaster: 1
+  showTime: 1
+  hideTime: 1
+  maxAlpha: 0.3
+  stopAlphaShow: 0.3
+  startAlphaTimeV1: 0.08
+  endAlphaTimeV1: 0.5
+  startAlphaTimeV0: 0.6
+  endAlphaTimeV0: 1
+  maxAlphaFooter: 0.5
+  speedRotateMin: 23
+  speedRotateMax: 27

@@ -1,24 +1,20 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 using static ModelTable;
-using static UnityEditor.Progress;
 using static UnityEngine.EventSystems.EventTrigger;
 
 
 public class AbstractMeshManager : MonoBehaviour
 {
+    protected GameObject _go;
 
-  protected GameObject _go;
-  protected object LoadMesh(EquipmentCategory category , params int[] itemIds)
-  {
-        try
-        {
-            switch (category)
-            {
+    protected object LoadMesh(EquipmentCategory category, params int[] itemIds) {
+        try {
+            switch (category) {
                 case EquipmentCategory.Weapon:
                     int weaponId = itemIds[0];
                     Weapon weapon = ItemTable.Instance.GetWeapon(weaponId);
                     GameObject goWeapon = LoadWeapon(weapon, weaponId);
-                    if(weapon != null) ObjectPoolManager.Instance?.AddPrefabToPool(ObjectType.Weapon, goWeapon);
+                    if (weapon != null) ObjectPoolManager.Instance?.AddPrefabToPool(ObjectType.Weapon, goWeapon);
                     return goWeapon;
                 case EquipmentCategory.Armor:
                     int aramorId = itemIds[0];
@@ -32,7 +28,7 @@ public class AbstractMeshManager : MonoBehaviour
                     int fullArmorRaceId = itemIds[1];
                     Armor armorModel = ItemTable.Instance.GetArmor(fullArmorId);
                     ModelTable.L2ArmorPiece fullGoArmor = LoadArmor(armorModel, CharacterRaceAnimationParser.SafeConvertToRace(fullArmorRaceId));
-                    if (armorModel != null) AddPrefabToList(ObjectType.Armor , fullGoArmor.baseAllModels);
+                    if (armorModel != null) AddPrefabToList(ObjectType.Armor, fullGoArmor.baseAllModels);
                     return fullGoArmor;
                 case EquipmentCategory.EtcItem:
                     int etcId = itemIds[0];
@@ -44,16 +40,13 @@ public class AbstractMeshManager : MonoBehaviour
                 default:
                     Debug.LogWarning("Unknown equipment category");
                     return null;
-
             }
-
-        }
-        catch (System.Exception ex)
-        {
-            Debug.LogWarning($"AbstractMeshManager-> LoadMesh íå ñìîãëè çàãðóçèòü íóæíóþ Mesh !!! ArmorID {itemIds[0]} Type {category} error print: ->\n" + ex.ToString());
+        } catch (System.Exception ex) {
+            Debug.LogWarning(
+                $"AbstractMeshManager-> LoadMesh Ð½Ðµ ÑÐ¼Ð¾Ð³Ð»Ð¸ Ð·Ð°Ð³Ñ€ÑƒÐ·Ð¸Ñ‚ÑŒ Ð½ÑƒÐ¶Ð½ÑƒÑŽ Mesh !!! ArmorID {itemIds[0]} Type {category} error print: ->\n" +
+                ex.ToString());
             return null;
         }
-
     }
 
     protected GameObject CreateCopy(GameObject originalGameObject , string name , ObjectType type)
@@ -129,11 +122,11 @@ public class AbstractMeshManager : MonoBehaviour
         return weaponPrefab;
     }
 
-    private ModelTable.L2ArmorPiece LoadArmor(Armor armor, CharacterRaceAnimation raceId)
+    private L2ArmorPiece LoadArmor(Armor armor, CharacterRaceAnimation raceId)
     {
         if (armor == null ) return null;
 
-        ModelTable.L2ArmorPiece armorPiece = ModelTable.Instance.GetArmorPiece(armor, raceId);
+        L2ArmorPiece armorPiece = ModelTable.Instance.GetArmorPiece(armor, raceId);
 
         if (armorPiece == null)
         {
@@ -260,7 +253,5 @@ public class AbstractMeshManager : MonoBehaviour
        return  weapon.Weapongrp.Model.Replace("LineageWeapons." , "");
 
     }
-
-
 
 }

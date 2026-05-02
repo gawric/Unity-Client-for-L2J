@@ -1,20 +1,27 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public class MovementTarget
 {
     private object _objectPoint;
     private float _distance;
-
-    public MovementTarget(object objectPoint , float distance)
+    private bool _isRunning;
+    public MovementTarget(object objectPoint , float distance , bool isRunning)
     {
         _objectPoint = objectPoint;
         _distance = distance;
+        _isRunning = isRunning;
     }
 
     public MovementTarget(Entity entity, float distance)
     {
         _objectPoint = entity.transform;
         _distance = distance;
+        _isRunning = true;
+    }
+
+    public bool IsRunningServer()
+    {
+        return _isRunning;
     }
 
     public float GetDistance()
@@ -30,7 +37,7 @@ public class MovementTarget
             case Vector3 vector:
                 return vector;
             default:
-                Debug.LogError("Invalid object type");
+                Debug.LogError("MovementTarget->GetTarget: Invalid object type");
                 return Vector3.zero;
         }
     }

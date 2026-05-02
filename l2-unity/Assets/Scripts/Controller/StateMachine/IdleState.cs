@@ -1,4 +1,4 @@
-
+п»ї
 using UnityEngine;
 
 public class IdleState : StateBase
@@ -20,7 +20,7 @@ public class IdleState : StateBase
         }
     }
 
-    public override void HandleEvent(Event evt)
+    public override void HandleEvent(Event evt, object payload = null)
     {
         switch (evt)
         {
@@ -40,14 +40,14 @@ public class IdleState : StateBase
                    // if (TargetManager.Instance.IsAttackTargetSet())
                    // {
                    //     _stateMachine.ChangeState(PlayerState.ATTACKING);
-                    //    Debug.Log("Требуется реализация SendRequestAutoAttack -1 ");
+                    //    Debug.Log("РўСЂРµР±СѓРµС‚СЃСЏ СЂРµР°Р»РёР·Р°С†РёСЏ SendRequestAutoAttack -1 ");
                         //GameClient.Instance.ClientPacketHandler.SendRequestAutoAttack(-1);
                     //}
                    // else
                    // {
                    //     _stateMachine.ChangeState(PlayerState.ATTACKING);
                         //Debug.LogWarning("[StateMachine] Attacking a target which is not current target.");
-                    //    Debug.Log("Требуется реализация SendRequestAutoAttack");
+                    //    Debug.Log("РўСЂРµР±СѓРµС‚СЃСЏ СЂРµР°Р»РёР·Р°С†РёСЏ SendRequestAutoAttack");
                         //GameClient.Instance.ClientPacketHandler.SendRequestAutoAttack(TargetManager.Instance.AttackTarget.Identity.Id);
                     //}
 

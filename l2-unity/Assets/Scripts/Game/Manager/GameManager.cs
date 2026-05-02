@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using static ServerListPacket;
 
@@ -9,6 +9,8 @@ public class GameManager : MonoBehaviour {
     [SerializeField] private GameState _gameState = GameState.LOGIN_SCREEN;
     private bool _gameReady = false;
     [SerializeField] private Camera _loadingCamera;
+
+    public bool IsSwitchingServer = false;
 
     public GameState GameState {
         get { return _gameState; }
@@ -110,7 +112,8 @@ public class GameManager : MonoBehaviour {
         ServerSelectWindow.Instance.UpdateServerList(lastServer, serverData, charsOnServers);
     }
 
-    public void OnAuthAllowed() {
+    public void OnAuthAllowed()
+    {
         GameState = GameState.CHAR_SELECT;
        // Debug.Log("Event Allowed Char Select");
         LoginCameraManager.Instance.SwitchCamera("CharSelect");
@@ -187,7 +190,7 @@ public class GameManager : MonoBehaviour {
             }
             else
             {
-                //Debug.Log("GameManager: ����������� ������ !!!! OnGameLaunched L2LoginUI NULLL");
+                //Debug.Log("GameManager: пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ !!!! OnGameLaunched L2LoginUI NULLL");
             }
 
             CharacterCreator.Instance.SpawnAllPawns();
@@ -198,6 +201,7 @@ public class GameManager : MonoBehaviour {
     public void StartLoading()
     {
         _loadingCamera.enabled = true;
+
         if (L2GameUI.Instance != null)
         {
             L2GameUI.Instance.StartLoading();

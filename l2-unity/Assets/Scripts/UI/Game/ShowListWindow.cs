@@ -1,4 +1,4 @@
-using FMOD;
+﻿using FMOD;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -13,7 +13,7 @@ public class ShowListWindow : L2PopupWindow
 {
     private static ShowListWindow _instance;
     public static ShowListWindow Instance { get { return _instance; } }
-    private Button _�ancelButton;
+    private Button _СЃancelButton;
     private Button _okButton;
     private DropdownField _dropdown;
     private Dictionary<string, int> _players;
@@ -41,11 +41,11 @@ public class ShowListWindow : L2PopupWindow
         InitWindow(root);
         yield return new WaitForEndOfFrame();
 
-        _�ancelButton = _windowEle.Q<Button>("CancelButton");
+        _СЃancelButton = _windowEle.Q<Button>("CancelButton");
         _okButton = _windowEle.Q<Button>("StartButton");
-        var conent = _windowEle.Q<VisualElement>("content");
+        var content = _windowEle.Q<VisualElement>("content");
 
-        _dropdown = conent.Q<DropdownField>("comboBox");
+        _dropdown = content.Q<DropdownField>("comboBox");
 
         RegisterCloseWindowEvent("btn-close-frame");
         var dragArea = GetElementByClass("drag-area");
@@ -57,7 +57,7 @@ public class ShowListWindow : L2PopupWindow
         _dropdown.RegisterValueChangedCallback(OnDropdownValueChanged);
 
         _okButton.RegisterCallback<ClickEvent>((evt) => OnClick(evt));
-        _�ancelButton.RegisterCallback<ClickEvent>((evt) => OnCancel(evt));
+        _СЃancelButton.RegisterCallback<ClickEvent>((evt) => OnCancel(evt));
 
         RegisterClickWindowEvent(_windowEle, null);
         OnCenterScreen(_root);

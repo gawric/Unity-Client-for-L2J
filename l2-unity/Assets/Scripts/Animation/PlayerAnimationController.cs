@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.U2D;
+using static Org.BouncyCastle.Crypto.Digests.SkeinEngine;
+using static UnityEngine.Rendering.DebugUI;
 
 public class PlayerAnimationController : BaseAnimationController
 {
@@ -27,7 +30,14 @@ public class PlayerAnimationController : BaseAnimationController
         _instance = null;
     }
 
-
+    public void StartTrigger(string name)
+    {
+        ToggleAnimationTrigger(name);
+    }
+    public void StartCrossFade(string name , float duration)
+    {
+        ToggleAnimationCrossFade(name, duration);
+    }
     public void SetBool(string name, bool value, bool share)
     {
         if (_animator.GetBool(name) != value)
@@ -73,6 +83,7 @@ public class PlayerAnimationController : BaseAnimationController
             }
         }
     }
+
 
 
 }

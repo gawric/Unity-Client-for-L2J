@@ -1,3 +1,4 @@
+﻿
 public class WalkingMonsterState : MonsterBase
 {
     public WalkingMonsterState(MonsterStateMachine stateMachine) : base(stateMachine) { }
@@ -20,16 +21,16 @@ public class WalkingMonsterState : MonsterBase
             case Event.ARRIVED:
                 _stateMachine.ChangeState(MonsterState.IDLE);
                 _stateMachine.NotifyEvent(Event.ARRIVED);
-                DebugLineDraw.RemoveDrawLineDebug(monsterEntity.IdentityInterlude.Id);
+                //DebugLineDraw.RemoveDrawLineDebug(_stateMachine.GetObjectId());
                 break;
             case Event.CANCEL:
                 _stateMachine.ChangeState(MonsterState.IDLE);
                 _stateMachine.NotifyEvent(Event.ARRIVED);
-                DebugLineDraw.RemoveDrawLineDebug(monsterEntity.IdentityInterlude.Id);
+                //DebugLineDraw.RemoveDrawLineDebug(_stateMachine.GetObjectId());
                 break;
             case Event.MOVE_TO:
-               // Debug.Log("MosterAnimation State Walk > start animation");
-                AnimationManager.Instance.PlayMonsterAnimation(monsterEntity.IdentityInterlude.Id , nac, AnimationNames.MONSTER_WALK.ToString());
+                // Debug.Log("MosterAnimation State Walk > start animation");
+                AnimationManager.Instance.PlayMonsterAnimation(_stateMachine.GetObjectId(), AnimationNames.MONSTER_WALK.ToString());
                 break;
 
         }

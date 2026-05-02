@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public class MagicSkillUse : ServerPacket
 {
@@ -6,6 +6,7 @@ public class MagicSkillUse : ServerPacket
     private int _targetObjId;
     private Vector3 _attackerPos;
     private Vector3 _targetPos;
+    private Skillgrp _skillGrp;
     private int _aX;
     private int _aY;
     private int _aZ;
@@ -41,6 +42,8 @@ public class MagicSkillUse : ServerPacket
     public Vector3 AttackerPos { get => _attackerPos; }
     public Vector3 TargetPos { get => _targetPos; }
 
+    public Skillgrp SkillGrp { get => _skillGrp; }
+
     public MagicSkillUse(byte[] d) : base(d)
     {
         Parse();
@@ -74,8 +77,7 @@ public class MagicSkillUse : ServerPacket
         _tY = ReadI();
         _tZ = ReadI();
         _targetPos = VectorUtils.ConvertPosToUnity(new Vector3(_tX, _tY, _tZ));
-
-        //DebugInfo(_aX, _aY, _aZ, _tX, _tY, _tZ);
+        _skillGrp = SkillgrpTable.Instance.GetSkill(_skillId, _skilllvl);
     }
 
 

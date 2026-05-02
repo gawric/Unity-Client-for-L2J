@@ -1,4 +1,5 @@
-
+﻿
+using System;
 using UnityEngine;
 
 public class MonsterStateAtk : MonsterStateBase
@@ -71,7 +72,7 @@ public class MonsterStateAtk : MonsterStateBase
     {
         if (animator.GetBool(parameterName) != false)
         {
-            AnimationManager.Instance.StopMonsterCurrentAnimation(animator , parameterName);
+            AnimationManager.Instance.StopMonsterCurrentAnimation(animator.GetInteger(AnimatorUtils.OBJECT_ID), parameterName);
         }
 
     }

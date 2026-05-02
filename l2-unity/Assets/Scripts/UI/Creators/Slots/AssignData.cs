@@ -1,4 +1,4 @@
-public class AssignData
+﻿public class AssignData
 {
     private ItemInstance _itemInstance;
     private AbstractItem _itemData;

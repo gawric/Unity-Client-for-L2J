@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using static UnityEditor.Progress;
 
 public class TradeStart : ServerPacket
 {
@@ -35,7 +34,7 @@ public class TradeStart : ServerPacket
         }
 
         // Извлекаем предметы из буфера
-        List<Item> itemList = new List<Item>();
+        List<ItemInstance> itemList = new List<ItemInstance>();
         for (int i = 0; i < itemCount; i++)
         {
             int type1 = ReadSh(); // Тип предмета 1

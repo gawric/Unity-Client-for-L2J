@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Reflection.Emit;
@@ -16,7 +16,7 @@ public class SystemMessageWindow : L2PopupWindow
     private const string _defaultNameOk = "OkButton";
     public static SystemMessageWindow Instance { get { return _instance; } }
     private UnityEngine.UIElements.Label _textLabel;
-    private Button _ñancelButton;
+    private Button _cancelButton;
     private Button _okButton;
 
     public event Action OnButtonOk;
@@ -48,11 +48,11 @@ public class SystemMessageWindow : L2PopupWindow
         InitWindow(root);
         yield return new WaitForEndOfFrame();
 
-        _ñancelButton = _windowEle.Q<Button>(_defaultNameCancel);
+        _cancelButton = _windowEle.Q<Button>(_defaultNameCancel);
         _okButton = _windowEle.Q<Button>(_defaultNameOk);
         _textLabel = _windowEle.Q<UnityEngine.UIElements.Label>("labelText");
         //RegisterCloseWindowEventByName("OkButton");
-        _ñancelButton.RegisterCallback<ClickEvent>(ClickEventClosed);
+        _cancelButton.RegisterCallback<ClickEvent>(ClickEventClosed);
         _okButton.RegisterCallback<ClickEvent>(ClickEventOk);
 
         RegisterClickWindowEvent(_windowEle, null);
@@ -82,7 +82,7 @@ public class SystemMessageWindow : L2PopupWindow
         }
 
         OnCenterScreen(_root);
-        _ñancelButton.style.display = DisplayStyle.None;
+        _cancelButton.style.display = DisplayStyle.None;
         _okButton.style.display = DisplayStyle.Flex;
         _textLabel.text = messageText;
         base.ShowWindow();
@@ -99,7 +99,7 @@ public class SystemMessageWindow : L2PopupWindow
         }
 
         OnCenterScreen(_root);
-        _ñancelButton.style.display = DisplayStyle.Flex;
+        _cancelButton.style.display = DisplayStyle.Flex;
         _okButton.style.display = DisplayStyle.Flex;
         _textLabel.text = messageText;
         base.ShowWindow();
@@ -126,9 +126,9 @@ public class SystemMessageWindow : L2PopupWindow
 
     private void ReRegisterCallBack()
     {
-        _ñancelButton = _windowEle.Q<Button>(_defaultNameCancel);
+        _cancelButton = _windowEle.Q<Button>(_defaultNameCancel);
         _okButton = _windowEle.Q<Button>(_defaultNameOk);
-        _ñancelButton.RegisterCallback<ClickEvent>(ClickEventClosed);
+        _cancelButton.RegisterCallback<ClickEvent>(ClickEventClosed);
         _okButton.RegisterCallback<ClickEvent>(ClickEventOk);
     }
 

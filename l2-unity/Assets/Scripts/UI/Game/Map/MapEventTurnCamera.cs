@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 [RequireComponent(typeof(Transform))]
 public class MapEventTurnCamera : MonoBehaviour, IRegisteredBillboard

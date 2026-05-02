@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -217,7 +217,7 @@ public class L2SlotManager : L2PopupWindow
         }
 
         SystemMessageWindow.Instance.OnButtonOk += OkDestroyRecipe;
-        SystemMessageWindow.Instance.OnButtonClosed += On�ancelRecipe;
+        SystemMessageWindow.Instance.OnButtonClosed += OnРЎancelRecipe;
         SystemMessageWindow.Instance.ShowWindowDialogYesOrNot("Are you sure you want to destroy the recipe?");
 
         int position = _hoverSlot.Position;
@@ -236,7 +236,7 @@ public class L2SlotManager : L2PopupWindow
         CleanupMessageWindow();
     }
 
-    private void On�ancelRecipe()
+    private void OnРЎancelRecipe()
     {
 
         CleanupMessageWindow();
@@ -244,7 +244,7 @@ public class L2SlotManager : L2PopupWindow
 
     private void CleanupMessageWindow()
     {
-        SystemMessageUtils.CancelEvent(SystemMessageWindow.Instance, OkDestroyRecipe, On�ancelRecipe);
+        SystemMessageUtils.CancelEvent(SystemMessageWindow.Instance, OkDestroyRecipe, OnРЎancelRecipe);
     }
 
 

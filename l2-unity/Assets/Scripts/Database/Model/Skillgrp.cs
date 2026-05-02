@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -6,7 +6,8 @@ public class Skillgrp
 {
     private readonly string _activeSkillName = "Active Skill";
     private readonly string _passiveSkillName = "Passive Skill";
-    
+    private readonly string _selfSkillName = "Self Skill";
+
     [SerializeField] public int _id;
     [SerializeField] public int _level;
     [SerializeField] public int _subLevel;
@@ -74,6 +75,19 @@ public class Skillgrp
         {
             return _passiveSkillName;
         }
+        else if (_operate_type == 3)
+        {
+            return _selfSkillName;
+        }
         return "";
+    }
+    //oparation type 3 > self cast
+    public string GetAnimOperationType3()
+    {
+        if(_id == 226)
+        {
+            return "sit";
+        }
+        return "none";
     }
 }

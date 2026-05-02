@@ -1,4 +1,4 @@
-public enum Intention
+﻿public enum Intention
 {
     INTENTION_IDLE,
     INTENTION_WAITING,
@@ -6,6 +6,7 @@ public enum Intention
     INTENTION_ATTACK,
     INTENTION_DEAD,
     INTENTION_MAGIC_ATTACK,
+    INTENTION_PHYSICAL_SKILLS_ATTACK,
     INTENTION_MOVE_TO_PAWN,
     INTENTION_STOP_MOVE,
     INTENTION_SIT,

@@ -30,9 +30,9 @@ scopes = {
 	"picker_visibility_flags.075BCD15" = "264"
 	"picker_item_size.075BCD15" = "88"
 	"picker_inspector.075BCD15" = "0"
-	"last_search.66F56946" = "CharSelectWindow"
+	"last_search.66F56946" = "PlayerImpactEffect"
 	"OpenInspectorPreview.66F56946" = "0"
-	"currentGroup.66F56946" = "all"
+	"currentGroup.66F56946" = "asset"
 }
 providers = {
 	profilermarkers = {
@@ -89,6 +89,8 @@ providers = {
 objectSelectors = {
 }
 recentSearches = [
+	"PlayerImpactEffect "
+	"ChatWindow"
 	"CharSelectWindow"
 	"0x05"
 	"InterludeKeyPacket"
@@ -107,8 +109,6 @@ recentSearches = [
 	"SocialAction"
 	"Social"
 	"StatusUpdate"
-	"wait"
-	"control"
 ]
 searchItemFavorites = [
 	"GlobalObjectId_V1-3-8f18501e449af2c438ac58e7d23ae0f7-2655988077585873504-0"

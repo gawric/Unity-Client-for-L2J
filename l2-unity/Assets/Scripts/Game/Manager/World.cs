@@ -1,10 +1,11 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Security.Principal;
 using System.Text;
 using System.Threading.Tasks;
 
 using UnityEngine;
+using UnityEngine.InputSystem.XR;
 using UnityEngine.UIElements.Experimental;
 using static UnityEditor.Progress;
 
@@ -102,22 +103,33 @@ public class World : MonoBehaviour {
 
     public void SpawnPlayerInterlude(NetworkIdentityInterlude identity, PlayerStatusInterlude status, PlayerInterludeStats stats, PlayerInterludeAppearance appearance)
     {
+        
         identity.SetPosY(GetGroundHeight(identity.Position));
+ 
         identity.EntityType = EntityType.Player;
+ 
 
         CharacterRace race = (CharacterRace)appearance.Race;
+   
         CharacterRaceAnimation raceId = CharacterRaceAnimationParser.ParseRaceInterlude(race, appearance.Sex, appearance.BaseClass);
+   
 
         GameObject go = CharacterBuilder.Instance.BuildCharacterBaseInterlude(raceId, appearance, identity.EntityType);
+     
         go.transform.SetParent(_usersContainer.transform);
+      
         //go.transform.eulerAngles = new Vector3(transform.eulerAngles.x, identity.Heading, transform.eulerAngles.z);
-       
+
         go.transform.position = identity.Position;
+       
         go.transform.rotation = identity.Heading;
+     
 
         // go.transform.name = "_Player";
         go.transform.name = identity.Name;
+   
         PlayerEntity player = go.GetComponent<PlayerEntity>();
+ 
 
         player.Status = status;
         player.IdentityInterlude = identity;
@@ -126,43 +138,60 @@ public class World : MonoBehaviour {
         player.Race = race;
         player.RaceId = raceId;
         player.Running = appearance.Running;
+  
         player.SetDead(false);
-
+ 
         go.GetComponent<NetworkTransformShare>().enabled = true;
+   
         go.GetComponent<PlayerController>().enabled = true;
+   
         go.GetComponent<PlayerController>().Initialize();
+   
 
         go.SetActive(true);
+      
 
         go.GetComponentInChildren<PlayerAnimationController>().Initialize();
+     
         PlayerAnimationController controller = go.GetComponentInChildren<PlayerAnimationController>();
-        AnimationManager.Instance.SetAnimationManager(controller , player);
 
+       
+        AnimationManager.Instance.RegisterController(identity.Id, controller , player);
+   
         go.GetComponent<Gear>().Initialize(player.IdentityInterlude.Id, player.RaceId);
+     
         var statsIntr = (PlayerInterludeStats)player.Stats;
+       
         player.Initialize();
-        //player.GetComponent<NetworkTransformReceive>().Initialize();
+
+
+
         player.UpdateRunSpeed(statsIntr.RunRealSpeed);
+      
         player.UpdateWalkSpeed(statsIntr.WalkRealSpeed);
+      
 
-        // Debug.Log("PLAYER SPAWN RunSpeed " + statsIntr.RunSpeed);
-        //Debug.Log("PLAYER SPAWN PAtkSpd " + statsIntr.PAtkSpd);
-        // player.UpdatePAtkSpeedPlayer((int)statsIntr.BasePAtkSpeed);
-
-        //416 - ���������� �����
-        //554 - � ����������
+        //416 - пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
+        //554 - пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
         player.UpdatePAtkSpeedPlayer((int)statsIntr.BasePAtkSpeed);
+      
         player.UpdateMAtkSpeed((int)statsIntr.MAtkSpd);
+     
         //go.transform.SetParent(_usersContainer.transform);
 
         CameraController.Instance.enabled = true;
+      
         CameraController.Instance.SetTarget(go);
+      
         CameraController.Instance.SetHeading(identity.OrigHeading);
+    
 
         CharacterInfoWindow.Instance.UpdateValues();
+    
         PlayerStateMachine.Instance.Player = player;
-
+    
         _players.Add(identity.Id, player);
+      
         _objects.Add(identity.Id, player);
     }
 
@@ -255,7 +284,7 @@ public class World : MonoBehaviour {
         {
 
             Debug.Log("Name NPC " + npcName.Name);
-            //Debug ����� ��������� ������ 1 �������� � ��� !!!!
+            //Debug пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ 1 пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅ !!!!
            //if (isSinglSpawn | !npcName.Name.Equals("Elder Keltir")) return;
 
            // if (!isSinglSpawn)
@@ -289,6 +318,7 @@ public class World : MonoBehaviour {
                 npcGo.transform.SetParent(_npcsContainer.transform);
                 npc = npcGo.GetComponent<NpcEntity>();
                 ((NpcEntity)npc).NpcData = npcData;
+
             }
             else
             {
@@ -421,14 +451,15 @@ public class World : MonoBehaviour {
 
     private MonsterStateMachine InitMonster(Entity npc , GameObject npcGo)
     {
-        npc.GetComponent<NetworkAnimationController>().Initialize();
+        var animationController = npc.GetComponent<NetworkAnimationController>();
+        animationController.Initialize();
         npcGo.GetComponent<Gear>().Initialize(npc.IdentityInterlude.Id, npc.RaceId);
         npc.Initialize();
         var msm = npcGo.GetComponent<MonsterStateMachine>();
 
         if (msm != null)
         {
-
+            AnimationManager.Instance.RegisterController(npc.IdentityInterlude.Id, animationController, npc);
             npc.UpdateNpcPAtkSpd((int)npc.Stats.PAtkRealSpeed);
             npc.UpdateNpcRunningSpd(npc.Stats.RunRealSpeed);
             npc.UpdateNpcWalkSpd(npc.Stats.WalkRealSpeed);
@@ -441,7 +472,8 @@ public class World : MonoBehaviour {
 
     private void InitNpc(Entity npc, GameObject npcGo)
     {
-        npc.GetComponent<NetworkAnimationController>().Initialize();
+        var animationController = npc.GetComponent<NetworkAnimationController>();
+        animationController.Initialize();
         MoveNpc moveNpc = npcGo.GetComponent<MoveNpc>();
 
 
@@ -450,6 +482,7 @@ public class World : MonoBehaviour {
         var nsm = npcGo.GetComponent<NpcStateMachine>();
         if (nsm != null)
         {
+            AnimationManager.Instance.RegisterController(npc.IdentityInterlude.Id, animationController, npc);
             npc.UpdateNpcPAtkSpd((int)npc.Stats.PAtkSpd);
             npc.UpdateNpcRunningSpd(npc.Stats.RunRealSpeed);
             npc.UpdateNpcWalkSpd(npc.Stats.WalkRealSpeed);
@@ -465,8 +498,6 @@ public class World : MonoBehaviour {
         {
             if (entity.IsDead())
             {
-                //DeadMonster deadEvent = entity.GetComponent<DeadMonster>();
-                //deadEvent.OnDeadAntiGravity(objectId, true, this);
                 DeadManager.Instance.AddDeadAndRemove(objectId , new DeadData(true, entity));
             }
             else
@@ -665,14 +696,7 @@ public class World : MonoBehaviour {
         return null;
     }
 
-    public MonsterStateMachine GetMonsterStateMachine(int id)
-    {
-        if (_msObjects.ContainsKey(id))
-        {
-            return _msObjects[id];
-        }
-        return null;
-    }
+
 
     // Wait for entity to be fully loaded
     public async Task<Entity> GetEntityAsync(int id) {

@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 public class MonsterStateMachine : MonoBehaviour
@@ -41,7 +41,11 @@ public class MonsterStateMachine : MonoBehaviour
 
     public Entity Entity { get { return _entity; } }
 
-
+    public int GetObjectId()
+    {
+        if (_entity == null) return -1;
+        return _entity.IdentityInterlude.Id;
+    }
 
     public virtual void Initialize(int mosterId, 
         int npcId,

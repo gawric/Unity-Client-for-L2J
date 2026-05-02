@@ -1,4 +1,4 @@
-#if (UNITY_EDITOR) 
+﻿#if (UNITY_EDITOR) 
 using Newtonsoft.Json;
 using System.IO;
 using UnityEngine;

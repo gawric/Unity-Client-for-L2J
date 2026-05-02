@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 using static UnityEngine.GraphicsBuffer;
@@ -6,6 +6,7 @@ using static UnityEngine.GraphicsBuffer;
 public class PlayerActions : MonoBehaviour
 {
     private Dictionary<ActionType, L2Action> _actions;
+    
     private static PlayerActions _instance;
     public static PlayerActions Instance
     {

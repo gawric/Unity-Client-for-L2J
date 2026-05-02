@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
 using UnityEngine;
@@ -6,17 +6,17 @@ using UnityEngine;
 public class CreatureMessage : SystemMessage
 {
     private string sendName;
-    private string text;
-    private string color;
-    public CreatureMessage(string sendName , string text , string color) : base(null, null)
+    private string _text;
+    public ChatTypeData _data;
+    public CreatureMessage(string sendName , string text , ChatTypeData data) : base(null, null)
     {
         this.sendName = sendName;
-        this.text = " "+text;
-        this.color = color;
+        _text = text;
+        _data = data;
     }
 
     public override string ToString()
     {
-        return "<color="+color+">" + sendName+":"+text+"</color>";
+        return "<color="+_data.Color+">" + sendName+": "+ _text+ "</color>";
     }
 }

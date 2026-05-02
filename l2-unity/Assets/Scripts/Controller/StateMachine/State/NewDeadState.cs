@@ -1,4 +1,4 @@
-public class NewDeadState : StateBase
+﻿public class NewDeadState : StateBase
 {
     public NewDeadState(PlayerStateMachine stateMachine) : base(stateMachine) { }
 
@@ -6,12 +6,12 @@ public class NewDeadState : StateBase
     {
         if(PlayerController.Instance.RunningToDestination) PlayerController.Instance.StopMove();
     }
-    public override void HandleEvent(Event evt)
+    public override void HandleEvent(Event evt, object payload = null)
     {
         switch (evt)
         {
             case Event.DEAD:
-                AnimationManager.Instance.PlayOriginalAnimation(AnimationNames.DEAD.ToString());
+                AnimationManager.Instance.PlayOriginalAnimation(_stateMachine.GetObjectId() , AnimationNames.DEAD.ToString());
                 break;
  
         }

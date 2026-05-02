@@ -1,4 +1,4 @@
-using FMOD.Studio;
+﻿using FMOD.Studio;
 using System.IO;
 using UnityEngine;
 
@@ -26,7 +26,7 @@ public class NewMoveToPawnIntention : IntentionBase
                 if (distance > model.Distance())
                 {
                     PlayerStateMachine.Instance.IsMoveToPawn = true;
-                    PlayerController.Instance.MoveToPoint(new MovementTarget(model.TarEntity(), model.Distance()));
+                    PlayerController.Instance.MoveToPoint(new MovementTarget(model.TarEntity(), model.Distance() ));
                     StartAnimMoveTo();
                 }
 

@@ -1,0 +1,772 @@
+Index: l2-unity/Assets/Scripts/Controller/ClickManager.cs
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/l2-unity/Assets/Scripts/Controller/ClickManager.cs b/l2-unity/Assets/Scripts/Controller/ClickManager.cs
+--- a/l2-unity/Assets/Scripts/Controller/ClickManager.cs	(revision 5c390ee3c1b62db09e44e521fb12779ce05cf608)
++++ b/l2-unity/Assets/Scripts/Controller/ClickManager.cs	(date 1769618219854)
+@@ -77,7 +77,7 @@
+                 {
+                     _targetObjectData = _hoverObjectData;
+ 
+-                    if (_entityMask == (_entityMask | (1 << hitLayer)) && _targetObjectData.ObjectTag != "Player")
++                    if (_entityMask == (_entityMask | (1 << hitLayer)))
+                     {
+                         OnClickOnEntity();
+                     }
+@@ -141,13 +141,16 @@
+ 
+     public void OnClickOnEntity()
+     {
+-        Debug.Log("Hit entity");
+-        TargetData _target = new TargetData(_targetObjectData);
+-        var l2jpos = _target.Identity.GetL2jPos();
+-        ClickAction sendPaket = CreatorPacketsUser.CreateActiont(_target.Identity.Id , (int)l2jpos.x , (int)l2jpos.y , (int)l2jpos.z , 0);
+-        bool enable = GameClient.Instance.IsCryptEnabled();
++            Debug.Log("Hit entity");
++            TargetData _target = new TargetData(_targetObjectData);
++        if (_target != null)
++        {
++            var l2jpos = _target.Identity.GetL2jPos();
++            ClickAction sendPaket = CreatorPacketsUser.CreateActiont(_target.Identity.Id, (int)l2jpos.x, (int)l2jpos.y, (int)l2jpos.z, 0);
++            bool enable = GameClient.Instance.IsCryptEnabled();
+ 
+-        SendGameDataQueue.Instance().AddItem(sendPaket, enable, enable);
++            SendGameDataQueue.Instance().AddItem(sendPaket, enable, enable);
++        }
+     }
+ 
+ 
+Index: l2-unity/Assets/Scripts/Game/Action/AttackAction.cs
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/l2-unity/Assets/Scripts/Game/Action/AttackAction.cs b/l2-unity/Assets/Scripts/Game/Action/AttackAction.cs
+--- a/l2-unity/Assets/Scripts/Game/Action/AttackAction.cs	(revision 5c390ee3c1b62db09e44e521fb12779ce05cf608)
++++ b/l2-unity/Assets/Scripts/Game/Action/AttackAction.cs	(date 1769612030006)
+@@ -8,11 +8,19 @@
+     // Local action
+     public override void UseAction()
+     {
+-        // If has a target and attack key pressed
+-        if (TargetManager.Instance.HasTarget())
+-        {
+-            Debug.LogWarning("Use attack action.");
+-            //PlayerStateMachine.Instance.ChangeIntention(Intention.INTENTION_ATTACK, AttackIntentionType.AttackInput);
++        Debug.LogWarning("Use attack action.");
++
++        if (TargetManager.Instance.HasTarget())
++        {
++            if (!PlayerEntity.Instance.IsAttack && PlayerStateMachine.Instance.State != PlayerState.DEAD)
++             {
++                 var target = PlayerEntity.Instance.GetTargetEntity();
++                 if (target != null && !target.IsDead())
++                {
++                     Debug.LogWarning("Trying To Attack");
++                     ClickManager.Instance.OnClickOnEntity();
++                }
++            }
+         }
+     }
+ }
+\ No newline at end of file
+Index: l2-unity/Assets/Scripts/Networking/ClientLibrary/Packet/ServerPacket.cs
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/l2-unity/Assets/Scripts/Networking/ClientLibrary/Packet/ServerPacket.cs b/l2-unity/Assets/Scripts/Networking/ClientLibrary/Packet/ServerPacket.cs
+--- a/l2-unity/Assets/Scripts/Networking/ClientLibrary/Packet/ServerPacket.cs	(revision 5c390ee3c1b62db09e44e521fb12779ce05cf608)
++++ b/l2-unity/Assets/Scripts/Networking/ClientLibrary/Packet/ServerPacket.cs	(date 1769642526112)
+@@ -128,6 +128,7 @@
+ 
+         return Encoding.GetEncoding("UTF-8").GetString(data);
+     }
++
+     //java server 
+     protected string ReadOtherS()
+     {
+Index: l2-unity/Assets/Scripts/Networking/ClientLibrary/PacketHandlerInterlude/GameServer/GameClientInterludePacketHandler.cs
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/l2-unity/Assets/Scripts/Networking/ClientLibrary/PacketHandlerInterlude/GameServer/GameClientInterludePacketHandler.cs b/l2-unity/Assets/Scripts/Networking/ClientLibrary/PacketHandlerInterlude/GameServer/GameClientInterludePacketHandler.cs
+--- a/l2-unity/Assets/Scripts/Networking/ClientLibrary/PacketHandlerInterlude/GameServer/GameClientInterludePacketHandler.cs	(revision 5c390ee3c1b62db09e44e521fb12779ce05cf608)
++++ b/l2-unity/Assets/Scripts/Networking/ClientLibrary/PacketHandlerInterlude/GameServer/GameClientInterludePacketHandler.cs	(date 1769622766668)
+@@ -82,7 +82,9 @@
+ 
+     public void SendMessage(string text)
+     {
+-        Debug.Log("GameClientInterludePacketHandler: �� ����������� ����� �������� ��� ��� SendMessage");
++        //CreatorPacketsUser.Instance.sendMessage(text);
++
++      //  Debug.Log("GameClientInterludePacketHandler: �� ����������� ����� �������� ��� ��� SendMessage");
+     }
+  
+ }
+Index: l2-unity/Assets/Scripts/Networking/ClientLibrary/PacketHandlerInterlude/GameServer/GSInterludeMessageHandler.cs
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/l2-unity/Assets/Scripts/Networking/ClientLibrary/PacketHandlerInterlude/GameServer/GSInterludeMessageHandler.cs b/l2-unity/Assets/Scripts/Networking/ClientLibrary/PacketHandlerInterlude/GameServer/GSInterludeMessageHandler.cs
+--- a/l2-unity/Assets/Scripts/Networking/ClientLibrary/PacketHandlerInterlude/GameServer/GSInterludeMessageHandler.cs	(revision 5c390ee3c1b62db09e44e521fb12779ce05cf608)
++++ b/l2-unity/Assets/Scripts/Networking/ClientLibrary/PacketHandlerInterlude/GameServer/GSInterludeMessageHandler.cs	(date 1769723755921)
+@@ -70,22 +70,25 @@
+ 
+     private void OnCreatureSay(byte[] data)
+     {
+-        //SystemMessageInterlude packet = new SystemMessageInterlude(data);
+-        //Debug.Log("������ ��������� �� ����������� � ����� ������ !!!! " + 1);
+         CreatureSay packet = new CreatureSay(data);
+-        if(packet.Message != null)
++        CreatureMessage message = packet.Message;
++
++        if (message != null)
+         {
+-            if (InitPacketsLoadWord.getInstance().IsInit)
++            EventProcessor.Instance.QueueEvent(() =>
+             {
+-                InitPacketsLoadWord.getInstance().AddPacketsInit(packet);
+-            }
+-            else
+-            {
+-                SendShowClient(packet.Message);
+-            }
++                try
++                {
++                    ChatWindow.Instance.ReceiveChatMessage(message);
++                }
++                catch (Exception)
++                {
++                    Debug.LogError("CreatureSay: Critical error now show SystemMessage");
++                    SendShowClient(message);
++                }
++
++            });
+         }
+-       
+-
+     }
+ 
+     private void OnNpcSay(byte[] data)
+Index: l2-unity/Assets/Scripts/Networking/ClientLibrary/PacketInterlude/Creators/CreatorPacketsUser.cs
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/l2-unity/Assets/Scripts/Networking/ClientLibrary/PacketInterlude/Creators/CreatorPacketsUser.cs b/l2-unity/Assets/Scripts/Networking/ClientLibrary/PacketInterlude/Creators/CreatorPacketsUser.cs
+--- a/l2-unity/Assets/Scripts/Networking/ClientLibrary/PacketInterlude/Creators/CreatorPacketsUser.cs	(revision 5c390ee3c1b62db09e44e521fb12779ce05cf608)
++++ b/l2-unity/Assets/Scripts/Networking/ClientLibrary/PacketInterlude/Creators/CreatorPacketsUser.cs	(date 1769715967357)
+@@ -224,4 +224,14 @@
+         return new RequestBypassToServer(bypasscommand);
+     }
+ 
++    public static RequestSay2 CreateSendMessage(ChatTypeData data, string message)
++    {
++        return new RequestSay2(data,message, "");
++    }
++
++    public static RequestSay2 CreateSendWhisperMessage(ChatTypeData data,string message,string name)
++    {
++        return new RequestSay2(data, message,name);
++    }
++
+ }
+Index: l2-unity/Assets/Scripts/Networking/ClientLibrary/PacketInterlude/GameServer/ServerServer/World/Npc/NpcSay.cs
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/l2-unity/Assets/Scripts/Networking/ClientLibrary/PacketInterlude/GameServer/ServerServer/World/Npc/NpcSay.cs b/l2-unity/Assets/Scripts/Networking/ClientLibrary/PacketInterlude/GameServer/ServerServer/World/Npc/NpcSay.cs
+--- a/l2-unity/Assets/Scripts/Networking/ClientLibrary/PacketInterlude/GameServer/ServerServer/World/Npc/NpcSay.cs	(revision 5c390ee3c1b62db09e44e521fb12779ce05cf608)
++++ b/l2-unity/Assets/Scripts/Networking/ClientLibrary/PacketInterlude/GameServer/ServerServer/World/Npc/NpcSay.cs	(date 1769707220609)
+@@ -39,13 +39,20 @@
+ 
+     private void CreateMessage(int chatType , string text , string senderName)
+     {
+-        if (chatType == (int)ChatType.GENERAL)
++        ChatTypeData data = ChatTypes.GetById(chatType);
++
++        if (data != null)
+         {
+-            message = new CreatureMessage(senderName, text, "#dcd9dc");
+-        }
+-        else if (chatType == (int)ChatType.ANNOUNCEMENT | chatType == (int)ChatType.CRITICAL_ANNOUNCE)
+-        {
+-            message = new CreatureMessage("Announcements", text, "#80fbff");
++            int dataType = data.Type;
++
++            if (dataType == 10 || dataType == 18)
++            {
++                message = new CreatureMessage("Announcements", text , data);
++            }
++            else
++            {
++                message = new CreatureMessage(senderName, text , data);
++            }
+         }
+     }
+ }
+Index: l2-unity/Assets/Scripts/Networking/ClientLibrary/PacketInterlude/GameServer/ServerServer/World/SystemMessage/ChatType.cs
+===================================================================
+diff --git a/l2-unity/Assets/Scripts/Networking/ClientLibrary/PacketInterlude/GameServer/ServerServer/World/SystemMessage/ChatType.cs b/l2-unity/Assets/Scripts/Networking/ClientLibrary/PacketInterlude/GameServer/ServerServer/World/SystemMessage/ChatType.cs
+deleted file mode 100644
+--- a/l2-unity/Assets/Scripts/Networking/ClientLibrary/PacketInterlude/GameServer/ServerServer/World/SystemMessage/ChatType.cs	(revision 5c390ee3c1b62db09e44e521fb12779ce05cf608)
++++ /dev/null	(revision 5c390ee3c1b62db09e44e521fb12779ce05cf608)
+@@ -1,31 +0,0 @@
+-using System.Collections;
+-using System.Collections.Generic;
+-using UnityEngine;
+-
+-public enum  ChatType: int
+-{
+-    GENERAL = 0,
+-    SHOUT = 1,
+-    WHISPER = 2,
+-    PARTY = 3,
+-    CLAN = 4 ,
+-    GM = 5,
+-    PETITION_PLAYER = 6,
+-    PETITION_GM = 7,
+-    TRADE = 8,
+-    ALLIANCE = 9,
+-    ANNOUNCEMENT = 10,
+-    BOAT = 11,
+-    FRIEND = 12,
+-    MSNCHAT = 13,
+-    PARTYMATCH_ROOM = 14,
+-    PARTYROOM_COMMANDER = 15,
+-    PARTYROOM_ALL =16,
+-    HERO_VOICE = 17,
+-    CRITICAL_ANNOUNCE = 18,
+-    SCREEN_ANNOUNCE = 19,
+-    BATTLEFIELD= 20,
+-    MPCC_ROOM = 21,
+-    //NPC_GENERAL(0), // Epilogue adjustment
+-    //NPC_SHOUT(1); // Epilogue adjustment
+-}
+Index: l2-unity/Assets/Scripts/Networking/ClientLibrary/PacketInterlude/GameServer/ServerServer/World/SystemMessage/CreatureMessage.cs
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/l2-unity/Assets/Scripts/Networking/ClientLibrary/PacketInterlude/GameServer/ServerServer/World/SystemMessage/CreatureMessage.cs b/l2-unity/Assets/Scripts/Networking/ClientLibrary/PacketInterlude/GameServer/ServerServer/World/SystemMessage/CreatureMessage.cs
+--- a/l2-unity/Assets/Scripts/Networking/ClientLibrary/PacketInterlude/GameServer/ServerServer/World/SystemMessage/CreatureMessage.cs	(revision 5c390ee3c1b62db09e44e521fb12779ce05cf608)
++++ b/l2-unity/Assets/Scripts/Networking/ClientLibrary/PacketInterlude/GameServer/ServerServer/World/SystemMessage/CreatureMessage.cs	(date 1769728278124)
+@@ -6,17 +6,17 @@
+ public class CreatureMessage : SystemMessage
+ {
+     private string sendName;
+-    private string text;
+-    private string color;
+-    public CreatureMessage(string sendName , string text , string color) : base(null, null)
++    private string _text;
++    public ChatTypeData _data;
++    public CreatureMessage(string sendName , string text , ChatTypeData data) : base(null, null)
+     {
+         this.sendName = sendName;
+-        this.text = " "+text;
+-        this.color = color;
++        _text = text;
++        _data = data;
+     }
+ 
+     public override string ToString()
+     {
+-        return "<color="+color+">" + sendName+":"+text+"</color>";
++        return "<color="+_data.Color+">" + sendName+": "+ _text+ "</color>";
+     }
+ }
+Index: l2-unity/Assets/Scripts/Networking/ClientLibrary/PacketInterlude/GameServer/ServerServer/World/SystemMessage/CreatureSay.cs
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/l2-unity/Assets/Scripts/Networking/ClientLibrary/PacketInterlude/GameServer/ServerServer/World/SystemMessage/CreatureSay.cs b/l2-unity/Assets/Scripts/Networking/ClientLibrary/PacketInterlude/GameServer/ServerServer/World/SystemMessage/CreatureSay.cs
+--- a/l2-unity/Assets/Scripts/Networking/ClientLibrary/PacketInterlude/GameServer/ServerServer/World/SystemMessage/CreatureSay.cs	(revision 5c390ee3c1b62db09e44e521fb12779ce05cf608)
++++ b/l2-unity/Assets/Scripts/Networking/ClientLibrary/PacketInterlude/GameServer/ServerServer/World/SystemMessage/CreatureSay.cs	(date 1769728804453)
+@@ -8,7 +8,6 @@
+     public CreatureMessage Message { get { return message; } }
+     public CreatureSay(byte[] d) : base(d)
+     {
+-        
+         Parse();
+     }
+ 
+@@ -16,16 +15,27 @@
+     {
+         objectId = ReadI();
+         chatType = ReadI();
+-        if (chatType == (int)ChatType.GENERAL)
+-        {
+-            senderName = ReadOtherS();
+-            text = ReadOtherS();
+-            message = new CreatureMessage(senderName , text , "#dcd9dc");
+-        }else if ( chatType == (int)ChatType.ANNOUNCEMENT | chatType == (int)ChatType.CRITICAL_ANNOUNCE)
++
++        ChatTypeData data = ChatTypes.GetById(chatType);
++
++        if(data != null)
+         {
+-            senderName = ReadOtherS();
+-            text = ReadOtherS();
+-            message = new CreatureMessage("Announcements", text , "#80fbff");
++              senderName = ReadOtherS();
++
++              ReadI();//High Five NPCString ID
++
++              text = ReadOtherS();
++
++              int dataType = data.Type;
++
++              if(dataType == 10 || dataType == 18)
++              {
++                message = new CreatureMessage("Announcements", text , data);
++              }
++              else
++              {
++                   message = new CreatureMessage(senderName , text , data);
++              }
+         }
+     }
+ }
+Index: l2-unity/Assets/Scripts/UI/Game/Chat/ChatTab.cs
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/l2-unity/Assets/Scripts/UI/Game/Chat/ChatTab.cs b/l2-unity/Assets/Scripts/UI/Game/Chat/ChatTab.cs
+--- a/l2-unity/Assets/Scripts/UI/Game/Chat/ChatTab.cs	(revision 5c390ee3c1b62db09e44e521fb12779ce05cf608)
++++ b/l2-unity/Assets/Scripts/UI/Game/Chat/ChatTab.cs	(date 1769720623181)
+@@ -8,6 +8,10 @@
+ public class ChatTab
+ {
+     [SerializeField] string _tabName = "Tab";
++    [SerializeField] private ChatType _chatType;
++
++    public ChatType ChatType => _chatType;
++    public int TabId => (int)_chatType;
+ 
+     private bool _autoscroll = true;
+     private ScrollView _scrollView;
+Index: l2-unity/Assets/Scripts/UI/Game/Chat/ChatWindow.cs
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/l2-unity/Assets/Scripts/UI/Game/Chat/ChatWindow.cs b/l2-unity/Assets/Scripts/UI/Game/Chat/ChatWindow.cs
+--- a/l2-unity/Assets/Scripts/UI/Game/Chat/ChatWindow.cs	(revision 5c390ee3c1b62db09e44e521fb12779ce05cf608)
++++ b/l2-unity/Assets/Scripts/UI/Game/Chat/ChatWindow.cs	(date 1769796806151)
+@@ -4,7 +4,8 @@
+ using UnityEngine;
+ using UnityEngine.UIElements;
+ 
+-public class ChatWindow : L2Window {
++public class ChatWindow : L2Window
++{
+     private VisualTreeAsset _tabTemplate;
+     private VisualTreeAsset _tabHeaderTemplate;
+     private VisualTreeAsset _messageLabelTemplate;
+@@ -21,33 +22,40 @@
+     [SerializeField] private bool _chatOpened = false;
+     [SerializeField] private int _chatInputCharacterLimit = 64;
+ 
+-    
++
+ 
+     public bool ChatOpened { get { return _chatOpened; } }
+ 
+     private static ChatWindow _instance;
+     public static ChatWindow Instance { get { return _instance; } }
+ 
+-    private void Awake() {
+-        if (_instance == null) {
++    private void Awake()
++    {
++        if (_instance == null)
++        {
+             _instance = this;
+-        } else {
++        }
++        else
++        {
+             Destroy(this);
+         }
+     }
+ 
+-    private void OnDestroy() {
++    private void OnDestroy()
++    {
+         _instance = null;
+     }
+ 
+-    protected override void LoadAssets() {
++    protected override void LoadAssets()
++    {
+         _windowTemplate = LoadAsset("Data/UI/_Elements/Game/Chat/ChatWindow");
+         _tabTemplate = LoadAsset("Data/UI/_Elements/Game/Chat/ChatTab");
+         _tabHeaderTemplate = LoadAsset("Data/UI/_Elements/Game/Chat/ChatTabHeader");
+         _messageLabelTemplate = LoadAsset("Data/UI/_Elements/Game/Chat/MessageLabelTemplate");
+     }
+ 
+-    protected override IEnumerator BuildWindow(VisualElement root) {
++    protected override IEnumerator BuildWindow(VisualElement root)
++    {
+         InitWindow(root);
+ 
+         yield return new WaitForEndOfFrame();
+@@ -66,12 +74,12 @@
+ 
+         diagonalResizeHandle.AddManipulator(diagonalResizeManipulator);
+ 
+-        _chatInput = (TextField) GetElementById("ChatInputField");
++        _chatInput = (TextField)GetElementById("ChatInputField");
+         _chatInput.RegisterCallback<FocusEvent>(OnChatInputFocus);
+         _chatInput.RegisterCallback<BlurEvent>(OnChatInputBlur);
+         _chatInput.maxLength = _chatInputCharacterLimit;
+ 
+-        var enlargeTextBtn = (Button) GetElementById("EnlargeTextBtn");
++        var enlargeTextBtn = (Button)GetElementById("EnlargeTextBtn");
+         enlargeTextBtn.AddManipulator(new ButtonClickSoundManipulator(enlargeTextBtn));
+ 
+         var chatOptionsBtn = (Button)GetElementById("ChatOptionsBtn");
+@@ -89,20 +97,24 @@
+     }
+ 
+ 
+-    private void CreateTabs() {
++    private void CreateTabs()
++    {
+         _chatTabView = GetElementById("ChatTabView");
+ 
+         VisualElement tabHeaderContainer = _chatTabView.Q<VisualElement>("tab-header-container");
+-        if(tabHeaderContainer == null) {
++        if (tabHeaderContainer == null)
++        {
+             Debug.LogError("tab-header-container is null");
+         }
+         VisualElement tabContainer = _chatTabView.Q<VisualElement>("tab-content-container");
+ 
+-        if (tabContainer == null) {
++        if (tabContainer == null)
++        {
+             Debug.LogError("tab-content-container");
+         }
+ 
+-        for (int i = 0; i < _tabs.Count; i++) {
++        for (int i = 0; i < _tabs.Count; i++)
++        {
+             VisualElement tabElement = _tabTemplate.CloneTree()[0];
+             // tabElement.name = _tabs[i].TabName;
+             tabElement.name = _tabs[i].TabName;
+@@ -117,17 +129,21 @@
+ 
+             _tabs[i].SetMessageTemplate(_messageLabelTemplate);
+             _tabs[i].Initialize(_windowEle, tabElement, tabHeaderElement);
+-           
++
+         }
+ 
+-        if (_tabs.Count > 0) {
++        if (_tabs.Count > 0)
++        {
+             SwitchTab(_tabs[0]);
+         }
+     }
+ 
+-    public bool SwitchTab(ChatTab switchTo) {
+-        if (_activeTab != switchTo) {
+-            if(_activeTab != null) {
++    public bool SwitchTab(ChatTab switchTo)
++    {
++        if (_activeTab != switchTo)
++        {
++            if (_activeTab != null)
++            {
+                 _activeTab.TabContainer.AddToClassList("unselected-tab");
+                 _activeTab.TabHeader.RemoveFromClassList("active");
+             }
+@@ -137,125 +153,190 @@
+             ScrollDown(switchTo.Scroller);
+ 
+             _activeTab = switchTo;
++
++            Debug.Log("switching to: " + _activeTab.TabName);
+             return true;
+         }
+ 
+         return false;
+     }
+ 
+-    void Update() {
+-        //if (InputManager.Instance.Validate)
+-        //{
+-           // if (_chatOpened)
+-            //{
+-            //    CloseChat(true);
+-            //}
+-            //else
+-            //{
+-             //   StartCoroutine(OpenChat());
+-            //}
+-        //}
++    void Update()
++    {
++        if (InputManager.Instance.Validate)
++        {
++            if (_chatOpened)
++            {
++                CloseChat(true);
++            }
++            else
++            {
++                StartCoroutine(OpenChat());
++            }
++        }
+     }
+ 
+-    IEnumerator OpenChat() {
++    IEnumerator OpenChat()
++    {
+         _chatOpened = true;
+         L2GameUI.Instance.BlurFocus();
+         yield return new WaitForEndOfFrame();
+         _chatInput.Focus();
+     }
+ 
+-    public void CloseChat(bool sendMessage) {
++    public void CloseChat(bool sendMessage)
++    {
+         _chatOpened = false;
+ 
+         L2GameUI.Instance.BlurFocus();
+ 
+-        if(sendMessage) {
+-            if(_chatInput.text.Length > 0) {
+-                SendChatMessage(_chatInput.text);
+-                _chatInput.value = "";
++        if (sendMessage)
++        {
++            string text = _chatInput.text;
++            if (text.Length > 0)
++            {
++                if (CanSend(1100))
++                {
++                    if (IsGmCommand(text))
++                    {
++                        String prefix = "admin_";
++                        string gmCommand = text.Substring(2);
++                        string command = prefix + gmCommand;
++                        bool enable = GameClient.Instance.IsCryptEnabled();
++                        SendGameDataQueue.Instance().AddItem(CreatorPacketsUser.CreateByPassPacket(command), enable, enable);
++                        Debug.Log("ChatWindow: requested admin command :" + command);
++                    }
++                    else
++                    {
++                        var commands = PlayerCommands.FindByText(text);
++                        if (commands != null)
++                        {
++                            bool enable = GameClient.Instance.IsCryptEnabled();
++                            SendGameDataQueue.Instance().AddItem(CreatorPacketsUser.CreateRequestUserCommand(commands.Id), enable, enable);
++                            Debug.Log("ChatWindow: requested player command :" + commands  + " id: " + commands.Id);
++                        }
++                        else
++                        {
++                            SendChatMessage(_activeTab, text);
++                        }
++                    }
++
++                    _chatInput.value = "";
++                }
++                else
++                    _activeTab.ConcatMessage("Server:Please dont spam the chat.");
+             }
+         }
+     }
++
++    public static bool IsGmCommand(string text)
++    {
++        return text != null
++            && text.Length > 1
++            && text[0] == '/'
++            && text[1] == '/';
++    }
++
++    private long _flood = 0;
++
++    bool CanSend(long cooldownMs)
++    {
++        long now = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
++
++        if (now < _flood)
++            return false;
++
++        _flood = now + cooldownMs;
++        return true;
++    }
+ 
+-    private void OnChatInputFocus(FocusEvent evt) {
+-        if(!_chatInputContainer.ClassListContains("highlighted")) {
++    private void OnChatInputFocus(FocusEvent evt)
++    {
++        if (!_chatInputContainer.ClassListContains("highlighted"))
++        {
+             _chatInputContainer.AddToClassList("highlighted");
+         }
+ 
+-        if(!_chatOpened) {
++        if (!_chatOpened)
++        {
+             _chatOpened = true;
+         }
+     }
+ 
+-    private void OnChatInputBlur(BlurEvent evt) {
+-        if(_chatInputContainer.ClassListContains("highlighted")) {
++    private void OnChatInputBlur(BlurEvent evt)
++    {
++        if (_chatInputContainer.ClassListContains("highlighted"))
++        {
+             _chatInputContainer.RemoveFromClassList("highlighted");
+         }
+ 
+-        if(_chatOpened) {
++        if (_chatOpened)
++        {
+             _chatOpened = false;
+         }
+     }
+ 
+-    public void ClearChat() {
+-        for(int i = 0; i < _tabs.Count; i++) {
+-            ClearTab(i);
++    public void SendChatMessage(ChatTab tab, string text)
++    {
++        ChatTypeData data = ChatTypes.GetById(tab.TabId);
++        if (data != null)
++        {
++            bool enable = GameClient.Instance.IsCryptEnabled();
++            SendGameDataQueue.Instance().AddItem(CreatorPacketsUser.CreateSendMessage(data, text), enable, enable);
++        }
++        else
++        {
++            Debug.Log("SendChatMessage : Incorrect data for tab :" + tab.TabId);
+         }
+     }
+ 
+-    public void ClearTab(int tabIndex) {
+-        if(tabIndex <= _tabs.Count - 1) {
+-            //_tabs[tabIndex].Content.text = "";
+-        }
+-    }
++    public void ReceiveChatMessage(CreatureMessage data)
++    {
++        ChatType messageType = (ChatType)data._data.Type;
++
++        Debug.Log("Creature Say: Received:" + data.ToString() + " Type: " + messageType + " ChatTypeId: " + data._data.Type);
+ 
+- 
+-    public void SendChatMessage(string text) {
+-        if(World.Instance.OfflineMode) {
+-            ChatMessage message = new ChatMessage(PlayerEntity.Instance.IdentityInterlude.Name, text);
+-            ReceiveChatMessage(message);
+-        } else {
+-            GameClient.Instance.ClientPacketHandler.SendMessage(text);
++        bool isAnnounce = messageType == ChatType.ANNOUNCEMENT || messageType == ChatType.CRITICAL_ANNOUNCE;
++        for (int i = 0; i < _tabs.Count; i++)
++        {
++            ChatTab tab = _tabs[i];
++
++            if (tab.ChatType == messageType || tab.ChatType == ChatType.GENERAL && isAnnounce || tab.ChatType == ChatType.GENERAL && messageType == ChatType.WHISPER)
++            {
++                tab.ConcatMessage(data.ToString());
++            }
+         }
+     }
+ 
+-    public void ReceiveChatMessage(ChatMessage message) {
+-        if(message == null) {
++    public void ReceiveSystemMessage(SystemMessage message)
++    {
++        if (message == null)
++        {
+             return;
+         }
+ 
+-        for(int i = 0; i < _tabs.Count; i++) {
+-            //if(_tabs[i].FilteredMessages.Count > 0) {
+-            //    if(_tabs[i].FilteredMessages.Contains(message.MessageType)) {
+-            //        ConcatMessage(_tabs[i].Content, message.ToString());
+-            //    }
+-            //}
+-            _tabs[i].ConcatMessage( message.ToString());
++        for (int i = 0; i < _tabs.Count; i++)
++        {
++            //if(_tabs[i].FilteredMessages.Count > 0)
++            // {
++            // if (_tabs[i].FilteredMessages.Contains(message.MessageType))
++            // {
++            // ConcatMessage(_tabs[i].Content, message.ToString());
++            // }
++            // }
++            _tabs[i].ConcatMessage(message.ToString());
+         }
+     }
+ 
+-    public void ReceiveSystemMessage(SystemMessage message) {
+-        if (message == null) {
+-            return;
+-        }
+-
+-        for (int i = 0; i < _tabs.Count; i++) {
+-            //if(_tabs[i].FilteredMessages.Count > 0) {
+-            //    if(_tabs[i].FilteredMessages.Contains(message.MessageType)) {
+-            //        ConcatMessage(_tabs[i].Content, message.ToString());
+-            //    }
+-            //}
+-            _tabs[i].ConcatMessage( message.ToString());
+-        }
+-    }
+ 
+- 
+ 
+-    internal void ScrollDown(Scroller scroller) {
++    internal void ScrollDown(Scroller scroller)
++    {
+         StartCoroutine(ScrollDownWithDelay(scroller));
+     }
+ 
+-    IEnumerator ScrollDownWithDelay(Scroller scroller) {
++    IEnumerator ScrollDownWithDelay(Scroller scroller)
++    {
+         yield return new WaitForEndOfFrame();
+         scroller.value = scroller.highValue > 0 ? scroller.highValue : 0;
+     }
+Index: l2-unity/Assets/Scripts/UI/L2GameUI.cs
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/l2-unity/Assets/Scripts/UI/L2GameUI.cs b/l2-unity/Assets/Scripts/UI/L2GameUI.cs
+--- a/l2-unity/Assets/Scripts/UI/L2GameUI.cs	(revision 5c390ee3c1b62db09e44e521fb12779ce05cf608)
++++ b/l2-unity/Assets/Scripts/UI/L2GameUI.cs	(date 1769618424433)
+@@ -278,7 +278,7 @@
+         {
+             if (InventoryWindow.Instance != null)
+             {
+-                //InventoryWindow.Instance.ToggleHideWindowManual();
++                InventoryWindow.Instance.ToggleHideWindowManual();
+             }
+         }
+ 
+diff --git a/l2-unity/Assets/Scripts/Networking/ClientLibrary/PacketInterlude/GameServer/ServerServer/World/SystemMessage/ChatType.cs.meta b/l2-unity/Assets/Scripts/Networking/ClientLibrary/PacketInterlude/GameServer/ServerServer/World/SystemMessage/ChatType.cs.meta
+deleted file mode 100644
+index 1810704223f4e40da4232a73b9efa1cf42f7ad72..0000000000000000000000000000000000000000
+GIT binary patch
+literal 0
+Hc$@<O00001
+

@@ -1,85 +1,65 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System;
+using System.IO;
 using System.Net.Sockets;
-using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
 
 public class LoginClientReceiving
 {
-    private AsynchronousClient _asyncClient;
+    private readonly AsynchronousClient _asyncClient;
+    private const int HeaderSize = 2;
 
-    public LoginClientReceiving(AsynchronousClient asyncClient) { 
-
-        this._asyncClient = asyncClient;
+    public LoginClientReceiving(AsynchronousClient asyncClient)
+    {
+        _asyncClient = asyncClient;
     }
 
-    public void StartReceiving(Socket _socket)
+    public Task StartReceiving(Socket socket, System.Threading.CancellationToken token)
     {
         Debug.Log("Start receiving LoginClient");
-        Task.Run(() => {
-            Receiving(_socket);
-        });
+        return Task.Run(() => Receiving(socket, token), token);
     }
-     
-    private void Receiving(Socket _socket)
+
+    private void Receiving(Socket socket, System.Threading.CancellationToken token)
     {
-        using (NetworkStream stream = new NetworkStream(_socket))
+        try
         {
-            int lengthHi;
-            int lengthLo;
-            int length;
-            try
+            while (!token.IsCancellationRequested && _asyncClient.IsConnected)
             {
-
-                for (; ; )
+                var stream = _asyncClient._stream;
+                if (stream != null)
                 {
-                    if (!_asyncClient.IsConnected)
-                    {
-                        Debug.LogWarning("Disconnected.");
-                        break;
-                    }
+                    int lo = stream.ReadByte();
+                    int hi = stream.ReadByte();
 
-                    lengthLo = stream.ReadByte();
-                    lengthHi = stream.ReadByte();
-                    length = (lengthHi * 256) + lengthLo;
-                    if (lengthHi == -1 || !_asyncClient.IsConnected)
-                    {
-                        Debug.Log("Server terminated the connection.");
-                        _asyncClient.Disconnect();
-                        break;
-                    }
+                    if (lo < 0 || hi < 0)
+                        throw new EndOfStreamException("Server closed connection.");
 
-                    byte[] data = new byte[length];
+                    int totalLen = (hi << 8) | lo;
+                    if (totalLen <= HeaderSize)
+                        throw new EndOfStreamException($"Receiving Exception: totalLen={totalLen}");
 
-                    int bytesRead = 0;
-                    int chunkSize = 1;
-                    while (bytesRead < data.Length && chunkSize > 0)
-                    {
+                    int dataLen = totalLen - HeaderSize;
 
-                        if (stream.DataAvailable)
-                        {
-                            bytesRead += chunkSize = stream.Read(data, bytesRead, length - bytesRead);
-                        }
-                        else
-                        {
-                            break;
-                        }
-                    }
+                    byte[] data = new byte[dataLen];
+                    GameClientReceiving.ReadWholeArray(stream, data);
 
-                    Array.Resize(ref data, bytesRead);
-
-
-                    IncomingLoginDataQueue.Instance().AddItem(data , _asyncClient.InitPacket , _asyncClient.CryptEnabled);
-
+                    IncomingLoginDataQueue.Instance().AddItem(data, _asyncClient.InitPacket, _asyncClient.CryptEnabled);
                 }
             }
-            catch (Exception e)
-            {
-                Debug.LogException(e);
-            }
-
+        }
+        catch (ObjectDisposedException)
+        {
+        }
+        catch (IOException)
+        {
+        }
+        catch (SocketException)
+        {
+        }
+        catch (Exception e)
+        {
+            Debug.LogException(e);
         }
     }
 }

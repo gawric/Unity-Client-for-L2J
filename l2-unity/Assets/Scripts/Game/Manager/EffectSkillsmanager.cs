@@ -1,5 +1,6 @@
-using UnityEngine;
+﻿using UnityEngine;
 
+//Это не действующий класс нужен был для проверки скилов
 public class EffectSkillsmanager : MonoBehaviour
 {
     private GameObject _skillsEffect;
@@ -50,7 +51,7 @@ public class EffectSkillsmanager : MonoBehaviour
         GameObject go = _currentTransfromEffect.gameObject;
         go.gameObject.SetActive(true);
 
-        _currentTransfromEffect.position = GetPosition�ollision(footerPosition, S_1177.MOVE_FROM_ORIGINAL_POSITION_FOOTER);
+        _currentTransfromEffect.position = GetPositionРЎollision(footerPosition, S_1177.MOVE_FROM_ORIGINAL_POSITION_FOOTER);
         
 
         string[] effectsFooter = S_1177.NAME_FOOTER_EFFECT;
@@ -60,12 +61,12 @@ public class EffectSkillsmanager : MonoBehaviour
         _rootBodyEffect = go.transform.Find(S_1177.NAME_BODY_OBJECT);
 
         //_rootBodyEffect.position = bodyPosition;
-        //_rootBodyEffect.position = GetPosition�ollision(bodyPosition, S_1177.MOVE_FROM_ORIGINAL_POSITION_FOOTER);
+        //_rootBodyEffect.position = GetPositionРЎollision(bodyPosition, S_1177.MOVE_FROM_ORIGINAL_POSITION_FOOTER);
         _rootBodyEffect.position = bodyPosition;
         //_rootBodyEffect.LookAt(monster.transform);
         foreach (string i in effectsFooter)
         {
-            ShowEffectFooter(go, _rootFooterEffect, i, S_1177.NAME_FOOTER_OBJECT);
+            //ShowEffectFooter(go, _rootFooterEffect, i, S_1177.NAME_FOOTER_OBJECT);
         }
 
         foreach (string i in effectsBody)
@@ -80,57 +81,57 @@ public class EffectSkillsmanager : MonoBehaviour
         return _rootBodyEffect;
     }
 
-    private Vector3 GetPosition�ollision(Vector3 transformPlayer , float pos)
+    private Vector3 GetPositionРЎollision(Vector3 transformPlayer , float pos)
     {
         return new Vector3(transformPlayer.x, transformPlayer.y + pos, transformPlayer.z);
     }
 
-    public void ShowEffectFooter(GameObject go  , Transform _footerEffect, string effectFooterName , string effectFooterObject)
-    {
-        if (effectFooterName.Equals("windblowin00"))
-        {
+    //public void ShowEffectFooter(GameObject go  , Transform _footerEffect, string effectFooterName , string effectFooterObject)
+    //{
+   //     if (effectFooterName.Equals("windblowin00"))
+   //     {
 
-            var _effectFooter = _footerEffect.transform.Find(effectFooterName);
-            var _effectFooter01 = _footerEffect.transform.Find("windblowin01");
-            FlyWindStrike fws = _effectFooter.gameObject.GetComponent<FlyWindStrike>();
-            FlyWindStrike01 fws01 = _effectFooter01.gameObject.GetComponent<FlyWindStrike01>();
-            fws.SetFlS01(fws01);
-            fws.SetShow();
-        }
-        else if (effectFooterName.Equals("auraplane00"))
-        {
-            var _effectFooter = _footerEffect.transform.Find(effectFooterName);
-            AuraWindStrike aws = _effectFooter.gameObject.GetComponent<AuraWindStrike>();
-            aws.SetShow();
-        }
+    //        var _effectFooter = _footerEffect.transform.Find(effectFooterName);
+    //        var _effectFooter01 = _footerEffect.transform.Find("windblowin01");
+    //        FlyWindStrike fws = _effectFooter.gameObject.GetComponent<FlyWindStrike>();
+    //        FlyWindStrike01 fws01 = _effectFooter01.gameObject.GetComponent<FlyWindStrike01>();
+    //        fws.SetFlS01(fws01);
+    //        fws.SetShow();
+     //   }
+    //    else if (effectFooterName.Equals("auraplane00"))
+    //    {
+    //        var _effectFooter = _footerEffect.transform.Find(effectFooterName);
+     //       AuraWindStrike aws = _effectFooter.gameObject.GetComponent<AuraWindStrike>();
+     //       aws.SetShow();
+     //   }
 
-    }
+   // }
 
     public void ShowEffectBody(GameObject go, Transform _bodyEffect ,  string effectBodyName, string effectBodyObject)
     {
         if (effectBodyName.Equals("sphere_shader"))
         {
             var _efectSpere = _bodyEffect.transform.Find(effectBodyName);
-            BodyWindStrike bws01 = _efectSpere.gameObject.GetComponent<BodyWindStrike>();
-            bws01.SetShow(false);
+           // BodyWindStrike bws01 = _efectSpere.gameObject.GetComponent<BodyWindStrike>();
+           // bws01.SetShow(false);
         }
         else if (effectBodyName.Equals("glowvfx"))
         {
             var _efect01 = _bodyEffect.transform.Find(effectBodyName);
-            VfxWindStrike bws01 = _efect01.gameObject.GetComponent<VfxWindStrike>();
-            bws01.SetShow();
+            //VfxWindStrike bws01 = _efect01.gameObject.GetComponent<VfxWindStrike>();
+           // bws01.SetShow();
         }
         else if (effectBodyName.Equals("bodywindblowin01"))
         {
             var _efect01 = _bodyEffect.transform.Find(effectBodyName);
-            BodyWindStrike bws01 = _efect01.gameObject.GetComponent<BodyWindStrike>();
-            bws01.SetShow(true);
+            //BodyWindStrike bws01 = _efect01.gameObject.GetComponent<BodyWindStrike>();
+           // bws01.SetShow(true);
         }
         else if (effectBodyName.Equals("bodywindblowin02"))
         {
             var _efect02 = _bodyEffect.transform.Find(effectBodyName);
-            BodyWindStrike bws02 = _efect02.gameObject.GetComponent<BodyWindStrike>();
-            bws02.SetShow(true);
+           // BodyWindStrike bws02 = _efect02.gameObject.GetComponent<BodyWindStrike>();
+            //bws02.SetShow(true);
         }
     }
     public async void StartFlyOrActive(int skillId , int targetObjId , float speed, float timeToReachTarget)
@@ -139,10 +140,10 @@ public class EffectSkillsmanager : MonoBehaviour
         GameObject go = _currentTransfromEffect.gameObject;
         Entity targetEntity = await World.Instance.GetEntityNoLock(targetObjId);
         var _rootBodyEffect = go.transform.Find(S_1177.NAME_BODY_OBJECT);
-        FlyObjectToTarget foToTarget = _rootBodyEffect.gameObject.GetComponent<FlyObjectToTarget>();
+        //FlyObjectToTarget foToTarget = _rootBodyEffect.gameObject.GetComponent<FlyObjectToTarget>();
         //Debug.Log("StartFlyOrActive: OltTime " + oldTime + " dist " + dist);
         //foToTarget.StartFly(targetEntity.transform.position , 10 , oldTime);
-        foToTarget.StartFly(targetEntity, speed, timeToReachTarget);
+        //foToTarget.StartFly(targetEntity, speed, timeToReachTarget);
     }
     public void HideEffect(float elapsedTime , int skillId, float timeToTravel)
     {
@@ -177,15 +178,15 @@ public class EffectSkillsmanager : MonoBehaviour
         {
             var _footerEffect = go.transform.Find(effectFooterObject);
             var _effectFooter = _footerEffect.transform.Find(effectFooterName);
-            FlyWindStrike fws = _effectFooter.gameObject.GetComponent<FlyWindStrike>();
-            fws.SetHide();
+            //FlyWindStrike fws = _effectFooter.gameObject.GetComponent<FlyWindStrike>();
+            //fws.SetHide();
         }
         else if (effectFooterName.Equals("auraplane00"))
         {
             var _footerEffect = go.transform.Find(effectFooterObject);
             var _effectFooter = _footerEffect.transform.Find(effectFooterName);
-            AuraWindStrike fws = _effectFooter.gameObject.GetComponent<AuraWindStrike>();
-            fws.SetHide();
+            //AuraWindStrike fws = _effectFooter.gameObject.GetComponent<AuraWindStrike>();
+            //fws.SetHide();
         }
 
     }
@@ -195,29 +196,29 @@ public class EffectSkillsmanager : MonoBehaviour
         if (effectBodyName.Equals("sphere_shader"))
         {
             var _efectSpere = _bodyEffect.transform.Find(effectBodyName);
-            BodyWindStrike bws01 = _efectSpere.gameObject.GetComponent<BodyWindStrike>();
+            //BodyWindStrike bws01 = _efectSpere.gameObject.GetComponent<BodyWindStrike>();
             float rem = remainingTime / 1000f ;
             float rem1 = rem + 0.7f;
-            bws01.SetElapsedHide(rem1);
-            bws01.SetHide();
+            //bws01.SetElapsedHide(rem1);
+            //bws01.SetHide();
         }
         else if (effectBodyName.Equals("glowvfx"))
         {
             var _efect01 = _bodyEffect.transform.Find(effectBodyName);
-            VfxWindStrike bws01 = _efect01.gameObject.GetComponent<VfxWindStrike>();
-            bws01.SetHide();
+            //VfxWindStrike bws01 = _efect01.gameObject.GetComponent<VfxWindStrike>();
+           // bws01.SetHide();
         }
         else if (effectBodyName.Equals("bodywindblowin01"))
         {
             var _efect01 = _bodyEffect.transform.Find(effectBodyName);
-            BodyWindStrike bws01 = _efect01.gameObject.GetComponent<BodyWindStrike>();
-            bws01.SetHide();
+           // BodyWindStrike bws01 = _efect01.gameObject.GetComponent<BodyWindStrike>();
+            //bws01.SetHide();
         }
         else if (effectBodyName.Equals("bodywindblowin02"))
         {
             var _efect02 = _bodyEffect.transform.Find(effectBodyName);
-            BodyWindStrike bws02 = _efect02.gameObject.GetComponent<BodyWindStrike>();
-            bws02.SetHide();
+            //BodyWindStrike bws02 = _efect02.gameObject.GetComponent<BodyWindStrike>();
+           // bws02.SetHide();
         }
 
     }

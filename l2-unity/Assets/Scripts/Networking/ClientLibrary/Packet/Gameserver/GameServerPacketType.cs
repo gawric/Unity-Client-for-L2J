@@ -1,4 +1,4 @@
-public enum GameServerPacketType : byte
+﻿public enum GameServerPacketType : byte
 {
     Ping = 0x00,
     Key = 0x01,

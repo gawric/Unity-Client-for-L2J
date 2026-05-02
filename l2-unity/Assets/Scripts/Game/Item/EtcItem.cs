@@ -1,4 +1,4 @@
-public class EtcItem : AbstractItem
+﻿public class EtcItem : AbstractItem
 {
     public EtcItemgrp EtcItemgrp { get { return (EtcItemgrp)_itemgrp; } }
 

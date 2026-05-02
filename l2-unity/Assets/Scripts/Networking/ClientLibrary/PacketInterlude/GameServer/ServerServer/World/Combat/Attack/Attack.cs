@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 
 public class Attack : ServerPacket
@@ -44,9 +44,10 @@ public class Attack : ServerPacket
        int _flags =  ReadB();
         _firstHit = new Hit(_targetObjId, _damage, _flags);
 
-        _aX = ReadI();
+       _aX = ReadI();
        _aY = ReadI();
        _aZ = ReadI();
+
        int sizeHit = ReadSh();
 
         _attackerPos = VectorUtils.ConvertPosToUnity(new Vector3(_aX, _aY, _aZ));

@@ -128,6 +128,7 @@ public abstract class ServerPacket : Packet
 
         return Encoding.GetEncoding("UTF-8").GetString(data);
     }
+
     //java server 
     protected string ReadOtherS()
     {

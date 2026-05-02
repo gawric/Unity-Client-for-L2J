@@ -1,5 +1,4 @@
-using UnityEditorInternal;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class NewIdleState : StateBase
 {
@@ -7,7 +6,7 @@ public class NewIdleState : StateBase
 
     public override void Update() { }
 
-    public override void HandleEvent(Event evt)
+    public override void HandleEvent(Event evt, object payload = null)
     {
         switch (evt)
         {
@@ -45,29 +44,24 @@ public class NewIdleState : StateBase
         var animation = _stateMachine.Player.isAutoAttack
             ? AnimationNames.ATK_WAIT
             : AnimationNames.WAIT;
+        Debug.Log("HandleArrival: NEW_IDLE_STATE " + animation.ToString());
         PlayAnimation(animation);
     }
 
     private void HandleWaitReturn()
     {
-        PlayAnimation(AnimationNames.ATK_WAIT);
+        if (!_stateMachine.Player.IsAttack)
+        {
+            PlayAnimation(AnimationNames.ATK_WAIT);
+            Debug.Log("HandleArrival: Handle_Wait_Return ");
+        }
+
         PlayerEntity.Instance.LastAtkAnimation = null;
     }
 
-    private void StopPreviousEquipAnimation()
-    {
-        string lastAnimName = _stateMachine.Player.GetLastAnimName();
-        Debug.Log("StopPreviousEquipAnimation>>> stop " + lastAnimName);
-        if (!string.IsNullOrEmpty(lastAnimName))
-        {
-            string paramName = AnimationNames.WAIT.Concat(lastAnimName);
-            Debug.Log("StopPreviousEquipAnimation>>> start " + paramName);
-            AnimationManager.Instance.StopCurrentAnimation(paramName);
-        }
-    }
 
     private void PlayAnimation(Animation animation)
     {
-        AnimationManager.Instance.PlayAnimation(animation.ToString(), true);
+        AnimationManager.Instance.PlayAnimation(_stateMachine.GetObjectId() , animation.ToString(), true);
     }
 }

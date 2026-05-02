@@ -1,4 +1,4 @@
-using FMOD.Studio;
+﻿using FMOD.Studio;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.XR;
@@ -184,18 +184,6 @@ public class ItemInstance : AbstractServerItem
     {
         if (isBow)
         {
-
-
-            //Event Bow delete left hand arrow
-            //if (!IsBow() & _bodyPart == ItemSlot.lrhand) return false;
-
-            //Event Bow Replace -> Sword
-            //if (!IsBow() & bodyPartSource == ItemSlot.lrhand & _bodyPart == ItemSlot.rhand) return true;
-            //Event Sword -> Replace Bow
-            //return isBow == IsBow();
-
-
-
             // Event Bow delete left hand arrow
             if (ShouldDeleteArrowWhenBowUnequipped())
                 return false;
@@ -220,15 +208,6 @@ public class ItemInstance : AbstractServerItem
                 return true;
             }
 
-            //if (bodyPartSource == ItemSlot.lhand)
-            //{
-            //    return false;
-            //}
-
-            //if (bodyPartSource == ItemSlot.rhand)
-            //{
-            //    return true;
-            //}
         }else if (bodyPartSource == ItemSlot.lrhand)
         {
             //Event Replace Arrow need delete no replace

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
@@ -82,7 +82,7 @@ public class StorageVariable
        // }
     }
 
-    public void Add�1Items(VariableItem itemsParce)
+    public void AddРЎ1Items(VariableItem itemsParce)
     {
        // lock (_sync)
        // {

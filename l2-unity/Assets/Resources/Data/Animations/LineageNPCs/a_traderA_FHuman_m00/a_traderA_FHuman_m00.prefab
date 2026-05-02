@@ -746,10 +746,10 @@ MonoBehaviour:
     _scaledWalkSpeed: 0
     _basePAtkSpeed: 0
   _appearance:
-    _collisonHeight: 0
-    _collisionRadius: 0
-    _lhand: 0
-    _rhand: 0
+    CollisionHeight: 0
+    CollisionRadius: 0
+    LHand: 0
+    RHand: 0
   _running: 0
   _dead: 0
   _race: 0

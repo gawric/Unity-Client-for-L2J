@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+ï»¿using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 using static ObjectPoolManager;
@@ -49,12 +49,12 @@ public abstract class  AbstractPoolManager : MonoBehaviour
     {
         if (maxSize <= 0)
         {
-            Debug.LogWarning($"Ëèìèò ïóëà äëÿ {type} äîëæåí áûòü áîëüøå 0!");
+            Debug.LogWarning($"Ð›Ð¸Ð¼Ð¸Ñ‚ Ð¿ÑƒÐ»Ð° Ð´Ð»Ñ {type} Ð´Ð¾Ð»Ð¶ÐµÐ½ Ð±Ñ‹Ñ‚ÑŒ Ð±Ð¾Ð»ÑŒÑˆÐµ 0!");
             return;
         }
 
         objectTypePoolLimits[type] = maxSize;
-        Debug.Log($"Óñòàíîâëåí ëèìèò ïóëà äëÿ {type} ðàâíûé {maxSize}");
+        Debug.Log($"Ð£ÑÑ‚Ð°Ð½Ð¾Ð²Ð»ÐµÐ½ Ð»Ð¸Ð¼Ð¸Ñ‚ Ð¿ÑƒÐ»Ð° Ð´Ð»Ñ {type} Ñ€Ð°Ð²Ð½Ñ‹Ð¹ {maxSize}");
     }
 
     protected void ValidateAndCreateDictionary(ObjectType tag, GameObject prefab)

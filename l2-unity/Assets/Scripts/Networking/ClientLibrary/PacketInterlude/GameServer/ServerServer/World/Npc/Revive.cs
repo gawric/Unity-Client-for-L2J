@@ -1,4 +1,4 @@
-using System.Security.Principal;
+﻿using System.Security.Principal;
 using UnityEngine;
 
 public class Revive : ServerPacket

@@ -1,8 +1,5 @@
-using Org.BouncyCastle.Security;
-using UnityEditor.Experimental.GraphView;
+﻿using System;
 using UnityEngine;
-using UnityEngine.ProBuilder;
-using static ChangeWaitTypePacket;
 
 public class HitManager : MonoBehaviour
 {
@@ -43,23 +40,75 @@ public class HitManager : MonoBehaviour
 
     }
 
-    public void HandleHitCollider(Transform attacker , Transform target, Vector3 hitCollider, Vector3 hitColliderDirection)
+    public void HandleHitCollider(Entity attaker ,  Transform attacker , MonsterStateMachine targetStateMachine, Vector3 hitCollider, Vector3 hitColliderDirection)
     {
-        GameObject targetGameObject = target.gameObject;
-
-        if(targetGameObject != null)
+    
+        if(targetStateMachine != null)
         {
-            MonsterStateMachine targetStateMachine = targetGameObject.GetComponent<MonsterStateMachine>();
             if (targetStateMachine != null & targetStateMachine.State == MonsterState.IDLE)
             {
                 targetStateMachine.NotifyEvent(Event.HIT_REACTION);
-                Debug.Log("Hit colliders on HIT_REACTION");
             }
-
-            WorldCombat.Instance.InflictAttack(hitCollider, hitColliderDirection);
+            if (attaker.IsSoulshotCharged)
+            {
+                EffectManager.Instance.PlayerImpactEffect(99998, hitCollider);
+                attaker.IsSoulshotCharged = false;
+            }
+            else
+            {
+                WorldCombat.Instance.InflictAttack(hitCollider, hitColliderDirection);
+            }
+            //WorldCombat.Instance.InflictAttack(hitCollider, hitColliderDirection);
+            //Эффект рабочий просто для теста off
 
         }
+    }
 
+    public bool TryPrepareProjectileEffectHit(
+        GameObject projectilePrefab,
+        Vector3 hitPoint,
+        Vector3 hitDirection,
+        int attackerEntityId,
+        Func<Transform, bool> isFromTrackedProjectile,
+        out Vector3 resolvedHitPoint,
+        out Vector3 resolvedHitDirection)
+    {
+        resolvedHitPoint = hitPoint;
+        resolvedHitDirection = Vector3.forward;
+
+        if (projectilePrefab == null || isFromTrackedProjectile == null)
+        {
+            return false;
+        }
+
+        Transform attacker = projectilePrefab.transform;
+        if (attacker == null || !isFromTrackedProjectile(attacker))
+        {
+            return false;
+        }
+
+        resolvedHitDirection = hitDirection.sqrMagnitude > 0.0001f
+            ? hitDirection.normalized
+            : Vector3.forward;
+
+        Entity attackerEntity = ResolveEntityFromWorld(attackerEntityId);
+        if (attackerEntity != null && attackerEntity.IsSoulshotCharged)
+        {
+            EffectManager.Instance.PlayerImpactEffect(99998, resolvedHitPoint);
+            attackerEntity.IsSoulshotCharged = false;
+        }
+
+        return true;
+    }
+
+    private Entity ResolveEntityFromWorld(int entityId)
+    {
+        if (entityId <= 0 || World.Instance == null)
+        {
+            return null;
+        }
+
+        return World.Instance.GetEntityNoLockSync(entityId);
     }
 
 

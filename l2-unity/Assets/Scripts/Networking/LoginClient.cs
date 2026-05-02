@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Collections;
@@ -124,14 +124,6 @@ public class LoginClient : DefaultClient {
     public override void OnAuthAllowed() {
         Debug.Log("Authed to LoginServer");
         GameManager.Instance.OnLoginServerAuthAllowed();
-    }
-
-    public void OnPlayOk() {
-        GameManager.Instance.OnLoginServerPlayOk();
-
-        if (GameManager.Instance.GameState == GameState.READY_TO_CONNECT) {
-            GameClient.Instance.Connect();
-        }
     }
 
     public void OnServerListReceived(byte lastServer, List<ServerData> serverData, Dictionary<int, int> charsOnServers) {

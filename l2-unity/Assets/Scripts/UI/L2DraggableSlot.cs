@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using UnityEngine.UIElements;
 
 public class L2DraggableSlot : L2ClickableSlot

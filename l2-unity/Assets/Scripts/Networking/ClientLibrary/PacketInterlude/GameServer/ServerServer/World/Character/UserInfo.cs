@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using static StorageVariable;
 
 public class UserInfo : ServerPacket
@@ -10,7 +10,7 @@ public class UserInfo : ServerPacket
 
     public UserInfo(byte[] d , PlayerInfoInterlude info) : base(d)
     {
-        this._info = info;
+        _info = info;
         Parse();
     }
 
@@ -32,7 +32,6 @@ public class UserInfo : ServerPacket
         int female = ReadI();
         _info.Appearance.Sex = female;
         _info.Appearance.Race = (int)MapClassId.GetRace(reace);
-        //int baseClass = ReadI();
         _info.Appearance.BaseClass = ReadI();
         _info.Stats.Level = ReadI();
          long exp =  ReadOtherL();
@@ -213,7 +212,6 @@ public class UserInfo : ServerPacket
 
 
         _info.Appearance.CollisionRadius = (float)ReadD();
-        // _info.Appearance.CollisionHeight = (float)ReadD();
         float collision = (float)ReadD();
         _info.Appearance.CollisionHeight = collision;
         int hairStyle = ReadI();
@@ -267,12 +265,13 @@ public class UserInfo : ServerPacket
         int colorName = ReadI();
         byte isRunning = ReadB();// changes the Speed display on Status Window
         _info.Appearance.Running = isRunning == 1;
+        
         int pledgeClass = ReadI();
         int PledgeType = ReadI();   
         int titleColor = ReadI();
         int isCursedWeaponEquipped = ReadI();
         StorageVariable.getInstance().ResumeShowDelayMessage((int)MessageID.ADD_EXP_SP);
-        Debug.Log("USERRRR INFO �������� ��������!!!! ");
+        Debug.Log("USERRRR INFO пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ!!!! ");
     }
 
     private float GetRealSpeed(int baseSpeed , float speedMultiplier)

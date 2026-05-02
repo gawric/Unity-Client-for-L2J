@@ -1,4 +1,4 @@
-
+﻿
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -8,8 +8,8 @@ public class DataLabel
     private int _position;
     private Label _label;
     private bool _visible;
-    
-    public DataLabel(int position , Label label , bool visible)
+
+    public DataLabel(int position, Label label, bool visible)
     {
         label.text = "";
         _position = position;
@@ -23,7 +23,8 @@ public class DataLabel
         _label.text = text;
     }
 
-    public int GetPosition(){
+    public int GetPosition()
+    {
         return _position;
     }
 

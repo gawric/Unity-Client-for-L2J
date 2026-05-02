@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 
 public class IdleMosterState : MonsterBase
@@ -26,15 +26,15 @@ public class IdleMosterState : MonsterBase
             case Event.READY_TO_ACT:
                 break;
             case Event.ENTER_WORLD:
-                AnimationManager.Instance.PlayMonsterAnimation(ent.IdentityInterlude.Id , nac, AnimationNames.MONSTER_WAIT.ToString());
+                AnimationManager.Instance.PlayMonsterAnimation(_stateMachine.GetObjectId(), AnimationNames.MONSTER_WAIT.ToString());
                 break;
             case Event.ARRIVED:
                 //Debug.Log("MosterAnimation State Walk > start animation");
-                AnimationManager.Instance.PlayMonsterAnimation(ent.IdentityInterlude.Id , nac, AnimationNames.MONSTER_WAIT.ToString());
+                AnimationManager.Instance.PlayMonsterAnimation(_stateMachine.GetObjectId(), AnimationNames.MONSTER_WAIT.ToString());
                 break;
             case Event.HIT_REACTION:
                 Debug.Log("MosterAnimation State HIT_REACTION > start animation");
-                AnimationManager.Instance.PlayMonsterAnimation(ent.IdentityInterlude.Id, nac, AnimationNames.MONSTER_DamageAction.Value);
+                AnimationManager.Instance.PlayMonsterAnimation(_stateMachine.GetObjectId(), AnimationNames.MONSTER_DamageAction.Value);
                 break;
 
 

@@ -1,4 +1,4 @@
-using HtmlAgilityPack;
+п»їusing HtmlAgilityPack;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -35,7 +35,7 @@ public class TutorialShowHtml : ServerPacket
 
     static void DetectedNode(HtmlNode node, IParse parce)
     {
-        // Если узел текстовый, выводим его текст
+        // Р•СЃР»Рё СѓР·РµР» С‚РµРєСЃС‚РѕРІС‹Р№, РІС‹РІРѕРґРёРј РµРіРѕ С‚РµРєСЃС‚
         if (node.NodeType == HtmlNodeType.Text)
         {
             parce.Parse(node.InnerText.Trim());

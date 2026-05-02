@@ -1,4 +1,4 @@
-using Org.BouncyCastle.Asn1;
+п»їusing Org.BouncyCastle.Asn1;
 using Org.BouncyCastle.Crypto;
 using Org.BouncyCastle.Crypto.Engines;
 using Org.BouncyCastle.Crypto.Parameters;
@@ -60,7 +60,7 @@ public class RSACrypt
         engine.Init(true, publicKey);
 
         int modulusBytes = (publicKey.Modulus.BitLength + 7) / 8;
-        int chunkSize = modulusBytes - 1; // гарантируем, что значение < modulus
+        int chunkSize = modulusBytes - 1; // РіР°СЂР°РЅС‚РёСЂСѓРµРј, С‡С‚Рѕ Р·РЅР°С‡РµРЅРёРµ < modulus
 
         var outBlocks = new List<byte>();
 
@@ -68,10 +68,10 @@ public class RSACrypt
         {
             int len = Math.Min(chunkSize, plain.Length - offset);
             byte[] chunk = new byte[modulusBytes]; // left-padded block
-            // копируем chunk в конец блока
+            // РєРѕРїРёСЂСѓРµРј chunk РІ РєРѕРЅРµС† Р±Р»РѕРєР°
             Array.Copy(plain, offset, chunk, modulusBytes - len, len);
 
-            byte[] encrypted = engine.ProcessBlock(chunk, 0, chunk.Length); // длина обычно = modulusBytes
+            byte[] encrypted = engine.ProcessBlock(chunk, 0, chunk.Length); // РґР»РёРЅР° РѕР±С‹С‡РЅРѕ = modulusBytes
             outBlocks.AddRange(encrypted);
         }
 
@@ -133,7 +133,7 @@ public byte[] EncryptRSANoPadding(byte[] block) {
 
     public static RsaKeyParameters LoadPublicKey(byte[] modBytes)
     {
-        // Используем BouncyCastle BigInteger(1, bytes) чтобы трактовать как положительное число
+        // РСЃРїРѕР»СЊР·СѓРµРј BouncyCastle BigInteger(1, bytes) С‡С‚РѕР±С‹ С‚СЂР°РєС‚РѕРІР°С‚СЊ РєР°Рє РїРѕР»РѕР¶РёС‚РµР»СЊРЅРѕРµ С‡РёСЃР»Рѕ
         var modulus = new Org.BouncyCastle.Math.BigInteger(1, modBytes);
         var exponent = new Org.BouncyCastle.Math.BigInteger(1, new byte[] { 0x01, 0x00, 0x01 }); // 65537
 

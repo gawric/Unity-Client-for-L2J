@@ -52,16 +52,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c6dd7d6ef87a0c640b45fe5ff487286d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _canMove: 1
-  _moveDirection: {x: 0, y: 0, z: 0}
-  _currentSpeed: 0
-  _defaultSpeed: 4
-  _measuredSpeed: 0
   _jumpForce: 10
   _gravity: 28
-  _targetPosition: {x: 0, y: 0, z: 0}
-  _runningToDestination: 0
-  _lookAtTarget: {fileID: 0}
+  angleThreshold: 3
 --- !u!114 &3064332933061382819
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -84,7 +77,6 @@ MonoBehaviour:
     worldPosition: {x: 0, y: 0, z: 0}
     center: {x: 0, y: 0, z: 0}
     cost: 0
-  _targetDestination: {x: 0, y: 0, z: 0}
   _defaultDestinationThreshold: 0.1
   _currentDestinationThreshold: 0.1
   _path: []
@@ -113,12 +105,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 16d00e5a138b0f04598f7c9cf63c621c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _entityLoaded: 0
   _identity:
     _entityType: 0
     _id: 0
     _name: 
     _title: 
-    _type: 
+    _titleColor: 9CE8A9FF
+    _resetTick: 0
     _npcId: 0
     _npcClass: 
     _playerClass: 0
@@ -126,20 +120,39 @@ MonoBehaviour:
     _position: {x: 0, y: 0, z: 0}
     _heading: 0
     _owned: 0
-  _status:
-    _hp: 0
-    _maxHp: 0
-    _level: 0
+  _identityInterlude:
+    _entityType: 0
+    _id: 0
+    _name: 
+    _title: 
+    _titleColor: 9CE8A9FF
+    _resetTick: 0
+    _npcId: 0
+    _npcClass: 
+    _playerClass: 0
+    _position: {x: 4724, y: -68, z: -1731}
+    _heading: {x: 0, y: 0, z: 0, w: 0}
+    _owned: 0
   _stats:
+    _level: 0
     _speed: 0
     _scaledSpeed: 0
+    _walkSpeed: 0
     _pAtkSpd: 0
     _mAtkSpd: 0
+    _maxHp: 0
+    _maxMp: 0
+    _maxCp: 0
+    _scaledRunSpeed: 0
+    _scaledWalkSpeed: 0
+    _basePAtkSpeed: 0
   _appearance:
-    _collisonHeight: 0
-    _collisionRadius: 0
-    _lhand: 0
-    _rhand: 0
+    CollisionHeight: 0
+    CollisionRadius: 0
+    LHand: 0
+    RHand: 0
+  _running: 0
+  _dead: 0
   _race: 0
   _raceId: 0
   _targetId: 0
@@ -162,7 +175,6 @@ CharacterController:
     serializedVersion: 2
     m_Bits: 0
   m_LayerOverridePriority: 0
-  m_IsTrigger: 0
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
@@ -187,6 +199,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _serverPosition: {x: 0, y: 0, z: 0}
   _shouldShareRotation: 0
+  _rotationShareEnabled: 0
 --- !u!114 &2816631728359154816
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -214,8 +227,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2252c3a871737844284914893aca0171, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _isAutoAttacking: 0
-  _isRunningToTarget: 0
 --- !u!114 &498144083810351663
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -228,6 +239,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b2e175ae1c7d2db47864ba360adcc743, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  allBone:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
   _rightHandType: 0
   _rightHandBone: {fileID: 0}
   _rightHand: {fileID: 0}
@@ -237,11 +253,6 @@ MonoBehaviour:
   _leftHand: {fileID: 0}
   _weaponAnim: 
   _container: {fileID: 0}
-  _torso: {fileID: 0}
-  _fullarmor: {fileID: 0}
-  _legs: {fileID: 0}
-  _gloves: {fileID: 0}
-  _boots: {fileID: 0}
 --- !u!1001 &537851921877061978
 PrefabInstance:
   m_ObjectHideFlags: 0

@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using static L2Slot;
 using UnityEngine.UIElements;
 using System;

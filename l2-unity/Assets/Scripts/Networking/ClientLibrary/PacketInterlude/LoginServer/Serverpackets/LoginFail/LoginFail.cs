@@ -1,4 +1,4 @@
-public class LoginFail : ServerPacket
+﻿public class LoginFail : ServerPacket
 {
     private byte reason;
     private string message;

@@ -1,4 +1,4 @@
-public class NextTargetAction : L2Action
+﻿public class NextTargetAction : L2Action
 {
     public NextTargetAction() : base() { }
 

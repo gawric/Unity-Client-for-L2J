@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 [System.Serializable]
 public class CameraCollisionDetection {
@@ -45,6 +45,9 @@ public class CameraCollisionDetection {
     }
 
     public Vector3[] GetCameraViewPortPoints() {
+
+        if (_camera == null) return new Vector3[0];
+
         Vector3[] cameraClipPoints = new Vector3[5];
         Quaternion camRot = _camera.transform.rotation;
         Vector3 camPos = _camera.transform.position;
@@ -76,6 +79,9 @@ public class CameraCollisionDetection {
         Vector3[] clipPoints = GetCameraClipPoints(desiredDistance);
         Vector3[] viewPoints = GetCameraViewPortPoints();
 
+
+        if (viewPoints.Length == 0) return;
+
         _adjustedDistance = desiredDistance;
         float distance = -1f;
 
@@ -89,11 +95,6 @@ public class CameraCollisionDetection {
                 hitObject = hit.transform;
             }
 
-            if(_debug) {
-                Debug.DrawLine(clipPoints[i], _target.position, Color.green);
-                Debug.DrawLine(viewPoints[i], _target.position, Color.yellow);
-
-            }
         }
 
         if(distance != -1f) {

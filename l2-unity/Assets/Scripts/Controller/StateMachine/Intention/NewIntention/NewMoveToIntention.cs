@@ -1,4 +1,4 @@
-using System.IO;
+﻿using System.IO;
 using System.Security.Cryptography;
 using UnityEngine;
 
@@ -37,14 +37,16 @@ public class NewMoveToIntention : IntentionBase
 
             
             //PlayerController.Instance.MoveToPoint((Vector3)arg0, 0.1f);
-            PlayerController.Instance.MoveToPoint(new MovementTarget(newPosition, 0.1f));
+            PlayerController.Instance.MoveToPoint(new MovementTarget(newPosition, 0.1f , PlayerEntity.Instance.Running));
             StartAnimMoveTo();
         }
     }
 
     private void StartAnimMoveTo()
     {
-        if (_stateMachine.State == PlayerState.IDLE | _stateMachine.State == PlayerState.ATTACKING)
+        if (_stateMachine.State == PlayerState.IDLE |
+            _stateMachine.State == PlayerState.ATTACKING |
+            _stateMachine.State == PlayerState.PHYSICAL_SKILLS)
         {
             _stateMachine.ChangeState(PlayerState.WALKING);
             _stateMachine.NotifyEvent(Event.MOVE_TO);

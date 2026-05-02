@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+п»їusing System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
@@ -14,9 +14,9 @@ public class ObjectPoolManager : AbstractPoolManager, IPoolManager
     }
 
     public List<Pool> pools;
-    // Минимальный размер пула >= 3
+    // РњРёРЅРёРјР°Р»СЊРЅС‹Р№ СЂР°Р·РјРµСЂ РїСѓР»Р° >= 3
     private int _maxSizePool = 3;
-    [SerializeField] private Transform poolParent; // Родительский объект для пулов
+    [SerializeField] private Transform poolParent; // Р РѕРґРёС‚РµР»СЊСЃРєРёР№ РѕР±СЉРµРєС‚ РґР»СЏ РїСѓР»РѕРІ
 
 
 
@@ -44,7 +44,7 @@ public class ObjectPoolManager : AbstractPoolManager, IPoolManager
 
         SetPoolLimit(ObjectType.Arrow , 25);
         SetupPoolHierarchy(pools, poolParent);
-        Debug.Log($"Создание пула объектов успешно. Размер: {poolDictionary.Count}");
+        Debug.Log($"РЎРѕР·РґР°РЅРёРµ РїСѓР»Р° РѕР±СЉРµРєС‚РѕРІ СѓСЃРїРµС€РЅРѕ. Р Р°Р·РјРµСЂ: {poolDictionary.Count}");
     }
 
   
@@ -53,13 +53,13 @@ public class ObjectPoolManager : AbstractPoolManager, IPoolManager
     {
         if (prefab == null)
         {
-            Debug.LogWarning("Префаб не может быть null!");
+            Debug.LogWarning("РџСЂРµС„Р°Р± РЅРµ РјРѕР¶РµС‚ Р±С‹С‚СЊ null!");
             return;
         }
 
         if (count <= 0)
         {
-            Debug.LogWarning("Количество должно быть больше 0!");
+            Debug.LogWarning("РљРѕР»РёС‡РµСЃС‚РІРѕ РґРѕР»Р¶РЅРѕ Р±С‹С‚СЊ Р±РѕР»СЊС€Рµ 0!");
             return;
         }
 
@@ -81,7 +81,7 @@ public class ObjectPoolManager : AbstractPoolManager, IPoolManager
 
         if (objectsToAdd <= 0)
         {
-            Debug.Log($"Пул для {prefab.name} достиг максимального размера ({currentLimit}). Невозможно добавить {count} объектов.");
+            Debug.Log($"РџСѓР» РґР»СЏ {prefab.name} РґРѕСЃС‚РёРі РјР°РєСЃРёРјР°Р»СЊРЅРѕРіРѕ СЂР°Р·РјРµСЂР° ({currentLimit}). РќРµРІРѕР·РјРѕР¶РЅРѕ РґРѕР±Р°РІРёС‚СЊ {count} РѕР±СЉРµРєС‚РѕРІ.");
             return;
         }
 
@@ -95,14 +95,14 @@ public class ObjectPoolManager : AbstractPoolManager, IPoolManager
             Plus1Create(prefab);
         }
 
-        Debug.Log($"ObjectPoolManager->Добавлено {objectsToAdd} объектов в пул для {prefab.name}. Общее количество: {prefabPool.Count}/{currentLimit} Общий размер: {poolDictionary[ObjectType.Armor].Count}");
+        Debug.Log($"ObjectPoolManager->Р”РѕР±Р°РІР»РµРЅРѕ {objectsToAdd} РѕР±СЉРµРєС‚РѕРІ РІ РїСѓР» РґР»СЏ {prefab.name}. РћР±С‰РµРµ РєРѕР»РёС‡РµСЃС‚РІРѕ: {prefabPool.Count}/{currentLimit} РћР±С‰РёР№ СЂР°Р·РјРµСЂ: {poolDictionary[ObjectType.Armor].Count}");
     }
 
     public GameObject SpawnFromPool(ObjectType tag, GameObject specificPrefab = null)
     {
         if (!poolDictionary.ContainsKey(tag))
         {
-            Debug.LogWarning($"Пул с тегом {tag} не существует.");
+            Debug.LogWarning($"РџСѓР» СЃ С‚РµРіРѕРј {tag} РЅРµ СЃСѓС‰РµСЃС‚РІСѓРµС‚.");
             return null;
         }
 
@@ -111,7 +111,7 @@ public class ObjectPoolManager : AbstractPoolManager, IPoolManager
 
         if (!prefabPools.ContainsKey(prefab))
         {
-            Debug.LogWarning($"Префаб не найден в пуле {tag}");
+            Debug.LogWarning($"РџСЂРµС„Р°Р± РЅРµ РЅР°Р№РґРµРЅ РІ РїСѓР»Рµ {tag}");
             return null;
         }
 
@@ -123,7 +123,7 @@ public class ObjectPoolManager : AbstractPoolManager, IPoolManager
             newObj.SetActive(false);
             objectPool.Enqueue(newObj);
             Plus1Create(prefab);
-            Debug.LogError($"ObjectPoolManager->SpawnFromPool: Критическая ошибка. Object pooling перестал работать; все объекты теперь будут уничтожаться Unity и создаваться через Instantiate.");
+            Debug.LogError($"ObjectPoolManager->SpawnFromPool: РљСЂРёС‚РёС‡РµСЃРєР°СЏ РѕС€РёР±РєР°. Object pooling РїРµСЂРµСЃС‚Р°Р» СЂР°Р±РѕС‚Р°С‚СЊ; РІСЃРµ РѕР±СЉРµРєС‚С‹ С‚РµРїРµСЂСЊ Р±СѓРґСѓС‚ СѓРЅРёС‡С‚РѕР¶Р°С‚СЊСЃСЏ Unity Рё СЃРѕР·РґР°РІР°С‚СЊСЃСЏ С‡РµСЂРµР· Instantiate.");
             return newObj;
         }
 
@@ -172,7 +172,7 @@ public class ObjectPoolManager : AbstractPoolManager, IPoolManager
 
         if (objectPool.Count >= currentLimit)
         {
-            Debug.LogError($"ObjectPoolManager->HandlePoolReturn: Объект уничтожен через Destroy Unity!");
+            Debug.LogError($"ObjectPoolManager->HandlePoolReturn: РћР±СЉРµРєС‚ СѓРЅРёС‡С‚РѕР¶РµРЅ С‡РµСЂРµР· Destroy Unity!");
             Destroy(objectToReturn);
         }
         else
@@ -186,8 +186,8 @@ public class ObjectPoolManager : AbstractPoolManager, IPoolManager
 
 public enum ObjectType
 {
-    Weapon,    // Оружие
-    Armor,     // Броня
-    Face,      // Лицо
-    Arrow      // Стрела
+    Weapon,    // РћСЂСѓР¶РёРµ
+    Armor,     // Р‘СЂРѕРЅСЏ
+    Face,      // Р›РёС†Рѕ
+    Arrow      // РЎС‚СЂРµР»Р°
 }
