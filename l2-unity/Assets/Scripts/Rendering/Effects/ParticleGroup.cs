@@ -7,6 +7,7 @@ public class ParticleGroup : EffectPart
     private const string IceBoltTaEffectName = "el_ice_bolt_ta";
     private const string IcebergGroupName = "iceberg";
     private const string IcefragGroupName = "icefrag";
+    private const string OwnerWorldPosShaderProperty = "_OwnerWorldPos";
     [SerializeField] private L2Particle _owner;
     [SerializeField] private Renderer[] _particles;
     [Header("Spawning (Настройки появления)")]
@@ -63,6 +64,7 @@ public class ParticleGroup : EffectPart
                 if (_isParticleActive[i])
                 {
                     anyActive = true;
+                    UpdateOwnerWorldPos(_particles[i]);
                     if (now - _particleSpawnTimes[i] >= _duration)
                     {
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
@@ -207,6 +209,7 @@ public class ParticleGroup : EffectPart
             // Debug.Log("Set Start Time " + shaderStartTime + " Seed " + seed + "name " + m.name);
             m.SetFloat("_StartTime", shaderStartTime);
             m.SetFloat("_Seed", seed);
+            SetOwnerWorldPos(m);
             if (SurfaceNormal != Vector3.zero)
             {
                 m.SetVector("_SurfaceNormals", SurfaceNormal);
@@ -288,6 +291,50 @@ public class ParticleGroup : EffectPart
     }
 
     private float Now() => Application.isPlaying ? Time.time : Time.realtimeSinceStartup;
+
+    private void UpdateOwnerWorldPos(Renderer renderer)
+    {
+        if (renderer == null)
+        {
+            return;
+        }
+
+        Material[] materials = renderer.materials;
+        for (int i = 0; i < materials.Length; i++)
+        {
+            SetOwnerWorldPos(materials[i]);
+        }
+    }
+
+    private void SetOwnerWorldPos(Material material)
+    {
+        if (material == null || !material.HasProperty(OwnerWorldPosShaderProperty))
+        {
+            return;
+        }
+
+        material.SetVector(OwnerWorldPosShaderProperty, ResolveOwnerWorldPos());
+    }
+
+    private Vector3 ResolveOwnerWorldPos()
+    {
+        if (PlayerEntity.Instance != null)
+        {
+            return PlayerEntity.Instance.transform.position;
+        }
+
+        if (OwnerTarget != null)
+        {
+            return OwnerTarget.position;
+        }
+
+        if (FollowTarget != null)
+        {
+            return FollowTarget.position;
+        }
+
+        return transform.position + transform.forward;
+    }
 
     public void SetRuntimeContinuousLoopOverride(bool hasOverride, bool value)
     {

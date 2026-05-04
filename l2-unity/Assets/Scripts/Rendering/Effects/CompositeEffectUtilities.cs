@@ -23,6 +23,8 @@ public static class CompositeEffectUtilities
             case CompositePartSpawnTiming.OnHitCollider:
                 // Spawned by runtime collider-hit event, not by time delay.
                 return float.PositiveInfinity;
+            case CompositePartSpawnTiming.OnAnimationShoot:
+                return float.PositiveInfinity;
             default:
                 return 0f;
         }
@@ -32,7 +34,10 @@ public static class CompositeEffectUtilities
     {
         if (resolvedTransform != null)
         {
-            return resolvedTransform.TransformPoint(positionOffset);
+            // Attachment world anchor (e.g. pelvis, controller center) often differs from the follow pivot (entity root).
+            // Apply offset in follow-transform local space without dropping the anchor.
+            Vector3 local = resolvedTransform.InverseTransformPoint(resolvedWorldPosition) + positionOffset;
+            return resolvedTransform.TransformPoint(local);
         }
 
         return resolvedWorldPosition + positionOffset;

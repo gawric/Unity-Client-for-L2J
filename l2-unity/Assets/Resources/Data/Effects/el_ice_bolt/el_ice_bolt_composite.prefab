@@ -110,9 +110,9 @@ MonoBehaviour:
   - name: el_ice_bolt_ta
     prefab: {fileID: 3087697352690439982, guid: f6dfb8210bf5113418fe0f39c14d2286, type: 3}
     settingsOverride: {fileID: 0}
-    attachmentPoint: 4
-    spawnTiming: 3
-    hitLeadSeconds: 0.5
+    attachmentPoint: 8
+    spawnTiming: 5
+    hitLeadSeconds: 0
     positionOffset: {x: 0, y: 0, z: 0}
     normalizeOffsetByOwnerHeight: 1
     referenceHeight: 1.8

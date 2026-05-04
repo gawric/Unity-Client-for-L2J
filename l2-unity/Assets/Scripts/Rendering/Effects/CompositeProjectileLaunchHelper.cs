@@ -60,6 +60,38 @@ public static class CompositeProjectileLaunchHelper
         return false;
     }
 
+    /// <summary>
+    /// True if this composite must listen for the caster animation shoot event (projectile on shoot and/or parts spawned on shoot).
+    /// </summary>
+    public static bool RequiresAnimationShootEvent(CompositePrefabPart[] parts)
+    {
+        if (parts == null)
+        {
+            return false;
+        }
+
+        for (int i = 0; i < parts.Length; i++)
+        {
+            CompositePrefabPart part = parts[i];
+            if (part == null)
+            {
+                continue;
+            }
+
+            if (ShouldLaunchOnShoot(part))
+            {
+                return true;
+            }
+
+            if (part.spawnTiming == CompositePartSpawnTiming.OnAnimationShoot)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     public static bool ShouldLaunchOnShoot(CompositePrefabPart part)
     {
        var lauchMode =  GetLaunchMode(part);
@@ -174,9 +206,10 @@ public static class CompositeProjectileLaunchHelper
 
     private static bool ShouldHideUntilShoot(CompositePrefabPart part)
     {
-        if (part != null && part.spawnTiming == CompositePartSpawnTiming.OnHitCollider)
+        if (part != null && (part.spawnTiming == CompositePartSpawnTiming.OnHitCollider
+                             || part.spawnTiming == CompositePartSpawnTiming.OnAnimationShoot))
         {
-            // Parts spawned on collider hit appear after shoot event, so pre-shoot hide/reveal flow must not apply.
+            // Collider-hit parts appear after hit; on-shoot-spawned parts do not exist yet at cast start.
             return false;
         }
 

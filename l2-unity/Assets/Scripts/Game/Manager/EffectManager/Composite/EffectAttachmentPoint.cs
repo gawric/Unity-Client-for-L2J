@@ -7,5 +7,10 @@ public enum EffectAttachmentPoint
     TargetLowerBody = 4,
     WorldHitPoint = 5,
     CasterPosition = 6,
-    TargetPosition = 7
+    TargetPosition = 7,
+    /// <summary>
+    /// Capsule center from CharacterController (local center → world). Works for quadrupeds and humanoids
+    /// when the controller is authored per prefab; falls back to combined renderer bounds center.
+    /// </summary>
+    TargetCenter = 8
 }

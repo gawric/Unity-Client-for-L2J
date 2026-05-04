@@ -62,6 +62,7 @@ public class CompositePrefabEffect : TimedCompositeEffectBase
     private EffectResolveContext _context;
     private readonly List<PendingCompositePart> _pendingParts = new List<PendingCompositePart>();
     private readonly List<CompositePrefabPart> _pendingHitColliderParts = new List<CompositePrefabPart>();
+    private readonly List<CompositePrefabPart> _pendingAnimationShootParts = new List<CompositePrefabPart>();
     private readonly Dictionary<CompositePrefabPart, BaseEffect> _spawnedPartInstances = new Dictionary<CompositePrefabPart, BaseEffect>();
     private readonly HashSet<CompositePrefabPart> _launchedProjectileParts = new HashSet<CompositePrefabPart>();
     private readonly List<AnimationEventsBase> _shootEventSources = new List<AnimationEventsBase>();
@@ -83,6 +84,7 @@ public class CompositePrefabEffect : TimedCompositeEffectBase
         _spawnedPartInstances.Clear();
         _launchedProjectileParts.Clear();
         _pendingHitColliderParts.Clear();
+        _pendingAnimationShootParts.Clear();
         SubscribeShootEventIfNeeded();
         SubscribeProjectileHitEventIfNeeded();
     }
@@ -105,8 +107,7 @@ public class CompositePrefabEffect : TimedCompositeEffectBase
 
         QueueImmediateAndDelayedParts();
         StartPendingPartsRoutineIfNeeded();
-        //??????? ?? ???????: ????? ????? ?? ??????? - ????? ?????? = ????? ???????. ?? ?????? ?? ?????????? ?????? ?? event ????????
-        //StartShootFallbackRoutineIfNeeded();
+        StartShootFallbackRoutineIfNeeded();
         DestroyCompositeByLifetime();
     }
 
@@ -159,20 +160,23 @@ public class CompositePrefabEffect : TimedCompositeEffectBase
     private void SubscribeShootEventIfNeeded()
     {
         UnsubscribeShootEvent();
-        var test1 = RequiresAnimationShootLaunch();
-        var entity = _context?.CasterEntity;
-        if (RequiresAnimationShootLaunch() || _context?.CasterEntity?.IdentityInterlude == null)
+        if (!CompositeProjectileLaunchHelper.RequiresAnimationShootEvent(_parts))
         {
-            int casterId = _context.CasterEntity.IdentityInterlude.Id;
-            _animationEvents = AnimationManager.Instance.GetAnimationEvents(casterId);
-            TrySubscribeShootSource(_animationEvents, "AnimationManager");
+            return;
+        }
 
+        if (_context?.CasterEntity?.IdentityInterlude == null || AnimationManager.Instance == null)
+        {
+            return;
+        }
 
+        int casterId = _context.CasterEntity.IdentityInterlude.Id;
+        _animationEvents = AnimationManager.Instance.GetAnimationEvents(casterId);
+        TrySubscribeShootSource(_animationEvents, "AnimationManager");
 
-            if (!_isSubscribedToAnyShoot)
-            {
-                _isSubscribedToAnyShoot = true;
-            }
+        if (!_isSubscribedToAnyShoot)
+        {
+            _isSubscribedToAnyShoot = true;
         }
     }
 
@@ -184,13 +188,13 @@ public class CompositePrefabEffect : TimedCompositeEffectBase
             return;
         }
 
+        if (source == null)
+        {
+            return;
+        }
+
         source.OnAnimationStartShoot += HandleAnimationShoot;
         _shootEventSources.Add(source);
-    }
-
-    private bool RequiresAnimationShootLaunch()
-    {
-        return CompositeProjectileLaunchHelper.RequiresAnimationShootLaunch(_parts);
     }
 
     private void HandleAnimationShoot(string _)
@@ -201,6 +205,8 @@ public class CompositePrefabEffect : TimedCompositeEffectBase
 
     private void ProcessShootEvent(string channel)
     {
+        SpawnPendingAnimationShootParts();
+
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
         if (_castData != null)
         {
@@ -228,6 +234,27 @@ public class CompositePrefabEffect : TimedCompositeEffectBase
             _context.TargetTransform,
             _playStartedAt,
             DebugPrefix);
+    }
+
+    private void SpawnPendingAnimationShootParts()
+    {
+        if (_pendingAnimationShootParts.Count == 0)
+        {
+            return;
+        }
+
+        for (int i = 0; i < _pendingAnimationShootParts.Count; i++)
+        {
+            CompositePrefabPart part = _pendingAnimationShootParts[i];
+            if (part == null || _spawnedPartInstances.ContainsKey(part))
+            {
+                continue;
+            }
+
+            SpawnPart(part);
+        }
+
+        _pendingAnimationShootParts.Clear();
     }
 
     private void HandleProjectileEffectHit(GameObject projectilePrefab, Transform target, Vector3 hitPoint, Vector3 hitDirection, int attackerEntityId)
@@ -303,7 +330,13 @@ public class CompositePrefabEffect : TimedCompositeEffectBase
 
     private void StartShootFallbackRoutineIfNeeded()
     {
-        if (_castData == null || _castData.serverTimeToShoot <= 0f || !RequiresAnimationShootLaunch())
+        if (_castData == null || !CompositeProjectileLaunchHelper.RequiresAnimationShootEvent(_parts))
+        {
+            return;
+        }
+
+        // Same gate as before: at serverTimeToShoot==0 rely on the animation shoot event only (avoid one-frame fallback racing the animator).
+        if (_castData.serverTimeToShoot <= 0f)
         {
             return;
         }
@@ -332,10 +365,7 @@ public class CompositePrefabEffect : TimedCompositeEffectBase
 #endif
         }
 
-        if (_launchedProjectileParts.Count == 0)
-        {
-            ProcessShootEvent("fallback");
-        }
+        ProcessShootEvent("fallback");
 
         _fallbackShootRoutine = null;
     }
@@ -370,7 +400,7 @@ public class CompositePrefabEffect : TimedCompositeEffectBase
         BaseEffect instance = Instantiate(part.prefab, spawnPosition, rotation);
         instance.gameObject.SetActive(true);
 
-        AttachToResolvedTransformIfNeeded(part, resolvedTransform, instance.transform, adjustedOffset);
+        AttachToResolvedTransformIfNeeded(part, resolvedTransform, instance.transform, adjustedOffset, worldPosition);
         ApplyPartScale(part, instance.transform);
         ApplyShaderLifetimeOverride(part, instance.transform);
 
@@ -485,6 +515,7 @@ public class CompositePrefabEffect : TimedCompositeEffectBase
     {
         _pendingParts.Clear();
         _pendingHitColliderParts.Clear();
+        _pendingAnimationShootParts.Clear();
 
         if (_parts == null)
         {
@@ -502,6 +533,12 @@ public class CompositePrefabEffect : TimedCompositeEffectBase
             if (part.spawnTiming == CompositePartSpawnTiming.OnHitCollider)
             {
                 _pendingHitColliderParts.Add(part);
+                continue;
+            }
+
+            if (part.spawnTiming == CompositePartSpawnTiming.OnAnimationShoot)
+            {
+                _pendingAnimationShootParts.Add(part);
                 continue;
             }
 
@@ -577,6 +614,7 @@ public class CompositePrefabEffect : TimedCompositeEffectBase
 
         _pendingParts.Clear();
         _pendingHitColliderParts.Clear();
+        _pendingAnimationShootParts.Clear();
         _spawnedPartInstances.Clear();
         _launchedProjectileParts.Clear();
     }

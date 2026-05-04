@@ -124,6 +124,7 @@ Material:
     - _DstBlendAlpha: 0
     - _EnvStrength: 0.83
     - _EnvironmentReflections: 1
+    - _ExtraRandomStartSpinZ: 3.14159
     - _FadeIn: 1
     - _FadeInEndTime: 0.2
     - _Fadeout: 1
@@ -139,14 +140,20 @@ Material:
     - _Parallax: 0.005
     - _QueueOffset: 0
     - _ReceiveShadows: 1
+    - _Seed: 0
+    - _SizeScaleRandomDelay: 0.627
+    - _SizeScaleSpeed: 0.746
     - _Smoothness: 0.5
     - _SmoothnessTextureChannel: 0
     - _SpecMaskStrength: 1.026
     - _SpecularHighlights: 1
+    - _SpinParticles: 1
     - _SrcBlend: 1
     - _SrcBlendAlpha: 1
     - _StartTime: 0
     - _Surface: 0
+    - _UniformSize: 1
+    - _UseSizeScale: 1
     - _WorkflowMode: 1
     - _ZWrite: 1
     m_Colors:
@@ -155,9 +162,22 @@ Material:
     - _EdgeColor: {r: 0.986, g: 0.993, b: 1, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _EnvTint: {r: 1, g: 1, b: 1, a: 1}
+    - _ExtraRandomSizeMultiplier: {r: 0.45, g: 1.35, b: 0, a: 0}
     - _InitialDelayRange: {r: 0, g: 0, b: 0, a: 0}
     - _LifetimeRange: {r: 2, g: 2, b: 0, a: 0}
+    - _SizeRangeX: {r: 0.0605, g: 0.099, b: 0, a: 0}
+    - _SizeRangeY: {r: 0.0605, g: 0.099, b: 0, a: 0}
+    - _SizeRangeZ: {r: 0.0605, g: 0.099, b: 0, a: 0}
+    - _SizeScale0: {r: 0, g: 0.7, b: 0, a: 0}
+    - _SizeScale1: {r: 0.09, g: 1.4, b: 0, a: 0}
+    - _SizeScale2: {r: 1, g: 1, b: 0, a: 0}
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
+    - _SpinsPerSecondRangeX: {r: -0.01, g: 0.01, b: 0, a: 0}
+    - _SpinsPerSecondRangeY: {r: 0.015, g: 0.015, b: 0, a: 0}
+    - _SpinsPerSecondRangeZ: {r: -0.01, g: 0.01, b: 0, a: 0}
+    - _StartSpinRangeX: {r: -1, g: 1, b: 0, a: 0}
+    - _StartSpinRangeY: {r: 0.1, g: 0.4, b: 0, a: 0}
+    - _StartSpinRangeZ: {r: -1, g: 1, b: 0, a: 0}
     - _Tint: {r: 0.9789999, g: 0.986, b: 1, a: 1}
     - _UVScroll: {r: 0, g: 0, b: 0, a: 0}
   m_BuildTextureStacks: []

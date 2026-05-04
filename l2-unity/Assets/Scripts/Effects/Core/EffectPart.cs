@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public enum EffectPartType { Body, Footer, Aura , Fly , FlySub }
+
 
 //[RequireComponent(typeof(Renderer))]
 public abstract class EffectPart : MonoBehaviour

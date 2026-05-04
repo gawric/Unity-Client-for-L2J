@@ -32,6 +32,8 @@ public class DefaultEffectAttachmentResolver : IEffectAttachmentResolver
                 return ResolveRoot(context.TargetTransform, out resolvedTransform, out worldPosition);
             case EffectAttachmentPoint.TargetLowerBody:
                 return ResolveLowerBody(context.TargetEntity, context.TargetTransform, out resolvedTransform, out worldPosition);
+            case EffectAttachmentPoint.TargetCenter:
+                return ResolveTargetCenter(context.TargetEntity, context.TargetTransform, out resolvedTransform, out worldPosition);
             case EffectAttachmentPoint.WorldHitPoint:
                 if (context.HasHitPoint)
                 {
@@ -86,6 +88,66 @@ public class DefaultEffectAttachmentResolver : IEffectAttachmentResolver
         return context.CasterTransform != null || context.TargetTransform != null || context.HasHitPoint;
     }
 
+    private bool ResolveTargetCenter(Entity entity, Transform fallbackRoot, out Transform resolvedTransform, out Vector3 worldPosition)
+    {
+        resolvedTransform = null;
+        worldPosition = Vector3.zero;
+
+        if (fallbackRoot == null)
+        {
+            return false;
+        }
+
+        resolvedTransform = fallbackRoot;
+
+        CharacterController controller = null;
+        if (entity != null)
+        {
+            controller = entity.GetComponent<CharacterController>();
+            if (controller == null)
+            {
+                controller = entity.GetComponentInChildren<CharacterController>(true);
+            }
+        }
+        else
+        {
+            controller = fallbackRoot.GetComponent<CharacterController>();
+            if (controller == null)
+            {
+                controller = fallbackRoot.GetComponentInChildren<CharacterController>(true);
+            }
+        }
+
+        if (controller != null)
+        {
+            worldPosition = controller.transform.TransformPoint(controller.center);
+            return true;
+        }
+
+        Transform searchRoot = entity != null ? entity.transform : fallbackRoot;
+        Renderer[] renderers = searchRoot.GetComponentsInChildren<Renderer>(true);
+        if (renderers != null && renderers.Length > 0)
+        {
+            Bounds bounds = renderers[0].bounds;
+            for (int i = 1; i < renderers.Length; i++)
+            {
+                if (renderers[i] != null)
+                {
+                    bounds.Encapsulate(renderers[i].bounds);
+                }
+            }
+
+            if (bounds.size.sqrMagnitude > 0.00001f)
+            {
+                worldPosition = bounds.center;
+                return true;
+            }
+        }
+
+        worldPosition = fallbackRoot.position;
+        return true;
+    }
+
     private bool ResolveRoot(Transform src, out Transform resolvedTransform, out Vector3 worldPosition)
     {
         resolvedTransform = src;
@@ -98,16 +160,17 @@ public class DefaultEffectAttachmentResolver : IEffectAttachmentResolver
         resolvedTransform = null;
         worldPosition = Vector3.zero;
 
-        // Prefer pelvis/hips first so "LowerBody" is near torso center, not near floor.
+        // Prefer pelvis/hips for choosing follow transform when root is missing; world anchor matches follow pivot
+        // when following entity root so Composite prefab positionOffset (tuned as root-local TransformPoint) stays valid.
+        // For bone-centered hits without that offset, use TargetCenter / WorldHitPoint instead.
         Gear gear = entity != null ? entity.Gear : null;
         if (gear != null)
         {
             Transform pelvis = gear.FindRecursiveBone("Bip01_Pelvis") ?? gear.FindRecursiveBone("Bip01_Hips");
             if (pelvis != null)
             {
-                // Keep lower-body spawn point, but follow root for stability across rigs.
                 resolvedTransform = fallbackRoot != null ? fallbackRoot : pelvis;
-                worldPosition = pelvis.position;
+                worldPosition = resolvedTransform.position;
                 return true;
             }
 
@@ -116,7 +179,9 @@ public class DefaultEffectAttachmentResolver : IEffectAttachmentResolver
             if (leftFoot != null && rightFoot != null)
             {
                 resolvedTransform = fallbackRoot;
-                worldPosition = (leftFoot.position + rightFoot.position) * 0.5f;
+                worldPosition = resolvedTransform != null
+                    ? resolvedTransform.position
+                    : (leftFoot.position + rightFoot.position) * 0.5f;
                 return true;
             }
         }
@@ -127,9 +192,8 @@ public class DefaultEffectAttachmentResolver : IEffectAttachmentResolver
             Transform hips = animator.GetBoneTransform(HumanBodyBones.Hips);
             if (hips != null)
             {
-                // Keep lower-body spawn point, but follow root for stability across rigs.
                 resolvedTransform = fallbackRoot != null ? fallbackRoot : hips;
-                worldPosition = hips.position;
+                worldPosition = resolvedTransform.position;
                 return true;
             }
 
@@ -139,13 +203,16 @@ public class DefaultEffectAttachmentResolver : IEffectAttachmentResolver
             if (left != null && right != null)
             {
                 resolvedTransform = fallbackRoot;
-                worldPosition = (left.position + right.position) * 0.5f;
+                worldPosition = resolvedTransform != null
+                    ? resolvedTransform.position
+                    : (left.position + right.position) * 0.5f;
                 return true;
             }
         }
 
         if (fallbackRoot != null)
         {
+            resolvedTransform = fallbackRoot;
             worldPosition = fallbackRoot.position;
             return true;
         }

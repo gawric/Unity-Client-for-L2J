@@ -7,24 +7,17 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: FFighter_m005_t00_m00_ah
-  m_Shader: {fileID: 4800000, guid: 933532a4fcc9baf4fa0491de14d08ed7, type: 3}
+  m_Name: L2SteamInterlude
+  m_Shader: {fileID: 4800000, guid: 4c8280e81268e184fa67a29db5038641, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
-  m_ValidKeywords:
-  - _ALPHATEST_ON
-  - _EMISSION
-  - _ENVIRONMENTREFLECTIONS_OFF
-  - _SPECULARHIGHLIGHTS_OFF
-  m_InvalidKeywords:
-  - BACKFACE_NORMAL_MODE_MIRROR
-  - _WINDQUALITY_BEST
-  m_LightmapFlags: 6
+  m_ValidKeywords: []
+  m_InvalidKeywords: []
+  m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
-  m_DoubleSidedGI: 1
-  m_CustomRenderQueue: 2450
-  stringTagMap:
-    RenderType: TransparentCutout
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: -1
+  stringTagMap: {}
   disabledShaderPasses:
   - MOTIONVECTORS
   m_LockedProperties: 
@@ -32,7 +25,7 @@ Material:
     serializedVersion: 3
     m_TexEnvs:
     - _BaseMap:
-        m_Texture: {fileID: 2800000, guid: 2a41fd8f8bf3b99409f32448ced9fc6e, type: 3}
+        m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _BumpMap:
@@ -55,12 +48,8 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
-    - _ExtraTex:
-        m_Texture: {fileID: 0}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
     - _MainTex:
-        m_Texture: {fileID: 2800000, guid: 2a41fd8f8bf3b99409f32448ced9fc6e, type: 3}
+        m_Texture: {fileID: 2800000, guid: 7396ec3fdbef92e4eba2655c464b75ed, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MetallicGlossMap:
@@ -79,8 +68,8 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
-    - _SubsurfaceTex:
-        m_Texture: {fileID: 0}
+    - _Tex1:
+        m_Texture: {fileID: 2800000, guid: 7396ec3fdbef92e4eba2655c464b75ed, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - unity_Lightmaps:
@@ -97,59 +86,96 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - BACKFACE_NORMAL_MODE: 1
-    - EFFECT_BILLBOARD: 0
-    - EFFECT_EXTRA_TEX: 0
     - _AddPrecomputedVelocity: 0
-    - _AlphaClip: 1
-    - _AlphaClipThreshold: 0.5
-    - _AlphaToMask: 1
+    - _AlphaClip: 0
+    - _AlphaToMask: 0
+    - _BillboardToOwner: 1
     - _Blend: 0
+    - _BlendBetweenSubdivisions: 1
     - _BlendModePreserveSpecular: 1
     - _BumpScale: 1
     - _ClearCoatMask: 0
     - _ClearCoatSmoothness: 0
-    - _Cull: 0
+    - _ColorScaleTime1: 1
+    - _Cull: 2
     - _Cutoff: 0.5
     - _DetailAlbedoMapScale: 1
     - _DetailNormalMapScale: 1
     - _DstBlend: 0
     - _DstBlendAlpha: 0
-    - _EnvironmentReflections: 0
+    - _EnvironmentReflections: 1
+    - _FadeIn: 1
+    - _FadeInEndTime: 0.15
+    - _Fadeout: 1
+    - _FadeoutStartTime: 1
     - _GlossMapScale: 0
     - _Glossiness: 0
     - _GlossyReflections: 0
-    - _HueVariationKwToggle: 0
+    - _HasLifetime: 1
     - _Metallic: 0
-    - _NormalMapKwToggle: 0
     - _OcclusionStrength: 1
-    - _OldHueVarBehavior: 0
+    - _Opacity: 0.211
     - _Parallax: 0.005
-    - _QueueControl: 0
     - _QueueOffset: 0
+    - _RandomizeSubdivisionPhase: 1
     - _ReceiveShadows: 1
-    - _Smoothness: 0
+    - _Seed: 0
+    - _SizeScaleTimeEnd: 1
+    - _SizeScaleValueEnd: 1.2
+    - _SmokeBrightness: 0.98
+    - _Smoothness: 0.5
     - _SmoothnessTextureChannel: 0
-    - _SpecularHighlights: 0
+    - _SpawnUnitScale: 0.01
+    - _SpecularHighlights: 1
+    - _SpinParticles: 1
     - _SrcBlend: 1
     - _SrcBlendAlpha: 1
-    - _SubsurfaceIndirect: 0.25
-    - _SubsurfaceKwToggle: 0
+    - _StartTime: 0
+    - _SubdivisionAnimSpeed: 1
+    - _SubdivisionEnd: 15
+    - _SubdivisionStart: 4
     - _Surface: 0
-    - _WINDQUALITY: 4
-    - _WindQuality: 0
+    - _TextureUSubdivisions: 8
+    - _TextureVSubdivisions: 8
+    - _UniformSize: 1
+    - _UseSizeScale: 1
+    - _UseVelocityTowardOwner: 0
     - _WorkflowMode: 1
     - _ZWrite: 1
     m_Colors:
     - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
+    - _BillboardWorldUp: {r: 0, g: 0, b: 1, a: 0}
     - _Color: {r: 1, g: 1, b: 1, a: 1}
+    - _Color0: {r: 1, g: 1, b: 1, a: 1}
+    - _Color1: {r: 1, g: 1, b: 1, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
-    - _HueVariationColor: {r: 1, g: 0.5, b: 0, a: 0.2}
+    - _InitialDelayRange: {r: 0.2, g: 0.2, b: 0, a: 0}
+    - _LifetimeRange: {r: 1, g: 1.4, b: 0, a: 0}
+    - _OwnerWorldPos: {r: 0, g: 0, b: 0, a: 0}
+    - _PolarAzimuthDeg: {r: 0, g: 360, b: 0, a: 0}
+    - _PolarFromZDeg: {r: 85, g: 95, b: 0, a: 0}
+    - _PolarRadius: {r: 16, g: 16, b: 0, a: 0}
+    - _SizeRangeX: {r: 12, g: 12, b: 0, a: 0}
+    - _SizeRangeY: {r: 12, g: 12, b: 0, a: 0}
+    - _SizeRangeZ: {r: 12, g: 12, b: 0, a: 0}
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
-    - _SubsurfaceColor: {r: 1, g: 1, b: 1, a: 1}
+    - _SpinsPerSecondRangeX: {r: 0.1, g: 0.1, b: 0, a: 0}
+    - _SpinsPerSecondRangeY: {r: 0.05, g: 0.1, b: 0, a: 0}
+    - _SpinsPerSecondRangeZ: {r: 0.05, g: 0.1, b: 0, a: 0}
+    - _StartLocationOffset: {r: 0, g: 0, b: 1, a: 0}
+    - _StartLocationRangeX: {r: -25, g: 25, b: 0, a: 0}
+    - _StartLocationRangeY: {r: -25, g: 25, b: 0, a: 0}
+    - _StartLocationRangeZ: {r: 0, g: 0, b: 0, a: 0}
+    - _StartSpinRangeX: {r: 0, g: 0, b: 0.05, a: 0}
+    - _StartSpinRangeY: {r: 0, g: 0, b: 0, a: 0}
+    - _StartSpinRangeZ: {r: 0, g: 0, b: 0, a: 0}
+    - _TowardOwnerSpeed: {r: 1, g: 5, b: 0, a: 0}
+    - _VelocityRangeX: {r: 10, g: 10, b: 0, a: 0}
+    - _VelocityRangeY: {r: 10, g: 10, b: 0, a: 0}
+    - _VelocityRangeZ: {r: -40, g: -20, b: 0, a: 0}
   m_BuildTextureStacks: []
   m_AllowLocking: 1
---- !u!114 &2870736736491043606
+--- !u!114 &5254511812658591994
 MonoBehaviour:
   m_ObjectHideFlags: 11
   m_CorrespondingSourceObject: {fileID: 0}

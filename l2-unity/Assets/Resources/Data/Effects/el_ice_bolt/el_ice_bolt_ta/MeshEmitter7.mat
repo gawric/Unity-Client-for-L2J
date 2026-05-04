@@ -42,7 +42,7 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _Alpha: 0.34
+    - _Alpha: 1
     - _AlphaSmooth: 0
     - _Billboard: 0
     - _Brighten: 0
@@ -58,10 +58,10 @@ Material:
     - _ColorScale9Time: 0
     - _ColorScaleRepeats: 0
     - _Debug: 0
-    - _FadeIn: 1
-    - _FadeInEndTime: 0.52
+    - _FadeIn: 0.1
+    - _FadeInEndTime: 0.2
     - _Fadeout: 1
-    - _FadeoutStartTime: 3.28
+    - _FadeoutStartTime: 1
     - _GetVelocityDirectionFrom: 0
     - _HasLifetime: 0
     - _QueueControl: 0

@@ -229,7 +229,8 @@ public abstract class TimedCompositeEffectBase : BaseEffect
         CompositePrefabPart part,
         Transform resolvedTransform,
         Transform instanceTransform,
-        Vector3 adjustedOffset)
+        Vector3 adjustedOffset,
+        Vector3 resolvedWorldPosition)
     {
         if (part == null || instanceTransform == null || !part.followResolvedTransform || resolvedTransform == null)
         {
@@ -237,8 +238,9 @@ public abstract class TimedCompositeEffectBase : BaseEffect
         }
 
         instanceTransform.SetParent(resolvedTransform, true);
-        // Keep stable offset while following attachment point movement/rotation.
-        instanceTransform.localPosition = adjustedOffset;
+        // Match spawn math in CompositeEffectUtilities.ResolveSpawnPosition: anchor in world can differ from follow pivot.
+        Vector3 localAnchor = resolvedTransform.InverseTransformPoint(resolvedWorldPosition);
+        instanceTransform.localPosition = localAnchor + adjustedOffset;
     }
 
     protected override void OnDestroy()
