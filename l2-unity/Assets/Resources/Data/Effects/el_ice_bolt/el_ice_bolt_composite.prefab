@@ -56,14 +56,14 @@ MonoBehaviour:
     normalizeOffsetByOwnerHeight: 0
     referenceHeight: 1.8
     scale: 1.3
-    followResolvedTransform: 0
+    followResolvedTransform: 1
     inheritRotation: 0
-    passCastDataToPart: 0
-    useCastTimedLifetime: 0
-    overrideContinuousLoop: 0
-    continuousLoop: 0
-    disableShaderLifetime: 0
-    overrideHideTime: 0
+    passCastDataToPart: 1
+    useCastTimedLifetime: 1
+    overrideContinuousLoop: 1
+    continuousLoop: 1
+    disableShaderLifetime: 1
+    overrideHideTime: 1
     customHideTime: 0
     enableFinalShaderLifetimeOnFade: 0
     finalShaderLifetimeMin: 0

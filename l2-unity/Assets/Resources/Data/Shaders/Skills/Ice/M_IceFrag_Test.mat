@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!114 &-2704337281386124109
+--- !u!114 &-2521146351965747745
 MonoBehaviour:
   m_ObjectHideFlags: 11
   m_CorrespondingSourceObject: {fileID: 0}
@@ -20,8 +20,8 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: M_IceApprox_Test
-  m_Shader: {fileID: 4800000, guid: d0513930d74ee484fb159ab9e4ce5f02, type: 3}
+  m_Name: M_IceFrag_Test
+  m_Shader: {fileID: 4800000, guid: 2df831b1bbd84dd9a63f9132db26d468, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
@@ -66,7 +66,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MainTex:
-        m_Texture: {fileID: 2800000, guid: 14026ab9081b343409256738d8146538, type: 3}
+        m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MainTexture:
@@ -108,7 +108,7 @@ Material:
     m_Ints: []
     m_Floats:
     - _AddPrecomputedVelocity: 0
-    - _Alpha: 1.043
+    - _Alpha: 1
     - _AlphaClip: 0
     - _AlphaToMask: 0
     - _Blend: 0
@@ -124,11 +124,10 @@ Material:
     - _DstBlendAlpha: 0
     - _EnvStrength: 0.83
     - _EnvironmentReflections: 1
-    - _ExtraRandomStartSpinZ: 3.14159
-    - _FadeIn: 1
-    - _FadeInEndTime: 0.2
+    - _FadeIn: 0
+    - _FadeInEndTime: 0
     - _Fadeout: 1
-    - _FadeoutStartTime: 1.9
+    - _FadeoutStartTime: 0.4
     - _FresnelPower: 0.1
     - _FresnelStrength: 0.852
     - _GlossMapScale: 0
@@ -141,10 +140,9 @@ Material:
     - _QueueOffset: 0
     - _ReceiveShadows: 1
     - _Seed: 0
-    - _SizeScaleRandomDelay: 0.627
-    - _SizeScaleSpeed: 0.746
     - _Smoothness: 0.5
     - _SmoothnessTextureChannel: 0
+    - _SpawnUnitScale: 0.01904762
     - _SpecMaskStrength: 1.026
     - _SpecularHighlights: 1
     - _SpinParticles: 1
@@ -153,32 +151,41 @@ Material:
     - _StartTime: 0
     - _Surface: 0
     - _UniformSize: 1
-    - _UseSizeScale: 1
+    - _UseSizeScale: 0
     - _WorkflowMode: 1
     - _ZWrite: 1
     m_Colors:
+    - _Acceleration: {r: 0, g: -350, b: 0, a: 0}
     - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _EdgeColor: {r: 0.986, g: 0.993, b: 1, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _EnvTint: {r: 1, g: 1, b: 1, a: 1}
-    - _ExtraRandomSizeMultiplier: {r: 0.45, g: 1.35, b: 0, a: 0}
+    - _ExtraRandomSizeMultiplier: {r: 0.9, g: 1.1, b: 0, a: 0}
     - _InitialDelayRange: {r: 0, g: 0, b: 0, a: 0}
-    - _LifetimeRange: {r: 2, g: 2, b: 0, a: 0}
-    - _SizeRangeX: {r: 0.0605, g: 0.099, b: 0, a: 0}
-    - _SizeRangeY: {r: 0.0605, g: 0.099, b: 0, a: 0}
-    - _SizeRangeZ: {r: 0.0605, g: 0.099, b: 0, a: 0}
-    - _SizeScale0: {r: 0, g: 0.7, b: 0, a: 0}
-    - _SizeScale1: {r: 0.09, g: 1.4, b: 0, a: 0}
+    - _LifetimeRange: {r: 1, g: 1, b: 0, a: 0}
+    - _OutwardSpeed: {r: 80, g: 100, b: 0, a: 0}
+    - _OwnerWorldPos: {r: 0, g: 0, b: 0, a: 0}
+    - _PolarAzimuthDeg: {r: 0, g: 360, b: 0, a: 0}
+    - _PolarFromYDeg: {r: 30, g: 150, b: 0, a: 0}
+    - _PolarRadius: {r: 10, g: 10, b: 0, a: 0}
+    - _SizeRangeX: {r: 0.06, g: 0.19, b: 0, a: 0}
+    - _SizeRangeY: {r: 0.03, g: 0.15, b: 0, a: 0}
+    - _SizeRangeZ: {r: 0.03, g: 0.15, b: 0, a: 0}
+    - _SizeScale0: {r: 0, g: 1, b: 0, a: 0}
+    - _SizeScale1: {r: 1, g: 1, b: 0, a: 0}
     - _SizeScale2: {r: 1, g: 1, b: 0, a: 0}
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
-    - _SpinsPerSecondRangeX: {r: -0.01, g: 0.01, b: 0, a: 0}
-    - _SpinsPerSecondRangeY: {r: 0.015, g: 0.015, b: 0, a: 0}
-    - _SpinsPerSecondRangeZ: {r: -0.01, g: 0.01, b: 0, a: 0}
-    - _StartSpinRangeX: {r: -1, g: 1, b: 0, a: 0}
-    - _StartSpinRangeY: {r: 0.1, g: 0.4, b: 0, a: 0}
-    - _StartSpinRangeZ: {r: -1, g: 1, b: 0, a: 0}
-    - _Tint: {r: 0.9789999, g: 0.986, b: 1, a: 1}
+    - _SpinsPerSecondRangeX: {r: 0, g: 1, b: 0, a: 0}
+    - _SpinsPerSecondRangeY: {r: 1, g: 2, b: 0, a: 0}
+    - _SpinsPerSecondRangeZ: {r: 1, g: 2, b: 0, a: 0}
+    - _StartLocationOffset: {r: 0, g: 4, b: 0, a: 0}
+    - _StartSpinRangeX: {r: 0, g: 1, b: 0, a: 0}
+    - _StartSpinRangeY: {r: 0, g: 1, b: 0, a: 0}
+    - _StartSpinRangeZ: {r: 0, g: 1, b: 0, a: 0}
+    - _Tint: {r: 0.95, g: 0.96999997, b: 1, a: 1}
     - _UVScroll: {r: 0, g: 0, b: 0, a: 0}
+    - _UpVelocity: {r: 150, g: 240, b: 0, a: 0}
+    - _VelocityLossRange: {r: 2, g: 2, b: 0, a: 0}
   m_BuildTextureStacks: []
   m_AllowLocking: 1

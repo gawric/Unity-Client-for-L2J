@@ -69,6 +69,7 @@ Shader "L2/Effects/L2IceApprox"
 
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
             #include "../Common/L2FxParticleAnim.hlsl"
+            #include "L2IceLook.hlsl"
 
             struct Attributes
             {
@@ -84,13 +85,6 @@ Shader "L2/Effects/L2IceApprox"
                 float3 normalWS    : TEXCOORD1;
                 float3 viewDirWS   : TEXCOORD2;
             };
-
-            TEXTURE2D(_MainTexture);
-            SAMPLER(sampler_MainTexture);
-            TEXTURE2D(_SpecMask);
-            SAMPLER(sampler_SpecMask);
-            TEXTURECUBE(_EnvCube);
-            SAMPLER(sampler_EnvCube);
 
             CBUFFER_START(UnityPerMaterial)
                 float4 _MainTexture_ST;
@@ -179,13 +173,6 @@ Shader "L2/Effects/L2IceApprox"
 
             half4 frag(Varyings IN) : SV_Target
             {
-                float2 uvMain = IN.uv;
-                float2 uvMask = TRANSFORM_TEX(IN.uv, _SpecMask) + _UVScroll.xy * _Time.y;
-
-                half4 baseCol = SAMPLE_TEXTURE2D(_MainTexture, sampler_MainTexture, uvMain);
-                half4 maskTex = SAMPLE_TEXTURE2D(_SpecMask, sampler_SpecMask, uvMask);
-
-                half mask = saturate(dot(maskTex.rgb, half3(0.3333h, 0.3333h, 0.3333h)) * _SpecMaskStrength);
                 half lifeAlpha = (half)L2Fx_LifetimeAlpha(
                     _Time.y,
                     _HasLifetime,
@@ -197,18 +184,22 @@ Shader "L2/Effects/L2IceApprox"
                     _Fadeout,
                     _FadeoutStartTime);
 
-                half ndv = saturate(dot(normalize(IN.normalWS), normalize(IN.viewDirWS)));
-                half fresnel = pow(1.0h - ndv, max(0.1h, _FresnelPower)) * _FresnelStrength;
-                float3 reflDir = reflect(-normalize(IN.viewDirWS), normalize(IN.normalWS));
-                half3 envRgb = SAMPLE_TEXTURECUBE(_EnvCube, sampler_EnvCube, reflDir).rgb * _EnvTint.rgb;
-
-                half3 iceRgb = baseCol.rgb * _Tint.rgb;
-                half3 edgeGlow = _EdgeColor.rgb * (fresnel * mask);
-                half3 envSpec = envRgb * (mask * _EnvStrength);
-                half3 finalRgb = iceRgb + edgeGlow + envSpec;
-
-                half finalA = saturate(baseCol.a * _Tint.a * _Alpha * lifeAlpha);
-                return half4(finalRgb, finalA);
+                L2IceLookInput lookInput;
+                lookInput.uvMain = IN.uv;
+                lookInput.uvMask = TRANSFORM_TEX(IN.uv, _SpecMask) + _UVScroll.xy * _Time.y;
+                lookInput.normalWS = IN.normalWS;
+                lookInput.viewDirWS = IN.viewDirWS;
+                return L2IceLook_Fragment(
+                    lookInput,
+                    lifeAlpha,
+                    _Tint,
+                    _Alpha,
+                    _SpecMaskStrength,
+                    _FresnelPower,
+                    _FresnelStrength,
+                    _EdgeColor,
+                    _EnvTint,
+                    _EnvStrength);
             }
             ENDHLSL
         }
