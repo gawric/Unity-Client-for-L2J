@@ -64,6 +64,8 @@ public abstract class AnimationEventsBase : MonoBehaviour
     }
     public void OnAnimationComplete(string animationName)
     {
+        animationName = NormalizeAnimationEventName(animationName);
+
         if (_priorityAnimations.ContainsKey(animationName))
         {
             if (Time.frameCount == _lastDuplicateCompleteFrame &&
@@ -116,7 +118,27 @@ public abstract class AnimationEventsBase : MonoBehaviour
     /// </summary>
     public virtual void OnAnimationShoot(string animationName)
     {
+        animationName = NormalizeAnimationEventName(animationName);
         OnAnimationStartShoot?.Invoke(animationName);
+    }
+
+    private static string NormalizeAnimationEventName(string animationName)
+    {
+        if (string.IsNullOrEmpty(animationName))
+        {
+            return animationName;
+        }
+
+        // MagicNoTarget clips are played through the shared MagicShot animator state.
+        // Some imported clips also carry the truncated event payload "MagicNoTarge".
+        if (animationName == "MagicNoTarget" ||
+            animationName == "MagicNoTarge" ||
+            animationName == "MagicNotarget")
+        {
+            return "MagicShot";
+        }
+
+        return animationName;
     }
 
  

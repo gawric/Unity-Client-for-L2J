@@ -7,6 +7,7 @@ public abstract class AbstractAttackEvents : StateBase
     protected AnimationEventsBase _events;
     private Animation[] _specialsBows;
     private bool _isSubscribed;
+  
     public AbstractAttackEvents(int objectId , Animation[] specialsBows, PlayerStateMachine stateMachine = null ) : base(stateMachine)
     {
         _specialsBows = specialsBows;
@@ -17,6 +18,7 @@ public abstract class AbstractAttackEvents : StateBase
     {
         base.Enter();
         if (_isSubscribed) return;
+        _isSubscribed = true;
 
         if (_events != null)
         {
@@ -29,6 +31,12 @@ public abstract class AbstractAttackEvents : StateBase
 
         if (ProjectileManager.Instance != null)
         {
+            SkillExecutor.Instance.OnAllAnimationFinished += OnAllAnimationFinishedFromExecutor;
+        }
+
+
+        if (ProjectileManager.Instance != null)
+        {
             ProjectileManager.Instance.OnHitMonster += OnHitBodyMonster;
             ProjectileManager.Instance.OnHitCollider += OnHitColliderMonster;
             ProjectileManager.Instance.OnHitEffectProjectile += OnHitEffectProjectile;
@@ -38,13 +46,14 @@ public abstract class AbstractAttackEvents : StateBase
             SwordCollisionService.Instance.OnHitCollider += OnHitColliderMonster;
         }
 
-        _isSubscribed = true;
+
     }
 
     public override void Exit()
     {
         base.Exit();
         if (!_isSubscribed) return;
+        _isSubscribed = false;
 
         if (_events != null)
         {
@@ -54,6 +63,8 @@ public abstract class AbstractAttackEvents : StateBase
             _events.OnAnimationStartLoadArrow -= CallBackLoadArrow;
             _events.OnAnimationStartHit -= CallBackStartHit;
         }
+
+        SkillExecutor.Instance.OnAllAnimationFinished -= OnAllAnimationFinishedFromExecutor;
 
         if (ProjectileManager.Instance != null)
         {
@@ -66,7 +77,20 @@ public abstract class AbstractAttackEvents : StateBase
             SwordCollisionService.Instance.OnHitCollider -= OnHitColliderMonster;
         }
 
-        _isSubscribed = false;
+
+    
+    }
+
+
+    private void OnAllAnimationFinishedFromExecutor(AnimationEventsBase actions)
+    {
+        if (actions == null || _events == null || actions != _events)
+        {
+            return;
+        }
+
+        PlayerStateMachine.Instance.ChangeIntention(Intention.INTENTION_IDLE);
+        PlayerStateMachine.Instance.NotifyEvent(Event.WAIT_RETURN);
     }
 
 

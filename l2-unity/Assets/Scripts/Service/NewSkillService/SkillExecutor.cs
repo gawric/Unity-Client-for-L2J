@@ -9,6 +9,7 @@ public class SkillExecutor : MonoBehaviour
     private SkillAnimationRunner _animRunner;
 
     public event Action OnSkillSequenceFinished;
+    public event Action<AnimationEventsBase> OnAllAnimationFinished;
     public static SkillExecutor Instance { get; private set; }
 
 
@@ -47,7 +48,7 @@ public class SkillExecutor : MonoBehaviour
         int objectId = entity.IdentityInterlude.Id;
 
         EffectManager.Instance.PlayEffect(skill.Id, entity.transform, entity.GetMagicCastData());
-        //_emitter.SetupActions(actions);
+
 
         string[] cycle = animationCombo.GetAnimCycle();
         _animRunner.StartRunOverride(cycle, objectId, AnimationManager.Instance, () => OnAllAnimationFinish(actions));
@@ -56,7 +57,7 @@ public class SkillExecutor : MonoBehaviour
 
     private void OnAllAnimationFinish(AnimationEventsBase actions)
     {
-       // _emitter.CleanupActions(actions);
+        OnAllAnimationFinished?.Invoke(actions);
     }
 
 

@@ -436,8 +436,22 @@ public class CompositePrefabEffect : TimedCompositeEffectBase
             return;
         }
 
-        float delay = Mathf.Max(0f, partSettings.defaultLifeTime - partSettings.hideTime);
+        // Start final shader lifetime BEFORE BeginFadeOut/StopPart moment, otherwise
+        // fade window is never visible because parts are disabled in the same frame.
+        float finalWindow = Mathf.Max(part.finalShaderLifetimeMax, part.finalShaderLifetimeMin, 0f);
+        float delay = Mathf.Max(0f, partSettings.defaultLifeTime - partSettings.hideTime - finalWindow);
         StartCoroutine(EnableFinalShaderLifetimeAfterDelay(instanceTransform, delay, part.finalShaderLifetimeMin, part.finalShaderLifetimeMax));
+
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        if (!string.IsNullOrEmpty(instanceTransform.name) &&
+            instanceTransform.name.IndexOf("wh_heal", StringComparison.OrdinalIgnoreCase) >= 0)
+        {
+            Debug.Log(
+                $"{DebugPrefix} Final shader lifetime scheduled for '{instanceTransform.name}' " +
+                $"startIn={delay:F3}s window={finalWindow:F3}s life={partSettings.defaultLifeTime:F3}s hide={partSettings.hideTime:F3}s " +
+                $"range=({part.finalShaderLifetimeMin:F3},{part.finalShaderLifetimeMax:F3}).");
+        }
+#endif
     }
 
     private IEnumerator EnableFinalShaderLifetimeAfterDelay(Transform instanceTransform, float delay, float rangeMin, float rangeMax)

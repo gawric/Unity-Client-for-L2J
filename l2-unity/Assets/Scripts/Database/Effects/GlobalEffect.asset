@@ -48,3 +48,8 @@ MonoBehaviour:
     comment: ice-bolt-composite-effect
     settings: {fileID: 11400000, guid: e540cb9c791a7e444b8e4801c60e1a70, type: 2}
     ignoreFlightTimeForCast: 1
+  - id: 1011
+    prefab: {fileID: -2331866982259287529, guid: 785a831417b3cda4984eab6e66a512c4, type: 3}
+    comment: heal-composite-effect
+    settings: {fileID: 11400000, guid: 71be8ca0eae2cd44fbcbd0243ca6ff9f, type: 2}
+    ignoreFlightTimeForCast: 1

@@ -4,6 +4,7 @@ using UnityEngine;
 public class ParticleGroup : EffectPart
 {
     private const string DebugTraceEffectName = "el_wind_strike_ta";
+    private const string DebugTraceHealEffectToken = "wh_heal";
     private const string IceBoltTaEffectName = "el_ice_bolt_ta";
     private const string IcebergGroupName = "iceberg";
     private const string IcefragGroupName = "icefrag";
@@ -15,6 +16,8 @@ public class ParticleGroup : EffectPart
     [SerializeField] private int _countPerSecond = 15;
     [SerializeField] private int _maxCount = 2;
     [SerializeField] private bool _forceContinuousSpawning;
+    [Tooltip("Continuous loop keeps already-active particles alive without resetting shader _StartTime/_Seed. Use for effects whose shader animation must keep running, for example mesh spin.")]
+    [SerializeField] private bool _preserveShaderTimeInContinuousLoop;
 
     [Space(10)]
     [SerializeField] private bool _isBurstSpawning;    // Мгновенный выстрел (после задержки)
@@ -44,6 +47,8 @@ public class ParticleGroup : EffectPart
     private int _icebergPlayCount;
     private int _icebergSlotOnCount;
     private int _icebergSlotAutoOffCount;
+    private float _lastWhHealShaderTimeLog;
+    private float _lastWhHealPreserveLog;
 
     public void FixedUpdate()
     {
@@ -83,6 +88,15 @@ public class ParticleGroup : EffectPart
                                 $"aliveFor={(now - _particleSpawnTimes[i]):F3}s duration={_duration:F3}s " +
                                 $"slotAutoOffCount={_icebergSlotAutoOffCount} frame={Time.frameCount}.");
                         }
+
+                        if (ShouldTraceWhHeal())
+                        {
+                            Debug.Log(
+                                $"[WH_HEAL_GROUP_SLOT_OFF] group='{name}' slot={i} now={now:F3}s " +
+                                $"aliveFor={(now - _particleSpawnTimes[i]):F3}s groupDuration={_duration:F3}s " +
+                                $"preserveLoopTime={_preserveShaderTimeInContinuousLoop} runtimeLoop={_runtimeContinuousLoop} " +
+                                $"shaderMat={BuildRuntimeMaterialLifetimeSnapshot(_particles[i], now)} frame={Time.frameCount}.");
+                        }
 #endif
                         //Debug.Log($"<color=orange>[Particle DIE]</color> {gameObject.name} слот [{i}] выключен.");
                         _particles[i].gameObject.SetActive(false);
@@ -91,6 +105,14 @@ public class ParticleGroup : EffectPart
                 }
             }
         }
+
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        if (ShouldTraceWhHeal() && anyActive && now - _lastWhHealShaderTimeLog >= 0.25f)
+        {
+            _lastWhHealShaderTimeLog = now;
+            LogWhHealShaderTimeSample(now, "tick");
+        }
+#endif
 
         // 3. ЛОГИКА СПАВНА
         bool shouldLoopContinuously = _forceContinuousSpawning || _runtimeContinuousLoop;
@@ -145,6 +167,29 @@ public class ParticleGroup : EffectPart
         }
 
         GameObject pObj = _particles[_particleIndex].gameObject;
+        bool shouldLoopContinuously = _forceContinuousSpawning || _runtimeContinuousLoop;
+        if (shouldLoopContinuously &&
+            _isParticleActive[_particleIndex] &&
+            pObj.activeSelf &&
+            _preserveShaderTimeInContinuousLoop)
+        {
+            // Some long-lived effects use shader time for continuous motion.
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            if (ShouldTraceWhHeal() && now - _lastWhHealPreserveLog >= 0.5f)
+            {
+                _lastWhHealPreserveLog = now;
+                float alive = now - _particleSpawnTimes[_particleIndex];
+                Debug.Log(
+                    $"[WH_HEAL_PRESERVE_SHADER_TIME] group='{name}' slot={_particleIndex} now={now:F3}s " +
+                    $"alive={alive:F3}s groupDuration={_duration:F3}s skipRestart=true " +
+                    $"shaderMat={BuildRuntimeMaterialLifetimeSnapshot(_particles[_particleIndex], now)} frame={Time.frameCount}.");
+            }
+#endif
+            UpdateOwnerWorldPos(_particles[_particleIndex]);
+            _particleIndex++;
+            return;
+        }
+
         pObj.SetActive(true);
 
         _particleSpawnTimes[_particleIndex] = now;
@@ -214,6 +259,22 @@ public class ParticleGroup : EffectPart
             {
                 m.SetVector("_SurfaceNormals", SurfaceNormal);
             }
+
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            if (ShouldTraceWhHeal())
+            {
+                float hasLt = m.HasProperty("_HasLifetime") ? m.GetFloat("_HasLifetime") : -1f;
+                Vector4 life = m.HasProperty("_LifetimeRange") ? m.GetVector("_LifetimeRange") : Vector4.zero;
+                Vector4 delay = m.HasProperty("_InitialDelayRange") ? m.GetVector("_InitialDelayRange") : Vector4.zero;
+                float st = m.GetFloat("_StartTime");
+                float sd = m.HasProperty("_Seed") ? m.GetFloat("_Seed") : 0f;
+                Debug.Log(
+                    $"[WH_HEAL_SHADER_SPAWN] group='{name}' slot={_particleIndex} matIdx={materialIndex} mat='{m.name}' " +
+                    $"now={now:F3}s _StartTime={st:F3} shaderAgeApprox={(now - st):F3}s _Seed={sd:F3} " +
+                    $"_HasLifetime={hasLt:F3} _LifetimeRange=({life.x:F3},{life.y:F3}) _InitialDelay=({delay.x:F3},{delay.y:F3}) " +
+                    $"warmup={_relativeWarmupTime:F3}s frame={Time.frameCount}.");
+            }
+#endif
         }
 
         _particleIndex++;
@@ -230,6 +291,8 @@ public class ParticleGroup : EffectPart
         _stopped = false;
         _debugPlayStartedAt = _lastEnable;
         _debugFirstSpawnLogged = false;
+        _lastWhHealShaderTimeLog = 0f;
+        _lastWhHealPreserveLog = 0f;
 
         if (_duration < 0.01f) _duration = GetLifeTimeFromMaterial();
 
@@ -276,6 +339,17 @@ public class ParticleGroup : EffectPart
                 $"[ICEFRAG_DURATION_START] group='{name}' playAt={_debugPlayStartedAt:F3}s " +
                 $"duration={_duration:F3}s startDelay={_startDelay:F3}s countPerSec={_countPerSecond} maxCount={_maxCount} " +
                 $"fixedDuration={_hasFixedDuration} owner='{(_owner != null ? _owner.name : "null")}'.");
+        }
+
+        if (ShouldTraceWhHeal())
+        {
+            Debug.Log(
+                $"[WH_HEAL_GROUP_PLAY] group='{name}' playAt={_debugPlayStartedAt:F3}s owner='{(_owner != null ? _owner.name : "null")}' " +
+                $"duration={_duration:F3}s fixedDuration={_hasFixedDuration} baseShaderLife={_baseShaderLifetime:F3}s " +
+                $"runtimeLoop={_runtimeContinuousLoop} loopOv={_hasRuntimeContinuousLoopOverride}:{_runtimeContinuousLoopOverrideValue} " +
+                $"forceContinuous={_forceContinuousSpawning} preserveShaderTime={_preserveShaderTimeInContinuousLoop} " +
+                $"burst={_isBurstSpawning} countPerSec={_countPerSecond} maxCount={_maxCount} startDelay={_startDelay:F3}s " +
+                $"warmup={_relativeWarmupTime:F3}s frame={Time.frameCount}.");
         }
 #endif
     }
@@ -386,6 +460,15 @@ public class ParticleGroup : EffectPart
             $"legacyHit={((EffectSkillsmanager.Instance != null) ? EffectSkillsmanager.Instance.HitTime() / 1000f : -1f):F3}s " +
             $"baseShaderLife={_baseShaderLifetime:F3}s runtimeLoop={_runtimeContinuousLoop} " +
             $"loopOverride={_hasRuntimeContinuousLoopOverride}:{_runtimeContinuousLoopOverrideValue}");
+
+        if (ShouldTraceWhHeal())
+        {
+            Debug.Log(
+                $"[WH_HEAL_GROUP_SETUP] group='{name}' owner='{(_owner != null ? _owner.name : "null")}' settings='{(_settings != null ? _settings.name : "null")}' " +
+                $"hideTime={(_settings != null ? _settings.hideTime : -1f):F3}s defaultLife={(_settings != null ? _settings.defaultLifeTime : -1f):F3}s " +
+                $"sameAsLineAboveDurationAfter={_duration:F3}s preserveShaderTime={_preserveShaderTimeInContinuousLoop} " +
+                $"sharedMat0={BuildMaterialLifetimeSnapshot(_particles != null && _particles.Length > 0 ? _particles[0] : null)}.");
+        }
 #endif
     }
     public override void StopPart()
@@ -414,6 +497,13 @@ public class ParticleGroup : EffectPart
             Debug.Log(
                 $"[ICEFRAG_DURATION_STOP] group='{name}' elapsed={elapsed:F3}s duration={_duration:F3}s " +
                 $"castHit={(_castData != null ? _castData.HitTime : -1f):F3}s settingsLife={(_settings != null ? _settings.defaultLifeTime : -1f):F3}s.");
+        }
+
+        if (ShouldTraceWhHeal())
+        {
+            Debug.Log(
+                $"[WH_HEAL_GROUP_STOP] group='{name}' elapsed={elapsed:F3}s duration={_duration:F3}s " +
+                $"preserveShaderTime={_preserveShaderTimeInContinuousLoop} runtimeLoop={_runtimeContinuousLoop} frame={Time.frameCount}.");
         }
 #endif
         _stopped = true;
@@ -447,6 +537,81 @@ public class ParticleGroup : EffectPart
         return _owner.name.IndexOf(IceBoltTaEffectName, System.StringComparison.OrdinalIgnoreCase) >= 0 &&
                name.IndexOf(IcefragGroupName, System.StringComparison.OrdinalIgnoreCase) >= 0;
     }
+
+    private bool ShouldTraceWhHeal()
+    {
+        if (!string.IsNullOrEmpty(name) &&
+            name.IndexOf(DebugTraceHealEffectToken, System.StringComparison.OrdinalIgnoreCase) >= 0)
+        {
+            return true;
+        }
+
+        if (_owner != null && !string.IsNullOrEmpty(_owner.name) &&
+            _owner.name.IndexOf(DebugTraceHealEffectToken, System.StringComparison.OrdinalIgnoreCase) >= 0)
+        {
+            return true;
+        }
+
+        Transform t = transform;
+        for (int depth = 0; t != null && depth < 16; depth++, t = t.parent)
+        {
+            if (!string.IsNullOrEmpty(t.name) &&
+                t.name.IndexOf(DebugTraceHealEffectToken, System.StringComparison.OrdinalIgnoreCase) >= 0)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+    private void LogWhHealShaderTimeSample(float now, string reason)
+    {
+        if (_particles == null || _isParticleActive == null)
+        {
+            return;
+        }
+
+        for (int i = 0; i < _particles.Length; i++)
+        {
+            if (!_isParticleActive[i] || _particles[i] == null || !_particles[i].gameObject.activeSelf)
+            {
+                continue;
+            }
+
+            Debug.Log(
+                $"[WH_HEAL_SHADER_TICK] reason={reason} group='{name}' slot={i} now={now:F3}s " +
+                $"alive={(now - _particleSpawnTimes[i]):F3}s groupDuration={_duration:F3}s " +
+                $"{BuildRuntimeMaterialLifetimeSnapshot(_particles[i], now)} frame={Time.frameCount}.");
+            return;
+        }
+    }
+
+    private string BuildRuntimeMaterialLifetimeSnapshot(Renderer renderer, float now)
+    {
+        if (renderer == null)
+        {
+            return "no_renderer";
+        }
+
+        Material[] mats = renderer.materials;
+        if (mats == null || mats.Length == 0 || mats[0] == null)
+        {
+            return "no_runtime_material";
+        }
+
+        Material mat = mats[0];
+        Vector4 initialDelay = mat.HasProperty("_InitialDelayRange") ? mat.GetVector("_InitialDelayRange") : Vector4.zero;
+        Vector4 lifetime = mat.HasProperty("_LifetimeRange") ? mat.GetVector("_LifetimeRange") : Vector4.zero;
+        float hasLifetime = mat.HasProperty("_HasLifetime") ? mat.GetFloat("_HasLifetime") : -1f;
+        float startTime = mat.HasProperty("_StartTime") ? mat.GetFloat("_StartTime") : -1f;
+        float age = startTime > -0.5f ? now - startTime : -1f;
+        return
+            $"{mat.name}:_HasLifetime={hasLifetime:F3} life=({lifetime.x:F3},{lifetime.y:F3}) " +
+            $"initDelay=({initialDelay.x:F3},{initialDelay.y:F3}) _StartTime={startTime:F3} shaderAge~={age:F3}s";
+    }
+#endif
 
     private string BuildMaterialLifetimeSnapshot(Renderer renderer)
     {

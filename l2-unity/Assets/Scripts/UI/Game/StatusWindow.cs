@@ -54,6 +54,8 @@ public class StatusWindow : L2Window
             horizontalResizeHandle, _windowEle, _statusWindowMinWidth, _statusWindowMaxWidth);
         horizontalResizeHandle.AddManipulator(horizontalResize);
 
+        _windowEle.RegisterCallback<ClickEvent>(OnStatusWindowClicked);
+
         _nameLabel = (Label)GetElementById("PlayerNameText");
         if(_nameLabel == null) {
             Debug.LogError("Status window PlayerNameText is null.");
@@ -108,6 +110,50 @@ public class StatusWindow : L2Window
         if(_MPBar == null) {
             Debug.LogError("Status windowar MPBar is null");
         }
+    }
+
+    private void OnStatusWindowClicked(ClickEvent evt)
+    {
+        if (evt.button != 0)
+        {
+            return;
+        }
+
+        SelectPlayerAsTarget();
+        evt.StopPropagation();
+    }
+
+    private void SelectPlayerAsTarget()
+    {
+        PlayerEntity player = PlayerEntity.Instance;
+        if (player == null || TargetManager.Instance == null)
+        {
+            return;
+        }
+
+        TargetManager.Instance.SetTarget(new ObjectData(player.gameObject), "#ffffff");
+        SendSelfTargetAction(player);
+    }
+
+    private void SendSelfTargetAction(PlayerEntity player)
+    {
+        if (player.IdentityInterlude == null || GameClient.Instance == null)
+        {
+            return;
+        }
+
+        var position = player.transform.position;
+        var l2jpos = VectorUtils.ConvertPosUnityToL2j(position);
+
+        ClickAction sendPacket = CreatorPacketsUser.CreateActiont(
+            player.IdentityInterlude.Id,
+            (int)l2jpos.x,
+            (int)l2jpos.y,
+            (int)l2jpos.z,
+            0);
+
+        bool enable = GameClient.Instance.IsCryptEnabled();
+        SendGameDataQueue.Instance().AddItem(sendPacket, enable, enable);
     }
 
     void FixedUpdate()

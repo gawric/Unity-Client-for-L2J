@@ -210,17 +210,22 @@ public abstract class TimedCompositeEffectBase : BaseEffect
         }
 
         ParticleGroup[] groups = instanceTransform.GetComponentsInChildren<ParticleGroup>(true);
-        if (groups == null || groups.Length == 0)
-        {
-            return;
-        }
-
         for (int i = 0; i < groups.Length; i++)
         {
             ParticleGroup group = groups[i];
             if (group != null)
             {
                 group.SetRuntimeContinuousLoopOverride(part.overrideContinuousLoop, part.continuousLoop);
+            }
+        }
+
+        ParticleSingle[] singles = instanceTransform.GetComponentsInChildren<ParticleSingle>(true);
+        for (int i = 0; i < singles.Length; i++)
+        {
+            ParticleSingle single = singles[i];
+            if (single != null)
+            {
+                single.SetRuntimeContinuousLoopOverride(part.overrideContinuousLoop, part.continuousLoop);
             }
         }
     }

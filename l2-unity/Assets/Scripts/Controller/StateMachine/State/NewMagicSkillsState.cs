@@ -1,5 +1,6 @@
 ﻿using System;
 using UnityEngine;
+using static UnityEngine.EventSystems.EventTrigger;
 
 public class NewMagicSkillsState  : AbstractAttackEvents
 {
@@ -11,7 +12,7 @@ public class NewMagicSkillsState  : AbstractAttackEvents
 
     public override void Enter()
     {
-
+        base.Enter();
     }
     public override void HandleEvent(Event evt, object payload = null)
     {
@@ -35,10 +36,24 @@ public class NewMagicSkillsState  : AbstractAttackEvents
                 Debug.Log("NewMagicSkillsState Use Sate> Отмена скорее всего запрос пришел из ActionFaild");
                 break;
             case Event.APPLY_SELF_SKILL:
+
                 AnimationCombo selfCombo = SkillgrpTable.Instance.GetAnimComboBySkillId(useSkill.SkillId, useSkill.SkillLvl);
+                SetupDurationIfHitTimeNot0(useSkill, objectId, entity, selfCombo);
+
                 SkillExecutor.Instance.ExecuteSkillOverride(useSkill.SkillGrp, entity, selfCombo, _events);
                 break;
 
+        }
+    }
+
+    private void SetupDurationIfHitTimeNot0(MagicSkillUse useSkill , int objectId ,  Entity entity ,  AnimationCombo selfCombo)
+    {
+
+        if (useSkill.HitTime > 0)
+        {
+            float[] durations_self = AnimationManager.Instance.GetOverrideClipsDurations(objectId, selfCombo.GetAnimCycle());
+            float shotEventTime_self = AnimationManager.Instance.GetOverrideEventTimeByName(objectId, selfCombo.GetAnimCycle(), "OnAnimationShoot");
+            entity.SetupTotalCastDuration(useSkill.HitTime, 0f, durations_self, shotEventTime_self);
         }
     }
 

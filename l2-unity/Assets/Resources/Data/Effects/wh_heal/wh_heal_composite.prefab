@@ -1,0 +1,171 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &3407451541169557743
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2522490527146848082}
+  - component: {fileID: -2331866982259287529}
+  m_Layer: 0
+  m_Name: wh_heal_composite
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2522490527146848082
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3407451541169557743}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 4676.284, y: -71.03992, z: -1555.6414}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &-2331866982259287529
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3407451541169557743}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 62c54513227c16f4eb5c8009ec8e165e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _owner: {fileID: 0}
+  _parts:
+  - name: wh_heal_ca
+    prefab: {fileID: 691409183428148954, guid: 7335f0a77e41cce49b2980951b4dbf4a, type: 3}
+    settingsOverride: {fileID: 0}
+    attachmentPoint: 6
+    spawnTiming: 0
+    hitLeadSeconds: 0
+    positionOffset: {x: 0, y: 0, z: 0}
+    normalizeOffsetByOwnerHeight: 0
+    referenceHeight: 1.8
+    scale: 1.3
+    followResolvedTransform: 0
+    inheritRotation: 0
+    passCastDataToPart: 1
+    useCastTimedLifetime: 1
+    overrideContinuousLoop: 1
+    continuousLoop: 1
+    disableShaderLifetime: 1
+    overrideHideTime: 1
+    customHideTime: 0
+    enableFinalShaderLifetimeOnFade: 1
+    finalShaderLifetimeMin: 1
+    finalShaderLifetimeMax: 1.2
+    projectile:
+      launchMode: 0
+      showBeforeAnimationShoot: 0
+      impactType: 0
+      settingsOverride:
+        id: 0
+        prefab: {fileID: 0}
+        transform: {fileID: 0}
+        startPosition: {x: 0, y: 0, z: 0}
+        targetTransform: {fileID: 0}
+        targetPosition: {x: 0, y: 0, z: 0}
+        speed: 0
+        damage: 0
+        lifetime: 0
+        speedCurve:
+          serializedVersion: 2
+          m_Curve: []
+          m_PreInfinity: 0
+          m_PostInfinity: 0
+          m_RotationOrder: 0
+        startTime: 0
+        distance: 0
+        useGravity: 0
+        gravityScale: 0
+        isActive: 0
+        hitPoint: {x: 0, y: 0, z: 0}
+        hitNormal: {x: 0, y: 0, z: 0}
+        flytime: 0
+        hitPointCollider: {x: 0, y: 0, z: 0}
+        hitNormalCollider: {x: 0, y: 0, z: 0}
+        hitDirection: {x: 0, y: 0, z: 0}
+        arrowCollider: {fileID: 0}
+        impactType: 0
+        lastPosition: {x: 0, y: 0, z: 0}
+        castStartTimeSnapshot: 0
+        castServerShootSnapshot: 0
+        castServerHitSnapshot: 0
+        projectileLaunchGlobalFromCast: 0
+        attackerEntityId: 0
+  - name: wh_heal_ta
+    prefab: {fileID: 1011223352834338050, guid: e39ce298a8d9097409cb14958e1ac757, type: 3}
+    settingsOverride: {fileID: 0}
+    attachmentPoint: 6
+    spawnTiming: 0
+    hitLeadSeconds: 0
+    positionOffset: {x: 0, y: 0, z: 0}
+    normalizeOffsetByOwnerHeight: 0
+    referenceHeight: 1.8
+    scale: 1.3
+    followResolvedTransform: 0
+    inheritRotation: 0
+    passCastDataToPart: 0
+    useCastTimedLifetime: 0
+    overrideContinuousLoop: 0
+    continuousLoop: 0
+    disableShaderLifetime: 0
+    overrideHideTime: 0
+    customHideTime: 0
+    enableFinalShaderLifetimeOnFade: 0
+    finalShaderLifetimeMin: 0
+    finalShaderLifetimeMax: 0
+    projectile:
+      launchMode: 0
+      showBeforeAnimationShoot: 0
+      impactType: 0
+      settingsOverride:
+        id: 0
+        prefab: {fileID: 0}
+        transform: {fileID: 0}
+        startPosition: {x: 0, y: 0, z: 0}
+        targetTransform: {fileID: 0}
+        targetPosition: {x: 0, y: 0, z: 0}
+        speed: 0
+        damage: 0
+        lifetime: 0
+        speedCurve:
+          serializedVersion: 2
+          m_Curve: []
+          m_PreInfinity: 0
+          m_PostInfinity: 0
+          m_RotationOrder: 0
+        startTime: 0
+        distance: 0
+        useGravity: 0
+        gravityScale: 0
+        isActive: 0
+        hitPoint: {x: 0, y: 0, z: 0}
+        hitNormal: {x: 0, y: 0, z: 0}
+        flytime: 0
+        hitPointCollider: {x: 0, y: 0, z: 0}
+        hitNormalCollider: {x: 0, y: 0, z: 0}
+        hitDirection: {x: 0, y: 0, z: 0}
+        arrowCollider: {fileID: 0}
+        impactType: 0
+        lastPosition: {x: 0, y: 0, z: 0}
+        castStartTimeSnapshot: 0
+        castServerShootSnapshot: 0
+        castServerHitSnapshot: 0
+        projectileLaunchGlobalFromCast: 0
+        attackerEntityId: 0
+  _serverHitLifetimeTailSeconds: 0

@@ -38,6 +38,7 @@ public static class CompositeProjectileLaunchHelper
                 continue;
             }
 
+            RestartHiddenVisuals(spawned);
             SetVisualsVisible(spawned.transform, true);
         }
     }
@@ -220,6 +221,15 @@ public static class CompositeProjectileLaunchHelper
     private static ProjectileImpactType GetImpactType(CompositePrefabPart part)
     {
         return GetProjectileConfig(part).impactType;
+    }
+
+    private static void RestartHiddenVisuals(BaseEffect spawned)
+    {
+        L2Particle particle = spawned as L2Particle;
+        if (particle != null)
+        {
+            particle.ResetTimer();
+        }
     }
 
     private static CompositeProjectileConfig GetProjectileConfig(CompositePrefabPart part)
