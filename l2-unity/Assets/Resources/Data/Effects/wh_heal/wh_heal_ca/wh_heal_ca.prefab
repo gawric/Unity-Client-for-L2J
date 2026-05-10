@@ -58,6 +58,11 @@ MonoBehaviour:
   _hasFixedDuration: 0
   _instantKillAtCastEnd: 0
   _fitToBounds: 0
+  _testSpawnOnlyNoTeardown: 0
+  _shaderHold: 0.6
+  _releaseShaderHoldByCastProgress: 1
+  _shaderHoldReleaseStartNormalized: 0.85
+  _smoothShaderHoldRelease: 1
 --- !u!1 &2294509006655095925
 GameObject:
   m_ObjectHideFlags: 0
@@ -121,6 +126,11 @@ MonoBehaviour:
   _hasFixedDuration: 0
   _instantKillAtCastEnd: 0
   _fitToBounds: 0
+  _testSpawnOnlyNoTeardown: 0
+  _shaderHold: 0.6
+  _releaseShaderHoldByCastProgress: 1
+  _shaderHoldReleaseStartNormalized: 0.85
+  _smoothShaderHoldRelease: 1
 --- !u!1 &3290672776648416884
 GameObject:
   m_ObjectHideFlags: 0
@@ -179,6 +189,11 @@ MonoBehaviour:
   _hasFixedDuration: 0
   _instantKillAtCastEnd: 0
   _fitToBounds: 0
+  _testSpawnOnlyNoTeardown: 0
+  _shaderHold: 0.6
+  _releaseShaderHoldByCastProgress: 1
+  _shaderHoldReleaseStartNormalized: 0.85
+  _smoothShaderHoldRelease: 1
 --- !u!1 &3893842496163158126
 GameObject:
   m_ObjectHideFlags: 0
@@ -487,6 +502,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _owner: {fileID: 0}
+  _skipScheduledDestroyForDebug: 0
   _surfaceNormal: {x: 0, y: 0, z: 0}
   _pooledEffect:
     _effectClass: 

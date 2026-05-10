@@ -42,7 +42,7 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _Alpha: 1
+    - _Alpha: 0.6
     - _AlphaSmooth: 0
     - _Billboard: 0
     - _Brighten: 1
@@ -60,10 +60,11 @@ Material:
     - _Debug: 0
     - _FadeIn: 1
     - _FadeInEndTime: 0.9
-    - _Fadeout: 0
-    - _FadeoutStartTime: 1.98
+    - _Fadeout: 1
+    - _FadeoutStartTime: 3
     - _GetVelocityDirectionFrom: 0
     - _HasLifetime: 1
+    - _Hold: 0
     - _QueueControl: 0
     - _QueueOffset: 0
     - _Seed: 0
@@ -95,7 +96,7 @@ Material:
     - _ColorScale8Color: {r: 0, g: 0, b: 0, a: 0}
     - _ColorScale9Color: {r: 0, g: 0, b: 0, a: 0}
     - _InitialDelayRange: {r: 0.5, g: 0.5, b: 0, a: 0}
-    - _LifetimeRange: {r: 3, g: 3, b: 0, a: 0}
+    - _LifetimeRange: {r: 2, g: 3, b: 0, a: 0}
     - _ProjectionNormal: {r: 0, g: 0, b: 0, a: 0}
     - _SizeRangeX: {r: 0.085, g: 0.085, b: 0, a: 0}
     - _SizeRangeY: {r: 0.3, g: 0.3, b: 0, a: 0}

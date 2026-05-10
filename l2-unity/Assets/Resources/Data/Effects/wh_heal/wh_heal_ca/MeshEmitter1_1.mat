@@ -42,7 +42,12 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     m_Ints: []
-    m_Floats: []
+    m_Floats:
+    - _Alpha: 0.6
+    - _FadeIn: 1
+    - _Fadeout: 1
+    - _FadeoutStartTime: 3
+    - _Hold: 0
     m_Colors: []
   m_BuildTextureStacks: []
   m_AllowLocking: 1

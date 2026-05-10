@@ -62,12 +62,12 @@ MonoBehaviour:
     useCastTimedLifetime: 1
     overrideContinuousLoop: 1
     continuousLoop: 1
-    disableShaderLifetime: 1
-    overrideHideTime: 1
+    disableShaderLifetime: 0
+    overrideHideTime: 0
     customHideTime: 0
-    enableFinalShaderLifetimeOnFade: 1
-    finalShaderLifetimeMin: 1
-    finalShaderLifetimeMax: 1.2
+    enableFinalShaderLifetimeOnFade: 0
+    finalShaderLifetimeMin: 0
+    finalShaderLifetimeMax: 0
     projectile:
       launchMode: 0
       showBeforeAnimationShoot: 0
@@ -169,3 +169,4 @@ MonoBehaviour:
         projectileLaunchGlobalFromCast: 0
         attackerEntityId: 0
   _serverHitLifetimeTailSeconds: 0
+  _skipDestroyCompositeByLifetime: 0

@@ -4,6 +4,9 @@ public class L2Particle : BaseEffect
 {
     private const string LifetimeTraceEffectName = "el_wind_strike_ta";
 
+    [Tooltip("Не вызывать DestoryEffect при Play — объект не удаляется по таймеру (отладка шейдера, Hold и т.п.). Выключено по умолчанию.")]
+    [SerializeField] private bool _skipScheduledDestroyForDebug;
+
     [SerializeField] private Vector3 _surfaceNormal;
     [SerializeField] private PooledEffect _pooledEffect;
     [SerializeField] private EffectPart[] _particleGroups;
@@ -61,14 +64,23 @@ public class L2Particle : BaseEffect
     {
         _playStartedAt = Time.time;
         ResetTimer();
-        DestoryEffect(_settings,  _castData);
+        if (!_skipScheduledDestroyForDebug)
+        {
+            DestoryEffect(_settings, _castData);
+        }
+
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
+        if (_skipScheduledDestroyForDebug)
+        {
+            Debug.Log($"[L2Particle] SkipScheduledDestroyForDebug: '{name}' — DestoryEffect не вызывается.");
+        }
+
         if (ShouldTraceLifetime())
         {
             Debug.Log(
                 $"[TA_LIFETIME_PLAY] effect='{name}' playAt={_playStartedAt:F3}s " +
                 $"scheduledLife={(_settings != null ? _settings.defaultLifeTime : -1f):F3}s " +
-                $"scheduledHide={(_settings != null ? _settings.hideTime : -1f):F3}s.");
+                $"scheduledHide={(_settings != null ? _settings.hideTime : -1f):F3}s skipDestroy={_skipScheduledDestroyForDebug}.");
         }
 #endif
     }

@@ -58,6 +58,9 @@ public class CompositePrefabEffect : TimedCompositeEffectBase
     [SerializeField] private CompositePrefabPart[] _parts;
     [SerializeField] private float _serverHitLifetimeTailSeconds = 0f;
 
+    [Tooltip("Если включено: не вызывать DestoryEffect по lifetime корня — дочерние префабы (например wh_heal_ca) не уничтожаются вместе с композитом. Только для отладки шейдеров/Hold.")]
+    [SerializeField] private bool _skipDestroyCompositeByLifetime;
+
     private readonly IEffectAttachmentResolver _resolver = new DefaultEffectAttachmentResolver();
     private EffectResolveContext _context;
     private readonly List<PendingCompositePart> _pendingParts = new List<PendingCompositePart>();
@@ -108,7 +111,16 @@ public class CompositePrefabEffect : TimedCompositeEffectBase
         QueueImmediateAndDelayedParts();
         StartPendingPartsRoutineIfNeeded();
         StartShootFallbackRoutineIfNeeded();
-        DestroyCompositeByLifetime();
+        if (!_skipDestroyCompositeByLifetime)
+        {
+            DestroyCompositeByLifetime();
+        }
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        else
+        {
+            Debug.Log($"{DebugPrefix} SkipDestroyCompositeByLifetime=true — корень композита не будет уничтожен по lifetime (дочерние объекты остаются в сцене).");
+        }
+#endif
     }
 
     public override void SetProgress(float normalizedTime)
