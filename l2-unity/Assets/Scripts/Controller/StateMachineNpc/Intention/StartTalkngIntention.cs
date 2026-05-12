@@ -27,10 +27,8 @@
    
     private void ShowHtmlDialog(NpcHtmlMessage packet)
     {
-
-       HtmlWindow.Instance.InjectToWindow(packet.Elements());
-       HtmlWindow.Instance.Test2();
-
+        HtmlWindow.Instance.InjectToWindow(packet.Html);
+        HtmlWindow.Instance.Show();
     }
 
 
