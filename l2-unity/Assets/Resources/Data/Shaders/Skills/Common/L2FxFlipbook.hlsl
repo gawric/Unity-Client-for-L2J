@@ -1,4 +1,4 @@
-#ifndef L2_FX_FLIPBOOK_INCLUDED
+﻿#ifndef L2_FX_FLIPBOOK_INCLUDED
 #define L2_FX_FLIPBOOK_INCLUDED
 
 #include "L2FxParticleAnim.hlsl"
@@ -25,12 +25,12 @@ float2 L2Fx_FlipbookAtlasUV(float2 uv01, int cellIndex, int uSubdivisions, int v
     int vSub = max(vSubdivisions, 1);
     int tiles = uSub * vSub;
     cellIndex = clamp(cellIndex, 0, tiles - 1);
-    float du = 1.0 / (float)uSub;
-    float dv = 1.0 / (float)vSub;
+    float du = 1.0 / (float) uSub;
+    float dv = 1.0 / (float) vSub;
     int u = cellIndex / vSub;
     int v = (vSub - 1) - (cellIndex % vSub);
     float2 cellSize = float2(du, dv);
-    float2 origin = float2((float)u * du, (float)v * dv);
+    float2 origin = float2((float) u * du, (float) v * dv);
     return origin + saturate(uv01 * cellSize);
 }
 
@@ -39,7 +39,7 @@ int L2Fx_FlipbookFrameIndex(float normalizedAge, int subStart, int subEnd)
 {
     int span = max(subEnd - subStart, 1);
     float t = saturate(normalizedAge);
-    int f = subStart + (int)floor(t * (float)span);
+    int f = subStart + (int) floor(t * (float) span);
     return clamp(f, subStart, subEnd);
 }
 
@@ -48,7 +48,7 @@ float L2Fx_FlipbookFrameFloat(float normalizedAge, int subStart, int subEnd)
 {
     int span = max(subEnd - subStart, 1);
     float t = saturate(normalizedAge);
-    return (float)subStart + t * (float)span;
+    return (float) subStart + t * (float) span;
 }
 
 // Two frame indices + lerp weight in [0,1) for sampling two atlas cells.
@@ -61,11 +61,11 @@ void L2Fx_FlipbookBlendFrames(
     out float blend)
 {
     float f = L2Fx_FlipbookFrameFloat(normalizedAge, subStart, subEnd);
-    frameA = (int)floor(f);
+    frameA = (int) floor(f);
     frameB = frameA + 1;
     frameA = clamp(frameA, subStart, subEnd);
     frameB = clamp(frameB, subStart, subEnd);
-    blend = saturate(f - (float)frameA);
+    blend = saturate(f - (float) frameA);
 }
 
 // Full atlas UV pair for BlendBetweenSubdivisions + subdiv grid (Unreal TextureU/VSubdivisions).
@@ -91,10 +91,10 @@ void L2Fx_FlipbookAtlasUVBlend(
 // Matches intent of SubDivision: RandomRange(Seed, FrameStart, FrameEnd) then Floor -> int cell index.
 int L2Fx_FlipbookSubDivisionRandomFrame(float seed, float startTime, int frameStart, int frameEnd, float salt)
 {
-    float mn = (float)min(frameStart, frameEnd);
-    float mx = (float)max(frameStart, frameEnd);
+    float mn = (float) min(frameStart, frameEnd);
+    float mx = (float) max(frameStart, frameEnd);
     float r = L2Fx_RandomRange(float2(mn, mx), seed, startTime, salt);
-    int idx = (int)floor(r);
+    int idx = (int) floor(r);
     return clamp(idx, min(frameStart, frameEnd), max(frameStart, frameEnd));
 }
 

@@ -110,14 +110,14 @@ MonoBehaviour:
   - name: wh_heal_ta
     prefab: {fileID: 1011223352834338050, guid: e39ce298a8d9097409cb14958e1ac757, type: 3}
     settingsOverride: {fileID: 0}
-    attachmentPoint: 6
-    spawnTiming: 0
+    attachmentPoint: 3
+    spawnTiming: 5
     hitLeadSeconds: 0
     positionOffset: {x: 0, y: 0, z: 0}
     normalizeOffsetByOwnerHeight: 0
     referenceHeight: 1.8
     scale: 1.3
-    followResolvedTransform: 0
+    followResolvedTransform: 1
     inheritRotation: 0
     passCastDataToPart: 0
     useCastTimedLifetime: 0

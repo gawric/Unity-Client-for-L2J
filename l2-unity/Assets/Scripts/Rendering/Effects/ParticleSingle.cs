@@ -5,11 +5,7 @@ public class ParticleSingle : EffectPart
     private const string OwnerWorldPosShaderProperty = "_OwnerWorldPos";
     private const string DebugTraceHealEffectToken = "wh_heal";
 
-    private static readonly int HasLifetimeShaderId = Shader.PropertyToID("_HasLifetime");
     private static readonly int HoldShaderId = Shader.PropertyToID("_Hold");
-    private static readonly int FadeInShaderId = Shader.PropertyToID("_FadeIn");
-    private static readonly int FadeoutShaderId = Shader.PropertyToID("_Fadeout");
-    private static readonly int FadeoutStartTimeShaderId = Shader.PropertyToID("_FadeoutStartTime");
     private static readonly int LifetimeRangeShaderId = Shader.PropertyToID("_LifetimeRange");
     private static readonly int StartTimeShaderId = Shader.PropertyToID("_StartTime");
 
@@ -139,7 +135,8 @@ public class ParticleSingle : EffectPart
                     $"[PARTICLE_SINGLE_TICK] group='{name}' now={now:F3}s alive={(now - _spawnedAt):F3}s " +
                     $"duration={_duration:F3}s castHit={(_castData != null ? _castData.HitTime : -1f):F3}s " +
                     $"settingsLife={(_settings != null ? _settings.defaultLifeTime : -1f):F3}s " +
-                    $"activeLoop={(_forceContinuousSpawning || _runtimeContinuousLoop)} mats=[{BuildAllRuntimeMaterialsFadeDiag(now)}].");
+                    $"activeLoop={(_forceContinuousSpawning || _runtimeContinuousLoop)} " +
+                    $"[FADE_PHASE]={BuildFirstMaterialFadePhase(now)} mats=[{BuildAllRuntimeMaterialsFadeDiag(now)}].");
             }
 #endif
         }
@@ -258,7 +255,7 @@ public class ParticleSingle : EffectPart
                 $"[PARTICLE_SINGLE_STOPPART] group='{name}' now={now:F3}s elapsed={(now - _lastEnable):F3}s " +
                 $"duration={_duration:F3}s castHit={(_castData != null ? _castData.HitTime : -1f):F3}s " +
                 $"settingsLife={(_settings != null ? _settings.defaultLifeTime : -1f):F3}s " +
-                $"mats=[{BuildAllRuntimeMaterialsFadeDiag(now)}].");
+                $"[FADE_PHASE]={BuildFirstMaterialFadePhase(now)} mats=[{BuildAllRuntimeMaterialsFadeDiag(now)}].");
         }
 #endif
        // _stopped = true;
@@ -338,7 +335,8 @@ public class ParticleSingle : EffectPart
                 Debug.Log(
                     $"[PARTICLE_SINGLE_SPAWN] group='{name}' idx={i} now={now:F3}s shaderStartTime={shaderStartTime:F3}s relativeWarmup={_relativeWarmupTime:F3}s _Seed={seed:F3} " +
                     $"castHit={(_castData != null ? _castData.HitTime : -1f):F3}s settingsLife={(_settings != null ? _settings.defaultLifeTime : -1f):F3}s " +
-                    $"diag={BuildShaderFadeDiagnosticLine(runtimeMat, now)}");
+                    $"[FADE_PHASE]={ShaderFadeDiagnostic.FadePhaseLabel(runtimeMat, now)} " +
+                    $"diag={ShaderFadeDiagnostic.BuildLine(runtimeMat, now)}");
             }
 #endif
         }
@@ -514,30 +512,24 @@ public class ParticleSingle : EffectPart
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
     private static string BuildShaderFadeDiagnosticLine(Material mat, float now)
     {
-        if (mat == null)
+        return ShaderFadeDiagnostic.BuildLine(mat, now);
+    }
+
+    private string BuildFirstMaterialFadePhase(float now)
+    {
+        Renderer renderer = ResolveRenderer();
+        if (renderer == null)
         {
-            return "null_mat";
+            return "no_renderer";
         }
 
-        string sn = mat.shader != null ? mat.shader.name : "no_shader";
-        float hasLt = mat.HasProperty(HasLifetimeShaderId) ? mat.GetFloat(HasLifetimeShaderId) : -1f;
-        float fadeout = mat.HasProperty(FadeoutShaderId) ? mat.GetFloat(FadeoutShaderId) : -1f;
-        float fadeIn = mat.HasProperty(FadeInShaderId) ? mat.GetFloat(FadeInShaderId) : -1f;
-        float fadeStart = mat.HasProperty(FadeoutStartTimeShaderId) ? mat.GetFloat(FadeoutStartTimeShaderId) : -1f;
-        Vector4 life = mat.HasProperty(LifetimeRangeShaderId) ? mat.GetVector(LifetimeRangeShaderId) : Vector4.zero;
-        float lifeMax = Mathf.Max(life.x, life.y, 1e-6f);
-        float hold = mat.HasProperty(HoldShaderId) ? mat.GetFloat(HoldShaderId) : -1f;
-        float st = mat.HasProperty(StartTimeShaderId) ? mat.GetFloat(StartTimeShaderId) : -1f;
-        float age = st > -0.5f ? now - st : -1f;
-        float tail = (fadeStart >= 0f && lifeMax > 1e-4f) ? lifeMax - fadeStart : -1f;
-        float fadeFrac =
-            tail > 1e-4f && age >= fadeStart
-                ? Mathf.Clamp01((age - fadeStart) / tail)
-                : -1f;
-        return
-            $"{mat.name} shader={sn} HasLt={hasLt} Fadeout={fadeout} FadeIn={fadeIn} " +
-            $"fadeStart={fadeStart:F4} lifeMax={lifeMax:F4} tail={tail:F4} Hold={hold} " +
-            $"StartT={st:F4} age={age:F4}s fadeFrac={fadeFrac:F3}";
+        Material[] mats = renderer.materials;
+        if (mats == null || mats.Length == 0 || mats[0] == null)
+        {
+            return "no_mat";
+        }
+
+        return ShaderFadeDiagnostic.FadePhaseLabel(mats[0], now);
     }
 
     private string BuildAllRuntimeMaterialsFadeDiag(float now)

@@ -1,26 +1,352 @@
 #ifndef L2_FX_EMITTER_SPAWN_INCLUDED
 #define L2_FX_EMITTER_SPAWN_INCLUDED
 
-// Unreal Engine 1 / Lineage 2 Interlude–style emitter helpers: polar + box spawn offset,
-// constant velocity drift, radial velocity toward owner, random lifetime/delay,
-// two-key size scale and color over normalized age. Flipbook: see L2FxFlipbook.hlsl.
+// ═══════════════════════════════════════════════════════════════
+// L2_FX_EMITTER_SPAWN — UE3 SpriteEmitter spawn helpers
+// Unity-corrected (Y-up + unit conversion).
 //
-// Include after Core.hlsl if you use float3 with matrices; otherwise standalone.
-// Depends on L2FxParticleAnim for L2Fx_RandomRange / hashing.
+// UNIT CONVERSION: UE3 Unreal Units → Unity meters
+//   UE3: 1 UU = 1 cm = 0.01 m
+//   Unity: 1 unit = 1 meter
+//   Multiply all length/velocity/accel by L2FX_UU_TO_UNITY.
+//
+// Based on UE3 USpriteEmitter / UParticleEmitter disassembly.
+// ═══════════════════════════════════════════════════════════════
+
 #include "L2FxParticleAnim.hlsl"
 
-static const float L2Fx_DegToRad = 0.01745329252;
+// ───────────────────────────────────────────────────────────────
+// Unit conversion
+// ───────────────────────────────────────────────────────────────
+#ifndef L2FX_UU_TO_UNITY
+#define L2FX_UU_TO_UNITY 0.01
+#endif
 
-// Random lifetime in [min, max] (Unreal LifetimeRange).
+// ───────────────────────────────────────────────────────────────
+// Angles & spin
+// ───────────────────────────────────────────────────────────────
+static const float L2Fx_DegToRad = 0.01745329252;
+#define L2FX_SPIN_TO_RAD 0.000095873799
+
+// =================================================================
+// SPAWN: LIFETIME & DELAY
+// =================================================================
+
 float L2Fx_RandomLifetime(float2 lifetimeMinMax, float seed, float startTime, float salt)
 {
     return max(1e-4, L2Fx_RandomRange(lifetimeMinMax, seed, startTime, salt));
 }
 
-// Random initial delay in [min, max] (Unreal InitialDelayRange).
 float L2Fx_RandomInitialDelay(float2 delayMinMax, float seed, float startTime, float salt)
 {
     return max(0.0, L2Fx_RandomRange(delayMinMax, seed, startTime, salt));
+}
+
+// =================================================================
+// SPAWN: POSITION — POLAR (Unity Y-up, pitch from horizontal)
+// =================================================================
+
+float3 L2Fx_SpawnOffsetPolarUnity(
+    float2 azimuthDegMinMax,
+    float2 pitchFromHorizontalDegMinMax,
+    float2 radiusMinMax_UE,
+    float seed, float startTime)
+{
+    float yawDeg = L2Fx_RandomRange(azimuthDegMinMax, seed, startTime, 71.0);
+    float pitchDeg = L2Fx_RandomRange(pitchFromHorizontalDegMinMax, seed, startTime, 73.0);
+    float r_UE = L2Fx_RandomRange(radiusMinMax_UE, seed, startTime, 79.0);
+
+    float yaw = yawDeg * L2Fx_DegToRad;
+    float pitch = pitchDeg * L2Fx_DegToRad;
+    float r = r_UE * L2FX_UU_TO_UNITY;
+
+    float cosP = cos(pitch), sinP = sin(pitch);
+
+    return float3(r * cosP * cos(yaw),
+                  r * sinP,
+                  r * cosP * sin(yaw));
+}
+
+// =================================================================
+// SPAWN: POSITION — BOX
+// =================================================================
+
+float3 L2Fx_SpawnOffsetBox(
+    float2 rangeX_UE, float2 rangeY_UE, float2 rangeZ_UE,
+    float seed, float startTime)
+{
+    float3 off_UE = float3(
+        L2Fx_RandomRange(rangeX_UE, seed, startTime, 83.0),
+        L2Fx_RandomRange(rangeY_UE, seed, startTime, 89.0),
+        L2Fx_RandomRange(rangeZ_UE, seed, startTime, 97.0));
+    return off_UE * L2FX_UU_TO_UNITY;
+}
+
+// =================================================================
+// SPAWN: POSITION — COMBINE
+// =================================================================
+
+float3 L2Fx_CombineSpawnOffsets(
+    float3 startLocationOffset_UE,
+    float3 polarCartesian,
+    float3 boxCartesian)
+{
+    return startLocationOffset_UE * L2FX_UU_TO_UNITY + polarCartesian + boxCartesian;
+}
+
+// =================================================================
+// SPAWN: VELOCITY
+// =================================================================
+
+float3 L2Fx_VelocityRandomBox(
+    float2 vx_UE, float2 vy_UE, float2 vz_UE,
+    float seed, float startTime)
+{
+    float3 vel_UE = float3(
+        L2Fx_RandomRange(vx_UE, seed, startTime, 101.0),
+        L2Fx_RandomRange(vy_UE, seed, startTime, 103.0),
+        L2Fx_RandomRange(vz_UE, seed, startTime, 107.0));
+    return vel_UE * L2FX_UU_TO_UNITY;
+}
+
+float3 L2Fx_VelocityOutwardFromOwner(
+    float3 spawnWorld, float3 ownerWorld,
+    float2 speedMinMax_UE,
+    float seed, float startTime)
+{
+    float3 d = spawnWorld - ownerWorld;
+    float len = length(d);
+    float3 dir = len > 1e-5 ? (d / len) : float3(0, 1, 0);
+    float speed = L2Fx_RandomRange(speedMinMax_UE, seed, startTime, 113.0);
+    return dir * speed * L2FX_UU_TO_UNITY;
+}
+
+float3 L2Fx_VelocityTowardOwner(
+    float3 spawnWorld, float3 ownerWorld,
+    float2 speedMinMax_UE,
+    float seed, float startTime)
+{
+    float3 d = ownerWorld - spawnWorld;
+    float len = length(d);
+    float3 dir = len > 1e-5 ? (d / len) : float3(0, 1, 0);
+    float speed = L2Fx_RandomRange(speedMinMax_UE, seed, startTime, 109.0);
+    return dir * speed * L2FX_UU_TO_UNITY;
+}
+
+float3 L2Fx_VelocityAddTowardOwner(
+    float3 spawnWorld, float3 ownerWorld,
+    float2 addRangeMinMax_UE,
+    float seed, float startTime)
+{
+    float3 d = spawnWorld - ownerWorld;
+    float len = length(d);
+    float3 dir = len > 1e-5 ? (d / len) : float3(0, 1, 0);
+    float add = L2Fx_RandomRange(addRangeMinMax_UE, seed, startTime, 127.0);
+    return dir * add * L2FX_UU_TO_UNITY;
+}
+
+// =================================================================
+// SPAWN: ACCELERATION
+// =================================================================
+
+float3 L2Fx_AccelerationRandom(
+    float3 min_UE, float3 max_UE,
+    float seed, float startTime)
+{
+    float3 acc_UE = float3(
+        L2Fx_RandomRange(float2(min_UE.x, max_UE.x), seed, startTime, 137.0),
+        L2Fx_RandomRange(float2(min_UE.y, max_UE.y), seed, startTime, 139.0),
+        L2Fx_RandomRange(float2(min_UE.z, max_UE.z), seed, startTime, 149.0));
+    return acc_UE * L2FX_UU_TO_UNITY;
+}
+
+// =================================================================
+// SPAWN: SIZE
+// =================================================================
+
+float3 L2Fx_StartSize(
+    float3 sizeMin_UE, float3 sizeMax_UE,
+    bool uniformSize,
+    float seed, float startTime)
+{
+    float3 sz;
+    if (uniformSize)
+    {
+        float s = L2Fx_RandomRange(float2(sizeMin_UE.x, sizeMax_UE.x), seed, startTime, 151.0);
+        sz = float3(s, s, s);
+    }
+    else
+    {
+        sz = float3(
+            L2Fx_RandomRange(float2(sizeMin_UE.x, sizeMax_UE.x), seed, startTime, 151.0),
+            L2Fx_RandomRange(float2(sizeMin_UE.y, sizeMax_UE.y), seed, startTime, 157.0),
+            L2Fx_RandomRange(float2(sizeMin_UE.z, sizeMax_UE.z), seed, startTime, 163.0));
+    }
+    return sz * L2FX_UU_TO_UNITY;
+}
+
+// =================================================================
+// SPAWN: SPIN (scalar)
+// =================================================================
+
+float L2Fx_StartSpin(float2 spinRange, float seed, float startTime)
+{
+    return L2Fx_RandomRange(spinRange, seed, startTime, 167.0);
+}
+
+float L2Fx_SpinsPerSecond(float2 spsRange, float seed, float startTime)
+{
+    return L2Fx_RandomRange(spsRange, seed, startTime, 173.0);
+}
+
+float L2Fx_SpinAngleRadians(float startSpin, float spinsPerSec, float age)
+{
+    return (startSpin + spinsPerSec * age) * L2FX_SPIN_TO_RAD;
+}
+
+// =================================================================
+// SPAWN: SUBIMAGE
+// =================================================================
+
+uint L2Fx_SubImageIndex(float2 subRange, uint cols, uint rows, float seed, float startTime)
+{
+    uint count = cols * rows;
+    if (count == 0)
+        return 0;
+    float idx = L2Fx_RandomRange(subRange, seed, startTime, 193.0);
+    return (uint) idx % count;
+}
+
+// =================================================================
+// UPDATE: COLORS
+// =================================================================
+
+float4 L2Fx_SampleColorScale(
+    float normalizedAge,
+    float colorScaleParam,
+    uint colorScaleCount,
+    float colorScaleTimes[8],
+    float4 colorScaleColors[8],
+    bool bAlphaBlend)
+{
+    if (colorScaleCount == 0)
+        return float4(1, 1, 1, 1);
+
+    float sp = frac((colorScaleParam + 1.0) * normalizedAge);
+
+    uint idx = 0;
+    while (idx < colorScaleCount && colorScaleTimes[idx] < sp)
+        idx++;
+
+    float4 prevCol;
+    float prevT;
+    float4 nextCol;
+    float nextT;
+
+    if (idx == 0)
+    {
+        prevCol = float4(1, 1, 1, 1);
+        prevT = 0.0;
+        nextCol = colorScaleColors[0];
+        nextT = colorScaleTimes[0];
+    }
+    else
+    {
+        prevCol = colorScaleColors[idx - 1];
+        prevT = colorScaleTimes[idx - 1];
+        nextCol = (idx < colorScaleCount) ? colorScaleColors[idx] : prevCol;
+        nextT = (idx < colorScaleCount) ? colorScaleTimes[idx] : prevT + 1e-4;
+    }
+
+    float ts = (sp - prevT) / max(nextT - prevT, 1e-4);
+    float4 col = lerp(prevCol, nextCol, ts);
+    col.a = bAlphaBlend ? col.a : 1.0;
+    return col;
+}
+
+// =================================================================
+// UPDATE: SIZES
+// =================================================================
+
+float3 L2Fx_SampleSizeScale(
+    float normalizedAge,
+    float sizeScaleParam,
+    float sizeScaleRepeats,
+    uint sizeScaleCount,
+    float sizeScaleTimes[8],
+    float3 sizeScaleValues[8],
+    bool bUseRegularSizeScale)
+{
+    if (sizeScaleCount == 0)
+        return float3(1, 1, 1);
+
+    float sp = frac((sizeScaleParam + sizeScaleRepeats) * normalizedAge);
+
+    uint idx = 0;
+    while (idx < sizeScaleCount && sizeScaleTimes[idx] < sp)
+        idx++;
+
+    float3 prevS;
+    float prevT;
+    float3 nextS;
+    float nextT;
+
+    if (idx == 0)
+    {
+        prevS = float3(1, 1, 1);
+        prevT = 0.0;
+        nextS = sizeScaleValues[0];
+        nextT = sizeScaleTimes[0];
+    }
+    else
+    {
+        prevS = sizeScaleValues[idx - 1];
+        prevT = sizeScaleTimes[idx - 1];
+        nextS = (idx < sizeScaleCount) ? sizeScaleValues[idx] : prevS;
+        nextT = (idx < sizeScaleCount) ? sizeScaleTimes[idx] : prevT + 1e-4;
+    }
+
+    if (abs(nextT - prevT) < 1e-4)
+        return prevS;
+
+    float ts = (sp - prevT) / (nextT - prevT);
+
+    if (bUseRegularSizeScale)
+        return lerp(prevS, nextS, ts);
+    else
+        return lerp(prevS.x, nextS.x, ts).xxx;
+}
+
+// =================================================================
+// UPDATE: FADE IN / OUT (subtractive)
+// =================================================================
+
+float4 L2Fx_ApplyFadeInOut(
+    float4 color,
+    float normalizedAge,
+    float fadeInTime, float4 fadeInColor,
+    float fadeOutTime, float4 fadeOutColor,
+    bool forcedFade)
+{
+    if (normalizedAge > fadeOutTime && fadeOutTime < 1.0)
+    {
+        float fo = (normalizedAge - fadeOutTime) / max(1.0 - fadeOutTime, 1e-4);
+        color -= fadeOutColor * saturate(fo);
+    }
+
+    if (normalizedAge < fadeInTime && fadeInTime > 0.0)
+    {
+        float fi = (fadeInTime - normalizedAge) / max(fadeInTime, 1e-4);
+        color -= fadeInColor * saturate(fi);
+    }
+
+    if (forcedFade && normalizedAge > fadeOutTime && fadeOutTime < 1.0)
+    {
+        float ft = (normalizedAge - fadeOutTime) / max(1.0 - fadeOutTime, 1e-4);
+        color *= 1.0 - saturate(ft);
+    }
+
+    return max(color, 0.0);
 }
 
 // Polar spawn offset matching common UE1-style StartLocationPolarRange:
@@ -48,59 +374,20 @@ float3 L2Fx_SpawnOffsetPolarDegrees(
     return float3(x, y, z);
 }
 
-// Axis-aligned box random offset (Unreal StartLocationRange per axis).
-float3 L2Fx_SpawnOffsetBox(float2 rangeX, float2 rangeY, float2 rangeZ, float seed, float startTime)
-{
-    float x = L2Fx_RandomRange(rangeX, seed, startTime, 83.0);
-    float y = L2Fx_RandomRange(rangeY, seed, startTime, 89.0);
-    float z = L2Fx_RandomRange(rangeZ, seed, startTime, 97.0);
-    return float3(x, y, z);
-}
-
-// Full spawn offset: fixed emitter offset + polar + box (typical additive combination).
-float3 L2Fx_CombineSpawnOffsets(float3 startLocationOffset, float3 polarCartesian, float3 boxCartesian)
-{
-    return startLocationOffset + polarCartesian + boxCartesian;
-}
-
 // Constant velocity displacement: p += v * t (no drag).
 float3 L2Fx_DisplacementFromVelocity(float3 velocity, float ageSeconds)
 {
     return velocity * max(0.0, ageSeconds);
 }
 
-// Random velocity per axis (Unreal StartVelocityRange when direction is axis-aligned / local).
-float3 L2Fx_VelocityRandomBox(float2 vx, float2 vy, float2 vz, float seed, float startTime)
+// ColorScale with two stops: c0 at age 0, c1 at normalized time t1 (Unreal RelativeTime on second key).
+float4 L2Fx_ColorScaleTwoKeys(float normalizedAge, float4 color0, float4 color1, float relativeTime1)
 {
-    return float3(
-        L2Fx_RandomRange(vx, seed, startTime, 101.0),
-        L2Fx_RandomRange(vy, seed, startTime, 103.0),
-        L2Fx_RandomRange(vz, seed, startTime, 107.0));
+    float t = max(1e-4, saturate(relativeTime1));
+    float u = saturate(normalizedAge / t);
+    return lerp(color0, color1, u);
 }
 
-// PTVD_StartPositionAndOwner: direction from spawn toward owner, magnitude in [speedMin, speedMax].
-// Use when steam should move along (owner - spawn) in world space.
-float3 L2Fx_VelocityTowardOwner(float3 spawnWorld, float3 ownerWorld, float2 speedMinMax, float seed, float startTime)
-{
-    float3 d = ownerWorld - spawnWorld;
-    float len = length(d);
-    float3 dir = len > 1e-5 ? (d / len) : float3(0, 0, 1);
-    float speed = L2Fx_RandomRange(speedMinMax, seed, startTime, 109.0);
-    return dir * speed;
-}
-
-// Outward from owner through spawn: direction normalize(spawn - owner).
-float3 L2Fx_VelocityOutwardFromOwner(float3 spawnWorld, float3 ownerWorld, float2 speedMinMax, float seed, float startTime)
-{
-    float3 d = spawnWorld - ownerWorld;
-    float len = length(d);
-    float3 dir = len > 1e-5 ? (d / len) : float3(0, 1, 0);
-    float speed = L2Fx_RandomRange(speedMinMax, seed, startTime, 113.0);
-    return dir * speed;
-}
-
-// UseRegularSizeScale=False with a single SizeScale key at end of life:
-// implicit (RelativeTime=0, RelativeSize=1) -> (tEnd, sEnd). Same as Interlude Steam entry.
 float L2Fx_SizeScaleImplicitStartOneKey(float normalizedAge, float useSizeScale, float relativeTimeEnd, float relativeSizeEnd)
 {
     if (useSizeScale < 0.5)
@@ -113,12 +400,31 @@ float L2Fx_SizeScaleImplicitStartOneKey(float normalizedAge, float useSizeScale,
     return lerp(1.0, relativeSizeEnd, u);
 }
 
-// ColorScale with two stops: c0 at age 0, c1 at normalized time t1 (Unreal RelativeTime on second key).
-float4 L2Fx_ColorScaleTwoKeys(float normalizedAge, float4 color0, float4 color1, float relativeTime1)
+// =================================================================
+// UPDATE: MOVEMENT, DAMPING, VELOCITY LOSS
+// =================================================================
+
+float3 L2Fx_ApplyDamping(float3 vel, float3 damping, float dt)
 {
-    float t = max(1e-4, saturate(relativeTime1));
-    float u = saturate(normalizedAge / t);
-    return lerp(color0, color1, u);
+    return vel * (1.0 - damping * dt);
 }
 
-#endif
+float3 L2Fx_ApplyVelocityLoss(float3 vel, float3 loss_UE, float dt)
+{
+    return vel - loss_UE * L2FX_UU_TO_UNITY * dt;
+}
+
+// =================================================================
+// UPDATE: COLOR MULTIPLIER
+// =================================================================
+
+float3 L2Fx_ApplyColorMultiplier(float3 color, float3 multMin, float3 multMax, float seed, float startTime)
+{
+    float3 m = float3(
+        L2Fx_RandomRange(float2(multMin.x, multMax.x), seed, startTime, 197.0),
+        L2Fx_RandomRange(float2(multMin.y, multMax.y), seed + 1, startTime, 199.0),
+        L2Fx_RandomRange(float2(multMin.z, multMax.z), seed + 2, startTime, 211.0));
+    return color * m;
+}
+
+#endif // L2_FX_EMITTER_SPAWN_INCLUDED

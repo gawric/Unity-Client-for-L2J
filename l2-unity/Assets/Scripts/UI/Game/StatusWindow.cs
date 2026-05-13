@@ -131,7 +131,7 @@ public class StatusWindow : L2Window
             return;
         }
 
-        TargetManager.Instance.SetTarget(new ObjectData(player.gameObject), "#ffffff");
+        //TargetManager.Instance.SetTarget(new ObjectData(player.gameObject), "#ffffff");
         SendSelfTargetAction(player);
     }
 

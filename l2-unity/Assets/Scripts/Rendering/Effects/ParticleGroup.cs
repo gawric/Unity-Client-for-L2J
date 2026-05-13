@@ -272,7 +272,8 @@ public class ParticleGroup : EffectPart
                     $"[WH_HEAL_SHADER_SPAWN] group='{name}' slot={_particleIndex} matIdx={materialIndex} mat='{m.name}' " +
                     $"now={now:F3}s _StartTime={st:F3} shaderAgeApprox={(now - st):F3}s _Seed={sd:F3} " +
                     $"_HasLifetime={hasLt:F3} _LifetimeRange=({life.x:F3},{life.y:F3}) _InitialDelay=({delay.x:F3},{delay.y:F3}) " +
-                    $"warmup={_relativeWarmupTime:F3}s frame={Time.frameCount}.");
+                    $"warmup={_relativeWarmupTime:F3}s [FADE_PHASE]={ShaderFadeDiagnostic.FadePhaseLabel(m, now)} " +
+                    $"{ShaderFadeDiagnostic.BuildLine(m, now)} frame={Time.frameCount}.");
             }
 #endif
         }
@@ -504,6 +505,26 @@ public class ParticleGroup : EffectPart
             Debug.Log(
                 $"[WH_HEAL_GROUP_STOP] group='{name}' elapsed={elapsed:F3}s duration={_duration:F3}s " +
                 $"preserveShaderTime={_preserveShaderTimeInContinuousLoop} runtimeLoop={_runtimeContinuousLoop} frame={Time.frameCount}.");
+
+            float nowStop = Now();
+            if (_particles != null)
+            {
+                for (int si = 0; si < _particles.Length; si++)
+                {
+                    if (_particles[si] == null || !_particles[si].gameObject.activeSelf)
+                    {
+                        continue;
+                    }
+
+                    Material[] smats = _particles[si].materials;
+                    Material m0 = smats != null && smats.Length > 0 ? smats[0] : null;
+                    Debug.Log(
+                        $"[WH_HEAL_GROUP_STOP_FADE] group='{name}' slot={si} now={nowStop:F3}s " +
+                        $"[FADE_PHASE]={ShaderFadeDiagnostic.FadePhaseLabel(m0, nowStop)} " +
+                        $"{ShaderFadeDiagnostic.BuildLine(m0, nowStop)} frame={Time.frameCount}.");
+                    break;
+                }
+            }
         }
 #endif
         _stopped = true;
@@ -580,10 +601,15 @@ public class ParticleGroup : EffectPart
                 continue;
             }
 
+            Material[] mats = _particles[i].materials;
+            Material mat0 = mats != null && mats.Length > 0 ? mats[0] : null;
+            string fadePhase = ShaderFadeDiagnostic.FadePhaseLabel(mat0, now);
+            string fadeLine = ShaderFadeDiagnostic.BuildLine(mat0, now);
             Debug.Log(
                 $"[WH_HEAL_SHADER_TICK] reason={reason} group='{name}' slot={i} now={now:F3}s " +
                 $"alive={(now - _particleSpawnTimes[i]):F3}s groupDuration={_duration:F3}s " +
-                $"{BuildRuntimeMaterialLifetimeSnapshot(_particles[i], now)} frame={Time.frameCount}.");
+                $"{BuildRuntimeMaterialLifetimeSnapshot(_particles[i], now)} " +
+                $"[FADE_PHASE]={fadePhase} {fadeLine} frame={Time.frameCount}.");
             return;
         }
     }

@@ -1,4 +1,4 @@
-#ifndef L2_FX_PARTICLE_ANIM_INCLUDED
+﻿#ifndef L2_FX_PARTICLE_ANIM_INCLUDED
 #define L2_FX_PARTICLE_ANIM_INCLUDED
 
 // Shared L2-style particle timing: lifetime, fade in/out, size curve, seeded random, spin.

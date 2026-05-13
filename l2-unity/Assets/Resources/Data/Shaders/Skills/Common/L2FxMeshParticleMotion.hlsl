@@ -1,9 +1,26 @@
-#ifndef L2_FX_MESH_PARTICLE_MOTION_INCLUDED
+﻿#ifndef L2_FX_MESH_PARTICLE_MOTION_INCLUDED
 #define L2_FX_MESH_PARTICLE_MOTION_INCLUDED
 
-// Shared mesh-particle motion helpers for Lineage-style fragments and debris.
-// Include after Core.hlsl. Depends on L2FxEmitterSpawn for random/spin helpers.
+// ═══════════════════════════════════════════════════════════════
+// L2_FX_MESH_PARTICLE_MOTION — Unity-corrected motion helpers
+//
+// Based on UE3 FParticle / UMeshEmitter disassembly.
+//
+// Corrections vs original library:
+//   1. Polar: Y-up, pitch from horizontal plane.
+//   2. VelocityLoss = LINEAR subtraction, not exponential drag.
+//   3. Spin = SINGLE SCALAR (rotation around local Z).
+//
+// Depends on: L2FxParticleAnim.hlsl, L2_FX_EMITTER_SPAWN_INCLUDED.hlsl
+// ═══════════════════════════════════════════════════════════════
+
+#include "L2FxParticleAnim.hlsl"
 #include "L2FxEmitterSpawn.hlsl"
+
+// ───────────────────────────────────────────────────────────────
+// Displacement: V₀t + ½at² (constant accel, NO drag)
+// ───────────────────────────────────────────────────────────────
+
 
 // Polar spawn offset for Unity's Y-up world: azimuth around +Y, polar angle from +Y.
 // Matches UE-style StartLocationPolarRange semantics when converted to Unity axes.
@@ -24,6 +41,7 @@ float3 L2Fx_SpawnOffsetPolarYDegrees(
         radius * sinPhi * sin(theta));
 }
 
+
 // Exponential drag approximation plus constant acceleration.
 float3 L2Fx_DampedDisplacement(float3 velocity, float3 acceleration, float velocityLoss, float ageSeconds)
 {
@@ -38,18 +56,69 @@ float3 L2Fx_DampedDisplacement(float3 velocity, float3 acceleration, float veloc
     return velocityDisplacement + (0.5 * acceleration * t * t);
 }
 
-// Outward direction in the horizontal XZ plane. Falls back to seeded azimuth if the offset is vertical.
-float2 L2Fx_OutwardDirectionXZ(float3 spawnOffset, float2 fallbackAzimuthDegMinMax, float seed, float startTime, float salt)
+float3 L2Fx_DisplacementConstantAccel(
+    float3 velocity,
+    float3 acceleration,
+    float ageSeconds)
 {
-    float2 horizontalDir = spawnOffset.xz;
-    float horizontalLen = length(horizontalDir);
-    if (horizontalLen > 1e-5)
-    {
-        return horizontalDir / horizontalLen;
-    }
+    float t = max(0.0, ageSeconds);
+    return velocity * t + 0.5 * acceleration * t * t;
+}
 
-    float fallbackAngle = L2Fx_RandomRange(fallbackAzimuthDegMinMax, seed, startTime, salt) * L2Fx_DegToRad;
+// ───────────────────────────────────────────────────────────────
+// Horizontal direction from spawn offset (XZ plane)
+// ───────────────────────────────────────────────────────────────
+
+float2 L2Fx_OutwardDirectionXZ(
+    float3 spawnOffset,
+    float2 fallbackAzimuthDegMinMax,
+    float seed, float startTime, float salt)
+{
+    float2 hDir = spawnOffset.xz;
+    float len = length(hDir);
+
+    if (len > 1e-5)
+        return hDir / len;
+
+    float fallbackAngle = L2Fx_RandomRange(
+        fallbackAzimuthDegMinMax, seed, startTime, salt) * L2Fx_DegToRad;
     return float2(cos(fallbackAngle), sin(fallbackAngle));
+}
+
+// ───────────────────────────────────────────────────────────────
+// Spin — SCALAR, rotation around local Z
+// ───────────────────────────────────────────────────────────────
+
+float L2Fx_ComputeSpinAngleRadians(
+    float startSpin,
+    float spinsPerSecond,
+    float ageSeconds)
+{
+    float units = startSpin + spinsPerSecond * ageSeconds;
+    return units * L2FX_SPIN_TO_RAD;
+}
+
+void L2Fx_ApplyMeshScalarSpin(
+    inout float3 positionOS,
+    inout float3 normalOS,
+    bool spinParticles,
+    float spinAngleRad)
+{
+    if (!spinParticles)
+        return;
+
+    float c = cos(spinAngleRad);
+    float s = sin(spinAngleRad);
+
+    positionOS = float3(
+        positionOS.x * c - positionOS.y * s,
+        positionOS.x * s + positionOS.y * c,
+        positionOS.z);
+
+    normalOS = float3(
+        normalOS.x * c - normalOS.y * s,
+        normalOS.x * s + normalOS.y * c,
+        normalOS.z);
 }
 
 void L2Fx_RotatePositionAndNormal(
@@ -98,4 +167,4 @@ void L2Fx_ApplyMeshParticleSpin(
     L2Fx_RotatePositionAndNormal(positionOS, normalOS, angles);
 }
 
-#endif
+#endif // L2_FX_MESH_PARTICLE_MOTION_INCLUDED

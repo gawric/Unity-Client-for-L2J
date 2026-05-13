@@ -205,15 +205,17 @@ MonoBehaviour:
   - {fileID: 9087542295205013065}
   - {fileID: 7362535825178690737}
   - {fileID: 3759953779561855002}
-  _warmup: 0
-  _warmupTimeSec: 0
-  _warmupTimeTickPerSec: 0
+  _startDelay: 0
   _countPerSecond: 8
   _maxCount: 25
-  _hasCastDuration: 0
-  _castDurationAffectsLifetime: 0
-  _duration: 4
+  _forceContinuousSpawning: 0
+  _preserveShaderTimeInContinuousLoop: 0
+  _isBurstSpawning: 0
+  _relativeWarmupTime: 0
+  _duration: 3
+  _hasFixedDuration: 1
   _instantKillAtCastEnd: 0
+  _fitToBounds: 0
 --- !u!1 &704892509339254649
 GameObject:
   m_ObjectHideFlags: 0
@@ -915,6 +917,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _owner: {fileID: 0}
+  _skipScheduledDestroyForDebug: 0
   _surfaceNormal: {x: 0, y: 0, z: 0}
   _pooledEffect:
     _effectClass: 
@@ -925,13 +928,6 @@ MonoBehaviour:
     _hitEffectIndex: 0
     _caster: {fileID: 0}
     _target: {fileID: 0}
-    _skill:
-      _skillId: 0
-      _skillEffect:
-        _skillId: 0
-        _castingActions: []
-        _shotActions: []
-        _explosionActions: []
     _startingPosition: {x: 0, y: 0, z: 0}
     _endPosition: {x: 0, y: 0, z: 0}
     _hitTime: 0
@@ -1026,15 +1022,17 @@ MonoBehaviour:
   - {fileID: 494164740828534790}
   - {fileID: 3256354883057965683}
   - {fileID: 4604480796052880694}
-  _warmup: 0
-  _warmupTimeSec: 0
-  _warmupTimeTickPerSec: 0
+  _startDelay: 0
   _countPerSecond: 5
   _maxCount: 20
-  _hasCastDuration: 0
-  _castDurationAffectsLifetime: 0
-  _duration: 4
+  _forceContinuousSpawning: 0
+  _preserveShaderTimeInContinuousLoop: 0
+  _isBurstSpawning: 0
+  _relativeWarmupTime: 0
+  _duration: 7
+  _hasFixedDuration: 1
   _instantKillAtCastEnd: 0
+  _fitToBounds: 0
 --- !u!1 &2556810679983106565
 GameObject:
   m_ObjectHideFlags: 0
