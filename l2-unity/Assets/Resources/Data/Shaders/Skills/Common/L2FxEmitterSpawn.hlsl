@@ -427,4 +427,41 @@ float3 L2Fx_ApplyColorMultiplier(float3 color, float3 multMin, float3 multMax, f
     return color * m;
 }
 
+// ─── Абсолютная версия FadeInOut ───
+float4 L2Fx_ApplyFadeInOutAbsolute(
+    float4 color,
+    float ageSeconds,
+    float lifetime,
+    float fadeInEndTime,
+    float4 fadeInColor,
+    float fadeOutStartTime,
+    float4 fadeOutColor,
+    bool forcedFade)
+{
+    float invLt = 1.0 / max(lifetime, 1e-4);
+    float fadeInTime = fadeInEndTime * invLt;
+    float fadeOutTime = fadeOutStartTime * invLt;
+    float normalizedAge = saturate(ageSeconds * invLt);
+    return L2Fx_ApplyFadeInOut(color, normalizedAge, fadeInTime, fadeInColor,
+                               fadeOutTime, fadeOutColor, forcedFade);
+}
+
+// ─── Lifetime для MeshEmitter (ForcedFade derivation) ───
+float L2Fx_MeshDeriveLifetime(float fadeOutStartTime, bool forcedFade, float explicitLifetime)
+{
+    if (forcedFade && explicitLifetime <= 0.0)
+        return max(fadeOutStartTime, 0.001) + 0.001;
+    return max(explicitLifetime, 0.001);
+}
+
+void L2Fx_ApplySpinCCWorCW(inout float3 spin, float3 ccwOrCw)
+{
+    // ccwOrCw == 0 → CCW (invert)
+    // ccwOrCw == 1 → CW  (keep)
+    spin.x *= (ccwOrCw.x == 0.0) ? -1.0 : 1.0;
+    spin.y *= (ccwOrCw.y == 0.0) ? -1.0 : 1.0;
+    spin.z *= (ccwOrCw.z == 0.0) ? -1.0 : 1.0;
+}
+
+
 #endif // L2_FX_EMITTER_SPAWN_INCLUDED

@@ -125,7 +125,7 @@ float L2Fx_LifetimeAlpha(
     float lifetime,
     float fadeIn,
     float fadeInEndTime,
-    float fadeout,
+    float fadeOutEnabled,
     float fadeoutStartTime)
 {
     float has = step(0.5, hasLifetime);
@@ -147,14 +147,14 @@ float L2Fx_LifetimeAlpha(
     }
 
     float fadeInMul = 1.0;
-    if (fadeIn > 0.5)
+    if (fadeIn >= 0.5)
     {
         float fadeInEnd = max(0.0001, fadeInEndTime);
         fadeInMul = saturate(age / fadeInEnd);
     }
 
     float fadeOutMul = 1.0;
-    if (fadeout > 0.5)
+    if (fadeOutEnabled >= 0.5)
     {
         float fadeStart = clamp(fadeoutStartTime, 0.0, lt);
         float fadeDuration = max(0.0001, lt - fadeStart);

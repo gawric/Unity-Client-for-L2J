@@ -58,3 +58,8 @@ MonoBehaviour:
     comment: heal-composite-effect
     settings: {fileID: 11400000, guid: 71be8ca0eae2cd44fbcbd0243ca6ff9f, type: 2}
     ignoreFlightTimeForCast: 1
+  - id: 1168
+    prefab: {fileID: -3238118204883760824, guid: 9b901fe81afbe024b9140f04af7f15ca, type: 3}
+    comment: curse-poison-effect
+    settings: {fileID: 11400000, guid: 32b8e356a6514494cb7425f31ee60898, type: 2}
+    ignoreFlightTimeForCast: 1

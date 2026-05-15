@@ -1,0 +1,111 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &5702419667616674288
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4625372346094980841}
+  - component: {fileID: -3238118204883760824}
+  m_Layer: 0
+  m_Name: el_curse_poison_composite
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &4625372346094980841
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5702419667616674288}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &-3238118204883760824
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5702419667616674288}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 62c54513227c16f4eb5c8009ec8e165e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _owner: {fileID: 0}
+  _parts:
+  - name: el_curse_poison_ca
+    prefab: {fileID: 8571449799585495401, guid: 0998676ecf0e17b4e9834a8b77731af3, type: 3}
+    settingsOverride: {fileID: 0}
+    attachmentPoint: 0
+    spawnTiming: 0
+    hitLeadSeconds: 0
+    positionOffset: {x: 0, y: 0.104, z: 0}
+    normalizeOffsetByOwnerHeight: 0
+    referenceHeight: 1.8
+    scale: 1.3
+    followResolvedTransform: 1
+    inheritRotation: 1
+    passCastDataToPart: 0
+    useCastTimedLifetime: 0
+    overrideContinuousLoop: 0
+    continuousLoop: 0
+    disableShaderLifetime: 0
+    overrideHideTime: 0
+    customHideTime: 0
+    enableFinalShaderLifetimeOnFade: 0
+    finalShaderLifetimeMin: 0
+    finalShaderLifetimeMax: 0
+    projectile:
+      launchMode: 0
+      showBeforeAnimationShoot: 0
+      impactType: 0
+      settingsOverride:
+        id: 0
+        prefab: {fileID: 0}
+        transform: {fileID: 0}
+        startPosition: {x: 0, y: 0, z: 0}
+        targetTransform: {fileID: 0}
+        targetPosition: {x: 0, y: 0, z: 0}
+        speed: 0
+        damage: 0
+        lifetime: 0
+        speedCurve:
+          serializedVersion: 2
+          m_Curve: []
+          m_PreInfinity: 0
+          m_PostInfinity: 0
+          m_RotationOrder: 0
+        startTime: 0
+        distance: 0
+        useGravity: 0
+        gravityScale: 0
+        isActive: 0
+        hitPoint: {x: 0, y: 0, z: 0}
+        hitNormal: {x: 0, y: 0, z: 0}
+        flytime: 0
+        hitPointCollider: {x: 0, y: 0, z: 0}
+        hitNormalCollider: {x: 0, y: 0, z: 0}
+        hitDirection: {x: 0, y: 0, z: 0}
+        arrowCollider: {fileID: 0}
+        impactType: 0
+        lastPosition: {x: 0, y: 0, z: 0}
+        castStartTimeSnapshot: 0
+        castServerShootSnapshot: 0
+        castServerHitSnapshot: 0
+        projectileLaunchGlobalFromCast: 0
+        attackerEntityId: 0
+  _serverHitLifetimeTailSeconds: 0
+  _skipDestroyCompositeByLifetime: 0

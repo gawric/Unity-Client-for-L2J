@@ -121,6 +121,40 @@ void L2Fx_ApplyMeshScalarSpin(
         normalOS.z);
 }
 
+// UMeshEmitter .uc SpinsPerSecondRange (e.g. 0.02) = revolutions per second, not URU.
+// StartSpin from .uc is 0..1 rotations. Do NOT use L2FX_SPIN_TO_RAD here.
+float L2Fx_ComputeSpinAngleRadiansMeshEmitterRevPerSec(
+    float startSpinRevolutions,
+    float spinsPerSecond,
+    float ageSeconds)
+{
+    return (startSpinRevolutions + spinsPerSecond * ageSeconds) * L2Fx_TwoPi;
+}
+
+// Magic circle meshes on ground in Unity: spin around +Y (not UE local Z / XY plane).
+void L2Fx_ApplyMeshSpinAroundY(
+    inout float3 positionOS,
+    inout float3 normalOS,
+    bool spinParticles,
+    float spinAngleRad)
+{
+    if (!spinParticles)
+        return;
+
+    float c = cos(spinAngleRad);
+    float s = sin(spinAngleRad);
+
+    positionOS = float3(
+        positionOS.x * c + positionOS.z * s,
+        positionOS.y,
+        -positionOS.x * s + positionOS.z * c);
+
+    normalOS = float3(
+        normalOS.x * c + normalOS.z * s,
+        normalOS.y,
+        -normalOS.x * s + normalOS.z * c);
+}
+
 void L2Fx_RotatePositionAndNormal(
     inout float3 positionOS,
     inout float3 normalOS,
@@ -165,6 +199,18 @@ void L2Fx_ApplyMeshParticleSpin(
         startTime);
 
     L2Fx_RotatePositionAndNormal(positionOS, normalOS, angles);
+}
+
+void L2Fx_ApplySpinCCWorCW_Vector(inout float3 spinsPerSecond, float3 ccwOrCw)
+{
+    spinsPerSecond.x *= (ccwOrCw.x == 0.0) ? -1.0 : 1.0;
+    spinsPerSecond.y *= (ccwOrCw.y == 0.0) ? -1.0 : 1.0;
+    spinsPerSecond.z *= (ccwOrCw.z == 0.0) ? -1.0 : 1.0;
+}
+
+float L2Fx_ApplySpinCCWorCW_Scalar(float spinsPerSecond, float ccwOrCwX)
+{
+    return (ccwOrCwX == 0.0) ? -spinsPerSecond : spinsPerSecond;
 }
 
 #endif // L2_FX_MESH_PARTICLE_MOTION_INCLUDED

@@ -8,6 +8,42 @@ public class ParticleSingle : EffectPart
     private static readonly int HoldShaderId = Shader.PropertyToID("_Hold");
     private static readonly int LifetimeRangeShaderId = Shader.PropertyToID("_LifetimeRange");
     private static readonly int StartTimeShaderId = Shader.PropertyToID("_StartTime");
+    private static readonly int HasLifetimeShaderId = Shader.PropertyToID("_HasLifetime");
+    private static readonly int InitialDelayRangeShaderId = Shader.PropertyToID("_InitialDelayRange");
+    private static readonly int FadeInShaderId = Shader.PropertyToID("_FadeIn");
+    private static readonly int FadeInEndTimeShaderId = Shader.PropertyToID("_FadeInEndTime");
+    private static readonly int FadeoutShaderId = Shader.PropertyToID("_Fadeout");
+    private static readonly int FadeoutStartTimeShaderId = Shader.PropertyToID("_FadeoutStartTime");
+    private static readonly int AtlasUvRemapShaderId = Shader.PropertyToID("_AtlasUvRemap");
+    private static readonly int AtlasUvMinMaxShaderId = Shader.PropertyToID("_AtlasUvMinMax");
+    private static readonly int IgnoreMainTexAlphaShaderId = Shader.PropertyToID("_IgnoreMainTexAlpha");
+    private static readonly int EmitterAlphaShaderId = Shader.PropertyToID("_EmitterAlpha");
+    private static readonly int AlphaEdgeFeatherShaderId = Shader.PropertyToID("_AlphaEdgeFeather");
+    private static readonly int SplitRibbonByLumShaderId = Shader.PropertyToID("_SplitRibbonByLum");
+    private static readonly int SoftLumMinShaderId = Shader.PropertyToID("_SoftLumMin");
+    private static readonly int SoftLumMaxShaderId = Shader.PropertyToID("_SoftLumMax");
+    private static readonly int LineLumMinShaderId = Shader.PropertyToID("_LineLumMin");
+    private static readonly int LineLumMaxShaderId = Shader.PropertyToID("_LineLumMax");
+    private static readonly int SoftOpacityMulShaderId = Shader.PropertyToID("_SoftOpacityMul");
+    private static readonly int LineOpacityMulShaderId = Shader.PropertyToID("_LineOpacityMul");
+    private static readonly int SoftRgbBoostShaderId = Shader.PropertyToID("_SoftRgbBoost");
+    private static readonly int LineRgbBoostShaderId = Shader.PropertyToID("_LineRgbBoost");
+    private static readonly int SplitByUvLayerShaderId = Shader.PropertyToID("_SplitByUvLayer");
+    private static readonly int UvLayerCenterShaderId = Shader.PropertyToID("_UvLayerCenter");
+    private static readonly int UvLayerDistMinShaderId = Shader.PropertyToID("_UvLayerDistMin");
+    private static readonly int UvLayerDistMaxShaderId = Shader.PropertyToID("_UvLayerDistMax");
+    private static readonly int OuterSoftOpacityMulShaderId = Shader.PropertyToID("_OuterSoftOpacityMul");
+    private static readonly int OuterLineOpacityMulShaderId = Shader.PropertyToID("_OuterLineOpacityMul");
+    private static readonly int OuterSoftRgbBoostShaderId = Shader.PropertyToID("_OuterSoftRgbBoost");
+    private static readonly int OuterLineRgbBoostShaderId = Shader.PropertyToID("_OuterLineRgbBoost");
+    private static readonly int ColorScaleRepeatsShaderId = Shader.PropertyToID("_ColorScaleRepeats");
+    private static readonly int ColorScaleCountShaderId = Shader.PropertyToID("_ColorScaleCount");
+    private static readonly int ColorScaleTime1ShaderId = Shader.PropertyToID("_ColorScaleTime1");
+    private static readonly int ColorScaleTime2ShaderId = Shader.PropertyToID("_ColorScaleTime2");
+    private static readonly int ColorScale0ShaderId = Shader.PropertyToID("_ColorScale0");
+    private static readonly int ColorScale1ShaderId = Shader.PropertyToID("_ColorScale1");
+    private static readonly int ColorScale2ShaderId = Shader.PropertyToID("_ColorScale2");
+    private static readonly int BAlphaBlendShaderId = Shader.PropertyToID("_bAlphaBlend");
 
     [SerializeField] private L2Particle _owner;
     [SerializeField] private Renderer[] _particles;
@@ -310,14 +346,14 @@ public class ParticleSingle : EffectPart
                 continue;
             }
 
-            if (runtimeMat.HasProperty("_Alpha") && sharedMaterials != null && i < sharedMaterials.Length)
+            Material sharedMat = sharedMaterials != null && i < sharedMaterials.Length ? sharedMaterials[i] : null;
+
+            if (runtimeMat.HasProperty("_Alpha") && sharedMat != null && sharedMat.HasProperty("_Alpha"))
             {
-                Material sharedMat = sharedMaterials[i];
-                if (sharedMat != null && sharedMat.HasProperty("_Alpha"))
-                {
-                    runtimeMat.SetFloat("_Alpha", sharedMat.GetFloat("_Alpha"));
-                }
+                runtimeMat.SetFloat("_Alpha", sharedMat.GetFloat("_Alpha"));
             }
+
+            TryCopyShaderLifetimeFadeFromShared(runtimeMat, sharedMat);
 
             runtimeMat.SetFloat("_StartTime", shaderStartTime);
             runtimeMat.SetFloat("_Seed", seed);
@@ -339,6 +375,202 @@ public class ParticleSingle : EffectPart
                     $"diag={ShaderFadeDiagnostic.BuildLine(runtimeMat, now)}");
             }
 #endif
+        }
+    }
+
+    /// <summary>
+    /// Копирует lifetime/fade, атлас-UV, альфу, feather, EmitterAlpha, split luma и split UV-слоя (MagicCircleBrighten) из shared в runtime после <c>renderer.materials</c>.
+    /// </summary>
+    private static void TryCopyShaderLifetimeFadeFromShared(Material runtimeMat, Material sharedMat)
+    {
+        if (runtimeMat == null || sharedMat == null)
+        {
+            return;
+        }
+
+        if (runtimeMat.HasProperty(HasLifetimeShaderId) && sharedMat.HasProperty(HasLifetimeShaderId))
+        {
+            runtimeMat.SetFloat(HasLifetimeShaderId, sharedMat.GetFloat(HasLifetimeShaderId));
+        }
+
+        if (runtimeMat.HasProperty(LifetimeRangeShaderId) && sharedMat.HasProperty(LifetimeRangeShaderId))
+        {
+            runtimeMat.SetVector(LifetimeRangeShaderId, sharedMat.GetVector(LifetimeRangeShaderId));
+        }
+
+        if (runtimeMat.HasProperty(InitialDelayRangeShaderId) && sharedMat.HasProperty(InitialDelayRangeShaderId))
+        {
+            runtimeMat.SetVector(InitialDelayRangeShaderId, sharedMat.GetVector(InitialDelayRangeShaderId));
+        }
+
+        if (runtimeMat.HasProperty(FadeInShaderId) && sharedMat.HasProperty(FadeInShaderId))
+        {
+            runtimeMat.SetFloat(FadeInShaderId, sharedMat.GetFloat(FadeInShaderId));
+        }
+
+        if (runtimeMat.HasProperty(FadeInEndTimeShaderId) && sharedMat.HasProperty(FadeInEndTimeShaderId))
+        {
+            runtimeMat.SetFloat(FadeInEndTimeShaderId, sharedMat.GetFloat(FadeInEndTimeShaderId));
+        }
+
+        if (runtimeMat.HasProperty(FadeoutShaderId) && sharedMat.HasProperty(FadeoutShaderId))
+        {
+            runtimeMat.SetFloat(FadeoutShaderId, sharedMat.GetFloat(FadeoutShaderId));
+        }
+
+        if (runtimeMat.HasProperty(FadeoutStartTimeShaderId) && sharedMat.HasProperty(FadeoutStartTimeShaderId))
+        {
+            runtimeMat.SetFloat(FadeoutStartTimeShaderId, sharedMat.GetFloat(FadeoutStartTimeShaderId));
+        }
+
+        if (runtimeMat.HasProperty(AtlasUvRemapShaderId) && sharedMat.HasProperty(AtlasUvRemapShaderId))
+        {
+            runtimeMat.SetFloat(AtlasUvRemapShaderId, sharedMat.GetFloat(AtlasUvRemapShaderId));
+        }
+
+        if (runtimeMat.HasProperty(AtlasUvMinMaxShaderId) && sharedMat.HasProperty(AtlasUvMinMaxShaderId))
+        {
+            runtimeMat.SetVector(AtlasUvMinMaxShaderId, sharedMat.GetVector(AtlasUvMinMaxShaderId));
+        }
+
+        if (runtimeMat.HasProperty(IgnoreMainTexAlphaShaderId) && sharedMat.HasProperty(IgnoreMainTexAlphaShaderId))
+        {
+            runtimeMat.SetFloat(IgnoreMainTexAlphaShaderId, sharedMat.GetFloat(IgnoreMainTexAlphaShaderId));
+        }
+
+        if (runtimeMat.HasProperty(EmitterAlphaShaderId) && sharedMat.HasProperty(EmitterAlphaShaderId))
+        {
+            runtimeMat.SetFloat(EmitterAlphaShaderId, sharedMat.GetFloat(EmitterAlphaShaderId));
+        }
+
+        if (runtimeMat.HasProperty(AlphaEdgeFeatherShaderId) && sharedMat.HasProperty(AlphaEdgeFeatherShaderId))
+        {
+            runtimeMat.SetFloat(AlphaEdgeFeatherShaderId, sharedMat.GetFloat(AlphaEdgeFeatherShaderId));
+        }
+
+        if (runtimeMat.HasProperty(SplitRibbonByLumShaderId) && sharedMat.HasProperty(SplitRibbonByLumShaderId))
+        {
+            runtimeMat.SetFloat(SplitRibbonByLumShaderId, sharedMat.GetFloat(SplitRibbonByLumShaderId));
+        }
+
+        if (runtimeMat.HasProperty(SoftLumMinShaderId) && sharedMat.HasProperty(SoftLumMinShaderId))
+        {
+            runtimeMat.SetFloat(SoftLumMinShaderId, sharedMat.GetFloat(SoftLumMinShaderId));
+        }
+
+        if (runtimeMat.HasProperty(SoftLumMaxShaderId) && sharedMat.HasProperty(SoftLumMaxShaderId))
+        {
+            runtimeMat.SetFloat(SoftLumMaxShaderId, sharedMat.GetFloat(SoftLumMaxShaderId));
+        }
+
+        if (runtimeMat.HasProperty(LineLumMinShaderId) && sharedMat.HasProperty(LineLumMinShaderId))
+        {
+            runtimeMat.SetFloat(LineLumMinShaderId, sharedMat.GetFloat(LineLumMinShaderId));
+        }
+
+        if (runtimeMat.HasProperty(LineLumMaxShaderId) && sharedMat.HasProperty(LineLumMaxShaderId))
+        {
+            runtimeMat.SetFloat(LineLumMaxShaderId, sharedMat.GetFloat(LineLumMaxShaderId));
+        }
+
+        if (runtimeMat.HasProperty(SoftOpacityMulShaderId) && sharedMat.HasProperty(SoftOpacityMulShaderId))
+        {
+            runtimeMat.SetFloat(SoftOpacityMulShaderId, sharedMat.GetFloat(SoftOpacityMulShaderId));
+        }
+
+        if (runtimeMat.HasProperty(LineOpacityMulShaderId) && sharedMat.HasProperty(LineOpacityMulShaderId))
+        {
+            runtimeMat.SetFloat(LineOpacityMulShaderId, sharedMat.GetFloat(LineOpacityMulShaderId));
+        }
+
+        if (runtimeMat.HasProperty(SoftRgbBoostShaderId) && sharedMat.HasProperty(SoftRgbBoostShaderId))
+        {
+            runtimeMat.SetFloat(SoftRgbBoostShaderId, sharedMat.GetFloat(SoftRgbBoostShaderId));
+        }
+
+        if (runtimeMat.HasProperty(LineRgbBoostShaderId) && sharedMat.HasProperty(LineRgbBoostShaderId))
+        {
+            runtimeMat.SetFloat(LineRgbBoostShaderId, sharedMat.GetFloat(LineRgbBoostShaderId));
+        }
+
+        if (runtimeMat.HasProperty(SplitByUvLayerShaderId) && sharedMat.HasProperty(SplitByUvLayerShaderId))
+        {
+            runtimeMat.SetFloat(SplitByUvLayerShaderId, sharedMat.GetFloat(SplitByUvLayerShaderId));
+        }
+
+        if (runtimeMat.HasProperty(UvLayerCenterShaderId) && sharedMat.HasProperty(UvLayerCenterShaderId))
+        {
+            runtimeMat.SetVector(UvLayerCenterShaderId, sharedMat.GetVector(UvLayerCenterShaderId));
+        }
+
+        if (runtimeMat.HasProperty(UvLayerDistMinShaderId) && sharedMat.HasProperty(UvLayerDistMinShaderId))
+        {
+            runtimeMat.SetFloat(UvLayerDistMinShaderId, sharedMat.GetFloat(UvLayerDistMinShaderId));
+        }
+
+        if (runtimeMat.HasProperty(UvLayerDistMaxShaderId) && sharedMat.HasProperty(UvLayerDistMaxShaderId))
+        {
+            runtimeMat.SetFloat(UvLayerDistMaxShaderId, sharedMat.GetFloat(UvLayerDistMaxShaderId));
+        }
+
+        if (runtimeMat.HasProperty(OuterSoftOpacityMulShaderId) && sharedMat.HasProperty(OuterSoftOpacityMulShaderId))
+        {
+            runtimeMat.SetFloat(OuterSoftOpacityMulShaderId, sharedMat.GetFloat(OuterSoftOpacityMulShaderId));
+        }
+
+        if (runtimeMat.HasProperty(OuterLineOpacityMulShaderId) && sharedMat.HasProperty(OuterLineOpacityMulShaderId))
+        {
+            runtimeMat.SetFloat(OuterLineOpacityMulShaderId, sharedMat.GetFloat(OuterLineOpacityMulShaderId));
+        }
+
+        if (runtimeMat.HasProperty(OuterSoftRgbBoostShaderId) && sharedMat.HasProperty(OuterSoftRgbBoostShaderId))
+        {
+            runtimeMat.SetFloat(OuterSoftRgbBoostShaderId, sharedMat.GetFloat(OuterSoftRgbBoostShaderId));
+        }
+
+        if (runtimeMat.HasProperty(OuterLineRgbBoostShaderId) && sharedMat.HasProperty(OuterLineRgbBoostShaderId))
+        {
+            runtimeMat.SetFloat(OuterLineRgbBoostShaderId, sharedMat.GetFloat(OuterLineRgbBoostShaderId));
+        }
+
+        if (runtimeMat.HasProperty(ColorScaleRepeatsShaderId) && sharedMat.HasProperty(ColorScaleRepeatsShaderId))
+        {
+            runtimeMat.SetFloat(ColorScaleRepeatsShaderId, sharedMat.GetFloat(ColorScaleRepeatsShaderId));
+        }
+
+        if (runtimeMat.HasProperty(ColorScaleCountShaderId) && sharedMat.HasProperty(ColorScaleCountShaderId))
+        {
+            runtimeMat.SetFloat(ColorScaleCountShaderId, sharedMat.GetFloat(ColorScaleCountShaderId));
+        }
+
+        if (runtimeMat.HasProperty(ColorScaleTime1ShaderId) && sharedMat.HasProperty(ColorScaleTime1ShaderId))
+        {
+            runtimeMat.SetFloat(ColorScaleTime1ShaderId, sharedMat.GetFloat(ColorScaleTime1ShaderId));
+        }
+
+        if (runtimeMat.HasProperty(ColorScaleTime2ShaderId) && sharedMat.HasProperty(ColorScaleTime2ShaderId))
+        {
+            runtimeMat.SetFloat(ColorScaleTime2ShaderId, sharedMat.GetFloat(ColorScaleTime2ShaderId));
+        }
+
+        if (runtimeMat.HasProperty(ColorScale0ShaderId) && sharedMat.HasProperty(ColorScale0ShaderId))
+        {
+            runtimeMat.SetColor(ColorScale0ShaderId, sharedMat.GetColor(ColorScale0ShaderId));
+        }
+
+        if (runtimeMat.HasProperty(ColorScale1ShaderId) && sharedMat.HasProperty(ColorScale1ShaderId))
+        {
+            runtimeMat.SetColor(ColorScale1ShaderId, sharedMat.GetColor(ColorScale1ShaderId));
+        }
+
+        if (runtimeMat.HasProperty(ColorScale2ShaderId) && sharedMat.HasProperty(ColorScale2ShaderId))
+        {
+            runtimeMat.SetColor(ColorScale2ShaderId, sharedMat.GetColor(ColorScale2ShaderId));
+        }
+
+        if (runtimeMat.HasProperty(BAlphaBlendShaderId) && sharedMat.HasProperty(BAlphaBlendShaderId))
+        {
+            runtimeMat.SetFloat(BAlphaBlendShaderId, sharedMat.GetFloat(BAlphaBlendShaderId));
         }
     }
 

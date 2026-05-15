@@ -128,4 +128,37 @@ float4 L2Fx_MeshComputeColor(
     return saturate(col);
 }
 
+
+
+// Файл 3: добавить перегрузку с абсолютным временем
+float4 L2Fx_MeshComputeColorAbsolute(
+    float ageSeconds, // ← абсолютный возраст
+    float lifetime, // ← полное время жизни
+    float colorScaleParam, uint colorScaleCount,
+    float colorScaleTimes[8], float4 colorScaleColors[8],
+    bool bAlphaBlend,
+    float fadeInEndTimeAbs, float4 fadeInColor, // ← абсолют!
+    float fadeOutStartTimeAbs, float4 fadeOutColor, // ← абсолют!
+    bool forcedFade,
+    float3 colorMultMin, float3 colorMultMax,
+    float seed, float startTime,
+    float opacity, float emitterAlpha)
+{
+    float4 col = L2Fx_SampleColorScale(
+        saturate(ageSeconds / max(lifetime, 1e-4)),
+        colorScaleParam, colorScaleCount,
+        colorScaleTimes, colorScaleColors, bAlphaBlend);
+
+    col = L2Fx_ApplyFadeInOutAbsolute( // ← ВЫЗОВ НОВОЙ ФУНКЦИИ
+        col, ageSeconds, lifetime,
+        fadeInEndTimeAbs, fadeInColor,
+        fadeOutStartTimeAbs, fadeOutColor, forcedFade);
+
+    col.rgb = L2Fx_ApplyColorMultiplier(
+        col.rgb, colorMultMin, colorMultMax, seed, startTime);
+
+    col.a *= opacity * emitterAlpha;
+    return saturate(col);
+}
+
 #endif // L2_FX_MESH_EMITTER_INCLUDED
