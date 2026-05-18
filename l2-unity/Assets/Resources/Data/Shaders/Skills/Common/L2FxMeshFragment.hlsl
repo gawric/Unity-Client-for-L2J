@@ -39,6 +39,20 @@ float L2Fx_MeshFrag_SampleTextureAlpha(
     return 1.0;
 }
 
+float L2Fx_MeshFrag_ApplyAlphaPowerStrength(
+    float mask,
+    float alphaFromLuma,
+    float alphaPower,
+    float alphaStrength)
+{
+    if (alphaFromLuma > 0.5)
+    {
+        return pow(saturate(mask), max(alphaPower, 0.0001)) * alphaStrength;
+    }
+
+    return mask;
+}
+
 void L2Fx_MeshFrag_ApplyGroundShadow(
     inout float4 color,
     float4 texColor,
@@ -106,6 +120,13 @@ float3 L2Fx_MeshFrag_MagicCircleLumaUvSplit(
     }
 
     return tintedRgb * f;
+}
+
+// PTDS_Darken: white = no change, dark tint = darken (min-blend or DstColor multiply).
+float3 L2Fx_MeshFrag_DarkenMinSource(float3 tintedRgb, float mask)
+{
+    float m = saturate(mask);
+    return lerp(float3(1.0, 1.0, 1.0), saturate(tintedRgb), m);
 }
 
 #endif // L2_FX_MESH_FRAGMENT_INCLUDED

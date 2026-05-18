@@ -41,6 +41,111 @@ float3 L2Fx_SpawnOffsetPolarYDegrees(
         radius * sinPhi * sin(theta));
 }
 
+// PTVD_OwnerAndStartPosition: StartVelocityRange X/Y scale UE direction components (not a single radial speed).
+// spawnOffsetUnity uses the same UE→Unity remap as StartLocationOffset (x, z, y).
+float3 L2Fx_VelocityOwnerAndStartPosition(
+    float3 spawnOffsetUnity,
+    float2 velocityRangeX_UE,
+    float2 velocityRangeY_UE,
+    float seed,
+    float startTime)
+{
+    float3 dUE = float3(spawnOffsetUnity.x, spawnOffsetUnity.z, spawnOffsetUnity.y);
+    float len = length(dUE);
+    float3 nUE = len > 1e-5 ? (dUE / len) : float3(0, 0, 1);
+    float sx = L2Fx_RandomRange(velocityRangeX_UE, seed, startTime, 113.0);
+    float sy = L2Fx_RandomRange(velocityRangeY_UE, seed, startTime, 115.0);
+    float3 velUE = float3(nUE.x * sx, nUE.y * sy, nUE.z * sy);
+    return float3(velUE.x, velUE.z, velUE.y);
+}
+
+// UE FVector (X,Y,Z) → Unity (X,Z,Y) for Y-up.
+float3 L2Fx_UeVectorToUnity(float3 vUe)
+{
+    return float3(vUe.x, vUe.z, vUe.y);
+}
+
+// Spawn_Velocity (row 4) + GetVelocityDirectionFrom Project (row 31):
+//   vel = lerp(VelMin, VelMax, rand); dir = normalize(pos - owner); vel = dir * dot(vel, dir)
+float3 L2Fx_VelocitySpawnThenProjectOnOwner(
+    float3 spawnPosUe,
+    float3 ownerPosUe,
+    float2 velocityRangeX_UE,
+    float2 velocityRangeY_UE,
+    float2 velocityRangeZ_UE,
+    float seed,
+    float startTime)
+{
+    float3 velUe = float3(
+        L2Fx_RandomRange(velocityRangeX_UE, seed, startTime, 101.0),
+        L2Fx_RandomRange(velocityRangeY_UE, seed, startTime, 103.0),
+        L2Fx_RandomRange(velocityRangeZ_UE, seed, startTime, 107.0));
+
+    float3 dirUe = spawnPosUe - ownerPosUe;
+    float len = length(dirUe);
+    dirUe = len > 1e-5 ? (dirUe / len) : float3(0, 0, 1);
+    return dirUe * dot(velUe, dirUe);
+}
+
+// Update_MovePosition + MoveVelocity + VelocityLoss (rows 36–37, 48): v=v0+a*t-loss*t, p=v0*t+½a*t²-½loss*t²
+float3 L2Fx_DisplacementLinearVelocityLoss(
+    float3 velocity,
+    float3 acceleration,
+    float3 velocityLossPerSec,
+    float ageSeconds)
+{
+    float t = max(0.0, ageSeconds);
+    return velocity * t + 0.5 * acceleration * t * t - 0.5 * velocityLossPerSec * t * t;
+}
+
+// Horizontal direction from spawn offset (XZ plane)
+float2 L2Fx_OutwardDirectionXZ(
+    float3 spawnOffset,
+    float2 fallbackAzimuthDegMinMax,
+    float seed, float startTime, float salt)
+{
+    float2 hDir = spawnOffset.xz;
+    float len = length(hDir);
+
+    if (len > 1e-5)
+        return hDir / len;
+
+    float fallbackAngle = L2Fx_RandomRange(
+        fallbackAzimuthDegMinMax, seed, startTime, salt) * L2Fx_DegToRad;
+    return float2(cos(fallbackAngle), sin(fallbackAngle));
+}
+
+// Sharp sideways burst (XZ) + soft fall (Y). VelocityRange X = horizontal, Y = initial sink.
+float3 L2Fx_VelocityFogSpreadHorizontal(
+    float3 spawnOffsetUnity,
+    float2 horizontalSpeedRange_UE,
+    float2 downwardSpeedRange_UE,
+    float downwardScale,
+    float horizontalBoost,
+    float2 fallbackAzimuthDeg,
+    float seed,
+    float startTime)
+{
+    float2 hDir = L2Fx_OutwardDirectionXZ(spawnOffsetUnity, fallbackAzimuthDeg, seed, startTime, 181.0);
+    float hs = L2Fx_RandomRange(horizontalSpeedRange_UE, seed, startTime, 113.0) * horizontalBoost;
+    float ds = L2Fx_RandomRange(downwardSpeedRange_UE, seed, startTime, 115.0) * downwardScale;
+    return float3(hDir.x * hs, -ds, hDir.y * hs);
+}
+
+// Horizontal spread slows (VelocityLoss); vertical keeps Acceleration (gravity), no loss on Y.
+float3 L2Fx_DisplacementFogFall(
+    float3 velocity,
+    float3 acceleration,
+    float horizontalVelocityLossPerSec,
+    float ageSeconds)
+{
+    float t = max(0.0, ageSeconds);
+    float3 velH = float3(velocity.x, 0.0, velocity.z);
+    float3 velV = float3(0.0, velocity.y, 0.0);
+    float3 lossH = float3(horizontalVelocityLossPerSec, 0.0, horizontalVelocityLossPerSec);
+    return L2Fx_DisplacementLinearVelocityLoss(velH, float3(0, 0, 0), lossH, t)
+        + L2Fx_DisplacementLinearVelocityLoss(velV, acceleration, float3(0, 0, 0), t);
+}
 
 // Exponential drag approximation plus constant acceleration.
 float3 L2Fx_DampedDisplacement(float3 velocity, float3 acceleration, float velocityLoss, float ageSeconds)
@@ -63,26 +168,6 @@ float3 L2Fx_DisplacementConstantAccel(
 {
     float t = max(0.0, ageSeconds);
     return velocity * t + 0.5 * acceleration * t * t;
-}
-
-// ───────────────────────────────────────────────────────────────
-// Horizontal direction from spawn offset (XZ plane)
-// ───────────────────────────────────────────────────────────────
-
-float2 L2Fx_OutwardDirectionXZ(
-    float3 spawnOffset,
-    float2 fallbackAzimuthDegMinMax,
-    float seed, float startTime, float salt)
-{
-    float2 hDir = spawnOffset.xz;
-    float len = length(hDir);
-
-    if (len > 1e-5)
-        return hDir / len;
-
-    float fallbackAngle = L2Fx_RandomRange(
-        fallbackAzimuthDegMinMax, seed, startTime, salt) * L2Fx_DegToRad;
-    return float2(cos(fallbackAngle), sin(fallbackAngle));
 }
 
 // ───────────────────────────────────────────────────────────────
