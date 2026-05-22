@@ -12,5 +12,9 @@ public enum EffectAttachmentPoint
     /// Capsule center from CharacterController (local center → world). Works for quadrupeds and humanoids
     /// when the controller is authored per prefab; falls back to combined renderer bounds center.
     /// </summary>
-    TargetCenter = 8
+    TargetCenter = 8,
+    /// <summary>
+    /// Center of target horizontally, above the visual mesh (renderer bounds top or capsule top).
+    /// </summary>
+    TargetOverHead = 9
 }

@@ -66,15 +66,25 @@ public static class CompositeEffectUtilities
             context.CasterEntity = casterEntity;
             context.CasterUserId = casterEntity.IdentityInterlude != null ? casterEntity.IdentityInterlude.Id : 0;
 
-            if (casterEntity.TargetId > 0 && World.Instance != null)
+            int resolvedTargetId = 0;
+            if (castData != null && castData.TargetObjectId > 0)
             {
-                Entity targetEntity = World.Instance.GetEntityNoLockSync(casterEntity.TargetId);
+                resolvedTargetId = castData.TargetObjectId;
+            }
+            else if (casterEntity.TargetId > 0)
+            {
+                resolvedTargetId = casterEntity.TargetId;
+            }
+
+            if (resolvedTargetId > 0 && World.Instance != null)
+            {
+                Entity targetEntity = World.Instance.GetEntityNoLockSync(resolvedTargetId);
                 if (targetEntity != null)
                 {
                     context.TargetEntity = targetEntity;
                     context.TargetUserId = targetEntity.IdentityInterlude != null
                         ? targetEntity.IdentityInterlude.Id
-                        : casterEntity.TargetId;
+                        : resolvedTargetId;
                     context.TargetTransform = targetEntity.transform;
                 }
             }

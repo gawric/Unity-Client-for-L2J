@@ -179,7 +179,8 @@ void L2Fx_MeshBuiltin_TransformVertexOS(
     float sizeScaleTime3, float sizeScaleVal3,
     float sizeScaleTime4, float sizeScaleVal4,
     float3 startLocationOffsetUU,
-    float meshYOffset)
+    float meshYOffset,
+    float sizeScaleHorizontalOnly)
 {
     if (spinParticles > 0.5)
     {
@@ -207,7 +208,13 @@ void L2Fx_MeshBuiltin_TransformVertexOS(
         startSizeM *= L2FX_UU_TO_UNITY;
     }
 
-    posOS *= startSizeM * sizeScale;
+    float3 sizeMul = startSizeM * sizeScale;
+    if (sizeScaleHorizontalOnly > 0.5)
+    {
+        sizeMul = float3(startSizeM.x * sizeScale, startSizeM.y, startSizeM.z * sizeScale);
+    }
+
+    posOS *= sizeMul;
     posOS += L2Fx_MeshBuiltin_StartLocationOffsetM(startLocationOffsetUU);
     posOS.y += meshYOffset;
 }

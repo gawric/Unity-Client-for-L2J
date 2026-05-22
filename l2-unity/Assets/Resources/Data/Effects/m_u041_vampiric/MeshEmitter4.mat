@@ -1,0 +1,117 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!21 &2100000
+Material:
+  serializedVersion: 8
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: MeshEmitter4
+  m_Shader: {fileID: 4800000, guid: b3c4d5e6f708192a3b4c5d6e7f8091a1, type: 3}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
+  m_ValidKeywords: []
+  m_InvalidKeywords:
+  - _ALPHAFROMLUMA_ON
+  - _FADEIN_ON
+  - _FADEOUT_ON
+  - _HASLIFETIME_ON
+  - _IGNOREMAINTEXALPHA_ON
+  - _SPINPARTICLES_ON
+  - _USESIZESCALE_ON
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: 3000
+  stringTagMap: {}
+  disabledShaderPasses:
+  - MOTIONVECTORS
+  m_LockedProperties: 
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - _MainTex:
+        m_Texture: {fileID: 2800000, guid: a6898afe8be154e4db40eb3b686b11e7, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Ints:
+    - _ColorScaleCount: 3
+    - _SizeScaleCount: 4
+    m_Floats:
+    - _AlphaEdgeFeather: 0.014
+    - _AlphaFromLuma: 1
+    - _AlphaPower: 1.2
+    - _ApplyUuToStartSize: 0
+    - _BillboardToCamera: 0
+    - _ClipDepthBias: 0.001
+    - _ColorScaleCount: 3
+    - _ColorScaleRepeats: 1
+    - _ColorScaleTime1: 0.5
+    - _ColorScaleTime2: 1
+    - _EdgeGlowAlpha: 0.075
+    - _EdgeGlowBlurTexels: 2
+    - _EdgeGlowPower: 0.5
+    - _EmitterAlpha: 1
+    - _FadeIn: 1
+    - _FadeInEndTime: 0.234
+    - _Fadeout: 1
+    - _FadeoutStartTime: 0.728
+    - _HasLifetime: 1
+    - _IgnoreMainTexAlpha: 1
+    - _InkAlphaStrength: 2.2
+    - _InkDilateTexels: 4
+    - _InkShapeScale: 2
+    - _LumaAlphaFloor: 0
+    - _MeshYOffset: 0
+    - _Opacity: 1
+    - _Seed: 0
+    - _SizeScaleCount: 4
+    - _SizeScaleParam: 0
+    - _SizeScaleRepeats: 1
+    - _SizeScaleTime0: 0
+    - _SizeScaleTime1: 0.2
+    - _SizeScaleTime2: 0.45
+    - _SizeScaleTime3: 1
+    - _SizeScaleVal0: 0.5
+    - _SizeScaleVal1: 1
+    - _SizeScaleVal2: 1.02
+    - _SizeScaleVal3: 1.03
+    - _SpinCCWorCW: 0
+    - _SpinParticles: 1
+    - _SpinsPerSecond: 0
+    - _StartTime: 0
+    - _StreakLumaVariation: 0
+    - _UseRegularSizeScale: 0
+    - _UseSizeScale: 1
+    - _UvFitScale: 1
+    - _bAlphaBlend: 0
+    m_Colors:
+    - _ColorScale0: {r: 0.9, g: 0.9, b: 0.9, a: 1}
+    - _ColorScale1: {r: 0.95, g: 0.95, b: 0.95, a: 1}
+    - _ColorScale2: {r: 1, g: 1, b: 1, a: 1}
+    - _BillboardEulerOffset: {r: 0, g: 90, b: 0, a: 0}
+    - _BillboardWorldUp: {r: 0, g: 1, b: 0, a: 0}
+    - _EdgeGlowTint: {r: 0.55, g: 0.12, b: 0.18, a: 1}
+    - _InitialDelayRange: {r: 0, g: 0, b: 0, a: 0}
+    - _LifetimeRange: {r: 1.3, g: 1.3, b: 0, a: 0}
+    - _StartLocationOffset: {r: 0, g: 0, b: 0, a: 0}
+    - _StartSize: {r: 1, g: 1, b: 1, a: 0}
+    - _StartSpinRange: {r: 1, g: 1, b: 0, a: 0}
+    - _StreakTint: {r: 1, g: 1, b: 1, a: 1}
+    - _UvFitOffset: {r: 0, g: 0, b: 0, a: 0}
+  m_BuildTextureStacks: []
+  m_AllowLocking: 1
+--- !u!114 &8345250213954068061
+MonoBehaviour:
+  m_ObjectHideFlags: 11
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d0353a89b1f911e48b9e16bdc9f2e058, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  version: 10

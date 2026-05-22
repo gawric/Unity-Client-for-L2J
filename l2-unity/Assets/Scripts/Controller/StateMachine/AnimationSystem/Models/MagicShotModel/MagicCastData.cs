@@ -41,14 +41,18 @@ public class MagicCastData
     public float shotEventTime;
     public float serverTimeToShoot;
 
+    /// <summary>Object id цели из пакета MagicSkillUse (приоритетнее PlayerEntity.TargetId для VFX).</summary>
+    public int TargetObjectId;
+
     /// <summary>Окно от старта каста до момента выстрела: номинал минус penalty или минус фиксированный offset.</summary>
     public float AdjustedShootWindowSeconds { get; private set; }
 
-    public void Setup(float serverHitMs, float flyMs, float[] clipsDurations, float shotEventTime)
+    public void Setup(float serverHitMs, float flyMs, float[] clipsDurations, float shotEventTime, int targetObjectId = 0)
     {
         StartTime = Time.time;
         HitTime = serverHitMs / 1000f;
         FlightTime = flyMs / 1000f;
+        TargetObjectId = targetObjectId;
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
         Debug.Log(

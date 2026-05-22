@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public class L2Particle : BaseEffect
+public class L2Particle : BaseEffect, IRegisteredBillboard
 {
     private const string LifetimeTraceEffectName = "el_wind_strike_ta";
 
@@ -8,6 +8,9 @@ public class L2Particle : BaseEffect
     [SerializeField] private bool _skipScheduledDestroyForDebug;
 
     [SerializeField] private Vector3 _surfaceNormal;
+    [Header("Billboard")]
+    [SerializeField] private bool _billboardToCamera;
+    [SerializeField] private Vector3 _billboardRotationOffsetEuler;
     [SerializeField] private PooledEffect _pooledEffect;
     [SerializeField] private EffectPart[] _particleGroups;
     private EffectSettings _settings;
@@ -16,12 +19,52 @@ public class L2Particle : BaseEffect
     public PooledEffect PooledEffect { get { return _pooledEffect; } }
     public Vector3 SurfaceNormal { get { return _surfaceNormal; } set { _surfaceNormal = value; } }
 
+    private void OnEnable()
+    {
+        if (_billboardToCamera)
+        {
+            RegisteredBillboards.Register(this);
+        }
+    }
+
+    private void OnDisable()
+    {
+        if (_billboardToCamera)
+        {
+            RegisteredBillboards.Unregister(this);
+        }
+    }
+
     private void Awake()
     {
         _pooledEffect.ResetTimerCallback = () =>
         {
             ResetTimer();
         };
+    }
+
+    public void OnCameraPreRender(Camera camera)
+    {
+        ApplyBillboardRotation(camera);
+    }
+
+    private void LateUpdate()
+    {
+        if (_billboardToCamera)
+        {
+            ApplyBillboardRotation(Camera.main);
+        }
+    }
+
+    private void ApplyBillboardRotation(Camera camera)
+    {
+        if (!_billboardToCamera || camera == null)
+        {
+            return;
+        }
+
+        // Copy camera orientation so the whole mesh turns as an object, preserving its authored 3D shape.
+        transform.rotation = camera.transform.rotation * Quaternion.Euler(_billboardRotationOffsetEuler);
     }
 
     public override void Setup(EffectSettings settings, MagicCastData castData, Transform owner)

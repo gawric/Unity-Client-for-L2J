@@ -28,7 +28,7 @@ public class NewMagicSkillsState  : AbstractAttackEvents
                 float[] durations = AnimationManager.Instance.GetOverrideClipsDurations(objectId, readyCombo.GetAnimCycle());
                 float shotEventTime = AnimationManager.Instance.GetOverrideEventTimeByName(objectId, readyCombo.GetAnimCycle(), "OnAnimationShoot");
                 float flightTimeMs = ResolveMagicFlightTimeMs(entity, useSkill.SkillId);
-                entity.SetupTotalCastDuration(useSkill.HitTime, flightTimeMs, durations, shotEventTime);
+                entity.SetupTotalCastDuration(useSkill.HitTime, flightTimeMs, durations, shotEventTime, useSkill.TargetId);
 
                 SkillExecutor.Instance.ExecuteSkillOverride(useSkill.SkillGrp, entity, readyCombo, _events);
                 break;
@@ -53,7 +53,7 @@ public class NewMagicSkillsState  : AbstractAttackEvents
         {
             float[] durations_self = AnimationManager.Instance.GetOverrideClipsDurations(objectId, selfCombo.GetAnimCycle());
             float shotEventTime_self = AnimationManager.Instance.GetOverrideEventTimeByName(objectId, selfCombo.GetAnimCycle(), "OnAnimationShoot");
-            entity.SetupTotalCastDuration(useSkill.HitTime, 0f, durations_self, shotEventTime_self);
+            entity.SetupTotalCastDuration(useSkill.HitTime, 0f, durations_self, shotEventTime_self, useSkill.TargetId);
         }
     }
 

@@ -44,6 +44,9 @@ public class ParticleSingle : EffectPart
     private static readonly int ColorScale1ShaderId = Shader.PropertyToID("_ColorScale1");
     private static readonly int ColorScale2ShaderId = Shader.PropertyToID("_ColorScale2");
     private static readonly int BAlphaBlendShaderId = Shader.PropertyToID("_bAlphaBlend");
+    private static readonly int BillboardToCameraShaderId = Shader.PropertyToID("_BillboardToCamera");
+    private static readonly int BillboardWorldUpShaderId = Shader.PropertyToID("_BillboardWorldUp");
+    private static readonly int BillboardEulerOffsetShaderId = Shader.PropertyToID("_BillboardEulerOffset");
 
     [SerializeField] private L2Particle _owner;
     [SerializeField] private Renderer[] _particles;
@@ -571,6 +574,21 @@ public class ParticleSingle : EffectPart
         if (runtimeMat.HasProperty(BAlphaBlendShaderId) && sharedMat.HasProperty(BAlphaBlendShaderId))
         {
             runtimeMat.SetFloat(BAlphaBlendShaderId, sharedMat.GetFloat(BAlphaBlendShaderId));
+        }
+
+        if (runtimeMat.HasProperty(BillboardToCameraShaderId) && sharedMat.HasProperty(BillboardToCameraShaderId))
+        {
+            runtimeMat.SetFloat(BillboardToCameraShaderId, sharedMat.GetFloat(BillboardToCameraShaderId));
+        }
+
+        if (runtimeMat.HasProperty(BillboardWorldUpShaderId) && sharedMat.HasProperty(BillboardWorldUpShaderId))
+        {
+            runtimeMat.SetVector(BillboardWorldUpShaderId, sharedMat.GetVector(BillboardWorldUpShaderId));
+        }
+
+        if (runtimeMat.HasProperty(BillboardEulerOffsetShaderId) && sharedMat.HasProperty(BillboardEulerOffsetShaderId))
+        {
+            runtimeMat.SetVector(BillboardEulerOffsetShaderId, sharedMat.GetVector(BillboardEulerOffsetShaderId));
         }
     }
 

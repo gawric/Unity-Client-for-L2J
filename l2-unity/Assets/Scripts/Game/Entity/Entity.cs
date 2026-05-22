@@ -16,6 +16,7 @@ public class Entity : MonoBehaviour {
     [SerializeField] private bool _dead;
     [SerializeField] private CharacterRace _race;
     [SerializeField] private CharacterRaceAnimation _raceId;
+    [SerializeField] private EntityBodyType _bodyType = EntityBodyType.Humanoid;
     
     public Animator Animator { get; private set; }
     [Header("Combat")]
@@ -66,6 +67,7 @@ public class Entity : MonoBehaviour {
     public long StartAutoAttackTime { get { return _startAutoAttackTime; } }
     public CharacterRace Race { get { return _race; } set { _race = value; } }
     public CharacterRaceAnimation RaceId { get { return _raceId; } set { _raceId = value; } }
+    public EntityBodyType BodyType { get { return _bodyType; } set { _bodyType = value; } }
     public bool EntityLoaded { get { return _entityLoaded; } set { _entityLoaded = value; } }
 
     protected  void Awake() 
@@ -488,11 +490,11 @@ public class Entity : MonoBehaviour {
         return _status.GetRemainingHp();
     }
 
-    public void SetupTotalCastDuration(float serverHitTimeMs, float flightTimeMs, float[] clipsDurations,float shotEventTime)
+    public void SetupTotalCastDuration(float serverHitTimeMs, float flightTimeMs, float[] clipsDurations, float shotEventTime, int targetObjectId = 0)
     {
         if (_castData == null) _castData = new MagicCastData();
 
-        _castData.Setup(serverHitTimeMs, flightTimeMs, clipsDurations, shotEventTime);
+        _castData.Setup(serverHitTimeMs, flightTimeMs, clipsDurations, shotEventTime, targetObjectId);
     }
 
     public MagicCastData GetMagicCastData()

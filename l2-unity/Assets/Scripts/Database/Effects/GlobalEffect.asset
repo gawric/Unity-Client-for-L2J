@@ -63,3 +63,8 @@ MonoBehaviour:
     comment: curse-poison-effect
     settings: {fileID: 11400000, guid: 32b8e356a6514494cb7425f31ee60898, type: 2}
     ignoreFlightTimeForCast: 1
+  - id: 1147
+    prefab: {fileID: -3238118204883760824, guid: 7e9c873da8301df4eb47aabe93145e6f, type: 3}
+    comment: vampiric-touch-effect
+    settings: {fileID: 11400000, guid: 5b8dc6046d4381541bf1b9e6b1e707ee, type: 2}
+    ignoreFlightTimeForCast: 1

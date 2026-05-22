@@ -190,7 +190,7 @@ Shader "L2/Effects/MagicCircleAlphaBlend"
                     _SizeScaleTime2, _SizeScaleVal2,
                     _SizeScaleTime3, _SizeScaleVal3,
                     _SizeScaleTime4, _SizeScaleVal4,
-                    _StartLocationOffset.xyz, _MeshYOffset);
+                    _StartLocationOffset.xyz, _MeshYOffset, 0.0);
 
                 OUT.positionHCS = L2Fx_MeshUrp_ObjectToHClip(posOS, _ClipDepthBias);
 

@@ -1638,7 +1638,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &4203682438251803849
 Transform:
   m_ObjectHideFlags: 0
@@ -1683,8 +1683,8 @@ MonoBehaviour:
   - {fileID: 2384580062900496370}
   - {fileID: 472610664458563292}
   _startDelay: 0
-  _countPerSecond: 15
-  _maxCount: 2
+  _countPerSecond: 18
+  _maxCount: 7
   _forceContinuousSpawning: 0
   _preserveShaderTimeInContinuousLoop: 0
   _isBurstSpawning: 0
@@ -1881,7 +1881,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &5582890308068778517
 Transform:
   m_ObjectHideFlags: 0
@@ -1915,7 +1915,7 @@ MonoBehaviour:
   _particles:
   - {fileID: 2354450245404494577}
   - {fileID: 5550030751054203706}
-  _startDelay: 0
+  _startDelay: 0.2
   _countPerSecond: 15
   _maxCount: 2
   _forceContinuousSpawning: 0
@@ -2338,6 +2338,8 @@ MonoBehaviour:
   _particleGroups:
   - {fileID: 6267013441865937614}
   - {fileID: 8818717049774853731}
+  - {fileID: 9043262613120225988}
+  - {fileID: 1525088895938171724}
 --- !u!1 &6595195315372875419
 GameObject:
   m_ObjectHideFlags: 0

@@ -177,7 +177,7 @@
                     _SizeScaleTime2, _SizeScaleVal2,
                     1.0, 1.0,
                     1.0, 1.0,
-                    _StartLocationOffset.xyz, 0.0);
+                    _StartLocationOffset.xyz, 0.0, 0.0);
 
                 OUT.positionHCS = L2Fx_MeshUrp_ObjectToHClip(posOS, 0.0);
 

@@ -128,12 +128,19 @@ public class CompositePrefabEffect : TimedCompositeEffectBase
         // Composite root delegates playback to spawned child effects.
     }
 
+    private void RefreshResolveContext()
+    {
+        _context = CompositeEffectUtilities.BuildContext(_owner, _castData);
+    }
+
     private void SpawnPart(CompositePrefabPart part)
     {
         if (!IsPartSpawnable(part))
         {
             return;
         }
+
+        RefreshResolveContext();
 
         if (!TryResolveAttachment(part, out Transform resolvedTransform, out Vector3 worldPosition))
         {
