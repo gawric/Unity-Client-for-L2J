@@ -230,6 +230,61 @@ public abstract class TimedCompositeEffectBase : BaseEffect
         }
     }
 
+    protected void ApplyPartHomeFlightOverrides(CompositePrefabPart part, Transform instanceTransform)
+    {
+        if (part == null || instanceTransform == null || !CompositeHomeProjectileLaunchHelper.IsEnabled(part))
+        {
+            return;
+        }
+
+        ParticleGroup[] groups = instanceTransform.GetComponentsInChildren<ParticleGroup>(true);
+        bool hasAnchor = false;
+        int anchorCount = 0;
+        for (int i = 0; i < groups.Length; i++)
+        {
+            if (groups[i] != null && groups[i].IsHomeFlightAnchor)
+            {
+                hasAnchor = true;
+                anchorCount++;
+            }
+        }
+
+        if (!hasAnchor && groups.Length > 0 && groups[0] != null)
+        {
+            groups[0].ApplyRuntimeHomeFlightProfile(ParticleGroupHomeFlightProfile.DefaultAnchor);
+            hasAnchor = true;
+        }
+
+        if (!hasAnchor || part.homeProjectile == null || !part.homeProjectile.mirrorDualFlight || anchorCount != 1)
+        {
+            return;
+        }
+
+        groups = instanceTransform.GetComponentsInChildren<ParticleGroup>(true);
+        for (int i = 0; i < groups.Length; i++)
+        {
+            ParticleGroup source = groups[i];
+            if (source == null || !source.IsHomeFlightAnchor || source.name.EndsWith("_Mirror"))
+            {
+                continue;
+            }
+
+            GameObject mirrorObject = Instantiate(source.gameObject, source.transform.parent);
+            mirrorObject.name = source.gameObject.name + "_Mirror";
+            Transform mirrorTransform = mirrorObject.transform;
+            mirrorTransform.SetPositionAndRotation(source.transform.position, source.transform.rotation);
+            mirrorTransform.localScale = source.transform.localScale;
+
+            ParticleGroup mirrorGroup = mirrorObject.GetComponent<ParticleGroup>();
+            if (mirrorGroup != null)
+            {
+                mirrorGroup.ApplyRuntimeHomeFlightProfile(ParticleGroupHomeFlightProfile.MirroredAnchor);
+            }
+
+            break;
+        }
+    }
+
     protected void AttachToResolvedTransformIfNeeded(
         CompositePrefabPart part,
         Transform resolvedTransform,

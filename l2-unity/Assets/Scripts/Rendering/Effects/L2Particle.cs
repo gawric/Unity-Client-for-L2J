@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
 public class L2Particle : BaseEffect, IRegisteredBillboard
 {
@@ -107,7 +108,7 @@ public class L2Particle : BaseEffect, IRegisteredBillboard
     {
         _playStartedAt = Time.time;
         ResetTimer();
-        if (!_skipScheduledDestroyForDebug)
+        if (!_skipScheduledDestroyForDebug && !IsDestroyDeferredUntilHomeArrival)
         {
             DestoryEffect(_settings, _castData);
         }
@@ -130,10 +131,7 @@ public class L2Particle : BaseEffect, IRegisteredBillboard
 
     public void ResetTimer()
     {
-        if (_particleGroups == null || _particleGroups.Length == 0)
-        {
-            _particleGroups = GetComponentsInChildren<EffectPart>();
-        }
+        RefreshParticleGroups();
 
         for (int i = 0; i < _particleGroups.Length; i++)
         {
@@ -159,6 +157,41 @@ public class L2Particle : BaseEffect, IRegisteredBillboard
 
             _particleGroups[i].PlayPart();
         }
+    }
+
+    private void RefreshParticleGroups()
+    {
+        if (_particleGroups == null || _particleGroups.Length == 0)
+        {
+            _particleGroups = GetComponentsInChildren<EffectPart>();
+            return;
+        }
+
+        List<EffectPart> refreshed = new List<EffectPart>(_particleGroups.Length + 1);
+        for (int i = 0; i < _particleGroups.Length; i++)
+        {
+            if (_particleGroups[i] != null && !refreshed.Contains(_particleGroups[i]))
+            {
+                refreshed.Add(_particleGroups[i]);
+            }
+        }
+
+        EffectPart[] children = GetComponentsInChildren<EffectPart>();
+        for (int i = 0; i < children.Length; i++)
+        {
+            EffectPart part = children[i];
+            if (part == null || refreshed.Contains(part))
+            {
+                continue;
+            }
+
+            if (part is ParticleGroup group && group.IsHomeFlightAnchor)
+            {
+                refreshed.Add(part);
+            }
+        }
+
+        _particleGroups = refreshed.ToArray();
     }
 
     protected override void OnDestroy()

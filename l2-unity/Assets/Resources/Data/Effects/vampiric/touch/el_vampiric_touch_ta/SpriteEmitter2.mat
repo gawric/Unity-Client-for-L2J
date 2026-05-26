@@ -1,0 +1,98 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!21 &2100000
+Material:
+  serializedVersion: 8
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: SpriteEmitter2
+  m_Shader: {fileID: 4800000, guid: a3f7c2e91b4d5648e0a1f9b2c3d4e5f6, type: 3}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
+  m_ValidKeywords: []
+  m_InvalidKeywords:
+  - _ALPHAFROMLUMA_ON
+  - _BALPHABLEND_ON
+  - _FADEOUT_ON
+  - _HASLIFETIME_ON
+  - _UNIFORMSIZE_ON
+  - _USESIZESCALE_ON
+  - _USETRAILVELOCITY_ON
+  - _USETRAILPATHFADE_ON
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: 3000
+  stringTagMap: {}
+  disabledShaderPasses:
+  - MOTIONVECTORS
+  m_LockedProperties: 
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - _MainTex:
+        m_Texture: {fileID: 2800000, guid: e4beac3ec5456554dbd5e3a7ff8bcc49, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Ints: []
+    m_Floats:
+    - _AlphaBoost: 16
+    - _AlphaFromLuma: 1
+    - _ApplySpawnUnitScale: 0
+    - _BillboardScale: 0
+    - _BlendBetweenSubdivisions: 0
+    - _ColorScaleTime1: 1
+    - _FadeIn: 0
+    - _FadeInEndTime: 0
+    - _Fadeout: 1
+    - _FadeoutStartTime: 0.23
+    - _HasLifetime: 1
+    - _IgnoreMainTexAlpha: 0
+    - _LumaAlphaFloor: 0.02
+    - _Opacity: 1.04
+    - _RgbBoost: 2.46
+    - _Seed: 0
+    - _SpawnUnitScale: 0.01
+    - _SpinParticles: 1
+    - _StartTime: 0
+    - _SubdivisionEnd: 15
+    - _SubdivisionStart: 15
+    - _TextureDilateTexels: 2.2
+    - _TextureUSubdivisions: 4
+    - _TextureVSubdivisions: 4
+    - _UniformSize: 1
+    - _UseRandomSubdivision: 0
+    - _UseSizeScale: 1
+    - _UseTrailVelocity: 1
+    - _UseTrailPathFade: 1
+    - _TrailPathFadeHead: 1
+    - _TrailPathFadeTail: 0.12
+    - _TrailPathFadeT: 0
+    - _bAlphaBlend: 1
+    m_Colors:
+    - _Acceleration: {r: 0, g: 0, b: 0, a: 0}
+    - _ColorScale0: {r: 1, g: 1, b: 1, a: 1}
+    - _ColorScale1: {r: 1, g: 1, b: 1, a: 1}
+    - _InitialDelayRange: {r: 0, g: 0, b: 0, a: 0}
+    - _LifetimeRange: {r: 0.5, g: 0.5, b: 0, a: 0}
+    - _OwnerWorldPos: {r: 0, g: 0, b: 0, a: 0}
+    - _PolarAzimuthDeg: {r: 0, g: 360, b: 0, a: 0}
+    - _PolarPitchDeg: {r: 90, g: 90, b: 0, a: 0}
+    - _PolarRadius: {r: 0, g: 0, b: 0, a: 0}
+    - _SizeRange: {r: 1, g: 1, b: 0, a: 0}
+    - _SizeScale0: {r: 0, g: 1.5, b: 0, a: 0}
+    - _SizeScale1: {r: 0.07, g: 1.2, b: 0, a: 0}
+    - _SizeScale2: {r: 1, g: 1.2, b: 0, a: 0}
+    - _SpinsPerSecondRange: {r: 0, g: 0, b: 0, a: 0}
+    - _StartLocationOffset: {r: 0, g: 0, b: 0, a: 0}
+    - _StartSpinRange: {r: 0, g: 1, b: 0, a: 0}
+    - _StartVelocityRangeX: {r: 0, g: 0, b: 0, a: 0}
+    - _StartVelocityRangeY: {r: 0, g: 0, b: 0, a: 0}
+    - _StartVelocityRangeZ: {r: 0, g: 0, b: 0, a: 0}
+    - _VelocityRangeX: {r: 0, g: 0, b: 0, a: 0}
+    - _VelocityRangeY: {r: 0, g: 0, b: 0, a: 0}
+    - _VelocityRangeZ: {r: 0, g: 0, b: 0, a: 0}
+  m_BuildTextureStacks: []
+  m_AllowLocking: 1

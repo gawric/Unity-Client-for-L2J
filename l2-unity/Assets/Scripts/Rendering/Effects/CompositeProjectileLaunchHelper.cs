@@ -84,6 +84,11 @@ public static class CompositeProjectileLaunchHelper
                 return true;
             }
 
+            if (CompositeHomeProjectileLaunchHelper.ShouldLaunchOnShoot(part))
+            {
+                return true;
+            }
+
             if (part.spawnTiming == CompositePartSpawnTiming.OnAnimationShoot)
             {
                 return true;
@@ -95,7 +100,6 @@ public static class CompositeProjectileLaunchHelper
 
     public static bool ShouldLaunchOnShoot(CompositePrefabPart part)
     {
-       var lauchMode =  GetLaunchMode(part);
         return GetLaunchMode(part) == ProjectileLaunchMode.OnAnimationShoot;
     }
 

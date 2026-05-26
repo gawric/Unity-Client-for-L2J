@@ -21,6 +21,53 @@ public class CompositeProjectileConfig
 }
 
 [Serializable]
+public class CompositeHomeProjectileConfig
+{
+    public ProjectileLaunchMode launchMode = ProjectileLaunchMode.Disabled;
+    // Original m_u003_b uses 450 Unreal units/sec. In Unity scale this is ~4.5 m/sec.
+    public float speed = 4.5f;
+    public float acceleration = 0f;
+    // When distance to caster (home point or root) <= this, start fade-out.
+    public float fadeStartDistance = 0.5f;
+    public float fadeOutSeconds = 0.35f;
+    // Optional hard finish if still within this range after fade started.
+    public float arriveDistance = 0.2f;
+    // 0 = fly until arrival at caster; >0 = safety cap only.
+    public float maxLifetime = 0f;
+    public EffectAttachmentPoint homeAttachmentPoint = EffectAttachmentPoint.CasterCenter;
+    public Vector3 homeOffset = new Vector3(0f, 0.1f, 0f);
+    public bool usePathArc = true;
+    [Tooltip("Legacy apex shift. Used when pathApexAlongLine <= 0 (apex = 0.46 + factor*0.2).")]
+    public float pathStartLineFactor = -0.15f;
+    [Tooltip("Along-line peel from spawn (0=monster, 1=player).")]
+    [Range(0f, 1f)]
+    public float pathPeelAlongLine = 0.16f;
+    [Tooltip("Along-line apex of side arc (0=monster, 1=player). 0 = use pathStartLineFactor legacy.")]
+    [Range(0f, 1f)]
+    public float pathApexAlongLine = 0f;
+    [Tooltip("Along-line height reference for arc peak (0=monster, 1=player). 0 = midpoint (0.5).")]
+    [Range(0f, 1f)]
+    public float pathPeakHeightAlongLine = 0f;
+    // Lateral bulge toward caster's left (original side arc).
+    public float pathSideOffset = 1.25f;
+    // Extra height above chord midpoint (climb then descend toward caster).
+    public float pathHeightOffset = 0.44f;
+    [Tooltip("Extra peak height per meter of horizontal travel monster→caster.")]
+    public float pathDistanceHeightFactor = 0.112f;
+    [Tooltip("Share of peak height applied at peel (early climb while spreading sideways).")]
+    [Range(0f, 1f)]
+    public float pathEarlyClimbFactor = 0.2f;
+    [Tooltip("Speed multiplier before the orb reaches the arc apex.")]
+    public float pathAscentSpeedScale = 1f;
+    [Tooltip("Speed multiplier after the orb reaches the arc apex.")]
+    public float pathDescentSpeedScale = 1f;
+    public bool rotateToVelocity = true;
+    public bool destroyOnArrive = true;
+    [Tooltip("Spawn mirrored duplicate of each home flight anchor ParticleGroup (original m_u003_b x2).")]
+    public bool mirrorDualFlight = false;
+}
+
+[Serializable]
 public class CompositePrefabPart
 {
     public string name;
@@ -50,6 +97,7 @@ public class CompositePrefabPart
     public float finalShaderLifetimeMin = 0.15f;
     public float finalShaderLifetimeMax = 0.5f;
     public CompositeProjectileConfig projectile = new CompositeProjectileConfig();
+    public CompositeHomeProjectileConfig homeProjectile = new CompositeHomeProjectileConfig();
 }
 
 public class CompositePrefabEffect : TimedCompositeEffectBase
@@ -68,6 +116,7 @@ public class CompositePrefabEffect : TimedCompositeEffectBase
     private readonly List<CompositePrefabPart> _pendingAnimationShootParts = new List<CompositePrefabPart>();
     private readonly Dictionary<CompositePrefabPart, BaseEffect> _spawnedPartInstances = new Dictionary<CompositePrefabPart, BaseEffect>();
     private readonly HashSet<CompositePrefabPart> _launchedProjectileParts = new HashSet<CompositePrefabPart>();
+    private readonly HashSet<CompositePrefabPart> _launchedHomeProjectileParts = new HashSet<CompositePrefabPart>();
     private readonly List<AnimationEventsBase> _shootEventSources = new List<AnimationEventsBase>();
     private Coroutine _pendingSpawnRoutine;
     private Coroutine _fallbackShootRoutine;
@@ -86,6 +135,7 @@ public class CompositePrefabEffect : TimedCompositeEffectBase
         _context = CompositeEffectUtilities.BuildContext(owner, castData);
         _spawnedPartInstances.Clear();
         _launchedProjectileParts.Clear();
+        _launchedHomeProjectileParts.Clear();
         _pendingHitColliderParts.Clear();
         _pendingAnimationShootParts.Clear();
         SubscribeShootEventIfNeeded();
@@ -167,11 +217,18 @@ public class CompositePrefabEffect : TimedCompositeEffectBase
         MagicCastData partCastData = part.passCastDataToPart ? _castData : null;
         instance.Setup(partSettings, partCastData, setupOwner);
         ApplyPartLoopOverrides(part, instance.transform);
+        ApplyPartHomeFlightOverrides(part, instance.transform);
+        if (CompositeHomeProjectileLaunchHelper.IsEnabled(part))
+        {
+            instance.PrepareDestroyOnHomeArrival();
+        }
+
         instance.Play();
         CompositeProjectileLaunchHelper.ApplyPreShootVisibility(part, instance, DebugPrefix);
         _spawnedPartInstances[part] = instance;
         StartFinalShaderLifetimeRoutineIfNeeded(part, instance.transform, partSettings);
         TryLaunchPartAsProjectileImmediately(part, instance);
+        TryLaunchPartAsHomeProjectileImmediately(part, instance);
 
         LogSpawnedPart(part, partSettings, setupOwner);
     }
@@ -251,6 +308,14 @@ public class CompositePrefabEffect : TimedCompositeEffectBase
             _spawnedPartInstances,
             _launchedProjectileParts,
             _context.TargetTransform,
+            _playStartedAt,
+            DebugPrefix);
+
+        CompositeHomeProjectileLaunchHelper.ProcessShootLaunches(
+            _parts,
+            _spawnedPartInstances,
+            _launchedHomeProjectileParts,
+            _context,
             _playStartedAt,
             DebugPrefix);
     }
@@ -344,6 +409,24 @@ public class CompositePrefabEffect : TimedCompositeEffectBase
         if (CompositeProjectileLaunchHelper.TryLaunch(part, spawned, _context.TargetTransform, _playStartedAt, DebugPrefix))
         {
             _launchedProjectileParts.Add(part);
+        }
+    }
+
+    private void TryLaunchPartAsHomeProjectileImmediately(CompositePrefabPart part, BaseEffect spawned)
+    {
+        if (part == null || spawned == null || !CompositeHomeProjectileLaunchHelper.ShouldLaunchImmediately(part))
+        {
+            return;
+        }
+
+        if (_context?.CasterTransform == null || _launchedHomeProjectileParts.Contains(part))
+        {
+            return;
+        }
+
+        if (CompositeHomeProjectileLaunchHelper.TryLaunch(part, spawned, _context, _playStartedAt, DebugPrefix))
+        {
+            _launchedHomeProjectileParts.Add(part);
         }
     }
 
@@ -650,6 +733,7 @@ public class CompositePrefabEffect : TimedCompositeEffectBase
         _pendingAnimationShootParts.Clear();
         _spawnedPartInstances.Clear();
         _launchedProjectileParts.Clear();
+        _launchedHomeProjectileParts.Clear();
     }
 
     private void UnsubscribeShootEvent()

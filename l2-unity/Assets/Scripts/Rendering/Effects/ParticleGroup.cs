@@ -1,4 +1,4 @@
-﻿
+using System.Collections.Generic;
 using UnityEngine;
 
 public class ParticleGroup : EffectPart
@@ -15,6 +15,8 @@ public class ParticleGroup : EffectPart
     [SerializeField] private float _startDelay = 0f;    // ЗАДЕРЖКА ПЕРЕД СТАРТОМ (в сек)
     [SerializeField] private int _countPerSecond = 15;
     [SerializeField] private int _maxCount = 2;
+    [SerializeField] private bool _cloneParticlesToMaxCount;
+    [SerializeField] private int _cloneParticleLimit = 64;
     [SerializeField] private bool _forceContinuousSpawning;
     [Tooltip("Continuous loop keeps already-active particles alive without resetting shader _StartTime/_Seed. Use for effects whose shader animation must keep running, for example mesh spin.")]
     [SerializeField] private bool _preserveShaderTimeInContinuousLoop;
@@ -28,6 +30,62 @@ public class ParticleGroup : EffectPart
     [SerializeField] private bool _hasFixedDuration = true;
     [SerializeField] private bool _instantKillAtCastEnd;
     [SerializeField] private bool _fitToBounds;
+
+    [Header("Home Projectile Flight")]
+    [SerializeField] private bool _homeFlightAnchor;
+    [SerializeField] private float _homePathSideOffsetMultiplier = 1f;
+    [SerializeField] private float _homePathSideOffsetScale = 1f;
+    [SerializeField] private float _homePathHeightOffsetScale = 1f;
+    [SerializeField] private float _homeFlightSpeedScale = 1f;
+
+    private bool _hasRuntimeHomeFlightProfile;
+    private ParticleGroupHomeFlightProfile _runtimeHomeFlightProfile;
+
+    public bool IsHomeFlightAnchor =>
+        _homeFlightAnchor || (_hasRuntimeHomeFlightProfile && _runtimeHomeFlightProfile.isFlightAnchor);
+
+    public bool TryGetHomeFlightProfile(out ParticleGroupHomeFlightProfile profile)
+    {
+        if (_hasRuntimeHomeFlightProfile)
+        {
+            profile = _runtimeHomeFlightProfile;
+            return profile.isFlightAnchor;
+        }
+
+        if (!_homeFlightAnchor)
+        {
+            profile = default;
+            return false;
+        }
+
+        profile = new ParticleGroupHomeFlightProfile
+        {
+            isFlightAnchor = true,
+            pathSideOffsetMultiplier = _homePathSideOffsetMultiplier,
+            pathSideOffsetScale = _homePathSideOffsetScale,
+            pathHeightOffsetScale = _homePathHeightOffsetScale,
+            speedScale = _homeFlightSpeedScale
+        };
+        return true;
+    }
+
+    public void ApplyRuntimeHomeFlightProfile(ParticleGroupHomeFlightProfile profile)
+    {
+        _hasRuntimeHomeFlightProfile = true;
+        _runtimeHomeFlightProfile = profile;
+    }
+
+    public void ClearRuntimeHomeFlightProfile()
+    {
+        _hasRuntimeHomeFlightProfile = false;
+        _runtimeHomeFlightProfile = default;
+    }
+
+    /// <summary>Starts this group's particle system (used for runtime mirror duplicate).</summary>
+    public void StartGroupPlayback()
+    {
+        PlayPart();
+    }
 
     // Prevent auto-running in scene before explicit PlayPart/Setup.
     private bool _stopped = true;
@@ -49,6 +107,7 @@ public class ParticleGroup : EffectPart
     private int _icebergSlotAutoOffCount;
     private float _lastWhHealShaderTimeLog;
     private float _lastWhHealPreserveLog;
+    private bool _runtimeParticleClonesCreated;
 
     public void FixedUpdate()
     {
@@ -155,6 +214,20 @@ public class ParticleGroup : EffectPart
         }
     }
 
+    private void ApplySpawnSpin(Renderer renderer, float seed)
+    {
+        if (renderer == null)
+        {
+            return;
+        }
+
+        ParticleGroupSpawnSpin spawnSpin = GetComponent<ParticleGroupSpawnSpin>();
+        if (spawnSpin != null)
+        {
+            spawnSpin.Apply(renderer, seed);
+        }
+    }
+
     private void ActivateParticle(float now)
     {
         if (_particles == null || _particles.Length == 0) return;
@@ -254,6 +327,7 @@ public class ParticleGroup : EffectPart
             // Debug.Log("Set Start Time " + shaderStartTime + " Seed " + seed + "name " + m.name);
             m.SetFloat("_StartTime", shaderStartTime);
             m.SetFloat("_Seed", seed);
+            ApplySpawnSpin(_particles[_particleIndex], seed);
             SetOwnerWorldPos(m);
             if (SurfaceNormal != Vector3.zero)
             {
@@ -299,6 +373,8 @@ public class ParticleGroup : EffectPart
 
         if (_particles == null || _particles.Length == 0)
             _particles = GetComponentsInChildren<Renderer>(true);
+
+        EnsureRuntimeParticleCapacity();
 
         _particleSpawnTimes = new float[_particles.Length];
         _isParticleActive = new bool[_particles.Length];
@@ -355,6 +431,44 @@ public class ParticleGroup : EffectPart
 #endif
     }
 
+    private void EnsureRuntimeParticleCapacity()
+    {
+        if (!Application.isPlaying || !_cloneParticlesToMaxCount || _runtimeParticleClonesCreated || _particles == null || _particles.Length == 0)
+        {
+            return;
+        }
+
+        int desiredCount = Mathf.Clamp(_maxCount, _particles.Length, Mathf.Max(_particles.Length, _cloneParticleLimit));
+        if (desiredCount <= _particles.Length)
+        {
+            return;
+        }
+
+        List<Renderer> particles = new List<Renderer>(_particles);
+        int sourceCount = particles.Count;
+        for (int i = particles.Count; i < desiredCount; i++)
+        {
+            Renderer source = particles[i % sourceCount];
+            if (source == null)
+            {
+                continue;
+            }
+
+            GameObject clone = Instantiate(source.gameObject, source.transform.parent);
+            clone.name = $"{source.gameObject.name}_RuntimeClone";
+            clone.SetActive(false);
+
+            Renderer cloneRenderer = clone.GetComponent<Renderer>();
+            if (cloneRenderer != null)
+            {
+                particles.Add(cloneRenderer);
+            }
+        }
+
+        _particles = particles.ToArray();
+        _runtimeParticleClonesCreated = true;
+    }
+
     private float GetLifeTimeFromMaterial()
     {
         if (_particles == null || _particles.Length == 0) return _duration;
@@ -391,25 +505,6 @@ public class ParticleGroup : EffectPart
         material.SetVector(OwnerWorldPosShaderProperty, ResolveOwnerWorldPos());
     }
 
-    private Vector3 ResolveOwnerWorldPos()
-    {
-        if (PlayerEntity.Instance != null)
-        {
-            return PlayerEntity.Instance.transform.position;
-        }
-
-        if (OwnerTarget != null)
-        {
-            return OwnerTarget.position;
-        }
-
-        if (FollowTarget != null)
-        {
-            return FollowTarget.position;
-        }
-
-        return transform.position + transform.forward;
-    }
 
     public void SetRuntimeContinuousLoopOverride(bool hasOverride, bool value)
     {
@@ -527,6 +622,9 @@ public class ParticleGroup : EffectPart
             }
         }
 #endif
+        _runtimeContinuousLoop = false;
+        _hasRuntimeContinuousLoopOverride = true;
+        _runtimeContinuousLoopOverrideValue = false;
         _stopped = true;
     }
 

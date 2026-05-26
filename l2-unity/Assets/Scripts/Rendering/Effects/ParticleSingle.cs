@@ -297,9 +297,11 @@ public class ParticleSingle : EffectPart
                 $"[FADE_PHASE]={BuildFirstMaterialFadePhase(now)} mats=[{BuildAllRuntimeMaterialsFadeDiag(now)}].");
         }
 #endif
-       // _stopped = true;
-       // SetActive(false);
-       // _active = false;
+        _runtimeContinuousLoop = false;
+        _hasRuntimeContinuousLoopOverride = true;
+        _runtimeContinuousLoopOverrideValue = false;
+        _spawnedCount = _maxCount;
+        _stopped = true;
     }
 
     public void SetRuntimeContinuousLoopOverride(bool hasOverride, bool value)
@@ -739,25 +741,6 @@ public class ParticleSingle : EffectPart
         material.SetVector(OwnerWorldPosShaderProperty, ResolveOwnerWorldPos());
     }
 
-    private Vector3 ResolveOwnerWorldPos()
-    {
-        if (PlayerEntity.Instance != null)
-        {
-            return PlayerEntity.Instance.transform.position;
-        }
-
-        if (OwnerTarget != null)
-        {
-            return OwnerTarget.position;
-        }
-
-        if (FollowTarget != null)
-        {
-            return FollowTarget.position;
-        }
-
-        return transform.position + transform.forward;
-    }
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
     private static string BuildShaderFadeDiagnosticLine(Material mat, float now)

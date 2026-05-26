@@ -16,5 +16,9 @@ public enum EffectAttachmentPoint
     /// <summary>
     /// Center of target horizontally, above the visual mesh (renderer bounds top or capsule top).
     /// </summary>
-    TargetOverHead = 9
+    TargetOverHead = 9,
+    /// <summary>
+    /// Capsule / renderer bounds center on caster (waist–chest area for humanoids).
+    /// </summary>
+    CasterCenter = 10
 }

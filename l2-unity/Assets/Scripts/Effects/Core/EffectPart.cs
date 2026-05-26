@@ -62,6 +62,48 @@ public abstract class EffectPart : MonoBehaviour
     public virtual Transform FollowTarget { get; set; }
     public virtual Transform OwnerTarget { get; set; }
 
+    private bool _ownerWorldPosOverrideActive;
+    private Vector3 _ownerWorldPosOverride;
+
+    public void SetOwnerWorldPosOverride(bool active, Vector3 worldPosition)
+    {
+        _ownerWorldPosOverrideActive = active;
+        if (active)
+        {
+            _ownerWorldPosOverride = worldPosition;
+        }
+    }
+
+    protected Vector3 ResolveOwnerWorldPos()
+    {
+        if (_ownerWorldPosOverrideActive)
+        {
+            return _ownerWorldPosOverride;
+        }
+
+        return ResolveOwnerWorldPosDefault();
+    }
+
+    protected Vector3 ResolveOwnerWorldPosDefault()
+    {
+        if (PlayerEntity.Instance != null)
+        {
+            return PlayerEntity.Instance.transform.position;
+        }
+
+        if (OwnerTarget != null)
+        {
+            return OwnerTarget.position;
+        }
+
+        if (FollowTarget != null)
+        {
+            return FollowTarget.position;
+        }
+
+        return transform.position + transform.forward;
+    }
+
     public abstract void Setup(EffectSettings settings , MagicCastData castData);
     public abstract void PlayPart();
     public abstract void StopPart();

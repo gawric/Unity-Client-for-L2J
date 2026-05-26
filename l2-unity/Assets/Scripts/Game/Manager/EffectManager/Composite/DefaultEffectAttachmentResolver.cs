@@ -36,6 +36,8 @@ public class DefaultEffectAttachmentResolver : IEffectAttachmentResolver
                 return ResolveTargetCenter(context.TargetEntity, context.TargetTransform, out resolvedTransform, out worldPosition);
             case EffectAttachmentPoint.TargetOverHead:
                 return ResolveTargetOverHead(context.TargetEntity, context.TargetTransform, out resolvedTransform, out worldPosition);
+            case EffectAttachmentPoint.CasterCenter:
+                return ResolveTargetCenter(context.CasterEntity, context.CasterTransform, out resolvedTransform, out worldPosition);
             case EffectAttachmentPoint.WorldHitPoint:
                 if (context.HasHitPoint)
                 {
