@@ -46,7 +46,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _owner: {fileID: 0}
   _parts:
-  - name: el_vampiric_touch_ta
+  - name: el_vampiric_touch_fl
     prefab: {fileID: 533138916183887364, guid: 9e72c30231d8b544aa55536116ed52a0, type: 3}
     settingsOverride: {fileID: 0}
     attachmentPoint: 8
@@ -211,6 +211,8 @@ MonoBehaviour:
       pathHeightOffset: 0.44
       pathDistanceHeightFactor: 0.112
       pathEarlyClimbFactor: 0.2
+      pathAscentSpeedScale: 1
+      pathDescentSpeedScale: 1
       rotateToVelocity: 1
       destroyOnArrive: 1
       mirrorDualFlight: 0
@@ -294,6 +296,8 @@ MonoBehaviour:
       pathHeightOffset: 0.44
       pathDistanceHeightFactor: 0.112
       pathEarlyClimbFactor: 0.2
+      pathAscentSpeedScale: 1
+      pathDescentSpeedScale: 1
       rotateToVelocity: 1
       destroyOnArrive: 1
       mirrorDualFlight: 0

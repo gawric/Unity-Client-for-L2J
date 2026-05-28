@@ -72,6 +72,12 @@ Shader "L2/Effects/VampiricTouchBlink"
         [Toggle] _RadialSoftMask ("Clip To Halo Circle (camera view)", Float) = 1
         _WorldMaskRadiusScale ("Halo Radius (x min quad size)", Range(0.2, 0.8)) = 0.48
         _RadialMaskSoftness ("Soft Edge (fraction of radius)", Range(0.05, 0.5)) = 0.22
+
+        [Header(Debug)]
+        [Toggle] _DebugAtlasPreview ("Debug Atlas Preview (show selected cell)", Float) = 0
+        _DebugAtlasPreviewAlpha ("Debug Preview Alpha", Range(0, 1)) = 0.85
+        _DebugAtlasPreviewBoost ("Debug Preview RGB Boost", Range(0.25, 8)) = 1
+        _DebugAtlasBackground ("Debug Preview Background", Color) = (0.03, 0.04, 0.08, 1)
     }
 
     SubShader
@@ -107,6 +113,7 @@ Shader "L2/Effects/VampiricTouchBlink"
             #include "../../Common/L2FxSpriteMultiSheet.hlsl"
             #include "../../Common/L2FxMeshFragment.hlsl"
             #include "../../Common/L2FxBrightenAlpha.hlsl"
+            #include "../../Common/L2FxAtlasDebug.hlsl"
 
             TEXTURE2D(_MainTex);
             SAMPLER(sampler_MainTex);
@@ -167,6 +174,10 @@ Shader "L2/Effects/VampiricTouchBlink"
                 float _RadialSoftMask;
                 float _WorldMaskRadiusScale;
                 float _RadialMaskSoftness;
+                float _DebugAtlasPreview;
+                float _DebugAtlasPreviewAlpha;
+                float _DebugAtlasPreviewBoost;
+                float4 _DebugAtlasBackground;
             CBUFFER_END
 
             struct Attributes
@@ -325,6 +336,18 @@ Shader "L2/Effects/VampiricTouchBlink"
                 half4 texA = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, IN.uvAtlasA);
                 half4 texB = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, IN.uvAtlasB);
                 half4 tex = lerp(texA, texB, (half)IN.flipbookBlend);
+
+                if (_DebugAtlasPreview > 0.5)
+                {
+                    float alphaRawPreview = L2Fx_BrightenAlphaRaw(
+                        tex, _AlphaFromLuma, _LumaAlphaFloor, _IgnoreMainTexAlpha);
+                    return L2Fx_AtlasDebugPreviewColor(
+                        tex,
+                        alphaRawPreview,
+                        _DebugAtlasPreviewAlpha,
+                        _DebugAtlasPreviewBoost,
+                        _DebugAtlasBackground);
+                }
 
                 half4 col = tex * IN.tint;
                 half3 rgb = col.rgb;

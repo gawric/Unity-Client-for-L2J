@@ -45,6 +45,9 @@ Material:
     - _ColorScaleSmoothness: 0.4
     - _ColorScaleTime1: 0.567857
     - _ColorScaleTime2: 1
+    - _DebugAtlasPreview: 0
+    - _DebugAtlasPreviewAlpha: 0.671
+    - _DebugAtlasPreviewBoost: 0.25
     - _FadeIn: 1
     - _FadeInEndTime: 0.1911
     - _Fadeout: 1
@@ -83,6 +86,7 @@ Material:
     - _ColorScale0: {r: 1, g: 0.79, b: 0.51, a: 1}
     - _ColorScale1: {r: 0.65, g: 0.5135, b: 0.3315, a: 1}
     - _ColorScale2: {r: 1, g: 0.79, b: 0.51, a: 1}
+    - _DebugAtlasBackground: {r: 0.03, g: 0.04, b: 0.08, a: 1}
     - _InitialDelayRange: {r: 0, g: 0, b: 0, a: 0}
     - _LifetimeRange: {r: 1.911, g: 1.911, b: 0, a: 0}
     - _ProjectionNormal: {r: 1, g: 0, b: 0, a: 0}
