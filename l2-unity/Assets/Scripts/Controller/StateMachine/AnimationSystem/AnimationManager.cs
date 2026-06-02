@@ -14,7 +14,10 @@ public class AnimationManager : BaseAnimationManager , IAnimationManager
     private const string CAST_TRIGGER_MID = "CastMid";
     private const string CAST_TRIGGER_END = "CastEnd";
     private const string CAST_TRIGGER_SHOT = "MagicShot";
+    private const string CAST_TRIGGER_END_2P = "CastEnd2P";
+    private const string CAST_TRIGGER_SHOT_2P = "MagicShot2P";
     private const string SHOT_SOURCE_RUNNER = "Runner";
+    private const int OVERRIDE_AWAIT_WARN_TIMEOUT_MS = 5000;
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
     /// <summary>
@@ -102,7 +105,9 @@ public class AnimationManager : BaseAnimationManager , IAnimationManager
     public async Task AsyncPlayAnimationRaceOverrides(int objectId, string triggerName , string overrideAnimationName)
     {
         float startedAt = Time.time;
-        string expectedFinishName = triggerName;
+        string expectedFinishName = string.IsNullOrWhiteSpace(overrideAnimationName)
+            ? triggerName
+            : overrideAnimationName.Trim();
         if (_tcsMap.TryGetValue(objectId, out var oldTcs))
         {
             oldTcs.TrySetResult(false);
@@ -119,6 +124,11 @@ public class AnimationManager : BaseAnimationManager , IAnimationManager
 
         EnsureAwaitSubscribed(objectId, model);
 
+        Debug.Log(
+            $"[AnimAwait] START objectId={objectId} trigger='{triggerName}' override='{overrideAnimationName}' " +
+            $"expectedFinish='{expectedFinishName}' mode=override now={Time.time:F3}");
+
+        _ = WarnIfAwaitStuck(objectId, triggerName, expectedFinishName, startedAt);
 
         PlayerAnimationTrigger(objectId, triggerName , false);
 
@@ -129,6 +139,19 @@ public class AnimationManager : BaseAnimationManager , IAnimationManager
         Debug.Log(
             $"[AnimAwait] END objectId={objectId} trigger='{triggerName}' override='{overrideAnimationName}' " +
             $"mode=override elapsed={Time.time - startedAt:F3}s now={Time.time:F3}");
+    }
+
+    private async Task WarnIfAwaitStuck(int objectId, string triggerName, string expectedFinishName, float startedAt)
+    {
+        await Task.Delay(OVERRIDE_AWAIT_WARN_TIMEOUT_MS);
+
+        if (_expectedFinishNameByObjectId.TryGetValue(objectId, out string currentExpected) &&
+            string.Equals(currentExpected, expectedFinishName, StringComparison.Ordinal))
+        {
+            Debug.LogWarning(
+                $"[AnimAwait] STUCK? objectId={objectId} trigger='{triggerName}' expectedFinish='{expectedFinishName}' " +
+                $"elapsed={Time.time - startedAt:F3}s action=waiting_for_OnAnimationFinished");
+        }
     }
 
 
@@ -192,6 +215,8 @@ public class AnimationManager : BaseAnimationManager , IAnimationManager
             controller.ResetAnimationTrigger(CAST_TRIGGER_MID);
             controller.ResetAnimationTrigger(CAST_TRIGGER_END);
             controller.ResetAnimationTrigger(CAST_TRIGGER_SHOT);
+            controller.ResetAnimationTrigger(CAST_TRIGGER_END_2P);
+            controller.ResetAnimationTrigger(CAST_TRIGGER_SHOT_2P);
         }
 
         controller.ToggleAnimationTrigger(animationName);
@@ -218,12 +243,16 @@ public class AnimationManager : BaseAnimationManager , IAnimationManager
     {
         return animationName == CAST_TRIGGER_MID ||
                animationName == CAST_TRIGGER_END ||
-               animationName == CAST_TRIGGER_SHOT;
+               animationName == CAST_TRIGGER_SHOT ||
+               animationName == CAST_TRIGGER_END_2P ||
+               animationName == CAST_TRIGGER_SHOT_2P;
     }
 
     private static bool IsMagicShotTrigger(string animationName)
     {
-        return animationName == CAST_TRIGGER_SHOT || animationName.StartsWith(CAST_TRIGGER_SHOT, StringComparison.Ordinal);
+        return animationName == CAST_TRIGGER_SHOT ||
+               animationName == CAST_TRIGGER_SHOT_2P ||
+               animationName.StartsWith(CAST_TRIGGER_SHOT, StringComparison.Ordinal);
     }
 
 
@@ -256,6 +285,19 @@ public class AnimationManager : BaseAnimationManager , IAnimationManager
     public void SetSpTimeAtk(int objectId, int timeAtk)
     {
        GetPlayerController(objectId)?.SetInt(SP_TIME_ATK , timeAtk);
+    }
+
+    public void ResetPlayerAnimatorSpeed(int objectId, float speed = 1f)
+    {
+        IAnimationController controller = GetPlayerController(objectId);
+        if (controller == null)
+        {
+            Debug.LogWarning($"[AnimSpeed] reset skipped objectId={objectId} reason=no_controller");
+            return;
+        }
+
+        controller.SetAnimatorSpeed(speed);
+        Debug.Log($"[AnimSpeed] reset objectId={objectId} speed={speed:F3}");
     }
 
     public float[] GetOverrideClipsDurations(int objectId, string[]cycle)

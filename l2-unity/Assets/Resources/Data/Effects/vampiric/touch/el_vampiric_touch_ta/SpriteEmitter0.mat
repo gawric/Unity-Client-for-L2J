@@ -52,6 +52,7 @@ Material:
     - _DebugAtlasPreview: 0
     - _DebugAtlasPreviewAlpha: 1
     - _DebugAtlasPreviewBoost: 6.49
+    - _ExpansionEndSec: 0.1
     - _FadeIn: 1
     - _FadeInEndTime: 0
     - _Fadeout: 1
@@ -64,7 +65,9 @@ Material:
     - _LumaAlphaFloor: 0
     - _LumaAlphaPower: 0.55
     - _Opacity: 1
+    - _PostBurstScaleSpeed: 1.5
     - _RgbBoost: 8
+    - _ScaleAfterExpansion: 1
     - _Seed: 0
     - _SpawnUnitScale: 0.01
     - _SpinParticles: 1
@@ -74,11 +77,12 @@ Material:
     - _TextureUSubdivisions: 2
     - _TextureVSubdivisions: 2
     - _UniformSize: 1
+    - _UseMeshLifetimeScale: 1
     - _UseMeshQuadBounds: 1
     - _UseProceduralFlash: 0
     - _UseRadialVelocity: 0
     - _UseRandomSubdivision: 0
-    - _UseSizeScale: 0
+    - _UseSizeScale: 1
     - _UseSoftLumaAlpha: 1
     - _bAlphaBlend: 1
     m_Colors:

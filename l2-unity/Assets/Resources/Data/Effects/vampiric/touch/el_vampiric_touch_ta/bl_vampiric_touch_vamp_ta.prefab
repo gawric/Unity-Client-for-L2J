@@ -228,7 +228,6 @@ GameObject:
   m_Component:
   - component: {fileID: 2803779241002393591}
   - component: {fileID: 3092087029800873978}
-  - component: {fileID: 7182934056172839405}
   m_Layer: 0
   m_Name: SpriteEmitter0
   m_TagString: Untagged
@@ -287,38 +286,6 @@ MonoBehaviour:
   _homePathSideOffsetScale: 1
   _homePathHeightOffsetScale: 1
   _homeFlightSpeedScale: 1
---- !u!114 &7182934056172839405
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3809821648917439038}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a7f3c2e81d5b4a9e8f6c0d3b2e1a4f57, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _readCurveFromMaterial: 1
-  _curveTimeScale: 1
-  _syncFadeOutToExpansionPath: 1
-  _fadeOutStartPathT: 0.6
-  _syncLifetimeToExpansion: 1
-  _expansionEndSec: 0.1
-  _particleLifetimeSec: 0.8
-  _sizeScale0: {x: 0, y: 1}
-  _sizeScale1: {x: 0.03, y: 1.7}
-  _sizeScale2: {x: 0.5, y: 1.8}
-  _sizeScale3: {x: 0.75, y: 1.9}
-  _sizeScale4: {x: 1, y: 2}
-  _usePlanarScatter: 1
-  _scatterForwardAxisLocal: {x: 1, y: 0, z: 0}
-  _scatterDistance: 0
-  _driftAfterExpansion: 0
-  _postBurstDriftSpeed: 0
-  _scaleAfterExpansion: 1
-  _postBurstScaleSpeed: 1.5
-  _scaleOnlyInScatterPlane: 0
 --- !u!1 &5653117460315421010
 GameObject:
   m_ObjectHideFlags: 0

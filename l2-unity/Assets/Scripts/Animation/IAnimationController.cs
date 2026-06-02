@@ -15,6 +15,7 @@ public interface IAnimationController
     public void ReplaceAnimClip(string animName, string overrideAnimName);
     public bool GetBool(string name);
     public int GetInt(string name);
+    public void SetAnimatorSpeed(float value);
   
     event Action<string> OnAnimationFinished;
     event Action<string> OnAnimationStartShoot;

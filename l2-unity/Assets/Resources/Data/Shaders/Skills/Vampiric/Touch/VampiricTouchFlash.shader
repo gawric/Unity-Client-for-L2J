@@ -54,6 +54,10 @@ Shader "L2/Effects/VampiricTouchFlash"
         _SizeScale2 ("SizeScale T2 / S2", Vector) = (0.28, 5.5, 0, 0)
         _SizeScale3 ("SizeScale T3 / S3", Vector) = (0.62, 6.0, 0, 0)
         _SizeScale4 ("SizeScale T4 / S4", Vector) = (1.0, 6.2, 0, 0)
+        [Toggle] _UseMeshLifetimeScale ("Use shader mesh lifetime scale", Float) = 0
+        _ExpansionEndSec ("Expansion End Sec", Float) = 0.6
+        [Toggle] _ScaleAfterExpansion ("Scale after expansion", Float) = 0
+        _PostBurstScaleSpeed ("Post Burst Scale Speed", Float) = 0
 
         [Toggle] _SpinParticles ("Spin Particles", Float) = 1
         _SpinsPerSecondRange ("Spins Per Second rev (Min,Max)", Vector) = (0, 0, 0, 0)
@@ -109,6 +113,7 @@ Shader "L2/Effects/VampiricTouchFlash"
             #include "../../Common/L2FxFlipbook.hlsl"
             #include "../../Common/L2FxMeshParticleMotion.hlsl"
             #include "../../Common/L2FxSpriteEmitterVertex.hlsl"
+            #include "../../Common/L2FxMeshLifetimeScale.hlsl"
             #include "../../Common/L2FxMeshFragment.hlsl"
             #include "../../Common/L2FxAtlasDebug.hlsl"
 
@@ -158,6 +163,10 @@ Shader "L2/Effects/VampiricTouchFlash"
                 float4 _SizeScale2;
                 float4 _SizeScale3;
                 float4 _SizeScale4;
+                float _UseMeshLifetimeScale;
+                float _ExpansionEndSec;
+                float _ScaleAfterExpansion;
+                float _PostBurstScaleSpeed;
                 float _SpinParticles;
                 float4 _SpinsPerSecondRange;
                 float4 _StartSpinRange;
@@ -229,39 +238,6 @@ Shader "L2/Effects/VampiricTouchFlash"
                 return lenDir > 1e-5 ? (dir / lenDir) : float3(0, 1, 0);
             }
 
-            float FlashSizeScale(float ageNorm)
-            {
-                if (_UseSizeScale <= 0.5)
-                {
-                    return 1.0;
-                }
-                float t = saturate(ageNorm);
-                float t0 = saturate(_SizeScale0.x);
-                float t1 = saturate(_SizeScale1.x);
-                float t2 = saturate(_SizeScale2.x);
-                float t3 = saturate(_SizeScale3.x);
-                float t4 = saturate(_SizeScale4.x);
-                float s0 = _SizeScale0.y;
-                float s1 = _SizeScale1.y;
-                float s2 = _SizeScale2.y;
-                float s3 = _SizeScale3.y;
-                float s4 = _SizeScale4.y;
-
-                if (t <= t1)
-                {
-                    return lerp(s0, s1, saturate((t - t0) / max(1e-5, t1 - t0)));
-                }
-                if (t <= t2)
-                {
-                    return lerp(s1, s2, saturate((t - t1) / max(1e-5, t2 - t1)));
-                }
-                if (t <= t3)
-                {
-                    return lerp(s2, s3, saturate((t - t2) / max(1e-5, t3 - t2)));
-                }
-                return lerp(s3, s4, saturate((t - t3) / max(1e-5, t4 - t3)));
-            }
-
             float2 FlashRotateUv(float2 uv, float angle)
             {
                 float s;
@@ -322,22 +298,46 @@ Shader "L2/Effects/VampiricTouchFlash"
                 float ageNorm = saturate(age / max(lifetime, 1e-4));
                 OUT.particleSeed = pSeed;
 
-                float sizeMul = FlashSizeScale(ageNorm);
+                float scalePathT = _UseMeshLifetimeScale > 0.5
+                    ? L2Fx_MeshLifetimeScalePathT(age, _HasLifetime, _ExpansionEndSec, lifetime)
+                    : ageNorm;
+                float sizeMul = L2Fx_MeshLifetimeScaleMultiplier(
+                    scalePathT,
+                    age,
+                    lifetime,
+                    _UseSizeScale,
+                    _SizeScale0,
+                    _SizeScale1,
+                    _SizeScale2,
+                    _SizeScale3,
+                    _SizeScale4,
+                    _UseMeshLifetimeScale > 0.5 ? _ExpansionEndSec : lifetime,
+                    _UseMeshLifetimeScale > 0.5 ? _ScaleAfterExpansion : 0.0,
+                    _UseMeshLifetimeScale > 0.5 ? _PostBurstScaleSpeed : 0.0);
                 float3 baseSize = L2Fx_StartSize(
                     _SizeRange.xy,
                     _SizeRange.xy,
                     _SizeRange.xy,
                     _UniformSize > 0.5,
                     pSeed,
-                    _StartTime) * sizeMul;
+                    _StartTime);
                 if (_ApplyUuToStartSize > 0.5)
                 {
                     // SpriteEmitter0 StartSizeRange is authored in UE UU; convert to meters.
                     baseSize *= _SpawnUnitScale;
                 }
-                float3 quadOS = _UseMeshQuadBounds > 0.5
-                    ? IN.positionOS.xyz
-                    : IN.positionOS.xyz * baseSize;
+                float3 quadOS = IN.positionOS.xyz;
+                if (_UseMeshQuadBounds > 0.5)
+                {
+                    if (_UseMeshLifetimeScale > 0.5)
+                    {
+                        quadOS *= sizeMul;
+                    }
+                }
+                else
+                {
+                    quadOS *= baseSize * sizeMul;
+                }
 
                 if (_SpinParticles > 0.5)
                 {

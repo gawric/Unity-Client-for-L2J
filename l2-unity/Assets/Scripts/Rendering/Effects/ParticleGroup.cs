@@ -87,13 +87,6 @@ public class ParticleGroup : EffectPart
         PlayPart();
     }
 
-    public Renderer[] Particles => _particles;
-
-    public void SetSyncedParticleDuration(float durationSec)
-    {
-        _duration = Mathf.Max(0.01f, durationSec);
-    }
-
     // Prevent auto-running in scene before explicit PlayPart/Setup.
     private bool _stopped = true;
     private float _lastEnable;
@@ -136,7 +129,6 @@ public class ParticleGroup : EffectPart
                 {
                     anyActive = true;
                     UpdateOwnerWorldPos(_particles[i]);
-                    UpdateMeshLifetimeScale(_particles[i], now);
                     if (now - _particleSpawnTimes[i] >= _duration)
                     {
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
@@ -233,47 +225,6 @@ public class ParticleGroup : EffectPart
         if (spawnSpin != null)
         {
             spawnSpin.Apply(renderer, seed);
-        }
-    }
-
-    private void UpdateMeshLifetimeScale(Renderer renderer, float now)
-    {
-        if (renderer == null)
-        {
-            return;
-        }
-
-        ParticleGroupMeshLifetimeScale meshScale = GetComponent<ParticleGroupMeshLifetimeScale>();
-        if (meshScale != null)
-        {
-            meshScale.Apply(renderer, now);
-        }
-    }
-
-    private void ApplySyncedShaderLifetime(Renderer renderer)
-    {
-        if (renderer == null)
-        {
-            return;
-        }
-
-        ParticleGroupMeshLifetimeScale meshScale = GetComponent<ParticleGroupMeshLifetimeScale>();
-        if (meshScale == null)
-        {
-            return;
-        }
-
-        Material curveMat = renderer.sharedMaterial;
-        float particleLifetime = meshScale.ResolveParticleLifetimeSecForSpawn(curveMat);
-        Vector4 lifetimeRange = new Vector4(particleLifetime, particleLifetime, 0f, 0f);
-        Material[] runtimeMaterials = renderer.materials;
-        for (int i = 0; i < runtimeMaterials.Length; i++)
-        {
-            Material mat = runtimeMaterials[i];
-            if (mat != null && mat.HasProperty("_LifetimeRange"))
-            {
-                mat.SetVector("_LifetimeRange", lifetimeRange);
-            }
         }
     }
 
@@ -377,8 +328,6 @@ public class ParticleGroup : EffectPart
             m.SetFloat("_StartTime", shaderStartTime);
             m.SetFloat("_Seed", seed);
             ApplySpawnSpin(_particles[_particleIndex], seed);
-            ApplySyncedShaderLifetime(_particles[_particleIndex]);
-            UpdateMeshLifetimeScale(_particles[_particleIndex], now);
             SetOwnerWorldPos(m);
             if (SurfaceNormal != Vector3.zero)
             {
@@ -423,12 +372,7 @@ public class ParticleGroup : EffectPart
         if (_particles == null || _particles.Length == 0)
             _particles = GetComponentsInChildren<Renderer>(true);
 
-        ParticleGroupMeshLifetimeScale meshLifetimeScale = GetComponent<ParticleGroupMeshLifetimeScale>();
-        if (meshLifetimeScale != null)
-        {
-            meshLifetimeScale.SyncBeforePlay(this);
-        }
-        else if (_duration < 0.01f)
+        if (_duration < 0.01f)
         {
             _duration = GetLifeTimeFromMaterial();
         }
@@ -446,12 +390,6 @@ public class ParticleGroup : EffectPart
 
         for (int i = 0; i < _particles.Length; i++)
             if (_particles[i] != null) _particles[i].gameObject.SetActive(false);
-
-        ParticleGroupMeshLifetimeScale meshScale = GetComponent<ParticleGroupMeshLifetimeScale>();
-        if (meshScale != null)
-        {
-            meshScale.ResetAllCachedScales();
-        }
 
         //Debug.Log($"<color=cyan>[Effect START]</color> {gameObject.name}. Ожидание старта: {_startDelay}с.");
 #if UNITY_EDITOR || DEVELOPMENT_BUILD

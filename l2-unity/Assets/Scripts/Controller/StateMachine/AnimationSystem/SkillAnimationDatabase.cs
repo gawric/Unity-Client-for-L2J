@@ -99,9 +99,10 @@ public class SkillAnimationDatabase
 
     public static string GetAnimationClipName(string trigerName, string raceName)
     {
+        string slotTriggerName = ResolveOverrideSlotTriggerName(trigerName);
         if (FDarkElf == raceName)
         {
-            string key = trigerName + "_" + raceName;
+            string key = slotTriggerName + "_" + raceName;
 
             if (_raceCacheFDarkElf.ContainsKey(key))
             {
@@ -110,6 +111,27 @@ public class SkillAnimationDatabase
             }
         }
         return "";
+    }
+
+    /// <summary>
+    /// Maps dedicated 2-phase animator triggers to base override slots (CastEnd / MagicShot).
+    /// </summary>
+    public static string ResolveOverrideSlotTriggerName(string triggerName)
+    {
+        if (string.IsNullOrEmpty(triggerName))
+        {
+            return triggerName;
+        }
+
+        switch (triggerName)
+        {
+            case "CastEnd2P":
+                return "CastEnd";
+            case "MagicShot2P":
+                return "MagicShot";
+            default:
+                return triggerName;
+        }
     }
 
 }

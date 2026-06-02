@@ -332,6 +332,11 @@ public class BaseAnimationController : AnimationEventsBase, IAnimationController
         return _animator.GetInteger(_animator.name);
     }
 
+    public void SetAnimatorSpeed(float value)
+    {
+        _animator.speed = value;
+    }
+
     public string GetAnimatorName()
     {
        return _animator?.runtimeAnimatorController.name;

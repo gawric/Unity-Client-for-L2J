@@ -37,6 +37,7 @@ public class EffectDatabase : ScriptableObject
     public bool ShouldIgnoreFlightTimeForCast(int effectId)
     {
         EffectData data = effects.Find(e => e.id == effectId);
+        if(data == null) return true;
         return data != null && data.ignoreFlightTimeForCast;
     }
 }

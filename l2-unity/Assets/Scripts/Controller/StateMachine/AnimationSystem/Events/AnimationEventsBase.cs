@@ -35,8 +35,10 @@ public abstract class AnimationEventsBase : MonoBehaviour
         {
             //magic atk
             { "MagicShot", false },
+            { "MagicShot2P", false },
             { "CastMid", false },
             { "CastEnd", false },
+            { "CastEnd2P", false },
              //magic end
             { "jatk01_bow", false },
             { "jatk02_bow", false },

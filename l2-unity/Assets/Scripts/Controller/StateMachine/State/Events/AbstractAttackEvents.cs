@@ -89,6 +89,12 @@ public abstract class AbstractAttackEvents : StateBase
             return;
         }
 
+        if (_stateMachine != null && _stateMachine.Player != null)
+        {
+            int objectId = _stateMachine.Player.IdentityInterlude.Id;
+            AnimationManager.Instance.ResetPlayerAnimatorSpeed(objectId);
+        }
+
         PlayerStateMachine.Instance.ChangeIntention(Intention.INTENTION_IDLE);
         PlayerStateMachine.Instance.NotifyEvent(Event.WAIT_RETURN);
     }

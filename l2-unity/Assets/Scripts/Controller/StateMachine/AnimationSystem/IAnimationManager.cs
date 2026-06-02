@@ -26,6 +26,7 @@ public interface IAnimationManager
     void PlayerSetAllFloat(int objectId , Dictionary<string, float> floatValues);
     public AnimationEventsBase  GetAnimationEvents(int objectId);
     public void SetSpTimeAtk(int objectId , int timeAtk);
+    public void ResetPlayerAnimatorSpeed(int objectId, float speed = 1f);
 
 
 }
