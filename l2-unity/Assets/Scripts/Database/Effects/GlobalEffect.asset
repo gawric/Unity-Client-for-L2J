@@ -68,3 +68,18 @@ MonoBehaviour:
     comment: vampiric-touch-effect
     settings: {fileID: 11400000, guid: 5b8dc6046d4381541bf1b9e6b1e707ee, type: 2}
     ignoreFlightTimeForCast: 1
+  - id: 1164
+    prefab: {fileID: -3238118204883760824, guid: 66d26d0635a594043b2d5f942f4d6de8, type: 3}
+    comment: curse-weakness-effect
+    settings: {fileID: 11400000, guid: 5de638f04240ef249a0d92a299aca7bf, type: 2}
+    ignoreFlightTimeForCast: 1
+  - id: 1015
+    prefab: {fileID: -2331866982259287529, guid: 0a1ab700809977949bd61dd85067c905, type: 3}
+    comment: battle-heal-effect
+    settings: {fileID: 11400000, guid: 8a59a8af482172b45ae1974088ba7b1e, type: 2}
+    ignoreFlightTimeForCast: 1
+  - id: 1012
+    prefab: {fileID: -2331866982259287529, guid: 6f984f99a4852004f8aea8a601c2af6b, type: 3}
+    comment: cure-poison-effect
+    settings: {fileID: 11400000, guid: 379a78eda0ba8ef40961f6ef9d85878a, type: 2}
+    ignoreFlightTimeForCast: 1
