@@ -149,29 +149,6 @@ public class DefaultEffectAttachmentResolver : IEffectAttachmentResolver
         resolvedTransform = fallbackRoot;
         EntityBodyType bodyType = entity != null ? entity.BodyType : EntityBodyType.Humanoid;
 
-        Transform searchRoot = entity != null ? entity.transform : fallbackRoot;
-        Renderer[] renderers = searchRoot != null
-            ? searchRoot.GetComponentsInChildren<Renderer>(true)
-            : null;
-        if (renderers != null && renderers.Length > 0)
-        {
-            Bounds bounds = renderers[0].bounds;
-            for (int i = 1; i < renderers.Length; i++)
-            {
-                if (renderers[i] != null)
-                {
-                    bounds.Encapsulate(renderers[i].bounds);
-                }
-            }
-
-            if (bounds.size.sqrMagnitude > 0.00001f)
-            {
-                float margin = Mathf.Max(0.04f, bounds.extents.y * 0.08f);
-                worldPosition = new Vector3(bounds.center.x, bounds.max.y + margin, bounds.center.z);
-                return true;
-            }
-        }
-
         CharacterController controller = ResolveCharacterController(entity, fallbackRoot);
         if (controller != null)
         {
@@ -183,7 +160,87 @@ public class DefaultEffectAttachmentResolver : IEffectAttachmentResolver
             return true;
         }
 
+        Transform searchRoot = entity != null ? entity.transform : fallbackRoot;
+        if (TryEncapsulateCharacterRenderBounds(searchRoot, out Bounds bounds))
+        {
+            float margin = Mathf.Max(0.04f, bounds.extents.y * 0.08f);
+            Vector3 horizontal = ResolveCharacterHorizontalWorld(entity, fallbackRoot);
+            worldPosition = new Vector3(horizontal.x, bounds.max.y + margin, horizontal.z);
+            return true;
+        }
+
         return ResolveTargetOverHeadFromRenderers(entity, fallbackRoot, bodyType, out resolvedTransform, out worldPosition);
+    }
+
+    private static Vector3 ResolveCharacterHorizontalWorld(Entity entity, Transform fallbackRoot)
+    {
+        CharacterController controller = null;
+        if (entity != null)
+        {
+            controller = entity.GetComponent<CharacterController>();
+            if (controller == null)
+            {
+                controller = entity.GetComponentInChildren<CharacterController>(true);
+            }
+        }
+
+        if (controller == null && fallbackRoot != null)
+        {
+            controller = fallbackRoot.GetComponent<CharacterController>();
+            if (controller == null)
+            {
+                controller = fallbackRoot.GetComponentInChildren<CharacterController>(true);
+            }
+        }
+
+        if (controller != null)
+        {
+            return controller.transform.TransformPoint(controller.center);
+        }
+
+        return fallbackRoot != null ? fallbackRoot.position : Vector3.zero;
+    }
+
+    private static bool ShouldIncludeRendererForCharacterBounds(Renderer renderer)
+    {
+        if (renderer == null)
+        {
+            return false;
+        }
+
+        return renderer.GetComponentInParent<BaseEffect>() == null;
+    }
+
+    private static bool TryEncapsulateCharacterRenderBounds(Transform searchRoot, out Bounds bounds)
+    {
+        bounds = default;
+        if (searchRoot == null)
+        {
+            return false;
+        }
+
+        Renderer[] renderers = searchRoot.GetComponentsInChildren<Renderer>(true);
+        bool hasBounds = false;
+        for (int i = 0; i < renderers.Length; i++)
+        {
+            Renderer renderer = renderers[i];
+            if (!ShouldIncludeRendererForCharacterBounds(renderer))
+            {
+                continue;
+            }
+
+            if (!hasBounds)
+            {
+                bounds = renderer.bounds;
+                hasBounds = true;
+            }
+            else
+            {
+                bounds.Encapsulate(renderer.bounds);
+            }
+        }
+
+        return hasBounds && bounds.size.sqrMagnitude > 0.00001f;
     }
 
     private CharacterController ResolveCharacterController(Entity entity, Transform fallbackRoot)
@@ -220,25 +277,12 @@ public class DefaultEffectAttachmentResolver : IEffectAttachmentResolver
         resolvedTransform = fallbackRoot;
         worldPosition = Vector3.zero;
 
-        Transform searchRoot = entity != null ? entity.transform : fallbackRoot;
-        Renderer[] renderers = searchRoot.GetComponentsInChildren<Renderer>(true);
-        if (renderers != null && renderers.Length > 0)
+        if (TryEncapsulateCharacterRenderBounds(entity != null ? entity.transform : fallbackRoot, out Bounds bounds))
         {
-            Bounds bounds = renderers[0].bounds;
-            for (int i = 1; i < renderers.Length; i++)
-            {
-                if (renderers[i] != null)
-                {
-                    bounds.Encapsulate(renderers[i].bounds);
-                }
-            }
-
-            if (bounds.size.sqrMagnitude > 0.00001f)
-            {
-                float margin = Mathf.Max(0.04f, bounds.extents.y * 0.08f);
-                worldPosition = new Vector3(bounds.center.x, bounds.max.y + margin, bounds.center.z);
-                return true;
-            }
+            float margin = Mathf.Max(0.04f, bounds.extents.y * 0.08f);
+            Vector3 horizontal = ResolveCharacterHorizontalWorld(entity, fallbackRoot);
+            worldPosition = new Vector3(horizontal.x, bounds.max.y + margin, horizontal.z);
+            return true;
         }
 
         worldPosition = fallbackRoot.position;

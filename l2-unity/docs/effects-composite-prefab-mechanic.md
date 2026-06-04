@@ -85,6 +85,9 @@
   - `WorldHitPoint`
   - `CasterPosition`
   - `TargetPosition`
+  - `TargetCenter` — центр капсулы / bounds цели
+  - `TargetOverHead` — над макушкой (Y из bounds, XZ из капсулы/root)
+  - `CasterCenter` — центр кастера
 
 ---
 
@@ -149,7 +152,6 @@
   - `OnServerShootTime` (`HitTime - FlightTime`)
   - `OnFlightTimeElapsed` (`FlightTime`)
   - `OnHitTime` (`HitTime`)
-- `manualDelaySeconds` — дополнительная ручная задержка.
 - `positionOffset` — смещение от attachment point.
 - `scale` — ручной масштаб части.
 - `normalizeOffsetByOwnerHeight` — масштабирование `positionOffset` по росту модели.
@@ -238,6 +240,20 @@ Enum таймингов вынесен в отдельный файл:
 
 - в `MagicCastData.Setup(...)` — `serverHitMs`, `HitTime`, `FlightTime`;
 - в `CompositePrefabEffect` — постановка частей в очередь и фактический spawn части.
+
+### 8) `TargetOverHead` и VFX на модели (июнь 2026)
+
+Файл: `DefaultEffectAttachmentResolver.cs`
+
+- **`TargetOverHead`:** высота из renderer bounds персонажа, **горизонталь (X/Z)** из `CharacterController.center` или `transform.position`, не из `bounds.center` (оружие/плащ иначе смещают эффект вбок).
+- В bounds для OverHead **не учитываются** renderer’ы под `BaseEffect` (иначе дочерние VFX раздувают/смещают точку).
+
+**Паттерн для `*_ca` в composite (heal, cure poison):**
+
+- `attachmentPoint = CasterPosition` (6), `followResolvedTransform = false` — как в `wh_heal_composite`.
+- **Не** использовать `CasterRoot` + follow для крупного ground VFX на кастере, если другие части цепляются к `TargetOverHead` на том же entity (self-buff).
+
+Подробности Cure Poison: [2026-06-04-cure-poison-composite.md](./2026-06-04-cure-poison-composite.md).
 
 ---
 

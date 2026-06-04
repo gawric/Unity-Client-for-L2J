@@ -46,10 +46,95 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _owner: {fileID: 0}
   _parts:
-  - name: wh_heal_ta
+  - name: wh_cure_poison_ta
+    prefab: {fileID: -8605063496294535788, guid: 36fcd440b410b574ab3b1de88da2f84f, type: 3}
+    settingsOverride: {fileID: 0}
+    attachmentPoint: 4
+    spawnTiming: 5
+    hitLeadSeconds: 0
+    positionOffset: {x: 0, y: 0.5, z: 0}
+    normalizeOffsetByOwnerHeight: 0
+    referenceHeight: 1.8
+    scale: 1.3
+    followResolvedTransform: 1
+    inheritRotation: 0
+    passCastDataToPart: 0
+    useCastTimedLifetime: 0
+    overrideContinuousLoop: 0
+    continuousLoop: 0
+    disableShaderLifetime: 0
+    overrideHideTime: 0
+    customHideTime: 0
+    enableFinalShaderLifetimeOnFade: 0
+    finalShaderLifetimeMin: 0
+    finalShaderLifetimeMax: 0
+    projectile:
+      launchMode: 0
+      showBeforeAnimationShoot: 0
+      impactType: 0
+      settingsOverride:
+        id: 0
+        prefab: {fileID: 0}
+        transform: {fileID: 0}
+        startPosition: {x: 0, y: 0, z: 0}
+        targetTransform: {fileID: 0}
+        targetPosition: {x: 0, y: 0, z: 0}
+        speed: 0
+        damage: 0
+        lifetime: 0
+        speedCurve:
+          serializedVersion: 2
+          m_Curve: []
+          m_PreInfinity: 0
+          m_PostInfinity: 0
+          m_RotationOrder: 0
+        startTime: 0
+        distance: 0
+        useGravity: 0
+        gravityScale: 0
+        isActive: 0
+        hitPoint: {x: 0, y: 0, z: 0}
+        hitNormal: {x: 0, y: 0, z: 0}
+        flytime: 0
+        hitPointCollider: {x: 0, y: 0, z: 0}
+        hitNormalCollider: {x: 0, y: 0, z: 0}
+        hitDirection: {x: 0, y: 0, z: 0}
+        arrowCollider: {fileID: 0}
+        impactType: 0
+        lastPosition: {x: 0, y: 0, z: 0}
+        castStartTimeSnapshot: 0
+        castServerShootSnapshot: 0
+        castServerHitSnapshot: 0
+        projectileLaunchGlobalFromCast: 0
+        attackerEntityId: 0
+    homeProjectile:
+      launchMode: 0
+      speed: 4.5
+      acceleration: 0
+      fadeStartDistance: 0.5
+      fadeOutSeconds: 0.35
+      arriveDistance: 0.2
+      maxLifetime: 0
+      homeAttachmentPoint: 10
+      homeOffset: {x: 0, y: 0.1, z: 0}
+      usePathArc: 1
+      pathStartLineFactor: -0.15
+      pathPeelAlongLine: 0.16
+      pathApexAlongLine: 0
+      pathPeakHeightAlongLine: 0
+      pathSideOffset: 1.25
+      pathHeightOffset: 0.44
+      pathDistanceHeightFactor: 0.112
+      pathEarlyClimbFactor: 0.2
+      pathAscentSpeedScale: 1
+      pathDescentSpeedScale: 1
+      rotateToVelocity: 1
+      destroyOnArrive: 1
+      mirrorDualFlight: 0
+  - name: wh_cure_poison_ta_head
     prefab: {fileID: -8605063496294535788, guid: f6561843e1d6ab04e98bc312e47f147b, type: 3}
     settingsOverride: {fileID: 0}
-    attachmentPoint: 3
+    attachmentPoint: 9
     spawnTiming: 5
     hitLeadSeconds: 0
     positionOffset: {x: 0, y: 0, z: 0}
@@ -62,6 +147,91 @@ MonoBehaviour:
     useCastTimedLifetime: 0
     overrideContinuousLoop: 0
     continuousLoop: 0
+    disableShaderLifetime: 0
+    overrideHideTime: 0
+    customHideTime: 0
+    enableFinalShaderLifetimeOnFade: 0
+    finalShaderLifetimeMin: 0
+    finalShaderLifetimeMax: 0
+    projectile:
+      launchMode: 0
+      showBeforeAnimationShoot: 0
+      impactType: 0
+      settingsOverride:
+        id: 0
+        prefab: {fileID: 0}
+        transform: {fileID: 0}
+        startPosition: {x: 0, y: 0, z: 0}
+        targetTransform: {fileID: 0}
+        targetPosition: {x: 0, y: 0, z: 0}
+        speed: 0
+        damage: 0
+        lifetime: 0
+        speedCurve:
+          serializedVersion: 2
+          m_Curve: []
+          m_PreInfinity: 0
+          m_PostInfinity: 0
+          m_RotationOrder: 0
+        startTime: 0
+        distance: 0
+        useGravity: 0
+        gravityScale: 0
+        isActive: 0
+        hitPoint: {x: 0, y: 0, z: 0}
+        hitNormal: {x: 0, y: 0, z: 0}
+        flytime: 0
+        hitPointCollider: {x: 0, y: 0, z: 0}
+        hitNormalCollider: {x: 0, y: 0, z: 0}
+        hitDirection: {x: 0, y: 0, z: 0}
+        arrowCollider: {fileID: 0}
+        impactType: 0
+        lastPosition: {x: 0, y: 0, z: 0}
+        castStartTimeSnapshot: 0
+        castServerShootSnapshot: 0
+        castServerHitSnapshot: 0
+        projectileLaunchGlobalFromCast: 0
+        attackerEntityId: 0
+    homeProjectile:
+      launchMode: 0
+      speed: 4.5
+      acceleration: 0
+      fadeStartDistance: 0.5
+      fadeOutSeconds: 0.35
+      arriveDistance: 0.2
+      maxLifetime: 0
+      homeAttachmentPoint: 10
+      homeOffset: {x: 0, y: 0.1, z: 0}
+      usePathArc: 1
+      pathStartLineFactor: -0.15
+      pathPeelAlongLine: 0.16
+      pathApexAlongLine: 0
+      pathPeakHeightAlongLine: 0
+      pathSideOffset: 1.25
+      pathHeightOffset: 0.44
+      pathDistanceHeightFactor: 0.112
+      pathEarlyClimbFactor: 0.2
+      pathAscentSpeedScale: 1
+      pathDescentSpeedScale: 1
+      rotateToVelocity: 1
+      destroyOnArrive: 1
+      mirrorDualFlight: 0
+  - name: wh_cure_poison_ca
+    prefab: {fileID: 691409183428148954, guid: 7335f0a77e41cce49b2980951b4dbf4a, type: 3}
+    settingsOverride: {fileID: 0}
+    attachmentPoint: 6
+    spawnTiming: 0
+    hitLeadSeconds: 0
+    positionOffset: {x: 0, y: 0, z: 0}
+    normalizeOffsetByOwnerHeight: 0
+    referenceHeight: 1.8
+    scale: 1.3
+    followResolvedTransform: 0
+    inheritRotation: 0
+    passCastDataToPart: 1
+    useCastTimedLifetime: 1
+    overrideContinuousLoop: 1
+    continuousLoop: 1
     disableShaderLifetime: 0
     overrideHideTime: 0
     customHideTime: 0

@@ -36,7 +36,7 @@
 ### Префабы
 
 - `wh_heal_ta.prefab`: на корневом `BeamEmitter0` висит `L2BeamStripMeshBuilder` с актуальными `_segments`, `_boundsSize`.
-- `wh_heal_composite.prefab`: исправлена ссылка на префаб `wh_heal_ta` (раньше ошибочно указывал на `wh_heal_ca`), `spawnTiming` для `ta` приведён к немедленному показу там, где это было нужно для отладки позиции/жизни.
+- `wh_heal_composite.prefab`: ссылка `wh_heal_ta` исправлена (раньше ошибочно указывала на `wh_heal_ca`). `wh_heal_ca`: `attachmentPoint: CasterPosition` (6), `followResolvedTransform: 0`. `wh_heal_ta`: `spawnTiming: OnAnimationShoot` (5) — этот паттерн `ca` переиспользуется в `wh_сure_posion_composite` (см. [2026-06-04-cure-poison-composite.md](./2026-06-04-cure-poison-composite.md)).
 
 ### Смежное (из той же ветки разговора)
 
