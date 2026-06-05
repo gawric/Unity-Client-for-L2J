@@ -1,5 +1,8 @@
 // UE m_u003_c SpriteEmitter0 "VampireFlash": PTDS_Brighten, fx_m_t0005 2x2, random subdiv 2..3.
 // Small blue motes: delayed burst, additive blend, fast growth via SizeScale.
+// Extended: optional ColorScaleRepeats, 3-key color, ColorMultiplierRange, SphereRadius,
+//   StartLocationRange, PTVD_OwnerAndStartPosition velocity, VelocityLoss.
+// All new features are opt-in via [Toggle] flags; default state = original VampireFlash behaviour.
 Shader "L2/Effects/VampiricTouchFlash"
 {
     Properties
@@ -31,19 +34,42 @@ Shader "L2/Effects/VampiricTouchFlash"
         _ColorScaleTime1 ("ColorScale Time[1]", Range(0, 1)) = 1
         _ColorScale1 ("ColorScale[1]", Color) = (1, 1, 1, 1)
 
+        _ColorScaleTime2 ("ColorScale Time[2]", Range(0, 1)) = 1
+        _ColorScale2 ("ColorScale[2]", Color) = (1, 1, 1, 1)
+        _ColorScaleCount ("ColorScale Count (2 or 3)", Int) = 2
+        _ColorScaleRepeats ("ColorScale Repeats (0=legacy,>0=cycles/lifetime)", Float) = 0
+
+        _ColorMultMin ("ColorMult Min (R,G,B)", Color) = (1, 1, 1, 1)
+        _ColorMultMax ("ColorMult Max (R,G,B)", Color) = (1, 1, 1, 1)
+
         _StartLocationOffset ("StartLocationOffset (UU)", Vector) = (-7, 0, 2, 0)
-        [Toggle] _ApplySpawnUnitScale ("Apply UE UU→Unity (0.01)", Float) = 1
+        [Toggle] _ApplySpawnUnitScale ("Apply UE UU->Unity (0.01)", Float) = 1
         _SpawnUnitScale ("UE UU to Unity meters", Float) = 0.01
         _PolarAzimuthDeg ("Polar Azimuth Deg (Min,Max)", Vector) = (0, 360, 0, 0)
         _PolarPitchDeg ("Polar Pitch from +Z Deg (Min,Max)", Vector) = (0, 180, 0, 0)
         _RadialSpeed ("Radial Speed UU/s (Min=Max, same speed)", Vector) = (18, 18, 0, 0)
         _PolarRadius ("Polar Radius (Min,Max)", Vector) = (0, 6, 0, 0)
 
+        [Toggle] _UseSphereRadius ("Extra random on sphere surface", Float) = 0
+        _SphereRadiusUU ("SphereRadiusRange UU (Min,Max)", Vector) = (16, 16, 0, 0)
+
+        [Toggle] _UseStartLocationRange ("Random box offset from polar point", Float) = 0
+        _StartLocationRangeXY ("StartLocationRange XY UU (minX,maxX,minY,maxY)", Vector) = (-5, 5, -5, 5)
+        _StartLocationRangeZ ("StartLocationRange Z UU (minZ,maxZ)", Vector) = (-15, 15, 0, 0)
+
         [Toggle] _UseRadialVelocity ("Outward drift from spawn sphere", Float) = 1
+        [Toggle] _UseCameraHorizontalPlane ("Spread on camera horizontal plane (screen L/R)", Float) = 0
         _Acceleration ("Acceleration (XYZ, UE units)", Vector) = (0, 0, 0, 0)
 
+        [Toggle] _UseVelocityTowardOwner ("PTVD_OwnerAndStartPosition (toward owner)", Float) = 0
+        _StartVelocityRange ("StartVelocityRange X,Y UU (velX_min,velX_max,velY_min,velY_max)", Vector) = (70, 70, 70, 70)
+        _OwnerWorldPos ("Owner World Pos (set by MaterialPropertyBlock)", Vector) = (0, 0, 0, 0)
+
+        [Toggle] _UseVelocityLoss ("Apply velocity loss (linear drag)", Float) = 0
+        _VelocityLossRange ("VelocityLossRange UU (Min,Max)", Vector) = (2, 2, 0, 0)
+
         _SizeRange ("Start Size UU (Min,Max)", Vector) = (2, 4, 0, 0)
-        [Toggle] _ApplyUuToStartSize ("StartSize × 0.01 (only if size is raw UE UU)", Float) = 0
+        [Toggle] _ApplyUuToStartSize ("StartSize x 0.01 (only if size is raw UE UU)", Float) = 0
         [Toggle] _UseMeshQuadBounds ("Use Unity Quad bounds (no shader resize)", Float) = 1
         _BillboardScale ("Manual Billboard Scale (0 = use quad transform scale)", Float) = 0
         [Toggle] _UniformSize ("Uniform Size", Float) = 1
@@ -143,15 +169,32 @@ Shader "L2/Effects/VampiricTouchFlash"
                 float4 _ColorScale0;
                 float _ColorScaleTime1;
                 float4 _ColorScale1;
+                float _ColorScaleTime2;
+                float4 _ColorScale2;
+                uint _ColorScaleCount;
+                float _ColorScaleRepeats;
+                float4 _ColorMultMin;
+                float4 _ColorMultMax;
                 float4 _StartLocationOffset;
                 float _ApplySpawnUnitScale;
                 float _SpawnUnitScale;
                 float4 _PolarAzimuthDeg;
                 float4 _PolarPitchDeg;
                 float4 _PolarRadius;
+                float _UseSphereRadius;
+                float4 _SphereRadiusUU;
+                float _UseStartLocationRange;
+                float4 _StartLocationRangeXY;
+                float4 _StartLocationRangeZ;
                 float _UseRadialVelocity;
+                float _UseCameraHorizontalPlane;
                 float4 _RadialSpeed;
                 float4 _Acceleration;
+                float _UseVelocityTowardOwner;
+                float4 _StartVelocityRange;
+                float4 _OwnerWorldPos;
+                float _UseVelocityLoss;
+                float4 _VelocityLossRange;
                 float4 _SizeRange;
                 float _ApplyUuToStartSize;
                 float _UseMeshQuadBounds;
@@ -212,20 +255,83 @@ Shader "L2/Effects/VampiricTouchFlash"
                 return _ApplySpawnUnitScale > 0.5 ? _SpawnUnitScale : 1.0;
             }
 
+            // ---- random-on-sphere helper for SphereRadius ----
+            float3 FlashRandomOnSphereUE(float seed, float startTime, float radiusUU, float saltBase)
+            {
+                float u = L2Fx_RandomRange(float2(0.0, 1.0), seed, startTime, saltBase);
+                float v = L2Fx_RandomRange(float2(0.0, 1.0), seed, startTime, saltBase + 1.0);
+                float theta = 6.2831853 * u;
+                float z = 1.0 - 2.0 * v;
+                float r = sqrt(max(0.0, 1.0 - z * z));
+                return float3(r * cos(theta), r * sin(theta), z) * radiusUU;
+            }
+
             float3 FlashSpawnOffset(float pSeed)
             {
+                float unitScale = FlashUnitScale();
+
+                if (_UseCameraHorizontalPlane > 0.5)
+                {
+                    float azimuthDeg = L2Fx_RandomRange(_PolarAzimuthDeg.xy, pSeed, _StartTime, 71.0);
+                    float radiusUU = L2Fx_RandomRange(_PolarRadius.xy, pSeed, _StartTime, 79.0);
+                    float3 dirWS = L2Fx_CameraHorizontalUnitDirection(azimuthDeg);
+                    float3 offsetWS = dirWS * (radiusUU * unitScale);
+
+                    if (_UseStartLocationRange > 0.5)
+                    {
+                        float3 camRightH;
+                        float3 camForwardH;
+                        L2Fx_CameraHorizontalBasis(camRightH, camForwardH);
+                        float boxRight = L2Fx_RandomRange(_StartLocationRangeXY.xy, pSeed, _StartTime, 231.0) * unitScale;
+                        float boxForward = L2Fx_RandomRange(_StartLocationRangeXY.zw, pSeed, _StartTime, 233.0) * unitScale;
+                        float boxUp = L2Fx_RandomRange(_StartLocationRangeZ.xy, pSeed, _StartTime, 239.0) * unitScale;
+                        offsetWS += camRightH * boxRight + camForwardH * boxForward + float3(0.0, boxUp, 0.0);
+                    }
+
+                    offsetWS += L2Fx_UeVectorToUnity(_StartLocationOffset.xyz) * unitScale;
+
+                    float3 pivotWS = TransformObjectToWorld(float3(0.0, 0.0, 0.0));
+                    return TransformWorldToObject(pivotWS + offsetWS);
+                }
+
                 float3 posUe = L2Fx_SpawnOffsetPolarDegrees(
                     _PolarAzimuthDeg.xy,
                     _PolarPitchDeg.xy,
                     _PolarRadius.xy,
                     pSeed,
                     _StartTime);
+
+                // --- SphereRadius (extra random on sphere surface) ---
+                if (_UseSphereRadius > 0.5)
+                {
+                    float sphereR = L2Fx_RandomRange(_SphereRadiusUU.xy, pSeed, _StartTime, 211.0);
+                    posUe += FlashRandomOnSphereUE(pSeed, _StartTime, sphereR, 221.0);
+                }
+
+                // --- StartLocationRange (random box offset from polar point) ---
+                if (_UseStartLocationRange > 0.5)
+                {
+                    posUe += float3(
+                        L2Fx_RandomRange(_StartLocationRangeXY.xy, pSeed, _StartTime, 231.0),
+                        L2Fx_RandomRange(_StartLocationRangeXY.zw, pSeed, _StartTime, 233.0),
+                        L2Fx_RandomRange(_StartLocationRangeZ.xy, pSeed, _StartTime, 239.0));
+                }
+
                 posUe += _StartLocationOffset.xyz;
-                return L2Fx_UeVectorToUnity(posUe) * FlashUnitScale();
+                return L2Fx_UeVectorToUnity(posUe) * unitScale;
             }
 
             float3 FlashRandomUnitDirection(float pSeed)
             {
+                if (_UseCameraHorizontalPlane > 0.5)
+                {
+                    float azimuthDeg = L2Fx_RandomRange(_PolarAzimuthDeg.xy, pSeed, _StartTime, 71.0);
+                    float3 dirWS = L2Fx_CameraHorizontalUnitDirection(azimuthDeg);
+                    float3 dirOS = L2Fx_WorldVelocityToObject(dirWS);
+                    float lenDir = length(dirOS);
+                    return lenDir > 1e-5 ? (dirOS / lenDir) : float3(0.0, 1.0, 0.0);
+                }
+
                 // Direction for "explosion-like" velocity must not inherit StartLocationOffset bias.
                 float3 dirUe = L2Fx_SpawnOffsetPolarDegrees(
                     _PolarAzimuthDeg.xy,
@@ -235,7 +341,40 @@ Shader "L2/Effects/VampiricTouchFlash"
                     _StartTime);
                 float3 dir = L2Fx_UeVectorToUnity(dirUe);
                 float lenDir = length(dir);
-                return lenDir > 1e-5 ? (dir / lenDir) : float3(0, 1, 0);
+                return lenDir > 1e-5 ? (dir / lenDir) : float3(0.0, 1.0, 0.0);
+            }
+
+            // --- PTVD_OwnerAndStartPosition: horizontal outward burst (PoisonCloud-style XZ spread) ---
+            float3 FlashVelocityOwnerAndStart(float3 spawnOffsetUnity, float pSeed)
+            {
+                float unitScale = FlashUnitScale();
+                float hs = L2Fx_RandomRange(_StartVelocityRange.xy, pSeed, _StartTime, 113.0) * unitScale;
+
+                if (_UseCameraHorizontalPlane > 0.5)
+                {
+                    float3 pivotWS = TransformObjectToWorld(float3(0.0, 0.0, 0.0));
+                    float3 spawnWS = TransformObjectToWorld(spawnOffsetUnity);
+                    float3 flatOffWS = float3(spawnWS.x - pivotWS.x, 0.0, spawnWS.z - pivotWS.z);
+
+                    float3 camRightH;
+                    float3 camForwardH;
+                    L2Fx_CameraHorizontalBasis(camRightH, camForwardH);
+                    float2 hCam = float2(dot(flatOffWS, camRightH), dot(flatOffWS, camForwardH));
+                    float len = length(hCam);
+                    float3 dirWS = len > 1e-5
+                        ? (camRightH * (hCam.x / len) + camForwardH * (hCam.y / len))
+                        : L2Fx_CameraHorizontalUnitDirection(
+                            L2Fx_RandomRange(_PolarAzimuthDeg.xy, pSeed, _StartTime, 181.0));
+                    return L2Fx_WorldVelocityToObject(dirWS * hs);
+                }
+
+                float2 hDir = L2Fx_OutwardDirectionXZ(
+                    spawnOffsetUnity,
+                    _PolarAzimuthDeg.xy,
+                    pSeed,
+                    _StartTime,
+                    181.0);
+                return float3(hDir.x * hs, 0.0, hDir.y * hs);
             }
 
             float2 FlashRotateUv(float2 uv, float angle)
@@ -286,6 +425,52 @@ Shader "L2/Effects/VampiricTouchFlash"
                 return centerWS
                     + rightWS * (quadOS.x * objectScale.x)
                     + upWS * (quadOS.y * objectScale.y);
+            }
+
+            // --- ColorScale with optional repeats and 3 keys ---
+            float4 FlashComputeColorTint(float ageNorm, float pSeed)
+            {
+                if (_ColorScaleRepeats <= 0.0 && _ColorScaleCount <= 2)
+                {
+                    // Legacy path: simple 2-key lerp (original VampiricFlash behaviour)
+                    float4 tint = L2Fx_ColorScaleTwoKeys(
+                        ageNorm, _ColorScale0, _ColorScale1, _ColorScaleTime1);
+                    if (_bAlphaBlend > 0.5) tint.a = tint.r;
+                    return tint;
+                }
+
+                // New path: SampleColorScale with repeats, 2-3 keys
+                float ctimes[8];
+                float4 ccols[8];
+                [unroll]
+                for (uint i = 0; i < 8; i++)
+                {
+                    ctimes[i] = 999.0;
+                    ccols[i] = float4(1, 1, 1, 1);
+                }
+                ctimes[0] = 0.0;
+                ccols[0] = _ColorScale0;
+                if (_ColorScaleCount >= 2)
+                {
+                    ctimes[1] = _ColorScaleTime1;
+                    ccols[1] = _ColorScale1;
+                }
+                if (_ColorScaleCount >= 3)
+                {
+                    ctimes[2] = _ColorScaleTime2;
+                    ccols[2] = _ColorScale2;
+                }
+
+                float csParam = max(_ColorScaleRepeats, 1.0) - 1.0;
+                float4 tint = L2Fx_SampleColorScale(
+                    ageNorm, csParam, _ColorScaleCount,
+                    ctimes, ccols, _bAlphaBlend > 0.5);
+
+                // Apply ColorMultiplierRange (only when repeat path is active)
+                tint.rgb = L2Fx_ApplyColorMultiplier(
+                    tint.rgb, _ColorMultMin.rgb, _ColorMultMax.rgb, pSeed, _StartTime);
+
+                return tint;
             }
 
             Varyings vert(Attributes IN)
@@ -348,14 +533,37 @@ Shader "L2/Effects/VampiricTouchFlash"
                 }
 
                 float3 spawnOfs = FlashSpawnOffset(pSeed);
-                if (_UseRadialVelocity > 0.5)
+
+                // --- Velocity ---
+                if (_UseRadialVelocity > 0.5 || _UseVelocityTowardOwner > 0.5)
                 {
-                    float3 dir = FlashRandomUnitDirection(pSeed + 17.0);
-                    float radialSpeed = L2Fx_RandomRange(_RadialSpeed.xy, pSeed, _StartTime, 103.0) * FlashUnitScale();
-                    float3 vel = dir * radialSpeed;
+                    float3 vel;
+                    if (_UseVelocityTowardOwner > 0.5)
+                    {
+                        // PTVD_OwnerAndStartPosition: direction toward owner
+                        vel = FlashVelocityOwnerAndStart(spawnOfs, pSeed);
+                    }
+                    else
+                    {
+                        // Original radial velocity: random direction
+                        float3 dir = FlashRandomUnitDirection(pSeed + 17.0);
+                        float radialSpeed = L2Fx_RandomRange(_RadialSpeed.xy, pSeed, _StartTime, 103.0) * FlashUnitScale();
+                        vel = dir * radialSpeed;
+                    }
+
                     float3 acc = L2Fx_UeVectorToUnity(_Acceleration.xyz) * FlashUnitScale();
-                    spawnOfs += L2Fx_DisplacementLinearVelocityLoss(vel, acc, float3(0, 0, 0), age);
+
+                    if (_UseVelocityLoss > 0.5)
+                    {
+                        float loss = L2Fx_RandomRange(_VelocityLossRange.xy, pSeed, _StartTime, 197.0) * FlashUnitScale();
+                        spawnOfs += L2Fx_DisplacementLinearHorizontalVelocityLoss(vel, acc, loss, age);
+                    }
+                    else
+                    {
+                        spawnOfs += L2Fx_DisplacementLinearVelocityLoss(vel, acc, float3(0.0, 0.0, 0.0), age);
+                    }
                 }
+
                 float3 centerWS = TransformObjectToWorld(spawnOfs);
                 float3 posWS = _UseMeshQuadBounds > 0.5
                     ? FlashCameraFacingPositionWS(centerWS, quadOS)
@@ -399,15 +607,15 @@ Shader "L2/Effects/VampiricTouchFlash"
                 OUT.uvAtlasB = uvB;
                 OUT.flipbookBlend = fBlend;
 
-                OUT.tint = L2Fx_ColorScaleTwoKeys(
-                    ageNorm,
-                    _ColorScale0,
-                    _ColorScale1,
-                    _ColorScaleTime1);
+                OUT.tint = FlashComputeColorTint(ageNorm, pSeed);
 
-                if (_bAlphaBlend > 0.5)
+                // Legacy alpha-blend fallback (when not using repeats path)
+                if (_ColorScaleRepeats <= 0.0 && _ColorScaleCount <= 2)
                 {
-                    OUT.tint.a = OUT.tint.r;
+                    if (_bAlphaBlend > 0.5)
+                    {
+                        OUT.tint.a = OUT.tint.r;
+                    }
                 }
 
                 return OUT;

@@ -49,7 +49,7 @@ Material:
     - _FadeIn: 0
     - _FadeInEndTime: 0
     - _Fadeout: 1
-    - _FadeoutStartTime: 0.03
+    - _FadeoutStartTime: 1
     - _HasLifetime: 1
     - _IgnoreMainTexAlpha: 1
     - _LumaAlphaFloor: 0.02
@@ -61,15 +61,15 @@ Material:
     - _SizeScaleParam: 1
     - _SizeScaleRepeats: 0
     - _SizeScaleTime0: 0
-    - _SizeScaleTime1: 0.059
+    - _SizeScaleTime1: 0.25
     - _SizeScaleTime2: 1
-    - _SizeScaleTime3: 0.68
+    - _SizeScaleTime3: 1
     - _SizeScaleTime4: 1
     - _SizeScaleVal0: 1.7
-    - _SizeScaleVal1: 3.7
+    - _SizeScaleVal1: 4.2
     - _SizeScaleVal2: 6
-    - _SizeScaleVal3: 7
-    - _SizeScaleVal4: 7
+    - _SizeScaleVal3: 6
+    - _SizeScaleVal4: 6
     - _SpinCCWorCW: 0
     - _SpinParticles: 1
     - _SpinsPerSecond: 1.2

@@ -5,6 +5,7 @@ public class ParticleGroup : EffectPart
 {
     private const string DebugTraceEffectName = "el_wind_strike_ta";
     private const string DebugTraceHealEffectToken = "wh_heal";
+    private const string DebugTraceCurePoisonToken = "cure_poison";
     private const string IceBoltTaEffectName = "el_ice_bolt_ta";
     private const string IcebergGroupName = "iceberg";
     private const string IcefragGroupName = "icefrag";
@@ -108,6 +109,8 @@ public class ParticleGroup : EffectPart
     private float _lastWhHealShaderTimeLog;
     private float _lastWhHealPreserveLog;
     private bool _runtimeParticleClonesCreated;
+    private bool _burstSpawnFinished;
+    private float _lastCurePoisonShaderTimeLog;
 
     public void FixedUpdate()
     {
@@ -171,21 +174,36 @@ public class ParticleGroup : EffectPart
             _lastWhHealShaderTimeLog = now;
             LogWhHealShaderTimeSample(now, "tick");
         }
+
+        if (ShouldTraceCurePoison() && anyActive && now - _lastCurePoisonShaderTimeLog >= 0.2f)
+        {
+            _lastCurePoisonShaderTimeLog = now;
+            LogCurePoisonShaderTimeSample(now, "tick");
+        }
 #endif
 
         // 3. ЛОГИКА СПАВНА
         bool shouldLoopContinuously = _forceContinuousSpawning || _runtimeContinuousLoop;
         if (_spawnedCount < _maxCount || shouldLoopContinuously)
         {
-            if (_isBurstSpawning && !shouldLoopContinuously)
+            if (_isBurstSpawning && !shouldLoopContinuously && !_burstSpawnFinished)
             {
-                // Если это Burst - выстреливаем всё сразу ОДИН РАЗ после задержки
-                //Debug.Log($"<color=yellow>[Burst SPAWN]</color> {gameObject.name}: Мгновенный запуск {_maxCount} частиц через {_startDelay}с.");
+                // Burst only once per PlayPart; guard avoids re-arming slots if spawnedCount drifts.
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+                if (ShouldTraceCurePoison())
+                {
+                    Debug.Log(
+                        $"[CURE_POISON_BURST] group='{name}' now={now:F3}s maxCount={_maxCount} " +
+                        $"particleSlots={(_particles != null ? _particles.Length : 0)} frame={Time.frameCount}.");
+                }
+#endif
                 for (int i = 0; i < _maxCount; i++)
                 {
                     ActivateParticle(now);
                     _spawnedCount++;
                 }
+
+                _burstSpawnFinished = true;
             }
             else
             {
@@ -241,6 +259,20 @@ public class ParticleGroup : EffectPart
 
         GameObject pObj = _particles[_particleIndex].gameObject;
         bool shouldLoopContinuously = _forceContinuousSpawning || _runtimeContinuousLoop;
+
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        if (ShouldTraceCurePoison() && _isParticleActive[_particleIndex] && pObj.activeSelf)
+        {
+            Material[] activeMats = _particles[_particleIndex].materials;
+            Material activeMat = activeMats != null && activeMats.Length > 0 ? activeMats[0] : null;
+            float prevStart = activeMat != null && activeMat.HasProperty("_StartTime") ? activeMat.GetFloat("_StartTime") : -1f;
+            Debug.LogWarning(
+                $"[CURE_POISON_RESPAWN] group='{name}' slot={_particleIndex} now={now:F3}s " +
+                $"prevStartTime={prevStart:F3}s prevAlive={(now - _particleSpawnTimes[_particleIndex]):F3}s " +
+                $"spawnedCount={_spawnedCount}/{_maxCount} burstDone={_burstSpawnFinished} frame={Time.frameCount}.");
+        }
+#endif
+
         if (shouldLoopContinuously &&
             _isParticleActive[_particleIndex] &&
             pObj.activeSelf &&
@@ -329,6 +361,16 @@ public class ParticleGroup : EffectPart
             m.SetFloat("_Seed", seed);
             ApplySpawnSpin(_particles[_particleIndex], seed);
             SetOwnerWorldPos(m);
+
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            if (ShouldTraceCurePoison())
+            {
+                Debug.Log(
+                    $"[CURE_POISON_SPAWN] group='{name}' slot={_particleIndex} mat='{m.name}' now={now:F3}s " +
+                    $"shaderStart={shaderStartTime:F3}s seed={seed:F3} burstDone={_burstSpawnFinished} " +
+                    $"spawnedCount={_spawnedCount + 1}/{_maxCount} frame={Time.frameCount}.");
+            }
+#endif
             if (SurfaceNormal != Vector3.zero)
             {
                 m.SetVector("_SurfaceNormals", SurfaceNormal);
@@ -364,10 +406,12 @@ public class ParticleGroup : EffectPart
         _particleIndex = 0;
         _spawnedCount = 0;
         _stopped = false;
+        _burstSpawnFinished = false;
         _debugPlayStartedAt = _lastEnable;
         _debugFirstSpawnLogged = false;
         _lastWhHealShaderTimeLog = 0f;
         _lastWhHealPreserveLog = 0f;
+        _lastCurePoisonShaderTimeLog = 0f;
 
         if (_particles == null || _particles.Length == 0)
             _particles = GetComponentsInChildren<Renderer>(true);
@@ -430,6 +474,14 @@ public class ParticleGroup : EffectPart
                 $"forceContinuous={_forceContinuousSpawning} preserveShaderTime={_preserveShaderTimeInContinuousLoop} " +
                 $"burst={_isBurstSpawning} countPerSec={_countPerSecond} maxCount={_maxCount} startDelay={_startDelay:F3}s " +
                 $"warmup={_relativeWarmupTime:F3}s frame={Time.frameCount}.");
+        }
+
+        if (ShouldTraceCurePoison())
+        {
+            Debug.Log(
+                $"[CURE_POISON_PLAY] group='{name}' playAt={_debugPlayStartedAt:F3}s slots={(_particles != null ? _particles.Length : 0)} " +
+                $"duration={_duration:F3}s shaderLife={_baseShaderLifetime:F3}s burst={_isBurstSpawning} maxCount={_maxCount} " +
+                $"mat0={BuildMaterialLifetimeSnapshot(_particles != null && _particles.Length > 0 ? _particles[0] : null)} frame={Time.frameCount}.");
         }
 #endif
     }
@@ -662,14 +714,30 @@ public class ParticleGroup : EffectPart
 
     private bool ShouldTraceWhHeal()
     {
+        return ShouldTraceEffectToken(DebugTraceHealEffectToken);
+    }
+
+    private bool ShouldTraceCurePoison()
+    {
         if (!string.IsNullOrEmpty(name) &&
-            name.IndexOf(DebugTraceHealEffectToken, System.StringComparison.OrdinalIgnoreCase) >= 0)
+            name.IndexOf("BlueDust", System.StringComparison.OrdinalIgnoreCase) >= 0)
+        {
+            return true;
+        }
+
+        return ShouldTraceEffectToken(DebugTraceCurePoisonToken);
+    }
+
+    private bool ShouldTraceEffectToken(string token)
+    {
+        if (!string.IsNullOrEmpty(name) &&
+            name.IndexOf(token, System.StringComparison.OrdinalIgnoreCase) >= 0)
         {
             return true;
         }
 
         if (_owner != null && !string.IsNullOrEmpty(_owner.name) &&
-            _owner.name.IndexOf(DebugTraceHealEffectToken, System.StringComparison.OrdinalIgnoreCase) >= 0)
+            _owner.name.IndexOf(token, System.StringComparison.OrdinalIgnoreCase) >= 0)
         {
             return true;
         }
@@ -678,7 +746,7 @@ public class ParticleGroup : EffectPart
         for (int depth = 0; t != null && depth < 16; depth++, t = t.parent)
         {
             if (!string.IsNullOrEmpty(t.name) &&
-                t.name.IndexOf(DebugTraceHealEffectToken, System.StringComparison.OrdinalIgnoreCase) >= 0)
+                t.name.IndexOf(token, System.StringComparison.OrdinalIgnoreCase) >= 0)
             {
                 return true;
             }
@@ -689,6 +757,16 @@ public class ParticleGroup : EffectPart
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
     private void LogWhHealShaderTimeSample(float now, string reason)
+    {
+        LogShaderTimeSample(now, reason, "WH_HEAL_SHADER_TICK");
+    }
+
+    private void LogCurePoisonShaderTimeSample(float now, string reason)
+    {
+        LogShaderTimeSample(now, reason, "CURE_POISON_SHADER_TICK");
+    }
+
+    private void LogShaderTimeSample(float now, string reason, string logTag)
     {
         if (_particles == null || _isParticleActive == null)
         {
@@ -706,8 +784,9 @@ public class ParticleGroup : EffectPart
             Material mat0 = mats != null && mats.Length > 0 ? mats[0] : null;
             string fadePhase = ShaderFadeDiagnostic.FadePhaseLabel(mat0, now);
             string fadeLine = ShaderFadeDiagnostic.BuildLine(mat0, now);
+            float seed = mat0 != null && mat0.HasProperty("_Seed") ? mat0.GetFloat("_Seed") : 0f;
             Debug.Log(
-                $"[WH_HEAL_SHADER_TICK] reason={reason} group='{name}' slot={i} now={now:F3}s " +
+                $"[{logTag}] reason={reason} group='{name}' slot={i} now={now:F3}s seed={seed:F3} " +
                 $"alive={(now - _particleSpawnTimes[i]):F3}s groupDuration={_duration:F3}s " +
                 $"{BuildRuntimeMaterialLifetimeSnapshot(_particles[i], now)} " +
                 $"[FADE_PHASE]={fadePhase} {fadeLine} frame={Time.frameCount}.");

@@ -98,6 +98,34 @@ float3 L2Fx_DisplacementLinearVelocityLoss(
     return velocity * t + 0.5 * acceleration * t * t - 0.5 * velocityLossPerSec * t * t;
 }
 
+// UE VelocityLossRange X/Y only: drag on horizontal (Unity XZ), vertical keeps accel, no Y loss.
+// Clamps integration at t_stop = speed/loss so particles coast to a halt instead of reversing.
+float3 L2Fx_DisplacementLinearHorizontalVelocityLoss(
+    float3 velocity,
+    float3 acceleration,
+    float horizontalLossPerSec,
+    float ageSeconds)
+{
+    float t = max(0.0, ageSeconds);
+    float3 velH = float3(velocity.x, 0.0, velocity.z);
+    float speed = length(velH);
+    float3 dirH = speed > 1e-5 ? (velH / speed) : float3(0.0, 0.0, 0.0);
+    float loss = max(horizontalLossPerSec, 0.0);
+    float tEff = t;
+    if (loss > 1e-5)
+        tEff = min(t, speed / loss);
+
+    float dist = speed * tEff - 0.5 * loss * tEff * tEff;
+    float3 dispH = dirH * max(0.0, dist);
+    float3 dispV = L2Fx_DisplacementLinearVelocityLoss(
+        float3(0.0, velocity.y, 0.0),
+        float3(0.0, acceleration.y, 0.0),
+        float3(0.0, 0.0, 0.0),
+        t);
+    float3 dispAccH = float3(acceleration.x, 0.0, acceleration.z) * (0.5 * t * t);
+    return dispH + dispV + dispAccH;
+}
+
 // Horizontal direction from spawn offset (XZ plane)
 float2 L2Fx_OutwardDirectionXZ(
     float3 spawnOffset,

@@ -30,6 +30,38 @@ float L2Fx_MotionCompensationForManualBillboardScale(float manualBillboardScale)
     return 1.0 / max(objectScale.x, 1e-4);
 }
 
+// Flat camera basis on the ground plane (screen left/right independent of player facing).
+void L2Fx_CameraHorizontalBasis(out float3 camRightH, out float3 camForwardH)
+{
+    float3 camRightWS = float3(UNITY_MATRIX_V[0].x, UNITY_MATRIX_V[1].x, UNITY_MATRIX_V[2].x);
+    float3 camForwardWS = float3(-UNITY_MATRIX_V[0].z, -UNITY_MATRIX_V[1].z, -UNITY_MATRIX_V[2].z);
+
+    camRightH = float3(camRightWS.x, 0.0, camRightWS.z);
+    float lenR = length(camRightH);
+    camRightH = lenR > 1e-5 ? camRightH / lenR : float3(1.0, 0.0, 0.0);
+
+    camForwardH = float3(camForwardWS.x, 0.0, camForwardWS.z);
+    float lenF = length(camForwardH);
+    camForwardH = lenF > 1e-5 ? camForwardH / lenF : float3(0.0, 0.0, 1.0);
+}
+
+// Azimuth in camera horizontal plane: 90 deg = screen left, 270 deg = screen right.
+// Requires L2Fx_DegToRad from L2FxEmitterSpawn.hlsl (include that file before this one).
+float3 L2Fx_CameraHorizontalUnitDirection(float azimuthDeg)
+{
+    float3 camRightH;
+    float3 camForwardH;
+    L2Fx_CameraHorizontalBasis(camRightH, camForwardH);
+
+    float theta = azimuthDeg * L2Fx_DegToRad;
+    return -camRightH * sin(theta) + camForwardH * cos(theta);
+}
+
+float3 L2Fx_WorldVelocityToObject(float3 velWS)
+{
+    return mul((float3x3)GetWorldToObjectMatrix(), velWS);
+}
+
 float3 L2Fx_CameraBillboardPositionWS(
     float3 centerWS,
     float3 quadOS,

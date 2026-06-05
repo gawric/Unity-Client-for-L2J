@@ -36,6 +36,7 @@ public sealed class EffectPrefabStaggeredDrift : MonoBehaviour
     [Header("Debug")]
     [SerializeField] private bool _debugLog = true;
     [SerializeField] private float _debugLogIntervalSeconds = 0.25f;
+    [SerializeField] private float _accelerationMetersPerSecond2 = 1.0f; // Ускорение движения
 
     private const string LogTag = "[CURE_DRIFT]";
 
@@ -49,7 +50,7 @@ public sealed class EffectPrefabStaggeredDrift : MonoBehaviour
 
     private void OnEnable()
     {
-        _enabledAt = Time.time;
+        _enabledAt = Time.time; // Фиксируем время физического появления
         _nextDebugLogAt = 0f;
         Restart();
         ScheduleDeferredRestart();
@@ -58,6 +59,7 @@ public sealed class EffectPrefabStaggeredDrift : MonoBehaviour
 
     private void Start()
     {
+        _enabledAt = Time.time; // Фиксируем время на случай отложенного Start
         Restart();
         LogState("Start");
     }
@@ -75,7 +77,6 @@ public sealed class EffectPrefabStaggeredDrift : MonoBehaviour
 
     public void Restart()
     {
-        _enabledAt = Time.time;
         Transform[] newTargets = ResolveTargets();
         int count = newTargets != null ? newTargets.Length : 0;
         if (count == 0)
@@ -86,30 +87,62 @@ public sealed class EffectPrefabStaggeredDrift : MonoBehaviour
                     $"{LogTag} '{name}' Restart: no targets (children={transform.childCount}, assigned={(_targets != null ? _targets.Length : 0)}, includeInactive={_includeInactiveChildren}) — keeping previous list.",
                     this);
             }
-
             return;
         }
 
         _resolvedTargets = newTargets;
 
+        // Инициализируем массивы строго один раз при первом спавне
         if (_initialLocalPositions == null || _initialLocalPositions.Length != count)
         {
             _initialLocalPositions = new Vector3[count];
             _initialWorldPositions = new Vector3[count];
             _driftMeters = new float[count];
+
+            for (int i = 0; i < count; i++)
+            {
+                Transform t = _resolvedTargets[i];
+                if (t == null) continue;
+
+                _initialLocalPositions[i] = t.localPosition;
+                _driftMeters[i] = 0f;
+            }
         }
+
+        // Рассчитываем, сколько времени система УЖЕ реально движется к моменту этого вызова Restart()
+        float systemElapsed = Time.time - _enabledAt;
 
         for (int i = 0; i < count; i++)
         {
             Transform t = _resolvedTargets[i];
-            if (t == null)
-            {
-                continue;
-            }
+            if (t == null) continue;
 
-            _initialLocalPositions[i] = t.localPosition;
+            // Временно возвращаем в локальный базис, чтобы Unity корректно 
+            // применил новый lossyScale (0.09 вместо 0.07) от внешней системы
+            t.localPosition = _initialLocalPositions[i];
             _initialWorldPositions[i] = t.position;
-            _driftMeters[i] = 0f;
+
+            // ИСПРАВЛЕНИЕ: Вычисляем правильный driftMeters для текущего кадра корутины,
+            // вместо того чтобы грубо обнулять его в 0f!
+            float targetStart = _startDelaySeconds + (_staggerDelaySeconds * i);
+            if (systemElapsed >= targetStart)
+            {
+                float localTime = systemElapsed - targetStart;
+                float v0 = _speedMetersPerSecond;
+                float a = _accelerationMetersPerSecond2;
+
+                // Восстанавливаем пройденную дистанцию на момент вызова
+                float currentDrift = (v0 * localTime) + (0.5f * a * localTime * localTime);
+                if (_maxDriftMeters > 0f && currentDrift >= _maxDriftMeters)
+                {
+                    currentDrift = _maxDriftMeters;
+                }
+                _driftMeters[i] = currentDrift;
+            }
+            else
+            {
+                _driftMeters[i] = 0f;
+            }
         }
 
         if (_debugLog)
@@ -120,6 +153,9 @@ public sealed class EffectPrefabStaggeredDrift : MonoBehaviour
                 this);
         }
     }
+
+
+
 
     private void ScheduleDeferredRestart()
     {
@@ -145,44 +181,58 @@ public sealed class EffectPrefabStaggeredDrift : MonoBehaviour
 
     private void LateUpdate()
     {
-        if (_resolvedTargets == null || _resolvedTargets.Length == 0 || _speedMetersPerSecond <= 0f)
+        if (_resolvedTargets == null || _resolvedTargets.Length == 0)
         {
             return;
         }
 
+        // Полное время, прошедшее с момента истинной активации системы
         float elapsed = Time.time - _enabledAt;
-        float step = _speedMetersPerSecond * Time.deltaTime;
 
         for (int i = 0; i < _resolvedTargets.Length; i++)
         {
             Transform t = _resolvedTargets[i];
-            if (t == null)
+            if (t == null) continue;
+
+            // Точный математический момент старта конкретного кольца
+            float targetStart = _startDelaySeconds + (_staggerDelaySeconds * i);
+
+            // --- БЛОКИРОВКА СБРОСА ШЕЙДЕРА (ФИКС БАГА С ПОВТОРОМ) ---
+            // Вычисляем, какое ИСТИННОЕ стартовое время должно быть у этого кольца в мире Unity
+            float correctShaderStartTime = _enabledAt + targetStart;
+
+            // Находим материал кольца и принудительно прописываем ему правильное время старта.
+            // Это не даст внешнему скрипту CompositePrefabEffect сбросить анимацию размера.
+            if (t.TryGetComponent<MeshRenderer>(out var renderer) && renderer.material != null)
             {
-                continue;
+                if (renderer.material.HasProperty("_StartTime"))
+                {
+                    renderer.material.SetFloat("_StartTime", correctShaderStartTime);
+                }
             }
 
-            float targetStart = _startDelaySeconds + _staggerDelaySeconds * i;
+            // Если время этого кольца еще не пришло, удерживаем его на стартовой позиции
             if (elapsed < targetStart)
             {
-                ApplyPosition(t, i, 0f);
-                _driftMeters[i] = 0f;
+                t.localPosition = _initialLocalPositions[i];
                 continue;
             }
 
-            if (_maxDriftMeters > 0f && _driftMeters[i] >= _maxDriftMeters)
+            // --- ГЕОМЕТРИЯ ПАДЕНИЯ ---
+            float localTime = elapsed - targetStart;
+            float v0 = _speedMetersPerSecond;
+            float a = _accelerationMetersPerSecond2;
+
+            // Равноускоренное движение вниз
+            float currentDrift = (v0 * localTime) + (0.5f * a * localTime * localTime);
+
+            if (_maxDriftMeters > 0f && currentDrift >= _maxDriftMeters)
             {
-                ApplyPosition(t, i, _driftMeters[i]);
-                continue;
+                currentDrift = _maxDriftMeters;
             }
 
-            float move = step;
-            if (_maxDriftMeters > 0f)
-            {
-                move = Mathf.Min(move, _maxDriftMeters - _driftMeters[i]);
-            }
-
-            _driftMeters[i] += move;
-            ApplyPosition(t, i, _driftMeters[i]);
+            _driftMeters[i] = currentDrift;
+            ApplyPosition(t, i, currentDrift);
         }
 
         if (_debugLog && Time.time >= _nextDebugLogAt)
@@ -195,7 +245,18 @@ public sealed class EffectPrefabStaggeredDrift : MonoBehaviour
     private void ApplyPosition(Transform t, int index, float driftMeters)
     {
         Vector3 worldAxis = GetWorldAxisVector();
-        Vector3 worldOffset = worldAxis * driftMeters;
+
+        // --- ЛОГИКА ПРОСТРАНСТВЕННОГО НАХЛЁСТА ---
+        // Узнаем, какую МАКСИМАЛЬНУЮ дистанцию должно пройти одно кольцо
+        // Если мы хотим идеальный стык встык, то начальный сдвиг = _maxDriftMeters * index.
+        // Если хотим НАХЛЁСТ (чтобы они немного перекрывали друг друга), умножаем на 0.8 или 0.9.
+        float overlapFactor = 0.85f; // 15% нахлёста для бесшовности текстуры
+        float chainOffset = _maxDriftMeters * index * overlapFactor;
+
+        // Итоговое смещение = стартовый сдвиг по цепочке + текущее падение по времени
+        float totalDrift = chainOffset + driftMeters;
+
+        Vector3 worldOffset = worldAxis * totalDrift;
 
         if (_driftSpace == Space.World)
         {
@@ -203,9 +264,14 @@ public sealed class EffectPrefabStaggeredDrift : MonoBehaviour
             return;
         }
 
-        Vector3 localOffset = transform.InverseTransformVector(worldOffset);
+        Transform parentTransform = t.parent;
+        Vector3 localOffset = parentTransform != null
+            ? parentTransform.InverseTransformVector(worldOffset)
+            : worldOffset;
+
         t.localPosition = _initialLocalPositions[index] + localOffset;
     }
+
 
     private Vector3 GetWorldAxisVector()
     {
@@ -288,11 +354,10 @@ public sealed class EffectPrefabStaggeredDrift : MonoBehaviour
                 continue;
             }
 
-            if (!_includeInactiveChildren && !child.gameObject.activeInHierarchy)
+            if (!_includeInactiveChildren && !child.gameObject.activeSelf)
             {
                 continue;
             }
-
             list.Add(child);
         }
 
@@ -325,4 +390,7 @@ public sealed class EffectPrefabStaggeredDrift : MonoBehaviour
             }
         }
     }
+
+
+
 }
