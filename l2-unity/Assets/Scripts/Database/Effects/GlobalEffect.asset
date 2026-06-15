@@ -83,3 +83,8 @@ MonoBehaviour:
     comment: cure-poison-effect
     settings: {fileID: 11400000, guid: 379a78eda0ba8ef40961f6ef9d85878a, type: 2}
     ignoreFlightTimeForCast: 1
+  - id: 1040
+    prefab: {fileID: -2331866982259287529, guid: d1b012004056a204199b49bc2dbe78a5, type: 3}
+    comment: shield-composite-effect
+    settings: {fileID: 11400000, guid: a8f3c2e1d4b5678901234abcdef56789, type: 2}
+    ignoreFlightTimeForCast: 1

@@ -13,6 +13,79 @@ float L2Fx_MeshFrag_AlphaFeather(float texAlpha, float alphaEdgeFeather)
     return smoothstep(0.0, alphaEdgeFeather, texAlpha);
 }
 
+// Fade alpha near mesh UV edges so the quad boundary is not visible (square falloff).
+float L2Fx_QuadEdgeSoftMask(float2 uv01, float edgeSoftness)
+{
+    if (edgeSoftness <= 1e-4)
+    {
+        return 1.0;
+    }
+
+    float2 edgeDist = min(saturate(uv01), saturate(1.0 - uv01));
+    float edgeMin = min(edgeDist.x, edgeDist.y);
+    return smoothstep(0.0, edgeSoftness, edgeMin);
+}
+
+// Per-axis quad edge fade: weak on X (wide ring sides), stronger on Y (top/bottom margin).
+float L2Fx_QuadEdgeSoftMaskSelective(float2 uv01, float2 edgeSoftness)
+{
+    float2 edgeDist = min(saturate(uv01), saturate(1.0 - uv01));
+
+    float maskX = (edgeSoftness.x <= 1e-4) ? 1.0 : smoothstep(0.0, edgeSoftness.x, edgeDist.x);
+    float maskY = (edgeSoftness.y <= 1e-4) ? 1.0 : smoothstep(0.0, edgeSoftness.y, edgeDist.y);
+    return maskX * maskY;
+}
+
+// Circular fade: matches round sprite alpha; softness is UV radius band before inscribed circle edge.
+float L2Fx_RadialUvSoftMask(float2 uv01, float edgeSoftness)
+{
+    if (edgeSoftness <= 1e-4)
+    {
+        return 1.0;
+    }
+
+    float radial = length(uv01 - 0.5) * 2.0;
+    return 1.0 - smoothstep(1.0 - edgeSoftness, 1.0, radial);
+}
+
+half4 L2Fx_AlphaDilatedSample(
+    TEXTURE2D_PARAM(mainTex, mainTexSampler),
+    float2 uv,
+    float2 texelSize,
+    float dilateTexels)
+{
+    half4 tex = SAMPLE_TEXTURE2D(mainTex, mainTexSampler, uv);
+    if (dilateTexels <= 0.001)
+    {
+        return tex;
+    }
+
+    float2 s = texelSize * dilateTexels;
+    float2 sx = float2(s.x, 0.0);
+    float2 sy = float2(0.0, s.y);
+    float2 sd = s * 0.7071;
+
+    tex = max(tex, SAMPLE_TEXTURE2D(mainTex, mainTexSampler, uv + sx * 0.35));
+    tex = max(tex, SAMPLE_TEXTURE2D(mainTex, mainTexSampler, uv - sx * 0.35));
+    tex = max(tex, SAMPLE_TEXTURE2D(mainTex, mainTexSampler, uv + sy * 0.35));
+    tex = max(tex, SAMPLE_TEXTURE2D(mainTex, mainTexSampler, uv - sy * 0.35));
+
+    tex = max(tex, SAMPLE_TEXTURE2D(mainTex, mainTexSampler, uv + sx * 0.7));
+    tex = max(tex, SAMPLE_TEXTURE2D(mainTex, mainTexSampler, uv - sx * 0.7));
+    tex = max(tex, SAMPLE_TEXTURE2D(mainTex, mainTexSampler, uv + sy * 0.7));
+    tex = max(tex, SAMPLE_TEXTURE2D(mainTex, mainTexSampler, uv - sy * 0.7));
+
+    tex = max(tex, SAMPLE_TEXTURE2D(mainTex, mainTexSampler, uv + sx));
+    tex = max(tex, SAMPLE_TEXTURE2D(mainTex, mainTexSampler, uv - sx));
+    tex = max(tex, SAMPLE_TEXTURE2D(mainTex, mainTexSampler, uv + sy));
+    tex = max(tex, SAMPLE_TEXTURE2D(mainTex, mainTexSampler, uv - sy));
+    tex = max(tex, SAMPLE_TEXTURE2D(mainTex, mainTexSampler, uv + sd));
+    tex = max(tex, SAMPLE_TEXTURE2D(mainTex, mainTexSampler, uv - sd));
+    tex = max(tex, SAMPLE_TEXTURE2D(mainTex, mainTexSampler, uv + float2(sd.x, -sd.y)));
+    tex = max(tex, SAMPLE_TEXTURE2D(mainTex, mainTexSampler, uv + float2(-sd.x, sd.y)));
+    return tex;
+}
+
 float L2Fx_MeshFrag_SampleTextureAlpha(
     float4 texColor,
     float alphaFromLuma,
@@ -37,6 +110,13 @@ float L2Fx_MeshFrag_SampleTextureAlpha(
     }
 
     return 1.0;
+}
+
+// BC2/DXT3-style sprites: black RGB + shape in alpha. Use tint as particle color unless tex carries RGB.
+float3 L2Fx_MeshFrag_SpriteTintRgb(float3 texRgb, float3 tintRgb)
+{
+    float rgbPeak = max(max(texRgb.r, texRgb.g), texRgb.b);
+    return rgbPeak > 0.02 ? texRgb * tintRgb : tintRgb;
 }
 
 float L2Fx_MeshFrag_ApplyAlphaPowerStrength(

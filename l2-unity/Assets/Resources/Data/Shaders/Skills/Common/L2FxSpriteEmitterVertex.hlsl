@@ -90,6 +90,43 @@ float3 L2Fx_CameraBillboardPositionWS(
         + upWS * (quadOS.y * objectScale.y);
 }
 
+// UE PTDU_Normal: quad lies in the plane perpendicular to the particle Normal.
+// Default Normal is (0,0,1) in UE local space -> Unity local (0,1,0), transformed to world.
+float3 L2Fx_ResolveParticleNormalWS(float3 surfaceNormalMaterial)
+{
+    if (dot(surfaceNormalMaterial, surfaceNormalMaterial) > 1e-6)
+    {
+        return normalize(surfaceNormalMaterial);
+    }
+
+    float3 localNormal = float3(0.0, 1.0, 0.0);
+    float3 normalWS = mul((float3x3)unity_ObjectToWorld, localNormal);
+    return dot(normalWS, normalWS) > 1e-6 ? normalize(normalWS) : float3(0.0, 1.0, 0.0);
+}
+
+float3 L2Fx_PtduNormalPositionWS(
+    float3 centerWS,
+    float3 quadOS,
+    float manualBillboardScale,
+    float3 surfaceNormalMaterial)
+{
+    float3 normalWS = L2Fx_ResolveParticleNormalWS(surfaceNormalMaterial);
+
+    float3 refAxis = abs(normalWS.y) > 0.99 ? float3(1.0, 0.0, 0.0) : float3(0.0, 1.0, 0.0);
+    float3 tangent = normalize(cross(refAxis, normalWS));
+    float3 bitangent = cross(normalWS, tangent);
+
+    float3 objectScale = L2Fx_ObjectWorldScale();
+    if (manualBillboardScale > 0.0)
+    {
+        objectScale = float3(manualBillboardScale, manualBillboardScale, manualBillboardScale);
+    }
+
+    return centerWS
+        + tangent * (quadOS.x * objectScale.x)
+        + bitangent * (quadOS.y * objectScale.y);
+}
+
 void L2Fx_BuildColorScaleArrays5(
     uint colorScaleCount,
     float4 colorScale0,

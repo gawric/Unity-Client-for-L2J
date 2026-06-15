@@ -1,0 +1,798 @@
+{
+  "counts": {
+    "uc_files": 18,
+    "mat_files": 95,
+    "shader_files": 18,
+    "pairs": 76
+  },
+  "top_fields": [
+    [
+      "ColorScale(0)",
+      76
+    ],
+    [
+      "ColorScale(1)",
+      76
+    ],
+    [
+      "Name",
+      76
+    ],
+    [
+      "StartSizeRange",
+      76
+    ],
+    [
+      "InitialParticlesPerSecond",
+      76
+    ],
+    [
+      "AutomaticInitialSpawning",
+      76
+    ],
+    [
+      "RespawnDeadParticles",
+      74
+    ],
+    [
+      "FadeOutStartTime",
+      73
+    ],
+    [
+      "MaxParticles",
+      72
+    ],
+    [
+      "SpinParticles",
+      67
+    ],
+    [
+      "FadeOut",
+      66
+    ],
+    [
+      "LifetimeRange",
+      66
+    ],
+    [
+      "UseRegularSizeScale",
+      65
+    ],
+    [
+      "SizeScale(0)",
+      62
+    ],
+    [
+      "UseSizeScale",
+      59
+    ],
+    [
+      "SizeScale(1)",
+      57
+    ],
+    [
+      "StartSpinRange",
+      54
+    ],
+    [
+      "SizeScale(2)",
+      51
+    ],
+    [
+      "UniformSize",
+      47
+    ],
+    [
+      "SpinsPerSecondRange",
+      46
+    ],
+    [
+      "FadeInEndTime",
+      44
+    ],
+    [
+      "FadeIn",
+      44
+    ],
+    [
+      "StartLocationOffset",
+      44
+    ],
+    [
+      "DrawStyle",
+      43
+    ],
+    [
+      "Texture",
+      41
+    ],
+    [
+      "StaticMesh",
+      39
+    ],
+    [
+      "SizeScale(3)",
+      39
+    ],
+    [
+      "StartVelocityRange",
+      39
+    ],
+    [
+      "ColorScale(2)",
+      38
+    ],
+    [
+      "UseMeshBlendMode",
+      37
+    ],
+    [
+      "ColorMultiplierRange",
+      37
+    ],
+    [
+      "SpinCCWorCW",
+      37
+    ],
+    [
+      "RenderTwoSided",
+      35
+    ],
+    [
+      "Opacity",
+      34
+    ],
+    [
+      "ColorScaleRepeats",
+      33
+    ],
+    [
+      "TextureUSubdivisions",
+      32
+    ],
+    [
+      "TextureVSubdivisions",
+      32
+    ],
+    [
+      "SubdivisionEnd",
+      32
+    ],
+    [
+      "UseColorScale",
+      31
+    ],
+    [
+      "SubdivisionStart",
+      28
+    ],
+    [
+      "StartLocationPolarRange",
+      25
+    ],
+    [
+      "InitialDelayRange",
+      22
+    ],
+    [
+      "StartLocationRange",
+      19
+    ],
+    [
+      "UseRandomSubdivision",
+      18
+    ],
+    [
+      "ResetAfterChange",
+      16
+    ],
+    [
+      "ForcedFade",
+      14
+    ],
+    [
+      "SizeScale(4)",
+      14
+    ],
+    [
+      "MaxActiveDistance",
+      14
+    ],
+    [
+      "Acceleration",
+      13
+    ],
+    [
+      "VelocityLossRange",
+      13
+    ],
+    [
+      "StartLocationShape",
+      12
+    ],
+    [
+      "SizeScaleRepeats",
+      10
+    ],
+    [
+      "UseRotationFrom",
+      10
+    ],
+    [
+      "SphereRadiusRange",
+      9
+    ],
+    [
+      "GetVelocityDirectionFrom",
+      9
+    ],
+    [
+      "WarmupTicksPerSecond",
+      9
+    ],
+    [
+      "RelativeWarmupTime",
+      9
+    ],
+    [
+      "ColorScale(3)",
+      7
+    ],
+    [
+      "BlendBetweenSubdivisions",
+      7
+    ],
+    [
+      "ColorScale(4)",
+      6
+    ],
+    [
+      "CoordinateSystem",
+      6
+    ],
+    [
+      "UseDirectionAs",
+      6
+    ],
+    [
+      "WeatherSoundCheck",
+      5
+    ],
+    [
+      "FadeOutFactor",
+      3
+    ],
+    [
+      "FadeInFactor",
+      3
+    ],
+    [
+      "ColorScale(5)",
+      3
+    ],
+    [
+      "UseParticleColor",
+      3
+    ],
+    [
+      "MaxAbsVelocity",
+      2
+    ],
+    [
+      "ProjectionNormal",
+      2
+    ],
+    [
+      "SizeScale(5)",
+      2
+    ],
+    [
+      "InitialTimeRange",
+      1
+    ],
+    [
+      "BeamEndPoints(0)",
+      1
+    ],
+    [
+      "DetermineEndPointBy",
+      1
+    ],
+    [
+      "LowFrequencyPoints",
+      1
+    ],
+    [
+      "HighFrequencyPoints",
+      1
+    ]
+  ],
+  "top_props": [
+    [
+      "_FadeIn",
+      71
+    ],
+    [
+      "_Fadeout",
+      70
+    ],
+    [
+      "_FadeoutStartTime",
+      70
+    ],
+    [
+      "_FadeInEndTime",
+      66
+    ],
+    [
+      "_HasLifetime",
+      66
+    ],
+    [
+      "_Seed",
+      66
+    ],
+    [
+      "_StartTime",
+      66
+    ],
+    [
+      "_LifetimeRange",
+      66
+    ],
+    [
+      "_StartLocationOffset",
+      66
+    ],
+    [
+      "_SpinParticles",
+      65
+    ],
+    [
+      "_UseSizeScale",
+      64
+    ],
+    [
+      "_InitialDelayRange",
+      64
+    ],
+    [
+      "_ColorScaleRepeats",
+      61
+    ],
+    [
+      "_UniformSize",
+      61
+    ],
+    [
+      "_SizeScaleRepeats",
+      59
+    ],
+    [
+      "_SubdivisionEnd",
+      56
+    ],
+    [
+      "_SubdivisionStart",
+      56
+    ],
+    [
+      "_TextureUSubdivisions",
+      56
+    ],
+    [
+      "_TextureVSubdivisions",
+      56
+    ],
+    [
+      "_QueueOffset",
+      56
+    ],
+    [
+      "_Alpha",
+      54
+    ],
+    [
+      "_Acceleration",
+      53
+    ],
+    [
+      "_SizeScale0",
+      53
+    ],
+    [
+      "_SizeScale1",
+      53
+    ],
+    [
+      "_SizeScale2",
+      53
+    ],
+    [
+      "_SizeScale3",
+      52
+    ],
+    [
+      "_SizeScale4",
+      52
+    ],
+    [
+      "_StartLocationRangeZ",
+      52
+    ],
+    [
+      "_SpinsPerSecondRangeX",
+      50
+    ],
+    [
+      "_SpinsPerSecondRangeY",
+      50
+    ],
+    [
+      "_SpinsPerSecondRangeZ",
+      50
+    ],
+    [
+      "_StartSpinRangeZ",
+      50
+    ],
+    [
+      "_ProjectionNormal",
+      50
+    ],
+    [
+      "_SizeRangeX",
+      50
+    ],
+    [
+      "_SizeRangeY",
+      50
+    ],
+    [
+      "_SizeRangeZ",
+      50
+    ],
+    [
+      "_StartVelocityRangeX",
+      50
+    ],
+    [
+      "_StartVelocityRangeY",
+      50
+    ],
+    [
+      "_StartVelocityRangeZ",
+      50
+    ],
+    [
+      "_AlphaSmooth",
+      49
+    ],
+    [
+      "_Billboard",
+      49
+    ],
+    [
+      "_Brighten",
+      49
+    ],
+    [
+      "_ColorScale0Time",
+      49
+    ],
+    [
+      "_ColorScale1Time",
+      49
+    ],
+    [
+      "_ColorScale2Time",
+      49
+    ],
+    [
+      "_ColorScale3Time",
+      49
+    ],
+    [
+      "_ColorScale4Time",
+      49
+    ],
+    [
+      "_ColorScale5Time",
+      49
+    ],
+    [
+      "_ColorScale6Time",
+      49
+    ],
+    [
+      "_ColorScale7Time",
+      49
+    ],
+    [
+      "_ColorScale8Time",
+      49
+    ],
+    [
+      "_ColorScale9Time",
+      49
+    ],
+    [
+      "_Debug",
+      49
+    ],
+    [
+      "_GetVelocityDirectionFrom",
+      49
+    ],
+    [
+      "_QueueControl",
+      49
+    ],
+    [
+      "_StartLocationShape",
+      49
+    ],
+    [
+      "_UseColorScale",
+      49
+    ],
+    [
+      "_UseDirectionAs",
+      49
+    ],
+    [
+      "_ColorMultiplierRangeB",
+      49
+    ],
+    [
+      "_ColorMultiplierRangeG",
+      49
+    ],
+    [
+      "_ColorMultiplierRangeR",
+      49
+    ],
+    [
+      "_ColorScale0Color",
+      49
+    ],
+    [
+      "_ColorScale1Color",
+      49
+    ],
+    [
+      "_ColorScale2Color",
+      49
+    ],
+    [
+      "_ColorScale3Color",
+      49
+    ],
+    [
+      "_ColorScale4Color",
+      49
+    ],
+    [
+      "_ColorScale5Color",
+      49
+    ],
+    [
+      "_ColorScale6Color",
+      49
+    ],
+    [
+      "_ColorScale7Color",
+      49
+    ],
+    [
+      "_ColorScale8Color",
+      49
+    ],
+    [
+      "_ColorScale9Color",
+      49
+    ],
+    [
+      "_SizeScale5",
+      49
+    ],
+    [
+      "_SizeScale6",
+      49
+    ],
+    [
+      "_SizeScale7",
+      49
+    ],
+    [
+      "_SizeScale8",
+      49
+    ],
+    [
+      "_SizeScale9",
+      49
+    ],
+    [
+      "_SphereRadiusRange",
+      49
+    ],
+    [
+      "_StartLocationPolarRangeX",
+      49
+    ],
+    [
+      "_StartLocationPolarRangeY",
+      49
+    ],
+    [
+      "_StartLocationPolarRangeZ",
+      49
+    ],
+    [
+      "_StartLocationRangeX",
+      49
+    ],
+    [
+      "_StartLocationRangeY",
+      49
+    ],
+    [
+      "_StartSpinRangeX",
+      49
+    ],
+    [
+      "_StartSpinRangeY",
+      49
+    ],
+    [
+      "_SurfaceNormals",
+      49
+    ],
+    [
+      "_VelocityLossRangeX",
+      49
+    ],
+    [
+      "_VelocityLossRangeY",
+      49
+    ],
+    [
+      "_VelocityLossRangeZ",
+      49
+    ],
+    [
+      "_ColorScaleTime1",
+      18
+    ],
+    [
+      "_ColorScale0",
+      18
+    ],
+    [
+      "_ColorScale1",
+      18
+    ],
+    [
+      "_IgnoreMainTexAlpha",
+      17
+    ],
+    [
+      "_Opacity",
+      17
+    ],
+    [
+      "_bAlphaBlend",
+      17
+    ],
+    [
+      "_ColorScaleCount",
+      16
+    ],
+    [
+      "_AlphaFromLuma",
+      15
+    ],
+    [
+      "_LumaAlphaFloor",
+      15
+    ],
+    [
+      "_ApplyUuToStartSize",
+      14
+    ],
+    [
+      "_StartSpinRange",
+      13
+    ],
+    [
+      "_ColorScaleTime2",
+      12
+    ]
+  ],
+  "ratios": {
+    "('Opacity', '_Opacity')": {
+      "n": 5,
+      "median": 1.6666666666666667,
+      "min": 0.7048780487804878,
+      "max": 2.459016393442623
+    },
+    "('LifetimeRange', '_LifetimeRange.x')": {
+      "n": 60,
+      "median": 1.0,
+      "min": 0.6666666666666666,
+      "max": 191.1
+    },
+    "('LifetimeRange', '_LifetimeRange.y')": {
+      "n": 60,
+      "median": 1.0,
+      "min": 0.7,
+      "max": 191.1
+    },
+    "('InitialDelayRange', '_InitialDelayRange.x')": {
+      "n": 22,
+      "median": 1.0,
+      "min": 0.0,
+      "max": 1.0
+    },
+    "('InitialDelayRange', '_InitialDelayRange.y')": {
+      "n": 22,
+      "median": 1.0,
+      "min": 0.0,
+      "max": 1.0
+    },
+    "('FadeInEndTime', '_FadeInEndTime')": {
+      "n": 7,
+      "median": 0.8658008658008658,
+      "min": 0.0,
+      "max": 1.6666666666666667
+    },
+    "('FadeOutStartTime', '_FadeoutStartTime')": {
+      "n": 16,
+      "median": 0.9151785714285714,
+      "min": 0.1543340380549683,
+      "max": 2.5423728813559325
+    },
+    "('SubdivisionStart', '_SubdivisionStart')": {
+      "n": 19,
+      "median": 0.8571428571428571,
+      "min": 0.5,
+      "max": 1.1666666666666667
+    },
+    "('StartSizeRange.X', '_SizeRange.xy')": {
+      "n": 6,
+      "median": 0.75,
+      "min": 0.040499999999999994,
+      "max": 1.2000000000000002
+    },
+    "('SubdivisionEnd', '_SubdivisionEnd')": {
+      "n": 22,
+      "median": 0.875,
+      "min": 0.0,
+      "max": 1.3333333333333333
+    },
+    "('StartSizeRange.X', '_SizeRangeX.xy')": {
+      "n": 50,
+      "median": 1.0,
+      "min": 0.7646929824561404,
+      "max": 12.666666666666668
+    },
+    "('StartVelocityRange.Y', '_StartVelocityRangeY.xy')": {
+      "n": 17,
+      "median": 0.019047618333333335,
+      "min": 0.0,
+      "max": 0.0835809525
+    },
+    "('StartVelocityRange.Z', '_StartVelocityRangeZ.xy')": {
+      "n": 21,
+      "median": 0.013252822519858525,
+      "min": 0.0,
+      "max": 0.047619047916666664
+    },
+    "('StartVelocityRange.X', '_StartVelocityRangeX.xy')": {
+      "n": 21,
+      "median": 0.019047619166666665,
+      "min": 0.0,
+      "max": 0.01904762
+    }
+  }
+}
