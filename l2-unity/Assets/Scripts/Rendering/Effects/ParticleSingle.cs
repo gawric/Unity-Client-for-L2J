@@ -2,51 +2,8 @@ using UnityEngine;
 
 public class ParticleSingle : EffectPart
 {
-    private const string OwnerWorldPosShaderProperty = "_OwnerWorldPos";
-    private const string DebugTraceHealEffectToken = "wh_heal";
-
-    private static readonly int HoldShaderId = Shader.PropertyToID("_Hold");
-    private static readonly int LifetimeRangeShaderId = Shader.PropertyToID("_LifetimeRange");
-    private static readonly int StartTimeShaderId = Shader.PropertyToID("_StartTime");
-    private static readonly int HasLifetimeShaderId = Shader.PropertyToID("_HasLifetime");
-    private static readonly int InitialDelayRangeShaderId = Shader.PropertyToID("_InitialDelayRange");
-    private static readonly int FadeInShaderId = Shader.PropertyToID("_FadeIn");
-    private static readonly int FadeInEndTimeShaderId = Shader.PropertyToID("_FadeInEndTime");
-    private static readonly int FadeoutShaderId = Shader.PropertyToID("_Fadeout");
-    private static readonly int FadeoutStartTimeShaderId = Shader.PropertyToID("_FadeoutStartTime");
-    private static readonly int AtlasUvRemapShaderId = Shader.PropertyToID("_AtlasUvRemap");
-    private static readonly int AtlasUvMinMaxShaderId = Shader.PropertyToID("_AtlasUvMinMax");
-    private static readonly int IgnoreMainTexAlphaShaderId = Shader.PropertyToID("_IgnoreMainTexAlpha");
-    private static readonly int EmitterAlphaShaderId = Shader.PropertyToID("_EmitterAlpha");
-    private static readonly int AlphaEdgeFeatherShaderId = Shader.PropertyToID("_AlphaEdgeFeather");
-    private static readonly int SplitRibbonByLumShaderId = Shader.PropertyToID("_SplitRibbonByLum");
-    private static readonly int SoftLumMinShaderId = Shader.PropertyToID("_SoftLumMin");
-    private static readonly int SoftLumMaxShaderId = Shader.PropertyToID("_SoftLumMax");
-    private static readonly int LineLumMinShaderId = Shader.PropertyToID("_LineLumMin");
-    private static readonly int LineLumMaxShaderId = Shader.PropertyToID("_LineLumMax");
-    private static readonly int SoftOpacityMulShaderId = Shader.PropertyToID("_SoftOpacityMul");
-    private static readonly int LineOpacityMulShaderId = Shader.PropertyToID("_LineOpacityMul");
-    private static readonly int SoftRgbBoostShaderId = Shader.PropertyToID("_SoftRgbBoost");
-    private static readonly int LineRgbBoostShaderId = Shader.PropertyToID("_LineRgbBoost");
-    private static readonly int SplitByUvLayerShaderId = Shader.PropertyToID("_SplitByUvLayer");
-    private static readonly int UvLayerCenterShaderId = Shader.PropertyToID("_UvLayerCenter");
-    private static readonly int UvLayerDistMinShaderId = Shader.PropertyToID("_UvLayerDistMin");
-    private static readonly int UvLayerDistMaxShaderId = Shader.PropertyToID("_UvLayerDistMax");
-    private static readonly int OuterSoftOpacityMulShaderId = Shader.PropertyToID("_OuterSoftOpacityMul");
-    private static readonly int OuterLineOpacityMulShaderId = Shader.PropertyToID("_OuterLineOpacityMul");
-    private static readonly int OuterSoftRgbBoostShaderId = Shader.PropertyToID("_OuterSoftRgbBoost");
-    private static readonly int OuterLineRgbBoostShaderId = Shader.PropertyToID("_OuterLineRgbBoost");
-    private static readonly int ColorScaleRepeatsShaderId = Shader.PropertyToID("_ColorScaleRepeats");
-    private static readonly int ColorScaleCountShaderId = Shader.PropertyToID("_ColorScaleCount");
-    private static readonly int ColorScaleTime1ShaderId = Shader.PropertyToID("_ColorScaleTime1");
-    private static readonly int ColorScaleTime2ShaderId = Shader.PropertyToID("_ColorScaleTime2");
-    private static readonly int ColorScale0ShaderId = Shader.PropertyToID("_ColorScale0");
-    private static readonly int ColorScale1ShaderId = Shader.PropertyToID("_ColorScale1");
-    private static readonly int ColorScale2ShaderId = Shader.PropertyToID("_ColorScale2");
-    private static readonly int BAlphaBlendShaderId = Shader.PropertyToID("_bAlphaBlend");
-    private static readonly int BillboardToCameraShaderId = Shader.PropertyToID("_BillboardToCamera");
-    private static readonly int BillboardWorldUpShaderId = Shader.PropertyToID("_BillboardWorldUp");
-    private static readonly int BillboardEulerOffsetShaderId = Shader.PropertyToID("_BillboardEulerOffset");
+    private static readonly int AlphaShaderId = Shader.PropertyToID("_Alpha");
+    private static readonly int SurfaceNormalsShaderId = Shader.PropertyToID("_SurfaceNormals");
 
     [SerializeField] private L2Particle _owner;
     [SerializeField] private Renderer[] _particles;
@@ -82,17 +39,31 @@ public class ParticleSingle : EffectPart
     [Tooltip("Вкл.: от точки Release Start до конца каста _Hold линейно опускается к 0. Выкл.: при достижении Release Start _Hold сразу 0 (резкий срез).")]
     [SerializeField] private bool _smoothShaderHoldRelease = true;
 
-    private bool _stopped = true;
-    private bool _active;
-    private float _lastEnable;
-    private float _lastLoop;
-    private float _spawnedAt;
-    private int _spawnedCount;
-    private float _baseShaderLifetime = -1f;
-    private bool _runtimeContinuousLoop;
-    private bool _hasRuntimeContinuousLoopOverride;
-    private bool _runtimeContinuousLoopOverrideValue;
+    private readonly ParticleSingleLifetimeTracker _lifetime = new ParticleSingleLifetimeTracker();
+    private readonly L2ShaderHoldController _holdController = new L2ShaderHoldController();
+
     private float _lastShaderFadeDiagLog;
+    private bool _loggedHalfSecondCheckpoint;
+
+    private void Update()
+    {
+        if (_testSpawnOnlyNoTeardown)
+        {
+            return;
+        }
+
+        if (_lifetime.Stopped && !_holdController.CastEndFadeRequested)
+        {
+            return;
+        }
+
+        if (!_holdController.CanApplyHoldUpdates(_lifetime.Stopped))
+        {
+            return;
+        }
+
+        ApplyCompositeShaderHoldToAllRuntimeMaterials(Now());
+    }
 
     public void FixedUpdate()
     {
@@ -101,81 +72,70 @@ public class ParticleSingle : EffectPart
             return;
         }
 
-        if (_stopped)
+        if (_lifetime.Stopped && !_holdController.CastEndFadeRequested)
         {
             return;
         }
 
         float now = Now();
-        if (now - _lastEnable < _startDelay)
+        if (_lifetime.IsBeforeStartDelay(now, _startDelay))
         {
             return;
         }
 
-        bool shouldLoopContinuously = _forceContinuousSpawning || _runtimeContinuousLoop;
-        bool expired = _active && !_preserveShaderTimeInContinuousLoop && now - _spawnedAt >= _duration;
-        if (expired)
+        bool shouldLoopContinuously = _lifetime.ShouldLoopContinuously(_forceContinuousSpawning);
+        if (_lifetime.IsSlotExpired(now, _preserveShaderTimeInContinuousLoop))
         {
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
-            if (ShouldTraceWhHeal())
-            {
-                Debug.Log(
-                    $"[PARTICLE_SINGLE_SLOT_OFF] group='{name}' now={now:F3}s alive={(now - _spawnedAt):F3}s " +
-                    $"duration={_duration:F3}s preserveShaderTime={_preserveShaderTimeInContinuousLoop} " +
-                    $"forceSpawnLoop={_forceContinuousSpawning} runtimeLoop={_runtimeContinuousLoop} loopOv={_hasRuntimeContinuousLoopOverride}:{_runtimeContinuousLoopOverrideValue} " +
-                    $"mats=[{BuildAllRuntimeMaterialsFadeDiag(now)}].");
-            }
-#endif
-            SetActive(false);
-            _active = false;
+            ParticleSingleLifetimeDebug.LogSlotOff(BuildDebugSnapshot(now), now);
+            SetActive(false, "slot_expired");
+            _lifetime.Active = false;
         }
 
-        if (!_active)
+        if (!_lifetime.Active)
         {
-            if (_spawnedCount >= _maxCount && !shouldLoopContinuously)
+            if (_lifetime.SpawnedCount >= _maxCount && !shouldLoopContinuously)
             {
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
-                if (ShouldTraceWhHeal())
-                {
-                    Debug.Log(
-                        $"[PARTICLE_SINGLE_STOP_MAX] group='{name}' now={now:F3}s spawned={_spawnedCount}/{_maxCount} " +
-                        $"duration={_duration:F3}s shouldLoop={shouldLoopContinuously} " +
-                        $"mats=[{BuildAllRuntimeMaterialsFadeDiag(now)}].");
-                }
-#endif
-                _stopped = true;
+                ParticleSingleLifetimeDebug.LogStopMax(BuildDebugSnapshot(now), now);
+                _lifetime.Stopped = true;
                 return;
             }
 
             if (_isBurstSpawning && !shouldLoopContinuously)
             {
                 Spawn(now);
-                _spawnedCount = _maxCount;
+                _lifetime.SpawnedCount = _maxCount;
                 return;
             }
 
             float spawnInterval = 1f / Mathf.Max(1f, _countPerSecond);
-            if (now - _lastLoop >= spawnInterval)
+            if (now - _lifetime.LastLoop >= spawnInterval)
             {
-                _lastLoop = now;
+                _lifetime.LastLoop = now;
                 Spawn(now);
-                _spawnedCount += 1;
+                _lifetime.SpawnedCount += 1;
             }
         }
         else
         {
             UpdateOwnerWorldPos();
-            ApplyCompositeShaderHoldToAllRuntimeMaterials(now);
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-            if (ShouldTraceWhHeal() && now - _lastShaderFadeDiagLog >= 0.25f)
+            if (ParticleSingleLifetimeDebug.ShouldTrace(name, _owner, transform)
+                && _lifetime.Active
+                && !_loggedHalfSecondCheckpoint
+                && now - _lifetime.SpawnedAt >= 0.45f)
+            {
+                _loggedHalfSecondCheckpoint = true;
+                Renderer checkRenderer = ResolveRenderer();
+                Material checkMat = checkRenderer != null && checkRenderer.materials != null && checkRenderer.materials.Length > 0
+                    ? checkRenderer.materials[0]
+                    : null;
+                ParticleSingleLifetimeDebug.LogCheck500ms(BuildDebugSnapshot(now), now, checkRenderer, checkMat);
+            }
+
+            if (ParticleSingleLifetimeDebug.ShouldTrace(name, _owner, transform) && now - _lastShaderFadeDiagLog >= 0.25f)
             {
                 _lastShaderFadeDiagLog = now;
-                Debug.Log(
-                    $"[PARTICLE_SINGLE_TICK] group='{name}' now={now:F3}s alive={(now - _spawnedAt):F3}s " +
-                    $"duration={_duration:F3}s castHit={(_castData != null ? _castData.HitTime : -1f):F3}s " +
-                    $"settingsLife={(_settings != null ? _settings.defaultLifeTime : -1f):F3}s " +
-                    $"activeLoop={(_forceContinuousSpawning || _runtimeContinuousLoop)} " +
-                    $"[FADE_PHASE]={BuildFirstMaterialFadePhase(now)} mats=[{BuildAllRuntimeMaterialsFadeDiag(now)}].");
+                ParticleSingleLifetimeDebug.LogTick(BuildDebugSnapshot(now), now);
             }
 #endif
         }
@@ -188,61 +148,45 @@ public class ParticleSingle : EffectPart
             FitToOwnerWidth(OwnerTarget);
         }
 
-        if (_testSpawnOnlyNoTeardown)
-        {
-            if (_particles == null || _particles.Length == 0)
-            {
-                _particles = GetComponentsInChildren<Renderer>(true);
-            }
-
-            float t = Now();
-            _lastEnable = t;
-            _spawnedAt = t;
-            _spawnedCount = 1;
-            _active = true;
-            _stopped = true;
-            Spawn(t);
-            return;
-        }
-
-        _lastEnable = Now();
-        _lastLoop = 0f;
-        _spawnedAt = 0f;
-        _spawnedCount = 0;
-        _active = false;
-        _stopped = false;
-        _lastShaderFadeDiagLog = 0f;
-
-        if (_duration < 0.01f)
-        {
-            _duration = GetLifeTimeFromMaterial();
-        }
-
         if (_particles == null || _particles.Length == 0)
         {
             _particles = GetComponentsInChildren<Renderer>(true);
         }
 
-        _baseShaderLifetime = Mathf.Max(0.01f, GetLifeTimeFromMaterial());
-
-        _runtimeContinuousLoop = !_hasFixedDuration && _duration > _baseShaderLifetime + 0.05f;
-        if (_hasRuntimeContinuousLoopOverride)
+        if (_testSpawnOnlyNoTeardown)
         {
-            _runtimeContinuousLoop = _runtimeContinuousLoopOverrideValue;
+            float t = Now();
+            _lifetime.LastEnable = t;
+            _lifetime.SpawnedAt = t;
+            _lifetime.SpawnedCount = 1;
+            _lifetime.Active = true;
+            _lifetime.Stopped = true;
+            Spawn(t);
+            return;
         }
 
-        SetActive(false);
+        float now = Now();
+        _lifetime.ResetForPlayPart(now);
+        _lastShaderFadeDiagLog = 0f;
+        _loggedHalfSecondCheckpoint = false;
+        _holdController.ResetReleaseLogs();
+        _holdController.ResetCastEndFade();
 
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
-        if (ShouldTraceWhHeal())
-        {
-            Debug.Log(
-                $"[PARTICLE_SINGLE_PLAY] group='{name}' playAt={_lastEnable:F3}s " +
-                $"duration={_duration:F3}s baseShaderLife={_baseShaderLifetime:F3}s fixedDuration={_hasFixedDuration} " +
-                $"runtimeLoop={_runtimeContinuousLoop} loopOv={_hasRuntimeContinuousLoopOverride}:{_runtimeContinuousLoopOverrideValue} " +
-                $"maxCount={_maxCount} cps={_countPerSecond} startDelay={_startDelay:F3}s preserveShaderTime={_preserveShaderTimeInContinuousLoop}.");
-        }
-#endif
+        float materialLifetime = _lifetime.ReadLifetimeFromSharedMaterials(
+            ResolveRenderer(),
+            name,
+            _owner,
+            transform,
+            _duration);
+        _lifetime.PrepareForPlay(
+            materialLifetime,
+            _hasFixedDuration,
+            _holdController.HasRuntimeLoopOverride,
+            _holdController.RuntimeLoopOverrideValue);
+        _duration = _lifetime.Duration;
+
+        SetActive(false, "playpart_reset");
+        ParticleSingleLifetimeDebug.LogPlay(BuildDebugSnapshot(now));
     }
 
     public override void Setup(EffectSettings s, MagicCastData c)
@@ -250,33 +194,17 @@ public class ParticleSingle : EffectPart
         _settings = s;
         _castData = c;
         float durationBefore = _duration;
-        float castHitDuration = (_castData != null && _castData.HitTime > 0f) ? _castData.HitTime : 0f;
-        float settingsDuration = (_settings != null && _settings.defaultLifeTime > 0f) ? _settings.defaultLifeTime : 0f;
-        float legacyHitDuration = 0f;
-        if (castHitDuration <= 0f && settingsDuration <= 0f && EffectSkillsmanager.Instance != null)
-        {
-            float legacyHitTimeMs = EffectSkillsmanager.Instance.HitTime();
-            if (legacyHitTimeMs > 0f)
-            {
-                legacyHitDuration = legacyHitTimeMs / 1000f;
-            }
-        }
+        _lifetime.ResolveDurationFromSetup(
+            ref _duration,
+            _hasFixedDuration,
+            _settings,
+            _castData,
+            out float legacyHitDuration);
 
-        if (!_hasFixedDuration)
-        {
-            _duration = Mathf.Max(_duration, castHitDuration, settingsDuration, legacyHitDuration);
-        }
-
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
-        if (ShouldTraceWhHeal())
-        {
-            Debug.Log(
-                $"[PARTICLE_SINGLE_SETUP] group='{name}' owner='{(_owner != null ? _owner.name : "null")}' " +
-                $"durationBefore={durationBefore:F3}s durationAfter={_duration:F3}s fixedDuration={_hasFixedDuration} " +
-                $"castHit={castHitDuration:F3}s settingsLife={settingsDuration:F3}s legacyHit={legacyHitDuration:F3}s " +
-                $"settingsHide={(_settings != null ? _settings.hideTime : -1f):F3}s preserveShaderTime={_preserveShaderTimeInContinuousLoop}.");
-        }
-#endif
+        ParticleSingleDebugSnapshot snap = BuildDebugSnapshot(Now());
+        snap.LegacyHitDuration = legacyHitDuration;
+        ParticleSingleLifetimeDebug.LogSetup(snap, durationBefore);
+        _lifetime.Duration = _duration;
     }
 
     public override void StopPart()
@@ -286,28 +214,33 @@ public class ParticleSingle : EffectPart
             return;
         }
 
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
-        if (ShouldTraceWhHeal())
+        float now = Now();
+        Renderer stopRenderer = ResolveRenderer();
+        Material stopMat = stopRenderer != null && stopRenderer.materials != null && stopRenderer.materials.Length > 0
+            ? stopRenderer.materials[0]
+            : null;
+        ParticleSingleLifetimeDebug.LogStopPart(BuildDebugSnapshot(now), now, stopRenderer, stopMat);
+
+        _lifetime.RuntimeContinuousLoop = false;
+        _lifetime.SpawnedCount = _maxCount;
+
+        if (_holdController.TryBeginCastEndFadeDefer(BuildHoldSettings()))
         {
-            float now = Now();
-            Debug.Log(
-                $"[PARTICLE_SINGLE_STOPPART] group='{name}' now={now:F3}s elapsed={(now - _lastEnable):F3}s " +
-                $"duration={_duration:F3}s castHit={(_castData != null ? _castData.HitTime : -1f):F3}s " +
-                $"settingsLife={(_settings != null ? _settings.defaultLifeTime : -1f):F3}s " +
-                $"[FADE_PHASE]={BuildFirstMaterialFadePhase(now)} mats=[{BuildAllRuntimeMaterialsFadeDiag(now)}].");
+            ParticleSingleLifetimeDebug.LogHoldReleaseDefer(name, BuildCastTimeline(now), BuildHoldSettings());
+            return;
         }
-#endif
-        _runtimeContinuousLoop = false;
-        _hasRuntimeContinuousLoopOverride = true;
-        _runtimeContinuousLoopOverrideValue = false;
-        _spawnedCount = _maxCount;
-        _stopped = true;
+
+        CompleteImmediateStop(now);
     }
 
     public void SetRuntimeContinuousLoopOverride(bool hasOverride, bool value)
     {
-        _hasRuntimeContinuousLoopOverride = hasOverride;
-        _runtimeContinuousLoopOverrideValue = value;
+        _holdController.SetRuntimeLoopOverride(hasOverride, value);
+
+        if ((_lifetime.Active && !_lifetime.Stopped) || _holdController.CastEndFadeRequested)
+        {
+            ApplyCompositeShaderHoldToAllRuntimeMaterials(Now());
+        }
     }
 
     public void FitToOwnerWidth(Transform target)
@@ -335,12 +268,16 @@ public class ParticleSingle : EffectPart
             return;
         }
 
-        SetActive(true);
-        _active = true;
-        _spawnedAt = now;
+        SetActive(true, "spawn");
+        _lifetime.MarkSpawned(now);
+        _holdController.ResetReleaseLogs();
+        _holdController.ResetCastEndFade();
 
         float shaderStartTime = now - _relativeWarmupTime;
         float seed = Random.Range(-100f, 100f);
+        L2ShaderHoldController.Settings holdSettings = BuildHoldSettings();
+        float holdValue = _holdController.EvaluateHold(holdSettings, BuildCastTimeline(now));
+
         Material[] runtimeMaterials = renderer.materials;
         Material[] sharedMaterials = renderer.sharedMaterials;
         for (int i = 0; i < runtimeMaterials.Length; i++)
@@ -353,244 +290,41 @@ public class ParticleSingle : EffectPart
 
             Material sharedMat = sharedMaterials != null && i < sharedMaterials.Length ? sharedMaterials[i] : null;
 
-            if (runtimeMat.HasProperty("_Alpha") && sharedMat != null && sharedMat.HasProperty("_Alpha"))
+            if (runtimeMat.HasProperty(AlphaShaderId) && sharedMat != null && sharedMat.HasProperty(AlphaShaderId))
             {
-                runtimeMat.SetFloat("_Alpha", sharedMat.GetFloat("_Alpha"));
+                runtimeMat.SetFloat(AlphaShaderId, sharedMat.GetFloat(AlphaShaderId));
             }
 
-            TryCopyShaderLifetimeFadeFromShared(runtimeMat, sharedMat);
-
-            runtimeMat.SetFloat("_StartTime", shaderStartTime);
-            runtimeMat.SetFloat("_Seed", seed);
+            L2MaterialPropertyCopier.CopyLifetimeFadeAndFxFromShared(runtimeMat, sharedMat);
+            runtimeMat.SetFloat(L2MaterialPropertyCopier.StartTimeId, shaderStartTime);
+            runtimeMat.SetFloat(L2MaterialPropertyCopier.SeedId, seed);
             SetOwnerWorldPos(runtimeMat);
+
             if (SurfaceNormal != Vector3.zero)
             {
-                runtimeMat.SetVector("_SurfaceNormals", SurfaceNormal);
+                runtimeMat.SetVector(SurfaceNormalsShaderId, SurfaceNormal);
             }
 
-            TryApplyCompositeShaderHoldToMaterial(runtimeMat, now);
+            _holdController.ApplySpawnHoldSpecs(runtimeMat, in holdSettings, holdValue);
 
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
-            if (ShouldTraceWhHeal())
+            if (runtimeMat.HasProperty(L2MaterialPropertyCopier.EmitterAlphaId))
             {
-                Debug.Log(
-                    $"[PARTICLE_SINGLE_SPAWN] group='{name}' idx={i} now={now:F3}s shaderStartTime={shaderStartTime:F3}s relativeWarmup={_relativeWarmupTime:F3}s _Seed={seed:F3} " +
-                    $"castHit={(_castData != null ? _castData.HitTime : -1f):F3}s settingsLife={(_settings != null ? _settings.defaultLifeTime : -1f):F3}s " +
-                    $"[FADE_PHASE]={ShaderFadeDiagnostic.FadePhaseLabel(runtimeMat, now)} " +
-                    $"diag={ShaderFadeDiagnostic.BuildLine(runtimeMat, now)}");
+                _holdController.CaptureBaseEmitterAlpha(new[] { runtimeMat });
             }
-#endif
-        }
-    }
 
-    /// <summary>
-    /// Копирует lifetime/fade, атлас-UV, альфу, feather, EmitterAlpha, split luma и split UV-слоя (MagicCircleBrighten) из shared в runtime после <c>renderer.materials</c>.
-    /// </summary>
-    private static void TryCopyShaderLifetimeFadeFromShared(Material runtimeMat, Material sharedMat)
-    {
-        if (runtimeMat == null || sharedMat == null)
-        {
-            return;
-        }
-
-        if (runtimeMat.HasProperty(HasLifetimeShaderId) && sharedMat.HasProperty(HasLifetimeShaderId))
-        {
-            runtimeMat.SetFloat(HasLifetimeShaderId, sharedMat.GetFloat(HasLifetimeShaderId));
-        }
-
-        if (runtimeMat.HasProperty(LifetimeRangeShaderId) && sharedMat.HasProperty(LifetimeRangeShaderId))
-        {
-            runtimeMat.SetVector(LifetimeRangeShaderId, sharedMat.GetVector(LifetimeRangeShaderId));
-        }
-
-        if (runtimeMat.HasProperty(InitialDelayRangeShaderId) && sharedMat.HasProperty(InitialDelayRangeShaderId))
-        {
-            runtimeMat.SetVector(InitialDelayRangeShaderId, sharedMat.GetVector(InitialDelayRangeShaderId));
-        }
-
-        if (runtimeMat.HasProperty(FadeInShaderId) && sharedMat.HasProperty(FadeInShaderId))
-        {
-            runtimeMat.SetFloat(FadeInShaderId, sharedMat.GetFloat(FadeInShaderId));
-        }
-
-        if (runtimeMat.HasProperty(FadeInEndTimeShaderId) && sharedMat.HasProperty(FadeInEndTimeShaderId))
-        {
-            runtimeMat.SetFloat(FadeInEndTimeShaderId, sharedMat.GetFloat(FadeInEndTimeShaderId));
-        }
-
-        if (runtimeMat.HasProperty(FadeoutShaderId) && sharedMat.HasProperty(FadeoutShaderId))
-        {
-            runtimeMat.SetFloat(FadeoutShaderId, sharedMat.GetFloat(FadeoutShaderId));
-        }
-
-        if (runtimeMat.HasProperty(FadeoutStartTimeShaderId) && sharedMat.HasProperty(FadeoutStartTimeShaderId))
-        {
-            runtimeMat.SetFloat(FadeoutStartTimeShaderId, sharedMat.GetFloat(FadeoutStartTimeShaderId));
-        }
-
-        if (runtimeMat.HasProperty(AtlasUvRemapShaderId) && sharedMat.HasProperty(AtlasUvRemapShaderId))
-        {
-            runtimeMat.SetFloat(AtlasUvRemapShaderId, sharedMat.GetFloat(AtlasUvRemapShaderId));
-        }
-
-        if (runtimeMat.HasProperty(AtlasUvMinMaxShaderId) && sharedMat.HasProperty(AtlasUvMinMaxShaderId))
-        {
-            runtimeMat.SetVector(AtlasUvMinMaxShaderId, sharedMat.GetVector(AtlasUvMinMaxShaderId));
-        }
-
-        if (runtimeMat.HasProperty(IgnoreMainTexAlphaShaderId) && sharedMat.HasProperty(IgnoreMainTexAlphaShaderId))
-        {
-            runtimeMat.SetFloat(IgnoreMainTexAlphaShaderId, sharedMat.GetFloat(IgnoreMainTexAlphaShaderId));
-        }
-
-        if (runtimeMat.HasProperty(EmitterAlphaShaderId) && sharedMat.HasProperty(EmitterAlphaShaderId))
-        {
-            runtimeMat.SetFloat(EmitterAlphaShaderId, sharedMat.GetFloat(EmitterAlphaShaderId));
-        }
-
-        if (runtimeMat.HasProperty(AlphaEdgeFeatherShaderId) && sharedMat.HasProperty(AlphaEdgeFeatherShaderId))
-        {
-            runtimeMat.SetFloat(AlphaEdgeFeatherShaderId, sharedMat.GetFloat(AlphaEdgeFeatherShaderId));
-        }
-
-        if (runtimeMat.HasProperty(SplitRibbonByLumShaderId) && sharedMat.HasProperty(SplitRibbonByLumShaderId))
-        {
-            runtimeMat.SetFloat(SplitRibbonByLumShaderId, sharedMat.GetFloat(SplitRibbonByLumShaderId));
-        }
-
-        if (runtimeMat.HasProperty(SoftLumMinShaderId) && sharedMat.HasProperty(SoftLumMinShaderId))
-        {
-            runtimeMat.SetFloat(SoftLumMinShaderId, sharedMat.GetFloat(SoftLumMinShaderId));
-        }
-
-        if (runtimeMat.HasProperty(SoftLumMaxShaderId) && sharedMat.HasProperty(SoftLumMaxShaderId))
-        {
-            runtimeMat.SetFloat(SoftLumMaxShaderId, sharedMat.GetFloat(SoftLumMaxShaderId));
-        }
-
-        if (runtimeMat.HasProperty(LineLumMinShaderId) && sharedMat.HasProperty(LineLumMinShaderId))
-        {
-            runtimeMat.SetFloat(LineLumMinShaderId, sharedMat.GetFloat(LineLumMinShaderId));
-        }
-
-        if (runtimeMat.HasProperty(LineLumMaxShaderId) && sharedMat.HasProperty(LineLumMaxShaderId))
-        {
-            runtimeMat.SetFloat(LineLumMaxShaderId, sharedMat.GetFloat(LineLumMaxShaderId));
-        }
-
-        if (runtimeMat.HasProperty(SoftOpacityMulShaderId) && sharedMat.HasProperty(SoftOpacityMulShaderId))
-        {
-            runtimeMat.SetFloat(SoftOpacityMulShaderId, sharedMat.GetFloat(SoftOpacityMulShaderId));
-        }
-
-        if (runtimeMat.HasProperty(LineOpacityMulShaderId) && sharedMat.HasProperty(LineOpacityMulShaderId))
-        {
-            runtimeMat.SetFloat(LineOpacityMulShaderId, sharedMat.GetFloat(LineOpacityMulShaderId));
-        }
-
-        if (runtimeMat.HasProperty(SoftRgbBoostShaderId) && sharedMat.HasProperty(SoftRgbBoostShaderId))
-        {
-            runtimeMat.SetFloat(SoftRgbBoostShaderId, sharedMat.GetFloat(SoftRgbBoostShaderId));
-        }
-
-        if (runtimeMat.HasProperty(LineRgbBoostShaderId) && sharedMat.HasProperty(LineRgbBoostShaderId))
-        {
-            runtimeMat.SetFloat(LineRgbBoostShaderId, sharedMat.GetFloat(LineRgbBoostShaderId));
-        }
-
-        if (runtimeMat.HasProperty(SplitByUvLayerShaderId) && sharedMat.HasProperty(SplitByUvLayerShaderId))
-        {
-            runtimeMat.SetFloat(SplitByUvLayerShaderId, sharedMat.GetFloat(SplitByUvLayerShaderId));
-        }
-
-        if (runtimeMat.HasProperty(UvLayerCenterShaderId) && sharedMat.HasProperty(UvLayerCenterShaderId))
-        {
-            runtimeMat.SetVector(UvLayerCenterShaderId, sharedMat.GetVector(UvLayerCenterShaderId));
-        }
-
-        if (runtimeMat.HasProperty(UvLayerDistMinShaderId) && sharedMat.HasProperty(UvLayerDistMinShaderId))
-        {
-            runtimeMat.SetFloat(UvLayerDistMinShaderId, sharedMat.GetFloat(UvLayerDistMinShaderId));
-        }
-
-        if (runtimeMat.HasProperty(UvLayerDistMaxShaderId) && sharedMat.HasProperty(UvLayerDistMaxShaderId))
-        {
-            runtimeMat.SetFloat(UvLayerDistMaxShaderId, sharedMat.GetFloat(UvLayerDistMaxShaderId));
-        }
-
-        if (runtimeMat.HasProperty(OuterSoftOpacityMulShaderId) && sharedMat.HasProperty(OuterSoftOpacityMulShaderId))
-        {
-            runtimeMat.SetFloat(OuterSoftOpacityMulShaderId, sharedMat.GetFloat(OuterSoftOpacityMulShaderId));
-        }
-
-        if (runtimeMat.HasProperty(OuterLineOpacityMulShaderId) && sharedMat.HasProperty(OuterLineOpacityMulShaderId))
-        {
-            runtimeMat.SetFloat(OuterLineOpacityMulShaderId, sharedMat.GetFloat(OuterLineOpacityMulShaderId));
-        }
-
-        if (runtimeMat.HasProperty(OuterSoftRgbBoostShaderId) && sharedMat.HasProperty(OuterSoftRgbBoostShaderId))
-        {
-            runtimeMat.SetFloat(OuterSoftRgbBoostShaderId, sharedMat.GetFloat(OuterSoftRgbBoostShaderId));
-        }
-
-        if (runtimeMat.HasProperty(OuterLineRgbBoostShaderId) && sharedMat.HasProperty(OuterLineRgbBoostShaderId))
-        {
-            runtimeMat.SetFloat(OuterLineRgbBoostShaderId, sharedMat.GetFloat(OuterLineRgbBoostShaderId));
-        }
-
-        if (runtimeMat.HasProperty(ColorScaleRepeatsShaderId) && sharedMat.HasProperty(ColorScaleRepeatsShaderId))
-        {
-            runtimeMat.SetFloat(ColorScaleRepeatsShaderId, sharedMat.GetFloat(ColorScaleRepeatsShaderId));
-        }
-
-        if (runtimeMat.HasProperty(ColorScaleCountShaderId) && sharedMat.HasProperty(ColorScaleCountShaderId))
-        {
-            runtimeMat.SetFloat(ColorScaleCountShaderId, sharedMat.GetFloat(ColorScaleCountShaderId));
-        }
-
-        if (runtimeMat.HasProperty(ColorScaleTime1ShaderId) && sharedMat.HasProperty(ColorScaleTime1ShaderId))
-        {
-            runtimeMat.SetFloat(ColorScaleTime1ShaderId, sharedMat.GetFloat(ColorScaleTime1ShaderId));
-        }
-
-        if (runtimeMat.HasProperty(ColorScaleTime2ShaderId) && sharedMat.HasProperty(ColorScaleTime2ShaderId))
-        {
-            runtimeMat.SetFloat(ColorScaleTime2ShaderId, sharedMat.GetFloat(ColorScaleTime2ShaderId));
-        }
-
-        if (runtimeMat.HasProperty(ColorScale0ShaderId) && sharedMat.HasProperty(ColorScale0ShaderId))
-        {
-            runtimeMat.SetColor(ColorScale0ShaderId, sharedMat.GetColor(ColorScale0ShaderId));
-        }
-
-        if (runtimeMat.HasProperty(ColorScale1ShaderId) && sharedMat.HasProperty(ColorScale1ShaderId))
-        {
-            runtimeMat.SetColor(ColorScale1ShaderId, sharedMat.GetColor(ColorScale1ShaderId));
-        }
-
-        if (runtimeMat.HasProperty(ColorScale2ShaderId) && sharedMat.HasProperty(ColorScale2ShaderId))
-        {
-            runtimeMat.SetColor(ColorScale2ShaderId, sharedMat.GetColor(ColorScale2ShaderId));
-        }
-
-        if (runtimeMat.HasProperty(BAlphaBlendShaderId) && sharedMat.HasProperty(BAlphaBlendShaderId))
-        {
-            runtimeMat.SetFloat(BAlphaBlendShaderId, sharedMat.GetFloat(BAlphaBlendShaderId));
-        }
-
-        if (runtimeMat.HasProperty(BillboardToCameraShaderId) && sharedMat.HasProperty(BillboardToCameraShaderId))
-        {
-            runtimeMat.SetFloat(BillboardToCameraShaderId, sharedMat.GetFloat(BillboardToCameraShaderId));
-        }
-
-        if (runtimeMat.HasProperty(BillboardWorldUpShaderId) && sharedMat.HasProperty(BillboardWorldUpShaderId))
-        {
-            runtimeMat.SetVector(BillboardWorldUpShaderId, sharedMat.GetVector(BillboardWorldUpShaderId));
-        }
-
-        if (runtimeMat.HasProperty(BillboardEulerOffsetShaderId) && sharedMat.HasProperty(BillboardEulerOffsetShaderId))
-        {
-            runtimeMat.SetVector(BillboardEulerOffsetShaderId, sharedMat.GetVector(BillboardEulerOffsetShaderId));
+            ParticleSingleLifetimeDebug.LogSpawn(
+                BuildDebugSnapshot(now),
+                i,
+                now,
+                shaderStartTime,
+                _relativeWarmupTime,
+                seed,
+                holdValue,
+                _releaseShaderHoldByCastProgress,
+                _shaderHoldReleaseStartNormalized,
+                _smoothShaderHoldRelease,
+                renderer,
+                runtimeMat);
         }
     }
 
@@ -604,59 +338,23 @@ public class ParticleSingle : EffectPart
         return _particles[0];
     }
 
-    private void SetActive(bool value)
+    private void SetActive(bool value, string reason = null)
     {
         Renderer renderer = ResolveRenderer();
         if (renderer == null)
         {
+            ParticleSingleLifetimeDebug.LogSetActive(BuildDebugSnapshot(Now()), value, reason, null, false);
             return;
         }
 
+        bool wasActive = renderer.gameObject.activeSelf;
         renderer.gameObject.SetActive(value);
-    }
-
-    private float GetLifeTimeFromMaterial()
-    {
-        Renderer renderer = ResolveRenderer();
-        if (renderer == null || renderer.sharedMaterials == null)
-        {
-            return _duration;
-        }
-
-        for (int i = 0; i < renderer.sharedMaterials.Length; i++)
-        {
-            Material mat = renderer.sharedMaterials[i];
-            if (mat != null && mat.HasProperty(LifetimeRangeShaderId))
-            {
-                return mat.GetVector(LifetimeRangeShaderId).y;
-            }
-        }
-
-        return 0.5f;
-    }
-
-    /// <summary>
-    /// См. <see cref="TimedCompositeEffectBase.ApplyPartLoopOverrides"/>: continuous loop → пишем _Hold в L2SkillEffect.
-    /// Ближе к концу <see cref="_duration"/> снимаем Hold, иначе шейдер «залипает» и FadeOut не проявляется.
-    /// </summary>
-    private void TryApplyCompositeShaderHoldToMaterial(Material runtimeMat, float now)
-    {
-        if (runtimeMat == null || !runtimeMat.HasProperty(HoldShaderId))
-        {
-            return;
-        }
-
-        if (!_hasRuntimeContinuousLoopOverride || !_runtimeContinuousLoopOverrideValue)
-        {
-            return;
-        }
-
-        runtimeMat.SetFloat(HoldShaderId, EvaluateShaderHoldForCastNow(now));
+        ParticleSingleLifetimeDebug.LogSetActive(BuildDebugSnapshot(Now()), value, reason, renderer, wasActive);
     }
 
     private void ApplyCompositeShaderHoldToAllRuntimeMaterials(float now)
     {
-        if (!_hasRuntimeContinuousLoopOverride || !_runtimeContinuousLoopOverrideValue || !_releaseShaderHoldByCastProgress)
+        if (!_holdController.CanApplyHoldUpdates(_lifetime.Stopped))
         {
             return;
         }
@@ -667,51 +365,76 @@ public class ParticleSingle : EffectPart
             return;
         }
 
-        Material[] materials = renderer.materials;
-        for (int i = 0; i < materials.Length; i++)
+        if (_holdController.ApplyToMaterials(
+                renderer.materials,
+                BuildHoldSettings(),
+                BuildCastTimeline(now),
+                name,
+                _lifetime.SpawnedAt,
+                _lifetime.BaseShaderLifetime))
         {
-            TryApplyCompositeShaderHoldToMaterial(materials[i], now);
+            _lifetime.Stopped = true;
         }
     }
 
-    private float EvaluateShaderHoldForCastNow(float now)
+    private void CompleteImmediateStop(float now)
     {
-        if (!_releaseShaderHoldByCastProgress)
-        {
-            return _shaderHold;
-        }
-
-        float dur = Mathf.Max(1e-4f, _duration);
-        float u = Mathf.Clamp01((now - _spawnedAt) / dur);
-        return EvaluateShaderHoldForNormalizedCast(u);
+        _holdController.CompleteImmediateStop();
+        ApplyCompositeShaderHoldToAllRuntimeMaterials(now);
+        _lifetime.Stopped = true;
     }
 
-    private float EvaluateShaderHoldForNormalizedCast(float u)
+    private L2ShaderHoldController.Settings BuildHoldSettings()
     {
-        if (!_releaseShaderHoldByCastProgress)
+        return new L2ShaderHoldController.Settings
         {
-            return _shaderHold;
-        }
+            ShaderHold = _shaderHold,
+            ReleaseByCastProgress = _releaseShaderHoldByCastProgress,
+            ReleaseStartNormalized = _shaderHoldReleaseStartNormalized,
+            SmoothRelease = _smoothShaderHoldRelease
+        };
+    }
 
-        u = Mathf.Clamp01(u);
-        float start = Mathf.Clamp(_shaderHoldReleaseStartNormalized, 0f, 0.999f);
-        if (u < start)
+    private L2ShaderHoldController.CastTimeline BuildCastTimeline(float now)
+    {
+        return new L2ShaderHoldController.CastTimeline
         {
-            return _shaderHold;
-        }
+            Now = now,
+            CastStartTime = _lifetime.LastEnable,
+            SlotDuration = _duration,
+            Settings = _settings
+        };
+    }
 
-        if (_smoothShaderHoldRelease)
+    private ParticleSingleDebugSnapshot BuildDebugSnapshot(float now)
+    {
+        return new ParticleSingleDebugSnapshot
         {
-            if (start >= 1f - 1e-4f)
-            {
-                return 0f;
-            }
-
-            float t = Mathf.InverseLerp(start, 1f, u);
-            return Mathf.Lerp(_shaderHold, 0f, t);
-        }
-
-        return 0f;
+            GroupName = name,
+            Transform = transform,
+            Owner = _owner,
+            Renderer = ResolveRenderer(),
+            Now = now,
+            LastEnable = _lifetime.LastEnable,
+            SpawnedAt = _lifetime.SpawnedAt,
+            Duration = _duration,
+            BaseShaderLifetime = _lifetime.BaseShaderLifetime,
+            HasFixedDuration = _hasFixedDuration,
+            PreserveShaderTime = _preserveShaderTimeInContinuousLoop,
+            ForceContinuousSpawning = _forceContinuousSpawning,
+            RuntimeContinuousLoop = _lifetime.RuntimeContinuousLoop,
+            HasLoopOverride = _holdController.HasRuntimeLoopOverride,
+            LoopOverrideValue = _holdController.RuntimeLoopOverrideValue,
+            Active = _lifetime.Active,
+            Stopped = _lifetime.Stopped,
+            SpawnedCount = _lifetime.SpawnedCount,
+            MaxCount = _maxCount,
+            CountPerSecond = _countPerSecond,
+            StartDelay = _startDelay,
+            ShouldLoopContinuously = _lifetime.ShouldLoopContinuously(_forceContinuousSpawning),
+            Settings = _settings,
+            CastData = _castData
+        };
     }
 
     private float Now() => Application.isPlaying ? Time.time : Time.realtimeSinceStartup;
@@ -733,93 +456,11 @@ public class ParticleSingle : EffectPart
 
     private void SetOwnerWorldPos(Material material)
     {
-        if (material == null || !material.HasProperty(OwnerWorldPosShaderProperty))
+        if (material == null || !material.HasProperty(L2MaterialPropertyCopier.OwnerWorldPosProperty))
         {
             return;
         }
 
-        material.SetVector(OwnerWorldPosShaderProperty, ResolveOwnerWorldPos());
+        material.SetVector(L2MaterialPropertyCopier.OwnerWorldPosProperty, ResolveOwnerWorldPos());
     }
-
-
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
-    private static string BuildShaderFadeDiagnosticLine(Material mat, float now)
-    {
-        return ShaderFadeDiagnostic.BuildLine(mat, now);
-    }
-
-    private string BuildFirstMaterialFadePhase(float now)
-    {
-        Renderer renderer = ResolveRenderer();
-        if (renderer == null)
-        {
-            return "no_renderer";
-        }
-
-        Material[] mats = renderer.materials;
-        if (mats == null || mats.Length == 0 || mats[0] == null)
-        {
-            return "no_mat";
-        }
-
-        return ShaderFadeDiagnostic.FadePhaseLabel(mats[0], now);
-    }
-
-    private string BuildAllRuntimeMaterialsFadeDiag(float now)
-    {
-        Renderer renderer = ResolveRenderer();
-        if (renderer == null)
-        {
-            return "no_renderer";
-        }
-
-        Material[] mats = renderer.materials;
-        if (mats == null || mats.Length == 0)
-        {
-            return "no_runtime_material";
-        }
-
-        System.Text.StringBuilder sb = new System.Text.StringBuilder();
-        for (int i = 0; i < mats.Length; i++)
-        {
-            if (i > 0)
-            {
-                sb.Append(" | ");
-            }
-
-            sb.Append('[').Append(i).Append("] ").Append(BuildShaderFadeDiagnosticLine(mats[i], now));
-        }
-
-        return sb.ToString();
-    }
-#endif
-
-    private bool ShouldTraceWhHeal()
-    {
-        if (!string.IsNullOrEmpty(name) &&
-            name.IndexOf(DebugTraceHealEffectToken, System.StringComparison.OrdinalIgnoreCase) >= 0)
-        {
-            return true;
-        }
-
-        if (_owner != null && !string.IsNullOrEmpty(_owner.name) &&
-            _owner.name.IndexOf(DebugTraceHealEffectToken, System.StringComparison.OrdinalIgnoreCase) >= 0)
-        {
-            return true;
-        }
-
-        Transform t = transform;
-        for (int depth = 0; t != null && depth < 16; depth++, t = t.parent)
-        {
-            if (!string.IsNullOrEmpty(t.name) &&
-                t.name.IndexOf(DebugTraceHealEffectToken, System.StringComparison.OrdinalIgnoreCase) >= 0)
-            {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-
 }

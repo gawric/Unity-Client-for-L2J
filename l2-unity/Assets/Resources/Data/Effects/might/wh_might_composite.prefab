@@ -52,11 +52,11 @@ MonoBehaviour:
     attachmentPoint: 6
     spawnTiming: 0
     hitLeadSeconds: 0
-    positionOffset: {x: 0, y: 0, z: 0}
+    positionOffset: {x: 0, y: 0.194, z: 0}
     normalizeOffsetByOwnerHeight: 0
     referenceHeight: 1.8
     scale: 1.3
-    followResolvedTransform: 1
+    followResolvedTransform: 0
     inheritRotation: 0
     passCastDataToPart: 1
     useCastTimedLifetime: 1
@@ -64,10 +64,10 @@ MonoBehaviour:
     continuousLoop: 1
     disableShaderLifetime: 0
     overrideHideTime: 0
-    customHideTime: 0
+    customHideTime: 0.5
     enableFinalShaderLifetimeOnFade: 0
-    finalShaderLifetimeMin: 0
-    finalShaderLifetimeMax: 0
+    finalShaderLifetimeMin: 2
+    finalShaderLifetimeMax: 2
     projectile:
       launchMode: 0
       showBeforeAnimationShoot: 0

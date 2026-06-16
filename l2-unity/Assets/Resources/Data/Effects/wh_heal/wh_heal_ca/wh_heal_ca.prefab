@@ -504,6 +504,8 @@ MonoBehaviour:
   _owner: {fileID: 0}
   _skipScheduledDestroyForDebug: 0
   _surfaceNormal: {x: 0, y: 0, z: 0}
+  _billboardToCamera: 0
+  _billboardRotationOffsetEuler: {x: 0, y: 0, z: 0}
   _pooledEffect:
     _effectClass: 
     _effectDurationSec: 15

@@ -219,6 +219,69 @@ void L2Fx_MeshBuiltin_TransformVertexOS(
     posOS.y += meshYOffset;
 }
 
+// Spin uses spinAgeSeconds; size/color use animAgeNorm (for _Hold split).
+void L2Fx_MeshBuiltin_TransformVertexOS_SplitAge(
+    inout float3 posOS,
+    inout float3 nrmOS,
+    float spinParticles,
+    float startSpin,
+    float spinsPerSecond,
+    float spinCCWorCW,
+    float spinAgeSeconds,
+    float animAgeNorm,
+    float3 startSize,
+    float applyUuToStartSize,
+    float useSizeScale,
+    float useRegularSizeScale,
+    float sizeScaleParam,
+    float sizeScaleRepeats,
+    uint sizeScaleCount,
+    float sizeScaleTime0, float sizeScaleVal0,
+    float sizeScaleTime1, float sizeScaleVal1,
+    float sizeScaleTime2, float sizeScaleVal2,
+    float sizeScaleTime3, float sizeScaleVal3,
+    float sizeScaleTime4, float sizeScaleVal4,
+    float3 startLocationOffsetUU,
+    float meshYOffset,
+    float sizeScaleHorizontalOnly)
+{
+    if (spinParticles > 0.5)
+    {
+        float sps = L2Fx_ApplySpinCCWorCW_Scalar(spinsPerSecond, spinCCWorCW);
+        float angle = L2Fx_ComputeSpinAngleRadiansMeshEmitterRevPerSec(startSpin, sps, spinAgeSeconds);
+        L2Fx_ApplyMeshSpinAroundY(posOS, nrmOS, true, angle);
+    }
+
+    float sizeScale = L2Fx_MeshBuiltin_SampleSizeScaleScalar(
+        animAgeNorm,
+        sizeScaleParam,
+        sizeScaleRepeats,
+        sizeScaleCount,
+        useSizeScale,
+        useRegularSizeScale,
+        sizeScaleTime0, sizeScaleVal0,
+        sizeScaleTime1, sizeScaleVal1,
+        sizeScaleTime2, sizeScaleVal2,
+        sizeScaleTime3, sizeScaleVal3,
+        sizeScaleTime4, sizeScaleVal4);
+
+    float3 startSizeM = startSize;
+    if (applyUuToStartSize > 0.5)
+    {
+        startSizeM *= L2FX_UU_TO_UNITY;
+    }
+
+    float3 sizeMul = startSizeM * sizeScale;
+    if (sizeScaleHorizontalOnly > 0.5)
+    {
+        sizeMul = float3(startSizeM.x * sizeScale, startSizeM.y, startSizeM.z * sizeScale);
+    }
+
+    posOS *= sizeMul;
+    posOS += L2Fx_MeshBuiltin_StartLocationOffsetM(startLocationOffsetUU);
+    posOS.y += meshYOffset;
+}
+
 float2 L2Fx_MeshBuiltin_ApplyMainTexST(float2 uv01, float4 mainTexST)
 {
     return uv01 * mainTexST.xy + mainTexST.zw;
