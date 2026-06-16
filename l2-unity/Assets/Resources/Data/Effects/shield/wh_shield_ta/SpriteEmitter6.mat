@@ -18,7 +18,6 @@ Material:
   - _FADEIN_ON
   - _FADEOUT_ON
   - _HASLIFETIME_ON
-  - _SPINPARTICLES_ON
   - _UNIFORMSIZE_ON
   - _USEBRIGHTENBLEND_ON
   - _USERANDOMSUBDIVISION_ON
@@ -41,7 +40,7 @@ Material:
     m_Floats:
     - _AlphaBoost: 16
     - _AlphaFromLuma: 1
-    - _BillboardScale: 0.0725
+    - _BillboardScale: 0
     - _BlendBetweenSubdivisions: 0
     - _ColorScaleCount: 3
     - _ColorScaleRepeats: 10
@@ -62,15 +61,15 @@ Material:
     - _RgbBoost: 0.96
     - _Seed: 0
     - _SizeScaleTime0: 0.1
-    - _SizeScaleTime1: 0.18
-    - _SizeScaleTime2: 0.41
+    - _SizeScaleTime1: 0.507
+    - _SizeScaleTime2: 0.703
     - _SizeScaleTime3: 1
     - _SizeScaleVal0: 2
     - _SizeScaleVal1: 1
-    - _SizeScaleVal2: 0.7
+    - _SizeScaleVal2: 0.5
     - _SizeScaleVal3: 0.01
     - _SpawnUnitScale: 0.01
-    - _SpinParticles: 1
+    - _SpinParticles: 0
     - _SrcBlend: 5
     - _StartTime: 0
     - _SubdivisionEnd: 15
@@ -95,14 +94,14 @@ Material:
     - _OwnerWorldPos: {r: 0, g: 0, b: 0, a: 0}
     - _PolarAzimuthDeg: {r: 0, g: 360, b: 0, a: 0}
     - _PolarPitchDeg: {r: 90, g: 90, b: 0, a: 0}
-    - _PolarRadius: {r: 15, g: 15, b: 0, a: 0}
+    - _PolarRadius: {r: 200, g: 50, b: 200, a: 0}
     - _SizeRange: {r: 2, g: 2, b: 0, a: 0}
-    - _SpinsPerSecondRange: {r: 0.3, g: 0.5, b: 0, a: 0}
+    - _SpinsPerSecondRange: {r: 0, g: 0, b: 0, a: 0}
     - _StartLocationOffset: {r: 0, g: 0, b: 0, a: 0}
-    - _StartSpinRange: {r: 0, g: 1, b: 0, a: 0}
-    - _VelocityLossRange: {r: 2.5, g: 2.5, b: 0, a: 0}
-    - _VelocityRangeX: {r: 25, g: 35, b: 0, a: 0}
-    - _VelocityRangeY: {r: 0, g: 0, b: 0, a: 0}
-    - _VelocityRangeZ: {r: 0, g: 0, b: 0, a: 0}
+    - _StartSpinRange: {r: 0, g: 0, b: 0, a: 0}
+    - _VelocityLossRange: {r: 200, g: 200, b: 200, a: 0}
+    - _VelocityRangeX: {r: 200, g: 300, b: 0, a: 0}
+    - _VelocityRangeY: {r: 200, g: 300, b: 0, a: 0}
+    - _VelocityRangeZ: {r: -200, g: -300, b: 0, a: 0}
   m_BuildTextureStacks: []
   m_AllowLocking: 1

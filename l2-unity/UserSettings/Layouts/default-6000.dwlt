@@ -341,7 +341,7 @@ MonoBehaviour:
   m_Pos:
     serializedVersion: 2
     x: 0
-    y: 24
+    y: 79
     width: 424
     height: 543
   m_SerializedDataModeController:
@@ -358,9 +358,9 @@ MonoBehaviour:
   m_SceneHierarchy:
     m_TreeViewState:
       scrollPos: {x: 0, y: 0}
-      m_SelectedIDs: 
-      m_LastClickedID: 0
-      m_ExpandedIDs: ea1afefe5cfd2c0068fd2c00a2fd2c00c6fd2c00d4fd2c00
+      m_SelectedIDs: d0294600
+      m_LastClickedID: 4598224
+      m_ExpandedIDs: 8e3b20fed0294600d4294600e2294600f0294600fe294600
       m_RenameOverlay:
         m_UserAcceptedRename: 0
         m_Name: 
@@ -406,8 +406,8 @@ MonoBehaviour:
     m_TextWithWhitespace: "Scene\u200B"
   m_Pos:
     serializedVersion: 2
-    x: 426
-    y: 24
+    x: 425
+    y: 79
     width: 958
     height: 543
   m_SerializedDataModeController:
@@ -927,8 +927,8 @@ MonoBehaviour:
     m_OverlaysVisible: 1
   m_WindowGUID: cc27987af1a868c49b0894db9c0f5429
   m_Gizmos: 1
-  m_OverrideSceneCullingMask: 6917529027641081856
-  m_SceneIsLit: 1
+  m_OverrideSceneCullingMask: 0
+  m_SceneIsLit: 0
   m_SceneLighting: 1
   m_2DMode: 0
   m_isRotationLocked: 0
@@ -936,9 +936,9 @@ MonoBehaviour:
   m_AudioPlay: 0
   m_DebugDrawModesUseInteractiveLightBakingData: 0
   m_Position:
-    m_Target: {x: 4697.72, y: -70.181274, z: -1554.1622}
+    m_Target: {x: 0.1890259, y: 1.3672723, z: 0.16465527}
     speed: 2
-    m_Value: {x: -0.34357995, y: -0.18186373, z: 0.8180902}
+    m_Value: {x: 0.1890259, y: 1.3672723, z: 0.16465527}
   m_RenderMode: 0
   m_CameraMode:
     drawMode: 0
@@ -949,7 +949,7 @@ MonoBehaviour:
   m_SceneViewState:
     m_AlwaysRefresh: 1
     showFog: 1
-    showSkybox: 1
+    showSkybox: 0
     showFlares: 1
     showImageEffects: 1
     showParticleSystems: 1
@@ -984,13 +984,13 @@ MonoBehaviour:
     m_GridAxis: 1
     m_gridOpacity: 0.5
   m_Rotation:
-    m_Target: {x: 0.017097238, y: 0.98374844, z: -0.12933424, w: 0.12455033}
+    m_Target: {x: -0.12945981, y: 0.117760144, z: -0.016114814, w: -0.98458785}
     speed: 2
-    m_Value: {x: -0.12945981, y: 0.117760144, z: -0.016114814, w: -0.9845879}
+    m_Value: {x: -0.12944038, y: 0.11774247, z: -0.016112396, w: -0.9844401}
   m_Size:
-    m_Target: 0.6648397
+    m_Target: 3.3946218
     speed: 2
-    m_Value: 1.3114499
+    m_Value: 3.3946218
   m_Ortho:
     m_Target: 0
     speed: 2
@@ -1238,7 +1238,7 @@ MonoBehaviour:
   m_Pos:
     serializedVersion: 2
     x: 0
-    y: 593
+    y: 648
     width: 1384
     height: 338
   m_SerializedDataModeController:
@@ -1263,7 +1263,7 @@ MonoBehaviour:
     m_SkipHidden: 0
     m_SearchArea: 1
     m_Folders:
-    - Assets/Resources/Data/Effects/shield/wh_shield_ta
+    - Assets/Resources/Data/Effects/might/wh_might_ca
     m_Globs: []
     m_ProductIds: 
     m_AnyWithAssetOrigin: 0
@@ -1273,17 +1273,17 @@ MonoBehaviour:
   m_ViewMode: 1
   m_StartGridSize: 16
   m_LastFolders:
-  - Assets/Resources/Data/Effects/shield/wh_shield_ta
+  - Assets/Resources/Data/Effects/might/wh_might_ca
   m_LastFoldersGridSize: 16
   m_LastProjectPath: C:\unity\l2 client\l2-git-interlude\Unity-Client-for-L2J\l2-unity
   m_LockTracker:
     m_IsLocked: 0
   m_LastLocalAssetsSearchArea: 1
   m_FolderTreeState:
-    scrollPos: {x: 0, y: 162}
-    m_SelectedIDs: 9c190e00
-    m_LastClickedID: 924060
-    m_ExpandedIDs: 0000000050600200526002005460020056600200586002005a6002005c6002005e60020060600200626002006460020066600200686002006a6002006c6002006e60020070600200726002007460020076600200786002007a6002007c6002007e60020080600200826002008460020086600200886002008a6002008c6002008e60020090600200926002009460020096600200986002009a6002009c6002009e600200a0600200a2600200a4600200a6600200a8600200aa600200ac600200ae600200b0600200b2600200b4600200b6600200b8600200ba600200bc600200be600200c0600200c2600200c4600200c6600200c8600200ca600200cc600200ce600200d0600200d2600200d4600200d6600200d8600200da600200dc600200de600200e0600200e2600200e4600200e6600200e8600200ea600200ec600200ee600200
+    scrollPos: {x: 0, y: 415}
+    m_SelectedIDs: 78204600
+    m_LastClickedID: 4595832
+    m_ExpandedIDs: 000000004a6002004c6002004e60020050600200526002005460020056600200586002005a6002005c6002005e60020060600200626002006460020066600200686002006a6002006c6002006e60020070600200726002007460020076600200786002007a6002007c6002007e60020080600200826002008460020086600200886002008a6002008c6002008e60020090600200926002009460020096600200986002009a6002009c6002009e600200a0600200a2600200a4600200a6600200a8600200aa600200ac600200ae600200b0600200b2600200b4600200b6600200b8600200ba600200bc600200be600200c0600200c2600200c4600200c6600200c8600200ca600200cc600200ce600200d0600200d2600200d4600200d6600200d8600200da600200dc600200de600200e2600200e66002006820460000ca9a3b
     m_RenameOverlay:
       m_UserAcceptedRename: 0
       m_Name: 
@@ -1312,7 +1312,7 @@ MonoBehaviour:
     scrollPos: {x: 0, y: 0}
     m_SelectedIDs: 
     m_LastClickedID: 0
-    m_ExpandedIDs: 0000000050600200526002005460020056600200586002005a6002005c6002005e60020060600200626002006460020066600200686002006a6002006c6002006e60020070600200726002007460020076600200786002007a6002007c6002007e60020080600200826002008460020086600200886002008a6002008c6002008e60020090600200926002009460020096600200986002009a6002009c6002009e600200a0600200a2600200a4600200a6600200a8600200aa600200ac600200ae600200b0600200b2600200b4600200b6600200b8600200ba600200bc600200be600200c0600200c2600200c4600200c6600200c8600200ca600200cc600200ce600200d0600200d2600200d4600200d6600200d8600200da600200dc600200de600200e0600200e2600200e4600200e6600200e8600200ea600200ec600200ee600200
+    m_ExpandedIDs: 000000004a6002004c6002004e60020050600200526002005460020056600200586002005a6002005c6002005e60020060600200626002006460020066600200686002006a6002006c6002006e60020070600200726002007460020076600200786002007a6002007c6002007e60020080600200826002008460020086600200886002008a6002008c6002008e60020090600200926002009460020096600200986002009a6002009c6002009e600200a0600200a2600200a4600200a6600200a8600200aa600200ac600200ae600200b0600200b2600200b4600200b6600200b8600200ba600200bc600200be600200c0600200c2600200c4600200c6600200c8600200ca600200cc600200ce600200d0600200d2600200d4600200d6600200d8600200da600200dc600200de600200e0600200e2600200e4600200e6600200
     m_RenameOverlay:
       m_UserAcceptedRename: 0
       m_Name: 
@@ -1358,7 +1358,7 @@ MonoBehaviour:
       m_OriginalEventType: 11
       m_IsRenamingFilename: 1
       m_TrimLeadingAndTrailingWhitespace: 0
-      m_ClientGUIView: {fileID: 10}
+      m_ClientGUIView: {fileID: 9}
     m_CreateAssetUtility:
       m_EndAction: {fileID: 0}
       m_InstanceID: 0
@@ -1466,8 +1466,8 @@ MonoBehaviour:
     m_TextWithWhitespace: "Inspector\u200B"
   m_Pos:
     serializedVersion: 2
-    x: 1386
-    y: 24
+    x: 1385
+    y: 79
     width: 534
     height: 907
   m_SerializedDataModeController:

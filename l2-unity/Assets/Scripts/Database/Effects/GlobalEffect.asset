@@ -88,3 +88,8 @@ MonoBehaviour:
     comment: shield-composite-effect
     settings: {fileID: 11400000, guid: a8f3c2e1d4b5678901234abcdef56789, type: 2}
     ignoreFlightTimeForCast: 1
+  - id: 1068
+    prefab: {fileID: -2331866982259287529, guid: 6318d4c82b090cd4c8c287625d958b1f, type: 3}
+    comment: might-composite-effect
+    settings: {fileID: 11400000, guid: e73b899fdfd5e1243a008820002a9c0e, type: 2}
+    ignoreFlightTimeForCast: 1
