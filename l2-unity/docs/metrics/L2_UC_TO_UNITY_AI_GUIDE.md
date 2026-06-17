@@ -391,6 +391,7 @@ The scanned shader folder contains these skill shaders:
 - `L2/Effects/VampiricTouchSpark` — `fx_m_t0000` dust/spark tail; polar spawn, horizontal radial velocity from `spawnOfs.xz`, texture dilate/RGB/alpha boost. Reference for `PTVD_OwnerAndStartPosition` style rings.
 - `L2/Effects/ShieldTaSprite` — Shield TA sprites (`AngelDust`, flash); uses horizontal radial motion pattern from `VampiricTouchSpark` for polar skirt effects.
 - `L2/Effects/MagicCircleAlphaBlend` / `MagicCircleBrighten` — circle/ground/mesh style shaders.
+- `L2/Effects/MightCaMesh` — **mesh ribbon with head + tail in one draw** (`supportenchant00`, `fx_m_t0005`). Use D3D9 brighten path for firefly/tail strips; see section 10.
 - `L2/Effects/L2IceFrag`, `L2IceApprox`, steam shaders — ice/steam-specific visuals.
 
 If a `.uc` uses a feature the shader does not expose, do not invent a material property. Either choose a more capable shader or add a backward-compatible `[Toggle]` feature defaulted off.
@@ -609,4 +610,174 @@ ref:     Assets/Resources/Data/Shaders/Skills/Vampiric/Touch/VampiricTouchSpark.
 ref.mat: Assets/Resources/Data/Effects/vampiric/touch/el_vampiric_touch_ta/SpriteEmitter2.mat
 helper:  Assets/Resources/Data/Shaders/Skills/Common/L2FxMeshParticleMotion.hlsl (L2Fx_OutwardDirectionXZ)
 C#:      Assets/Scripts/Rendering/Effects/ParticleGroup.cs (_OwnerWorldPos write path)
+```
+
+---
+
+## 10. Mesh ribbon tails: bright head + fading tail in **one mesh**
+
+This section documents mesh emitters where the **bright point (head) and the soft tail are authored on a single static mesh** and rendered in **one draw call**. This is **not** a sprite trail, beam, or multi-emitter composite.
+
+Typical L2 assets:
+
+- mesh: `supportenchant00` (FBX ribbon strips with head/tail UV regions)
+- texture atlas: `fx_m_t0005` (and similar `fx_m_t*` sheets)
+- blend: `PTDS_Brighten` → `SrcAlpha One` (additive brighten)
+
+Verified reference: Might CA ground sparkles — `wh_might_ca` `MeshEmitter9` (`m_u004_a`).
+
+### How to recognize this pattern in `.uc` / assets
+
+```text
+Emitter type:     MeshEmitter (not SpriteEmitter)
+StaticMesh:       supportenchant00 (or similar ribbon mesh)
+Texture:          fx_m_t0005 / fx_m_t0000 family
+DrawStyle:        PTDS_Brighten
+```
+
+Visual in RenderDoc / original client:
+
+- **one** mesh draw per particle
+- UV layout: long strip along V with **low-luma tail gradient** and **high-luma bright head** in the same atlas cell
+- fragment shader: `out = sample(t0, uv) * textureFactor` — no luma-based alpha discard
+
+Do **not** confuse with:
+
+| Pattern | Difference |
+|---------|------------|
+| Sprite trail (`SpriteEmitter` + subdiv atlas) | separate billboard particles, not ribbon mesh UV |
+| `L2Fx_MeshFrag_MagicCircleLumaUvSplit` path | multiplicative soft/line RGB split — OK for magic circles, **wrong** for supportenchant fireflies (blows out head) |
+| `L2Fx_BrightenAlpha.hlsl` (sprite) | halo/history/faint-ray tuning for billboards — different model |
+
+### Shader and Common helpers
+
+Shader: `L2/Effects/MightCaMesh` (`MightCaMesh.shader`)
+
+Enable the D3D9 brighten branch:
+
+```text
+_UseD3d9BrightenFs = 1
+```
+
+Reusable HLSL (include in any new mesh shader with the same ribbon layout):
+
+```text
+Assets/Resources/Data/Shaders/Skills/Common/L2FxMeshBrightenD3d9.hlsl
+  L2Fx_MeshBrighten_SoftTailWeight   — luma band for tail only (excludes bright head)
+  L2Fx_MeshBrighten_TexHueTint       — normalized texture hue for additive tail lift
+  L2Fx_MeshBrighten_D3d9TexFactor    — full fragment: tex * factor + tailLift, rgb *= lifeAlpha
+
+Assets/Resources/Data/Shaders/Skills/Common/L2FxMeshLifetimeAlpha.hlsl
+  L2Fx_MeshLifetimeAlphaHold         — fade-in on elapsedAge, fade-out with _Hold rules
+```
+
+Minimal fragment usage in a new mesh shader:
+
+```hlsl
+#include "../Common/L2FxMeshFragment.hlsl"
+#include "../Common/L2FxMeshLifetimeAlpha.hlsl"
+#include "../Common/L2FxMeshBrightenD3d9.hlsl"
+
+// vert: pass lifeAlpha from L2Fx_MeshLifetimeAlphaHold(motionAge, elapsed, lifetime, _Hold, ...)
+
+half4 factor = L2Fx_MeshBuiltin_SampleBaseTint(...);
+
+if (_UseD3d9BrightenFs >= 0.5)
+{
+    return L2Fx_MeshBrighten_D3d9TexFactor(
+        texColor, factor, (half)IN.lifeAlpha,
+        _TailLift,
+        _SoftLumMin, _SoftLumMax, _LineLumMin, _LineLumMax,
+        _RgbBoost, _AlphaBoost, _IgnoreMainTexAlpha);
+}
+```
+
+### Material properties (ribbon tail tuning)
+
+These are **shader artistic controls**, not direct `.uc` scalar copies:
+
+```text
+_UseD3d9BrightenFs = 1          // required for head+tail mesh path
+_RgbBoost = 1                   // base tex * factor RGB
+_AlphaBoost = 1..1.25           // SrcAlpha One contribution
+_TailLift = 0.35..2             // additive RGB on soft tail band only (tune visually)
+_SoftLumMin / _SoftLumMax       // luma range of fading tail (default 0 .. 0.45)
+_LineLumMin / _LineLumMax       // luma range of bright head, excluded from tail lift
+_IgnoreMainTexAlpha = 0         // use authored alpha from fx_m_t*_A.png
+```
+
+Keep the **legacy luma-mask path** (`_UseD3d9BrightenFs = 0`) only when the effect intentionally uses `L2Fx_MeshFrag_SampleTextureAlpha` + `MagicCircleLumaUvSplit` (e.g. `wh_might_ta` `MeshEmitter0`).
+
+### Texture import rules
+
+For blue/cyan VFX atlases (`fx_m_t0005` and similar):
+
+```text
+Use:     fx_m_t0005_A.png  (or separate authored alpha channel)
+Avoid:   Texture Type "From Gray Scale" for alpha — kills soft tail on blue tints
+```
+
+Assign `_MainTex` to the `_A` variant when `_IgnoreMainTexAlpha = 0`.
+
+### Lifetime, fade-in, and hold
+
+```text
+FadeIn:     rgb *= lifeAlpha from frame 0 — particle is **full SizeScale immediately**
+            (do NOT scale vertex position by fade-in; UE ForcedFade is alpha-only on RGB)
+FadeIn age: wall-clock elapsedAge, not hold-capped motionAge
+FadeOut:    only when _Hold <= 0; uses motionAge when hold is active
+```
+
+Typical tuned values (`MeshEmitter9` / `wh_might_ca`):
+
+```text
+_FadeIn = 1,  _FadeInEndTime = 0.25
+_Fadeout = 1, _FadeoutStartTime = 4
+_LifetimeRange = (4.5, 4.5, 0, 0)
+_Hold = 0.6 in prefab L2SkillEffect — fade-out suppressed until hold releases
+```
+
+### Spin and axis
+
+`.uc SpinCCWorCW` may need **inversion** UE3 → Unity on some meshes:
+
+```text
+.uc SpinCCWorCW=1  ->  material _SpinCCWorCW = 0   // verify per mesh; Might CA ground uses 0
+```
+
+`supportenchant00` FBX is already in Unity meters — keep `_ApplyUuToStartSize = 0`.
+
+### Common mistakes (mesh tails)
+
+| Mistake | Symptom | Fix |
+|---------|---------|-----|
+| Treat as sprite trail | wrong shader / no ribbon UV | use `MeshEmitter` + `MightCaMesh` D3D9 path |
+| `_UseD3d9BrightenFs = 0` + luma alpha | thin, harsh tail; missing glow | enable D3D9 path |
+| `L2Fx_MeshFrag_MagicCircleLumaUvSplit` on fireflies | blown-out white head | use additive `_TailLift` via `L2Fx_MeshBrighten_D3d9TexFactor` |
+| From Gray Scale alpha | tail disappears on blue | `fx_m_t*_A.png`, `_IgnoreMainTexAlpha = 0` |
+| Fade-in via vertex scale | particle grows from zero | `rgb *= lifeAlpha` only |
+| `lifeAlpha` on alpha channel | double-faded additive | alpha = `factor.a * _AlphaBoost * tex.a` (no `lifeAlpha` on alpha) |
+
+### AI checklist for new mesh head+tail effects
+
+1. Confirm emitter is `MeshEmitter` with ribbon mesh (`supportenchant00` or CSV shows head/tail UV bands in one cell).
+2. Confirm `DrawStyle=PTDS_Brighten` in `.uc` → blend `SrcAlpha One`.
+3. Assign shader `L2/Effects/MightCaMesh` (or copy its D3D9 includes into a dedicated shader).
+4. Set `_UseD3d9BrightenFs = 1`; copy mechanical `.uc` fields (lifetime, fade, size scale, spin).
+5. Import texture with authored alpha (`*_A.png`); set `_IgnoreMainTexAlpha = 0`.
+6. Tune `_TailLift`, `_AlphaBoost` in Play mode against original client or RenderDoc.
+7. Verify spin direction (`_SpinCCWorCW`); verify fade-in does not shrink mesh vertices.
+8. Do **not** enable sprite brighten helpers (`L2Fx_BrightenAlpha.hlsl`) unless the emitter is actually a billboard.
+
+### Reference files in this repo
+
+```text
+.uc:      Assets/Resources/Data/Effects/might/wh_might_ca/m_u004_a.uc (MeshEmitter9)
+.mat:     Assets/Resources/Data/Effects/might/wh_might_ca/MeshEmitter9.mat
+shader:   Assets/Resources/Data/Shaders/Skills/Might/MightCaMesh.shader
+common:   Assets/Resources/Data/Shaders/Skills/Common/L2FxMeshBrightenD3d9.hlsl
+common:   Assets/Resources/Data/Shaders/Skills/Common/L2FxMeshLifetimeAlpha.hlsl
+mesh:     supportenchant00 (FBX in project Resources)
+tex:      fx_m_t0005_A.png
+prefab:   Assets/Resources/Data/Effects/might/wh_might_ca/wh_might_ca.prefab
 ```

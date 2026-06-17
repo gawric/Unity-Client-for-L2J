@@ -1,4 +1,5 @@
 // m_u004_b MeshEmitter0 "supportenchant00": fx_m_t0005, spin, size scale, Z velocity + accel.
+// m_u004_a MeshEmitter9 same mesh on ground: spin + size scale, no velocity/accel (params differ).
 // m_u004_b MeshEmitter3 shares this shader with different material params.
 //
 // Axis: UE (X,Y,Z) -> Unity (X,Z,Y). Unity Y is up; UE Z maps to Unity Y.
@@ -22,6 +23,7 @@ Shader "L2/Effects/MightCaMesh"
         _FadeInEndTime ("FadeIn End Time (sec)", Float) = 0.02
         [Toggle] _Fadeout ("Fade Out", Float) = 1
         _FadeoutStartTime ("FadeOut Start Time (sec)", Float) = 0.78
+        _FadeOutPower ("Fade Out strength (>1 = faster drop)", Range(1, 4)) = 1
 
         _ColorScale0 ("ColorScale[0]", Color) = (0.858824, 0.858824, 0.858824, 1)
         _ColorScaleTime1 ("ColorScale Time[1]", Range(0, 1)) = 0.5
@@ -41,6 +43,17 @@ Shader "L2/Effects/MightCaMesh"
         [Toggle] _AlphaFromLuma ("Alpha from luma (black = transparent)", Float) = 1
         _LumaAlphaFloor ("Luma alpha trim", Range(0, 0.25)) = 0.02
         _AlphaEdgeFeather ("Alpha edge feather", Range(0, 0.25)) = 0.02
+
+        [Header(D3D9 Brighten FS supportenchant00)]
+        [Toggle] _UseD3d9BrightenFs ("D3D9 FF: tex * textureFactor (no luma trim)", Float) = 0
+        _RgbBoost ("RGB Boost (heads + base)", Range(0.25, 4)) = 1
+        _AlphaBoost ("Alpha Boost (SrcAlpha One)", Range(0.25, 3)) = 1
+        _TailLift ("Tail RGB lift (additive, soft band only)", Range(0, 2)) = 0.35
+        [Toggle] _D3d9FadeAlphaWithLife ("D3D9: multiply alpha by lifeAlpha", Float) = 0
+        _SoftLumMin ("Tail band luma min", Range(0, 1)) = 0
+        _SoftLumMax ("Tail band luma max", Range(0, 1)) = 0.45
+        _LineLumMin ("Head luma min (excluded from tail lift)", Range(0, 1)) = 0.35
+        _LineLumMax ("Head luma max", Range(0, 1)) = 1
 
         _StartSize ("Start Size UE order (X,Y,Z from .uc)", Vector) = (0.2, 0.2, 0.25, 0)
         [Toggle] _ApplyUuToStartSize ("Also x UU->m on size (off for Unity FBX)", Float) = 0
@@ -107,6 +120,8 @@ Shader "L2/Effects/MightCaMesh"
             #include "../Common/L2FxMeshEmitterUrp.hlsl"
             #include "../Common/L2FxMeshDebug.hlsl"
             #include "../Common/L2FxMeshFragment.hlsl"
+            #include "../Common/L2FxMeshLifetimeAlpha.hlsl"
+            #include "../Common/L2FxMeshBrightenD3d9.hlsl"
             #include "../Common/L2FxHold.hlsl"
 
             TEXTURE2D(_MainTex);
@@ -125,6 +140,7 @@ Shader "L2/Effects/MightCaMesh"
                 float _FadeInEndTime;
                 float _Fadeout;
                 float _FadeoutStartTime;
+                float _FadeOutPower;
                 float4 _ColorScale0;
                 float _ColorScaleTime1;
                 float4 _ColorScale1;
@@ -141,6 +157,15 @@ Shader "L2/Effects/MightCaMesh"
                 float _AlphaFromLuma;
                 float _LumaAlphaFloor;
                 float _AlphaEdgeFeather;
+                float _UseD3d9BrightenFs;
+                float _RgbBoost;
+                float _AlphaBoost;
+                float _TailLift;
+                float _D3d9FadeAlphaWithLife;
+                float _SoftLumMin;
+                float _SoftLumMax;
+                float _LineLumMin;
+                float _LineLumMax;
                 float4 _StartSize;
                 float _ApplyUuToStartSize;
                 float _UniformSize;
@@ -188,49 +213,6 @@ Shader "L2/Effects/MightCaMesh"
                 float ageNorm : TEXCOORD1;
                 float lifeAlpha : TEXCOORD2;
             };
-
-            float MightCaMesh_LifetimeAlpha(float motionAge, float elapsedAge, float lifetime)
-            {
-                lifetime = max(lifetime, 1e-4);
-                motionAge = max(0.0, motionAge);
-                elapsedAge = max(0.0, elapsedAge);
-
-                // Hold>0: fade from capped motionAge, no expiry. Hold=0: normal lifetime on elapsed.
-                float fadeAge = (_Hold > 0.0) ? motionAge : elapsedAge;
-
-                if (_HasLifetime >= 0.5 && _Hold <= 0.0)
-                {
-                    if (elapsedAge <= 0.0 || elapsedAge >= lifetime)
-                    {
-                        return 0.0;
-                    }
-                }
-                else if (_HasLifetime >= 0.5 && _Hold > 0.0)
-                {
-                    if (motionAge <= 0.0)
-                    {
-                        return 0.0;
-                    }
-                }
-
-                float fadeInMul = 1.0;
-                if (_FadeIn >= 0.5)
-                {
-                    float fadeInEnd = max(0.0001, _FadeInEndTime);
-                    fadeInMul = saturate(fadeAge / fadeInEnd);
-                }
-
-                float fadeOutMul = 1.0;
-                if (_Fadeout >= 0.5 && _Hold <= 0.0)
-                {
-                    float fadeStart = clamp(_FadeoutStartTime, 0.0, lifetime);
-                    float fadeDuration = max(0.0001, lifetime - fadeStart);
-                    float fadeT = saturate((fadeAge - fadeStart) / fadeDuration);
-                    fadeOutMul = 1.0 - fadeT;
-                }
-
-                return saturate(fadeInMul * fadeOutMul);
-            }
 
             float3 MightCaMeshResolveStartSizeUnity()
             {
@@ -292,7 +274,14 @@ Shader "L2/Effects/MightCaMesh"
                 posOS += MightCaMeshParticleMotion(motionAge);
 
                 OUT.positionHCS = L2Fx_MeshUrp_ObjectToHClip(posOS, _ClipDepthBias);
-                OUT.lifeAlpha = MightCaMesh_LifetimeAlpha(motionAge, elapsed, lifetime);
+                OUT.lifeAlpha = L2Fx_MeshLifetimeAlphaHold(
+                    motionAge, elapsed, lifetime,
+                    _Hold, _HasLifetime,
+                    _FadeIn, _FadeInEndTime, _Fadeout, _FadeoutStartTime);
+                if (_FadeOutPower > 1.0001)
+                {
+                    OUT.lifeAlpha = pow(saturate(OUT.lifeAlpha), _FadeOutPower);
+                }
 
                 float2 uvMeshUnused;
                 L2Fx_MeshBuiltin_ResolveUv(
@@ -308,7 +297,7 @@ Shader "L2/Effects/MightCaMesh"
             {
                 half4 texColor = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, IN.uv);
 
-                half4 color = L2Fx_MeshBuiltin_SampleBaseTint(
+                half4 factor = L2Fx_MeshBuiltin_SampleBaseTint(
                     IN.ageNorm,
                     _ColorScaleRepeats,
                     _ColorScaleCount,
@@ -318,12 +307,22 @@ Shader "L2/Effects/MightCaMesh"
                     _ColorMultMin.rgb, _ColorMultMax.rgb,
                     _Opacity, _EmitterAlpha);
 
+                if (_UseD3d9BrightenFs >= 0.5)
+                {
+                    return L2Fx_MeshBrighten_D3d9TexFactor(
+                        texColor, factor, (half)IN.lifeAlpha,
+                        _TailLift,
+                        _SoftLumMin, _SoftLumMax, _LineLumMin, _LineLumMax,
+                        _RgbBoost, _AlphaBoost, _IgnoreMainTexAlpha,
+                        _D3d9FadeAlphaWithLife);
+                }
+
                 float mask = L2Fx_MeshFrag_SampleTextureAlpha(
                     texColor, _AlphaFromLuma, _LumaAlphaFloor, _IgnoreMainTexAlpha);
                 mask = L2Fx_MeshFrag_AlphaFeather(mask, _AlphaEdgeFeather);
 
-                half3 rgb = color.rgb * texColor.rgb * (half)mask;
-                half alpha = (half)saturate(color.a * mask * IN.lifeAlpha);
+                half3 rgb = factor.rgb * texColor.rgb * (half)mask;
+                half alpha = (half)saturate(factor.a * mask * IN.lifeAlpha);
                 return half4(saturate(rgb), alpha);
             }
 

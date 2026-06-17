@@ -47,12 +47,12 @@ MonoBehaviour:
   _owner: {fileID: 0}
   _parts:
   - name: wh_might_ca
-    prefab: {fileID: 820000000000000001, guid: fee55f73c2674e3d9039e73a67058be6, type: 3}
+    prefab: {fileID: 810000000000000001, guid: 08d51cff568c45b2b54c2058f72f91c1, type: 3}
     settingsOverride: {fileID: 0}
     attachmentPoint: 6
     spawnTiming: 0
     hitLeadSeconds: 0
-    positionOffset: {x: 0, y: 0.194, z: 0}
+    positionOffset: {x: 0, y: 0.1, z: 0}
     normalizeOffsetByOwnerHeight: 0
     referenceHeight: 1.8
     scale: 1.3
