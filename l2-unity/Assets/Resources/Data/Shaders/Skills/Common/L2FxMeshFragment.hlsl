@@ -112,6 +112,32 @@ float L2Fx_MeshFrag_SampleTextureAlpha(
     return 1.0;
 }
 
+// Soft luma alpha preserves dim plasma/halos on fx_m_t0005-style brighten sprites.
+float L2Fx_MeshFrag_SampleTextureAlphaSoft(
+    float4 texColor,
+    float alphaFromLuma,
+    float lumaAlphaFloor,
+    float lumaAlphaPower,
+    float useSoftLumaAlpha,
+    float ignoreMainTexAlpha)
+{
+    if (useSoftLumaAlpha > 0.5 && alphaFromLuma > 0.5)
+    {
+        float lum = dot(texColor.rgb, float3(0.299, 0.587, 0.114));
+        float mask = saturate((lum - lumaAlphaFloor) / max(1.0 - lumaAlphaFloor, 1e-4));
+        mask = pow(mask, max(lumaAlphaPower, 1e-4));
+        if (ignoreMainTexAlpha < 0.5)
+        {
+            return mask * texColor.a;
+        }
+
+        return mask;
+    }
+
+    return L2Fx_MeshFrag_SampleTextureAlpha(
+        texColor, alphaFromLuma, lumaAlphaFloor, ignoreMainTexAlpha);
+}
+
 // BC2/DXT3-style sprites: black RGB + shape in alpha. Use tint as particle color unless tex carries RGB.
 float3 L2Fx_MeshFrag_SpriteTintRgb(float3 texRgb, float3 tintRgb)
 {

@@ -1,5 +1,7 @@
 # Shader property catalog
 
+Related: [L2_EFFECT_PORT_AI_PROMPT.md](../L2_EFFECT_PORT_AI_PROMPT.md) · [L2Fx_Shader_Library_API.md](../L2Fx_Shader_Library_API.md) · [L2_UC_TO_UNITY_AI_GUIDE.md](L2_UC_TO_UNITY_AI_GUIDE.md)
+
 ## L2/Effects/CurePoisonLightSplash
 File: `Assets\Resources\Data\Shaders\Skills\Cure\CurePoisonLightSplash.shader`
 Props: _StartTime, _HasLifetime, _InitialDelayRange, _LifetimeRange, _Seed, _FadeIn, _FadeInEndTime, _Fadeout, _FadeoutStartTime, _ColorScale0, _ColorScaleTime1, _ColorScale1, _ColorScaleTime2, _ColorScale2, _ColorScaleCount, _ColorScaleRepeats, _bAlphaBlend, _ColorMultMin, _ColorMultMax, _Opacity, _EmitterAlpha, _StartSize, _UniformSize, _UseSizeScale, _UseRegularSizeScale, _SizeScaleCount, _SizeScaleRepeats, _SizeScaleParam, _SizeScaleTime0, _SizeScaleVal0, _SizeScaleTime1, _SizeScaleVal1, _SizeScaleTime2, _SizeScaleVal2, _SizeScaleTime3, _SizeScaleVal3, _SpinParticles, _StartSpinRange, _StartSpinRangeZ, _SpinsPerSecondRangeX, _SpinsPerSecondRangeY, _SpinsPerSecondRangeZ, _SpinMinorAxesScale, _SpinCCWorCW, _StartLocationOffset, _MeshYOffset, _ClipDepthBias, _MainTex, _TextureFactor, _IgnoreMainTexAlpha, _AlphaFromLuma, _LumaAlphaFloor, _AlphaEdgeFeather, _RgbBoost, _DebugAtlasPreview, _DebugAtlasPreviewAlpha, _DebugAtlasPreviewBoost, _DebugAtlasBackground

@@ -43,31 +43,6 @@ float L2Fx_RandomInitialDelay(float2 delayMinMax, float seed, float startTime, f
 }
 
 // =================================================================
-// SPAWN: POSITION — POLAR (Unity Y-up, pitch from horizontal)
-// =================================================================
-
-float3 L2Fx_SpawnOffsetPolarUnity(
-    float2 azimuthDegMinMax,
-    float2 pitchFromHorizontalDegMinMax,
-    float2 radiusMinMax_UE,
-    float seed, float startTime)
-{
-    float yawDeg = L2Fx_RandomRange(azimuthDegMinMax, seed, startTime, 71.0);
-    float pitchDeg = L2Fx_RandomRange(pitchFromHorizontalDegMinMax, seed, startTime, 73.0);
-    float r_UE = L2Fx_RandomRange(radiusMinMax_UE, seed, startTime, 79.0);
-
-    float yaw = yawDeg * L2Fx_DegToRad;
-    float pitch = pitchDeg * L2Fx_DegToRad;
-    float r = r_UE * L2FX_UU_TO_UNITY;
-
-    float cosP = cos(pitch), sinP = sin(pitch);
-
-    return float3(r * cosP * cos(yaw),
-                  r * sinP,
-                  r * cosP * sin(yaw));
-}
-
-// =================================================================
 // SPAWN: POSITION — BOX
 // =================================================================
 
@@ -197,11 +172,6 @@ float L2Fx_StartSpin(float2 spinRange, float seed, float startTime)
 float L2Fx_SpinsPerSecond(float2 spsRange, float seed, float startTime)
 {
     return L2Fx_RandomRange(spsRange, seed, startTime, 173.0);
-}
-
-float L2Fx_SpinAngleRadians(float startSpin, float spinsPerSec, float age)
-{
-    return (startSpin + spinsPerSec * age) * L2FX_SPIN_TO_RAD;
 }
 
 // =================================================================
@@ -453,15 +423,5 @@ float L2Fx_MeshDeriveLifetime(float fadeOutStartTime, bool forcedFade, float exp
         return max(fadeOutStartTime, 0.001) + 0.001;
     return max(explicitLifetime, 0.001);
 }
-
-void L2Fx_ApplySpinCCWorCW(inout float3 spin, float3 ccwOrCw)
-{
-    // ccwOrCw == 0 → CCW (invert)
-    // ccwOrCw == 1 → CW  (keep)
-    spin.x *= (ccwOrCw.x == 0.0) ? -1.0 : 1.0;
-    spin.y *= (ccwOrCw.y == 0.0) ? -1.0 : 1.0;
-    spin.z *= (ccwOrCw.z == 0.0) ? -1.0 : 1.0;
-}
-
 
 #endif // L2_FX_EMITTER_SPAWN_INCLUDED

@@ -1,57 +1,549 @@
-// m_u004_a SpriteEmitter7: PTDS_Brighten, fx_m_t0005, polar spawn, PTVD_StartPositionAndOwner.
-// TODO: port full sprite emitter vertex shader.
+// m_u004_a SpriteEmitter7: PTDS_Brighten, fx_m_t0005 4x4, polar spawn + box range,
+// funnel ease-in motion toward StartLocationOffset apex, ColorScale/SizeScale repeats.
 Shader "L2/Effects/MightTaSprite"
 {
     Properties
     {
         _MainTex ("Texture (fx_m_t0005)", 2D) = "white" {}
-        _Tint ("Debug Tint", Color) = (1, 1, 0.6, 0.6)
+
+        _StartTime ("Start Time", Float) = 0
+        [Toggle] _HasLifetime ("Has Lifetime", Float) = 1
+        _InitialDelayRange ("Initial Delay Range (Min,Max) sec", Vector) = (0, 0, 0, 0)
+        _LifetimeRange ("Lifetime Range (Min,Max) sec", Vector) = (0.5, 0.5, 0, 0)
+        _Seed ("Seed", Float) = 0
+
+        [Toggle] _FadeIn ("Fade In", Float) = 0
+        _FadeInEndTime ("FadeIn End Time (sec)", Float) = 0
+        [Toggle] _Fadeout ("Fade Out", Float) = 1
+        _FadeoutStartTime ("FadeOut Start Time (sec)", Float) = 0.5
+
+        _Opacity ("Opacity", Range(0, 2)) = 1
+        _TextureDilateTexels ("Texture Dilate Texels", Range(0, 24)) = 0
+        _RgbBoost ("RGB Boost", Range(0, 16)) = 1
+        _AlphaBoost ("Alpha Boost", Range(0, 16)) = 1
+        [Toggle] _IgnoreMainTexAlpha ("Ignore texture alpha", Float) = 1
+        [Toggle] _AlphaFromLuma ("Alpha from luma", Float) = 1
+        _LumaAlphaFloor ("Luma alpha trim", Range(0, 0.25)) = 0
+        [Toggle] _UseSoftLumaAlpha ("Soft luma alpha (preserve dim plasma)", Float) = 1
+        _LumaAlphaPower ("Luma alpha power (<1 keeps dim fill)", Range(0.2, 2)) = 0.55
+        [Toggle] _bAlphaBlend ("AlphaBlend ColorScale", Float) = 1
+
+        _ColorScaleRepeats ("ColorScale Repeats", Float) = 2
+        _ColorScaleCount ("ColorScale Count", Int) = 4
+        _ColorScale0 ("ColorScale[0]", Color) = (1, 1, 1, 1)
+        _ColorScaleTime1 ("ColorScale Time[1]", Range(0, 1)) = 0.089286
+        _ColorScale1 ("ColorScale[1]", Color) = (0.992, 0.992, 0.992, 1)
+        _ColorScaleTime2 ("ColorScale Time[2]", Range(0, 1)) = 0.467857
+        _ColorScale2 ("ColorScale[2]", Color) = (1, 1, 1, 1)
+        _ColorScaleTime3 ("ColorScale Time[3]", Range(0, 1)) = 1
+        _ColorScale3 ("ColorScale[3]", Color) = (1, 1, 1, 1)
+
+        _StartLocationOffset ("StartLocationOffset UE (X,Y,Z)", Vector) = (0, 0, 10, 0)
+        _StartLocationRangeX ("StartLocationRange X UU (Min,Max)", Vector) = (-10, 10, 0, 0)
+        _StartLocationRangeY ("StartLocationRange Y UU (Min,Max)", Vector) = (-10, 10, 0, 0)
+        _StartLocationRangeZ ("StartLocationRange Z UU (Min,Max)", Vector) = (-10, 10, 0, 0)
+        _PolarAzimuthDeg ("Polar Azimuth Deg (Min,Max)", Vector) = (0, 360, 0, 0)
+        _PolarPitchDeg ("Polar Pitch from +Z Deg (Min,Max)", Vector) = (75, 105, 0, 0)
+        _PolarRadius ("Polar Radius UU (Min,Max)", Vector) = (14, 14, 0, 0)
+        _SpawnUnitScale ("Spawn/velocity UU->Unity (0.01)", Float) = 0.01
+        _OwnerWorldPos ("Owner World Pos (ParticleGroup)", Vector) = (0, 0, 0, 0)
+
+        _VelocityRangeX ("(legacy UE velocity, unused)", Vector) = (30, 30, 0, 0)
+        _VelocityRangeY ("(legacy UE velocity, unused)", Vector) = (30, 30, 0, 0)
+        _Acceleration ("Arc Bend Accel UE (X,Y,Z)", Vector) = (0, 0, 100, 0)
+        _FunnelEasePower ("Funnel Ease-In Power (>1 = slow start)", Range(1, 5)) = 2.5
+        _FunnelArcScale ("Funnel Arc From Accel", Range(0, 0.25)) = 0.06
+
+        _SizeRange ("Start Size UU (Min,Max)", Vector) = (4.4, 8.8, 0, 0)
+        _BillboardScale ("Manual Billboard Scale (0 = object scale)", Float) = 0
+        [Toggle] _UniformSize ("Uniform Size", Float) = 1
+
+        [Toggle] _UseSizeScale ("Use SizeScale", Float) = 1
+        [Toggle] _UseRegularSizeScale ("Regular SizeScale", Float) = 0
+        _SizeScaleRepeats ("SizeScale Repeats", Float) = 6
+        _SizeScaleParam ("SizeScale Param", Float) = 0
+        _SizeScaleCount ("SizeScale Count", Int) = 4
+        _SizeScaleTime0 ("SizeScale Time[0]", Range(0, 1)) = 0.17
+        _SizeScaleVal0 ("SizeScale Value[0]", Float) = 1
+        _SizeScaleTime1 ("SizeScale Time[1]", Range(0, 1)) = 0.37
+        _SizeScaleVal1 ("SizeScale Value[1]", Float) = 1
+        _SizeScaleTime2 ("SizeScale Time[2]", Range(0, 1)) = 0.5
+        _SizeScaleVal2 ("SizeScale Value[2]", Float) = 0.8
+        _SizeScaleTime3 ("SizeScale Time[3]", Range(0, 1)) = 0.62
+        _SizeScaleVal3 ("SizeScale Value[3]", Float) = 1
+
+        [Toggle] _SpinParticles ("Spin Particles", Float) = 1
+        _SpinsPerSecondRange ("Spins Per Second rev (Min,Max)", Vector) = (0, 0, 0, 0)
+        _StartSpinRange ("Start Spin rev (Min,Max)", Vector) = (0, 0, 0, 0)
+        _SpinCCWorCW ("Spin CCW(0) / CW(1)", Range(0, 1)) = 0
+
+        _TextureUSubdivisions ("Texture U Subdivisions", Float) = 4
+        _TextureVSubdivisions ("Texture V Subdivisions", Float) = 4
+        _SubdivisionStart ("Subdivision Start", Float) = 6
+        _SubdivisionEnd ("Subdivision End", Float) = 8
+        [Toggle] _UseRandomSubdivision ("Use Random Subdivision", Float) = 1
+        [Toggle] _BlendBetweenSubdivisions ("Blend Between Subdivisions", Float) = 0
+
+        [Header(Debug)]
+        [Toggle] _DebugAtlasPreview ("Debug Atlas Preview (_StartTime=0)", Float) = 0
+        [Toggle] _DebugAtlasPreviewLoop ("Debug Preview Loop", Float) = 0
+        _DebugAtlasPreviewAge ("Debug Preview Age (sec, pause)", Range(0, 4)) = 0.25
+        _DebugAtlasPreviewSizeScale ("Debug Preview Size Multiplier", Range(0.5, 32)) = 8
+        _DebugAtlasPreviewAlpha ("Debug Preview Alpha", Range(0, 1)) = 0.85
+        _DebugAtlasPreviewBoost ("Debug Preview RGB Boost", Range(0.25, 8)) = 1
+        _DebugAtlasBackground ("Debug Preview Background", Color) = (0.03, 0.04, 0.08, 1)
+        [Toggle] _DebugSpawnRegion ("Debug Spawn Region Wire (Scene)", Float) = 0
+        _DebugSpawnRegionColor ("Debug Spawn Region Color", Color) = (1, 0.15, 0.55, 1)
     }
 
     SubShader
     {
-        Tags { "RenderType"="Transparent" "Queue"="Transparent" "IgnoreProjector"="True" }
-        Blend One One
-        ZWrite Off
+        Tags
+        {
+            "RenderPipeline" = "UniversalPipeline"
+            "Queue" = "Transparent"
+            "RenderType" = "Transparent"
+        }
+
+        Blend SrcAlpha One
         Cull Off
+        ZWrite Off
+        ZTest LEqual
 
         Pass
         {
+            Name "MightTaSpriteBrighten"
+            Tags { "LightMode" = "UniversalForward" }
+
             HLSLPROGRAM
             #pragma vertex vert
             #pragma fragment frag
+            #pragma target 3.0
+            #pragma shader_feature_local _DEBUGSPAWNREGION_ON
+
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
-            #include "Assets/Resources/Data/Shaders/Skills/Might/_MightStubTemplate.hlsl"
+            #include "../Common/L2FxEmitterSpawn.hlsl"
+            #include "../Common/L2FxFlipbook.hlsl"
+            #include "../Common/L2FxMotionEase.hlsl"
+            #include "../Common/L2FxMeshParticleMotion.hlsl"
+            #include "../Common/L2FxMeshEmitterVertex.hlsl"
+            #include "../Common/L2FxSpriteEmitterVertex.hlsl"
+            #include "../Common/L2FxMeshFragment.hlsl"
+            #include "../Common/L2FxAtlasDebug.hlsl"
+            #include "../Common/L2FxSpawnRegionDebug.hlsl"
+
+            TEXTURE2D(_MainTex);
+            SAMPLER(sampler_MainTex);
 
             CBUFFER_START(UnityPerMaterial)
                 float4 _MainTex_ST;
-                half4 _Tint;
+                float4 _MainTex_TexelSize;
+                float _StartTime;
+                float _HasLifetime;
+                float4 _InitialDelayRange;
+                float4 _LifetimeRange;
+                float _Seed;
+                float _FadeIn;
+                float _FadeInEndTime;
+                float _Fadeout;
+                float _FadeoutStartTime;
+                float _Opacity;
+                float _TextureDilateTexels;
+                float _RgbBoost;
+                float _AlphaBoost;
+                float _IgnoreMainTexAlpha;
+                float _AlphaFromLuma;
+                float _LumaAlphaFloor;
+                float _UseSoftLumaAlpha;
+                float _LumaAlphaPower;
+                float _bAlphaBlend;
+                float _ColorScaleRepeats;
+                uint _ColorScaleCount;
+                float4 _ColorScale0;
+                float _ColorScaleTime1;
+                float4 _ColorScale1;
+                float _ColorScaleTime2;
+                float4 _ColorScale2;
+                float _ColorScaleTime3;
+                float4 _ColorScale3;
+                float4 _StartLocationOffset;
+                float4 _StartLocationRangeX;
+                float4 _StartLocationRangeY;
+                float4 _StartLocationRangeZ;
+                float4 _PolarAzimuthDeg;
+                float4 _PolarPitchDeg;
+                float4 _PolarRadius;
+                float _SpawnUnitScale;
+                float4 _OwnerWorldPos;
+                float4 _VelocityRangeX;
+                float4 _VelocityRangeY;
+                float4 _Acceleration;
+                float _FunnelEasePower;
+                float _FunnelArcScale;
+                float4 _SizeRange;
+                float _BillboardScale;
+                float _UniformSize;
+                float _UseSizeScale;
+                float _UseRegularSizeScale;
+                float _SizeScaleRepeats;
+                float _SizeScaleParam;
+                uint _SizeScaleCount;
+                float _SizeScaleTime0;
+                float _SizeScaleVal0;
+                float _SizeScaleTime1;
+                float _SizeScaleVal1;
+                float _SizeScaleTime2;
+                float _SizeScaleVal2;
+                float _SizeScaleTime3;
+                float _SizeScaleVal3;
+                float _SpinParticles;
+                float4 _SpinsPerSecondRange;
+                float4 _StartSpinRange;
+                float _SpinCCWorCW;
+                float _TextureUSubdivisions;
+                float _TextureVSubdivisions;
+                float _SubdivisionStart;
+                float _SubdivisionEnd;
+                float _UseRandomSubdivision;
+                float _BlendBetweenSubdivisions;
+                float _DebugAtlasPreview;
+                float _DebugAtlasPreviewLoop;
+                float _DebugAtlasPreviewAge;
+                float _DebugAtlasPreviewSizeScale;
+                float _DebugAtlasPreviewAlpha;
+                float _DebugAtlasPreviewBoost;
+                float4 _DebugAtlasBackground;
+                float _DebugSpawnRegion;
+                float4 _DebugSpawnRegionColor;
             CBUFFER_END
 
             struct Attributes
             {
                 float4 positionOS : POSITION;
+                float3 normalOS : NORMAL;
                 float2 uv : TEXCOORD0;
             };
 
             struct Varyings
             {
-                float4 positionCS : SV_POSITION;
-                float2 uv : TEXCOORD0;
+                float4 positionHCS : SV_POSITION;
+                float2 uvAtlasA : TEXCOORD0;
+                float2 uvAtlasB : TEXCOORD1;
+                float4 tint : COLOR;
+                nointerpolation float particleSeed : TEXCOORD2;
+                float flipbookBlend : TEXCOORD3;
+                nointerpolation float focalVisibility : TEXCOORD4;
             };
 
-            Varyings vert(Attributes input)
+            float3 MightTaSpawnOffsetUe(float pSeed)
             {
-                Varyings output;
-                output.positionCS = TransformObjectToHClip(input.positionOS.xyz);
-                output.uv = TRANSFORM_TEX(input.uv, _MainTex);
-                return output;
+                return L2Fx_SpawnRegionOffsetUe(
+                    _PolarAzimuthDeg.xy,
+                    _PolarPitchDeg.xy,
+                    _PolarRadius.xy,
+                    _StartLocationOffset.xyz,
+                    float3(_StartLocationRangeX.x, _StartLocationRangeY.x, _StartLocationRangeZ.x),
+                    float3(_StartLocationRangeX.y, _StartLocationRangeY.y, _StartLocationRangeZ.y),
+                    pSeed,
+                    _StartTime);
             }
 
-            half4 frag(Varyings input) : SV_Target
+            float MightTaUnitsToWorld()
             {
-                return L2Might_StubSample(input.uv, _Tint);
+                return length(float3(UNITY_MATRIX_M[0][0], UNITY_MATRIX_M[1][0], UNITY_MATRIX_M[2][0]));
             }
+
+            // Funnel apex: StartLocationOffset center (matches spawn wireframe top-center).
+            float3 MightTaMotionFocalWS()
+            {
+                float3 focalOs = L2Fx_UeVectorToUnity(_StartLocationOffset.xyz);
+                return TransformObjectToWorld(focalOs);
+            }
+
+            void MightTaResolveAtlasUvs(
+                float2 quadUv,
+                int uSub,
+                int vSub,
+                int s0,
+                int s1,
+                float ageNorm,
+                float pSeed,
+                out float2 uvA,
+                out float2 uvB,
+                out float fBlend)
+            {
+                fBlend = 0.0;
+
+                if (_UseRandomSubdivision > 0.5)
+                {
+                    int fi = L2Fx_FlipbookSubDivisionRandomFrame(pSeed, _StartTime, s0, s1, 41.0);
+                    if (L2Fx_AtlasDebug_IsScenePreviewActive(_DebugAtlasPreview, _StartTime) > 0.5)
+                    {
+                        fi = s0;
+                    }
+
+                    uvA = L2Fx_FlipbookAtlasUV(quadUv, fi, uSub, vSub);
+                    uvB = uvA;
+                }
+                else if (_BlendBetweenSubdivisions > 0.5)
+                {
+                    int fa;
+                    int fb;
+                    L2Fx_FlipbookBlendFrames(ageNorm, s0, s1, fa, fb, fBlend);
+                    uvA = L2Fx_FlipbookAtlasUV(quadUv, fa, uSub, vSub);
+                    uvB = L2Fx_FlipbookAtlasUV(quadUv, fb, uSub, vSub);
+                }
+                else
+                {
+                    int fi = L2Fx_FlipbookFrameIndex(ageNorm, s0, s1);
+                    uvA = L2Fx_FlipbookAtlasUV(quadUv, fi, uSub, vSub);
+                    uvB = uvA;
+                }
+            }
+
+            Varyings vert(Attributes IN)
+            {
+                Varyings OUT;
+                float pSeed = L2Fx_SpriteMaterialSeed(_Seed);
+                float delay = L2Fx_RandomInitialDelay(_InitialDelayRange.xy, pSeed, _StartTime, 3.0);
+                float lifetime = L2Fx_RandomLifetime(_LifetimeRange.xy, pSeed, _StartTime, 7.0);
+                float age = L2Fx_AgeSeconds(_Time.y, _StartTime, delay);
+                if (_StartTime <= 1e-4 && _DebugAtlasPreview < 0.5)
+                {
+                    age = min(age, max(_LifetimeRange.y, 1e-4));
+                }
+                float ageNorm = saturate(age / max(lifetime, 1e-4));
+                OUT.particleSeed = pSeed;
+
+                float scenePreview = L2Fx_AtlasDebug_IsScenePreviewActive(_DebugAtlasPreview, _StartTime);
+                if (scenePreview > 0.5)
+                {
+                    lifetime = max(lifetime, 1e-4);
+                    age = L2Fx_AtlasDebug_ResolvePreviewAge(
+                        _DebugAtlasPreviewLoop,
+                        _DebugAtlasPreviewAge,
+                        _Time.y,
+                        lifetime);
+                    ageNorm = saturate(age / lifetime);
+                }
+
+                // Spawn offset is always honest (polar + box + offset) — atlas preview only overrides age/size/flipbook.
+                float3 posUe = MightTaSpawnOffsetUe(pSeed);
+                float3 spawnOfs = L2Fx_UeVectorToUnity(posUe);
+                float3 baseSize;
+
+                if (scenePreview > 0.5)
+                {
+                    // Fixed preview size — animated SizeScale looks like motion into camera.
+                    baseSize = L2Fx_StartSize(
+                        _SizeRange.xy,
+                        _SizeRange.xy,
+                        _SizeRange.xy,
+                        _UniformSize > 0.5,
+                        pSeed,
+                        _StartTime) * max(_DebugAtlasPreviewSizeScale, 0.5);
+                }
+                else
+                {
+                    float sizeMul = L2Fx_MeshBuiltin_SampleSizeScaleScalar(
+                        ageNorm,
+                        _SizeScaleParam,
+                        _SizeScaleRepeats,
+                        _SizeScaleCount,
+                        _UseSizeScale,
+                        _UseRegularSizeScale,
+                        _SizeScaleTime0, _SizeScaleVal0,
+                        _SizeScaleTime1, _SizeScaleVal1,
+                        _SizeScaleTime2, _SizeScaleVal2,
+                        _SizeScaleTime3, _SizeScaleVal3,
+                        1.0, 1.0);
+
+                    baseSize = L2Fx_StartSize(
+                        _SizeRange.xy,
+                        _SizeRange.xy,
+                        _SizeRange.xy,
+                        _UniformSize > 0.5,
+                        pSeed,
+                        _StartTime) * sizeMul;
+                }
+
+                float3 quadOS = IN.positionOS.xyz * baseSize;
+
+                if (_SpinParticles > 0.5 && scenePreview < 0.5)
+                {
+                    float startSpin = L2Fx_StartSpin(_StartSpinRange.xy, pSeed, _StartTime);
+                    float sps = L2Fx_SpinsPerSecond(_SpinsPerSecondRange.xy, pSeed, _StartTime);
+                    sps = L2Fx_ApplySpinCCWorCW_Scalar(sps, _SpinCCWorCW);
+                    float angle = (startSpin + sps * age) * L2Fx_TwoPi;
+                    L2Fx_ApplyMeshScalarSpin(quadOS, IN.normalOS, true, angle);
+                }
+
+                float3 spawnWS = TransformObjectToWorld(spawnOfs);
+                float3 centerWS = spawnWS;
+                float focalVisibility = 1.0;
+
+                // Funnel: ease-in spawn→focal (slow start, fast finish) + optional accel arc.
+                {
+                    float uuToWorld = MightTaUnitsToWorld();
+                    float pathProgress;
+                    float3 focalWS = MightTaMotionFocalWS();
+
+                    centerWS = L2Fx_EaseInPathPosition(
+                        spawnWS, focalWS, ageNorm, _FunnelEasePower, pathProgress);
+
+                    centerWS += L2Fx_EaseInPathArcOffset(
+                        L2Fx_UeVectorToUnity(_Acceleration.xyz) * uuToWorld,
+                        age,
+                        pathProgress,
+                        _FunnelArcScale);
+
+                    L2Fx_FocalArrivalClamp(
+                        focalWS,
+                        pathProgress,
+                        0.985,
+                        max(2.0, _SizeRange.y * 0.35) * uuToWorld,
+                        centerWS,
+                        focalVisibility);
+                }
+
+                if (focalVisibility < 0.5)
+                {
+                    quadOS = 0.0;
+                }
+
+                OUT.focalVisibility = focalVisibility;
+
+                float3 posWS = L2Fx_CameraBillboardPositionWS(
+                    centerWS,
+                    quadOS,
+                    _BillboardScale,
+                    0.0);
+
+                OUT.positionHCS = TransformWorldToHClip(posWS);
+
+                float2 quadUv = TRANSFORM_TEX(IN.uv, _MainTex);
+                int uSub = max(1, (int)_TextureUSubdivisions);
+                int vSub = max(1, (int)_TextureVSubdivisions);
+                int s0 = (int)_SubdivisionStart;
+                int s1 = (int)_SubdivisionEnd;
+                float fBlend;
+                float2 uvA;
+                float2 uvB;
+                MightTaResolveAtlasUvs(quadUv, uSub, vSub, s0, s1, ageNorm, pSeed, uvA, uvB, fBlend);
+
+                OUT.uvAtlasA = uvA;
+                OUT.uvAtlasB = uvB;
+                OUT.flipbookBlend = fBlend;
+
+                if (scenePreview > 0.5)
+                {
+                    OUT.tint = float4(1.0, 1.0, 1.0, 1.0);
+                }
+                else
+                {
+                    float ctimes[8];
+                    float4 ccols[8];
+                    L2Fx_BuildColorScaleArrays5(
+                        _ColorScaleCount,
+                        _ColorScale0,
+                        _ColorScaleTime1, _ColorScale1,
+                        _ColorScaleTime2, _ColorScale2,
+                        _ColorScaleTime3, _ColorScale3,
+                        1.0, float4(1, 1, 1, 1),
+                        ctimes,
+                        ccols);
+
+                    float csParam = max(_ColorScaleRepeats, 1.0) - 1.0;
+                    OUT.tint = L2Fx_SampleColorScale(
+                        ageNorm,
+                        csParam,
+                        _ColorScaleCount,
+                        ctimes,
+                        ccols,
+                        _bAlphaBlend > 0.5);
+                }
+
+                return OUT;
+            }
+
+            half4 MightTaDilatedSample(float2 uv)
+            {
+                half4 tex = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, uv);
+                if (_TextureDilateTexels <= 0.001)
+                {
+                    return tex;
+                }
+
+                float2 s = _MainTex_TexelSize.xy * _TextureDilateTexels;
+                float2 sx = float2(s.x, 0.0);
+                float2 sy = float2(0.0, s.y);
+                float2 sd = s * 0.7071;
+
+                tex = max(tex, SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, uv + sx * 0.35));
+                tex = max(tex, SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, uv - sx * 0.35));
+                tex = max(tex, SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, uv + sy * 0.35));
+                tex = max(tex, SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, uv - sy * 0.35));
+
+                tex = max(tex, SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, uv + sx * 0.7));
+                tex = max(tex, SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, uv - sx * 0.7));
+                tex = max(tex, SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, uv + sy * 0.7));
+                tex = max(tex, SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, uv - sy * 0.7));
+
+                tex = max(tex, SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, uv + sx));
+                tex = max(tex, SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, uv - sx));
+                tex = max(tex, SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, uv + sy));
+                tex = max(tex, SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, uv - sy));
+                tex = max(tex, SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, uv + sd));
+                tex = max(tex, SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, uv - sd));
+                tex = max(tex, SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, uv + float2(sd.x, -sd.y)));
+                tex = max(tex, SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, uv + float2(-sd.x, sd.y)));
+                return tex;
+            }
+
+            float MightTaSampleAlpha(half4 texColor)
+            {
+                return L2Fx_MeshFrag_SampleTextureAlphaSoft(
+                    texColor,
+                    _AlphaFromLuma,
+                    _LumaAlphaFloor,
+                    _LumaAlphaPower,
+                    _UseSoftLumaAlpha,
+                    _IgnoreMainTexAlpha);
+            }
+
+            half4 frag(Varyings IN) : SV_Target
+            {
+                float pSeed = IN.particleSeed;
+                float delay = L2Fx_RandomInitialDelay(_InitialDelayRange.xy, pSeed, _StartTime, 3.0);
+                float lifetime = L2Fx_RandomLifetime(_LifetimeRange.xy, pSeed, _StartTime, 7.0);
+
+                half4 texA = MightTaDilatedSample(IN.uvAtlasA);
+                half4 texB = MightTaDilatedSample(IN.uvAtlasB);
+                half4 mixed = lerp(texA, texB, (half)IN.flipbookBlend);
+
+                if (_DebugAtlasPreview > 0.5)
+                {
+                    float previewMask = MightTaSampleAlpha(mixed);
+                    return L2Fx_AtlasDebugPreviewColor(
+                        mixed,
+                        previewMask,
+                        _DebugAtlasPreviewAlpha,
+                        _DebugAtlasPreviewBoost,
+                        _DebugAtlasBackground);
+                }
+
+                float mask = MightTaSampleAlpha(mixed);
+
+                float lifeAlpha = L2Fx_LifetimeAlpha(
+                    _Time.y, _HasLifetime, _StartTime, delay, lifetime,
+                    _FadeIn, _FadeInEndTime, _Fadeout, _FadeoutStartTime);
+
+                // Brighten fx_m_t0005: RGB boost on full tex (incl. dim halo fill), mask gates alpha only.
+                half3 rgb = mixed.rgb * (half3)IN.tint.rgb * (half)_RgbBoost;
+                half alpha = (half)saturate(mask * _AlphaBoost * IN.tint.a * _Opacity * lifeAlpha * IN.focalVisibility);
+                return half4(saturate(rgb), alpha);
+            }
+
             ENDHLSL
         }
     }

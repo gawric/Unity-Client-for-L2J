@@ -80,6 +80,8 @@ Shader "L2/Effects/ShieldTaSprite"
         _DebugAtlasPreviewAlpha ("Debug Preview Alpha", Range(0, 1)) = 0.85
         _DebugAtlasPreviewBoost ("Debug Preview RGB Boost", Range(0.25, 8)) = 1
         _DebugAtlasBackground ("Debug Preview Background", Color) = (0.03, 0.04, 0.08, 1)
+        [Toggle] _DebugSpawnRegion ("Debug Spawn Region Wire (Scene)", Float) = 0
+        _DebugSpawnRegionColor ("Debug Spawn Region Color", Color) = (0, 1, 1, 0.9)
     }
 
     SubShader
@@ -106,6 +108,7 @@ Shader "L2/Effects/ShieldTaSprite"
             #pragma fragment frag
             #pragma target 3.0
             #pragma shader_feature_local _USEBRIGHTENBLEND_OFF
+            #pragma shader_feature_local _DEBUGSPAWNREGION_ON
 
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
             #include "../Common/L2FxEmitterSpawn.hlsl"
@@ -185,6 +188,8 @@ Shader "L2/Effects/ShieldTaSprite"
                 float _DebugAtlasPreviewAlpha;
                 float _DebugAtlasPreviewBoost;
                 float4 _DebugAtlasBackground;
+                float _DebugSpawnRegion;
+                float4 _DebugSpawnRegionColor;
             CBUFFER_END
 
             struct Attributes

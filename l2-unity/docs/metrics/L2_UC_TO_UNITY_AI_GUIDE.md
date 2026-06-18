@@ -1,5 +1,11 @@
 # Lineage 2 UE3 .uc -> Unity URP material mapping guide for AI
 
+**Related docs (read first):**
+
+- [L2_EFFECT_PORT_AI_PROMPT.md](../L2_EFFECT_PORT_AI_PROMPT.md) — onboarding prompt + GUID lookup rule
+- [L2Fx_Shader_Library_API.md](../L2Fx_Shader_Library_API.md) — all `L2Fx_*` HLSL helpers (reuse before writing new code)
+- [L2_Shader_Property_Catalog.md](L2_Shader_Property_Catalog.md) — shader property names by effect
+
 This project ports Lineage 2 Interlude particle effects from UE3 UnrealScript `.uc` emitters to Unity URP materials using custom shaders in:
 
 `Assets/Resources/Data/Shaders/Skills/`
@@ -772,6 +778,8 @@ _Hold = 0.6 in prefab L2SkillEffect — fade-out suppressed until hold releases
 ### Reference files in this repo
 
 ```text
+docs:     docs/L2_EFFECT_PORT_AI_PROMPT.md (AI onboarding + GUID rule)
+docs:     docs/L2Fx_Shader_Library_API.md (L2Fx_* function index)
 .uc:      Assets/Resources/Data/Effects/might/wh_might_ca/m_u004_a.uc (MeshEmitter9)
 .mat:     Assets/Resources/Data/Effects/might/wh_might_ca/MeshEmitter9.mat
 shader:   Assets/Resources/Data/Shaders/Skills/Might/MightCaMesh.shader
@@ -780,4 +788,6 @@ common:   Assets/Resources/Data/Shaders/Skills/Common/L2FxMeshLifetimeAlpha.hlsl
 mesh:     supportenchant00 (FBX in project Resources)
 tex:      fx_m_t0005_A.png
 prefab:   Assets/Resources/Data/Effects/might/wh_might_ca/wh_might_ca.prefab
+ref mat:  Assets/Resources/Data/Effects/cure_posion/wh_cure_poison_ta/SpriteEmitter8_Left.mat
+          → shader guid b7a91d5d4e6c4f23a8b197c4e2f6031a → VampiricTouchFlash.shader
 ```
