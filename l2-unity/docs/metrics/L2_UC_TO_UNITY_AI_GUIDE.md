@@ -1,4 +1,4 @@
-# Lineage 2 UE3 .uc -> Unity URP material mapping guide for AI
+# Lineage 2 UE2.5 .uc -> Unity URP material mapping guide for AI
 
 **Related docs (read first):**
 
@@ -16,10 +16,12 @@ Finished effect examples with `.uc` + `.mat` files are in:
 
 Generated from a scan of the current project:
 
-- `.uc` files found: 18
-- `.mat` files found: 95
-- custom skill shaders found: 18
-- direct emitter-name `.uc` -> `.mat` pairs found: 76
+- `.uc` files found under `Assets/Resources/Data/Effects`: 23
+- extra working `.uc` copy found under `Assets/Resources/Data/Shaders/Skills`: 1
+- `.mat` files found under `Assets/Resources/Data/Effects`: 105
+- custom skill shaders found: 24
+- shared skill HLSL helpers found: 23
+- direct emitter-name `.uc` -> `.mat` pairs: use a fresh scan before bulk edits; this value changes as effects are split into dedicated shaders
 
 Important project rule: C# scripts usually handle particle instances, physics, movement and positioning. Shaders are primarily visual renderers: texture, color, alpha, atlas, size scale, spin, optional shader-side spawn/motion. Do not blindly enable shader-side motion if C# already moves particles.
 
@@ -235,6 +237,8 @@ _ApplyUuToStartSize = 0/1
 
 Project preference: keep backward-compatible defaults. If a shader already uses authored Unity quad bounds, do not force raw UE size scaling.
 
+`DrawScale` is a class/actor-level scale in the `.uc` defaultproperties block. Treat it as prefab/object scale context, not as a replacement for `StartSizeRange`. The current auto-mapper does not write `DrawScale` to materials.
+
 ### SizeScale
 
 ```uc
@@ -254,6 +258,131 @@ _SizeScaleRepeats = .uc SizeScaleRepeats if present
 ```
 
 If `RelativeTime` is omitted in `SizeScale(0)`, use 0.0. If `RelativeSize` is omitted, use 1.0.
+
+`UseRegularSizeScale` controls scalar vs per-axis SizeScale behavior in UE. Current `.uc` files mostly set it to `False`; the auto-mapper does not currently write `_UseRegularSizeScale`, so preserve existing material values unless the shader is being checked visually.
+
+### MeshEmitter autoscale formula
+
+For new dedicated MeshEmitter HLSL shaders, use the shared helper:
+
+```text
+Assets/Resources/Data/Shaders/Skills/Common/L2FxMeshAutoScale.hlsl
+```
+
+Default formula:
+
+```text
+finalMeshScale = UeAxisToUnity(StartSizeRange) * SizeScale(age) * _L2FxMeshScale * _L2FxEffectScale
+```
+
+MeshEmitter `StartSizeRange` is usually mesh-local scale in these `.uc` files (`0.04..0.4` ranges are common). Do not multiply it by `0.01` by default. Keep `_ApplyUuToStartSize = 0` unless the shader/material was explicitly authored to treat mesh size as Unreal Units.
+
+| Source | Material property | Purpose | Default |
+|---|---|---|---|
+| `.uc StartSizeRange` | `_StartSize` or `_SizeRangeX/Y/Z` | Base mesh scale; preserve UE values and convert axis order in shader | From `.uc` |
+| `.uc SizeScale(n)` | `_SizeScaleTimeN`, `_SizeScaleValN` or `_SizeScaleN` | Lifetime size curve | From `.uc` |
+| Per-effect tuning | `_L2FxMeshScale` | Individual correction for a mesh/effect when authored FBX scale differs | `1` |
+| Runtime target scale | `_L2FxEffectScale` | Autoscale for target size, e.g. human vs wolf vs large NPC | `1` |
+| `.uc DrawScale` | Prefab/object context for now | Actor-level scale; often already approximated by prefab transforms | Do not auto-apply yet |
+
+Example: `might/wh_might_ca/MeshEmitter1` keeps `.uc _StartSize=(0.4,0.4,0.2)` and `.uc SizeScale=(1,3,3.7,4)`, then uses `_L2FxMeshScale=1.935` to preserve the currently tuned visual size. Future runtime autoscale should change `_L2FxEffectScale`, not the UC values.
+
+### SpriteEmitter autoscale formula
+
+For new dedicated SpriteEmitter HLSL shaders, use the shared helper:
+
+```text
+Assets/Resources/Data/Shaders/Skills/Common/L2FxSpriteAutoScale.hlsl
+```
+
+Default formula:
+
+```text
+baseSpriteSize = L2Fx_StartSize(StartSizeRangeUU, UniformSize, seed, startTime)
+finalSpriteSize = baseSpriteSize * _L2FxSpriteScale * _L2FxEffectScale
+```
+
+SpriteEmitter `StartSizeRange` is usually raw Unreal Units (`2..16` ranges are common). Keep raw `.uc` values in `_SizeRange`; `L2Fx_StartSize` applies the project `0.01` UU-to-Unity conversion. This is intentionally different from new MeshEmitter dedicated shaders, where `StartSizeRange` is usually mesh-local scale and `_ApplyUuToStartSize` stays off.
+
+| Source | Material property | Purpose | Default |
+|---|---|---|---|
+| `.uc StartSizeRange` | `_SizeRange` or `_SizeRangeX/Y/Z` | Base sprite size in raw UU | From `.uc` |
+| `.uc SizeScale(n)` | `_SizeScaleTimeN`, `_SizeScaleValN` or `_SizeScaleN` | Lifetime size curve | From `.uc` |
+| Per-effect tuning | `_L2FxSpriteScale` | Individual correction for a sprite/effect | `1` |
+| Runtime target scale | `_L2FxEffectScale` | Autoscale for target size, e.g. human vs wolf vs large NPC | `1` |
+| Billboard compensation | `_BillboardScale` | Manual billboard/object scale override; do not use as UC size replacement | Shader-specific |
+| `.uc DrawScale` | Prefab/object context for now | Actor-level scale; often approximated by prefab transforms | Do not auto-apply yet |
+
+Example: `might/wh_might_ca/SpriteEmitter7` keeps `.uc _SizeRange=(4,8)`, then uses `_L2FxSpriteScale=1.21` to preserve the tuned visual size. Future runtime autoscale should change `_L2FxEffectScale`, not the UC `_SizeRange`.
+
+### Shader target position
+
+Some sprite effects spawn around one point but travel toward a character attachment point, for example lower-body sparks flying toward caster center. Use the runtime shader target bridge instead of adding per-emitter scripts.
+
+Composite part fields:
+
+```text
+passShaderTargetPosition = true
+shaderTargetAttachmentPoint = CasterCenter / TargetCenter / TargetRoot / ...
+shaderTargetPositionOffset = local offset from resolved attach point (same space as positionOffset)
+```
+
+Use `shaderTargetPositionOffset` to nudge the shader focal point without editing material `_StartLocationOffset` or re-tuning spawn geometry. Example: `CasterCenter` is chest height, so `y = -0.35` moves the converge point lower on the body.
+
+Shader/material fields:
+
+```text
+_UseExternalTargetPosition = 1
+_L2FxTargetWorldPos = set by ParticleGroup at runtime
+```
+
+The runtime stores the resolved attachment as a local point relative to its transform when possible, so the shader target follows the character if it moves. Shaders should fall back to their local `.uc` focal point when `_UseExternalTargetPosition=0`.
+
+### UC to Unity convert layer
+
+For new dedicated shaders, keep raw `.uc` values in their matching material fields, then run them through a single UC-to-Unity conversion step before calling size, spin, or motion helpers.
+
+```text
+raw .uc material params
+  -> L2FxUcToUnityConvert.hlsl
+  -> Unity-ready size/spin/motion values
+  -> vertex helpers
+```
+
+The shared helper is:
+
+```text
+Assets/Resources/Data/Shaders/Skills/Common/L2FxUcToUnityConvert.hlsl
+```
+
+Current convert data fields:
+
+| Convert data | Material property | Purpose | Default |
+|---|---|---|---|
+| Mesh size | `_L2FxMeshScale` | Per-mesh/per-effect FBX size conversion | `1` |
+| Sprite size | `_L2FxSpriteScale` | Per-sprite/per-effect visual size conversion | `1` |
+| Runtime target size | `_L2FxEffectScale` | Autoscale for owner/target size | `1` |
+| Mesh spin direction | `_L2FxMeshSpinDirection` | Convert mesh spin direction without changing `.uc SpinCCWorCW` | `1` |
+
+New mesh shaders should assemble convert data once, then pass converted values to the lower-level helpers:
+
+```text
+convertData = mesh UC-to-Unity data from material properties
+startSizeUnity = L2Fx_UcToUnityMeshSize(.uc StartSizeRange, convertData)
+spinsPerSecondUnity = L2Fx_UcToUnityMeshSpinRate(.uc SpinsPerSecond, convertData)
+startLocationOffsetUnity = L2Fx_UcToUnityStartLocationOffset(.uc StartLocationOffset, convertData)
+```
+
+Use `_L2FxMeshSpinDirection=-1` when a mesh renders with the opposite visual rotation after Unity axis/mesh conversion. Example: `might/wh_might_ca/MeshEmitter9` keeps `.uc _SpinCCWorCW=1`, then uses `_L2FxMeshSpinDirection=-1` so the Unity-ready spin rate has the correct visual direction.
+
+StartLocationOffset rule:
+
+```text
+.uc StartLocationOffset=(X,Y,Z)
+Unity offset = (X,Z,Y) * _SpawnUnitScale
+```
+
+So a `.uc` Z offset becomes Unity Y-up offset. Example: `StartLocationOffset=(Z=5)` converts to Unity `(0, 0.05, 0)` when `_SpawnUnitScale=0.01`.
 
 ### Spin
 
@@ -368,6 +497,38 @@ _RadialSpeed = derived speed range when GetVelocityDirectionFrom is radial/spher
 If `.uc` has `GetVelocityDirectionFrom=PTVD_OwnerAndStartPosition` with polar spawn, direction is **not** a raw velocity axis — see section 9. Often set speed on `_VelocityRangeX` only and derive direction from `spawnOfs.xz`.
 
 Scan result for old materials showed velocity ratios around 0.01 to 0.02 for many cases, confirming UU-to-meter conversion plus some manual tuning.
+
+### Per-Effect UC Scale Compensation
+
+Some dedicated shaders should keep raw `.uc` values visible in the material inspector, then apply measured per-effect compensation in HLSL. Use this when RenderDoc matching finds a stable conversion between authored UE values and Unity visual geometry.
+
+Shared conversion helper:
+
+```text
+Assets/Resources/Data/Shaders/Skills/Common/L2FxUcToUnityConvert.hlsl
+```
+
+For `might/wh_might_ca/SpriteEmitter7` / `MightTaSprite`, keep these values copied directly from `m_u004_a.uc`:
+
+```text
+_PolarRadius = (14, 14, 0, 0)
+_StartLocationRangeX/Y/Z = (-10, 10, 0, 0)
+_StartLocationOffset = (0, 0, 10, 0)
+_VelocityRangeX/Y = (30, 30, 0, 0)
+_Acceleration = (0, 0, 100, 0)
+```
+
+Then apply the tuned scale layer:
+
+```text
+_UcPolarRadiusScale = 0.32142857       // 14 -> 4.5
+_UcStartLocationRangeScale = 0.16      // +/-10 -> +/-1.6
+_UcStartLocationOffsetScale = 0.24     // Z 10 -> Z 2.4
+_UcVelocityScale = 0.33333334          // 30 -> 10
+_UcAccelerationScale = 0.32            // 100 -> 32
+```
+
+This preserves the original UC numbers for future ports while matching the current RenderDoc-tuned Unity geometry.
 
 ### VelocityLossRange
 
@@ -673,6 +834,9 @@ Assets/Resources/Data/Shaders/Skills/Common/L2FxMeshBrightenD3d9.hlsl
   L2Fx_MeshBrighten_TexHueTint       — normalized texture hue for additive tail lift
   L2Fx_MeshBrighten_D3d9TexFactor    — full fragment: tex * factor + tailLift, rgb *= lifeAlpha
 
+Assets/Resources/Data/Shaders/Skills/Common/L2FxPlasmaParticleBlend.hlsl
+  L2Fx_PlasmaParticle_ApplyLowLumaRgbScale — soft plasma RGB control without hot-center blowout
+
 Assets/Resources/Data/Shaders/Skills/Common/L2FxMeshLifetimeAlpha.hlsl
   L2Fx_MeshLifetimeAlphaHold         — fade-in on elapsedAge, fade-out with _Hold rules
 ```
@@ -694,7 +858,9 @@ if (_UseD3d9BrightenFs >= 0.5)
         texColor, factor, (half)IN.lifeAlpha,
         _TailLift,
         _SoftLumMin, _SoftLumMax, _LineLumMin, _LineLumMax,
-        _RgbBoost, _AlphaBoost, _IgnoreMainTexAlpha);
+        _RgbBoost, _PlasmaRgbScale, _PlasmaLumaMax,
+        _AlphaBoost, _IgnoreMainTexAlpha,
+        _D3d9FadeAlphaWithLife);
 }
 ```
 
@@ -706,6 +872,8 @@ These are **shader artistic controls**, not direct `.uc` scalar copies:
 _UseD3d9BrightenFs = 1          // required for head+tail mesh path
 _RgbBoost = 1                   // base tex * factor RGB
 _AlphaBoost = 1..1.25           // SrcAlpha One contribution
+_PlasmaLumaMax = 0.215..0.35    // luma cutoff for low-luma plasma control
+_PlasmaRgbScale = 0.5..1.1      // RGB multiplier only on low-luma plasma texels
 _TailLift = 0.35..2             // additive RGB on soft tail band only (tune visually)
 _SoftLumMin / _SoftLumMax       // luma range of fading tail (default 0 .. 0.45)
 _LineLumMin / _LineLumMax       // luma range of bright head, excluded from tail lift
@@ -724,6 +892,31 @@ Avoid:   Texture Type "From Gray Scale" for alpha — kills soft tail on blue ti
 ```
 
 Assign `_MainTex` to the `_A` variant when `_IgnoreMainTexAlpha = 0`.
+
+### Plasma + hot center particles
+
+For `fx_m_t0005`-style effects where the texture contains both soft blue plasma and a bright hot center/line, keep the plasma control in the shared include:
+
+```hlsl
+#include "../Common/L2FxPlasmaParticleBlend.hlsl"
+
+rgb = L2Fx_PlasmaParticle_ApplyLowLumaRgbScale(
+    rgb, texRgb, _PlasmaRgbScale, _PlasmaLumaMax);
+```
+
+Use this when matching `PTDS_Brighten` particles/meshes where raising global luma or `_RgbBoost` makes the center blow out before the plasma reads correctly.
+
+```text
+_PlasmaLumaMax: luma cutoff for the soft plasma region
+_PlasmaRgbScale: RGB multiplier only for low-luma plasma texels
+```
+
+Reference tuning from `might/wh_might_ca`:
+
+```text
+SpriteEmitter7: _PlasmaLumaMax = 0.215, _PlasmaRgbScale = 1.032
+MeshEmitter1:   _PlasmaLumaMax = 0.215, _PlasmaRgbScale = 1.032
+```
 
 ### Lifetime, fade-in, and hold
 

@@ -12,6 +12,8 @@
 // Texture: use authored alpha (fx_m_t*_A.png), not From Gray Scale on blue VFX atlases.
 // Include after L2FxMeshFragment.hlsl.
 
+#include "L2FxPlasmaParticleBlend.hlsl"
+
 // Weight for tail band: smoothstep(softLum) excluding bright head (lineLum).
 float L2Fx_MeshBrighten_SoftTailWeight(
     float3 texRgb,
@@ -49,6 +51,8 @@ half4 L2Fx_MeshBrighten_D3d9TexFactor(
     float lineLumMin,
     float lineLumMax,
     float rgbBoost,
+    float plasmaRgbScale,
+    float plasmaLumaMax,
     float alphaBoost,
     float ignoreMainTexAlpha,
     float fadeAlphaWithLife)
@@ -60,6 +64,8 @@ half4 L2Fx_MeshBrighten_D3d9TexFactor(
         texColor.rgb, softLumMin, softLumMax, lineLumMin, lineLumMax);
     half3 hueTint = L2Fx_MeshBrighten_TexHueTint(texColor.rgb);
     rgb += hueTint * factor.rgb * (half)softW * (half)tailLift;
+    rgb = L2Fx_PlasmaParticle_ApplyLowLumaRgbScale(
+        rgb, texColor.rgb, plasmaRgbScale, plasmaLumaMax);
     rgb *= la;
 
     half alpha = factor.a * (half)alphaBoost;

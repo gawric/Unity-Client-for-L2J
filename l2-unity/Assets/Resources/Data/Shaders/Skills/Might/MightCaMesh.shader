@@ -39,6 +39,8 @@ Shader "L2/Effects/MightCaMesh"
         _Opacity ("Opacity", Range(0, 2)) = 1
         _EmitterAlpha ("Emitter Alpha", Range(0, 1)) = 1
 
+        [Enum(UnityEngine.Rendering.BlendMode)] _SrcBlend ("Source Blend", Float) = 5
+        [Enum(UnityEngine.Rendering.BlendMode)] _DstBlend ("Destination Blend", Float) = 1
         [Toggle] _IgnoreMainTexAlpha ("Ignore texture alpha (fx_m_t A=255)", Float) = 1
         [Toggle] _AlphaFromLuma ("Alpha from luma (black = transparent)", Float) = 1
         _LumaAlphaFloor ("Luma alpha trim", Range(0, 0.25)) = 0.02
@@ -47,6 +49,8 @@ Shader "L2/Effects/MightCaMesh"
         [Header(D3D9 Brighten FS supportenchant00)]
         [Toggle] _UseD3d9BrightenFs ("D3D9 FF: tex * textureFactor (no luma trim)", Float) = 0
         _RgbBoost ("RGB Boost (heads + base)", Range(0.25, 4)) = 1
+        _PlasmaRgbScale ("Plasma RGB Scale (low luma only)", Range(0, 2)) = 1
+        _PlasmaLumaMax ("Plasma Luma Max", Range(0.01, 1)) = 0.35
         _AlphaBoost ("Alpha Boost (SrcAlpha One)", Range(0.25, 3)) = 1
         _TailLift ("Tail RGB lift (additive, soft band only)", Range(0, 2)) = 0.35
         [Toggle] _D3d9FadeAlphaWithLife ("D3D9: multiply alpha by lifeAlpha", Float) = 0
@@ -57,6 +61,8 @@ Shader "L2/Effects/MightCaMesh"
 
         _StartSize ("Start Size UE order (X,Y,Z from .uc)", Vector) = (0.2, 0.2, 0.25, 0)
         [Toggle] _ApplyUuToStartSize ("Also x UU->m on size (off for Unity FBX)", Float) = 0
+        _L2FxEffectScale ("L2 Fx Effect Scale (runtime target)", Float) = 1
+        _L2FxMeshScale ("L2 Fx Mesh Scale (per-effect tune)", Float) = 1
         [Toggle] _UniformSize ("Uniform Size", Float) = 0
         [Toggle] _UseSizeScale ("Use SizeScale", Float) = 1
         [Toggle] _UseRegularSizeScale ("Regular SizeScale", Float) = 0
@@ -78,6 +84,7 @@ Shader "L2/Effects/MightCaMesh"
         _StartSpinRange ("Start Spin rev (Min,Max)", Vector) = (0, 1, 0, 0)
         _SpinsPerSecond ("Spins Per Second rev/s", Float) = 1.5
         _SpinCCWorCW ("Spin CCW(0) / CW(1)", Range(0, 1)) = 1
+        _L2FxMeshSpinDirection ("L2 Fx Mesh Spin Direction (UC->Unity)", Float) = 1
 
         _StartLocationOffset ("StartLocationOffset UE (X,Y,Z)", Vector) = (0, 0, 0, 0)
         _MeshYOffset ("Lift above ground (m)", Float) = 0
@@ -102,7 +109,7 @@ Shader "L2/Effects/MightCaMesh"
             "RenderType" = "Transparent"
         }
 
-        Blend SrcAlpha One
+        Blend [_SrcBlend] [_DstBlend]
         Cull Off
         ZWrite Off
         ZTest LEqual
@@ -123,6 +130,7 @@ Shader "L2/Effects/MightCaMesh"
             #include "../Common/L2FxMeshLifetimeAlpha.hlsl"
             #include "../Common/L2FxMeshBrightenD3d9.hlsl"
             #include "../Common/L2FxHold.hlsl"
+            #include "../Common/L2FxMeshAutoScale.hlsl"
 
             TEXTURE2D(_MainTex);
             SAMPLER(sampler_MainTex);
@@ -153,12 +161,16 @@ Shader "L2/Effects/MightCaMesh"
                 float4 _ColorMultMax;
                 float _Opacity;
                 float _EmitterAlpha;
+                float _SrcBlend;
+                float _DstBlend;
                 float _IgnoreMainTexAlpha;
                 float _AlphaFromLuma;
                 float _LumaAlphaFloor;
                 float _AlphaEdgeFeather;
                 float _UseD3d9BrightenFs;
                 float _RgbBoost;
+                float _PlasmaRgbScale;
+                float _PlasmaLumaMax;
                 float _AlphaBoost;
                 float _TailLift;
                 float _D3d9FadeAlphaWithLife;
@@ -168,6 +180,8 @@ Shader "L2/Effects/MightCaMesh"
                 float _LineLumMax;
                 float4 _StartSize;
                 float _ApplyUuToStartSize;
+                float _L2FxEffectScale;
+                float _L2FxMeshScale;
                 float _UniformSize;
                 float _UseSizeScale;
                 float _UseRegularSizeScale;
@@ -188,6 +202,7 @@ Shader "L2/Effects/MightCaMesh"
                 float4 _StartSpinRange;
                 float _SpinsPerSecond;
                 float _SpinCCWorCW;
+                float _L2FxMeshSpinDirection;
                 float4 _StartLocationOffset;
                 float _MeshYOffset;
                 float _ClipDepthBias;
@@ -214,12 +229,15 @@ Shader "L2/Effects/MightCaMesh"
                 float lifeAlpha : TEXCOORD2;
             };
 
-            float3 MightCaMeshResolveStartSizeUnity()
+            L2Fx_UcToUnityMeshConvertData MightCaMeshConvertData()
             {
-                float3 sizeUnity = L2Fx_UeVectorToUnity(_StartSize.xyz);
-                if (_ApplyUuToStartSize > 0.5)
-                    sizeUnity *= _SpawnUnitScale;
-                return sizeUnity;
+                L2Fx_UcToUnityMeshConvertData data;
+                data.applyUuToStartSize = _ApplyUuToStartSize;
+                data.spawnUnitScale = _SpawnUnitScale;
+                data.effectScale = _L2FxEffectScale;
+                data.meshScale = _L2FxMeshScale;
+                data.meshSpinDirection = _L2FxMeshSpinDirection;
+                return data;
             }
 
             float3 MightCaMeshParticleMotion(float ageSeconds)
@@ -255,13 +273,19 @@ Shader "L2/Effects/MightCaMesh"
 
                 float3 posOS = IN.positionOS.xyz;
                 float3 nrmOS = IN.normalOS;
-                float3 startSizeUnity = MightCaMeshResolveStartSizeUnity();
+                L2Fx_UcToUnityMeshConvertData convertData = MightCaMeshConvertData();
+                float3 startSizeUnity = L2Fx_UcToUnityMeshSize(_StartSize.xyz, convertData);
+                float spinsPerSecondUnity = L2Fx_UcToUnityMeshSpinRate(_SpinsPerSecond, convertData);
+                float3 startLocationOffsetUnity = L2Fx_UcToUnityStartLocationOffset(_StartLocationOffset.xyz, convertData);
 
-                L2Fx_MeshBuiltin_TransformVertexOS_SplitAge(
+                L2Fx_MeshBuiltin_TransformVertexOS_SplitAgeUnityOffset(
                     posOS, nrmOS,
-                    _SpinParticles, startSpinRev, _SpinsPerSecond, _SpinCCWorCW,
+                    _SpinParticles,
+                    startSpinRev,
+                    spinsPerSecondUnity,
+                    _SpinCCWorCW,
                     spinAge, sizeAgeNorm,
-                    startSizeUnity, 0.0,
+                    startSizeUnity,
                     _UseSizeScale, _UseRegularSizeScale,
                     _SizeScaleParam, _SizeScaleRepeats, _SizeScaleCount,
                     _SizeScaleTime0, _SizeScaleVal0,
@@ -269,7 +293,7 @@ Shader "L2/Effects/MightCaMesh"
                     _SizeScaleTime2, _SizeScaleVal2,
                     _SizeScaleTime3, _SizeScaleVal3,
                     _SizeScaleTime4, _SizeScaleVal4,
-                    _StartLocationOffset.xyz, _MeshYOffset, 0.0);
+                    startLocationOffsetUnity, _MeshYOffset, 0.0);
 
                 posOS += MightCaMeshParticleMotion(motionAge);
 
@@ -313,7 +337,8 @@ Shader "L2/Effects/MightCaMesh"
                         texColor, factor, (half)IN.lifeAlpha,
                         _TailLift,
                         _SoftLumMin, _SoftLumMax, _LineLumMin, _LineLumMax,
-                        _RgbBoost, _AlphaBoost, _IgnoreMainTexAlpha,
+                        _RgbBoost, _PlasmaRgbScale, _PlasmaLumaMax,
+                        _AlphaBoost, _IgnoreMainTexAlpha,
                         _D3d9FadeAlphaWithLife);
                 }
 

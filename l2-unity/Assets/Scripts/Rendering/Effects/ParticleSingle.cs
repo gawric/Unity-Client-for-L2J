@@ -461,6 +461,6 @@ public class ParticleSingle : EffectPart
             return;
         }
 
-        material.SetVector(L2MaterialPropertyCopier.OwnerWorldPosProperty, ResolveOwnerWorldPos());
+        material.SetVector(L2MaterialPropertyCopier.OwnerWorldPosProperty, ResolveOwnerWorldPosForShader(material));
     }
 }

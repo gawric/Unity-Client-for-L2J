@@ -14,6 +14,7 @@ Material:
   m_ValidKeywords: []
   m_InvalidKeywords:
   - _ALPHAFROMLUMA_ON
+  - _DEBUGMESHPREVIEW_ON
   - _FADEIN_ON
   - _FADEOUT_ON
   - _HASLIFETIME_ON
@@ -38,6 +39,7 @@ Material:
     - _ColorScaleCount: 3
     - _SizeScaleCount: 4
     m_Floats:
+    - _AlphaBoost: 1
     - _AlphaEdgeFeather: 0.02
     - _AlphaFromLuma: 1
     - _ApplyUuToStartSize: 0
@@ -46,21 +48,29 @@ Material:
     - _ColorScaleRepeats: 8
     - _ColorScaleTime1: 0.5
     - _ColorScaleTime2: 1
-    - _DebugMeshPreview: 0
+    - _D3d9FadeAlphaWithLife: 0
+    - _DebugMeshPreview: 1
     - _DebugMeshPreviewAge: 0
     - _DebugMeshPreviewLoop: 0
     - _EmitterAlpha: 1
     - _FadeIn: 1
     - _FadeInEndTime: 0.02
+    - _FadeOutPower: 1
     - _Fadeout: 1
     - _FadeoutStartTime: 0.78
     - _HasLifetime: 1
     - _Hold: 0
     - _HoldSizeReference: 0.413
     - _IgnoreMainTexAlpha: 1
+    - _L2FxEffectScale: 1
+    - _L2FxMeshScale: 1.25
+    - _L2FxMeshSpinDirection: -1
+    - _LineLumMax: 1
+    - _LineLumMin: 0.35
     - _LumaAlphaFloor: 0.02
     - _MeshYOffset: 0
     - _Opacity: 1
+    - _RgbBoost: 1
     - _Seed: 0
     - _SizeScaleCount: 4
     - _SizeScaleParam: 0
@@ -75,12 +85,16 @@ Material:
     - _SizeScaleVal2: 1.8
     - _SizeScaleVal3: 2.1
     - _SizeScaleVal4: 2.1
+    - _SoftLumMax: 0.45
+    - _SoftLumMin: 0
     - _SpawnUnitScale: 0.01
     - _SpinCCWorCW: 1
     - _SpinParticles: 1
     - _SpinsPerSecond: 1.5
     - _StartTime: 0
+    - _TailLift: 0.35
     - _UniformSize: 0
+    - _UseD3d9BrightenFs: 0
     - _UseRegularSizeScale: 0
     - _UseSizeScale: 1
     - _bAlphaBlend: 0
@@ -94,7 +108,7 @@ Material:
     - _InitialDelayRange: {r: 0, g: 0, b: 0, a: 0}
     - _LifetimeRange: {r: 2, g: 2, b: 0, a: 0}
     - _StartLocationOffset: {r: 0, g: 0, b: 0, a: 0}
-    - _StartSize: {r: 1, g: 1, b: 1, a: 0}
+    - _StartSize: {r: 0.2, g: 0.2, b: 0.25, a: 0}
     - _StartSpinRange: {r: 0, g: 1, b: 0, a: 0}
     - _StartVelocityRangeZ: {r: -23, g: -23, b: 0, a: 0}
   m_BuildTextureStacks: []

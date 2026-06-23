@@ -6,6 +6,9 @@ using UnityEngine;
 public static class L2MaterialPropertyCopier
 {
     public const string OwnerWorldPosProperty = "_OwnerWorldPos";
+    public const string UseExternalTargetPositionProperty = "_UseExternalTargetPosition";
+    public const string UseOwnerFromShaderTargetProperty = "_UseOwnerFromShaderTarget";
+    public const string L2FxTargetWorldPosProperty = "_L2FxTargetWorldPos";
 
     public static readonly int HoldId = Shader.PropertyToID("_Hold");
     public static readonly int HoldSizeReferenceId = Shader.PropertyToID("_HoldSizeReference");
@@ -18,6 +21,11 @@ public static class L2MaterialPropertyCopier
     public static readonly int FadeInEndTimeId = Shader.PropertyToID("_FadeInEndTime");
     public static readonly int FadeoutId = Shader.PropertyToID("_Fadeout");
     public static readonly int FadeoutStartTimeId = Shader.PropertyToID("_FadeoutStartTime");
+    public static readonly int FadeOutPowerId = Shader.PropertyToID("_FadeOutPower");
+    public static readonly int DebugAtlasPreviewId = Shader.PropertyToID("_DebugAtlasPreview");
+    public static readonly int RgbBoostId = Shader.PropertyToID("_RgbBoost");
+    public static readonly int AlphaBoostId = Shader.PropertyToID("_AlphaBoost");
+    public static readonly int OpacityId = Shader.PropertyToID("_Opacity");
     public static readonly int AtlasUvRemapId = Shader.PropertyToID("_AtlasUvRemap");
     public static readonly int AtlasUvMinMaxId = Shader.PropertyToID("_AtlasUvMinMax");
     public static readonly int IgnoreMainTexAlphaId = Shader.PropertyToID("_IgnoreMainTexAlpha");
@@ -51,6 +59,9 @@ public static class L2MaterialPropertyCopier
     public static readonly int BillboardToCameraId = Shader.PropertyToID("_BillboardToCamera");
     public static readonly int BillboardWorldUpId = Shader.PropertyToID("_BillboardWorldUp");
     public static readonly int BillboardEulerOffsetId = Shader.PropertyToID("_BillboardEulerOffset");
+    public static readonly int UseExternalTargetPositionId = Shader.PropertyToID(UseExternalTargetPositionProperty);
+    public static readonly int UseOwnerFromShaderTargetId = Shader.PropertyToID(UseOwnerFromShaderTargetProperty);
+    public static readonly int L2FxTargetWorldPosId = Shader.PropertyToID(L2FxTargetWorldPosProperty);
 
     public static void CopyLifetimeFadeAndFxFromShared(Material runtimeMat, Material sharedMat)
     {
@@ -59,21 +70,25 @@ public static class L2MaterialPropertyCopier
             return;
         }
 
-        if (runtimeMat.HasProperty(HasLifetimeId) && sharedMat.HasProperty(HasLifetimeId))
-        {
-            float runtimeHasLifetime = runtimeMat.GetFloat(HasLifetimeId);
-            if (runtimeHasLifetime > 0.5f)
-            {
-                runtimeMat.SetFloat(HasLifetimeId, sharedMat.GetFloat(HasLifetimeId));
-            }
-        }
-
+        CopyFloatIfPresent(runtimeMat, sharedMat, HasLifetimeId);
         CopyVectorIfPresent(runtimeMat, sharedMat, LifetimeRangeId);
         CopyVectorIfPresent(runtimeMat, sharedMat, InitialDelayRangeId);
         CopyFloatIfPresent(runtimeMat, sharedMat, FadeInId);
         CopyFloatIfPresent(runtimeMat, sharedMat, FadeInEndTimeId);
         CopyFloatIfPresent(runtimeMat, sharedMat, FadeoutId);
         CopyFloatIfPresent(runtimeMat, sharedMat, FadeoutStartTimeId);
+        CopyFloatIfPresent(runtimeMat, sharedMat, FadeOutPowerId);
+        if (Application.isPlaying && runtimeMat.HasProperty(DebugAtlasPreviewId))
+        {
+            runtimeMat.SetFloat(DebugAtlasPreviewId, 0f);
+        }
+        else
+        {
+            CopyFloatIfPresent(runtimeMat, sharedMat, DebugAtlasPreviewId);
+        }
+        CopyFloatIfPresent(runtimeMat, sharedMat, RgbBoostId);
+        CopyFloatIfPresent(runtimeMat, sharedMat, AlphaBoostId);
+        CopyFloatIfPresent(runtimeMat, sharedMat, OpacityId);
         CopyFloatIfPresent(runtimeMat, sharedMat, AtlasUvRemapId);
         CopyVectorIfPresent(runtimeMat, sharedMat, AtlasUvMinMaxId);
         CopyFloatIfPresent(runtimeMat, sharedMat, IgnoreMainTexAlphaId);

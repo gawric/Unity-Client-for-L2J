@@ -1,5 +1,5 @@
 // m_u004_a SpriteEmitter7: PTDS_Brighten, fx_m_t0005 4x4, polar spawn + box range,
-// funnel ease-in motion toward StartLocationOffset apex, ColorScale/SizeScale repeats.
+// PTVD_StartPositionAndOwner velocity toward focal (or funnel ease-in fallback), ColorScale/SizeScale repeats.
 Shader "L2/Effects/MightTaSprite"
 {
     Properties
@@ -13,13 +13,16 @@ Shader "L2/Effects/MightTaSprite"
         _Seed ("Seed", Float) = 0
 
         [Toggle] _FadeIn ("Fade In", Float) = 0
-        _FadeInEndTime ("FadeIn End Time (sec)", Float) = 0
+        _FadeInEndTime ("FadeIn End Time (sec, preview+play)", Float) = 0
         [Toggle] _Fadeout ("Fade Out", Float) = 1
-        _FadeoutStartTime ("FadeOut Start Time (sec)", Float) = 0.5
+        _FadeoutStartTime ("FadeOut Start Time (sec, preview+play)", Float) = 0.5
+        _FadeOutPower ("FadeOut Power (>1 faster early dim)", Range(0.25, 4)) = 1
 
         _Opacity ("Opacity", Range(0, 2)) = 1
         _TextureDilateTexels ("Texture Dilate Texels", Range(0, 24)) = 0
         _RgbBoost ("RGB Boost", Range(0, 16)) = 1
+        _PlasmaRgbScale ("Plasma RGB Scale (low luma only)", Range(0, 2)) = 1
+        _PlasmaLumaMax ("Plasma Luma Max", Range(0.01, 1)) = 0.35
         _AlphaBoost ("Alpha Boost", Range(0, 16)) = 1
         [Toggle] _IgnoreMainTexAlpha ("Ignore texture alpha", Float) = 1
         [Toggle] _AlphaFromLuma ("Alpha from luma", Float) = 1
@@ -46,15 +49,30 @@ Shader "L2/Effects/MightTaSprite"
         _PolarPitchDeg ("Polar Pitch from +Z Deg (Min,Max)", Vector) = (75, 105, 0, 0)
         _PolarRadius ("Polar Radius UU (Min,Max)", Vector) = (14, 14, 0, 0)
         _SpawnUnitScale ("Spawn/velocity UU->Unity (0.01)", Float) = 0.01
+        _UcStartLocationOffsetScale ("UC StartLocationOffset Scale (Might CA tune)", Float) = 1
+        _UcStartLocationRangeScale ("UC StartLocationRange Scale (Might CA tune)", Float) = 1
+        _UcPolarRadiusScale ("UC PolarRadius Scale (Might CA tune)", Float) = 1
+        _UcVelocityScale ("UC StartVelocity Scale (Might CA tune)", Float) = 1
+        _UcAccelerationScale ("UC Acceleration Scale (Might CA tune)", Float) = 1
         _OwnerWorldPos ("Owner World Pos (ParticleGroup)", Vector) = (0, 0, 0, 0)
+        [Toggle] _UseExternalTargetPosition ("Use External Target Position", Float) = 0
+        [Toggle] _UseOwnerFromShaderTarget ("Owner From Shader Target (CasterCenter)", Float) = 0
+        _L2FxTargetWorldPos ("L2 Fx Target World Pos", Vector) = (0, 0, 0, 0)
 
-        _VelocityRangeX ("(legacy UE velocity, unused)", Vector) = (30, 30, 0, 0)
-        _VelocityRangeY ("(legacy UE velocity, unused)", Vector) = (30, 30, 0, 0)
-        _Acceleration ("Arc Bend Accel UE (X,Y,Z)", Vector) = (0, 0, 100, 0)
-        _FunnelEasePower ("Funnel Ease-In Power (>1 = slow start)", Range(1, 5)) = 2.5
-        _FunnelArcScale ("Funnel Arc From Accel", Range(0, 0.25)) = 0.06
+        [Toggle] _UseVelocityTowardFocal ("Velocity Toward Focal (PTVD_StartPositionAndOwner)", Float) = 0
+        [Toggle] _UseFull3DVelocityFromOwner ("Full 3D Velocity From Owner (UE PTVD pitch)", Float) = 0
+        _VelocityRangeX ("StartVelocityRange X UU (Min,Max)", Vector) = (30, 30, 0, 0)
+        _VelocityRangeY ("StartVelocityRange Y UU (Min,Max)", Vector) = (30, 30, 0, 0)
+        _Acceleration ("Acceleration UE (X,Y,Z)", Vector) = (0, 0, 100, 0)
+        _ArcTangentialWeight ("Arc Tangential / Radial Speed (ring spiral)", Range(0, 1.5)) = 0
+        _FocalConvergeStart ("Focal Converge Start (norm age, 0.85 = last 15%)", Range(0, 1)) = 1
+        _FocalConvergePower ("Focal Converge Pull Power (>1 = tighter finish)", Range(0.5, 4)) = 2
+        _FunnelEasePower ("Funnel Ease-In Power (>1 = slow start, funnel mode only)", Range(1, 5)) = 2.5
+        _FunnelArcScale ("Funnel Arc From Accel (funnel mode only)", Range(0, 0.25)) = 0.06
 
-        _SizeRange ("Start Size UU (Min,Max)", Vector) = (4.4, 8.8, 0, 0)
+        _SizeRange ("Start Size UU (Min,Max)", Vector) = (4, 8, 0, 0)
+        _L2FxEffectScale ("L2 Fx Effect Scale (runtime target)", Float) = 1
+        _L2FxSpriteScale ("L2 Fx Sprite Scale (per-effect tune)", Float) = 1
         _BillboardScale ("Manual Billboard Scale (0 = object scale)", Float) = 0
         [Toggle] _UniformSize ("Uniform Size", Float) = 1
 
@@ -87,10 +105,10 @@ Shader "L2/Effects/MightTaSprite"
         [Header(Debug)]
         [Toggle] _DebugAtlasPreview ("Debug Atlas Preview (_StartTime=0)", Float) = 0
         [Toggle] _DebugAtlasPreviewLoop ("Debug Preview Loop", Float) = 0
-        _DebugAtlasPreviewAge ("Debug Preview Age (sec, pause)", Range(0, 4)) = 0.25
+        _DebugAtlasPreviewAge ("Debug Preview Life (0-1 of Lifetime)", Range(0, 1)) = 0.25
         _DebugAtlasPreviewSizeScale ("Debug Preview Size Multiplier", Range(0.5, 32)) = 8
-        _DebugAtlasPreviewAlpha ("Debug Preview Alpha", Range(0, 1)) = 0.85
-        _DebugAtlasPreviewBoost ("Debug Preview RGB Boost", Range(0.25, 8)) = 1
+        _DebugAtlasPreviewAlpha ("Debug Preview Floor Alpha (unused w/ fade)", Range(0, 1)) = 0.85
+        _DebugAtlasPreviewBoost ("Debug Preview RGB Extra Boost", Range(0.25, 8)) = 1
         _DebugAtlasBackground ("Debug Preview Background", Color) = (0.03, 0.04, 0.08, 1)
         [Toggle] _DebugSpawnRegion ("Debug Spawn Region Wire (Scene)", Float) = 0
         _DebugSpawnRegionColor ("Debug Spawn Region Color", Color) = (1, 0.15, 0.55, 1)
@@ -105,7 +123,7 @@ Shader "L2/Effects/MightTaSprite"
             "RenderType" = "Transparent"
         }
 
-        Blend SrcAlpha One
+        Blend One OneMinusSrcColor
         Cull Off
         ZWrite Off
         ZTest LEqual
@@ -131,6 +149,9 @@ Shader "L2/Effects/MightTaSprite"
             #include "../Common/L2FxMeshFragment.hlsl"
             #include "../Common/L2FxAtlasDebug.hlsl"
             #include "../Common/L2FxSpawnRegionDebug.hlsl"
+            #include "../Common/L2FxSpriteAutoScale.hlsl"
+            #include "../Common/L2FxUcToUnityConvert.hlsl"
+            #include "../Common/L2FxPlasmaParticleBlend.hlsl"
 
             TEXTURE2D(_MainTex);
             SAMPLER(sampler_MainTex);
@@ -147,9 +168,12 @@ Shader "L2/Effects/MightTaSprite"
                 float _FadeInEndTime;
                 float _Fadeout;
                 float _FadeoutStartTime;
+                float _FadeOutPower;
                 float _Opacity;
                 float _TextureDilateTexels;
                 float _RgbBoost;
+                float _PlasmaRgbScale;
+                float _PlasmaLumaMax;
                 float _AlphaBoost;
                 float _IgnoreMainTexAlpha;
                 float _AlphaFromLuma;
@@ -174,13 +198,27 @@ Shader "L2/Effects/MightTaSprite"
                 float4 _PolarPitchDeg;
                 float4 _PolarRadius;
                 float _SpawnUnitScale;
+                float _UcStartLocationOffsetScale;
+                float _UcStartLocationRangeScale;
+                float _UcPolarRadiusScale;
+                float _UcVelocityScale;
+                float _UcAccelerationScale;
                 float4 _OwnerWorldPos;
+                float _UseExternalTargetPosition;
+                float4 _L2FxTargetWorldPos;
+                float _UseVelocityTowardFocal;
+                float _UseFull3DVelocityFromOwner;
                 float4 _VelocityRangeX;
                 float4 _VelocityRangeY;
                 float4 _Acceleration;
+                float _ArcTangentialWeight;
+                float _FocalConvergeStart;
+                float _FocalConvergePower;
                 float _FunnelEasePower;
                 float _FunnelArcScale;
                 float4 _SizeRange;
+                float _L2FxEffectScale;
+                float _L2FxSpriteScale;
                 float _BillboardScale;
                 float _UniformSize;
                 float _UseSizeScale;
@@ -235,17 +273,33 @@ Shader "L2/Effects/MightTaSprite"
                 nointerpolation float focalVisibility : TEXCOORD4;
             };
 
+            float3 MightTaSpawnStartLocationOffsetUe()
+            {
+                return L2Fx_UcToUnityApplyScale3(_StartLocationOffset.xyz, _UcStartLocationOffsetScale);
+            }
+
             float3 MightTaSpawnOffsetUe(float pSeed)
             {
                 return L2Fx_SpawnRegionOffsetUe(
                     _PolarAzimuthDeg.xy,
                     _PolarPitchDeg.xy,
-                    _PolarRadius.xy,
-                    _StartLocationOffset.xyz,
-                    float3(_StartLocationRangeX.x, _StartLocationRangeY.x, _StartLocationRangeZ.x),
-                    float3(_StartLocationRangeX.y, _StartLocationRangeY.y, _StartLocationRangeZ.y),
+                    L2Fx_UcToUnityApplyScale2(_PolarRadius.xy, _UcPolarRadiusScale),
+                    MightTaSpawnStartLocationOffsetUe(),
+                    L2Fx_UcToUnityApplyScale3(
+                        float3(_StartLocationRangeX.x, _StartLocationRangeY.x, _StartLocationRangeZ.x),
+                        _UcStartLocationRangeScale),
+                    L2Fx_UcToUnityApplyScale3(
+                        float3(_StartLocationRangeX.y, _StartLocationRangeY.y, _StartLocationRangeZ.y),
+                        _UcStartLocationRangeScale),
                     pSeed,
                     _StartTime);
+            }
+
+            float3 MightTaFocalOffsetWS()
+            {
+                float3 offsetOs = L2Fx_UeVectorToUnity(
+                    L2Fx_UcToUnityApplyScale3(_StartLocationOffset.xyz, _UcStartLocationOffsetScale));
+                return TransformObjectToWorld(offsetOs) - TransformObjectToWorld(float3(0.0, 0.0, 0.0));
             }
 
             float MightTaUnitsToWorld()
@@ -256,8 +310,73 @@ Shader "L2/Effects/MightTaSprite"
             // Funnel apex: StartLocationOffset center (matches spawn wireframe top-center).
             float3 MightTaMotionFocalWS()
             {
+                if (_UseExternalTargetPosition > 0.5)
+                {
+                    return _L2FxTargetWorldPos.xyz;
+                }
+
                 float3 focalOs = L2Fx_UeVectorToUnity(_StartLocationOffset.xyz);
                 return TransformObjectToWorld(focalOs);
+            }
+
+            // PTVD_StartPositionAndOwner: inward radial to owner + ring tangent arc + UE accel bend.
+            float3 MightTaArcVelocityDirWS(float3 spawnWS, float3 ownerWS)
+            {
+                float3 toOwnerWS = ownerWS - spawnWS;
+                float3 radialDir;
+                if (_UseFull3DVelocityFromOwner > 0.5)
+                {
+                    float radialLen = length(toOwnerWS);
+                    radialDir = radialLen > 1e-5 ? (toOwnerWS / radialLen) : float3(0, 0, 1);
+                }
+                else
+                {
+                    float3 toOwnerH = float3(toOwnerWS.x, 0, toOwnerWS.z);
+                    float radialLenH = length(toOwnerH);
+                    radialDir = radialLenH > 1e-5 ? (toOwnerH / radialLenH) : float3(0, 0, 1);
+                }
+
+                float3 radialH = float3(radialDir.x, 0, radialDir.z);
+                float radialLenH2 = length(radialH);
+                float3 radialDirH = radialLenH2 > 1e-5 ? (radialH / radialLenH2) : float3(0, 0, 1);
+                float tangentialSign = _SpinCCWorCW > 0.5 ? -1.0 : 1.0;
+                float3 tangentDirH = float3(-radialDirH.z, 0, radialDirH.x) * tangentialSign;
+                float3 velDir = radialDir + tangentDirH * _ArcTangentialWeight;
+                if (length(velDir) > 1e-5)
+                {
+                    return normalize(velDir);
+                }
+
+                return radialDir;
+            }
+
+            void MightTaVelocityFocalArrival(
+                float3 spawnWS,
+                float3 focalWS,
+                float3 vel,
+                float stopDist,
+                inout float3 centerWS,
+                out float pathProgress,
+                inout float visibility)
+            {
+                float3 toFocalWS = focalWS - spawnWS;
+                float initialDist = length(toFocalWS);
+                float distToFocal = length(centerWS - focalWS);
+                pathProgress = saturate(1.0 - distToFocal / max(initialDist, 1e-5));
+
+                float movingAwayFromFocal = dot(centerWS - focalWS, vel);
+                bool reachedFocal = distToFocal <= stopDist;
+                bool overshotFocal = movingAwayFromFocal > 0.0 && distToFocal < initialDist * 0.8;
+
+                if (reachedFocal || overshotFocal)
+                {
+                    centerWS = focalWS;
+                    pathProgress = 1.0;
+                    if (overshotFocal)
+                    {
+                        visibility = 0.0;
+                    }
+                }
             }
 
             void MightTaResolveAtlasUvs(
@@ -307,7 +426,12 @@ Shader "L2/Effects/MightTaSprite"
                 float pSeed = L2Fx_SpriteMaterialSeed(_Seed);
                 float delay = L2Fx_RandomInitialDelay(_InitialDelayRange.xy, pSeed, _StartTime, 3.0);
                 float lifetime = L2Fx_RandomLifetime(_LifetimeRange.xy, pSeed, _StartTime, 7.0);
-                float age = L2Fx_AgeSeconds(_Time.y, _StartTime, delay);
+                // InitialDelay hides alpha in frag. Motion/size/spin also wait so the spark
+                // appears on the spawn ring at full brightness, then flies inward while fading.
+                float slotAge = max(0.0, _Time.y - _StartTime);
+                float motionAge = max(0.0, slotAge - delay);
+                motionAge = min(motionAge, lifetime);
+                float age = motionAge;
                 if (_StartTime <= 1e-4 && _DebugAtlasPreview < 0.5)
                 {
                     age = min(age, max(_LifetimeRange.y, 1e-4));
@@ -335,13 +459,15 @@ Shader "L2/Effects/MightTaSprite"
                 if (scenePreview > 0.5)
                 {
                     // Fixed preview size — animated SizeScale looks like motion into camera.
-                    baseSize = L2Fx_StartSize(
+                    baseSize = L2Fx_SpriteAutoScaleStartSize(
                         _SizeRange.xy,
                         _SizeRange.xy,
                         _SizeRange.xy,
                         _UniformSize > 0.5,
                         pSeed,
-                        _StartTime) * max(_DebugAtlasPreviewSizeScale, 0.5);
+                        _StartTime,
+                        1.0,
+                        _L2FxSpriteScale) * max(_DebugAtlasPreviewSizeScale, 0.5);
                 }
                 else
                 {
@@ -358,13 +484,15 @@ Shader "L2/Effects/MightTaSprite"
                         _SizeScaleTime3, _SizeScaleVal3,
                         1.0, 1.0);
 
-                    baseSize = L2Fx_StartSize(
+                    baseSize = L2Fx_SpriteAutoScaleStartSize(
                         _SizeRange.xy,
                         _SizeRange.xy,
                         _SizeRange.xy,
                         _UniformSize > 0.5,
                         pSeed,
-                        _StartTime) * sizeMul;
+                        _StartTime,
+                        _L2FxEffectScale,
+                        _L2FxSpriteScale) * sizeMul;
                 }
 
                 float3 quadOS = IN.positionOS.xyz * baseSize;
@@ -382,32 +510,76 @@ Shader "L2/Effects/MightTaSprite"
                 float3 centerWS = spawnWS;
                 float focalVisibility = 1.0;
 
-                // Funnel: ease-in spawn→focal (slow start, fast finish) + optional accel arc.
                 {
                     float uuToWorld = MightTaUnitsToWorld();
                     float pathProgress;
                     float3 focalWS = MightTaMotionFocalWS();
 
-                    centerWS = L2Fx_EaseInPathPosition(
-                        spawnWS, focalWS, ageNorm, _FunnelEasePower, pathProgress);
+                    if (_UseVelocityTowardFocal > 0.5)
+                    {
+                        // PTVD_StartPositionAndOwner: speed along owner<-spawn arc, not straight to chest focal.
+                        float3 ownerWS = _OwnerWorldPos.xyz;
+                        float3 velDir = MightTaArcVelocityDirWS(spawnWS, ownerWS);
+                        float speedUe = L2Fx_RandomRange(
+                            L2Fx_UcToUnityApplyScale2(_VelocityRangeX.xy, _UcVelocityScale),
+                            pSeed,
+                            _StartTime,
+                            101.0);
+                        float3 vel = velDir * speedUe * uuToWorld;
+                        float3 acc = L2Fx_UeVectorToUnity(
+                            L2Fx_UcToUnityApplyScale3(_Acceleration.xyz, _UcAccelerationScale)) * uuToWorld;
+                        float3 disp = L2Fx_DisplacementConstantAccel(vel, acc, age);
+                        centerWS = spawnWS + disp;
 
-                    centerWS += L2Fx_EaseInPathArcOffset(
-                        L2Fx_UeVectorToUnity(_Acceleration.xyz) * uuToWorld,
-                        age,
-                        pathProgress,
-                        _FunnelArcScale);
+                        if (_FocalConvergeStart < 0.999)
+                        {
+                            float stopDist = max(2.0, _SizeRange.y * 0.35) * uuToWorld;
+                            MightTaVelocityFocalArrival(
+                                spawnWS,
+                                focalWS,
+                                vel,
+                                stopDist,
+                                centerWS,
+                                pathProgress,
+                                focalVisibility);
 
-                    L2Fx_FocalArrivalClamp(
-                        focalWS,
-                        pathProgress,
-                        0.985,
-                        max(2.0, _SizeRange.y * 0.35) * uuToWorld,
-                        centerWS,
-                        focalVisibility);
+                            centerWS = L2Fx_EndFocalConverge(
+                                centerWS,
+                                focalWS,
+                                ageNorm,
+                                _FocalConvergeStart,
+                                _FocalConvergePower);
+                        }
+                    }
+                    else
+                    {
+                        // Funnel fallback: ease-in spawn→focal (slow start, fast finish) + optional accel arc.
+                        centerWS = L2Fx_EaseInPathPosition(
+                            spawnWS, focalWS, ageNorm, _FunnelEasePower, pathProgress);
+
+                        centerWS += L2Fx_EaseInPathArcOffset(
+                            L2Fx_UeVectorToUnity(
+                                L2Fx_UcToUnityApplyScale3(_Acceleration.xyz, _UcAccelerationScale)) * uuToWorld,
+                            age,
+                            pathProgress,
+                            _FunnelArcScale);
+                    }
+
+                    if (_UseVelocityTowardFocal <= 0.5)
+                    {
+                        L2Fx_FocalArrivalClamp(
+                            focalWS,
+                            pathProgress,
+                            0.985,
+                            max(2.0, _SizeRange.y * 0.35) * uuToWorld,
+                            centerWS,
+                            focalVisibility);
+                    }
                 }
 
                 if (focalVisibility < 0.5)
                 {
+                    // Hard clip only on velocity overshoot — lifetime fade uses lifeAlpha in frag.
                     quadOS = 0.0;
                 }
 
@@ -437,7 +609,26 @@ Shader "L2/Effects/MightTaSprite"
 
                 if (scenePreview > 0.5)
                 {
-                    OUT.tint = float4(1.0, 1.0, 1.0, 1.0);
+                    float ctimes[8];
+                    float4 ccols[8];
+                    L2Fx_BuildColorScaleArrays5(
+                        _ColorScaleCount,
+                        _ColorScale0,
+                        _ColorScaleTime1, _ColorScale1,
+                        _ColorScaleTime2, _ColorScale2,
+                        _ColorScaleTime3, _ColorScale3,
+                        1.0, float4(1, 1, 1, 1),
+                        ctimes,
+                        ccols);
+
+                    float csParam = max(_ColorScaleRepeats, 1.0) - 1.0;
+                    OUT.tint = L2Fx_SampleColorScale(
+                        ageNorm,
+                        csParam,
+                        _ColorScaleCount,
+                        ctimes,
+                        ccols,
+                        _bAlphaBlend > 0.5);
                 }
                 else
                 {
@@ -516,20 +707,31 @@ Shader "L2/Effects/MightTaSprite"
                 float pSeed = IN.particleSeed;
                 float delay = L2Fx_RandomInitialDelay(_InitialDelayRange.xy, pSeed, _StartTime, 3.0);
                 float lifetime = L2Fx_RandomLifetime(_LifetimeRange.xy, pSeed, _StartTime, 7.0);
+                lifetime = max(lifetime, 1e-4);
 
                 half4 texA = MightTaDilatedSample(IN.uvAtlasA);
                 half4 texB = MightTaDilatedSample(IN.uvAtlasB);
                 half4 mixed = lerp(texA, texB, (half)IN.flipbookBlend);
 
-                if (_DebugAtlasPreview > 0.5)
+                float scenePreview = L2Fx_AtlasDebug_IsScenePreviewActive(_DebugAtlasPreview, _StartTime);
+                if (scenePreview > 0.5)
                 {
-                    float previewMask = MightTaSampleAlpha(mixed);
-                    return L2Fx_AtlasDebugPreviewColor(
-                        mixed,
-                        previewMask,
-                        _DebugAtlasPreviewAlpha,
-                        _DebugAtlasPreviewBoost,
-                        _DebugAtlasBackground);
+                    float mask = MightTaSampleAlpha(mixed);
+                    float lifeAlpha = L2Fx_AtlasDebug_PreviewLifeAlpha(
+                        _DebugAtlasPreviewLoop,
+                        _DebugAtlasPreviewAge,
+                        _Time.y,
+                        lifetime,
+                        _HasLifetime,
+                        _FadeIn,
+                        _FadeInEndTime,
+                        _Fadeout,
+                        _FadeoutStartTime,
+                        _FadeOutPower);
+                    half3 rgb = mixed.rgb * (half3)IN.tint.rgb * (half)(_RgbBoost * _DebugAtlasPreviewBoost);
+                    half alpha = (half)saturate(mask * _AlphaBoost * IN.tint.a * _Opacity * lifeAlpha);
+                    half3 previewRgb = lerp((half3)_DebugAtlasBackground.rgb, rgb, (half)saturate(mask));
+                    return half4(saturate(previewRgb), alpha);
                 }
 
                 float mask = MightTaSampleAlpha(mixed);
@@ -537,10 +739,17 @@ Shader "L2/Effects/MightTaSprite"
                 float lifeAlpha = L2Fx_LifetimeAlpha(
                     _Time.y, _HasLifetime, _StartTime, delay, lifetime,
                     _FadeIn, _FadeInEndTime, _Fadeout, _FadeoutStartTime);
+                if (_Fadeout > 0.5)
+                {
+                    lifeAlpha = pow(saturate(lifeAlpha), max(_FadeOutPower, 0.0001));
+                }
 
                 // Brighten fx_m_t0005: RGB boost on full tex (incl. dim halo fill), mask gates alpha only.
+                // FadeOut/FadeIn via lifeAlpha only — focalVisibility is overshoot clip in vert, not alpha fade.
                 half3 rgb = mixed.rgb * (half3)IN.tint.rgb * (half)_RgbBoost;
-                half alpha = (half)saturate(mask * _AlphaBoost * IN.tint.a * _Opacity * lifeAlpha * IN.focalVisibility);
+                rgb = L2Fx_PlasmaParticle_ApplyLowLumaRgbScale(
+                    rgb, mixed.rgb, _PlasmaRgbScale, _PlasmaLumaMax);
+                half alpha = (half)saturate(mask * _AlphaBoost * IN.tint.a * _Opacity * lifeAlpha);
                 return half4(saturate(rgb), alpha);
             }
 

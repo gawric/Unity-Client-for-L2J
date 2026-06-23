@@ -12,7 +12,14 @@ Material:
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
-  m_InvalidKeywords: []
+  m_InvalidKeywords:
+  - _ALPHAFROMLUMA_ON
+  - _FADEOUT_ON
+  - _HASLIFETIME_ON
+  - _IGNOREMAINTEXALPHA_ON
+  - _SPINPARTICLES_ON
+  - _UNIFORMSIZE_ON
+  - _USESIZESCALE_ON
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
@@ -27,9 +34,81 @@ Material:
         m_Texture: {fileID: 2800000, guid: 0eb799b46a9ac16408f938314e03d640, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
-    m_Ints: []
-    m_Floats: []
+    m_Ints:
+    - _ColorScaleCount: 3
+    - _SizeScaleCount: 5
+    m_Floats:
+    - _AlphaBoost: 1
+    - _AlphaEdgeFeather: 0.02
+    - _AlphaFromLuma: 1
+    - _ApplyUuToStartSize: 0
+    - _ClipDepthBias: 0.001
+    - _ColorScaleCount: 3
+    - _ColorScaleRepeats: 1
+    - _ColorScaleTime1: 0.5
+    - _ColorScaleTime2: 1
+    - _D3d9FadeAlphaWithLife: 0
+    - _DebugMeshPreview: 0
+    - _DebugMeshPreviewAge: 0
+    - _DebugMeshPreviewLoop: 0
+    - _EmitterAlpha: 1
+    - _FadeIn: 0
+    - _FadeInEndTime: 0
+    - _FadeOutPower: 1
+    - _Fadeout: 1
+    - _FadeoutStartTime: 0
+    - _HasLifetime: 1
+    - _Hold: 0
+    - _HoldSizeReference: 0
+    - _IgnoreMainTexAlpha: 1
+    - _L2FxEffectScale: 1
+    - _L2FxMeshScale: 1
+    - _L2FxMeshSpinDirection: 1
+    - _LineLumMax: 1
+    - _LineLumMin: 0.35
+    - _LumaAlphaFloor: 0.02
+    - _MeshYOffset: 0
+    - _Opacity: 1
+    - _RgbBoost: 1
+    - _Seed: 0
+    - _SizeScaleCount: 5
+    - _SizeScaleParam: 0
+    - _SizeScaleRepeats: 1
+    - _SizeScaleTime0: 0
+    - _SizeScaleTime1: 0.14
+    - _SizeScaleTime2: 0.37
+    - _SizeScaleTime3: 0.81
+    - _SizeScaleTime4: 1
+    - _SizeScaleVal0: 0.5
+    - _SizeScaleVal1: 3.5
+    - _SizeScaleVal2: 4.6
+    - _SizeScaleVal3: 5.1
+    - _SizeScaleVal4: 5.3
+    - _SoftLumMax: 0.45
+    - _SoftLumMin: 0
+    - _SpawnUnitScale: 0.01
+    - _SpinCCWorCW: 0
+    - _SpinParticles: 1
+    - _SpinsPerSecond: 0
+    - _StartTime: 0
+    - _TailLift: 0.35
+    - _UniformSize: 1
+    - _UseD3d9BrightenFs: 0
+    - _UseRegularSizeScale: 0
+    - _UseSizeScale: 1
+    - _bAlphaBlend: 0
     m_Colors:
-    - _Tint: {r: 1, g: 1, b: 1, a: 1}
+    - _Acceleration: {r: 0, g: 0, b: 0, a: 0}
+    - _ColorMultMax: {r: 1, g: 1, b: 1, a: 1}
+    - _ColorMultMin: {r: 1, g: 1, b: 1, a: 1}
+    - _ColorScale0: {r: 1, g: 1, b: 1, a: 1}
+    - _ColorScale1: {r: 0.7372549, g: 0.7372549, b: 0.7372549, a: 1}
+    - _ColorScale2: {r: 0.2, g: 0.2, b: 0.2, a: 1}
+    - _InitialDelayRange: {r: 0, g: 0.1, b: 0, a: 0}
+    - _LifetimeRange: {r: 1.5, g: 1.5, b: 0, a: 0}
+    - _StartLocationOffset: {r: 0, g: 0, b: 8, a: 0}
+    - _StartSize: {r: 0.065, g: 0.065, b: 0.065, a: 0}
+    - _StartSpinRange: {r: 0, g: 1, b: 0, a: 0}
+    - _StartVelocityRangeZ: {r: 0, g: 0, b: 0, a: 0}
   m_BuildTextureStacks: []
   m_AllowLocking: 1

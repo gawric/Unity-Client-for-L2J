@@ -6,6 +6,7 @@ public class ParticleGroup : EffectPart
     private const string DebugTraceEffectName = "el_wind_strike_ta";
     private const string DebugTraceHealEffectToken = "wh_heal";
     private const string DebugTraceCurePoisonToken = "cure_poison";
+    private const string DebugTraceMightCaToken = "might_ca";
     private const string IceBoltTaEffectName = "el_ice_bolt_ta";
     private const string IcebergGroupName = "iceberg";
     private const string IcefragGroupName = "icefrag";
@@ -90,6 +91,7 @@ public class ParticleGroup : EffectPart
 
     // Prevent auto-running in scene before explicit PlayPart/Setup.
     private bool _stopped = true;
+    private bool _spawnStopped;
     private float _lastEnable;
     private float _lastLoop;
     private int _particleIndex = 0;
@@ -111,16 +113,23 @@ public class ParticleGroup : EffectPart
     private bool _runtimeParticleClonesCreated;
     private bool _burstSpawnFinished;
     private float _lastCurePoisonShaderTimeLog;
+    private float _lastMightCaShaderTimeLog;
 
     public void FixedUpdate()
     {
-        if (_stopped) return;
+        if (_stopped)
+        {
+            return;
+        }
 
         float now = Now();
         float timeSinceEnable = now - _lastEnable;
 
         // 1. ПРОВЕРКА ЗАДЕРЖКИ СТАРТА ГРУППЫ
-        if (timeSinceEnable < _startDelay) return;
+        if (!_spawnStopped && timeSinceEnable < _startDelay)
+        {
+            return;
+        }
 
         // 2. КОНТРОЛЬ СМЕРТИ ЧАСТИЦ (Индивидуально)
         bool anyActive = false;
@@ -131,7 +140,7 @@ public class ParticleGroup : EffectPart
                 if (_isParticleActive[i])
                 {
                     anyActive = true;
-                    UpdateOwnerWorldPos(_particles[i]);
+                    UpdateDynamicShaderWorldPositions(_particles[i]);
                     if (now - _particleSpawnTimes[i] >= _duration)
                     {
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
@@ -180,9 +189,25 @@ public class ParticleGroup : EffectPart
             _lastCurePoisonShaderTimeLog = now;
             LogCurePoisonShaderTimeSample(now, "tick");
         }
+
+        if (ShouldTraceMightCa() && anyActive && now - _lastMightCaShaderTimeLog >= 0.2f)
+        {
+            _lastMightCaShaderTimeLog = now;
+            LogMightCaShaderTimeSample(now, "tick");
+        }
 #endif
 
         // 3. ЛОГИКА СПАВНА
+        if (_spawnStopped)
+        {
+            if (!anyActive)
+            {
+                _stopped = true;
+            }
+
+            return;
+        }
+
         bool shouldLoopContinuously = _forceContinuousSpawning || _runtimeContinuousLoop;
         if (_spawnedCount < _maxCount || shouldLoopContinuously)
         {
@@ -290,7 +315,7 @@ public class ParticleGroup : EffectPart
                     $"shaderMat={BuildRuntimeMaterialLifetimeSnapshot(_particles[_particleIndex], now)} frame={Time.frameCount}.");
             }
 #endif
-            UpdateOwnerWorldPos(_particles[_particleIndex]);
+            UpdateDynamicShaderWorldPositions(_particles[_particleIndex]);
             _particleIndex++;
             return;
         }
@@ -346,21 +371,25 @@ public class ParticleGroup : EffectPart
                 continue;
             }
 
-            // Keep alpha exactly as configured in shared material.
-            if (m.HasProperty("_Alpha") && sharedMaterials != null && materialIndex < sharedMaterials.Length)
+            Material shared = sharedMaterials != null && materialIndex < sharedMaterials.Length
+                ? sharedMaterials[materialIndex]
+                : null;
+            if (shared != null)
             {
-                Material shared = sharedMaterials[materialIndex];
-                if (shared != null && shared.HasProperty("_Alpha"))
-                {
-                    m.SetFloat("_Alpha", shared.GetFloat("_Alpha"));
-                }
+                L2MaterialPropertyCopier.CopyLifetimeFadeAndFxFromShared(m, shared);
+            }
+
+            // Keep alpha exactly as configured in shared material.
+            if (m.HasProperty("_Alpha") && shared != null && shared.HasProperty("_Alpha"))
+            {
+                m.SetFloat("_Alpha", shared.GetFloat("_Alpha"));
             }
 
             // Debug.Log("Set Start Time " + shaderStartTime + " Seed " + seed + "name " + m.name);
             m.SetFloat("_StartTime", shaderStartTime);
             m.SetFloat("_Seed", seed);
             ApplySpawnSpin(_particles[_particleIndex], seed);
-            SetOwnerWorldPos(m);
+            SetDynamicShaderWorldPositions(m);
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
             if (ShouldTraceCurePoison())
@@ -369,6 +398,18 @@ public class ParticleGroup : EffectPart
                     $"[CURE_POISON_SPAWN] group='{name}' slot={_particleIndex} mat='{m.name}' now={now:F3}s " +
                     $"shaderStart={shaderStartTime:F3}s seed={seed:F3} burstDone={_burstSpawnFinished} " +
                     $"spawnedCount={_spawnedCount + 1}/{_maxCount} frame={Time.frameCount}.");
+            }
+
+            if (ShouldTraceMightCa())
+            {
+                Vector4 delayRange = m.HasProperty("_InitialDelayRange") ? m.GetVector("_InitialDelayRange") : Vector4.zero;
+                Debug.Log(
+                    $"[MIGHT_CA_SPAWN] group='{name}' slot={_particleIndex} now={now:F3}s shaderStart={shaderStartTime:F3}s " +
+                    $"warmup={_relativeWarmupTime:F3}s groupDuration={_duration:F3}s seed={seed:F3} " +
+                    $"initDelayRange=({delayRange.x:F3},{delayRange.y:F3}) " +
+                    $"note=INITIAL_DELAY at age=0 on activate is normal; watch MIGHT_CA_SHADER_TICK after delay " +
+                    $"[FADE_PHASE]={ShaderFadeDiagnostic.FadePhaseLabel(m, now)} " +
+                    $"{ShaderFadeDiagnostic.BuildLine(m, now)} frame={Time.frameCount}.");
             }
 #endif
             if (SurfaceNormal != Vector3.zero)
@@ -402,23 +443,34 @@ public class ParticleGroup : EffectPart
         if (_fitToBounds && OwnerTarget != null) FitToOwnerWidth(OwnerTarget);
 
         _lastEnable = Now();
-        _lastLoop = 0;
+        float spawnInterval = _countPerSecond > 0 ? 1f / _countPerSecond : 0.05f;
+        _lastLoop = _lastEnable - spawnInterval;
         _particleIndex = 0;
         _spawnedCount = 0;
         _stopped = false;
+        _spawnStopped = false;
         _burstSpawnFinished = false;
         _debugPlayStartedAt = _lastEnable;
         _debugFirstSpawnLogged = false;
         _lastWhHealShaderTimeLog = 0f;
         _lastWhHealPreserveLog = 0f;
         _lastCurePoisonShaderTimeLog = 0f;
+        _lastMightCaShaderTimeLog = 0f;
 
         if (_particles == null || _particles.Length == 0)
             _particles = GetComponentsInChildren<Renderer>(true);
 
         if (_duration < 0.01f)
         {
-            _duration = GetLifeTimeFromMaterial();
+            _duration = GetShaderSlotDurationFromMaterial();
+        }
+        else
+        {
+            float shaderSlotDuration = GetShaderSlotDurationFromMaterial();
+            if (_duration < shaderSlotDuration)
+            {
+                _duration = shaderSlotDuration;
+            }
         }
 
         EnsureRuntimeParticleCapacity();
@@ -534,9 +586,27 @@ public class ParticleGroup : EffectPart
         return 0.5f;
     }
 
+    private float GetShaderSlotDurationFromMaterial()
+    {
+        float lifetime = GetLifeTimeFromMaterial();
+        float maxDelay = 0f;
+        if (_particles != null && _particles.Length > 0)
+        {
+            foreach (Material m in _particles[0].sharedMaterials)
+            {
+                if (m != null && m.HasProperty("_InitialDelayRange"))
+                {
+                    maxDelay = m.GetVector("_InitialDelayRange").y;
+                }
+            }
+        }
+
+        return lifetime + maxDelay + 0.03f;
+    }
+
     private float Now() => Application.isPlaying ? Time.time : Time.realtimeSinceStartup;
 
-    private void UpdateOwnerWorldPos(Renderer renderer)
+    private void UpdateDynamicShaderWorldPositions(Renderer renderer)
     {
         if (renderer == null)
         {
@@ -546,18 +616,31 @@ public class ParticleGroup : EffectPart
         Material[] materials = renderer.materials;
         for (int i = 0; i < materials.Length; i++)
         {
-            SetOwnerWorldPos(materials[i]);
+            SetDynamicShaderWorldPositions(materials[i]);
         }
     }
 
-    private void SetOwnerWorldPos(Material material)
+    private void SetDynamicShaderWorldPositions(Material material)
     {
-        if (material == null || !material.HasProperty(OwnerWorldPosShaderProperty))
+        if (material == null)
         {
             return;
         }
 
-        material.SetVector(OwnerWorldPosShaderProperty, ResolveOwnerWorldPos());
+        if (material.HasProperty(OwnerWorldPosShaderProperty))
+        {
+            material.SetVector(OwnerWorldPosShaderProperty, ResolveOwnerWorldPosForShader(material));
+        }
+
+        if (material.HasProperty(L2MaterialPropertyCopier.L2FxTargetWorldPosId))
+        {
+            bool hasTarget = TryResolveShaderTargetWorldPos(out Vector3 targetWorldPos);
+            material.SetVector(L2MaterialPropertyCopier.L2FxTargetWorldPosId, targetWorldPos);
+            if (material.HasProperty(L2MaterialPropertyCopier.UseExternalTargetPositionId))
+            {
+                material.SetFloat(L2MaterialPropertyCopier.UseExternalTargetPositionId, hasTarget ? 1f : 0f);
+            }
+        }
     }
 
 
@@ -680,7 +763,37 @@ public class ParticleGroup : EffectPart
         _runtimeContinuousLoop = false;
         _hasRuntimeContinuousLoopOverride = true;
         _runtimeContinuousLoopOverrideValue = false;
-        _stopped = true;
+        _spawnStopped = true;
+
+        if (_instantKillAtCastEnd)
+        {
+            DeactivateAllParticles();
+            _stopped = true;
+        }
+    }
+
+    private void DeactivateAllParticles()
+    {
+        if (_particles == null)
+        {
+            return;
+        }
+
+        if (_particleSpawnTimes == null || _particleSpawnTimes.Length != _particles.Length)
+        {
+            _particleSpawnTimes = new float[_particles.Length];
+            _isParticleActive = new bool[_particles.Length];
+        }
+
+        for (int i = 0; i < _particles.Length; i++)
+        {
+            if (_particles[i] != null)
+            {
+                _particles[i].gameObject.SetActive(false);
+            }
+
+            _isParticleActive[i] = false;
+        }
     }
 
     private bool ShouldTraceDebug()
@@ -728,6 +841,17 @@ public class ParticleGroup : EffectPart
         return ShouldTraceEffectToken(DebugTraceCurePoisonToken);
     }
 
+    private bool ShouldTraceMightCa()
+    {
+        if (!string.IsNullOrEmpty(name) &&
+            name.IndexOf("SpriteEmitter7", System.StringComparison.OrdinalIgnoreCase) >= 0)
+        {
+            return true;
+        }
+
+        return ShouldTraceEffectToken(DebugTraceMightCaToken);
+    }
+
     private bool ShouldTraceEffectToken(string token)
     {
         if (!string.IsNullOrEmpty(name) &&
@@ -764,6 +888,11 @@ public class ParticleGroup : EffectPart
     private void LogCurePoisonShaderTimeSample(float now, string reason)
     {
         LogShaderTimeSample(now, reason, "CURE_POISON_SHADER_TICK");
+    }
+
+    private void LogMightCaShaderTimeSample(float now, string reason)
+    {
+        LogShaderTimeSample(now, reason, "MIGHT_CA_SHADER_TICK");
     }
 
     private void LogShaderTimeSample(float now, string reason, string logTag)

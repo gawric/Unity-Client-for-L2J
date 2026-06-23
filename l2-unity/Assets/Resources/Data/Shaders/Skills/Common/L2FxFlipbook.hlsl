@@ -88,14 +88,20 @@ void L2Fx_FlipbookAtlasUVBlend(
 
 // --- Gawric SubDivision-style (random cell, not time-based) ---
 
-// Matches intent of SubDivision: RandomRange(Seed, FrameStart, FrameEnd) then Floor -> int cell index.
+// Matches UE UseRandomSubdivision: uniform integer in [frameStart, frameEnd] inclusive.
 int L2Fx_FlipbookSubDivisionRandomFrame(float seed, float startTime, int frameStart, int frameEnd, float salt)
 {
-    float mn = (float) min(frameStart, frameEnd);
-    float mx = (float) max(frameStart, frameEnd);
-    float r = L2Fx_RandomRange(float2(mn, mx), seed, startTime, salt);
-    int idx = (int) floor(r);
-    return clamp(idx, min(frameStart, frameEnd), max(frameStart, frameEnd));
+    int lo = min(frameStart, frameEnd);
+    int hi = max(frameStart, frameEnd);
+    int span = hi - lo + 1;
+    if (span <= 1)
+    {
+        return lo;
+    }
+
+    float t = L2Fx_Hash11((seed * 17.0) + (startTime * 31.0) + salt);
+    int idx = lo + (int)floor(t * (float)span);
+    return clamp(idx, lo, hi);
 }
 
 // Atlas UV for one quad: same SubDivision mapping as L2Fx_FlipbookAtlasUV.

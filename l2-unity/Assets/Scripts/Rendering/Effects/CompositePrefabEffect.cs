@@ -86,6 +86,11 @@ public class CompositePrefabPart
     public bool followResolvedTransform = true;
     public bool inheritRotation = true;
     public bool passCastDataToPart = true;
+    [Header("Shader Target Position")]
+    public bool passShaderTargetPosition = false;
+    public EffectAttachmentPoint shaderTargetAttachmentPoint = EffectAttachmentPoint.CasterCenter;
+    [Tooltip("Local offset from resolved shader target attachment point (in attachment transform space if available).")]
+    public Vector3 shaderTargetPositionOffset = Vector3.zero;
     // If false, part keeps its own prefab/settings lifetime and is not stretched to cast HitTime.
     public bool useCastTimedLifetime = true;
     public bool overrideContinuousLoop = false;
@@ -216,6 +221,7 @@ public class CompositePrefabEffect : TimedCompositeEffectBase
         Transform setupOwner = ResolveSetupOwner(resolvedTransform, instance.transform);
         MagicCastData partCastData = part.passCastDataToPart ? _castData : null;
         instance.Setup(partSettings, partCastData, setupOwner);
+        ApplyPartShaderTargetPosition(part, instance.transform);
         ApplyPartLoopOverrides(part, instance.transform);
         ApplyPartHomeFlightOverrides(part, instance.transform);
         if (CompositeHomeProjectileLaunchHelper.IsEnabled(part))
@@ -589,6 +595,33 @@ public class CompositePrefabEffect : TimedCompositeEffectBase
     private Transform ResolveSetupOwner(Transform resolvedTransform, Transform instanceTransform)
     {
         return resolvedTransform != null ? resolvedTransform : (_owner != null ? _owner : instanceTransform);
+    }
+
+    private void ApplyPartShaderTargetPosition(CompositePrefabPart part, Transform instanceTransform)
+    {
+        if (part == null || instanceTransform == null || !part.passShaderTargetPosition)
+        {
+            return;
+        }
+
+        if (!_resolver.Resolve(part.shaderTargetAttachmentPoint, _context, out Transform targetTransform, out Vector3 targetWorldPosition))
+        {
+            return;
+        }
+
+        Vector3 adjustedTargetWorldPosition = CompositeEffectUtilities.ResolveSpawnPosition(
+            targetTransform,
+            targetWorldPosition,
+            part.shaderTargetPositionOffset);
+
+        EffectPart[] effectParts = instanceTransform.GetComponentsInChildren<EffectPart>(true);
+        for (int i = 0; i < effectParts.Length; i++)
+        {
+            if (effectParts[i] != null)
+            {
+                effectParts[i].SetShaderTargetWorldPosOverride(true, adjustedTargetWorldPosition, targetTransform);
+            }
+        }
     }
 
     private bool TryResolvePartSettings(CompositePrefabPart part, out EffectSettings partSettings)

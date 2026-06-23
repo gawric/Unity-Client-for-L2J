@@ -11,20 +11,21 @@ Material:
   m_Shader: {fileID: 4800000, guid: 198fd10316d74a8f8d5197b840117b31, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
-  m_ValidKeywords:
-  - _DEBUGSPAWNREGION_ON
+  m_ValidKeywords: []
   m_InvalidKeywords:
   - _ALPHAFROMLUMA_ON
   - _BALPHABLEND_ON
-  - _DEBUGATLASPREVIEW_ON
   - _FADEOUT_ON
   - _HASLIFETIME_ON
   - _IGNOREMAINTEXALPHA_ON
   - _SPINPARTICLES_ON
   - _UNIFORMSIZE_ON
+  - _USEFULL3DVELOCITYFROMOWNER_ON
+  - _USEOWNERFROMSHADERTARGET_ON
   - _USERANDOMSUBDIVISION_ON
   - _USESIZESCALE_ON
   - _USESOFTLUMAALPHA_ON
+  - _USEVELOCITYTOWARDFOCAL_ON
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
@@ -43,8 +44,9 @@ Material:
     - _ColorScaleCount: 4
     - _SizeScaleCount: 4
     m_Floats:
-    - _AlphaBoost: 0.8
+    - _AlphaBoost: 1
     - _AlphaFromLuma: 1
+    - _ArcTangentialWeight: 0
     - _BillboardScale: 0
     - _BlendBetweenSubdivisions: 0
     - _ColorScaleCount: 4
@@ -52,25 +54,32 @@ Material:
     - _ColorScaleTime1: 0.089286
     - _ColorScaleTime2: 0.467857
     - _ColorScaleTime3: 1
-    - _DebugAtlasPreview: 1
-    - _DebugAtlasPreviewAge: 0
-    - _DebugAtlasPreviewAlpha: 0.856
+    - _DebugAtlasPreview: 0
+    - _DebugAtlasPreviewAge: 0.108
+    - _DebugAtlasPreviewAlpha: 0.9
     - _DebugAtlasPreviewBoost: 8
     - _DebugAtlasPreviewLoop: 0
     - _DebugAtlasPreviewSizeScale: 0.5
-    - _DebugSpawnRegion: 1
+    - _DebugSpawnRegion: 0
     - _FadeIn: 0
     - _FadeInEndTime: 0
+    - _FadeOutPower: 2
     - _Fadeout: 1
-    - _FadeoutStartTime: 0.5
+    - _FadeoutStartTime: 0
+    - _FocalConvergePower: 2.5
+    - _FocalConvergeStart: 1
     - _FunnelArcScale: 0.06
     - _FunnelEasePower: 2.5
     - _HasLifetime: 1
     - _IgnoreMainTexAlpha: 1
+    - _L2FxEffectScale: 1
+    - _L2FxSpriteScale: 1.4
     - _LumaAlphaFloor: 0
-    - _LumaAlphaPower: 0.55
-    - _Opacity: 1.05
-    - _RgbBoost: 8
+    - _LumaAlphaPower: 1
+    - _Opacity: 1
+    - _PlasmaLumaMax: 0.215
+    - _PlasmaRgbScale: 1.032
+    - _RgbBoost: 0.7
     - _Seed: 0
     - _SizeScaleCount: 4
     - _SizeScaleParam: 0
@@ -92,11 +101,20 @@ Material:
     - _TextureDilateTexels: 0
     - _TextureUSubdivisions: 4
     - _TextureVSubdivisions: 4
+    - _UcAccelerationScale: 0.32
+    - _UcPolarRadiusScale: 0.32142857
+    - _UcStartLocationOffsetScale: 0.24
+    - _UcStartLocationRangeScale: 0.16
+    - _UcVelocityScale: 0.33333334
     - _UniformSize: 1
+    - _UseExternalTargetPosition: 0
+    - _UseFull3DVelocityFromOwner: 1
+    - _UseOwnerFromShaderTarget: 1
     - _UseRandomSubdivision: 1
     - _UseRegularSizeScale: 0
     - _UseSizeScale: 1
     - _UseSoftLumaAlpha: 1
+    - _UseVelocityTowardFocal: 1
     - _bAlphaBlend: 1
     m_Colors:
     - _Acceleration: {r: 0, g: 0, b: 100, a: 0}
@@ -106,18 +124,19 @@ Material:
     - _ColorScale3: {r: 1, g: 1, b: 1, a: 1}
     - _DebugAtlasBackground: {r: 0.03, g: 0.04, b: 0.08, a: 1}
     - _DebugSpawnRegionColor: {r: 1, g: 0.15, b: 0.55, a: 1}
-    - _InitialDelayRange: {r: 0, g: 0, b: 0, a: 0}
+    - _InitialDelayRange: {r: 0.2, g: 0.2, b: 0, a: 0}
+    - _L2FxTargetWorldPos: {r: 0, g: 0, b: 0, a: 0}
     - _LifetimeRange: {r: 0.5, g: 0.5, b: 0, a: 0}
     - _OwnerWorldPos: {r: 0, g: 0, b: 0, a: 0}
     - _PolarAzimuthDeg: {r: 0, g: 360, b: 0, a: 0}
     - _PolarPitchDeg: {r: 75, g: 105, b: 0, a: 0}
-    - _PolarRadius: {r: 6.3, g: 6.3, b: 0, a: 0}
-    - _SizeRange: {r: 4.4, g: 8.8, b: 0, a: 0}
+    - _PolarRadius: {r: 14, g: 14, b: 0, a: 0}
+    - _SizeRange: {r: 4, g: 8, b: 0, a: 0}
     - _SpinsPerSecondRange: {r: 0, g: 0, b: 0, a: 0}
-    - _StartLocationOffset: {r: 0, g: 0, b: 0, a: 0}
-    - _StartLocationRangeX: {r: -2.7, g: 2.7, b: 0, a: 0}
-    - _StartLocationRangeY: {r: -2.7, g: 2.7, b: 0, a: 0}
-    - _StartLocationRangeZ: {r: -2.7, g: 2.7, b: 0, a: 0}
+    - _StartLocationOffset: {r: 0, g: 0, b: 10, a: 0}
+    - _StartLocationRangeX: {r: -10, g: 10, b: 0, a: 0}
+    - _StartLocationRangeY: {r: -10, g: 10, b: 0, a: 0}
+    - _StartLocationRangeZ: {r: -10, g: 10, b: 0, a: 0}
     - _StartSpinRange: {r: 0, g: 1, b: 0, a: 0}
     - _VelocityRangeX: {r: 30, g: 30, b: 0, a: 0}
     - _VelocityRangeY: {r: 30, g: 30, b: 0, a: 0}

@@ -64,6 +64,10 @@ public abstract class EffectPart : MonoBehaviour
 
     private bool _ownerWorldPosOverrideActive;
     private Vector3 _ownerWorldPosOverride;
+    private bool _shaderTargetWorldPosOverrideActive;
+    private Vector3 _shaderTargetWorldPosOverride;
+    private Transform _shaderTargetWorldPosFollowTransform;
+    private Vector3 _shaderTargetWorldPosLocal;
 
     public void SetOwnerWorldPosOverride(bool active, Vector3 worldPosition)
     {
@@ -82,6 +86,52 @@ public abstract class EffectPart : MonoBehaviour
         }
 
         return ResolveOwnerWorldPosDefault();
+    }
+
+    protected Vector3 ResolveOwnerWorldPosForShader(Material material)
+    {
+        if (material != null &&
+            material.HasProperty(L2MaterialPropertyCopier.UseOwnerFromShaderTargetId) &&
+            material.GetFloat(L2MaterialPropertyCopier.UseOwnerFromShaderTargetId) > 0.5f &&
+            TryResolveShaderTargetWorldPos(out Vector3 targetWorldPos))
+        {
+            return targetWorldPos;
+        }
+
+        return ResolveOwnerWorldPos();
+    }
+
+    public void SetShaderTargetWorldPosOverride(bool active, Vector3 worldPosition, Transform followTransform = null)
+    {
+        _shaderTargetWorldPosOverrideActive = active;
+        _shaderTargetWorldPosFollowTransform = null;
+        if (active)
+        {
+            _shaderTargetWorldPosOverride = worldPosition;
+            if (followTransform != null)
+            {
+                _shaderTargetWorldPosFollowTransform = followTransform;
+                _shaderTargetWorldPosLocal = followTransform.InverseTransformPoint(worldPosition);
+            }
+        }
+    }
+
+    protected bool TryResolveShaderTargetWorldPos(out Vector3 worldPosition)
+    {
+        if (_shaderTargetWorldPosOverrideActive)
+        {
+            if (_shaderTargetWorldPosFollowTransform != null)
+            {
+                worldPosition = _shaderTargetWorldPosFollowTransform.TransformPoint(_shaderTargetWorldPosLocal);
+                return true;
+            }
+
+            worldPosition = _shaderTargetWorldPosOverride;
+            return true;
+        }
+
+        worldPosition = Vector3.zero;
+        return false;
     }
 
     protected Vector3 ResolveOwnerWorldPosDefault()

@@ -82,4 +82,27 @@ void L2Fx_FocalArrivalClamp(
     }
 }
 
+// Pull scattered arc paths toward a shared focal in the final lifetime segment.
+float3 L2Fx_EndFocalConverge(
+    float3 centerPos,
+    float3 focalPos,
+    float ageNorm,
+    float convergeStartNorm,
+    float convergePower)
+{
+    if (convergeStartNorm >= 0.999)
+    {
+        return centerPos;
+    }
+
+    float u = saturate((ageNorm - convergeStartNorm) / max(1.0 - convergeStartNorm, 1e-4));
+    if (u <= 0.0)
+    {
+        return centerPos;
+    }
+
+    float pull = pow(u, max(convergePower, 0.25));
+    return lerp(centerPos, focalPos, pull);
+}
+
 #endif

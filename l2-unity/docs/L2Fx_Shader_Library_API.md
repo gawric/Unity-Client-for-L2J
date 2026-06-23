@@ -272,10 +272,24 @@ URP mesh emitter vertex pipeline (builtin path).
 | `L2Fx_MeshBuiltin_StartLocationOffsetM(offsetUU)` | StartLocationOffset UU → meters. |
 | `L2Fx_MeshBuiltin_TransformVertexOS(...)` | Full mesh vertex transform (size/spin/uv). |
 | `L2Fx_MeshBuiltin_TransformVertexOS_SplitAge(...)` | Split motion/spin age (hold support). |
+| `L2Fx_MeshBuiltin_TransformVertexOS_SplitAgeUnityOffset(...)` | SplitAge variant for new convert-layer shaders; expects Unity-ready offset. |
 | `L2Fx_MeshBuiltin_ApplyMainTexST(uv, st)` | `_MainTex_ST` transform. |
 | `L2Fx_MeshBuiltin_ApplyAtlasRemap(uv, remap, minMax)` | Atlas UV remap. |
 | `L2Fx_MeshBuiltin_ResolveUv(...)` | UV path: planar / atlas / default. |
 | `L2Fx_MeshBuiltin_SampleBaseTint(...)` | Base tint from ColorScale + fade. |
+
+---
+
+## L2FxUcToUnityConvert.hlsl
+
+Conversion layer for new dedicated shaders. Raw `.uc` material values go in; Unity-ready values go to lower-level helpers.
+
+| Функция | Описание |
+|---------|----------|
+| `L2Fx_UcToUnityMeshSize(startSizeUe, data)` | Mesh StartSizeRange UC axes → Unity-ready mesh size. |
+| `L2Fx_UcToUnitySpriteSize(baseSizeUnity, data)` | Apply sprite/effect scale after sprite size has been converted. |
+| `L2Fx_UcToUnityMeshSpinRate(spinsPerSecond, data)` | Apply mesh spin direction conversion. |
+| `L2Fx_UcToUnityStartLocationOffset(offsetUe, data)` | StartLocationOffset UC axes `(X,Y,Z)` → Unity `(X,Z,Y) * spawnUnitScale`. |
 
 ---
 

@@ -157,6 +157,61 @@ float3 L2Fx_MeshBuiltin_StartLocationOffsetM(float3 startLocationOffsetUU)
         startLocationOffsetUU.y) * L2FX_UU_TO_UNITY;
 }
 
+void L2Fx_MeshBuiltin_ApplySizeSpinAndUnityOffset(
+    inout float3 posOS,
+    inout float3 nrmOS,
+    float spinParticles,
+    float startSpin,
+    float spinsPerSecond,
+    float spinCCWorCW,
+    float spinAgeSeconds,
+    float animAgeNorm,
+    float3 startSize,
+    float useSizeScale,
+    float useRegularSizeScale,
+    float sizeScaleParam,
+    float sizeScaleRepeats,
+    uint sizeScaleCount,
+    float sizeScaleTime0, float sizeScaleVal0,
+    float sizeScaleTime1, float sizeScaleVal1,
+    float sizeScaleTime2, float sizeScaleVal2,
+    float sizeScaleTime3, float sizeScaleVal3,
+    float sizeScaleTime4, float sizeScaleVal4,
+    float3 startLocationOffsetUnity,
+    float meshYOffset,
+    float sizeScaleHorizontalOnly)
+{
+    if (spinParticles > 0.5)
+    {
+        float sps = L2Fx_ApplySpinCCWorCW_Scalar(spinsPerSecond, spinCCWorCW);
+        float angle = L2Fx_ComputeSpinAngleRadiansMeshEmitterRevPerSec(startSpin, sps, spinAgeSeconds);
+        L2Fx_ApplyMeshSpinAroundY(posOS, nrmOS, true, angle);
+    }
+
+    float sizeScale = L2Fx_MeshBuiltin_SampleSizeScaleScalar(
+        animAgeNorm,
+        sizeScaleParam,
+        sizeScaleRepeats,
+        sizeScaleCount,
+        useSizeScale,
+        useRegularSizeScale,
+        sizeScaleTime0, sizeScaleVal0,
+        sizeScaleTime1, sizeScaleVal1,
+        sizeScaleTime2, sizeScaleVal2,
+        sizeScaleTime3, sizeScaleVal3,
+        sizeScaleTime4, sizeScaleVal4);
+
+    float3 sizeMul = startSize * sizeScale;
+    if (sizeScaleHorizontalOnly > 0.5)
+    {
+        sizeMul = float3(startSize.x * sizeScale, startSize.y, startSize.z * sizeScale);
+    }
+
+    posOS *= sizeMul;
+    posOS += startLocationOffsetUnity;
+    posOS.y += meshYOffset;
+}
+
 void L2Fx_MeshBuiltin_TransformVertexOS(
     inout float3 posOS,
     inout float3 nrmOS,
@@ -280,6 +335,45 @@ void L2Fx_MeshBuiltin_TransformVertexOS_SplitAge(
     posOS *= sizeMul;
     posOS += L2Fx_MeshBuiltin_StartLocationOffsetM(startLocationOffsetUU);
     posOS.y += meshYOffset;
+}
+
+void L2Fx_MeshBuiltin_TransformVertexOS_SplitAgeUnityOffset(
+    inout float3 posOS,
+    inout float3 nrmOS,
+    float spinParticles,
+    float startSpin,
+    float spinsPerSecond,
+    float spinCCWorCW,
+    float spinAgeSeconds,
+    float animAgeNorm,
+    float3 startSizeUnity,
+    float useSizeScale,
+    float useRegularSizeScale,
+    float sizeScaleParam,
+    float sizeScaleRepeats,
+    uint sizeScaleCount,
+    float sizeScaleTime0, float sizeScaleVal0,
+    float sizeScaleTime1, float sizeScaleVal1,
+    float sizeScaleTime2, float sizeScaleVal2,
+    float sizeScaleTime3, float sizeScaleVal3,
+    float sizeScaleTime4, float sizeScaleVal4,
+    float3 startLocationOffsetUnity,
+    float meshYOffset,
+    float sizeScaleHorizontalOnly)
+{
+    L2Fx_MeshBuiltin_ApplySizeSpinAndUnityOffset(
+        posOS, nrmOS,
+        spinParticles, startSpin, spinsPerSecond, spinCCWorCW,
+        spinAgeSeconds, animAgeNorm,
+        startSizeUnity,
+        useSizeScale, useRegularSizeScale,
+        sizeScaleParam, sizeScaleRepeats, sizeScaleCount,
+        sizeScaleTime0, sizeScaleVal0,
+        sizeScaleTime1, sizeScaleVal1,
+        sizeScaleTime2, sizeScaleVal2,
+        sizeScaleTime3, sizeScaleVal3,
+        sizeScaleTime4, sizeScaleVal4,
+        startLocationOffsetUnity, meshYOffset, sizeScaleHorizontalOnly);
 }
 
 float2 L2Fx_MeshBuiltin_ApplyMainTexST(float2 uv01, float4 mainTexST)
