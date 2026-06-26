@@ -14,12 +14,15 @@ Material:
   m_ValidKeywords: []
   m_InvalidKeywords:
   - _ALPHAFROMLUMA_ON
+  - _DEBUGMESHPREVIEW_ON
   - _FADEOUT_ON
   - _HASLIFETIME_ON
   - _IGNOREMAINTEXALPHA_ON
   - _SPINPARTICLES_ON
   - _UNIFORMSIZE_ON
+  - _USED3D9BRIGHTENFS_ON
   - _USESIZESCALE_ON
+  - _USESTARTSPIN3AXIS_ON
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
@@ -31,7 +34,7 @@ Material:
     serializedVersion: 3
     m_TexEnvs:
     - _MainTex:
-        m_Texture: {fileID: 2800000, guid: 0eb799b46a9ac16408f938314e03d640, type: 3}
+        m_Texture: {fileID: 2800000, guid: 0e69dac3d602aed48954e500375f1e59, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     m_Ints:
@@ -48,9 +51,10 @@ Material:
     - _ColorScaleTime1: 0.5
     - _ColorScaleTime2: 1
     - _D3d9FadeAlphaWithLife: 0
-    - _DebugMeshPreview: 0
-    - _DebugMeshPreviewAge: 0
+    - _DebugMeshPreview: 1
+    - _DebugMeshPreviewAge: 0.01
     - _DebugMeshPreviewLoop: 0
+    - _DstBlend: 1
     - _EmitterAlpha: 1
     - _FadeIn: 0
     - _FadeInEndTime: 0
@@ -62,24 +66,26 @@ Material:
     - _HoldSizeReference: 0
     - _IgnoreMainTexAlpha: 1
     - _L2FxEffectScale: 1
-    - _L2FxMeshScale: 1
+    - _L2FxMeshScale: 1.4
     - _L2FxMeshSpinDirection: 1
     - _LineLumMax: 1
     - _LineLumMin: 0.35
     - _LumaAlphaFloor: 0.02
     - _MeshYOffset: 0
-    - _Opacity: 1
+    - _Opacity: 0.8
+    - _PlasmaLumaMax: 0.35
+    - _PlasmaRgbScale: 1
     - _RgbBoost: 1
     - _Seed: 0
     - _SizeScaleCount: 5
     - _SizeScaleParam: 0
     - _SizeScaleRepeats: 1
     - _SizeScaleTime0: 0
-    - _SizeScaleTime1: 0.14
+    - _SizeScaleTime1: 0.264
     - _SizeScaleTime2: 0.37
     - _SizeScaleTime3: 0.81
     - _SizeScaleTime4: 1
-    - _SizeScaleVal0: 0.5
+    - _SizeScaleVal0: 1
     - _SizeScaleVal1: 3.5
     - _SizeScaleVal2: 4.6
     - _SizeScaleVal3: 5.1
@@ -90,12 +96,18 @@ Material:
     - _SpinCCWorCW: 0
     - _SpinParticles: 1
     - _SpinsPerSecond: 0
+    - _SrcBlend: 5
     - _StartTime: 0
     - _TailLift: 0.35
+    - _UcAccelerationScale: 1
+    - _UcStartLocationOffsetScale: 1
+    - _UcStartSizeScale: 1
+    - _UcVelocityScale: 1
     - _UniformSize: 1
-    - _UseD3d9BrightenFs: 0
+    - _UseD3d9BrightenFs: 1
     - _UseRegularSizeScale: 0
     - _UseSizeScale: 1
+    - _UseStartSpin3Axis: 1
     - _bAlphaBlend: 0
     m_Colors:
     - _Acceleration: {r: 0, g: 0, b: 0, a: 0}
@@ -109,6 +121,9 @@ Material:
     - _StartLocationOffset: {r: 0, g: 0, b: 8, a: 0}
     - _StartSize: {r: 0.065, g: 0.065, b: 0.065, a: 0}
     - _StartSpinRange: {r: 0, g: 1, b: 0, a: 0}
+    - _StartSpinRangeX: {r: 0, g: 1, b: 0, a: 0}
+    - _StartSpinRangeY: {r: 0, g: 1, b: 0, a: 0}
+    - _StartSpinRangeZ: {r: 0, g: 1, b: 0, a: 0}
     - _StartVelocityRangeZ: {r: 0, g: 0, b: 0, a: 0}
   m_BuildTextureStacks: []
   m_AllowLocking: 1

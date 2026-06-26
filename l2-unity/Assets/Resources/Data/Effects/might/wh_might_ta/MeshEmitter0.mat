@@ -14,6 +14,7 @@ Material:
   m_ValidKeywords: []
   m_InvalidKeywords:
   - _ALPHAFROMLUMA_ON
+  - _DEBUGMESHPREVIEWLOOP_ON
   - _DEBUGMESHPREVIEW_ON
   - _FADEIN_ON
   - _FADEOUT_ON
@@ -32,7 +33,7 @@ Material:
     serializedVersion: 3
     m_TexEnvs:
     - _MainTex:
-        m_Texture: {fileID: 2800000, guid: 001aabcd35656194e9c3f201c0df0f47, type: 3}
+        m_Texture: {fileID: 2800000, guid: 0e69dac3d602aed48954e500375f1e59, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     m_Ints:
@@ -51,7 +52,8 @@ Material:
     - _D3d9FadeAlphaWithLife: 0
     - _DebugMeshPreview: 1
     - _DebugMeshPreviewAge: 0
-    - _DebugMeshPreviewLoop: 0
+    - _DebugMeshPreviewLoop: 1
+    - _DstBlend: 1
     - _EmitterAlpha: 1
     - _FadeIn: 1
     - _FadeInEndTime: 0.02
@@ -63,13 +65,15 @@ Material:
     - _HoldSizeReference: 0.413
     - _IgnoreMainTexAlpha: 1
     - _L2FxEffectScale: 1
-    - _L2FxMeshScale: 1.25
+    - _L2FxMeshScale: 1.5
     - _L2FxMeshSpinDirection: -1
     - _LineLumMax: 1
     - _LineLumMin: 0.35
     - _LumaAlphaFloor: 0.02
     - _MeshYOffset: 0
     - _Opacity: 1
+    - _PlasmaLumaMax: 0.35
+    - _PlasmaRgbScale: 1
     - _RgbBoost: 1
     - _Seed: 0
     - _SizeScaleCount: 4
@@ -91,8 +95,13 @@ Material:
     - _SpinCCWorCW: 1
     - _SpinParticles: 1
     - _SpinsPerSecond: 1.5
+    - _SrcBlend: 5
     - _StartTime: 0
     - _TailLift: 0.35
+    - _UcAccelerationScale: 1
+    - _UcStartLocationOffsetScale: 1
+    - _UcStartSizeScale: 1
+    - _UcVelocityScale: 1
     - _UniformSize: 0
     - _UseD3d9BrightenFs: 0
     - _UseRegularSizeScale: 0

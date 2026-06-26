@@ -42,16 +42,22 @@ public class SkillExecutor : MonoBehaviour
         _animRunner.StartRun(cycle, objectId , AnimationManager.Instance  , () => OnAllAnimationFinish(actions));
     }
 
-    public async Task ExecuteSkillOverride(Skillgrp skill , Entity entity, AnimationCombo animationCombo, AnimationEventsBase actions)
+    public async Task ExecuteSkillOverride(Skillgrp skill, Entity entity, AnimationCombo animationCombo, AnimationEventsBase actions, bool isLong = false)
     {
         if (entity == null || animationCombo == null) return;
         int objectId = entity.IdentityInterlude.Id;
 
         EffectManager.Instance.PlayEffect(skill.Id, entity.transform, entity.GetMagicCastData());
 
-
         string[] cycle = animationCombo.GetAnimCycle();
-        _animRunner.StartRunOverride(cycle, objectId, AnimationManager.Instance, () => OnAllAnimationFinish(actions));
+        if (isLong)
+        {
+            _animRunner.StartRunLongOverride(cycle, objectId, AnimationManager.Instance, () => OnAllAnimationFinish(actions));
+        }
+        else
+        {
+            _animRunner.StartRunOverride(cycle, objectId, AnimationManager.Instance, () => OnAllAnimationFinish(actions));
+        }
     }
 
 

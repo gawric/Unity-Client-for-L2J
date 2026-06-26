@@ -71,9 +71,11 @@ MeshEmitter checklist:
 SpriteEmitter checklist:
 
 - `StartSizeRange` stays raw UC in material
-- `L2Fx_StartSize(...)` handles sprite UU-to-Unity conversion
+- `L2Fx_SpriteAutoScaleStartSize(...)` preserves legacy raw sprite-unit sizing for shaders that already use it (for example `MightTaSprite`)
+- Use `L2Fx_UcToUnitySpriteStartSize(...)` only for shaders/materials intentionally retuned to UU-to-Unity size conversion
 - Apply `_L2FxSpriteScale` / `_L2FxEffectScale` through sprite autoscale helpers
 - Preserve texture atlas fields: `TextureUSubdivisions`, `TextureVSubdivisions`, `SubdivisionStart`, `SubdivisionEnd`, `UseRandomSubdivision`, `BlendBetweenSubdivisions`
+- For `SphereRadiusRange`, reuse `L2Fx_SpawnRegionRandomOnSphereUe(...)` and add an explicit scale such as `_UcSphereRadiusScale` when tuning is needed
 - Check polar spawn, velocity, and spin against existing sprite helpers before writing custom code
 - For funnel/inward particles, prefer external shader target position (`CasterCenter`, `TargetCenter`, etc.) over hard-coded `StartLocationOffset` focal points
 

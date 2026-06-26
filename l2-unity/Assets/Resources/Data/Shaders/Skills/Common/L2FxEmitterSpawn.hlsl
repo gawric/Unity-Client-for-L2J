@@ -324,6 +324,17 @@ float4 L2Fx_ApplyFadeInOut(
 //   Y = angle from +Z axis (degrees; 0 = on +Z, 90 = in XY plane)
 //   Z = radius (world units)
 // Maps to Cartesian: ring near horizontal for Y ~ 85..95, r ~ const.
+float3 L2Fx_PolarCartesianUe(float thetaDeg, float phiDeg, float radius)
+{
+    float theta = thetaDeg * L2Fx_DegToRad;
+    float phi = phiDeg * L2Fx_DegToRad;
+    float sinPhi = sin(phi);
+    return float3(
+        radius * sinPhi * cos(theta),
+        radius * sinPhi * sin(theta),
+        radius * cos(phi));
+}
+
 float3 L2Fx_SpawnOffsetPolarDegrees(
     float2 azimuthDegMinMax,
     float2 polarFromPositiveZDegMinMax,
@@ -334,14 +345,7 @@ float3 L2Fx_SpawnOffsetPolarDegrees(
     float thetaDeg = L2Fx_RandomRange(azimuthDegMinMax, seed, startTime, 71.0);
     float phiDeg = L2Fx_RandomRange(polarFromPositiveZDegMinMax, seed, startTime, 73.0);
     float r = L2Fx_RandomRange(radiusMinMax, seed, startTime, 79.0);
-
-    float theta = thetaDeg * L2Fx_DegToRad;
-    float phi = phiDeg * L2Fx_DegToRad;
-    float sinPhi = sin(phi);
-    float x = r * sinPhi * cos(theta);
-    float y = r * sinPhi * sin(theta);
-    float z = r * cos(phi);
-    return float3(x, y, z);
+    return L2Fx_PolarCartesianUe(thetaDeg, phiDeg, r);
 }
 
 // Constant velocity displacement: p += v * t (no drag).

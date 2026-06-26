@@ -56,8 +56,49 @@ public class MagicCastData
     /// <summary>Wall-clock удержание позы после CastEnd2P (не замедляет сам клип).</summary>
     public float TwoClipCastEndHoldSeconds { get; private set; }
 
+    /// <summary>Long-cast path (scrolls / teleports): no animator speed scaling.</summary>
+    public bool IsLongCast;
+
+    public float DurMid;
+    public float DurEnd;
+    public float DurShot;
+
+    /// <summary>Seconds from cast start when MagicShotLong should fire (HitTime − DurShot).</summary>
+    public float ShotTriggerGlobalOffset;
+
+    public void SetupLongCast(float serverHitMs, float[] clipsDurations, float shotEventTime, int targetObjectId = 0)
+    {
+        IsLongCast = true;
+        StartTime = Time.time;
+        HitTime = serverHitMs / 1000f;
+        FlightTime = 0f;
+        TargetObjectId = targetObjectId;
+        TwoClipCastEndHoldSeconds = 0f;
+        AnimatorWallPenaltySeconds = 0f;
+
+        SpeedMid = 1f;
+        SpeedEnd = 1f;
+        SpeedShot = 1f;
+
+        DurMid = GetDurationSafe(clipsDurations, 0);
+        DurEnd = GetDurationSafe(clipsDurations, 1);
+        DurShot = GetDurationSafe(clipsDurations, 2);
+
+        float durShotToEvent = shotEventTime > 0f ? shotEventTime : DurShot;
+        this.shotEventTime = durShotToEvent;
+        serverTimeToShoot = Mathf.Max(0.01f, HitTime - FlightTime);
+        ShotTriggerGlobalOffset = Mathf.Max(0f, HitTime - DurShot);
+        AdjustedShootWindowSeconds = ShotTriggerGlobalOffset;
+
+        Debug.Log(
+            $"[LongCastData] hit={HitTime:F3}s shotTriggerAt={ShotTriggerGlobalOffset:F3}s " +
+            $"clips[mid={DurMid:F3},end={DurEnd:F3},shot={DurShot:F3},shotEvt={durShotToEvent:F3}] " +
+            $"loopEndSec≈{Mathf.Max(0f, ShotTriggerGlobalOffset - DurMid):F3}");
+    }
+
     public void Setup(float serverHitMs, float flyMs, float[] clipsDurations, float shotEventTime, int targetObjectId = 0)
     {
+        IsLongCast = false;
         StartTime = Time.time;
         HitTime = serverHitMs / 1000f;
         FlightTime = flyMs / 1000f;

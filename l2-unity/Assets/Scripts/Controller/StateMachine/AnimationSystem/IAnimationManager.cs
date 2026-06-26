@@ -13,6 +13,8 @@ public interface IAnimationManager
 
     Task AsyncPlayAnimationTrigger(int objectId, string animationName);
     Task AsyncPlayAnimationRaceOverrides(int objectId, string tiggerName , string overrideAnimationName);
+    Task AsyncPlayLongCastLoopPhase(int objectId, string triggerName, string overrideAnimationName);
+    Task AsyncAwaitOverrideAnimationFinish(int objectId, string expectedFinishName);
 
     public float[] GetOverrideClipsDurations(int objectId, string[] cycle);
     public float GetOverrideEventTimeByName(int objectId, string[] cycle , string eventName);

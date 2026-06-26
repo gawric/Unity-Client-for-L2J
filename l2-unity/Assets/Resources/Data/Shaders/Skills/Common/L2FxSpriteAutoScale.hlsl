@@ -2,8 +2,10 @@
 #define L2_FX_SPRITE_AUTOSCALE_INCLUDED
 
 // Shared SpriteEmitter size policy for new dedicated HLSL shaders.
-// SpriteEmitter StartSizeRange stays in raw UE units; L2Fx_StartSize applies
-// the project UU->Unity conversion before these multipliers are applied.
+// This facade preserves the legacy MightTaSprite contract: StartSizeRange is
+// sampled as raw UE sprite units, then only effect/sprite scale multipliers apply.
+// Shaders that need UU->Unity conversion should call L2Fx_UcToUnitySpriteStartSize
+// directly instead of this helper.
 
 #include "L2FxEmitterSpawn.hlsl"
 #include "L2FxUcToUnityConvert.hlsl"

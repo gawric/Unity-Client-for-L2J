@@ -530,6 +530,79 @@ _UcAccelerationScale = 0.32            // 100 -> 32
 
 This preserves the original UC numbers for future ports while matching the current RenderDoc-tuned Unity geometry.
 
+For `might/wh_might_ta/SpriteEmitter0` / `MightTaSprite`, the particle family is the same
+`fx_m_t0005_A` brighten sprite path as `SpriteEmitter7`, but the spawn shape is different.
+Start from the same family-level visual controls (`_PlasmaLumaMax`, `_PlasmaRgbScale`,
+`_RgbBoost`, `_L2FxSpriteScale`, velocity/acceleration scale), then tune only the spawn shape
+fields that differ in UC:
+
+```text
+SphereRadiusRange=(3,3)      -> _SphereRadiusUU = (3,3,0,0), _UseSphereRadius = 1
+StartLocationRange=(+-10)    -> _UcStartLocationRangeScale
+StartLocationPolarRange Z=2.4 -> _UcPolarRadiusScale
+StartLocationOffset Z=7      -> _UcStartLocationOffsetScale
+```
+
+Use `_UcSphereRadiusScale` to control `SphereRadiusRange` without changing the raw UC value.
+`_UcSphereRadiusScale = 0` disables sphere spread; values between `0..1` give a tighter spawn.
+
+`MightTaSprite` currently preserves the legacy sprite-size contract:
+`L2Fx_SpriteAutoScaleStartSize` samples `StartSizeRange` in raw sprite units and applies only
+`_L2FxEffectScale * _L2FxSpriteScale`. Do **not** route `MightTaSprite` size through
+`L2Fx_UcToUnitySpriteStartSize` unless all existing `MightTaSprite` materials are retuned.
+Spawn-shape conversion/tuning is handled separately by `_Uc*Scale` material values.
+
+For `might/wh_might_ta/MeshEmitter0` / `MightCaMesh`, the mesh-applicable compensation layer is:
+
+```text
+_StartSize = (0.2, 0.2, 0.25, 0)
+_StartLocationOffset = (0, 0, 0, 0)
+_StartVelocityRangeZ = (-23, -23, 0, 0)
+_Acceleration = (0, 0, -11, 0)
+```
+
+Shader properties:
+
+```text
+_UcStartSizeScale = 1
+_UcStartLocationOffsetScale = 1
+_UcVelocityScale = 1
+_UcAccelerationScale = 1
+```
+
+For `might/wh_might_ta/MeshEmitter3` (`supportenchant01`, `fx_m_t0006`), keep raw `.uc` values and the same four scale properties:
+
+```text
+_StartSize = (0.065, 0.065, 0.065, 0)
+_StartLocationOffset = (0, 0, 8, 0)
+_StartVelocityRangeZ = (0, 0, 0, 0)
+_Acceleration = (0, 0, 0, 0)
+
+_UcStartSizeScale = 1
+_UcStartLocationOffsetScale = 1
+_UcVelocityScale = 1
+_UcAccelerationScale = 1
+```
+
+Mesh emitters do not use `_UcPolarRadiusScale` or `_UcStartLocationRangeScale` because `MightCaMesh` has no polar/box spawn path. Tune `_L2FxMeshScale` separately for FBX/mesh visual size.
+
+For `might/wh_might_ta/MeshEmitter3` (`supportenchant01`), UE uses full 3-axis random start spin:
+
+```text
+StartSpinRange=(X=(Max=1),Y=(Max=1),Z=(Max=1))
+SpinParticles=True
+SpinsPerSecond=0
+```
+
+Enable in `MightCaMesh`:
+
+```text
+_UseStartSpin3Axis = 1
+_StartSpinRangeX/Y/Z = (0, 1, 0, 0)
+```
+
+Each `ParticleGroup` slot gets a unique `_Seed`, so the two `MaxParticles=2` meshes land in different random orientations (RenderDoc: distinct normals between draw calls).
+
 ### VelocityLossRange
 
 ```uc
@@ -892,6 +965,10 @@ Avoid:   Texture Type "From Gray Scale" for alpha — kills soft tail on blue ti
 ```
 
 Assign `_MainTex` to the `_A` variant when `_IgnoreMainTexAlpha = 0`.
+
+For `MightTaSprite` / `SpriteEmitter7` / `SpriteEmitter0`, use `fx_m_t0005_A.png`.
+Using `fx_m_t0005.png` with the same subdivisions (`6..8`) can show unwanted atlas fragments
+or different alpha behavior even when the UV subdivision settings match.
 
 ### Plasma + hot center particles
 

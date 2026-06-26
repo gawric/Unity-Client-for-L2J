@@ -497,6 +497,13 @@ public class Entity : MonoBehaviour {
         _castData.Setup(serverHitTimeMs, flightTimeMs, clipsDurations, shotEventTime, targetObjectId);
     }
 
+    public void SetupLongCastDuration(float serverHitTimeMs, float[] clipsDurations, float shotEventTime, int targetObjectId = 0)
+    {
+        if (_castData == null) _castData = new MagicCastData();
+
+        _castData.SetupLongCast(serverHitTimeMs, clipsDurations, shotEventTime, targetObjectId);
+    }
+
     public MagicCastData GetMagicCastData()
     {
         return _castData;

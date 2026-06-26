@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 
@@ -56,6 +57,7 @@ public class SkillAnimationDatabase
     public static void Initialize()
     {
         //MMagic Эти ролики берет для переиспользования (этот override аниматор)
+        _raceCacheMMagic.Add("CastLong_" + MMagic, new SkillClips(FOLDER_MMagic, "MMagic_M000_b.ao_CastLong_MMagic"));
         _raceCacheMMagic.Add("CastMid_"+ MMagic, new SkillClips(FOLDER_MMagic, "MMagic_M000_b.ao_CastMid_MMagic"));
         _raceCacheMMagic.Add("CastEnd_"+ MMagic, new SkillClips (FOLDER_MMagic, "MMagic_M000_b.ao_CastEnd_MMagic"));
         _raceCacheMMagic.Add("MagicShot_" + MMagic, new SkillClips (FOLDER_MMagic, "MMagic_M000_b.ao_MagicShot_MMagic"));
@@ -65,6 +67,7 @@ public class SkillAnimationDatabase
 
         //эти ролики берет для замены на свои (т.е это оригинальный аниматор)
         //FDarkElf
+        _raceCacheFDarkElf.Add("CastLong_" + FDarkElf, new SkillClips(FOLDER_FDarkElf, "FDarkElf_m001_b.ao_CastLong_FDarkElf"));
         _raceCacheFDarkElf.Add("CastMid_" + FDarkElf, new SkillClips(FOLDER_FDarkElf, "FDarkElf_m001_b.ao_CastMid_FDarkElf"));
         _raceCacheFDarkElf.Add("CastEnd_" + FDarkElf, new SkillClips(FOLDER_FDarkElf, "FDarkElf_m001_b.ao_CastEnd_FDarkElf"));
         _raceCacheFDarkElf.Add("MagicShot_" + FDarkElf, new SkillClips(FOLDER_FDarkElf, "FDarkElf_m001_b.ao_MagicShot_A_FDarkElf"));
@@ -115,6 +118,7 @@ public class SkillAnimationDatabase
 
     /// <summary>
     /// Maps dedicated 2-phase animator triggers to base override slots (CastEnd / MagicShot).
+    /// Long-cast triggers also map to the same slots because clip events use CastMid/CastEnd/MagicShot.
     /// </summary>
     public static string ResolveOverrideSlotTriggerName(string triggerName)
     {
@@ -129,8 +133,42 @@ public class SkillAnimationDatabase
                 return "CastEnd";
             case "MagicShot2P":
                 return "MagicShot";
+            case "CastMidLong":
+                return "CastMid";
+            case "CastEndLong":
+                return "CastEnd";
+            case "MagicShotLong":
+                return "MagicShot";
             default:
                 return triggerName;
+        }
+    }
+
+    /// <summary>
+    /// Имя из OnAnimationComplete на клипе (CastMid/CastEnd/MagicShot), не ключ override (CastLong/MagicNoTarget).
+    /// </summary>
+    public static string ResolveOverrideCompletionEventName(string triggerOrOverrideKey)
+    {
+        if (string.IsNullOrEmpty(triggerOrOverrideKey))
+        {
+            return triggerOrOverrideKey;
+        }
+
+        string slotName = ResolveOverrideSlotTriggerName(triggerOrOverrideKey);
+        if (!string.Equals(slotName, triggerOrOverrideKey, StringComparison.Ordinal))
+        {
+            return slotName;
+        }
+
+        switch (triggerOrOverrideKey)
+        {
+            case "CastLong":
+                return "CastMid";
+            case "MagicNoTarget":
+            case "MagicNotarget":
+                return "MagicShot";
+            default:
+                return triggerOrOverrideKey;
         }
     }
 

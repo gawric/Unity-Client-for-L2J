@@ -48,10 +48,14 @@ Shader "L2/Effects/MightTaSprite"
         _PolarAzimuthDeg ("Polar Azimuth Deg (Min,Max)", Vector) = (0, 360, 0, 0)
         _PolarPitchDeg ("Polar Pitch from +Z Deg (Min,Max)", Vector) = (75, 105, 0, 0)
         _PolarRadius ("Polar Radius UU (Min,Max)", Vector) = (14, 14, 0, 0)
+        [Toggle] _UseSphereRadius ("Use SphereRadiusRange", Float) = 0
+        _SphereRadiusUU ("SphereRadiusRange UU (Min,Max)", Vector) = (0, 0, 0, 0)
         _SpawnUnitScale ("Spawn/velocity UU->Unity (0.01)", Float) = 0.01
+        [Toggle] _UseSpawnUnitScale ("Use Spawn Unit Scale", Float) = 0
         _UcStartLocationOffsetScale ("UC StartLocationOffset Scale (Might CA tune)", Float) = 1
         _UcStartLocationRangeScale ("UC StartLocationRange Scale (Might CA tune)", Float) = 1
         _UcPolarRadiusScale ("UC PolarRadius Scale (Might CA tune)", Float) = 1
+        _UcSphereRadiusScale ("UC SphereRadius Scale (Might TA tune)", Float) = 1
         _UcVelocityScale ("UC StartVelocity Scale (Might CA tune)", Float) = 1
         _UcAccelerationScale ("UC Acceleration Scale (Might CA tune)", Float) = 1
         _OwnerWorldPos ("Owner World Pos (ParticleGroup)", Vector) = (0, 0, 0, 0)
@@ -61,8 +65,12 @@ Shader "L2/Effects/MightTaSprite"
 
         [Toggle] _UseVelocityTowardFocal ("Velocity Toward Focal (PTVD_StartPositionAndOwner)", Float) = 0
         [Toggle] _UseFull3DVelocityFromOwner ("Full 3D Velocity From Owner (UE PTVD pitch)", Float) = 0
+        [Toggle] _UseVelocityMagnitude3D ("Use XYZ Velocity Magnitude", Float) = 0
         _VelocityRangeX ("StartVelocityRange X UU (Min,Max)", Vector) = (30, 30, 0, 0)
         _VelocityRangeY ("StartVelocityRange Y UU (Min,Max)", Vector) = (30, 30, 0, 0)
+        _VelocityRangeZ ("StartVelocityRange Z UU (Min,Max)", Vector) = (0, 0, 0, 0)
+        _VelocityDirectionSign ("Velocity Direction Sign (1=inward, -1=outward)", Range(-1, 1)) = 1
+        _HorizontalOutwardWeight ("Horizontal Outward Weight", Range(0, 2)) = 0
         _Acceleration ("Acceleration UE (X,Y,Z)", Vector) = (0, 0, 100, 0)
         _ArcTangentialWeight ("Arc Tangential / Radial Speed (ring spiral)", Range(0, 1.5)) = 0
         _FocalConvergeStart ("Focal Converge Start (norm age, 0.85 = last 15%)", Range(0, 1)) = 1
@@ -197,10 +205,14 @@ Shader "L2/Effects/MightTaSprite"
                 float4 _PolarAzimuthDeg;
                 float4 _PolarPitchDeg;
                 float4 _PolarRadius;
+                float _UseSphereRadius;
+                float4 _SphereRadiusUU;
                 float _SpawnUnitScale;
+                float _UseSpawnUnitScale;
                 float _UcStartLocationOffsetScale;
                 float _UcStartLocationRangeScale;
                 float _UcPolarRadiusScale;
+                float _UcSphereRadiusScale;
                 float _UcVelocityScale;
                 float _UcAccelerationScale;
                 float4 _OwnerWorldPos;
@@ -208,8 +220,12 @@ Shader "L2/Effects/MightTaSprite"
                 float4 _L2FxTargetWorldPos;
                 float _UseVelocityTowardFocal;
                 float _UseFull3DVelocityFromOwner;
+                float _UseVelocityMagnitude3D;
                 float4 _VelocityRangeX;
                 float4 _VelocityRangeY;
+                float4 _VelocityRangeZ;
+                float _VelocityDirectionSign;
+                float _HorizontalOutwardWeight;
                 float4 _Acceleration;
                 float _ArcTangentialWeight;
                 float _FocalConvergeStart;
@@ -273,6 +289,11 @@ Shader "L2/Effects/MightTaSprite"
                 nointerpolation float focalVisibility : TEXCOORD4;
             };
 
+            float MightTaSpawnUnitScale()
+            {
+                return _UseSpawnUnitScale > 0.5 ? _SpawnUnitScale : 1.0;
+            }
+
             float3 MightTaSpawnStartLocationOffsetUe()
             {
                 return L2Fx_UcToUnityApplyScale3(_StartLocationOffset.xyz, _UcStartLocationOffsetScale);
@@ -280,7 +301,7 @@ Shader "L2/Effects/MightTaSprite"
 
             float3 MightTaSpawnOffsetUe(float pSeed)
             {
-                return L2Fx_SpawnRegionOffsetUe(
+                float3 posUe = L2Fx_SpawnRegionOffsetUe(
                     _PolarAzimuthDeg.xy,
                     _PolarPitchDeg.xy,
                     L2Fx_UcToUnityApplyScale2(_PolarRadius.xy, _UcPolarRadiusScale),
@@ -293,12 +314,21 @@ Shader "L2/Effects/MightTaSprite"
                         _UcStartLocationRangeScale),
                     pSeed,
                     _StartTime);
+
+                if (_UseSphereRadius > 0.5)
+                {
+                    float sphereRadiusUe = L2Fx_RandomRange(_SphereRadiusUU.xy, pSeed, _StartTime, 211.0)
+                        * max(_UcSphereRadiusScale, 0.0);
+                    posUe += L2Fx_SpawnRegionRandomOnSphereUe(pSeed, _StartTime, sphereRadiusUe, 221.0);
+                }
+
+                return posUe;
             }
 
             float3 MightTaFocalOffsetWS()
             {
                 float3 offsetOs = L2Fx_UeVectorToUnity(
-                    L2Fx_UcToUnityApplyScale3(_StartLocationOffset.xyz, _UcStartLocationOffsetScale));
+                    L2Fx_UcToUnityApplyScale3(_StartLocationOffset.xyz, _UcStartLocationOffsetScale)) * MightTaSpawnUnitScale();
                 return TransformObjectToWorld(offsetOs) - TransformObjectToWorld(float3(0.0, 0.0, 0.0));
             }
 
@@ -316,6 +346,7 @@ Shader "L2/Effects/MightTaSprite"
                 }
 
                 float3 focalOs = L2Fx_UeVectorToUnity(_StartLocationOffset.xyz);
+                focalOs *= MightTaSpawnUnitScale();
                 return TransformObjectToWorld(focalOs);
             }
 
@@ -453,7 +484,7 @@ Shader "L2/Effects/MightTaSprite"
 
                 // Spawn offset is always honest (polar + box + offset) — atlas preview only overrides age/size/flipbook.
                 float3 posUe = MightTaSpawnOffsetUe(pSeed);
-                float3 spawnOfs = L2Fx_UeVectorToUnity(posUe);
+                float3 spawnOfs = L2Fx_UeVectorToUnity(posUe) * MightTaSpawnUnitScale();
                 float3 baseSize;
 
                 if (scenePreview > 0.5)
@@ -520,12 +551,30 @@ Shader "L2/Effects/MightTaSprite"
                         // PTVD_StartPositionAndOwner: speed along owner<-spawn arc, not straight to chest focal.
                         float3 ownerWS = _OwnerWorldPos.xyz;
                         float3 velDir = MightTaArcVelocityDirWS(spawnWS, ownerWS);
+                        velDir *= (_VelocityDirectionSign < 0.0 ? -1.0 : 1.0);
                         float speedUe = L2Fx_RandomRange(
                             L2Fx_UcToUnityApplyScale2(_VelocityRangeX.xy, _UcVelocityScale),
                             pSeed,
                             _StartTime,
                             101.0);
+                        if (_UseVelocityMagnitude3D > 0.5)
+                        {
+                            float3 velUe = float3(
+                                L2Fx_RandomRange(L2Fx_UcToUnityApplyScale2(_VelocityRangeX.xy, _UcVelocityScale), pSeed, _StartTime, 101.0),
+                                L2Fx_RandomRange(L2Fx_UcToUnityApplyScale2(_VelocityRangeY.xy, _UcVelocityScale), pSeed, _StartTime, 103.0),
+                                L2Fx_RandomRange(L2Fx_UcToUnityApplyScale2(_VelocityRangeZ.xy, _UcVelocityScale), pSeed, _StartTime, 107.0));
+                            speedUe = length(velUe);
+                        }
                         float3 vel = velDir * speedUe * uuToWorld;
+                        if (_HorizontalOutwardWeight > 0.001)
+                        {
+                            float3 outwardH = float3(spawnWS.x - ownerWS.x, 0.0, spawnWS.z - ownerWS.z);
+                            float outwardLen = length(outwardH);
+                            if (outwardLen > 1e-5)
+                            {
+                                vel += (outwardH / outwardLen) * speedUe * uuToWorld * _HorizontalOutwardWeight;
+                            }
+                        }
                         float3 acc = L2Fx_UeVectorToUnity(
                             L2Fx_UcToUnityApplyScale3(_Acceleration.xyz, _UcAccelerationScale)) * uuToWorld;
                         float3 disp = L2Fx_DisplacementConstantAccel(vel, acc, age);

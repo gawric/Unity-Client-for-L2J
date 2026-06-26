@@ -11,6 +11,9 @@ public class SkillAnimationRunner
     private const string CAST_TRIGGER_SHOT_OVERRIDE = "MagicShot";
     private const string CAST_TRIGGER_END_2P = "CastEnd2P";
     private const string CAST_TRIGGER_SHOT_2P = "MagicShot2P";
+    private const string CAST_TRIGGER_MID_LONG = "CastMidLong";
+    private const string CAST_TRIGGER_END_LONG = "CastEndLong";
+    private const string CAST_TRIGGER_SHOT_LONG = "MagicShotLong";
     private const string NONE_ANIMATION_NAME = "none";
 
    public async Task StartRun(string[] cycle , int objectId , IAnimationManager animationManager , Action onComplete = null)
@@ -99,6 +102,56 @@ public class SkillAnimationRunner
             }
 
         Debug.Log($"[SkillRunOverride] COMPLETE sinceChainStart={Time.time - chainStartTime:F3}s objectId={objectId}");
+        onComplete?.Invoke();
+    }
+
+    public async Task StartRunLongOverride(string[] cycle, int objectId, IAnimationManager animationManager, Action onComplete = null)
+    {
+        if (cycle == null)
+        {
+            Debug.LogWarning($"[SkillRunLongOverride] cycle is null objectId={objectId}");
+            onComplete?.Invoke();
+            return;
+        }
+
+        float chainStartTime = Time.time;
+        var validAnimations = new List<string>();
+        for (int i = 0; i < cycle.Length; i++)
+        {
+            string animName = cycle[i];
+            if (!ShouldSkipAnimation(animName))
+            {
+                validAnimations.Add(animName.Trim());
+            }
+        }
+
+        if (validAnimations.Count < 3)
+        {
+            Debug.LogWarning(
+                $"[SkillRunLongOverride] expected 3 clips, got {validAnimations.Count} objectId={objectId} — fallback to override path");
+            await StartRunOverride(cycle, objectId, animationManager, onComplete);
+            return;
+        }
+
+        string midClip = validAnimations[0];
+        string endClip = validAnimations[1];
+        string shotClip = validAnimations[2];
+
+        Debug.Log(
+            $"[SkillRunLongOverride] START objectId={objectId} mid='{midClip}' end='{endClip}' shot='{shotClip}'");
+
+        Debug.Log($"[SkillRunLongOverride] phase=CastMidLong objectId={objectId}");
+        await animationManager.AsyncPlayAnimationRaceOverrides(objectId, CAST_TRIGGER_MID_LONG, midClip);
+        Debug.Log($"[SkillRunLongOverride] phase=CastMidLong done sinceStart={Time.time - chainStartTime:F3}s objectId={objectId}");
+
+        Task shotAwaitTask = animationManager.AsyncAwaitOverrideAnimationFinish(objectId, CAST_TRIGGER_SHOT_LONG);
+        Debug.Log($"[SkillRunLongOverride] phase=CastEndLong loop start objectId={objectId}");
+        await animationManager.AsyncPlayLongCastLoopPhase(objectId, CAST_TRIGGER_END_LONG, endClip);
+        Debug.Log($"[SkillRunLongOverride] phase=CastEndLong loop done sinceStart={Time.time - chainStartTime:F3}s objectId={objectId}");
+
+        await shotAwaitTask;
+        Debug.Log($"[SkillRunLongOverride] phase=MagicShotLong done COMPLETE sinceStart={Time.time - chainStartTime:F3}s objectId={objectId}");
+
         onComplete?.Invoke();
     }
 

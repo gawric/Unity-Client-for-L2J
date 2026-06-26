@@ -16,13 +16,18 @@ float L2Fx_SpawnRegionDebug_IsActive(float debugSpawnRegion, float startTime)
 // Single polar sample in UE FVector space (matches L2Fx_SpawnOffsetPolarDegrees).
 float3 L2Fx_SpawnRegionPolarOffsetUe(float thetaDeg, float phiDeg, float radius)
 {
-    float theta = thetaDeg * L2Fx_DegToRad;
-    float phi = phiDeg * L2Fx_DegToRad;
-    float sinPhi = sin(phi);
-    return float3(
-        radius * sinPhi * cos(theta),
-        radius * sinPhi * sin(theta),
-        radius * cos(phi));
+    return L2Fx_PolarCartesianUe(thetaDeg, phiDeg, radius);
+}
+
+// Random point on a sphere surface in UE FVector space (for SphereRadiusRange).
+float3 L2Fx_SpawnRegionRandomOnSphereUe(float seed, float startTime, float radiusUe, float saltBase)
+{
+    float u = L2Fx_RandomRange(float2(0.0, 1.0), seed, startTime, saltBase);
+    float v = L2Fx_RandomRange(float2(0.0, 1.0), seed, startTime, saltBase + 1.0);
+    float theta = L2Fx_TwoPi * u;
+    float z = 1.0 - 2.0 * v;
+    float r = sqrt(max(0.0, 1.0 - z * z));
+    return float3(r * cos(theta), r * sin(theta), z) * radiusUe;
 }
 
 // Full spawn offset in UE space: polar cap + box jitter + offset (.uc StartLocation*).

@@ -82,6 +82,10 @@ Shader "L2/Effects/MightCaMesh"
 
         [Toggle] _SpinParticles ("Spin Particles", Float) = 1
         _StartSpinRange ("Start Spin rev (Min,Max)", Vector) = (0, 1, 0, 0)
+        [Toggle] _UseStartSpin3Axis ("Start Spin XYZ (UE StartSpinRange)", Float) = 0
+        _StartSpinRangeX ("Start Spin X rev (Min,Max)", Vector) = (0, 1, 0, 0)
+        _StartSpinRangeY ("Start Spin Y rev (Min,Max)", Vector) = (0, 0, 0, 0)
+        _StartSpinRangeZ ("Start Spin Z rev (Min,Max)", Vector) = (0, 0, 0, 0)
         _SpinsPerSecond ("Spins Per Second rev/s", Float) = 1.5
         _SpinCCWorCW ("Spin CCW(0) / CW(1)", Range(0, 1)) = 1
         _L2FxMeshSpinDirection ("L2 Fx Mesh Spin Direction (UC->Unity)", Float) = 1
@@ -93,6 +97,10 @@ Shader "L2/Effects/MightCaMesh"
         _Acceleration ("Acceleration (XYZ UE UU/s²)", Vector) = (0, 0, -11, 0)
         _StartVelocityRangeZ ("StartVelocity Z UU/s (Min,Max)", Vector) = (-23, -23, 0, 0)
         _SpawnUnitScale ("UE UU -> Unity meters", Float) = 0.01
+        _UcStartSizeScale ("UC StartSize Scale", Float) = 1
+        _UcStartLocationOffsetScale ("UC StartLocationOffset Scale", Float) = 1
+        _UcVelocityScale ("UC StartVelocity Scale", Float) = 1
+        _UcAccelerationScale ("UC Acceleration Scale", Float) = 1
 
         [Header(Scene Debug Preview)]
         [Toggle] _DebugMeshPreview ("Debug Mesh Preview (_StartTime=0)", Float) = 0
@@ -200,6 +208,10 @@ Shader "L2/Effects/MightCaMesh"
                 float _SizeScaleVal4;
                 float _SpinParticles;
                 float4 _StartSpinRange;
+                float _UseStartSpin3Axis;
+                float4 _StartSpinRangeX;
+                float4 _StartSpinRangeY;
+                float4 _StartSpinRangeZ;
                 float _SpinsPerSecond;
                 float _SpinCCWorCW;
                 float _L2FxMeshSpinDirection;
@@ -209,6 +221,10 @@ Shader "L2/Effects/MightCaMesh"
                 float4 _Acceleration;
                 float4 _StartVelocityRangeZ;
                 float _SpawnUnitScale;
+                float _UcStartSizeScale;
+                float _UcStartLocationOffsetScale;
+                float _UcVelocityScale;
+                float _UcAccelerationScale;
                 float _DebugMeshPreview;
                 float _DebugMeshPreviewLoop;
                 float _DebugMeshPreviewAge;
@@ -243,9 +259,10 @@ Shader "L2/Effects/MightCaMesh"
             float3 MightCaMeshParticleMotion(float ageSeconds)
             {
                 float velZUe = L2Fx_RandomRange(_StartVelocityRangeZ.xy, _Seed, _StartTime, 101.0);
-                float3 velUe = float3(0.0, 0.0, velZUe);
+                float3 velUe = L2Fx_UcToUnityApplyScale3(float3(0.0, 0.0, velZUe), _UcVelocityScale);
+                float3 accUe = L2Fx_UcToUnityApplyScale3(_Acceleration.xyz, _UcAccelerationScale);
                 float3 velUnity = L2Fx_UeVectorToUnity(velUe) * _SpawnUnitScale;
-                float3 accUnity = L2Fx_UeVectorToUnity(_Acceleration.xyz) * _SpawnUnitScale;
+                float3 accUnity = L2Fx_UeVectorToUnity(accUe) * _SpawnUnitScale;
                 return L2Fx_DisplacementConstantAccel(velUnity, accUnity, ageSeconds);
             }
 
@@ -269,31 +286,75 @@ Shader "L2/Effects/MightCaMesh"
 
                 OUT.ageNorm = loopAgeNorm;
 
-                float startSpinRev = L2Fx_RandomRange(_StartSpinRange.xy, _Seed, _StartTime, 91.0);
-
                 float3 posOS = IN.positionOS.xyz;
                 float3 nrmOS = IN.normalOS;
                 L2Fx_UcToUnityMeshConvertData convertData = MightCaMeshConvertData();
-                float3 startSizeUnity = L2Fx_UcToUnityMeshSize(_StartSize.xyz, convertData);
+                float3 startSizeUe = L2Fx_UcToUnityApplyScale3(_StartSize.xyz, _UcStartSizeScale);
+                float3 startSizeUnity = L2Fx_UcToUnityMeshSize(startSizeUe, convertData);
                 float spinsPerSecondUnity = L2Fx_UcToUnityMeshSpinRate(_SpinsPerSecond, convertData);
-                float3 startLocationOffsetUnity = L2Fx_UcToUnityStartLocationOffset(_StartLocationOffset.xyz, convertData);
+                float3 startLocationOffsetUe = L2Fx_UcToUnityApplyScale3(
+                    _StartLocationOffset.xyz, _UcStartLocationOffsetScale);
+                float3 startLocationOffsetUnity = L2Fx_UcToUnityStartLocationOffset(
+                    startLocationOffsetUe, convertData);
 
-                L2Fx_MeshBuiltin_TransformVertexOS_SplitAgeUnityOffset(
-                    posOS, nrmOS,
-                    _SpinParticles,
-                    startSpinRev,
-                    spinsPerSecondUnity,
-                    _SpinCCWorCW,
-                    spinAge, sizeAgeNorm,
-                    startSizeUnity,
-                    _UseSizeScale, _UseRegularSizeScale,
-                    _SizeScaleParam, _SizeScaleRepeats, _SizeScaleCount,
-                    _SizeScaleTime0, _SizeScaleVal0,
-                    _SizeScaleTime1, _SizeScaleVal1,
-                    _SizeScaleTime2, _SizeScaleVal2,
-                    _SizeScaleTime3, _SizeScaleVal3,
-                    _SizeScaleTime4, _SizeScaleVal4,
-                    startLocationOffsetUnity, _MeshYOffset, 0.0);
+                if (_UseStartSpin3Axis >= 0.5)
+                {
+                    float sizeScale = L2Fx_MeshBuiltin_SampleSizeScaleScalar(
+                        sizeAgeNorm,
+                        _SizeScaleParam,
+                        _SizeScaleRepeats,
+                        _SizeScaleCount,
+                        _UseSizeScale,
+                        _UseRegularSizeScale,
+                        _SizeScaleTime0, _SizeScaleVal0,
+                        _SizeScaleTime1, _SizeScaleVal1,
+                        _SizeScaleTime2, _SizeScaleVal2,
+                        _SizeScaleTime3, _SizeScaleVal3,
+                        _SizeScaleTime4, _SizeScaleVal4);
+
+                    float3 sizeMul = startSizeUnity * sizeScale;
+                    float2 zeroSps = float2(0.0, 0.0);
+
+                    // Spin + scale in mesh-local space, then translate (same as sprite billboard center).
+                    // Offset-before-spin orbited vertices around object origin and shifted MeshEmitter3 sideways.
+                    L2Fx_ApplyMeshParticleSpin(
+                        posOS,
+                        nrmOS,
+                        _SpinParticles,
+                        spinAge,
+                        _StartSpinRangeX.xy,
+                        _StartSpinRangeY.xy,
+                        _StartSpinRangeZ.xy,
+                        zeroSps,
+                        zeroSps,
+                        zeroSps,
+                        _Seed,
+                        _StartTime);
+                    posOS *= sizeMul;
+                    posOS += startLocationOffsetUnity;
+                    posOS.y += _MeshYOffset;
+                }
+                else
+                {
+                    float startSpinRev = L2Fx_RandomRange(_StartSpinRange.xy, _Seed, _StartTime, 91.0);
+
+                    L2Fx_MeshBuiltin_TransformVertexOS_SplitAgeUnityOffset(
+                        posOS, nrmOS,
+                        _SpinParticles,
+                        startSpinRev,
+                        spinsPerSecondUnity,
+                        _SpinCCWorCW,
+                        spinAge, sizeAgeNorm,
+                        startSizeUnity,
+                        _UseSizeScale, _UseRegularSizeScale,
+                        _SizeScaleParam, _SizeScaleRepeats, _SizeScaleCount,
+                        _SizeScaleTime0, _SizeScaleVal0,
+                        _SizeScaleTime1, _SizeScaleVal1,
+                        _SizeScaleTime2, _SizeScaleVal2,
+                        _SizeScaleTime3, _SizeScaleVal3,
+                        _SizeScaleTime4, _SizeScaleVal4,
+                        startLocationOffsetUnity, _MeshYOffset, 0.0);
+                }
 
                 posOS += MightCaMeshParticleMotion(motionAge);
 

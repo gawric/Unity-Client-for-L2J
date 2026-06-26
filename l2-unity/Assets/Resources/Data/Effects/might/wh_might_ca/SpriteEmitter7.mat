@@ -55,11 +55,11 @@ Material:
     - _ColorScaleTime2: 0.467857
     - _ColorScaleTime3: 1
     - _DebugAtlasPreview: 0
-    - _DebugAtlasPreviewAge: 0.108
+    - _DebugAtlasPreviewAge: 0.088
     - _DebugAtlasPreviewAlpha: 0.9
     - _DebugAtlasPreviewBoost: 8
     - _DebugAtlasPreviewLoop: 0
-    - _DebugAtlasPreviewSizeScale: 0.5
+    - _DebugAtlasPreviewSizeScale: 11.7
     - _DebugSpawnRegion: 0
     - _FadeIn: 0
     - _FadeInEndTime: 0
@@ -112,6 +112,7 @@ Material:
     - _UseOwnerFromShaderTarget: 1
     - _UseRandomSubdivision: 1
     - _UseRegularSizeScale: 0
+    - _UseSpawnUnitScale: 0
     - _UseSizeScale: 1
     - _UseSoftLumaAlpha: 1
     - _UseVelocityTowardFocal: 1

@@ -7,10 +7,15 @@ public class ParticleGroup : EffectPart
     private const string DebugTraceHealEffectToken = "wh_heal";
     private const string DebugTraceCurePoisonToken = "cure_poison";
     private const string DebugTraceMightCaToken = "might_ca";
+    private const string DebugTraceMightTaToken = "wh_might_ta";
+    private const string MeshEmitter3GroupName = "MeshEmitter3";
     private const string IceBoltTaEffectName = "el_ice_bolt_ta";
     private const string IcebergGroupName = "iceberg";
     private const string IcefragGroupName = "icefrag";
     private const string OwnerWorldPosShaderProperty = "_OwnerWorldPos";
+    private static readonly int StartTimeShaderId = Shader.PropertyToID("_StartTime");
+    private static readonly int SeedShaderId = Shader.PropertyToID("_Seed");
+    private static readonly int DebugMeshPreviewShaderId = Shader.PropertyToID("_DebugMeshPreview");
     [SerializeField] private L2Particle _owner;
     [SerializeField] private Renderer[] _particles;
     [Header("Spawning (Настройки появления)")]
@@ -114,6 +119,8 @@ public class ParticleGroup : EffectPart
     private bool _burstSpawnFinished;
     private float _lastCurePoisonShaderTimeLog;
     private float _lastMightCaShaderTimeLog;
+    private float _lastMeshEmitter3ShaderTimeLog;
+    private MaterialPropertyBlock _particleRuntimeProperties;
 
     public void FixedUpdate()
     {
@@ -168,6 +175,15 @@ public class ParticleGroup : EffectPart
                                 $"preserveLoopTime={_preserveShaderTimeInContinuousLoop} runtimeLoop={_runtimeContinuousLoop} " +
                                 $"shaderMat={BuildRuntimeMaterialLifetimeSnapshot(_particles[i], now)} frame={Time.frameCount}.");
                         }
+
+                        if (ShouldTraceMightTaMeshEmitter3())
+                        {
+                            Debug.Log(
+                                $"[MESH_EMITTER3_SLOT_OFF] group='{name}' slot={i} now={now:F3}s " +
+                                $"aliveFor={(now - _particleSpawnTimes[i]):F3}s groupDuration={_duration:F3}s " +
+                                $"spawned={_spawnedCount}/{_maxCount} particleIndex={_particleIndex} " +
+                                $"{BuildMeshEmitter3RendererSnapshot(_particles[i], now)} frame={Time.frameCount}.");
+                        }
 #endif
                         //Debug.Log($"<color=orange>[Particle DIE]</color> {gameObject.name} слот [{i}] выключен.");
                         _particles[i].gameObject.SetActive(false);
@@ -194,6 +210,12 @@ public class ParticleGroup : EffectPart
         {
             _lastMightCaShaderTimeLog = now;
             LogMightCaShaderTimeSample(now, "tick");
+        }
+
+        if (ShouldTraceMightTaMeshEmitter3() && anyActive && now - _lastMeshEmitter3ShaderTimeLog >= 0.1f)
+        {
+            _lastMeshEmitter3ShaderTimeLog = now;
+            LogMeshEmitter3ShaderTimeSample(now, "tick");
         }
 #endif
 
@@ -269,6 +291,21 @@ public class ParticleGroup : EffectPart
         {
             spawnSpin.Apply(renderer, seed);
         }
+    }
+
+    private void ApplySpawnTimingProperties(Renderer renderer, float shaderStartTime, float seed)
+    {
+        if (renderer == null)
+        {
+            return;
+        }
+
+        _particleRuntimeProperties ??= new MaterialPropertyBlock();
+        renderer.GetPropertyBlock(_particleRuntimeProperties);
+        _particleRuntimeProperties.SetFloat(StartTimeShaderId, shaderStartTime);
+        _particleRuntimeProperties.SetFloat(SeedShaderId, seed);
+        _particleRuntimeProperties.SetFloat(DebugMeshPreviewShaderId, 0f);
+        renderer.SetPropertyBlock(_particleRuntimeProperties);
     }
 
     private void ActivateParticle(float now)
@@ -361,6 +398,7 @@ public class ParticleGroup : EffectPart
         //Debug.Log($"<color=green>[Particle SPAWN]</color> {gameObject.name} слот [{_particleIndex}] в {now:F3}с.");
 
         float seed = Random.Range(-100f, 100f);
+        ApplySpawnTimingProperties(_particles[_particleIndex], shaderStartTime, seed);
         Material[] runtimeMaterials = _particles[_particleIndex].materials;
         Material[] sharedMaterials = _particles[_particleIndex].sharedMaterials;
         for (int materialIndex = 0; materialIndex < runtimeMaterials.Length; materialIndex++)
@@ -385,9 +423,15 @@ public class ParticleGroup : EffectPart
                 m.SetFloat("_Alpha", shared.GetFloat("_Alpha"));
             }
 
+            // Debug preview is for Scene/material assets only; spawned slots must run from their own time.
+            if (m.HasProperty(DebugMeshPreviewShaderId))
+            {
+                m.SetFloat(DebugMeshPreviewShaderId, 0f);
+            }
+
             // Debug.Log("Set Start Time " + shaderStartTime + " Seed " + seed + "name " + m.name);
-            m.SetFloat("_StartTime", shaderStartTime);
-            m.SetFloat("_Seed", seed);
+            m.SetFloat(StartTimeShaderId, shaderStartTime);
+            m.SetFloat(SeedShaderId, seed);
             ApplySpawnSpin(_particles[_particleIndex], seed);
             SetDynamicShaderWorldPositions(m);
 
@@ -410,6 +454,16 @@ public class ParticleGroup : EffectPart
                     $"note=INITIAL_DELAY at age=0 on activate is normal; watch MIGHT_CA_SHADER_TICK after delay " +
                     $"[FADE_PHASE]={ShaderFadeDiagnostic.FadePhaseLabel(m, now)} " +
                     $"{ShaderFadeDiagnostic.BuildLine(m, now)} frame={Time.frameCount}.");
+            }
+
+            if (ShouldTraceMightTaMeshEmitter3())
+            {
+                Debug.Log(
+                    $"[MESH_EMITTER3_SPAWN] group='{name}' slot={_particleIndex} matIdx={materialIndex} " +
+                    $"now={now:F3}s shaderStart={shaderStartTime:F3}s seed={seed:F3} " +
+                    $"spawnedNext={_spawnedCount + 1}/{_maxCount} burst={_isBurstSpawning} " +
+                    $"countPerSec={_countPerSecond} fixedDuration={_hasFixedDuration} runtimeLoop={_runtimeContinuousLoop} " +
+                    $"{BuildMeshEmitter3RendererSnapshot(_particles[_particleIndex], now)} frame={Time.frameCount}.");
             }
 #endif
             if (SurfaceNormal != Vector3.zero)
@@ -456,6 +510,7 @@ public class ParticleGroup : EffectPart
         _lastWhHealPreserveLog = 0f;
         _lastCurePoisonShaderTimeLog = 0f;
         _lastMightCaShaderTimeLog = 0f;
+        _lastMeshEmitter3ShaderTimeLog = 0f;
 
         if (_particles == null || _particles.Length == 0)
             _particles = GetComponentsInChildren<Renderer>(true);
@@ -534,6 +589,26 @@ public class ParticleGroup : EffectPart
                 $"[CURE_POISON_PLAY] group='{name}' playAt={_debugPlayStartedAt:F3}s slots={(_particles != null ? _particles.Length : 0)} " +
                 $"duration={_duration:F3}s shaderLife={_baseShaderLifetime:F3}s burst={_isBurstSpawning} maxCount={_maxCount} " +
                 $"mat0={BuildMaterialLifetimeSnapshot(_particles != null && _particles.Length > 0 ? _particles[0] : null)} frame={Time.frameCount}.");
+        }
+
+        if (ShouldTraceMightTaMeshEmitter3())
+        {
+            Debug.Log(
+                $"[MESH_EMITTER3_PLAYPART] group='{name}' playAt={_debugPlayStartedAt:F3}s " +
+                $"startDelay={_startDelay:F3}s countPerSec={_countPerSecond} maxCount={_maxCount} " +
+                $"duration={_duration:F3}s fixedDuration={_hasFixedDuration} baseShaderLifetime={_baseShaderLifetime:F3}s " +
+                $"runtimeLoop={_runtimeContinuousLoop} burst={_isBurstSpawning} particleSlots={(_particles != null ? _particles.Length : 0)} " +
+                $"owner='{(_owner != null ? _owner.name : "null")}' frame={Time.frameCount}.");
+
+            if (_particles != null)
+            {
+                for (int i = 0; i < _particles.Length; i++)
+                {
+                    Debug.Log(
+                        $"[MESH_EMITTER3_PLAYPART_SLOT] group='{name}' slot={i} " +
+                        $"{BuildMeshEmitter3RendererSnapshot(_particles[i], _debugPlayStartedAt)} frame={Time.frameCount}.");
+                }
+            }
         }
 #endif
     }
@@ -852,6 +927,17 @@ public class ParticleGroup : EffectPart
         return ShouldTraceEffectToken(DebugTraceMightCaToken);
     }
 
+    private bool ShouldTraceMightTaMeshEmitter3()
+    {
+        if (string.IsNullOrEmpty(name) ||
+            name.IndexOf(MeshEmitter3GroupName, System.StringComparison.OrdinalIgnoreCase) < 0)
+        {
+            return false;
+        }
+
+        return ShouldTraceEffectToken(DebugTraceMightTaToken);
+    }
+
     private bool ShouldTraceEffectToken(string token)
     {
         if (!string.IsNullOrEmpty(name) &&
@@ -895,6 +981,27 @@ public class ParticleGroup : EffectPart
         LogShaderTimeSample(now, reason, "MIGHT_CA_SHADER_TICK");
     }
 
+    private void LogMeshEmitter3ShaderTimeSample(float now, string reason)
+    {
+        if (_particles == null)
+        {
+            return;
+        }
+
+        for (int i = 0; i < _particles.Length; i++)
+        {
+            bool trackedActive = _isParticleActive != null && i < _isParticleActive.Length && _isParticleActive[i];
+            float alive = trackedActive && _particleSpawnTimes != null && i < _particleSpawnTimes.Length
+                ? now - _particleSpawnTimes[i]
+                : -1f;
+            Debug.Log(
+                $"[MESH_EMITTER3_TICK] reason={reason} group='{name}' slot={i} now={now:F3}s " +
+                $"trackedActive={trackedActive} alive={alive:F3}s groupDuration={_duration:F3}s " +
+                $"spawned={_spawnedCount}/{_maxCount} particleIndex={_particleIndex} " +
+                $"{BuildMeshEmitter3RendererSnapshot(_particles[i], now)} frame={Time.frameCount}.");
+        }
+    }
+
     private void LogShaderTimeSample(float now, string reason, string logTag)
     {
         if (_particles == null || _isParticleActive == null)
@@ -921,6 +1028,44 @@ public class ParticleGroup : EffectPart
                 $"[FADE_PHASE]={fadePhase} {fadeLine} frame={Time.frameCount}.");
             return;
         }
+    }
+
+    private string BuildMeshEmitter3RendererSnapshot(Renderer renderer, float now)
+    {
+        if (renderer == null)
+        {
+            return "renderer=null";
+        }
+
+        Material shared = renderer.sharedMaterial;
+        Material runtime = null;
+        Material[] mats = renderer.materials;
+        if (mats != null && mats.Length > 0)
+        {
+            runtime = mats[0];
+        }
+
+        _particleRuntimeProperties ??= new MaterialPropertyBlock();
+        renderer.GetPropertyBlock(_particleRuntimeProperties);
+
+        float matStart = runtime != null && runtime.HasProperty(StartTimeShaderId) ? runtime.GetFloat(StartTimeShaderId) : -1f;
+        float matSeed = runtime != null && runtime.HasProperty(SeedShaderId) ? runtime.GetFloat(SeedShaderId) : 0f;
+        float matPreview = runtime != null && runtime.HasProperty(DebugMeshPreviewShaderId) ? runtime.GetFloat(DebugMeshPreviewShaderId) : -1f;
+        float matHold = runtime != null && runtime.HasProperty("_Hold") ? runtime.GetFloat("_Hold") : -1f;
+        Vector4 matLifetime = runtime != null && runtime.HasProperty("_LifetimeRange") ? runtime.GetVector("_LifetimeRange") : Vector4.zero;
+        Vector4 matDelay = runtime != null && runtime.HasProperty("_InitialDelayRange") ? runtime.GetVector("_InitialDelayRange") : Vector4.zero;
+        float matAge = matStart > -0.5f ? now - matStart : -1f;
+        float pbStart = _particleRuntimeProperties.GetFloat(StartTimeShaderId);
+        float pbSeed = _particleRuntimeProperties.GetFloat(SeedShaderId);
+        float pbPreview = _particleRuntimeProperties.GetFloat(DebugMeshPreviewShaderId);
+        float pbAge = pbStart > 0f ? now - pbStart : -1f;
+
+        return
+            $"renderer='{renderer.name}' goActive={renderer.gameObject.activeSelf} enabled={renderer.enabled} " +
+            $"shared='{(shared != null ? shared.name : "null")}' runtime='{(runtime != null ? runtime.name : "null")}' " +
+            $"matStart={matStart:F3} matAge={matAge:F3}s matSeed={matSeed:F3} matPreview={matPreview:F3} matHold={matHold:F3} " +
+            $"matLife=({matLifetime.x:F3},{matLifetime.y:F3}) matDelay=({matDelay.x:F3},{matDelay.y:F3}) " +
+            $"pbStart={pbStart:F3} pbAge={pbAge:F3}s pbSeed={pbSeed:F3} pbPreview={pbPreview:F3}";
     }
 
     private string BuildRuntimeMaterialLifetimeSnapshot(Renderer renderer, float now)

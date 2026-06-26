@@ -5,6 +5,7 @@
 // raw .uc material values -> Unity-ready values consumed by size/spin helpers.
 
 #include "L2FxMeshParticleMotion.hlsl"
+#include "L2FxSpawnRegionDebug.hlsl"
 
 struct L2Fx_UcToUnityMeshConvertData
 {
@@ -19,6 +20,21 @@ struct L2Fx_UcToUnitySpriteConvertData
 {
     float effectScale;
     float spriteScale;
+};
+
+// Polar/box spawn region from raw .uc (StartLocationPolarRange + StartLocation*).
+struct L2Fx_UcToUnitySpriteSpawnData
+{
+    float2 azimuthDegMinMax;
+    float2 polarPitchDegMinMax;
+    float2 radiusMinMax;
+    float3 startLocationOffsetUe;
+    float3 startLocationRangeMinUe;
+    float3 startLocationRangeMaxUe;
+    float ucPolarRadiusScale;
+    float ucStartLocationOffsetScale;
+    float ucStartLocationRangeScale;
+    float spawnUnitScale;
 };
 
 float L2Fx_UcToUnitySafePositiveScale(float value)
@@ -81,6 +97,51 @@ float3 L2Fx_UcToUnitySpriteSize(
     return baseSizeUnity
         * L2Fx_UcToUnitySafePositiveScale(data.effectScale)
         * L2Fx_UcToUnitySafePositiveScale(data.spriteScale);
+}
+
+float L2Fx_UcToUnityResolveSpawnUnitScale(float spawnUnitScale)
+{
+    return spawnUnitScale > 0.0 ? spawnUnitScale : L2FX_UU_TO_UNITY;
+}
+
+float3 L2Fx_UcToUnitySpriteSpawnOffset(
+    L2Fx_UcToUnitySpriteSpawnData spawn,
+    float seed,
+    float startTime)
+{
+    float3 offsetUe = L2Fx_UcToUnityApplyScale3(
+        spawn.startLocationOffsetUe,
+        spawn.ucStartLocationOffsetScale);
+    float3 posUe = L2Fx_SpawnRegionOffsetUe(
+        spawn.azimuthDegMinMax,
+        spawn.polarPitchDegMinMax,
+        L2Fx_UcToUnityApplyScale2(spawn.radiusMinMax, spawn.ucPolarRadiusScale),
+        offsetUe,
+        L2Fx_UcToUnityApplyScale3(spawn.startLocationRangeMinUe, spawn.ucStartLocationRangeScale),
+        L2Fx_UcToUnityApplyScale3(spawn.startLocationRangeMaxUe, spawn.ucStartLocationRangeScale),
+        seed,
+        startTime);
+
+    return L2Fx_UeVectorToUnity(posUe) * L2Fx_UcToUnityResolveSpawnUnitScale(spawn.spawnUnitScale);
+}
+
+float3 L2Fx_UcToUnitySpriteStartSize(
+    float2 sizeRangeX,
+    float2 sizeRangeY,
+    float2 sizeRangeZ,
+    bool uniformSize,
+    float seed,
+    float startTime,
+    L2Fx_UcToUnitySpriteConvertData data)
+{
+    float3 baseSizeUnity = L2Fx_StartSize(
+        float3(sizeRangeX.x, sizeRangeY.x, sizeRangeZ.x),
+        float3(sizeRangeX.y, sizeRangeY.y, sizeRangeZ.y),
+        uniformSize,
+        seed,
+        startTime);
+
+    return L2Fx_UcToUnitySpriteSize(baseSizeUnity, data);
 }
 
 float3 L2Fx_UcToUnityStartLocationOffset(

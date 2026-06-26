@@ -59,6 +59,9 @@ float L2Fx_SizeScale(float normalizedAge, float useSizeScale, float4 sizeScale0,
     return lerp(s1, s2, saturate((normalizedAge - t1) / denom12));
 }
 
+// Legacy sprite path: returns raw UE units (no L2FX_UU_TO_UNITY).
+// Prefer L2Fx_StartSize(float3 minUe, float3 maxUe, bool, ...) from L2FxEmitterSpawn.hlsl
+// or L2Fx_UcToUnitySpriteStartSize for dedicated shaders.
 float3 L2Fx_StartSize(float2 rangeX, float2 rangeY, float2 rangeZ, float uniformSize, float seed, float startTime)
 {
     float sx = L2Fx_RandomRange(rangeX, seed, startTime, 11.0);
