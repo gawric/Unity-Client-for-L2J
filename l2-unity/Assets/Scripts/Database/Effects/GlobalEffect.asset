@@ -93,3 +93,8 @@ MonoBehaviour:
     comment: might-composite-effect
     settings: {fileID: 11400000, guid: e73b899fdfd5e1243a008820002a9c0e, type: 2}
     ignoreFlightTimeForCast: 1
+  - id: 2013
+    prefab: {fileID: -7507245368011384688, guid: f67aeffaba1b72c4bbc3b2d1ca02ebc4, type: 3}
+    comment: teleport-composite-effect
+    settings: {fileID: 11400000, guid: dd6f482471331114da04e05ef1d9dddb, type: 2}
+    ignoreFlightTimeForCast: 1
