@@ -1,16 +1,24 @@
-// Calibration ONLY: it_healing_potion_ta / m_u004_b SpriteEmitter2
-// Self-contained: flipbook + size. No L2Fx library includes.
-// DrawScale (.uc): ONLY root Transform (DrawScale=0.05). NOT in shader/material.
-// Child quads: localScale=(1,1,1).
-// final(m) = StartSize(UU) * 0.01 * K_world * lossyScale(root DrawScale)
+// it_healing_potion_ta / m_u004_b SpriteEmitter2 — IDA-verified calib shader.
+// sizeUU = StartSize(UU) * SizeScale(t)  [diameter in UU]
+// sizeInMeters = sizeUU / 52.5
+// sizeM = sizeInMeters * _L2FxWorldCalibration  (global K = 7.0)
+// DrawScale on root Transform scales sprite size via unity_ObjectToWorld (no shader compensation).
 Shader "L2/Effects/Calib/HealingPotionTaSpriteEmitter2"
 {
     Properties
     {
         _MainTex ("Texture", 2D) = "white" {}
 
-        _L2FxWorldCalibration ("World Calibration K", Float) = 0.7
+        _L2FxWorldCalibration ("World Calibration K", Float) = 7
         _SizeRange ("Start Size UU Min Max", Vector) = (5.5, 5.5, 0, 0)
+
+        _TestSizeScaleAge ("SizeScale Age 0-1", Range(0, 1)) = 0.34
+        _SizeScaleRepeats ("SizeScale Repeats", Float) = 1
+        _SizeKey0 ("Size Key 0 Time Size", Vector) = (0, 0.6, 0, 0)
+        _SizeKey1 ("Size Key 1 Time Size", Vector) = (0.07, 1.8, 0, 0)
+        _SizeKey2 ("Size Key 2 Time Size", Vector) = (0.14, 2.6, 0, 0)
+        _SizeKey3 ("Size Key 3 Time Size", Vector) = (0.34, 3, 0, 0)
+        _SizeKey4 ("Size Key 4 Time Size", Vector) = (1, 3.4, 0, 0)
 
         _TextureUSubdivisions ("Atlas U Cells", Float) = 4
         _TextureVSubdivisions ("Atlas V Cells", Float) = 4
@@ -47,6 +55,8 @@ Shader "L2/Effects/Calib/HealingPotionTaSpriteEmitter2"
             #pragma target 3.0
 
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
+            #include "../Common/L2FxCoreGeometry.hlsl"
+            #include "../Common/L2FxFlipbook.hlsl"
 
             TEXTURE2D(_MainTex);
             SAMPLER(sampler_MainTex);
@@ -55,6 +65,13 @@ Shader "L2/Effects/Calib/HealingPotionTaSpriteEmitter2"
                 float4 _MainTex_ST;
                 float _L2FxWorldCalibration;
                 float4 _SizeRange;
+                float _TestSizeScaleAge;
+                float _SizeScaleRepeats;
+                float4 _SizeKey0;
+                float4 _SizeKey1;
+                float4 _SizeKey2;
+                float4 _SizeKey3;
+                float4 _SizeKey4;
                 float _TextureUSubdivisions;
                 float _TextureVSubdivisions;
                 float _SubdivisionStart;
@@ -64,37 +81,35 @@ Shader "L2/Effects/Calib/HealingPotionTaSpriteEmitter2"
                 float _LumaAlphaFloor;
             CBUFFER_END
 
-            float2 AtlasUV(float2 uv01, int cellIndex, int uSub, int vSub)
+            float EvaluateDynamicSizeScale(float progress)
             {
-                uSub = max(uSub, 1);
-                vSub = max(vSub, 1);
-                int tiles = uSub * vSub;
-                cellIndex = clamp(cellIndex, 0, tiles - 1);
-                float du = 1.0 / (float)uSub;
-                float dv = 1.0 / (float)vSub;
-                int u = cellIndex / vSub;
-                int v = (vSub - 1) - (cellIndex % vSub);
-                float2 cellSize = float2(du, dv);
-                float2 origin = float2((float)u * du, (float)v * dv);
-                return origin + saturate(uv01) * cellSize;
-            }
+                float phase = frac(progress * _SizeScaleRepeats);
 
-            void ResolveBlendFrames(
-                float ageNorm,
-                int subStart,
-                int subEnd,
-                out int frameA,
-                out int frameB,
-                out float blend)
-            {
-                int span = max(subEnd - subStart, 1);
-                float t = saturate(ageNorm);
-                float f = (float)subStart + t * (float)span;
-                frameA = (int)floor(f);
-                frameB = frameA + 1;
-                frameA = clamp(frameA, subStart, subEnd);
-                frameB = clamp(frameB, subStart, subEnd);
-                blend = saturate(f - (float)frameA);
+                float4 keys[5] = { _SizeKey0, _SizeKey1, _SizeKey2, _SizeKey3, _SizeKey4 };
+
+                if (keys[0].x > 0.0 && phase < keys[0].x)
+                {
+                    return lerp(1.0, keys[0].y, phase / max(keys[0].x, 1e-6));
+                }
+
+                int idx = 0;
+                while (idx < 4 && phase > keys[idx + 1].x)
+                {
+                    idx++;
+                }
+
+                float t0 = keys[idx].x;
+                float s0 = keys[idx].y;
+                float t1 = keys[idx + 1].x;
+                float s1 = keys[idx + 1].y;
+
+                if (abs(t1 - t0) < 1e-6)
+                {
+                    return s0;
+                }
+
+                float u = (phase - t0) / (t1 - t0);
+                return lerp(s0, s1, saturate(u));
             }
 
             float ResolveStartSizeUU()
@@ -128,8 +143,8 @@ Shader "L2/Effects/Calib/HealingPotionTaSpriteEmitter2"
             {
                 Varyings OUT;
 
-                float k = _L2FxWorldCalibration > 0.0 ? _L2FxWorldCalibration : 1.0;
-                float sizeM = ResolveStartSizeUU() * 0.01 * k;
+                float sizeUU = ResolveStartSizeUU() * EvaluateDynamicSizeScale(_TestSizeScaleAge);
+                float sizeM = L2Fx_GetFinalVertexSizeMeters(sizeUU, _L2FxWorldCalibration);
                 float3 quadOS = IN.positionOS.xyz * sizeM;
                 OUT.positionHCS = TransformObjectToHClip(float4(quadOS, 1.0));
 
@@ -137,13 +152,16 @@ Shader "L2/Effects/Calib/HealingPotionTaSpriteEmitter2"
                 int vSub = max(1, (int)_TextureVSubdivisions);
                 int s0 = (int)_SubdivisionStart;
                 int s1 = (int)_SubdivisionEnd;
-                int fa;
-                int fb;
-                float blend;
-                ResolveBlendFrames(_TestFlipbookAge, s0, s1, fa, fb, blend);
-                OUT.uvAtlasA = AtlasUV(IN.uv, fa, uSub, vSub);
-                OUT.uvAtlasB = AtlasUV(IN.uv, fb, uSub, vSub);
-                OUT.flipBlend = blend;
+                L2Fx_FlipbookAtlasUVBlend(
+                    IN.uv,
+                    _TestFlipbookAge,
+                    uSub,
+                    vSub,
+                    s0,
+                    s1,
+                    OUT.uvAtlasA,
+                    OUT.uvAtlasB,
+                    OUT.flipBlend);
                 return OUT;
             }
 

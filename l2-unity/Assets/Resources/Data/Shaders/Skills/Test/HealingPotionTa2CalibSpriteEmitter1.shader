@@ -1,26 +1,26 @@
-// it_healing_potion_ta / m_u004_b SpriteEmitter0 — calib shader (L2FxCoreGeometry.hlsl).
-Shader "L2/Effects/Calib/HealingPotionTaSpriteEmitter0"
+// it_healing_potion_ta_2 / m_u008_b SpriteEmitter1 — calib shader (L2FxCoreGeometry.hlsl).
+Shader "L2/Effects/Calib/HealingPotionTa2SpriteEmitter1"
 {
     Properties
     {
         _MainTex ("Texture", 2D) = "white" {}
 
         _L2FxWorldCalibration ("World Calibration K", Float) = 7
-        _SizeRange ("Start Size UU Min Max", Vector) = (3, 6, 0, 0)
+        _SizeRange ("Start Size UU Min Max", Vector) = (20, 20, 0, 0)
 
         _TestSizeScaleAge ("SizeScale Age 0-1", Range(0, 1)) = 0.5
-        _SizeScaleRepeats ("SizeScale Repeats", Float) = 6
-        _SizeKey0 ("Size Key 0 Time Size", Vector) = (0.17, 1, 0, 0)
-        _SizeKey1 ("Size Key 1 Time Size", Vector) = (0.75, 0.8, 0, 0)
+        _SizeScaleRepeats ("SizeScale Repeats", Float) = 1
+        _SizeKey0 ("Size Key 0 Time Size", Vector) = (0, 1, 0, 0)
+        _SizeKey1 ("Size Key 1 Time Size", Vector) = (1, 1, 0, 0)
         _SizeKey2 ("Size Key 2 Time Size", Vector) = (1, 1, 0, 0)
         _SizeKey3 ("Size Key 3 Time Size", Vector) = (1, 1, 0, 0)
         _SizeKey4 ("Size Key 4 Time Size", Vector) = (1, 1, 0, 0)
 
         _TextureUSubdivisions ("Atlas U Cells", Float) = 4
         _TextureVSubdivisions ("Atlas V Cells", Float) = 4
-        _ManualFrameIndex ("Manual Frame Index", Float) = 6
-        _SubdivisionStart ("Subdivision Start", Float) = 6
-        _SubdivisionEnd ("Subdivision End", Float) = 8
+        _SubdivisionStart ("Subdivision Start", Float) = 2
+        _SubdivisionEnd ("Subdivision End", Float) = 3
+        _TestFlipbookAge ("Flipbook Age 0-1", Range(0, 1)) = 0
 
         _RgbBoost ("RGB Boost", Range(0, 16)) = 7
         _LumaAlphaFloor ("Luma Alpha Floor", Range(0, 0.25)) = 0.003
@@ -42,7 +42,7 @@ Shader "L2/Effects/Calib/HealingPotionTaSpriteEmitter0"
 
         Pass
         {
-            Name "HealingPotionTaCalibSE0"
+            Name "HealingPotionTa2CalibSE1"
             Tags { "LightMode" = "UniversalForward" }
 
             HLSLPROGRAM
@@ -70,9 +70,9 @@ Shader "L2/Effects/Calib/HealingPotionTaSpriteEmitter0"
                 float4 _SizeKey4;
                 float _TextureUSubdivisions;
                 float _TextureVSubdivisions;
-                float _ManualFrameIndex;
                 float _SubdivisionStart;
                 float _SubdivisionEnd;
+                float _TestFlipbookAge;
                 float _RgbBoost;
                 float _LumaAlphaFloor;
             CBUFFER_END
@@ -130,7 +130,9 @@ Shader "L2/Effects/Calib/HealingPotionTaSpriteEmitter0"
             struct Varyings
             {
                 float4 positionHCS : SV_POSITION;
-                float2 uvAtlas : TEXCOORD0;
+                float2 uvAtlasA : TEXCOORD0;
+                float2 uvAtlasB : TEXCOORD1;
+                float flipBlend : TEXCOORD2;
             };
 
             Varyings vert(Attributes IN)
@@ -146,16 +148,24 @@ Shader "L2/Effects/Calib/HealingPotionTaSpriteEmitter0"
                 int vSub = max(1, (int)_TextureVSubdivisions);
                 int s0 = (int)_SubdivisionStart;
                 int s1 = (int)_SubdivisionEnd;
-                int lo = min(s0, s1);
-                int hi = max(s0, s1);
-                int frame = clamp((int)round(_ManualFrameIndex), lo, hi);
-                OUT.uvAtlas = L2Fx_FlipbookAtlasUV(IN.uv, frame, uSub, vSub);
+                L2Fx_FlipbookAtlasUVBlend(
+                    IN.uv,
+                    _TestFlipbookAge,
+                    uSub,
+                    vSub,
+                    s0,
+                    s1,
+                    OUT.uvAtlasA,
+                    OUT.uvAtlasB,
+                    OUT.flipBlend);
                 return OUT;
             }
 
             half4 frag(Varyings IN) : SV_Target
             {
-                half4 tex = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, IN.uvAtlas);
+                half4 texA = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, IN.uvAtlasA);
+                half4 texB = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, IN.uvAtlasB);
+                half4 tex = lerp(texA, texB, (half)IN.flipBlend);
                 float lum = dot(tex.rgb, float3(0.299, 0.587, 0.114));
                 float mask = saturate((lum - _LumaAlphaFloor) / max(1.0 - _LumaAlphaFloor, 1e-4));
                 half3 rgb = tex.rgb * (half)_RgbBoost * (half)mask;

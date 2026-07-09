@@ -27,16 +27,24 @@ Material:
         m_Texture: {fileID: 2800000, guid: 0e69dac3d602aed48954e500375f1e59, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    m_Ints: []
     m_Floats:
-    - _L2FxWorldCalibration: 0.7
+    - _L2FxWorldCalibration: 7
     - _LumaAlphaFloor: 0.003
     - _ManualFrameIndex: 6
     - _RgbBoost: 7
+    - _SizeScaleRepeats: 6
     - _SubdivisionEnd: 8
     - _SubdivisionStart: 6
+    - _TestSizeScaleAge: 0.5
     - _TextureUSubdivisions: 4
     - _TextureVSubdivisions: 4
     m_Colors:
+    - _SizeKey0: {r: 0.17, g: 1, b: 0, a: 0}
+    - _SizeKey1: {r: 0.75, g: 0.8, b: 0, a: 0}
+    - _SizeKey2: {r: 1, g: 1, b: 0, a: 0}
+    - _SizeKey3: {r: 1, g: 1, b: 0, a: 0}
+    - _SizeKey4: {r: 1, g: 1, b: 0, a: 0}
     - _SizeRange: {r: 3, g: 6, b: 0, a: 0}
   m_BuildTextureStacks: []
   m_AllowLocking: 1
