@@ -228,7 +228,7 @@ Shader "L2/Effects/VampiricTouchBlink"
 
                 if (_UseDirectionAsUp > 0.5)
                 {
-                    return L2Fx_PtduUpMultiSheetPositionWS(
+                    return L2Fx_PtduUpCylindricalBillboardPositionWS(
                         centerWS,
                         quadOS,
                         sizeM,

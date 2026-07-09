@@ -71,6 +71,9 @@ public static class L2MaterialPropertyCopier
         }
 
         CopyFloatIfPresent(runtimeMat, sharedMat, HasLifetimeId);
+        // CompositePrefabEffect may call EffectShaderLifetimeHelper.Apply(false) on the whole instance;
+        // per-slot spawn must restore authored lifetime fade (upline SpriteEmitter2, etc.).
+        RestoreShaderLifetimeFromSharedFadeAuthored(runtimeMat, sharedMat);
         CopyVectorIfPresent(runtimeMat, sharedMat, LifetimeRangeId);
         CopyVectorIfPresent(runtimeMat, sharedMat, InitialDelayRangeId);
         CopyFloatIfPresent(runtimeMat, sharedMat, FadeInId);
@@ -194,6 +197,21 @@ public static class L2MaterialPropertyCopier
         }
 
         return fallback;
+    }
+
+    private static void RestoreShaderLifetimeFromSharedFadeAuthored(Material runtimeMat, Material sharedMat)
+    {
+        if (runtimeMat == null || sharedMat == null || !runtimeMat.HasProperty(HasLifetimeId))
+        {
+            return;
+        }
+
+        float sharedHasLifetime = sharedMat.HasProperty(HasLifetimeId) ? sharedMat.GetFloat(HasLifetimeId) : 0f;
+        float fadeOut = sharedMat.HasProperty(FadeoutId) ? sharedMat.GetFloat(FadeoutId) : 0f;
+        if (sharedHasLifetime > 0.5f || fadeOut > 0.5f)
+        {
+            runtimeMat.SetFloat(HasLifetimeId, 1f);
+        }
     }
 
     private static void CopyFloatIfPresent(Material runtimeMat, Material sharedMat, int propertyId)

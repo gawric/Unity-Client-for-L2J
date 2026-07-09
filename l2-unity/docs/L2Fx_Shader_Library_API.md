@@ -197,6 +197,7 @@ Multi-sheet / view-dependent sprite positioning.
 | `L2Fx_SpriteYawRadiansFromObjectMatrix()` | Yaw объекта из matrix. |
 | `L2Fx_SpriteCameraForwardXZ(centerWS)` | Camera forward на XZ plane. |
 | `L2Fx_PtduUpMultiSheetPositionWS(...)` | PTDU_Up multi-sheet vertex WS. |
+| `L2Fx_PtduUpQuadUv01(quadUv01)` | Flip quad V for UE PTDU_Up / PointCoord vs Unity mesh UV; use before flipbook. |
 | `L2Fx_SpriteViewOffsetAndMaskRadius(...)` | View-space offset + mask radius для soft edge. |
 | `L2Fx_SpriteViewSoftMask(viewOffset, maskRadius, edgeSoftness)` | Radial soft mask в view space. |
 
@@ -223,8 +224,17 @@ Edit-mode atlas preview. Editor sync: `Assets/Editor/L2FxAtlasPreviewSlotSeedSyn
 | Функция | Описание |
 |---------|----------|
 | `L2Fx_AtlasDebug_IsScenePreviewActive(debugAtlasPreview, startTime)` | Preview mode в Scene view. |
-| `L2Fx_AtlasDebug_ResolvePreviewAge(loop, previewAge, timeY, lifetime)` | Age для preview scrubber. |
-| `L2Fx_AtlasDebugPreviewColor(tex, mask, alpha, boost, bgColor)` | Debug preview fragment color. |
+| `L2Fx_AtlasDebug_ResolvePreviewAge(loop, previewAge, timeY, lifetime)` | Age для preview scrubber / loop. |
+| `L2Fx_AtlasDebug_PreviewMotion(scenePreview, debugPreviewMotion)` | Motion preview on. |
+| `L2Fx_AtlasDebug_PreviewRealSize(scenePreview, debugPreviewRealSize)` | Real UC size preview on. |
+| `L2Fx_AtlasDebug_UseRuntimeMotion(scenePreview, previewMotion)` | Spawn + velocity path (not static atlas). |
+| `L2Fx_AtlasDebug_UseRuntimeSpin(scenePreview, previewMotion, spinEnabled)` | Spin in play / motion preview only. |
+| `L2Fx_AtlasDebug_OverrideAgeNorm(...)` | Override age/ageNorm in scene preview. |
+| `L2Fx_AtlasDebug_ResolveSpriteSize(...)` | Enlarged vs real UC size in preview. |
+| `L2Fx_AtlasDebug_PinFlipbookToStart(...)` | Static preview: pin atlas to SubdivisionStart. |
+| `L2Fx_AtlasDebug_PreviewLifeAlpha(...)` | Lifetime alpha в preview mode. |
+| `L2Fx_AtlasDebugPreviewColor(tex, mask, alpha, boost, bgColor)` | Debug preview fragment (SrcAlpha-style bg). |
+| `L2Fx_AtlasDebug_AdditiveOneOnePreview(tex, tintRgb, rgbBoost)` | One+One additive preview on black. |
 
 ---
 
@@ -288,6 +298,7 @@ Conversion layer for new dedicated shaders. Raw `.uc` material values go in; Uni
 |---------|----------|
 | `L2Fx_UcToUnityMeshSize(startSizeUe, data)` | Mesh StartSizeRange UC axes → Unity-ready mesh size. |
 | `L2Fx_UcToUnitySpriteSize(baseSizeUnity, data)` | Apply sprite/effect scale after sprite size has been converted. |
+| `L2Fx_UcToUnitySpriteAnisotropicTune(sizeM, widthScale, heightScale)` | Post-UC width/height RenderDoc tune (PTDU_Up X/Y); UC StartSizeRange unchanged. |
 | `L2Fx_UcToUnityMeshSpinRate(spinsPerSecond, data)` | Apply mesh spin direction conversion. |
 | `L2Fx_UcToUnityStartLocationOffset(offsetUe, data)` | StartLocationOffset UC axes `(X,Y,Z)` → Unity `(X,Z,Y) * spawnUnitScale`. |
 

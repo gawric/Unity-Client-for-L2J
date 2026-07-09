@@ -237,6 +237,9 @@ float4 L2Fx_SampleColorScale(
 // =================================================================
 // UPDATE: SIZES
 // =================================================================
+// Sprite emitters (verified m_u004_b_2): sizeScaleParam=1.0, sizeScaleRepeats
+// from .uc SizeScaleRepeats, implicit key0=(t=0,s=0). Frequency = param+repeats
+// = (Repeats+1). See Decompile_Common/L2FxSpriteSizeScale.hlsl.
 
 float3 L2Fx_SampleSizeScale(
     float normalizedAge,

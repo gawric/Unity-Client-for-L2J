@@ -48,7 +48,7 @@ Material:
     - _ColorScaleTime1: 0.725
     - _ColorScaleTime2: 1
     - _DebugMeshPreview: 1
-    - _DebugMeshPreviewAge: 25.7
+    - _DebugMeshPreviewAge: 14.6
     - _DebugMeshPreviewLoop: 0
     - _DstBlend: 1
     - _EmitterAlpha: 1
@@ -113,7 +113,7 @@ Material:
     - _PlasmaLowLumaRgbGain: {r: 0.82, g: 1, b: 0.68, a: 0}
     - _PolarAzimuthDeg: {r: 0, g: 360, b: 0, a: 0}
     - _PolarPitchDeg: {r: 60, g: 120, b: 0, a: 0}
-    - _PolarRadius: {r: 10, g: 10, b: 0, a: 0}
+    - _PolarRadius: {r: 0, g: 0, b: 0, a: 0}
     - _StartLocationOffset: {r: 0, g: 0, b: 7, a: 0}
     - _StartSize: {r: 0.6, g: 0.6, b: 0.6, a: 0}
   m_BuildTextureStacks: []

@@ -94,6 +94,10 @@ public class ParticleGroup : EffectPart
         PlayPart();
     }
 
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+    public L2Particle OwnerParticle => _owner;
+#endif
+
     // Prevent auto-running in scene before explicit PlayPart/Setup.
     private bool _stopped = true;
     private bool _spawnStopped;
@@ -117,9 +121,11 @@ public class ParticleGroup : EffectPart
     private float _lastWhHealPreserveLog;
     private bool _runtimeParticleClonesCreated;
     private bool _burstSpawnFinished;
+    private bool _mightTaQuadSizeLogged;
     private float _lastCurePoisonShaderTimeLog;
     private float _lastMightCaShaderTimeLog;
     private float _lastMeshEmitter3ShaderTimeLog;
+    private float _lastUplineGroupTickLog;
     private MaterialPropertyBlock _particleRuntimeProperties;
 
     public void FixedUpdate()
@@ -184,6 +190,18 @@ public class ParticleGroup : EffectPart
                                 $"spawned={_spawnedCount}/{_maxCount} particleIndex={_particleIndex} " +
                                 $"{BuildMeshEmitter3RendererSnapshot(_particles[i], now)} frame={Time.frameCount}.");
                         }
+
+                        ParticleGroupLifetimeDebug.LogSlotOff(
+                            name,
+                            _owner,
+                            transform,
+                            i,
+                            now,
+                            _particleSpawnTimes[i],
+                            _duration,
+                            _particles[i],
+                            "group_duration_expired");
+                        DocExtractorParticleSnapshotLogger.OnSlotOff(this, i);
 #endif
                         //Debug.Log($"<color=orange>[Particle DIE]</color> {gameObject.name} слот [{i}] выключен.");
                         _particles[i].gameObject.SetActive(false);
@@ -217,6 +235,21 @@ public class ParticleGroup : EffectPart
             _lastMeshEmitter3ShaderTimeLog = now;
             LogMeshEmitter3ShaderTimeSample(now, "tick");
         }
+
+        if (ParticleGroupLifetimeDebug.ShouldTraceUpline(name, _owner, transform) &&
+            anyActive &&
+            now - _lastUplineGroupTickLog >= 0.25f)
+        {
+            _lastUplineGroupTickLog = now;
+            LogUplineGroupTickSample(now);
+        }
+
+        DocExtractorParticleSnapshotLogger.OnFixedUpdateTick(
+            this,
+            now,
+            _particleSpawnTimes,
+            _isParticleActive,
+            _particles);
 #endif
 
         // 3. ЛОГИКА СПАВНА
@@ -332,6 +365,23 @@ public class ParticleGroup : EffectPart
                 $"[CURE_POISON_RESPAWN] group='{name}' slot={_particleIndex} now={now:F3}s " +
                 $"prevStartTime={prevStart:F3}s prevAlive={(now - _particleSpawnTimes[_particleIndex]):F3}s " +
                 $"spawnedCount={_spawnedCount}/{_maxCount} burstDone={_burstSpawnFinished} frame={Time.frameCount}.");
+        }
+
+        if (ParticleGroupLifetimeDebug.ShouldTraceUpline(name, _owner, transform) &&
+            _isParticleActive[_particleIndex] &&
+            pObj.activeSelf)
+        {
+            Material[] activeMats = _particles[_particleIndex].materials;
+            Material activeMat = activeMats != null && activeMats.Length > 0 ? activeMats[0] : null;
+            float prevStart = activeMat != null && activeMat.HasProperty("_StartTime") ? activeMat.GetFloat("_StartTime") : -1f;
+            ParticleGroupLifetimeDebug.LogRespawnWarning(
+                name,
+                _owner,
+                transform,
+                _particleIndex,
+                now,
+                _particleSpawnTimes[_particleIndex],
+                prevStart);
         }
 #endif
 
@@ -486,8 +536,39 @@ public class ParticleGroup : EffectPart
                     $"warmup={_relativeWarmupTime:F3}s [FADE_PHASE]={ShaderFadeDiagnostic.FadePhaseLabel(m, now)} " +
                     $"{ShaderFadeDiagnostic.BuildLine(m, now)} frame={Time.frameCount}.");
             }
+
+            if (materialIndex == 0)
+            {
+                ParticleGroupLifetimeDebug.LogSpawn(
+                    name,
+                    _owner,
+                    transform,
+                    _particleIndex,
+                    now,
+                    shaderStartTime,
+                    seed,
+                    _duration,
+                    _spawnedCount + 1,
+                    _maxCount,
+                    _particles[_particleIndex]);
+                DocExtractorParticleSnapshotLogger.OnParticleActivated(
+                    this,
+                    _particleIndex,
+                    _particles[_particleIndex],
+                    now,
+                    shaderStartTime,
+                    seed);
+            }
 #endif
         }
+
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        if (!_mightTaQuadSizeLogged && L2FxQuadSizeDiagnostic.ShouldTrace(name, _owner, transform))
+        {
+            _mightTaQuadSizeLogged = true;
+            L2FxQuadSizeDiagnostic.Log(name, _particles[_particleIndex], now);
+        }
+#endif
 
         _particleIndex++;
     }
@@ -506,25 +587,27 @@ public class ParticleGroup : EffectPart
         _burstSpawnFinished = false;
         _debugPlayStartedAt = _lastEnable;
         _debugFirstSpawnLogged = false;
+        _mightTaQuadSizeLogged = false;
         _lastWhHealShaderTimeLog = 0f;
         _lastWhHealPreserveLog = 0f;
         _lastCurePoisonShaderTimeLog = 0f;
         _lastMightCaShaderTimeLog = 0f;
         _lastMeshEmitter3ShaderTimeLog = 0f;
+        _lastUplineGroupTickLog = 0f;
 
         if (_particles == null || _particles.Length == 0)
             _particles = GetComponentsInChildren<Renderer>(true);
 
+        float shaderSlotDurationForLog = GetShaderSlotDurationFromMaterial();
         if (_duration < 0.01f)
         {
-            _duration = GetShaderSlotDurationFromMaterial();
+            _duration = shaderSlotDurationForLog;
         }
         else
         {
-            float shaderSlotDuration = GetShaderSlotDurationFromMaterial();
-            if (_duration < shaderSlotDuration)
+            if (_duration < shaderSlotDurationForLog)
             {
-                _duration = shaderSlotDuration;
+                _duration = shaderSlotDurationForLog;
             }
         }
 
@@ -538,6 +621,22 @@ public class ParticleGroup : EffectPart
         {
             _runtimeContinuousLoop = _runtimeContinuousLoopOverrideValue;
         }
+
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        ParticleGroupLifetimeDebug.LogPlayPart(
+            name,
+            _owner,
+            transform,
+            _debugPlayStartedAt,
+            _startDelay,
+            _duration,
+            shaderSlotDurationForLog,
+            _countPerSecond,
+            _maxCount,
+            _preserveShaderTimeInContinuousLoop,
+            _runtimeContinuousLoop);
+        DocExtractorParticleSnapshotLogger.OnPlayPart(this);
+#endif
 
         for (int i = 0; i < _particles.Length; i++)
             if (_particles[i] != null) _particles[i].gameObject.SetActive(false);
@@ -745,19 +844,23 @@ public class ParticleGroup : EffectPart
         // - runtime settings lifetime (may include additional tail)
         if (!_hasFixedDuration)
         {
-            float castHitDuration = (_castData != null && _castData.HitTime > 0f) ? _castData.HitTime : 0f;
-            float settingsDuration = (_settings != null && _settings.defaultLifeTime > 0f) ? _settings.defaultLifeTime : 0f;
-            float legacyHitDuration = 0f;
-            if (castHitDuration <= 0f && settingsDuration <= 0f && EffectSkillsmanager.Instance != null)
-            {
-                float legacyHitTimeMs = EffectSkillsmanager.Instance.HitTime();
-                if (legacyHitTimeMs > 0f)
-                {
-                    legacyHitDuration = legacyHitTimeMs / 1000f;
-                }
-            }
+            _duration = EffectCastDurationResolver.Resolve(
+                _duration,
+                _hasFixedDuration,
+                _settings,
+                _castData,
+                out float legacyHitDuration,
+                out bool serverHitOverridesSettings);
 
-            _duration = Mathf.Max(_duration, castHitDuration, settingsDuration, legacyHitDuration);
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            EffectCastDurationResolver.LogMismatchIfNeeded(
+                "ParticleGroup.Setup",
+                name,
+                (_castData != null ? _castData.HitTime : 0f),
+                (_settings != null ? _settings.defaultLifeTime : 0f),
+                _duration,
+                serverHitOverridesSettings);
+#endif
         }
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
@@ -999,6 +1102,35 @@ public class ParticleGroup : EffectPart
                 $"trackedActive={trackedActive} alive={alive:F3}s groupDuration={_duration:F3}s " +
                 $"spawned={_spawnedCount}/{_maxCount} particleIndex={_particleIndex} " +
                 $"{BuildMeshEmitter3RendererSnapshot(_particles[i], now)} frame={Time.frameCount}.");
+        }
+    }
+
+    private void LogUplineGroupTickSample(float now)
+    {
+        if (_particles == null || _isParticleActive == null)
+        {
+            return;
+        }
+
+        for (int i = 0; i < _particles.Length; i++)
+        {
+            if (!_isParticleActive[i] || _particles[i] == null || !_particles[i].gameObject.activeSelf)
+            {
+                continue;
+            }
+
+            ParticleGroupLifetimeDebug.LogTick(
+                name,
+                _owner,
+                transform,
+                i,
+                now,
+                _particleSpawnTimes[i],
+                _duration,
+                _spawnedCount,
+                _maxCount,
+                _particles[i]);
+            return;
         }
     }
 

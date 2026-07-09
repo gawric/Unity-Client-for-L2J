@@ -53,23 +53,13 @@ public class ParticleSingleLifetimeTracker
         MagicCastData castData,
         out float legacyHitDuration)
     {
-        legacyHitDuration = 0f;
-        float castHitDuration = castData != null && castData.HitTime > 0f ? castData.HitTime : 0f;
-        float settingsDuration = settings != null && settings.defaultLifeTime > 0f ? settings.defaultLifeTime : 0f;
-
-        if (castHitDuration <= 0f && settingsDuration <= 0f && EffectSkillsmanager.Instance != null)
-        {
-            float legacyHitTimeMs = EffectSkillsmanager.Instance.HitTime();
-            if (legacyHitTimeMs > 0f)
-            {
-                legacyHitDuration = legacyHitTimeMs / 1000f;
-            }
-        }
-
-        if (!hasFixedDuration)
-        {
-            duration = Mathf.Max(duration, castHitDuration, settingsDuration, legacyHitDuration);
-        }
+        duration = EffectCastDurationResolver.Resolve(
+            duration,
+            hasFixedDuration,
+            settings,
+            castData,
+            out legacyHitDuration,
+            out _);
     }
 
     public void PrepareForPlay(float fallbackDuration, bool hasFixedDuration, bool hasLoopOverride, bool loopOverrideValue)

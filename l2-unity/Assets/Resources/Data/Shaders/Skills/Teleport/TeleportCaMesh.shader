@@ -409,7 +409,13 @@ Shader "L2/Effects/TeleportCaMesh"
                 }
 
                 rgb *= (half)_RgbBoost * (half)IN.lifeAlpha;
-                return half4(saturate(rgb), 1.0);
+
+                // One+One additive: framebuffer only sees rgb — _EmitterAlpha must dim rgb, not just alpha.
+                half emitterVis = (half)saturate(_Opacity * _EmitterAlpha);
+                rgb *= emitterVis;
+
+                half alpha = outColor.a * (half)IN.lifeAlpha;
+                return half4(saturate(rgb), saturate(alpha));
             }
 
             ENDHLSL

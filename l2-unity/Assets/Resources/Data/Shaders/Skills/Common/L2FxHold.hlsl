@@ -128,8 +128,8 @@ float L2Fx_HoldSizeAgeNorm(float elapsed, float lifetime, float hold, float hold
         return saturate(holdSizeReference);
     }
 
-    float endNorm = max(holdSizeReference, linearNorm);
-    return lerp(holdSizeReference, endNorm, releaseT);
+    // On hold release scrub the remaining SizeScale curve [holdRef..1], not just wall-clock linearNorm.
+    return lerp(holdSizeReference, 1.0, releaseT);
 }
 
 #endif

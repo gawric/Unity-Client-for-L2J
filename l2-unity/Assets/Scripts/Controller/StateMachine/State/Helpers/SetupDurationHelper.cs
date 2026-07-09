@@ -5,10 +5,16 @@ using UnityEngine;
 public class SetupDurationHelper
 {
     public const int ScrollOfEscapeSkillId = 2013;
+    public const int UseHealPotionEscapeSkillId = 2031;
 
     public static bool IsLongCastSkill(MagicSkillUse useSkill)
     {
         return useSkill != null && useSkill.SkillId == ScrollOfEscapeSkillId;
+    }
+
+    public static bool IsUsePotion(MagicSkillUse useSkill)
+    {
+        return useSkill != null && useSkill.SkillId == UseHealPotionEscapeSkillId;
     }
 
     public static void SetupLongCastDurationIfHitTimeNot0(MagicSkillUse useSkill, int objectId, Entity entity, AnimationCombo selfCombo)

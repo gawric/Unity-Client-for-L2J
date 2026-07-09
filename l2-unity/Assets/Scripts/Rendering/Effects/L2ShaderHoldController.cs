@@ -5,12 +5,19 @@ using UnityEngine;
 /// </summary>
 public class L2ShaderHoldController
 {
+    /// <summary>
+    /// SizeScale tail starts this fraction of hideWindow before alpha fade (shrink while still visible).
+    /// </summary>
+    private const float DefaultCastEndHoldReleaseLead = 0.1f;
+
     public struct Settings
     {
         public float ShaderHold;
         public bool ReleaseByCastProgress;
         public float ReleaseStartNormalized;
         public bool SmoothRelease;
+        /// <summary>Fraction of composite hideTime: size release starts this much before alpha fade (cast-end defer only).</summary>
+        public float CastEndHoldReleaseLead;
     }
 
     public struct CastTimeline
@@ -24,6 +31,7 @@ public class L2ShaderHoldController
     private bool _hasRuntimeLoopOverride;
     private bool _runtimeLoopOverrideValue;
     private bool _castEndFadeRequested;
+    private float _castEndHoldSnapshot = -1f;
     private float _baseEmitterAlpha = 1f;
     private bool _loggedReleaseStart;
     private bool _loggedReleaseResume;
@@ -58,6 +66,7 @@ public class L2ShaderHoldController
     public void ResetCastEndFade()
     {
         _castEndFadeRequested = false;
+        _castEndHoldSnapshot = -1f;
     }
 
     public void CaptureBaseEmitterAlpha(Material[] materials)
@@ -70,13 +79,10 @@ public class L2ShaderHoldController
 
     public bool ShouldDeferStopForRelease(in Settings settings)
     {
-        return settings.ShaderHold > 1e-4f
-               && settings.ReleaseByCastProgress
-               && _hasRuntimeLoopOverride
-               && _runtimeLoopOverrideValue;
+        return settings.ShaderHold > 1e-4f && settings.ReleaseByCastProgress;
     }
 
-    public bool TryBeginCastEndFadeDefer(in Settings settings)
+    public bool TryBeginCastEndFadeDefer(in Settings settings, in CastTimeline timeline)
     {
         if (!ShouldDeferStopForRelease(in settings))
         {
@@ -84,6 +90,7 @@ public class L2ShaderHoldController
         }
 
         _castEndFadeRequested = true;
+        _castEndHoldSnapshot = settings.ShaderHold;
         return true;
     }
 
@@ -92,13 +99,16 @@ public class L2ShaderHoldController
         _hasRuntimeLoopOverride = true;
         _runtimeLoopOverrideValue = false;
         _castEndFadeRequested = false;
+        _castEndHoldSnapshot = -1f;
     }
 
     public float EvaluateHold(in Settings settings, in CastTimeline timeline)
     {
-        if (_castEndFadeRequested && settings.ReleaseByCastProgress && settings.ShaderHold > 1e-4f)
+        if (_castEndFadeRequested)
         {
-            return EvaluateHoldForCastNow(in settings, in timeline);
+            float snapshot = _castEndHoldSnapshot >= 0f ? _castEndHoldSnapshot : settings.ShaderHold;
+            float holdReleaseMul = ComputeCastEndHoldReleaseMul(in settings, in timeline);
+            return snapshot * holdReleaseMul;
         }
 
         if (!_hasRuntimeLoopOverride || !_runtimeLoopOverrideValue)
@@ -136,6 +146,20 @@ public class L2ShaderHoldController
         }
 
         ApplyCastEndEmitterFade(materials, in timeline);
+        if (_castEndFadeRequested)
+        {
+            float fadeMul = ComputeCastEndFadeMul(in timeline);
+            float holdReleaseMul = ComputeCastEndHoldReleaseMul(in settings, in timeline);
+            ParticleSingleLifetimeDebug.LogCastEndFadeAlpha(
+                debugGroupName,
+                in timeline,
+                holdLogMat,
+                holdValue,
+                _baseEmitterAlpha,
+                fadeMul,
+                holdReleaseMul);
+        }
+
         ParticleSingleLifetimeDebug.TryLogHoldReleaseTransition(
             debugGroupName,
             in settings,
@@ -205,8 +229,8 @@ public class L2ShaderHoldController
         float elapsed = ResolveCastElapsed(in timeline);
 
         bool castTimelineEnded = elapsed >= castDur - 0.02f;
-        bool fadeAndHoldDone = holdValue <= 0.02f && fadeMul <= 0.02f;
-        if (!castTimelineEnded && !fadeAndHoldDone)
+        bool fadeDone = fadeMul <= 0.02f;
+        if (!castTimelineEnded && !fadeDone)
         {
             return false;
         }
@@ -224,6 +248,7 @@ public class L2ShaderHoldController
             ref _loggedReleaseResume);
 
         ParticleSingleLifetimeDebug.LogHoldReleaseDone(debugGroupName, in timeline);
+        ParticleSingleLifetimeDebug.ResetCastEndFadeAlphaLog(debugGroupName);
         CompleteImmediateStop();
         return true;
     }
@@ -239,9 +264,40 @@ public class L2ShaderHoldController
             : 1f - Mathf.Clamp01((elapsed - fadeStart) / Mathf.Max(1e-4f, fadeWindow));
     }
 
+    private float ComputeCastEndHoldReleaseMul(in Settings settings, in CastTimeline timeline)
+    {
+        float castDur = ResolveCastDuration(in timeline);
+        float elapsed = ResolveCastElapsed(in timeline);
+        float fadeWindow = ResolveCastEndFadeWindow(in timeline);
+        float fadeStart = Mathf.Max(0f, castDur - fadeWindow);
+        float releaseStart = Mathf.Max(0f, fadeStart - fadeWindow * ResolveCastEndHoldReleaseLead(in settings));
+        if (elapsed <= releaseStart)
+        {
+            return 1f;
+        }
+
+        return 1f - Mathf.Clamp01((elapsed - releaseStart) / Mathf.Max(1e-4f, fadeWindow));
+    }
+
+    private static float ResolveCastEndHoldReleaseLead(in Settings settings)
+    {
+        if (settings.CastEndHoldReleaseLead > 1e-4f)
+        {
+            return Mathf.Clamp(settings.CastEndHoldReleaseLead, 0f, 0.5f);
+        }
+
+        return DefaultCastEndHoldReleaseLead;
+    }
+
     private float EvaluateHoldForCastNow(in Settings settings, in CastTimeline timeline)
     {
         if (!settings.ReleaseByCastProgress)
+        {
+            return settings.ShaderHold;
+        }
+
+        // Cast-end defer fades via _EmitterAlpha — keep hold (and size) stable until StopPart.
+        if (!_castEndFadeRequested && ShouldDeferStopForRelease(in settings))
         {
             return settings.ShaderHold;
         }
@@ -281,12 +337,19 @@ public class L2ShaderHoldController
 
     public static float ResolveCastDuration(in CastTimeline timeline)
     {
+        float slotDuration = Mathf.Max(1e-4f, timeline.SlotDuration);
         if (timeline.Settings != null && timeline.Settings.defaultLifeTime > 1e-4f)
         {
-            return timeline.Settings.defaultLifeTime;
+            float settingsLife = timeline.Settings.defaultLifeTime;
+            if (settingsLife > slotDuration + 0.01f)
+            {
+                return slotDuration;
+            }
+
+            return settingsLife;
         }
 
-        return Mathf.Max(1e-4f, timeline.SlotDuration);
+        return slotDuration;
     }
 
     public static float ResolveCastElapsed(in CastTimeline timeline)

@@ -45,6 +45,11 @@ public class NewPhysicalSkillsState : AbstractAttackEvents
                     SetupDurationHelper.SetupLongCastDurationIfHitTimeNot0(useSkill, objectId, entity, selfCombo);
 
                     SkillExecutor.Instance.ExecuteSkillOverride(useSkill.SkillGrp, entity, selfCombo, _events, isLong: true);
+                } //2013 potion heal
+                else if (SetupDurationHelper.IsUsePotion(useSkill))
+                {
+                    Entity entity = _stateMachine.Player;
+                    EffectManager.Instance.PlayEffect(useSkill.SkillId, entity.transform, entity.GetMagicCastData());
                 }
                 else
                 {

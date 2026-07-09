@@ -34,16 +34,19 @@ public class ParticleSingle : EffectPart
     [SerializeField] [Range(0f, 1f)] private float _shaderHold = 0.6f;
     [Tooltip("Иначе _Hold висит всё время каста и в L2SkillEffect может блокировать нормальный FadeOut.")]
     [SerializeField] private bool _releaseShaderHoldByCastProgress = true;
-    [Tooltip("Доля времени текущего _duration от момента спавна части — 0 = начало эффекта, 1 = конец _duration (серверное/кастовое). Раньше этой точки _Hold держится на Shader Hold.")]
+    [Tooltip("Доля времени каста (_duration): раньше этой точки _Hold = Shader Hold. При cast-end defer (телепорт) во время каста hold не отпускается — поле влияет только если defer выключен.")]
     [SerializeField] [Range(0f, 0.999f)] private float _shaderHoldReleaseStartNormalized = 0.85f;
-    [Tooltip("Вкл.: от точки Release Start до конца каста _Hold линейно опускается к 0. Выкл.: при достижении Release Start _Hold сразу 0 (резкий срез).")]
+    [Tooltip("Вкл.: от Release Start до конца каста _Hold линейно к 0. При defer до StopPart не используется.")]
     [SerializeField] private bool _smoothShaderHoldRelease = true;
+    [Tooltip("Только cast-end (после StopPart): сжатие SizeScale стартует на эту долю hideTime раньше alpha fade. 0 = синхронно с fade, 0.1 = на 10% hideTime раньше.")]
+    [SerializeField] [Range(0f, 0.5f)] private float _castEndHoldReleaseLead = 0.1f;
 
     private readonly ParticleSingleLifetimeTracker _lifetime = new ParticleSingleLifetimeTracker();
     private readonly L2ShaderHoldController _holdController = new L2ShaderHoldController();
 
     private float _lastShaderFadeDiagLog;
     private bool _loggedHalfSecondCheckpoint;
+    private bool _mightTaQuadSizeLogged;
 
     private void Update()
     {
@@ -169,6 +172,7 @@ public class ParticleSingle : EffectPart
         _lifetime.ResetForPlayPart(now);
         _lastShaderFadeDiagLog = 0f;
         _loggedHalfSecondCheckpoint = false;
+        _mightTaQuadSizeLogged = false;
         _holdController.ResetReleaseLogs();
         _holdController.ResetCastEndFade();
 
@@ -224,11 +228,25 @@ public class ParticleSingle : EffectPart
         _lifetime.RuntimeContinuousLoop = false;
         _lifetime.SpawnedCount = _maxCount;
 
-        if (_holdController.TryBeginCastEndFadeDefer(BuildHoldSettings()))
+        L2ShaderHoldController.Settings holdSettings = BuildHoldSettings();
+        L2ShaderHoldController.CastTimeline timeline = BuildCastTimeline(now);
+
+        if (_holdController.TryBeginCastEndFadeDefer(holdSettings, timeline))
         {
-            ParticleSingleLifetimeDebug.LogHoldReleaseDefer(name, BuildCastTimeline(now), BuildHoldSettings());
+            EffectShaderLifetimeHelper.FreezeShaderLoopWithoutExpiry(transform);
+            ApplyCompositeShaderHoldToAllRuntimeMaterials(now);
+            ParticleSingleLifetimeDebug.LogHoldReleaseDefer(name, timeline, holdSettings);
             return;
         }
+
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        if (holdSettings.ShaderHold > 1e-4f && holdSettings.ReleaseByCastProgress)
+        {
+            Debug.LogWarning(
+                $"[PARTICLE_SINGLE_STOPPART_NO_DEFER] group='{name}' hold={holdSettings.ShaderHold:F3} " +
+                "cast-end fade defer не сработал — мгновенная остановка.");
+        }
+#endif
 
         CompleteImmediateStop(now);
     }
@@ -326,6 +344,14 @@ public class ParticleSingle : EffectPart
                 renderer,
                 runtimeMat);
         }
+
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        if (!_mightTaQuadSizeLogged && L2FxQuadSizeDiagnostic.ShouldTrace(name, _owner, transform))
+        {
+            _mightTaQuadSizeLogged = true;
+            L2FxQuadSizeDiagnostic.Log(name, renderer, now);
+        }
+#endif
     }
 
     private Renderer ResolveRenderer()
@@ -391,16 +417,23 @@ public class ParticleSingle : EffectPart
             ShaderHold = _shaderHold,
             ReleaseByCastProgress = _releaseShaderHoldByCastProgress,
             ReleaseStartNormalized = _shaderHoldReleaseStartNormalized,
-            SmoothRelease = _smoothShaderHoldRelease
+            SmoothRelease = _smoothShaderHoldRelease,
+            CastEndHoldReleaseLead = _castEndHoldReleaseLead
         };
     }
 
     private L2ShaderHoldController.CastTimeline BuildCastTimeline(float now)
     {
+        float castStart = _lifetime.LastEnable;
+        if (_castData != null && _castData.StartTime > 0f)
+        {
+            castStart = _castData.StartTime;
+        }
+
         return new L2ShaderHoldController.CastTimeline
         {
             Now = now,
-            CastStartTime = _lifetime.LastEnable,
+            CastStartTime = castStart,
             SlotDuration = _duration,
             Settings = _settings
         };

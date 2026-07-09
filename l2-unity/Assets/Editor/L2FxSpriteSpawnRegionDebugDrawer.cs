@@ -24,6 +24,9 @@ public static class L2FxSpriteSpawnRegionDebugDrawer
     private static readonly int PolarPitchDegId = Shader.PropertyToID("_PolarPitchDeg");
     private static readonly int PolarRadiusId = Shader.PropertyToID("_PolarRadius");
     private static readonly int SpawnUnitScaleId = Shader.PropertyToID("_SpawnUnitScale");
+    private static readonly int UcPolarRadiusScaleId = Shader.PropertyToID("_UcPolarRadiusScale");
+    private static readonly int UcStartLocationOffsetScaleId = Shader.PropertyToID("_UcStartLocationOffsetScale");
+    private static readonly int UcStartLocationRangeScaleId = Shader.PropertyToID("_UcStartLocationRangeScale");
 
     private static readonly List<Renderer> RendererScratch = new List<Renderer>(64);
     private static readonly List<CachedDrawEntry> DrawCache = new List<CachedDrawEntry>(16);
@@ -250,6 +253,9 @@ public static class L2FxSpriteSpawnRegionDebugDrawer
             hash = hash * 31 + s.PitchMax.GetHashCode();
             hash = hash * 31 + s.RadiusMin.GetHashCode();
             hash = hash * 31 + s.RadiusMax.GetHashCode();
+            hash = hash * 31 + s.UcPolarRadiusScale.GetHashCode();
+            hash = hash * 31 + s.UcStartLocationOffsetScale.GetHashCode();
+            hash = hash * 31 + s.UcStartLocationRangeScale.GetHashCode();
             hash = hash * 31 + ResolveSpawnObjectScale(mat).GetHashCode();
             hash = hash * 31 + renderer.transform.localToWorldMatrix.GetHashCode();
             return hash;
@@ -652,6 +658,21 @@ public static class L2FxSpriteSpawnRegionDebugDrawer
         settings.PitchMax = pitch.y;
         settings.RadiusMin = radius.x;
         settings.RadiusMax = radius.y;
+        settings.UcPolarRadiusScale = mat.HasProperty(UcPolarRadiusScaleId)
+            ? mat.GetFloat(UcPolarRadiusScaleId)
+            : 1f;
+        settings.UcStartLocationOffsetScale = mat.HasProperty(UcStartLocationOffsetScaleId)
+            ? mat.GetFloat(UcStartLocationOffsetScaleId)
+            : 1f;
+        settings.UcStartLocationRangeScale = mat.HasProperty(UcStartLocationRangeScaleId)
+            ? mat.GetFloat(UcStartLocationRangeScaleId)
+            : 1f;
+
+        settings.OffsetUe *= settings.UcStartLocationOffsetScale;
+        settings.RangeMinUe *= settings.UcStartLocationRangeScale;
+        settings.RangeMaxUe *= settings.UcStartLocationRangeScale;
+        settings.RadiusMin *= settings.UcPolarRadiusScale;
+        settings.RadiusMax *= settings.UcPolarRadiusScale;
         return true;
     }
 
@@ -692,6 +713,9 @@ public static class L2FxSpriteSpawnRegionDebugDrawer
         public float PitchMax;
         public float RadiusMin;
         public float RadiusMax;
+        public float UcPolarRadiusScale;
+        public float UcStartLocationOffsetScale;
+        public float UcStartLocationRangeScale;
     }
 }
 #endif

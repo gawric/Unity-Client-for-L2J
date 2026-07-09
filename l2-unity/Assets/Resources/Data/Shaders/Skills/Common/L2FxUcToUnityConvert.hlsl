@@ -99,6 +99,15 @@ float3 L2Fx_UcToUnitySpriteSize(
         * L2Fx_UcToUnitySafePositiveScale(data.spriteScale);
 }
 
+// Post-UC anisotropic calibration (RenderDoc L2 vs Unity). Keep UC StartSizeRange unchanged;
+// tune only via widthScale / heightScale on the material (PTDU_Up: X=sheet width, Y=sheet height).
+float3 L2Fx_UcToUnitySpriteAnisotropicTune(float3 sizeM, float widthScale, float heightScale)
+{
+    float w = widthScale > 0.0 ? widthScale : 1.0;
+    float h = heightScale > 0.0 ? heightScale : 1.0;
+    return float3(sizeM.x * w, sizeM.y * h, sizeM.z * h);
+}
+
 float L2Fx_UcToUnityResolveSpawnUnitScale(float spawnUnitScale)
 {
     return spawnUnitScale > 0.0 ? spawnUnitScale : L2FX_UU_TO_UNITY;

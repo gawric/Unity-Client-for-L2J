@@ -215,7 +215,10 @@ public class CompositePrefabEffect : TimedCompositeEffectBase
 
         if (part.overrideHideTime && partSettings != null)
         {
-            partSettings.hideTime = Mathf.Max(0f, Mathf.Min(part.customHideTime, partSettings.defaultLifeTime));
+            float hide = part.customHideTime > 1e-4f
+                ? part.customHideTime
+                : (part.disableShaderLifetime ? 0.5f : 0f);
+            partSettings.hideTime = Mathf.Max(0f, Mathf.Min(hide, partSettings.defaultLifeTime));
         }
 
         Transform setupOwner = ResolveSetupOwner(resolvedTransform, instance.transform);

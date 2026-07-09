@@ -6,7 +6,14 @@ using UnityEngine;
 /// </summary>
 public static class ParticleSingleLifetimeDebug
 {
-    private static readonly string[] TraceEffectTokens = { "wh_heal", "wh_might" };
+    private static readonly string[] TraceEffectTokens =
+    {
+        "wh_heal",
+        "wh_might",
+        "wh_teleport",
+        "wind_strike",
+        "el_wind_strike"
+    };
 
     public static bool ShouldTrace(string groupName, L2Particle owner, Transform transform)
     {
@@ -44,6 +51,26 @@ public static class ParticleSingleLifetimeDebug
         return false;
     }
 
+    public static bool ShouldTraceGroupName(string groupName)
+    {
+        if (string.IsNullOrEmpty(groupName))
+        {
+            return false;
+        }
+
+        for (int tokenIndex = 0; tokenIndex < TraceEffectTokens.Length; tokenIndex++)
+        {
+            string token = TraceEffectTokens[tokenIndex];
+            if (!string.IsNullOrEmpty(token) &&
+                groupName.IndexOf(token, System.StringComparison.OrdinalIgnoreCase) >= 0)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     public static void LogPlay(in ParticleSingleDebugSnapshot snap)
     {
         if (!ShouldTrace(snap.GroupName, snap.Owner, snap.Transform))
@@ -60,13 +87,29 @@ public static class ParticleSingleLifetimeDebug
 
     public static void LogSetup(in ParticleSingleDebugSnapshot snap, float durationBefore)
     {
+        float castHit = snap.CastData != null ? snap.CastData.HitTime : 0f;
+        float settingsLife = snap.Settings != null ? snap.Settings.defaultLifeTime : 0f;
+        bool serverOverrides = castHit > 0f && settingsLife > castHit + 0.01f;
+        EffectCastDurationResolver.LogMismatchIfNeeded(
+            "ParticleSingle.Setup",
+            snap.GroupName,
+            castHit,
+            settingsLife,
+            snap.Duration,
+            serverOverrides);
+
+        if (snap.Settings != null && snap.Settings.hideTime <= 1e-4f)
+        {
+            Debug.LogWarning(
+                $"[PARTICLE_SINGLE_HIDE_TIME_ZERO] group='{snap.GroupName}' hideTime=0 — " +
+                "BeginFadeOut и Destroy в один кадр; задайте customHideTime на композите (0.5–1.0с).");
+        }
+
         if (!ShouldTrace(snap.GroupName, snap.Owner, snap.Transform))
         {
             return;
         }
 
-        float castHit = snap.CastData != null ? snap.CastData.HitTime : 0f;
-        float settingsLife = snap.Settings != null ? snap.Settings.defaultLifeTime : 0f;
         Debug.Log(
             $"[PARTICLE_SINGLE_SETUP] group='{snap.GroupName}' owner='{(snap.Owner != null ? snap.Owner.name : "null")}' " +
             $"durationBefore={durationBefore:F3}s durationAfter={snap.Duration:F3}s fixedDuration={snap.HasFixedDuration} " +
@@ -254,6 +297,11 @@ public static class ParticleSingleLifetimeDebug
         ref bool loggedReleaseStart,
         ref bool loggedReleaseResume)
     {
+        if (!ShouldTraceGroupName(groupName) && !castEndFadeRequested)
+        {
+            return;
+        }
+
         if (!hasLoopOverride && !castEndFadeRequested)
         {
             return;
@@ -475,9 +523,8 @@ public static class ParticleSingleLifetimeDebug
         }
         else
         {
-            float endNorm = Mathf.Max(holdSizeReference, linearNorm);
             motionAge = Mathf.Lerp(capSec, shaderAge, releaseT);
-            sizeAgeNorm = Mathf.Lerp(holdSizeReference, endNorm, releaseT);
+            sizeAgeNorm = Mathf.Lerp(holdSizeReference, 1f, releaseT);
         }
 
         if (hold <= 1e-4f)
@@ -553,6 +600,193 @@ public static class ParticleSingleLifetimeDebug
         }
 
         return sb.ToString();
+    }
+
+    private static readonly System.Collections.Generic.Dictionary<string, float> CastEndFadeAlphaLastLogAt =
+        new System.Collections.Generic.Dictionary<string, float>();
+
+    /// <summary>
+    /// Tracks MeshEmitter1 transparency during cast-end _EmitterAlpha fade (always in Editor/Dev builds).
+    /// Filter console: MESH_EMITTER1_FADE_ALPHA
+    /// </summary>
+    public static void LogCastEndFadeAlpha(
+        string groupName,
+        in L2ShaderHoldController.CastTimeline timeline,
+        Material mat,
+        float holdValue,
+        float baseEmitterAlpha,
+        float fadeMul,
+        float holdReleaseMul)
+    {
+        if (string.IsNullOrEmpty(groupName)
+            || groupName.IndexOf("MeshEmitter1", System.StringComparison.OrdinalIgnoreCase) < 0)
+        {
+            return;
+        }
+
+        float now = timeline.Now;
+        if (CastEndFadeAlphaLastLogAt.TryGetValue(groupName, out float lastAt) && now - lastAt < 0.1f)
+        {
+            return;
+        }
+
+        CastEndFadeAlphaLastLogAt[groupName] = now;
+
+        float elapsed = L2ShaderHoldController.ResolveCastElapsed(in timeline);
+        float castDur = L2ShaderHoldController.ResolveCastDuration(in timeline);
+        float hideWindow = L2ShaderHoldController.ResolveCastEndFadeWindow(in timeline);
+        float emitterAlpha = mat != null && mat.HasProperty(L2MaterialPropertyCopier.EmitterAlphaId)
+            ? mat.GetFloat(L2MaterialPropertyCopier.EmitterAlphaId)
+            : -1f;
+        float opacity = mat != null && mat.HasProperty(L2MaterialPropertyCopier.OpacityId)
+            ? mat.GetFloat(L2MaterialPropertyCopier.OpacityId)
+            : -1f;
+        float lifeAlpha = EstimateShaderLifeAlpha(mat, now);
+        float approxFramebufferAlpha = opacity >= 0f && emitterAlpha >= 0f && lifeAlpha >= 0f
+            ? opacity * emitterAlpha * lifeAlpha
+            : -1f;
+
+        Debug.Log(
+            $"[MESH_EMITTER1_FADE_ALPHA] group='{groupName}' now={now:F3}s " +
+            $"castElapsed={elapsed:F3}s castDur={castDur:F3}s hideWindow={hideWindow:F3}s " +
+            $"fadeMul={fadeMul:F4} holdReleaseMul={holdReleaseMul:F4} baseEmitterA={baseEmitterAlpha:F4} matEmitterA={emitterAlpha:F4} " +
+            $"opacity={opacity:F4} lifeAlpha~={lifeAlpha:F4} approxOutAlpha~={approxFramebufferAlpha:F4} " +
+            $"hold={holdValue:F4} sizeAgeNorm~={EstimateShaderSizeAgeNorm(mat, now):F4} " +
+            $"phase={ShaderFadeDiagnostic.FadePhaseLabel(mat, now)} " +
+            $"diag={ShaderFadeDiagnostic.BuildLine(mat, now)}");
+    }
+
+    private static float EstimateShaderLifeAlpha(Material mat, float now)
+    {
+        if (mat == null)
+        {
+            return -1f;
+        }
+
+        float hasLt = mat.HasProperty(L2MaterialPropertyCopier.HasLifetimeId)
+            ? mat.GetFloat(L2MaterialPropertyCopier.HasLifetimeId)
+            : 1f;
+        float hold = mat.HasProperty(L2MaterialPropertyCopier.HoldId)
+            ? mat.GetFloat(L2MaterialPropertyCopier.HoldId)
+            : 0f;
+        float fadeIn = mat.HasProperty(L2MaterialPropertyCopier.FadeInId)
+            ? mat.GetFloat(L2MaterialPropertyCopier.FadeInId)
+            : 0f;
+        float fadeInEnd = mat.HasProperty(L2MaterialPropertyCopier.FadeInEndTimeId)
+            ? mat.GetFloat(L2MaterialPropertyCopier.FadeInEndTimeId)
+            : 0f;
+        float fadeOut = mat.HasProperty(L2MaterialPropertyCopier.FadeoutId)
+            ? mat.GetFloat(L2MaterialPropertyCopier.FadeoutId)
+            : 0f;
+        float fadeOutStart = mat.HasProperty(L2MaterialPropertyCopier.FadeoutStartTimeId)
+            ? mat.GetFloat(L2MaterialPropertyCopier.FadeoutStartTimeId)
+            : float.MaxValue;
+        Vector4 life = mat.HasProperty(L2MaterialPropertyCopier.LifetimeRangeId)
+            ? mat.GetVector(L2MaterialPropertyCopier.LifetimeRangeId)
+            : Vector4.one;
+        float lifeMax = Mathf.Max(life.x, life.y, 1e-4f);
+        float st = mat.HasProperty(L2MaterialPropertyCopier.StartTimeId)
+            ? mat.GetFloat(L2MaterialPropertyCopier.StartTimeId)
+            : -1f;
+        if (st < -0.49f)
+        {
+            return -1f;
+        }
+
+        float age = Mathf.Max(0f, now - st);
+        float fadeAge = hold > 1e-4f ? Mathf.Min(age, lifeMax * hold) : age;
+        if (hasLt < 0.5f)
+        {
+            fadeAge = Mathf.Repeat(age, lifeMax);
+        }
+
+        float fadeInMul = fadeIn >= 0.5f
+            ? Mathf.Clamp01(age / Mathf.Max(1e-4f, fadeInEnd))
+            : 1f;
+        float fadeOutMul = 1f;
+        if (fadeOut >= 0.5f && hold <= 1e-4f)
+        {
+            float fadeStart = Mathf.Clamp(fadeOutStart, 0f, lifeMax);
+            float fadeDuration = Mathf.Max(1e-4f, lifeMax - fadeStart);
+            fadeOutMul = 1f - Mathf.Clamp01((fadeAge - fadeStart) / fadeDuration);
+        }
+
+        float lifeAlpha = Mathf.Clamp01(fadeInMul * fadeOutMul);
+        if (mat.HasProperty(L2MaterialPropertyCopier.FadeOutPowerId))
+        {
+            float fadeOutPower = mat.GetFloat(L2MaterialPropertyCopier.FadeOutPowerId);
+            if (fadeOutPower > 1.0001f)
+            {
+                lifeAlpha = Mathf.Pow(lifeAlpha, fadeOutPower);
+            }
+        }
+
+        return lifeAlpha;
+    }
+
+    private static float EstimateShaderSizeAgeNorm(Material mat, float now)
+    {
+        if (mat == null)
+        {
+            return -1f;
+        }
+
+        float hold = mat.HasProperty(L2MaterialPropertyCopier.HoldId)
+            ? mat.GetFloat(L2MaterialPropertyCopier.HoldId)
+            : 0f;
+        float holdSizeReference = mat.HasProperty(L2MaterialPropertyCopier.HoldSizeReferenceId)
+            ? mat.GetFloat(L2MaterialPropertyCopier.HoldSizeReferenceId)
+            : 0f;
+        Vector4 life = mat.HasProperty(L2MaterialPropertyCopier.LifetimeRangeId)
+            ? mat.GetVector(L2MaterialPropertyCopier.LifetimeRangeId)
+            : Vector4.one;
+        float lifeMax = Mathf.Max(life.x, life.y, 1e-4f);
+        float st = mat.HasProperty(L2MaterialPropertyCopier.StartTimeId)
+            ? mat.GetFloat(L2MaterialPropertyCopier.StartTimeId)
+            : -1f;
+        if (st < -0.49f)
+        {
+            return -1f;
+        }
+
+        float shaderAge = Mathf.Max(0f, now - st);
+        float linearNorm = Mathf.Clamp01(shaderAge / lifeMax);
+
+        if (holdSizeReference <= 1e-4f)
+        {
+            return linearNorm;
+        }
+
+        float releaseT = 0f;
+        if (hold <= 1e-4f)
+        {
+            releaseT = 1f;
+        }
+        else if (hold < holdSizeReference - 1e-4f)
+        {
+            releaseT = 1f - hold / holdSizeReference;
+        }
+
+        float capSec = lifeMax * holdSizeReference;
+        if (shaderAge < capSec)
+        {
+            return linearNorm;
+        }
+
+        if (releaseT <= 1e-4f)
+        {
+            return Mathf.Clamp01(holdSizeReference);
+        }
+
+        return Mathf.Lerp(holdSizeReference, 1f, releaseT);
+    }
+
+    public static void ResetCastEndFadeAlphaLog(string groupName)
+    {
+        if (!string.IsNullOrEmpty(groupName))
+        {
+            CastEndFadeAlphaLastLogAt.Remove(groupName);
+        }
     }
 }
 
@@ -640,6 +874,17 @@ public static class ParticleSingleLifetimeDebug
         float baseShaderLifetime,
         float slotDuration,
         ref bool loggedReleaseResume) { }
+
+    public static void LogCastEndFadeAlpha(
+        string groupName,
+        in L2ShaderHoldController.CastTimeline timeline,
+        Material mat,
+        float holdValue,
+        float baseEmitterAlpha,
+        float fadeMul,
+        float holdReleaseMul) { }
+
+    public static void ResetCastEndFadeAlphaLog(string groupName) { }
 }
 
 public struct ParticleSingleDebugSnapshot

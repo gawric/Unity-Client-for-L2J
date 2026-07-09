@@ -9,6 +9,8 @@
         _InitialDelayRange ("Initial Delay Range (Min,Max)", Vector) = (0, 0, 0, 0)
         _LifetimeRange ("Lifetime Range (Min,Max)", Vector) = (4, 4, 0, 0)
         _Seed ("Seed", Float) = 0
+        _Hold ("Hold (0 = off, L2SkillEffect)", Range(0, 1)) = 0
+        _HoldSizeReference ("Hold Size Reference (loop ref after release)", Range(0, 1)) = 0.75
 
         [Toggle] _FadeIn ("Fade In", Float) = 1
         _FadeInEndTime ("FadeIn End Time (sec)", Float) = 0.8
@@ -34,6 +36,7 @@
 
         _StartSize ("Start Size (mesh scale XYZ)", Vector) = (1, 1, 1, 0)
         [Toggle] _ApplyUuToStartSize ("StartSize × UU→m (0.01) — только если вершины в UE UU", Float) = 0
+        _L2FxMeshScale ("L2 Fx Mesh Scale (per-effect tune)", Float) = 1
         [Toggle] _UniformSize ("Uniform Size", Float) = 1.0
         [Toggle] _UseSizeScale ("Use SizeScale", Float) = 1.0
         [Toggle] _UseRegularSizeScale ("Regular SizeScale", Float) = 0.0
@@ -59,6 +62,13 @@
         [Toggle] _PlanarUvUseXZ ("Planar UV use XZ (off = XY)", Float) = 1
         [Toggle] _PlanarUvNormalizeExtents ("Planar UV fill mesh (normalize)", Float) = 0
         _PlanarUvMeshHalfExtents ("Planar mesh half-extents OS (plane X,Y)", Vector) = (0.5, 0.5, 0, 0)
+
+        _ClipDepthBias ("Depth bias NDC z (+ toward camera, - under effects)", Range(-0.01, 0.01)) = 0
+
+        [Header(Scene Debug Preview)]
+        [Toggle] _DebugMeshPreview ("Debug Mesh Preview (_StartTime=0)", Float) = 0
+        [Toggle] _DebugMeshPreviewLoop ("Debug Preview Loop", Float) = 0
+        _DebugMeshPreviewAge ("Debug Preview Age (sec, pause)", Range(0, 32)) = 0
     }
 
     SubShader
@@ -73,6 +83,7 @@
         Blend SrcAlpha OneMinusSrcAlpha
         Cull Off
         ZWrite Off
+        ZTest LEqual
 
         Pass
         {
@@ -85,7 +96,10 @@
             #pragma target 3.0
 
             #include "../../Common/L2FxMeshEmitterUrp.hlsl"
+            #include "../../Common/L2FxMeshDebug.hlsl"
             #include "../../Common/L2FxMeshFragment.hlsl"
+            #include "../../Common/L2FxMeshLifetimeAlpha.hlsl"
+            #include "../../Common/L2FxHold.hlsl"
 
             TEXTURE2D(_MainTex);
             SAMPLER(sampler_MainTex);
@@ -97,6 +111,8 @@
                 float4 _InitialDelayRange;
                 float4 _LifetimeRange;
                 float _Seed;
+                float _Hold;
+                float _HoldSizeReference;
                 float _FadeIn;
                 float _FadeInEndTime;
                 float _Fadeout;
@@ -116,6 +132,7 @@
                 float _GroundShadowLumaFloor;
                 float4 _StartSize;
                 float _ApplyUuToStartSize;
+                float _L2FxMeshScale;
                 float _UniformSize;
                 float _UseSizeScale;
                 float _UseRegularSizeScale;
@@ -138,6 +155,10 @@
                 float _PlanarUvUseXZ;
                 float _PlanarUvNormalizeExtents;
                 float4 _PlanarUvMeshHalfExtents;
+                float _ClipDepthBias;
+                float _DebugMeshPreview;
+                float _DebugMeshPreviewLoop;
+                float _DebugMeshPreviewAge;
             CBUFFER_END
 
             struct Attributes
@@ -152,24 +173,37 @@
                 float4 positionHCS : SV_POSITION;
                 float2 uv : TEXCOORD0;
                 float ageNorm : TEXCOORD1;
+                float lifeAlpha : TEXCOORD2;
             };
 
             Varyings vert(Attributes IN)
             {
                 Varyings OUT;
 
-                float delay, lifetime, age, ageNorm;
-                L2Fx_MeshBuiltin_ComputeTiming(
-                    _Time.y, _InitialDelayRange, _LifetimeRange, _Seed, _StartTime,
-                    delay, lifetime, age, ageNorm);
-                OUT.ageNorm = ageNorm;
+                float delay, lifetime, elapsed, ageNormUnused;
+                L2Fx_MeshDebug_ComputeTiming(
+                    _DebugMeshPreview, _DebugMeshPreviewLoop, _DebugMeshPreviewAge,
+                    _HasLifetime, _Time.y,
+                    _InitialDelayRange, _LifetimeRange, _Seed, _StartTime,
+                    delay, lifetime, elapsed, ageNormUnused);
+
+                lifetime = max(lifetime, 1e-4);
+
+                float motionAge = L2Fx_HoldMotionAgeStable(elapsed, lifetime, _Hold, _HoldSizeReference);
+                float spinAge = L2Fx_HoldSpinAge(elapsed);
+                float loopAgeNorm = L2Fx_HoldLoopAgeNorm(elapsed, lifetime, _Hold);
+                float sizeAgeNorm = L2Fx_HoldSizeAgeNorm(elapsed, lifetime, _Hold, _HoldSizeReference);
+
+                OUT.ageNorm = loopAgeNorm;
 
                 float3 posOS = IN.positionOS.xyz;
                 float3 nrmOS = IN.normalOS;
+                float meshScale = _L2FxMeshScale > 0.0 ? _L2FxMeshScale : 1.0;
+                float3 startSize = _StartSize.xyz * meshScale;
                 L2Fx_MeshBuiltin_TransformVertexOS(
                     posOS, nrmOS,
-                    _SpinParticles, _StartSpin, _SpinsPerSecond, _SpinCCWorCW, age, ageNorm,
-                    _StartSize.xyz, _ApplyUuToStartSize,
+                    _SpinParticles, _StartSpin, _SpinsPerSecond, _SpinCCWorCW, spinAge, sizeAgeNorm,
+                    startSize, _ApplyUuToStartSize,
                     _UseSizeScale, _UseRegularSizeScale,
                     _SizeScaleParam, _SizeScaleRepeats, _SizeScaleCount,
                     _SizeScaleTime0, _SizeScaleVal0,
@@ -179,7 +213,17 @@
                     1.0, 1.0,
                     _StartLocationOffset.xyz, 0.0, 0.0);
 
-                OUT.positionHCS = L2Fx_MeshUrp_ObjectToHClip(posOS, 0.0);
+                float depthBias = _ClipDepthBias;
+                if (_AsGroundShadow > 0.5 && abs(depthBias) < 1e-6)
+                {
+                    depthBias = -0.002;
+                }
+
+                OUT.positionHCS = L2Fx_MeshUrp_ObjectToHClip(posOS, depthBias);
+                OUT.lifeAlpha = L2Fx_MeshLifetimeAlphaHold(
+                    motionAge, elapsed, lifetime,
+                    _Hold, _HasLifetime,
+                    _FadeIn, _FadeInEndTime, _Fadeout, _FadeoutStartTime);
 
                 float2 uvMeshUnused;
                 L2Fx_MeshBuiltin_ResolveUv(
@@ -193,8 +237,6 @@
 
             half4 frag(Varyings IN) : SV_Target
             {
-                float delay = L2Fx_RandomInitialDelay(_InitialDelayRange.xy, _Seed, _StartTime, 3.0);
-                float lifetime = L2Fx_RandomLifetime(_LifetimeRange.xy, _Seed, _StartTime, 7.0);
                 half4 texColor = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, IN.uv);
 
                 float ctimes[8];
@@ -226,9 +268,7 @@
                     }
                 }
 
-                color.a *= (half)L2Fx_LifetimeAlpha(
-                    _Time.y, _HasLifetime, _StartTime, delay, lifetime,
-                    _FadeIn, _FadeInEndTime, _Fadeout, _FadeoutStartTime);
+                color.a *= (half)IN.lifeAlpha;
 
                 return saturate(color);
             }

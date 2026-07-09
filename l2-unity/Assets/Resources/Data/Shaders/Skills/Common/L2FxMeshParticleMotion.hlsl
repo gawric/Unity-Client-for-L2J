@@ -189,6 +189,37 @@ float3 L2Fx_DampedDisplacement(float3 velocity, float3 acceleration, float veloc
     return velocityDisplacement + (0.5 * acceleration * t * t);
 }
 
+// Exact UE velocity-loss integration, PER AXIS: dv/dt = a - k*v (k = VelocityLoss, 1/s).
+// The acceleration is ALSO damped, so speed converges to the terminal velocity a/k
+// instead of running away — this reproduces the L2 "plateau" (no overshoot).
+//   v(t) = a/k + (v0 - a/k) * exp(-k t)
+//   x(t) = (a/k) t + (v0 - a/k) * (1 - exp(-k t)) / k
+// k -> 0 collapses to the kinematic v0*t + 0.5*a*t^2.
+float3 L2Fx_DisplacementVelocityLossExp(
+    float3 velocity,
+    float3 acceleration,
+    float3 lossPerSec,
+    float ageSeconds)
+{
+    float t = max(0.0, ageSeconds);
+    float3 res;
+    [unroll]
+    for (int i = 0; i < 3; i++)
+    {
+        float k = lossPerSec[i];
+        if (k > 1e-4)
+        {
+            float vTerm = acceleration[i] / k;
+            res[i] = vTerm * t + (velocity[i] - vTerm) * (1.0 - exp(-k * t)) / k;
+        }
+        else
+        {
+            res[i] = velocity[i] * t + 0.5 * acceleration[i] * t * t;
+        }
+    }
+    return res;
+}
+
 float3 L2Fx_DisplacementConstantAccel(
     float3 velocity,
     float3 acceleration,

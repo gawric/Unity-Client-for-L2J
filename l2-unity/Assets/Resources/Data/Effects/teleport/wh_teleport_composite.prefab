@@ -65,9 +65,9 @@ MonoBehaviour:
     useCastTimedLifetime: 1
     overrideContinuousLoop: 1
     continuousLoop: 1
-    disableShaderLifetime: 1
+    disableShaderLifetime: 0
     overrideHideTime: 1
-    customHideTime: 0
+    customHideTime: 0.8
     enableFinalShaderLifetimeOnFade: 0
     finalShaderLifetimeMin: 0
     finalShaderLifetimeMax: 0
