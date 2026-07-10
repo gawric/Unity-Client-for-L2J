@@ -45,8 +45,8 @@ public class ParticleSingle : EffectPart
     private readonly L2ShaderHoldController _holdController = new L2ShaderHoldController();
 
     private float _lastShaderFadeDiagLog;
+    private float _lastQuadSizeDiagLog;
     private bool _loggedHalfSecondCheckpoint;
-    private bool _mightTaQuadSizeLogged;
 
     private void Update()
     {
@@ -140,6 +140,18 @@ public class ParticleSingle : EffectPart
                 _lastShaderFadeDiagLog = now;
                 ParticleSingleLifetimeDebug.LogTick(BuildDebugSnapshot(now), now);
             }
+
+            if (L2FxQuadSizeDiagnostic.ShouldTrace(name, _owner, transform)
+                && _lifetime.Active
+                && now - _lastQuadSizeDiagLog >= L2FxQuadSizeDiagnostic.LogIntervalSec)
+            {
+                _lastQuadSizeDiagLog = now;
+                Renderer quadRenderer = ResolveRenderer();
+                Material runtimeMat = quadRenderer != null && quadRenderer.materials != null && quadRenderer.materials.Length > 0
+                    ? quadRenderer.materials[0]
+                    : null;
+                L2FxQuadSizeDiagnostic.Log(name, quadRenderer, now, runtimeMat);
+            }
 #endif
         }
     }
@@ -171,8 +183,8 @@ public class ParticleSingle : EffectPart
         float now = Now();
         _lifetime.ResetForPlayPart(now);
         _lastShaderFadeDiagLog = 0f;
+        _lastQuadSizeDiagLog = 0f;
         _loggedHalfSecondCheckpoint = false;
-        _mightTaQuadSizeLogged = false;
         _holdController.ResetReleaseLogs();
         _holdController.ResetCastEndFade();
 
@@ -344,14 +356,6 @@ public class ParticleSingle : EffectPart
                 renderer,
                 runtimeMat);
         }
-
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
-        if (!_mightTaQuadSizeLogged && L2FxQuadSizeDiagnostic.ShouldTrace(name, _owner, transform))
-        {
-            _mightTaQuadSizeLogged = true;
-            L2FxQuadSizeDiagnostic.Log(name, renderer, now);
-        }
-#endif
     }
 
     private Renderer ResolveRenderer()

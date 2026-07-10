@@ -121,7 +121,7 @@ public class ParticleGroup : EffectPart
     private float _lastWhHealPreserveLog;
     private bool _runtimeParticleClonesCreated;
     private bool _burstSpawnFinished;
-    private bool _mightTaQuadSizeLogged;
+    private float _lastQuadSizeDiagLog;
     private float _lastCurePoisonShaderTimeLog;
     private float _lastMightCaShaderTimeLog;
     private float _lastMeshEmitter3ShaderTimeLog;
@@ -242,6 +242,21 @@ public class ParticleGroup : EffectPart
         {
             _lastUplineGroupTickLog = now;
             LogUplineGroupTickSample(now);
+        }
+
+        if (L2FxQuadSizeDiagnostic.ShouldTrace(name, _owner, transform)
+            && anyActive
+            && now - _lastQuadSizeDiagLog >= L2FxQuadSizeDiagnostic.LogIntervalSec)
+        {
+            _lastQuadSizeDiagLog = now;
+            Renderer quadRenderer = ResolveFirstActiveRenderer();
+            if (quadRenderer != null)
+            {
+                Material runtimeMat = quadRenderer.materials != null && quadRenderer.materials.Length > 0
+                    ? quadRenderer.materials[0]
+                    : null;
+                L2FxQuadSizeDiagnostic.Log(name, quadRenderer, now, runtimeMat);
+            }
         }
 
         DocExtractorParticleSnapshotLogger.OnFixedUpdateTick(
@@ -562,15 +577,25 @@ public class ParticleGroup : EffectPart
 #endif
         }
 
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
-        if (!_mightTaQuadSizeLogged && L2FxQuadSizeDiagnostic.ShouldTrace(name, _owner, transform))
-        {
-            _mightTaQuadSizeLogged = true;
-            L2FxQuadSizeDiagnostic.Log(name, _particles[_particleIndex], now);
-        }
-#endif
-
         _particleIndex++;
+    }
+
+    private Renderer ResolveFirstActiveRenderer()
+    {
+        if (_particles == null || _isParticleActive == null)
+        {
+            return null;
+        }
+
+        for (int i = 0; i < _particles.Length; i++)
+        {
+            if (_isParticleActive[i] && _particles[i] != null)
+            {
+                return _particles[i];
+            }
+        }
+
+        return null;
     }
 
     public override void PlayPart()
@@ -587,7 +612,7 @@ public class ParticleGroup : EffectPart
         _burstSpawnFinished = false;
         _debugPlayStartedAt = _lastEnable;
         _debugFirstSpawnLogged = false;
-        _mightTaQuadSizeLogged = false;
+        _lastQuadSizeDiagLog = 0f;
         _lastWhHealShaderTimeLog = 0f;
         _lastWhHealPreserveLog = 0f;
         _lastCurePoisonShaderTimeLog = 0f;

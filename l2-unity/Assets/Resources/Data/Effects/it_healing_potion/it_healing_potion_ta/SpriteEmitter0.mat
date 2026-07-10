@@ -12,7 +12,8 @@ Material:
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
-  m_InvalidKeywords: []
+  m_InvalidKeywords:
+  - _DEBUGDIRECTSIZEMUL_ON
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
@@ -29,7 +30,11 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _L2FxWorldCalibration: 7
+    - _DebugDirectSizeMul: 1
+    - _DebugManualAgeNorm: 0
+    - _DebugManualOverride: 0
+    - _DebugManualSizeMul: 1
+    - _L2FxWorldCalibration: 1.4
     - _LumaAlphaFloor: 0.003
     - _ManualFrameIndex: 6
     - _RgbBoost: 7

@@ -1,18 +1,26 @@
-// it_healing_potion_ta / m_u004_b SpriteEmitter2 — IDA-verified calib shader.
-// sizeUU = StartSize(UU) * SizeScale(t)  [diameter in UU]
-// sizeInMeters = sizeUU / 52.5
-// sizeM = sizeInMeters * _L2FxWorldCalibration  (global K = 7.0)
-// DrawScale on root Transform scales sprite size via unity_ObjectToWorld (no shader compensation).
+// it_healing_potion_ta / m_u004_b SpriteEmitter2 - calib shader (L2FxCoreGeometryTest + L2FxSpriteSizeScale).
+// Particle age from ParticleSingle (_StartTime/_Seed); optional loop for SizeScale/flipbook preview.
+
 Shader "L2/Effects/Calib/HealingPotionTaSpriteEmitter2"
 {
     Properties
     {
         _MainTex ("Texture", 2D) = "white" {}
 
-        _L2FxWorldCalibration ("World Calibration K", Float) = 7
+        _L2FxWorldCalibration ("World Calibration K", Float) = 2.17
         _SizeRange ("Start Size UU Min Max", Vector) = (5.5, 5.5, 0, 0)
 
-        _TestSizeScaleAge ("SizeScale Age 0-1", Range(0, 1)) = 0.34
+        [Header(ParticleSingle Runtime)]
+        _StartTime ("Start Time", Float) = 0
+        _Seed ("Seed", Float) = 0
+        _LifetimeRange ("Lifetime Range Min Max sec", Vector) = (2, 2, 0, 0)
+        _InitialDelayRange ("Initial Delay Range Min Max sec", Vector) = (0, 0.01, 0, 0)
+        [Toggle] _LoopSizeScalePreview ("Loop SizeScale Flipbook Preview", Float) = 1
+
+        [Header(Test)]
+        [Toggle] _TestDisableSizeScale ("Test Disable SizeScale", Float) = 0
+
+        [Header(SizeScale m_u004_b)]
         _SizeScaleRepeats ("SizeScale Repeats", Float) = 1
         _SizeKey0 ("Size Key 0 Time Size", Vector) = (0, 0.6, 0, 0)
         _SizeKey1 ("Size Key 1 Time Size", Vector) = (0.07, 1.8, 0, 0)
@@ -20,11 +28,11 @@ Shader "L2/Effects/Calib/HealingPotionTaSpriteEmitter2"
         _SizeKey3 ("Size Key 3 Time Size", Vector) = (0.34, 3, 0, 0)
         _SizeKey4 ("Size Key 4 Time Size", Vector) = (1, 3.4, 0, 0)
 
+        [Header(Flipbook)]
         _TextureUSubdivisions ("Atlas U Cells", Float) = 4
         _TextureVSubdivisions ("Atlas V Cells", Float) = 4
         _SubdivisionStart ("Subdivision Start", Float) = 4
         _SubdivisionEnd ("Subdivision End", Float) = 7
-        _TestFlipbookAge ("Flipbook Age 0-1", Range(0, 1)) = 0
 
         _RgbBoost ("RGB Boost", Range(0, 16)) = 7
         _LumaAlphaFloor ("Luma Alpha Floor", Range(0, 0.25)) = 0.003
@@ -55,7 +63,8 @@ Shader "L2/Effects/Calib/HealingPotionTaSpriteEmitter2"
             #pragma target 3.0
 
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
-            #include "../Common/L2FxCoreGeometry.hlsl"
+            #include "../Common/L2FxCoreGeometryTest.hlsl"
+            #include "../Common/Decompile_Common/L2FxSpriteSizeScale.hlsl"
             #include "../Common/L2FxFlipbook.hlsl"
 
             TEXTURE2D(_MainTex);
@@ -65,7 +74,12 @@ Shader "L2/Effects/Calib/HealingPotionTaSpriteEmitter2"
                 float4 _MainTex_ST;
                 float _L2FxWorldCalibration;
                 float4 _SizeRange;
-                float _TestSizeScaleAge;
+                float _StartTime;
+                float _Seed;
+                float4 _LifetimeRange;
+                float4 _InitialDelayRange;
+                float _LoopSizeScalePreview;
+                float _TestDisableSizeScale;
                 float _SizeScaleRepeats;
                 float4 _SizeKey0;
                 float4 _SizeKey1;
@@ -76,41 +90,9 @@ Shader "L2/Effects/Calib/HealingPotionTaSpriteEmitter2"
                 float _TextureVSubdivisions;
                 float _SubdivisionStart;
                 float _SubdivisionEnd;
-                float _TestFlipbookAge;
                 float _RgbBoost;
                 float _LumaAlphaFloor;
             CBUFFER_END
-
-            float EvaluateDynamicSizeScale(float progress)
-            {
-                float phase = frac(progress * _SizeScaleRepeats);
-
-                float4 keys[5] = { _SizeKey0, _SizeKey1, _SizeKey2, _SizeKey3, _SizeKey4 };
-
-                if (keys[0].x > 0.0 && phase < keys[0].x)
-                {
-                    return lerp(1.0, keys[0].y, phase / max(keys[0].x, 1e-6));
-                }
-
-                int idx = 0;
-                while (idx < 4 && phase > keys[idx + 1].x)
-                {
-                    idx++;
-                }
-
-                float t0 = keys[idx].x;
-                float s0 = keys[idx].y;
-                float t1 = keys[idx + 1].x;
-                float s1 = keys[idx + 1].y;
-
-                if (abs(t1 - t0) < 1e-6)
-                {
-                    return s0;
-                }
-
-                float u = (phase - t0) / (t1 - t0);
-                return lerp(s0, s1, saturate(u));
-            }
 
             float ResolveStartSizeUU()
             {
@@ -123,6 +105,25 @@ Shader "L2/Effects/Calib/HealingPotionTaSpriteEmitter2"
                     maxUU = t;
                 }
                 return (minUU + maxUU) * 0.5;
+            }
+
+            float ResolveParticleAgeNorm()
+            {
+                float delay = L2Fx_RandomInitialDelay(_InitialDelayRange.xy, _Seed, _StartTime, 3.0);
+                float lifetime = max(L2Fx_RandomLifetime(_LifetimeRange.xy, _Seed, _StartTime, 7.0), 1e-4);
+                float age = L2Fx_AgeSeconds(_Time.y, _StartTime, delay);
+
+                if (_StartTime <= 0.0)
+                {
+                    age = _Time.y;
+                }
+
+                if (_LoopSizeScalePreview > 0.5)
+                {
+                    return frac(age / lifetime);
+                }
+
+                return saturate(age / lifetime);
             }
 
             struct Attributes
@@ -143,7 +144,27 @@ Shader "L2/Effects/Calib/HealingPotionTaSpriteEmitter2"
             {
                 Varyings OUT;
 
-                float sizeUU = ResolveStartSizeUU() * EvaluateDynamicSizeScale(_TestSizeScaleAge);
+                float ageNorm = ResolveParticleAgeNorm();
+
+                float sizeMul = L2Fx_SpriteSizeScale_ScalarFromUniforms(
+                    ageNorm,
+                    1.0,
+                    _SizeScaleRepeats,
+                    5,
+                    false,
+                    false,
+                    _SizeKey0.x, _SizeKey0.y,
+                    _SizeKey1.x, _SizeKey1.y,
+                    _SizeKey2.x, _SizeKey2.y,
+                    _SizeKey3.x, _SizeKey3.y,
+                    _SizeKey4.x, _SizeKey4.y);
+
+                if (_TestDisableSizeScale > 0.5)
+                {
+                    sizeMul = 1.0;
+                }
+
+                float sizeUU = ResolveStartSizeUU() * sizeMul;
                 float sizeM = L2Fx_GetFinalVertexSizeMeters(sizeUU, _L2FxWorldCalibration);
                 float3 quadOS = IN.positionOS.xyz * sizeM;
                 OUT.positionHCS = TransformObjectToHClip(float4(quadOS, 1.0));
@@ -154,7 +175,7 @@ Shader "L2/Effects/Calib/HealingPotionTaSpriteEmitter2"
                 int s1 = (int)_SubdivisionEnd;
                 L2Fx_FlipbookAtlasUVBlend(
                     IN.uv,
-                    _TestFlipbookAge,
+                    ageNorm,
                     uSub,
                     vSub,
                     s0,

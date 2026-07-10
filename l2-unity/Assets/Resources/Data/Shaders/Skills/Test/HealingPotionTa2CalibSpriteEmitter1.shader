@@ -1,11 +1,11 @@
-// it_healing_potion_ta_2 / m_u008_b SpriteEmitter1 — calib shader (L2FxCoreGeometry.hlsl).
+// it_healing_potion_ta_2 / m_u008_b SpriteEmitter1 - calib shader (L2FxCoreGeometryTest.hlsl).
 Shader "L2/Effects/Calib/HealingPotionTa2SpriteEmitter1"
 {
     Properties
     {
         _MainTex ("Texture", 2D) = "white" {}
 
-        _L2FxWorldCalibration ("World Calibration K", Float) = 7
+        _L2FxWorldCalibration ("World Calibration K", Float) = 2.17
         _SizeRange ("Start Size UU Min Max", Vector) = (20, 20, 0, 0)
 
         _TestSizeScaleAge ("SizeScale Age 0-1", Range(0, 1)) = 0.5
@@ -51,7 +51,7 @@ Shader "L2/Effects/Calib/HealingPotionTa2SpriteEmitter1"
             #pragma target 3.0
 
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
-            #include "../Common/L2FxCoreGeometry.hlsl"
+            #include "../Common/L2FxCoreGeometryTest.hlsl"
             #include "../Common/L2FxFlipbook.hlsl"
 
             TEXTURE2D(_MainTex);

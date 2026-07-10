@@ -12,7 +12,8 @@ Material:
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
-  m_InvalidKeywords: []
+  m_InvalidKeywords:
+  - _LOOPSIZESCALEPREVIEW_ON
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
@@ -29,17 +30,21 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _L2FxWorldCalibration: 7
+    - _L2FxWorldCalibration: 1.4
+    - _LoopSizeScalePreview: 1
     - _LumaAlphaFloor: 0.003
     - _RgbBoost: 7
+    - _Seed: 0
     - _SizeScaleRepeats: 1
+    - _StartTime: 0
     - _SubdivisionEnd: 7
     - _SubdivisionStart: 4
-    - _TestFlipbookAge: 0
-    - _TestSizeScaleAge: 0.34
+    - _TestDisableSizeScale: 0
     - _TextureUSubdivisions: 4
     - _TextureVSubdivisions: 4
     m_Colors:
+    - _InitialDelayRange: {r: 0, g: 0.01, b: 0, a: 0}
+    - _LifetimeRange: {r: 2, g: 2, b: 0, a: 0}
     - _SizeKey0: {r: 0, g: 0.6, b: 0, a: 0}
     - _SizeKey1: {r: 0.07, g: 1.8, b: 0, a: 0}
     - _SizeKey2: {r: 0.14, g: 2.6, b: 0, a: 0}
