@@ -3,14 +3,12 @@ using UnityEngine;
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
 /// <summary>
 /// Reproduces calib sprite vertex-shader quad size in C# for debugging.
-/// Matches: sizeM = (sizeUU/52.5*K)/DrawScale in OS; world = sizeUU/52.5*K*quadSpan (DrawScale cancels).
+/// Matches: sizeM = sizeUU / 52.5 * K in object space.
 /// </summary>
 public static class L2FxQuadSizeDiagnostic
 {
-    private const string MightTaToken = "wh_might_ta";
-    private const string HealingPotionTaToken = "it_healing_potion_ta";
     private const float UuToMeters = 1f / 52.5f;
-    private const float DefaultWorldCalibration = 2.17f;
+    private const float DefaultWorldCalibration = 1.8f;
     public const float LogIntervalSec = 0.25f;
 
     public struct QuadSizeSnapshot
@@ -27,10 +25,13 @@ public static class L2FxQuadSizeDiagnostic
         public float initialDelaySec;
         public float scaleT;
         public float worldCalibrationK;
-        public float objectDrawScale;
         public Vector3 lossyScale;
         public Vector3 quadSpan;
         public string sizeScalePath;
+        public bool loopPreview;
+        public int flipbookFrameA;
+        public int flipbookFrameB;
+        public float flipbookBlend;
     }
 
     public static bool ShouldTrace(string groupName, L2Particle owner, Transform groupTransform)
@@ -48,8 +49,7 @@ public static class L2FxQuadSizeDiagnostic
             return false;
         }
 
-        return MatchesEffectToken(groupName, owner, groupTransform, MightTaToken)
-            || MatchesEffectToken(groupName, owner, groupTransform, HealingPotionTaToken);
+        return ParticleSingleLifetimeDebug.ShouldTrace(groupName, owner, groupTransform);
     }
 
     public static QuadSizeSnapshot Compute(string groupName, Renderer renderer, float now, Material runtimeMat = null)
@@ -80,7 +80,6 @@ public static class L2FxQuadSizeDiagnostic
 
         Transform quadTransform = renderer.transform;
         snap.lossyScale = quadTransform.lossyScale;
-        snap.objectDrawScale = ExtractObjectDrawScale(quadTransform);
         snap.quadSpan = Vector3.one;
         MeshFilter mf = renderer.GetComponent<MeshFilter>();
         if (mf != null && mf.sharedMesh != null)
@@ -113,10 +112,13 @@ public static class L2FxQuadSizeDiagnostic
 
         snap.sizeUU = snap.startSizeMidUU * snap.sizeMul;
         float sizeInMeters = snap.sizeUU * UuToMeters;
-        snap.sizeMetersVertex = (sizeInMeters * snap.worldCalibrationK) / snap.objectDrawScale;
+        snap.sizeMetersVertex = sizeInMeters * snap.worldCalibrationK;
         float worldDiameterM = sizeInMeters * snap.worldCalibrationK;
-        snap.finalWidthM = snap.quadSpan.x * worldDiameterM;
-        snap.finalHeightM = snap.quadSpan.y * worldDiameterM;
+        snap.finalWidthM = snap.quadSpan.x * worldDiameterM * Mathf.Abs(snap.lossyScale.x);
+        snap.finalHeightM = snap.quadSpan.y * worldDiameterM * Mathf.Abs(snap.lossyScale.y);
+        snap.loopPreview = mat.HasProperty("_LoopSizeScalePreview") &&
+            mat.GetFloat("_LoopSizeScalePreview") > 0.5f;
+        ResolveFlipbookFrames(mat, snap.ageNorm, out snap.flipbookFrameA, out snap.flipbookFrameB, out snap.flipbookBlend);
         return snap;
     }
 
@@ -149,21 +151,27 @@ public static class L2FxQuadSizeDiagnostic
             $"  path={s.sizeScalePath}  ageNorm={s.ageNorm:F4}  scaleT=frac((1+repeats)*age)={s.scaleT:F4}  repeats={repeats:F2}\n" +
             $"  runtime: _StartTime={startTime:F3} _Seed={seed:F3} delay={s.initialDelaySec:F4}s lifetime={s.lifetimeSec:F4}s ageSec={s.ageSec:F4}s\n" +
             $"  StartSize midUU={s.startSizeMidUU:F4}  sizeMul={s.sizeMul:F4}  sizeUU={s.sizeUU:F4}\n" +
-            $"  vertex OS: sizeM=(sizeUU/52.5*K)/DrawScale = {s.sizeMetersVertex:F6}m  K={s.worldCalibrationK:F3}  DrawScale={s.objectDrawScale:F4}\n" +
+            $"  vertex OS: sizeM=sizeUU/52.5*K = {s.sizeMetersVertex:F6}m  K={s.worldCalibrationK:F3}\n" +
             $"  world: quadSpan=({s.quadSpan.x:F3},{s.quadSpan.y:F3}) lossyScale=({s.lossyScale.x:F4},{s.lossyScale.y:F4})\n" +
-            $"  FINAL diameter(m): width={s.finalWidthM:F6}  height={s.finalHeightM:F6}  (= sizeUU/52.5*K*quadSpan, DrawScale-neutral)\n" +
-            $"  formula: finalWidth = midUU * sizeMul / 52.5 * K * quadSpan.x");
+            $"  FINAL diameter(m): width={s.finalWidthM:F6}  height={s.finalHeightM:F6}\n" +
+            $"  previewLoop={s.loopPreview} flipbook=frame{s.flipbookFrameA}->frame{s.flipbookFrameB} blend={s.flipbookBlend:F4}\n" +
+            $"  formula: finalWidth = midUU * sizeMul / 52.5 * K * quadSpan.x * abs(lossyScale.x)");
     }
 
-    private static float ExtractObjectDrawScale(Transform transform)
+    private static void ResolveFlipbookFrames(
+        Material mat,
+        float normalizedAge,
+        out int frameA,
+        out int frameB,
+        out float blend)
     {
-        if (transform == null)
-        {
-            return 1f;
-        }
-
-        Vector3 col0 = transform.localToWorldMatrix.GetColumn(0);
-        return Mathf.Max(col0.magnitude, 1e-4f);
+        int start = mat.HasProperty("_SubdivisionStart") ? Mathf.RoundToInt(mat.GetFloat("_SubdivisionStart")) : 0;
+        int end = mat.HasProperty("_SubdivisionEnd") ? Mathf.RoundToInt(mat.GetFloat("_SubdivisionEnd")) : start;
+        int span = Mathf.Max(end - start, 1);
+        float frame = start + Mathf.Clamp01(normalizedAge) * span;
+        frameA = Mathf.Clamp(Mathf.FloorToInt(frame), start, end);
+        frameB = Mathf.Clamp(frameA + 1, start, end);
+        blend = Mathf.Clamp01(frame - Mathf.Floor(frame));
     }
 
     private static float ResolveInitialDelay(Material mat)
@@ -407,31 +415,5 @@ public static class L2FxQuadSizeDiagnostic
         return x - Mathf.Floor(x);
     }
 
-    private static bool MatchesEffectToken(string groupName, L2Particle owner, Transform groupTransform, string token)
-    {
-        if (!string.IsNullOrEmpty(groupName) &&
-            groupName.IndexOf(token, System.StringComparison.OrdinalIgnoreCase) >= 0)
-        {
-            return true;
-        }
-
-        if (owner != null && !string.IsNullOrEmpty(owner.name) &&
-            owner.name.IndexOf(token, System.StringComparison.OrdinalIgnoreCase) >= 0)
-        {
-            return true;
-        }
-
-        Transform t = groupTransform;
-        for (int depth = 0; t != null && depth < 16; depth++, t = t.parent)
-        {
-            if (!string.IsNullOrEmpty(t.name) &&
-                t.name.IndexOf(token, System.StringComparison.OrdinalIgnoreCase) >= 0)
-            {
-                return true;
-            }
-        }
-
-        return false;
-    }
 }
 #endif

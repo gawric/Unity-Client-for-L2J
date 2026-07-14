@@ -12,8 +12,7 @@ Material:
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
-  m_InvalidKeywords:
-  - _LOOPSIZESCALEPREVIEW_ON
+  m_InvalidKeywords: []
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
@@ -30,16 +29,22 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _L2FxWorldCalibration: 1.4
+    - _L2FxWorldCalibration: 1.8
     - _LoopSizeScalePreview: 1
     - _LumaAlphaFloor: 0.003
     - _RgbBoost: 7
+    - _HasLifetime: 1
+    - _FadeIn: 1
+    - _FadeInEndTime: 0.049
+    - _Fadeout: 1
+    - _FadeoutStartTime: 0.154
     - _Seed: 0
-    - _SizeScaleRepeats: 1
+    - _SpriteMotionRandStateBits: 0
+    - _SpriteSpinRandStateBits: 0
     - _StartTime: 0
     - _SubdivisionEnd: 7
     - _SubdivisionStart: 4
-    - _TestDisableSizeScale: 0
+    - _TestSpinRadians: 0
     - _TextureUSubdivisions: 4
     - _TextureVSubdivisions: 4
     m_Colors:
@@ -51,5 +56,12 @@ Material:
     - _SizeKey3: {r: 0.34, g: 3, b: 0, a: 0}
     - _SizeKey4: {r: 1, g: 3.4, b: 0, a: 0}
     - _SizeRange: {r: 5.5, g: 5.5, b: 0, a: 0}
+    - _StartVelocityRangeXUc: {r: -0.001, g: 0.001, b: 0, a: 0}
+    - _StartVelocityRangeYUc: {r: -0.001, g: 0.001, b: 0, a: 0}
+    - _StartVelocityRangeZUc: {r: 0.004, g: 0.004, b: 0, a: 0}
+    - _SpriteSpinCcwOrCw: {r: 0, g: 1, b: 1, a: 0}
+    - _SpriteSpinSpsRangeUc: {r: 0, g: 0.3, b: 0, a: 0}
+    - _SpriteSpinStartRangeUc: {r: 0, g: 360, b: 0, a: 0}
+    - _StartLocationOffsetUU: {r: 0, g: 0, b: 8, a: 0}
   m_BuildTextureStacks: []
   m_AllowLocking: 1

@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 /// <summary>
@@ -17,6 +18,7 @@ public static class L2MaterialPropertyCopier
     public static readonly int SeedId = Shader.PropertyToID("_Seed");
     public static readonly int HasLifetimeId = Shader.PropertyToID("_HasLifetime");
     public static readonly int InitialDelayRangeId = Shader.PropertyToID("_InitialDelayRange");
+    public static readonly int LoopSizeScalePreviewId = Shader.PropertyToID("_LoopSizeScalePreview");
     public static readonly int FadeInId = Shader.PropertyToID("_FadeIn");
     public static readonly int FadeInEndTimeId = Shader.PropertyToID("_FadeInEndTime");
     public static readonly int FadeoutId = Shader.PropertyToID("_Fadeout");
@@ -62,6 +64,25 @@ public static class L2MaterialPropertyCopier
     public static readonly int UseExternalTargetPositionId = Shader.PropertyToID(UseExternalTargetPositionProperty);
     public static readonly int UseOwnerFromShaderTargetId = Shader.PropertyToID(UseOwnerFromShaderTargetProperty);
     public static readonly int L2FxTargetWorldPosId = Shader.PropertyToID(L2FxTargetWorldPosProperty);
+    public static readonly int StartSpinRandStateBitsId = Shader.PropertyToID("_StartSpinRandStateBits");
+    public static readonly int StartSpinYawRangeUcId = Shader.PropertyToID("_StartSpinYawRangeUc");
+    public static readonly int StartSpinPitchRangeUcId = Shader.PropertyToID("_StartSpinPitchRangeUc");
+    public static readonly int StartSpinRollRangeUcId = Shader.PropertyToID("_StartSpinRollRangeUc");
+    public static readonly int SpriteSpinRandStateBitsId = Shader.PropertyToID("_SpriteSpinRandStateBits");
+    public static readonly int SpriteSpinStartRangeUcId = Shader.PropertyToID("_SpriteSpinStartRangeUc");
+    public static readonly int SpriteSpinSpsRangeUcId = Shader.PropertyToID("_SpriteSpinSpsRangeUc");
+    public static readonly int SpriteSpinCcwOrCwId = Shader.PropertyToID("_SpriteSpinCcwOrCw");
+    public static readonly int SpriteMotionRandStateBitsId = Shader.PropertyToID("_SpriteMotionRandStateBits");
+    public static readonly int StartVelocityRangeXUcId = Shader.PropertyToID("_StartVelocityRangeXUc");
+    public static readonly int StartVelocityRangeYUcId = Shader.PropertyToID("_StartVelocityRangeYUc");
+    public static readonly int StartVelocityRangeZUcId = Shader.PropertyToID("_StartVelocityRangeZUc");
+
+    private const uint AppRandMultiplier = 214013u;
+    private const uint AppRandIncrement = 2531011u;
+    // m_u004_b / MeshEmitter3: captured L2 SpawnParticle trace shows 31
+    // appRand draws from slot 0's state before Roll to slot 1's state before Roll.
+    // This is emitter-specific, not a general StartSpin rule.
+    public const int MeshEmitter3SlotToSlotDrawCount = 31;
 
     public static void CopyLifetimeFadeAndFxFromShared(Material runtimeMat, Material sharedMat)
     {
@@ -76,6 +97,7 @@ public static class L2MaterialPropertyCopier
         RestoreShaderLifetimeFromSharedFadeAuthored(runtimeMat, sharedMat);
         CopyVectorIfPresent(runtimeMat, sharedMat, LifetimeRangeId);
         CopyVectorIfPresent(runtimeMat, sharedMat, InitialDelayRangeId);
+        CopyFloatIfPresent(runtimeMat, sharedMat, LoopSizeScalePreviewId);
         CopyFloatIfPresent(runtimeMat, sharedMat, FadeInId);
         CopyFloatIfPresent(runtimeMat, sharedMat, FadeInEndTimeId);
         CopyFloatIfPresent(runtimeMat, sharedMat, FadeoutId);
@@ -125,6 +147,143 @@ public static class L2MaterialPropertyCopier
         CopyFloatIfPresent(runtimeMat, sharedMat, BillboardToCameraId);
         CopyVectorIfPresent(runtimeMat, sharedMat, BillboardWorldUpId);
         CopyVectorIfPresent(runtimeMat, sharedMat, BillboardEulerOffsetId);
+        CopyVectorIfPresent(runtimeMat, sharedMat, SpriteSpinStartRangeUcId);
+        CopyVectorIfPresent(runtimeMat, sharedMat, SpriteSpinSpsRangeUcId);
+        CopyVectorIfPresent(runtimeMat, sharedMat, SpriteSpinCcwOrCwId);
+        CopyVectorIfPresent(runtimeMat, sharedMat, StartVelocityRangeXUcId);
+        CopyVectorIfPresent(runtimeMat, sharedMat, StartVelocityRangeYUcId);
+        CopyVectorIfPresent(runtimeMat, sharedMat, StartVelocityRangeZUcId);
+    }
+
+    /// <summary>
+    /// Copies one live appRand sequence into a m_u004_b / MeshEmitter3 slot.
+    /// The supplied base state is generated once per effect play; the stored state
+    /// is immediately before that slot's Roll/Z StartSpin draw.
+    /// </summary>
+    public static void CopyMeshAppRandStartSpinFromBaseState(
+        Material runtimeMat,
+        Material sharedMat,
+        uint baseState,
+        int slotIndex)
+    {
+        if (runtimeMat == null || sharedMat == null ||
+            !sharedMat.HasProperty(StartSpinRandStateBitsId))
+        {
+            return;
+        }
+
+        CopyVectorIfPresent(runtimeMat, sharedMat, StartSpinYawRangeUcId);
+        CopyVectorIfPresent(runtimeMat, sharedMat, StartSpinPitchRangeUcId);
+        CopyVectorIfPresent(runtimeMat, sharedMat, StartSpinRollRangeUcId);
+
+        SetStartSpinRandState(
+            runtimeMat,
+            ComputeMeshEmitter3StartSpinState(baseState, slotIndex));
+    }
+
+    public static uint ComputeMeshEmitter3StartSpinState(uint sharedBaseState, int slotIndex)
+    {
+        uint slotState = sharedBaseState;
+        for (int i = 0; i < slotIndex; i++)
+        {
+            slotState = AdvanceAppRandState(slotState, MeshEmitter3SlotToSlotDrawCount);
+        }
+
+        return slotState;
+    }
+
+    public static uint ReadStartSpinRandState(Material mat)
+    {
+        if (mat == null)
+        {
+            return 0u;
+        }
+
+        if (mat.HasProperty(StartSpinRandStateBitsId))
+        {
+            float bits = mat.GetFloat(StartSpinRandStateBitsId);
+            if (bits != 0f)
+            {
+                return unchecked((uint)BitConverter.SingleToInt32Bits(bits));
+            }
+        }
+
+        return 0u;
+    }
+
+    public static void SetStartSpinRandState(Material mat, uint state)
+    {
+        if (mat != null && mat.HasProperty(StartSpinRandStateBitsId))
+        {
+            mat.SetFloat(
+                StartSpinRandStateBitsId,
+                BitConverter.Int32BitsToSingle(unchecked((int)state)));
+        }
+    }
+
+    /// <summary>
+    /// Writes the state immediately before SpriteEmitter StartSpin's
+    /// FRangeVector::GetRand call. The shader consumes the verified nine
+    /// appFrand draws from this state.
+    /// </summary>
+    public static void SetSpriteSpinRandState(Material mat, uint state)
+    {
+        if (mat != null && mat.HasProperty(SpriteSpinRandStateBitsId))
+        {
+            mat.SetFloat(
+                SpriteSpinRandStateBitsId,
+                BitConverter.Int32BitsToSingle(unchecked((int)state)));
+        }
+    }
+
+    /// <summary>
+    /// Writes the state immediately before SpriteEmitter StartVelocityRange's
+    /// FRangeVector::GetRand call. The shader consumes its Z/Y/X draws.
+    /// </summary>
+    public static void SetSpriteMotionRandState(Material mat, uint state)
+    {
+        if (mat != null && mat.HasProperty(SpriteMotionRandStateBitsId))
+        {
+            mat.SetFloat(
+                SpriteMotionRandStateBitsId,
+                BitConverter.Int32BitsToSingle(unchecked((int)state)));
+        }
+    }
+
+    public static uint ReadSpriteSpinRandState(Material mat)
+    {
+        if (mat != null && mat.HasProperty(SpriteSpinRandStateBitsId))
+        {
+            float bits = mat.GetFloat(SpriteSpinRandStateBitsId);
+            if (bits != 0f)
+            {
+                return unchecked((uint)BitConverter.SingleToInt32Bits(bits));
+            }
+        }
+
+        return 0u;
+    }
+
+    /// <summary>
+    /// Produces a finite bit-pattern that survives Material.SetFloat/asuint.
+    /// It is a state seed, not a float numeric value.
+    /// </summary>
+    public static uint CreateFiniteAppRandState()
+    {
+        uint high = (uint)UnityEngine.Random.Range(0, 32768);
+        uint low = (uint)UnityEngine.Random.Range(0, 65536);
+        uint state = ((high << 16) | low) & 0x7F7FFFFFu;
+        return state == 0u ? 1u : state;
+    }
+
+    public static uint AdvanceAppRandState(uint state, int drawCount)
+    {
+        for (int i = 0; i < drawCount; i++)
+        {
+            state = unchecked(state * AppRandMultiplier + AppRandIncrement);
+        }
+
+        return state;
     }
 
     public static float ReadLifetimeMax(Material[] sharedMaterials, float fallback)

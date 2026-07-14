@@ -3,6 +3,14 @@
 
 // L2_FX_SPRITE_MOTION - SPRITE EMITTER ONLY - Decompile_Common
 //
+// SpriteEmitter2 / m_u004_b StartVelocityRange status: NOT VERIFIED.
+// Its authored velocity is only X/Y=[-0.001,0.001], Z=[0.004,0.004] UU/s,
+// which is too weak to validate reliably from the live visual result. The
+// StartVelocity appRand state/order and slot path must be captured on another
+// effect with a larger StartVelocityRange before treating the helper below as
+// byte-exact for SpriteEmitter2. Do not confuse the verified SpriteEmitter2
+// StartSpin/SPS trace with StartVelocity: they are separate spawn paths.
+//
 // SOURCE: UParticleEmitter::UpdateParticles (Engine.dll x86, IDA decomp).
 // VERIFIED byte-exact on live log via AEmitter::Tick hook (velocity/accel/velMul logged):
 //   Motion: m_u004_a (accel Z=+100), m_u004_b_2 (accel Z=-40) -> v+=a*dt & pos ~100%
@@ -32,10 +40,28 @@
 // Unit scale: UE UU (cm) -> Unity meters via L2FX_UU_TO_UNITY (0.01).
 
 #include "../L2FxEmitterSpawn.hlsl"
+#include "../L2FxCoreGeometryTest.hlsl"
+#include "L2FxAppRand.hlsl"
 
 float3 L2Fx_SpriteMotion_UeVectorToUnity(float3 vUe)
 {
     return float3(vUe.x, vUe.z, vUe.y);
+}
+
+// StartVelocityRange is a UE FRangeVector. Its appRand draw order is Z/Y/X,
+// matching the particle slot's X/Y/Z velocity components after reconstruction.
+float3 L2Fx_SpriteMotion_StartVelocityUeFromAppRandState(
+    float2 velocityXRangeUe,
+    float2 velocityYRangeUe,
+    float2 velocityZRangeUe,
+    uint startVelocityRandState)
+{
+    uint state = startVelocityRandState;
+    return L2Fx_FRangeVector_GetRandYawPitchRoll(
+        velocityXRangeUe,
+        velocityYRangeUe,
+        velocityZRangeUe,
+        state);
 }
 
 // Ballistic displacement in UE/L2 units (Z-up). No drag.
@@ -100,6 +126,20 @@ float3 L2Fx_SpriteMotion_DisplacementUnity(
     float3 dispUe = L2Fx_SpriteMotion_DisplacementUe(
         velocity0Ue, accelerationUe, ageSeconds, velocityMultiplier);
     return L2Fx_SpriteMotion_UeVectorToUnity(dispUe) * L2FX_UU_TO_UNITY;
+}
+
+// Use this variant for effects calibrated by L2FxCoreGeometryTest. It keeps
+// particle motion in the same UU-to-world scale as StartLocationOffset.
+float3 L2Fx_SpriteMotion_DisplacementUnityCalibrated(
+    float3 velocity0Ue,
+    float3 accelerationUe,
+    float ageSeconds,
+    float velocityMultiplier,
+    float worldCalibration)
+{
+    float3 displacementUe = L2Fx_SpriteMotion_DisplacementUe(
+        velocity0Ue, accelerationUe, ageSeconds, velocityMultiplier);
+    return L2Fx_UcPositionToUnityMeters(displacementUe, worldCalibration);
 }
 
 float3 L2Fx_SpriteMotion_DisplacementUnityWithDrag(

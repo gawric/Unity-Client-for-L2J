@@ -4,9 +4,7 @@
 
 // sizeInMeters = sizeUU / 52.5
 
-// sizeM via L2Fx_GetFinalVertexSizeMeters (DrawScale-neutral, global K = 2.17)
-
-// DrawScale on root Transform scales sprite size via unity_ObjectToWorld (no shader compensation).
+// sizeM via L2Fx_GetFinalVertexSizeMeters (verified global K = 1.4).
 
 Shader "L2/Effects/Calib/HealingPotionTa2SpriteEmitter6"
 
@@ -20,7 +18,7 @@ Shader "L2/Effects/Calib/HealingPotionTa2SpriteEmitter6"
 
 
 
-        _L2FxWorldCalibration ("World Calibration K", Float) = 2.17
+        _L2FxWorldCalibration ("World Calibration K", Float) = 1.4
 
         _SizeRange ("Start Size UU Min Max", Vector) = (2, 2, 0, 0)
 

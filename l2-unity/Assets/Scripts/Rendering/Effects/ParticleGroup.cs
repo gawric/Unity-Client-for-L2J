@@ -113,6 +113,7 @@ public class ParticleGroup : EffectPart
     private bool _runtimeContinuousLoop;
     private bool _hasRuntimeContinuousLoopOverride;
     private bool _runtimeContinuousLoopOverrideValue;
+    private uint _meshEmitter3AppRandBaseState;
     private bool _debugFirstSpawnLogged;
     private int _icebergPlayCount;
     private int _icebergSlotOnCount;
@@ -127,6 +128,8 @@ public class ParticleGroup : EffectPart
     private float _lastMeshEmitter3ShaderTimeLog;
     private float _lastUplineGroupTickLog;
     private MaterialPropertyBlock _particleRuntimeProperties;
+
+    public uint MeshEmitter3AppRandBaseState => _meshEmitter3AppRandBaseState;
 
     public void FixedUpdate()
     {
@@ -356,6 +359,18 @@ public class ParticleGroup : EffectPart
         renderer.SetPropertyBlock(_particleRuntimeProperties);
     }
 
+    /// <summary>
+    /// Generates a finite float bit-pattern so the state survives Unity's
+    /// Material.SetFloat/asuint bridge without NaN canonicalization.
+    /// </summary>
+    private static uint CreateMeshEmitter3AppRandBaseState()
+    {
+        uint high = (uint)Random.Range(0, 32768);
+        uint low = (uint)Random.Range(0, 65536);
+        uint state = ((high << 16) | low) & 0x7F7FFFFFu;
+        return state == 0u ? 1u : state;
+    }
+
     private void ActivateParticle(float now)
     {
         if (_particles == null || _particles.Length == 0) return;
@@ -480,6 +495,11 @@ public class ParticleGroup : EffectPart
             if (shared != null)
             {
                 L2MaterialPropertyCopier.CopyLifetimeFadeAndFxFromShared(m, shared);
+                L2MaterialPropertyCopier.CopyMeshAppRandStartSpinFromBaseState(
+                    m,
+                    shared,
+                    _meshEmitter3AppRandBaseState,
+                    _particleIndex);
             }
 
             // Keep alpha exactly as configured in shared material.
@@ -607,6 +627,7 @@ public class ParticleGroup : EffectPart
         _lastLoop = _lastEnable - spawnInterval;
         _particleIndex = 0;
         _spawnedCount = 0;
+        _meshEmitter3AppRandBaseState = CreateMeshEmitter3AppRandBaseState();
         _stopped = false;
         _spawnStopped = false;
         _burstSpawnFinished = false;

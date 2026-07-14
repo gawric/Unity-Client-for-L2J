@@ -47,6 +47,8 @@ public class ParticleSingle : EffectPart
     private float _lastShaderFadeDiagLog;
     private float _lastQuadSizeDiagLog;
     private bool _loggedHalfSecondCheckpoint;
+    private uint _spriteSpinAppRandBaseState;
+    private uint _spriteMotionAppRandBaseState;
 
     private void Update()
     {
@@ -90,6 +92,9 @@ public class ParticleSingle : EffectPart
         if (_lifetime.IsSlotExpired(now, _preserveShaderTimeInContinuousLoop))
         {
             ParticleSingleLifetimeDebug.LogSlotOff(BuildDebugSnapshot(now), now);
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            DocExtractorParticleSnapshotLogger.OnSlotOff(this);
+#endif
             SetActive(false, "slot_expired");
             _lifetime.Active = false;
         }
@@ -121,6 +126,9 @@ public class ParticleSingle : EffectPart
         else
         {
             UpdateOwnerWorldPos();
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            DocExtractorParticleSnapshotLogger.OnFixedUpdateTick(this, now, ResolveRenderer());
+#endif
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
             if (ParticleSingleLifetimeDebug.ShouldTrace(name, _owner, transform)
                 && _lifetime.Active
@@ -168,6 +176,9 @@ public class ParticleSingle : EffectPart
             _particles = GetComponentsInChildren<Renderer>(true);
         }
 
+        _spriteSpinAppRandBaseState = L2MaterialPropertyCopier.CreateFiniteAppRandState();
+        _spriteMotionAppRandBaseState = L2MaterialPropertyCopier.CreateFiniteAppRandState();
+
         if (_testSpawnOnlyNoTeardown)
         {
             float t = Now();
@@ -203,6 +214,9 @@ public class ParticleSingle : EffectPart
 
         SetActive(false, "playpart_reset");
         ParticleSingleLifetimeDebug.LogPlay(BuildDebugSnapshot(now));
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        DocExtractorParticleSnapshotLogger.OnPlayPart(this);
+#endif
     }
 
     public override void Setup(EffectSettings s, MagicCastData c)
@@ -305,6 +319,8 @@ public class ParticleSingle : EffectPart
 
         float shaderStartTime = now - _relativeWarmupTime;
         float seed = Random.Range(-100f, 100f);
+        // State immediately before SpriteEmitter2's StartSpin FRangeVector
+        // draw. The shader consumes the verified L2 appRand sequence itself.
         L2ShaderHoldController.Settings holdSettings = BuildHoldSettings();
         float holdValue = _holdController.EvaluateHold(holdSettings, BuildCastTimeline(now));
 
@@ -328,6 +344,8 @@ public class ParticleSingle : EffectPart
             L2MaterialPropertyCopier.CopyLifetimeFadeAndFxFromShared(runtimeMat, sharedMat);
             runtimeMat.SetFloat(L2MaterialPropertyCopier.StartTimeId, shaderStartTime);
             runtimeMat.SetFloat(L2MaterialPropertyCopier.SeedId, seed);
+            L2MaterialPropertyCopier.SetSpriteSpinRandState(runtimeMat, _spriteSpinAppRandBaseState);
+            L2MaterialPropertyCopier.SetSpriteMotionRandState(runtimeMat, _spriteMotionAppRandBaseState);
             SetOwnerWorldPos(runtimeMat);
 
             if (SurfaceNormal != Vector3.zero)
@@ -355,7 +373,20 @@ public class ParticleSingle : EffectPart
                 _smoothShaderHoldRelease,
                 renderer,
                 runtimeMat);
+            if (L2FxQuadSizeDiagnostic.ShouldTrace(name, _owner, transform))
+            {
+                L2FxQuadSizeDiagnostic.Log(name, renderer, now, runtimeMat);
+            }
         }
+
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        DocExtractorParticleSnapshotLogger.OnParticleActivated(
+            this,
+            renderer,
+            now,
+            shaderStartTime,
+            seed);
+#endif
     }
 
     private Renderer ResolveRenderer()

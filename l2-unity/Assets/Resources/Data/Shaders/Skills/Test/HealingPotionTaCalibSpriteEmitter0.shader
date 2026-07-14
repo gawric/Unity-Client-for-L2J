@@ -5,7 +5,7 @@ Shader "L2/Effects/Calib/HealingPotionTaSpriteEmitter0"
     {
         _MainTex ("Texture", 2D) = "white" {}
 
-        _L2FxWorldCalibration ("World Calibration K", Float) = 2.17
+        _L2FxWorldCalibration ("World Calibration K", Float) = 1.4
         _SizeRange ("Start Size UU Min Max", Vector) = (3, 6, 0, 0)
 
         _TestSizeScaleAge ("SizeScale Age 0-1", Range(0, 1)) = 0.5
