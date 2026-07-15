@@ -76,9 +76,14 @@ public static class L2MaterialPropertyCopier
     public static readonly int StartVelocityRangeXUcId = Shader.PropertyToID("_StartVelocityRangeXUc");
     public static readonly int StartVelocityRangeYUcId = Shader.PropertyToID("_StartVelocityRangeYUc");
     public static readonly int StartVelocityRangeZUcId = Shader.PropertyToID("_StartVelocityRangeZUc");
+    public static readonly int L2MotionReplayEnabledId = Shader.PropertyToID("_L2MotionReplayEnabled");
+    public static readonly int SpawnDeltaTimeId = Shader.PropertyToID("_SpawnDeltaTime");
 
     private const uint AppRandMultiplier = 214013u;
     private const uint AppRandIncrement = 2531011u;
+    // SpawnParticleSnapshot.log: m_u004_b / SpriteEmitter0, emitter 15475F00, slot 0.
+    private const uint HealingPotionSe0ReplaySpawnState = 0x6FEC3FC2u;
+    private const float HealingPotionSe0ReplaySpawnDeltaTime = 0.0111764f;
     // m_u004_b / MeshEmitter3: captured L2 SpawnParticle trace shows 31
     // appRand draws from slot 0's state before Roll to slot 1's state before Roll.
     // This is emitter-specific, not a general StartSpin rule.
@@ -248,6 +253,30 @@ public static class L2MaterialPropertyCopier
                 SpriteMotionRandStateBitsId,
                 BitConverter.Int32BitsToSingle(unchecked((int)state)));
         }
+    }
+
+    /// <summary>
+    /// Opt-in diagnostic replay for the captured m_u004_b SpriteEmitter0 slot 0.
+    /// It is intentionally limited to slot 0 and does not alter normal gameplay
+    /// while _L2MotionReplayEnabled remains zero on the shared material.
+    /// </summary>
+    public static bool ApplyHealingPotionSe0MotionReplay(Material mat, int slotIndex)
+    {
+        if (mat == null || slotIndex != 0 ||
+            !mat.HasProperty(L2MotionReplayEnabledId) ||
+            mat.GetFloat(L2MotionReplayEnabledId) <= 0.5f)
+        {
+            return false;
+        }
+
+        SetSpriteMotionRandState(mat, HealingPotionSe0ReplaySpawnState);
+        SetSpriteSpinRandState(mat, AdvanceAppRandState(HealingPotionSe0ReplaySpawnState, 22));
+        if (mat.HasProperty(SpawnDeltaTimeId))
+        {
+            mat.SetFloat(SpawnDeltaTimeId, HealingPotionSe0ReplaySpawnDeltaTime);
+        }
+
+        return true;
     }
 
     public static uint ReadSpriteSpinRandState(Material mat)

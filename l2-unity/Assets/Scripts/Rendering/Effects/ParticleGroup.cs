@@ -114,6 +114,7 @@ public class ParticleGroup : EffectPart
     private bool _hasRuntimeContinuousLoopOverride;
     private bool _runtimeContinuousLoopOverrideValue;
     private uint _meshEmitter3AppRandBaseState;
+    private uint _spriteEmitterAppRandBaseState;
     private bool _debugFirstSpawnLogged;
     private int _icebergPlayCount;
     private int _icebergSlotOnCount;
@@ -518,6 +519,14 @@ public class ParticleGroup : EffectPart
             m.SetFloat(StartTimeShaderId, shaderStartTime);
             m.SetFloat(SeedShaderId, seed);
             ApplySpawnSpin(_particles[_particleIndex], seed);
+            uint spriteSpawnState = L2MaterialPropertyCopier.AdvanceAppRandState(
+                _spriteEmitterAppRandBaseState,
+                _particleIndex * 28);
+            L2MaterialPropertyCopier.SetSpriteMotionRandState(m, spriteSpawnState);
+            L2MaterialPropertyCopier.SetSpriteSpinRandState(
+                m,
+                L2MaterialPropertyCopier.AdvanceAppRandState(spriteSpawnState, 22));
+            L2MaterialPropertyCopier.ApplyHealingPotionSe0MotionReplay(m, _particleIndex);
             SetDynamicShaderWorldPositions(m);
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
@@ -628,6 +637,7 @@ public class ParticleGroup : EffectPart
         _particleIndex = 0;
         _spawnedCount = 0;
         _meshEmitter3AppRandBaseState = CreateMeshEmitter3AppRandBaseState();
+        _spriteEmitterAppRandBaseState = L2MaterialPropertyCopier.CreateFiniteAppRandState();
         _stopped = false;
         _spawnStopped = false;
         _burstSpawnFinished = false;

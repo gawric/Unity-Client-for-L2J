@@ -32,6 +32,14 @@
 //                       p(t) = (a/loss)*t + (v0 - a/loss)*(1 - exp(-loss*t))/loss
 //   VelocityLoss is per-axis (VelocityLossRange X,Y,Z); loss=0 -> ballistic fallback.
 //
+// IMPORTANT — this shader helper is continuous-time, whereas native L2 updates
+// particles discretely once per emitter tick (acceleration first, then location).
+// For m_u004_b / SpriteEmitter0 the spawn path also pre-applies acceleration over
+// SpawnDeltaTime before PTVD. Replaying the same L2 state therefore shows a small
+// vertical velocity offset (about Acceleration * SpawnDeltaTime) immediately after
+// spawn. Keep this helper for stable GPU motion; do not interpret that offset as
+// VelocityLoss/drag or add artificial damping to compensate.
+//
 // NOTE: this matches Common/L2FxMeshParticleMotion.hlsl :: L2Fx_DisplacementVelocityLossExp
 //   (same exponential model). The earlier linear "-0.5*loss*t*t" WithLoss form was WRONG
 //   and has been replaced by the exp WithDrag form below.

@@ -17,6 +17,9 @@ public static class DocExtractorParticleSnapshotLogger
 
     public const float SampleIntervalSec = 0.1f;
     private const int SpriteEmitterLogIndex = 0;
+    private const int SpriteEmitter0LogIndex = 2;
+    public const int SpriteEmitter0SlotToSlotDrawCount =
+        DocExtractorSpriteEmitter0MotionSimulator.SlotToSlotDrawCount;
     private const int UplineUcLayerIndex = 3;
     private const string UplineEffectName = "LineageEffect.e_u031_a";
     private const uint AppRandMultiplier = 214013u;
@@ -41,6 +44,15 @@ public static class DocExtractorParticleSnapshotLogger
             new Dictionary<int, MeshStartSpinSnapshot>();
         public readonly Dictionary<int, SpriteSpinSnapshot> PrevSpriteSpinBySlot =
             new Dictionary<int, SpriteSpinSnapshot>();
+        public readonly Dictionary<int, float> PrevSampleTimeBySlot = new Dictionary<int, float>();
+        public float Se0TickHorizMin = float.PositiveInfinity;
+        public float Se0TickHorizMax = float.NegativeInfinity;
+        public float Se0TickZMin = float.PositiveInfinity;
+        public float Se0TickZMax = float.NegativeInfinity;
+        public int Se0TickSampleCount;
+        public float Se0TickParticleTime;
+        public float Se0TickWorldK = 1.8f;
+        public bool Se0L2MotionReplayDiagnosticLogged;
     }
 
     private readonly struct SpriteSpinSnapshot
@@ -90,6 +102,7 @@ public static class DocExtractorParticleSnapshotLogger
         }
 
         bool isTargetLayer =
+            layerName.IndexOf("SpriteEmitter0", StringComparison.OrdinalIgnoreCase) >= 0 ||
             layerName.IndexOf("SpriteEmitter2", StringComparison.OrdinalIgnoreCase) >= 0 ||
             layerName.IndexOf("MeshEmitter3", StringComparison.OrdinalIgnoreCase) >= 0;
         if (!isTargetLayer)
@@ -150,6 +163,14 @@ public static class DocExtractorParticleSnapshotLogger
         session.PrevLocWorldUe.Clear();
         session.MeshEmitter3StartSpinBySlot.Clear();
         session.PrevSpriteSpinBySlot.Clear();
+        session.PrevSampleTimeBySlot.Clear();
+        session.Se0TickHorizMin = float.PositiveInfinity;
+        session.Se0TickHorizMax = float.NegativeInfinity;
+        session.Se0TickZMin = float.PositiveInfinity;
+        session.Se0TickZMax = float.NegativeInfinity;
+        session.Se0TickSampleCount = 0;
+        session.Se0TickParticleTime = 0f;
+        session.Se0L2MotionReplayDiagnosticLogged = false;
 
         L2Particle owner = group.OwnerParticle;
         Transform caster = group.FollowTarget != null
@@ -165,9 +186,7 @@ public static class DocExtractorParticleSnapshotLogger
 
         var body = new StringBuilder(512);
         body.AppendLine("================================================================================");
-        string emitterName = group.name.IndexOf("MeshEmitter3", StringComparison.OrdinalIgnoreCase) >= 0
-            ? "ParticleGroup/MeshEmitter3"
-            : "?";
+        string emitterName = ResolveHealingPotionEmitterName(group.name);
         body.AppendLine(
             "EFFECT SESSION aEmitter=" + aEmitterHex +
             " aEmitterName=" + emitterName + " effect=" + effectName + " spawnKind=self");
@@ -196,6 +215,7 @@ public static class DocExtractorParticleSnapshotLogger
         session.PrevLocWorldUe.Clear();
         session.MeshEmitter3StartSpinBySlot.Clear();
         session.PrevSpriteSpinBySlot.Clear();
+        session.PrevSampleTimeBySlot.Clear();
 
         Transform caster = single.transform;
         Vector3 emitterWorldUe = DocExtractorParticleMotionSimulator.UnityWorldToUe(single.transform.position);
@@ -265,6 +285,13 @@ public static class DocExtractorParticleSnapshotLogger
         }
 
         session.LastSampleTime = now;
+        session.Se0TickHorizMin = float.PositiveInfinity;
+        session.Se0TickHorizMax = float.NegativeInfinity;
+        session.Se0TickZMin = float.PositiveInfinity;
+        session.Se0TickZMax = float.NegativeInfinity;
+        session.Se0TickSampleCount = 0;
+        session.Se0TickParticleTime = 0f;
+        session.Se0TickWorldK = 1.8f;
         bool wroteAny = false;
         for (int slot = 0; slot < particles.Length; slot++)
         {
@@ -288,6 +315,11 @@ public static class DocExtractorParticleSnapshotLogger
         if (!wroteAny)
         {
             session.Open = false;
+        }
+        else if (group.name.IndexOf("SpriteEmitter0", StringComparison.OrdinalIgnoreCase) >= 0 &&
+                 session.Se0TickSampleCount > 0)
+        {
+            AppendSpriteEmitter0GroupSpreadSummary(session);
         }
     }
 
@@ -361,6 +393,7 @@ public static class DocExtractorParticleSnapshotLogger
         session.PrevLocWorldUe.Remove(slot);
         session.MeshEmitter3StartSpinBySlot.Remove(slot);
         session.PrevSpriteSpinBySlot.Remove(slot);
+        session.PrevSampleTimeBySlot.Remove(slot);
         session.MeshEmitter3PairVerifyLogged = false;
     }
 
@@ -769,6 +802,12 @@ public static class DocExtractorParticleSnapshotLogger
             return;
         }
 
+        if (DocExtractorSpriteEmitter0MotionSimulator.IsSpriteEmitter0Material(mat))
+        {
+            WriteSpriteEmitter0Sample(group, session, slot, renderer, mat, now, shaderStartTime, seed, force);
+            return;
+        }
+
         if (!DocExtractorParticleMotionSimulator.TryEvaluate(
                 group.transform,
                 mat,
@@ -931,6 +970,509 @@ public static class DocExtractorParticleSnapshotLogger
         session.PrevLocLocalUe[slot] = motion.LocLocalUe;
         session.PrevLocWorldUe[slot] = motion.LocWorldUe;
         Append(body.ToString() + Environment.NewLine);
+    }
+
+    private static void WriteSpriteEmitter0Sample(
+        ParticleGroup group,
+        GroupSession session,
+        int slot,
+        Renderer renderer,
+        Material mat,
+        float now,
+        float shaderStartTime,
+        float seed,
+        bool force)
+    {
+        if (!DocExtractorSpriteEmitter0MotionSimulator.TryEvaluate(
+                group.transform,
+                mat,
+                now,
+                shaderStartTime,
+                out DocExtractorSpriteEmitter0MotionSimulator.MotionSample motion))
+        {
+            return;
+        }
+
+        if (!force && motion.ParticleTime < 1e-4f)
+        {
+            return;
+        }
+
+        if (force)
+        {
+            AppendSpriteEmitter0SpawnVerification(session, slot, now, shaderStartTime, seed, motion.Spawn);
+            AppendSpriteEmitter0L2MotionReplayDiagnostic(
+                group.transform,
+                session,
+                slot,
+                mat,
+                shaderStartTime);
+            session.PrevLocLocalUe[slot] = motion.LocLocalUe;
+            session.PrevLocWorldUe[slot] = motion.LocWorldUe;
+            session.PrevSampleTimeBySlot[slot] = now;
+            if (motion.ParticleTime < 1e-4f)
+            {
+                return;
+            }
+        }
+
+        if (!session.PrevLocLocalUe.TryGetValue(slot, out Vector3 oldLocalUe))
+        {
+            oldLocalUe = motion.LocLocalUe;
+        }
+
+        if (!session.PrevLocWorldUe.TryGetValue(slot, out Vector3 oldWorldUe))
+        {
+            oldWorldUe = motion.LocWorldUe;
+        }
+
+        Vector3 rendererPivotWorldUe = renderer != null
+            ? DocExtractorParticleMotionSimulator.UnityWorldToUe(renderer.transform.position)
+            : motion.LocWorldUe;
+
+        float observedSpeedUePerSec = 0f;
+        float expectedSpeedUePerSec = motion.VelocityNowUe.magnitude;
+        float tickDeltaSec = 0f;
+        Vector3 deltaLocalUe = motion.LocLocalUe - oldLocalUe;
+        if (session.PrevSampleTimeBySlot.TryGetValue(slot, out float previousSampleTime))
+        {
+            tickDeltaSec = now - previousSampleTime;
+            if (tickDeltaSec > 1e-4f)
+            {
+                observedSpeedUePerSec = deltaLocalUe.magnitude / tickDeltaSec;
+            }
+        }
+
+        session.TickCounter += 1;
+        L2Particle owner = group.OwnerParticle;
+        Transform caster = group.FollowTarget != null
+            ? group.FollowTarget
+            : owner != null
+                ? owner.transform
+                : group.transform;
+
+        var body = new StringBuilder(1024);
+        body.AppendFormat(
+            CultureInfo.InvariantCulture,
+            "SpriteEmitter[{0}] Particle[{1}] Tick{2}{3}",
+            SpriteEmitter0LogIndex,
+            slot,
+            session.TickCounter,
+            Environment.NewLine);
+        body.AppendLine(
+            "  aEmitter=" + FormatPointer(group) +
+            " aEmitterName=ParticleGroup/SpriteEmitter0 effect=UnityEffect.it_healing_potion spawnKind=self");
+        body.AppendLine(
+            "  subEmitter=" + FormatPointer(renderer) +
+            " layerIndex=2 subLayerName=SpriteEmitter0");
+        body.AppendLine("  caster=" + FormatPointer(caster) + " sourceActor=" + FormatPointer(caster));
+        body.AppendFormat(
+            CultureInfo.InvariantCulture,
+            "  locLocal=({0:F3}, {1:F3}, {2:F3}){3}",
+            motion.LocLocalUe.x,
+            motion.LocLocalUe.y,
+            motion.LocLocalUe.z,
+            Environment.NewLine);
+        body.AppendFormat(
+            CultureInfo.InvariantCulture,
+            "  oldLocal=({0:F3}, {1:F3}, {2:F3}){3}",
+            oldLocalUe.x,
+            oldLocalUe.y,
+            oldLocalUe.z,
+            Environment.NewLine);
+        body.AppendFormat(
+            CultureInfo.InvariantCulture,
+            "  locWorld=({0:F2}, {1:F2}, {2:F2}){3}",
+            motion.LocWorldUe.x,
+            motion.LocWorldUe.y,
+            motion.LocWorldUe.z,
+            Environment.NewLine);
+        body.AppendFormat(
+            CultureInfo.InvariantCulture,
+            "  oldWorld=({0:F2}, {1:F2}, {2:F2}){3}",
+            oldWorldUe.x,
+            oldWorldUe.y,
+            oldWorldUe.z,
+            Environment.NewLine);
+        body.AppendFormat(
+            CultureInfo.InvariantCulture,
+            "  rendererPivotWorld=({0:F2}, {1:F2}, {2:F2}) note=Transform pivot only; SE0 visual center uses locWorld from shader{3}",
+            rendererPivotWorldUe.x,
+            rendererPivotWorldUe.y,
+            rendererPivotWorldUe.z,
+            Environment.NewLine);
+        body.AppendFormat(
+            CultureInfo.InvariantCulture,
+            "  deltaLocal=({0:F3}, {1:F3}, {2:F3}) deltaMag={3:F3}{4}",
+            deltaLocalUe.x,
+            deltaLocalUe.y,
+            deltaLocalUe.z,
+            deltaLocalUe.magnitude,
+            Environment.NewLine);
+        body.AppendFormat(
+            CultureInfo.InvariantCulture,
+            "  spawnPositionUU=({0:F3}, {1:F3}, {2:F3}) polarOffsetUU=({3:F3}, {4:F3}, {5:F3}){6}",
+            motion.Spawn.SpawnPositionUe.x,
+            motion.Spawn.SpawnPositionUe.y,
+            motion.Spawn.SpawnPositionUe.z,
+            motion.Spawn.PolarOffsetUe.x,
+            motion.Spawn.PolarOffsetUe.y,
+            motion.Spawn.PolarOffsetUe.z,
+            Environment.NewLine);
+        body.AppendFormat(
+            CultureInfo.InvariantCulture,
+            "  rawVelocityUU=({0:F3}, {1:F3}, {2:F3}) velocityBeforePtvdUU=({3:F3}, {4:F3}, {5:F3}){6}",
+            motion.Spawn.RawVelocityUe.x,
+            motion.Spawn.RawVelocityUe.y,
+            motion.Spawn.RawVelocityUe.z,
+            motion.Spawn.VelocityBeforePtvdUe.x,
+            motion.Spawn.VelocityBeforePtvdUe.y,
+            motion.Spawn.VelocityBeforePtvdUe.z,
+            Environment.NewLine);
+        body.AppendFormat(
+            CultureInfo.InvariantCulture,
+            "  ptvdDirectionUU=({0:F6}, {1:F6}, {2:F6}) velocityAfterPtvdUU=({3:F3}, {4:F3}, {5:F3}) velocityNowUU=({6:F3}, {7:F3}, {8:F3}){9}",
+            motion.Spawn.PtvdDirectionUe.x,
+            motion.Spawn.PtvdDirectionUe.y,
+            motion.Spawn.PtvdDirectionUe.z,
+            motion.Spawn.VelocityAfterPtvdUe.x,
+            motion.Spawn.VelocityAfterPtvdUe.y,
+            motion.Spawn.VelocityAfterPtvdUe.z,
+            motion.VelocityNowUe.x,
+            motion.VelocityNowUe.y,
+            motion.VelocityNowUe.z,
+            Environment.NewLine);
+        body.AppendFormat(
+            CultureInfo.InvariantCulture,
+            "  size=({0:F2}, {1:F2}, {2:F2}) spawnSizeUU={3:F4}{4}",
+            motion.SizeUe.x,
+            motion.SizeUe.y,
+            motion.SizeUe.z,
+            motion.Spawn.SpawnSizeUU,
+            Environment.NewLine);
+        body.AppendFormat(
+            CultureInfo.InvariantCulture,
+            "  particleTime={0:F4} maxLifetime={1:F4} lifeRemain={2:F4} lifeNorm={3:F4}{4}",
+            motion.ParticleTime,
+            motion.MaxLifetime,
+            motion.LifeRemain,
+            motion.AgeNorm,
+            Environment.NewLine);
+        body.AppendFormat(
+            CultureInfo.InvariantCulture,
+            "  motionTickDeltaSec={0:F4} observedSpeedUU={1:F3} expectedSpeedUU={2:F3} speedErrorUU={3:F3}{4}",
+            tickDeltaSec,
+            observedSpeedUePerSec,
+            expectedSpeedUePerSec,
+            observedSpeedUePerSec - expectedSpeedUePerSec,
+            Environment.NewLine);
+
+        float worldK = mat.HasProperty("_L2FxWorldCalibration") ? mat.GetFloat("_L2FxWorldCalibration") : 1.8f;
+        if (session.Se0TickSampleCount == 0)
+        {
+            session.Se0TickWorldK = worldK;
+        }
+
+        float horizRadiusUe = Mathf.Sqrt(
+            motion.LocLocalUe.x * motion.LocLocalUe.x +
+            motion.LocLocalUe.y * motion.LocLocalUe.y);
+        Vector3 dispFromSpawnVecUe = motion.LocLocalUe - motion.Spawn.SpawnPositionUe;
+        float dispFromSpawnUe = dispFromSpawnVecUe.magnitude;
+        Vector3 locMeters = DocExtractorSpriteEmitter0MotionSimulator.UcPositionToUnityMeters(
+            motion.LocLocalUe,
+            worldK);
+        float spawnHorizUe = Mathf.Sqrt(
+            motion.Spawn.SpawnPositionUe.x * motion.Spawn.SpawnPositionUe.x +
+            motion.Spawn.SpawnPositionUe.y * motion.Spawn.SpawnPositionUe.y);
+
+        session.Se0TickHorizMin = Mathf.Min(session.Se0TickHorizMin, horizRadiusUe);
+        session.Se0TickHorizMax = Mathf.Max(session.Se0TickHorizMax, horizRadiusUe);
+        session.Se0TickZMin = Mathf.Min(session.Se0TickZMin, motion.LocLocalUe.z);
+        session.Se0TickZMax = Mathf.Max(session.Se0TickZMax, motion.LocLocalUe.z);
+        session.Se0TickSampleCount += 1;
+        session.Se0TickParticleTime = motion.ParticleTime;
+
+        body.AppendFormat(
+            CultureInfo.InvariantCulture,
+            "  se0Spread horizRadiusUU={0:F3} spawnHorizUU={1:F3} heightUU={2:F3} dispFromSpawnUU={3:F3}{4}",
+            horizRadiusUe,
+            spawnHorizUe,
+            motion.LocLocalUe.z,
+            dispFromSpawnUe,
+            Environment.NewLine);
+        body.AppendFormat(
+            CultureInfo.InvariantCulture,
+            "  se0SpreadMeters loc=({0:F4}, {1:F4}, {2:F4}) worldK={3:F2} note=UU/52.5*K; compare with L2 locLocal in UU first{4}",
+            locMeters.x,
+            locMeters.y,
+            locMeters.z,
+            worldK,
+            Environment.NewLine);
+        body.AppendLine(
+            "  se0SpreadRef L2@t~0.057 horizRadiusUU=0.5..1.3 heightUU=6.9..9.9 spawnHorizUU~2.4 polarRadius");
+        body.AppendFormat(
+            CultureInfo.InvariantCulture,
+            "  appRandStateBeforeSpawn=0x{0:X8} shaderStartTime={1:F4} seed={2:F4}{3}",
+            motion.Spawn.AppRandStateBeforeSpawn,
+            shaderStartTime,
+            seed,
+            Environment.NewLine);
+        AppendSpriteEmitter2SpinSnapshot(
+            body,
+            session,
+            slot,
+            now,
+            shaderStartTime,
+            seed,
+            mat);
+        body.AppendFormat(
+            CultureInfo.InvariantCulture,
+            "  motionVerdict={0} note=compare locLocal/locWorld ticks with L2 ParticleSnapshot.log; speed check uses CPU mirror only{1}",
+            BuildSpriteEmitter0MotionVerdict(
+                motion.Spawn.AppRandStateBeforeSpawn,
+                motion.ParticleTime,
+                tickDeltaSec,
+                observedSpeedUePerSec - expectedSpeedUePerSec),
+            Environment.NewLine);
+
+        session.PrevLocLocalUe[slot] = motion.LocLocalUe;
+        session.PrevLocWorldUe[slot] = motion.LocWorldUe;
+        session.PrevSampleTimeBySlot[slot] = now;
+        Append(body.ToString());
+    }
+
+    private static void AppendSpriteEmitter0SpawnVerification(
+        GroupSession session,
+        int slot,
+        float now,
+        float shaderStartTime,
+        float seed,
+        DocExtractorSpriteEmitter0MotionSimulator.SpawnSnapshot spawn)
+    {
+        var body = new StringBuilder(768);
+        body.AppendFormat(
+            CultureInfo.InvariantCulture,
+            "SpawnParticleBegin Unity SpriteEmitter0 slot={0} spawnTime={1:F6} shaderStartTime={2:F6} seed={3:F6}{4}",
+            slot,
+            now,
+            shaderStartTime,
+            seed,
+            Environment.NewLine);
+        body.AppendFormat(
+            CultureInfo.InvariantCulture,
+            "  slotAdvanceDraws={0}{1}",
+            slot * SpriteEmitter0SlotToSlotDrawCount,
+            Environment.NewLine);
+        body.AppendFormat(
+            CultureInfo.InvariantCulture,
+            "  appRandStateBeforeSpawn=0x{0:X8}{1}",
+            spawn.AppRandStateBeforeSpawn,
+            Environment.NewLine);
+        body.AppendFormat(
+            CultureInfo.InvariantCulture,
+            "  rawVelocityUU=({0:F6}, {1:F6}, {2:F6}) polarOffsetUU=({3:F6}, {4:F6}, {5:F6}) spawnPositionUU=({6:F6}, {7:F6}, {8:F6}){9}",
+            spawn.RawVelocityUe.x,
+            spawn.RawVelocityUe.y,
+            spawn.RawVelocityUe.z,
+            spawn.PolarOffsetUe.x,
+            spawn.PolarOffsetUe.y,
+            spawn.PolarOffsetUe.z,
+            spawn.SpawnPositionUe.x,
+            spawn.SpawnPositionUe.y,
+            spawn.SpawnPositionUe.z,
+            Environment.NewLine);
+        body.AppendFormat(
+            CultureInfo.InvariantCulture,
+            "  velocityBeforePtvdUU=({0:F6}, {1:F6}, {2:F6}) ptvdDirectionUU=({3:F6}, {4:F6}, {5:F6}) velocityAfterPtvdUU=({6:F6}, {7:F6}, {8:F6}){9}",
+            spawn.VelocityBeforePtvdUe.x,
+            spawn.VelocityBeforePtvdUe.y,
+            spawn.VelocityBeforePtvdUe.z,
+            spawn.PtvdDirectionUe.x,
+            spawn.PtvdDirectionUe.y,
+            spawn.PtvdDirectionUe.z,
+            spawn.VelocityAfterPtvdUe.x,
+            spawn.VelocityAfterPtvdUe.y,
+            spawn.VelocityAfterPtvdUe.z,
+            Environment.NewLine);
+        body.AppendFormat(
+            CultureInfo.InvariantCulture,
+            "  lifetimeSec={0:F6} spawnSizeUU={1:F6}{2}",
+            spawn.LifetimeSeconds,
+            spawn.SpawnSizeUU,
+            Environment.NewLine);
+        body.AppendFormat(
+            CultureInfo.InvariantCulture,
+            "  spawnMotionVerdict={0}{1}",
+            BuildSpriteEmitter0SpawnVerdict(spawn),
+            Environment.NewLine);
+        body.AppendLine("SpawnParticleEnd Unity SpriteEmitter0 slot=" + slot);
+        Append(body.ToString());
+    }
+
+    private static string BuildSpriteEmitter0SpawnVerdict(
+        DocExtractorSpriteEmitter0MotionSimulator.SpawnSnapshot spawn)
+    {
+        if (spawn.AppRandStateBeforeSpawn == 0u)
+        {
+            return "FAIL missing-appRand-state — slots will share spawn values";
+        }
+
+        if (spawn.SpawnPositionUe.sqrMagnitude < 1e-4f)
+        {
+            return "WARN zero-spawn-position — polar offset may be missing";
+        }
+
+        if (spawn.VelocityAfterPtvdUe.sqrMagnitude < 1e-4f)
+        {
+            return "WARN zero-velocity-after-PTVD — check direction/velocity ranges";
+        }
+
+        return "PASS spawn-ready";
+    }
+
+    private static string BuildSpriteEmitter0MotionVerdict(
+        uint appRandState,
+        float particleTime,
+        float tickDeltaSec,
+        float speedErrorUe)
+    {
+        if (appRandState == 0u)
+        {
+            return "FAIL missing-appRand-state";
+        }
+
+        if (particleTime < 1e-4f || tickDeltaSec < 1e-4f)
+        {
+            return "PASS spawn-sample (speed check pending)";
+        }
+
+        float absSpeedError = Mathf.Abs(speedErrorUe);
+        if (absSpeedError > 5f)
+        {
+            return "FAIL locLocal-speed-mismatch";
+        }
+
+        if (absSpeedError > 2f)
+        {
+            return "WARN locLocal-speed-drift";
+        }
+
+        return "PASS locLocal-motion-aligned";
+    }
+
+    private static void AppendSpriteEmitter0L2MotionReplayDiagnostic(
+        Transform groupTransform,
+        GroupSession session,
+        int slot,
+        Material mat,
+        float shaderStartTime)
+    {
+        const string replayProperty = "_L2MotionReplayEnabled";
+        if (slot != 0 || session.Se0L2MotionReplayDiagnosticLogged ||
+            mat == null || !mat.HasProperty(replayProperty) ||
+            mat.GetFloat(replayProperty) <= 0.5f)
+        {
+            return;
+        }
+
+        // Captured from L2 SpawnParticleSnapshot.log / ParticleSnapshot.log:
+        // m_u004_b, SpriteEmitter8 (15475F00), slot 0, 2026-07-15.
+        var body = new StringBuilder(1024);
+        body.AppendLine("Se0L2MotionReplayDiagnostic");
+        body.AppendLine(
+            "  source=L2 m_u004_b SpriteEmitter8 slot=0 state=0x6FEC3FC2 spawnDt=0.0111764");
+        body.AppendLine(
+            "  mode=current Unity continuous displacement; compare against L2 discrete tick positions");
+
+        float[] ages = { 0.0111764f, 0.0574f, 0.0704f };
+        Vector3[] l2Locations =
+        {
+            new Vector3(1.947048783f, 0.304097384f, 8.153479576f),
+            new Vector3(1.245f, 0.194f, 8.394f),
+            new Vector3(1.048f, 0.164f, 8.446f),
+        };
+        float[] l2VelocityZ = { 6.437448978f, 4.589f, 4.070f };
+
+        for (int i = 0; i < ages.Length; i++)
+        {
+            float replayNow = shaderStartTime + ages[i];
+            if (!DocExtractorSpriteEmitter0MotionSimulator.TryEvaluate(
+                    groupTransform,
+                    mat,
+                    replayNow,
+                    shaderStartTime,
+                    out DocExtractorSpriteEmitter0MotionSimulator.MotionSample replay))
+            {
+                body.AppendLine("  result=FAIL unable-to-evaluate-replay");
+                break;
+            }
+
+            Vector3 delta = replay.LocLocalUe - l2Locations[i];
+            body.AppendFormat(
+                CultureInfo.InvariantCulture,
+                "  age={0:F7}s unityLoc=({1:F6},{2:F6},{3:F6}) l2Loc=({4:F6},{5:F6},{6:F6}) locErrorUU={7:F6} unityVz={8:F6} l2Vz={9:F6}{10}",
+                ages[i],
+                replay.LocLocalUe.x,
+                replay.LocLocalUe.y,
+                replay.LocLocalUe.z,
+                l2Locations[i].x,
+                l2Locations[i].y,
+                l2Locations[i].z,
+                delta.magnitude,
+                replay.VelocityNowUe.z,
+                l2VelocityZ[i],
+                Environment.NewLine);
+        }
+
+        body.AppendLine(
+            "  interpretation=loc error is the continuous-vs-discrete integration delta; velocity Z should remain near L2.");
+        Append(body.ToString());
+        session.Se0L2MotionReplayDiagnosticLogged = true;
+    }
+
+    private static void AppendSpriteEmitter0GroupSpreadSummary(GroupSession session)
+    {
+        float horizSpanUe = session.Se0TickHorizMax - session.Se0TickHorizMin;
+        float heightSpanUe = session.Se0TickZMax - session.Se0TickZMin;
+        float horizSpanM = horizSpanUe / 52.5f * session.Se0TickWorldK;
+        float heightSpanM = heightSpanUe / 52.5f * session.Se0TickWorldK;
+        float zCenterM = ((session.Se0TickZMin + session.Se0TickZMax) * 0.5f) / 52.5f * session.Se0TickWorldK;
+
+        var body = new StringBuilder(512);
+        body.AppendLine("Se0GroupSpreadSummary");
+        body.AppendFormat(
+            CultureInfo.InvariantCulture,
+            "  activeSlots={0} particleTime~={1:F4}s worldK={2:F2}{3}",
+            session.Se0TickSampleCount,
+            session.Se0TickParticleTime,
+            session.Se0TickWorldK,
+            Environment.NewLine);
+        body.AppendFormat(
+            CultureInfo.InvariantCulture,
+            "  horizRadiusUU=[{0:F3},{1:F3}] span={2:F3} heightUU=[{3:F3},{4:F3}] span={5:F3}{6}",
+            session.Se0TickHorizMin,
+            session.Se0TickHorizMax,
+            horizSpanUe,
+            session.Se0TickZMin,
+            session.Se0TickZMax,
+            heightSpanUe,
+            Environment.NewLine);
+        body.AppendFormat(
+            CultureInfo.InvariantCulture,
+            "  horizSpanM={0:F4} heightSpanM={1:F4} heightCenterM={2:F4}{3}",
+            horizSpanM,
+            heightSpanM,
+            zCenterM,
+            Environment.NewLine);
+        body.AppendFormat(
+            CultureInfo.InvariantCulture,
+            "  l2Ref@t~0.057 horizSpanUU~0.8 heightSpanUU~3.0 horizSpanM~{0:F4}@K={1:F2}{2}",
+            0.8f / 52.5f * session.Se0TickWorldK,
+            session.Se0TickWorldK,
+            Environment.NewLine);
+        body.AppendLine(
+            "  spreadVerdict=compare horizSpanUU first; if Unity>>L2 in UU then formula/RNG, if UU~match but looks wide then K or sprite size");
+        Append(body.ToString());
     }
 
     private static void WriteMeshEmitter3Sample(
@@ -1345,6 +1887,31 @@ public static class DocExtractorParticleSnapshotLogger
         }
 
         return session;
+    }
+
+    private static string ResolveHealingPotionEmitterName(string groupName)
+    {
+        if (string.IsNullOrEmpty(groupName))
+        {
+            return "?";
+        }
+
+        if (groupName.IndexOf("SpriteEmitter0", StringComparison.OrdinalIgnoreCase) >= 0)
+        {
+            return "ParticleGroup/SpriteEmitter0";
+        }
+
+        if (groupName.IndexOf("MeshEmitter3", StringComparison.OrdinalIgnoreCase) >= 0)
+        {
+            return "ParticleGroup/MeshEmitter3";
+        }
+
+        if (groupName.IndexOf("SpriteEmitter2", StringComparison.OrdinalIgnoreCase) >= 0)
+        {
+            return "ParticleGroup/SpriteEmitter2";
+        }
+
+        return "?";
     }
 
     private static string ResolveEffectName(L2Particle owner)

@@ -676,39 +676,19 @@ AI should not try to put these into random material floats unless the shader has
 
 ---
 
-## 7. Unity editor automation
+## 7. Unity editor workflow
 
-A conservative editor script was added at:
+There is no bulk `.uc` → material auto-mapper in the project anymore. The old
+`L2UcMaterialAutoMapper` menu path was removed because it only copied a subset
+of UC fields and produced misleading first-pass results.
 
-`Assets/Editor/L2UcMaterialAutoMapper.cs`
+For new effects, port manually:
 
-Usage:
-
-1. In Unity Project window select one `.uc` file.
-2. Select one or more `.mat` files from the same effect folder.
-3. Run menu:
-
-```text
-Tools/L2 Effects/Apply selected UC to selected Materials
-```
-
-The script:
-
-- matches materials to `.uc` emitters by name
-- supports `_Left`, `_Right`, `_1`, `_2` suffix fallbacks
-- writes only properties that exist on the material shader
-- supports Undo
-- saves assets
-- logs matched materials and property write counts to Console
-
-The script intentionally does not:
-
-- assign textures from `Texture'Package.Name'`
-- change shader assignment
-- change prefabs, meshes, particle counts, spawn rates or C# settings
-- overwrite unsupported shader features
-
-This makes it safe as a first-pass mapper, not a final visual replacement for manual review.
+1. Read the target `.uc` emitter block completely.
+2. Create or reuse a dedicated calib shader/material per emitter.
+3. Copy raw UC values into material fields by hand.
+4. Wire runtime through `L2MaterialPropertyCopier` / `ParticleGroup` where needed.
+5. Validate in Play mode and against L2 logs when parity matters.
 
 ---
 
