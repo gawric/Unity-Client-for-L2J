@@ -1,26 +1,34 @@
 #ifndef L2_FX_MESH_COLOR_FADE_INCLUDED
 #define L2_FX_MESH_COLOR_FADE_INCLUDED
 
-// UMeshEmitter runtime ColorScale + FadeOut.
+// UMeshEmitter runtime ColorScale + FadeIn/FadeOut + Opacity.
 //
-// CONFIRMED for LineageEffect.m_u004_b_2 / MeshEmitter6:
-// decompile control flow, live L2 particle memory, and the Unity CPU mirror
-// agree at matched lifeNorm samples. Example:
-//   L2   lifeNorm=0.8933 size=0.3372 runtimeColorA8=(0,0,0,27)
-//   Unity lifeNorm=0.8924 size=0.3371 runtimeColorA8=(0,0,0,27)
+// CONFIRMED (FadeOut / ColorScale / ColorMultiplier):
+//   LineageEffect.m_u004_b_2 / MeshEmitter6 — decompile + live memory + Unity mirror.
+//   Example: L2 lifeNorm=0.8933 runtimeColorA8=(0,0,0,27) matches Unity.
 //
-// Verified behavior for that emitter:
-//   - ColorScale is sampled linearly by normalized particle lifetime.
-//   - ColorScaleRepeats uses phase = frac((repeats + 1) * lifeNorm).
-//   - ColorMultiplier is applied to RGB.
-//   - FadeOut subtracts the same normalized fade value from RGB and alpha.
-//   - With FadeOut=True and omitted FadeOutStartTime, start time is 0:
-//       runtimeColorA8.A = floor(255 * (1 - lifeNorm)).
+// CONFIRMED (FadeIn + Opacity, 2026-07-17):
+//   it_healing_potion_ta MeshEmitter needlelight + Wave UpdateParticles logs.
+//   - FadeIn: age < FadeInEnd -> subtract (FadeInEnd - age) / FadeInEnd from RGBA
+//   - FadeOut: age > FadeOutStart -> subtract (age - start) / (life - start) from RGBA
+//   - Both subtractive, same as Sprite (L2FxSpriteColorFade_Apply)
+//   - Opacity (.uc) multiplies RGB ONLY after fades; runtimeColorA8.A is NOT scaled
+//   - Wave Opacity=0.5: t=0.0482 -> BGRA(51,73,102,204); post-FadeIn -> (76,98,127,255)
+//   - needlelight FadeInEnd=0.03 / FadeOutStart=0.28: Tick1/58 byte-exact match
 //
-// This is byte-validated for the configuration above, not a claim that every
-// MeshEmitter variant shares identical FadeIn, alpha-mode, or blend behavior.
-// The engine quantizes channels to bytes after its arithmetic. Unity rendering
-// should retain floats; use L2Fx_MeshColorFade_ToByte only for hook comparisons.
+// Pipeline:
+//   ColorScale * ColorMultiplier
+//   -> FadeIn / FadeOut (subtractive on all channels)
+//   -> max(0)
+//   -> RGB *= Opacity
+//   -> floor(*255) for hook compare (L2Fx_MeshColorFade_ToByte)
+//
+// Unity rendering should retain floats; ToByte is for live hook comparisons only.
+//
+// After this facade (Linear project + atlas sRGB OFF), particle ColorMul midtones
+// can look too bright — optional L2FxSpriteColorGammaLinear.hlsl on the material
+// toggle _L2SpriteColorGammaToLinear. Verified Wave + needlelight 2026-07-19.
+// Do not bake that into this file (fade/A8 must stay engine-accurate).
 
 #include "../L2FxEmitterSpawn.hlsl"
 
@@ -55,6 +63,47 @@ void L2Fx_MeshColorFade_BuildKeys6(
     colors[5] = color5;
 }
 
+// Full mesh path: FadeIn + FadeOut + Opacity (RGB only).
+float4 L2Fx_MeshColorFade_Apply(
+    float4 colorScale,
+    float3 colorMultiplier,
+    float ageSeconds,
+    float lifetimeSeconds,
+    float fadeIn,
+    float fadeInEndTime,
+    float fadeOut,
+    float fadeOutStartTime,
+    float opacity)
+{
+    float4 color = float4(colorScale.rgb * colorMultiplier, colorScale.a);
+    float lifetime = max(lifetimeSeconds, 1e-4);
+
+    // Fade-in: particle rises from black over [0, FadeInEndTime].
+    if (fadeIn >= 0.5 && fadeInEndTime > 0.0 && ageSeconds < fadeInEndTime)
+    {
+        float fi = (fadeInEndTime - ageSeconds) / max(1e-4, fadeInEndTime);
+        color -= saturate(fi);
+    }
+
+    // Fade-out: particle sinks to black over [FadeOutStart, lifetime].
+    if (fadeOut >= 0.5)
+    {
+        float start = clamp(fadeOutStartTime, 0.0, lifetime);
+        if (ageSeconds > start)
+        {
+            float fo = (ageSeconds - start) / max(1e-4, lifetime - start);
+            color -= saturate(fo);
+        }
+    }
+
+    color = max(color, 0.0);
+
+    // CONFIRMED: Opacity scales source RGB only; A stays post-fade.
+    color.rgb *= saturate(opacity);
+    return color;
+}
+
+// Backward-compatible FadeOut-only path (no FadeIn, Opacity=1).
 float4 L2Fx_MeshColorFade_Apply(
     float4 colorScale,
     float3 colorMultiplier,
@@ -63,20 +112,16 @@ float4 L2Fx_MeshColorFade_Apply(
     float fadeOut,
     float fadeOutStartTime)
 {
-    float4 color = float4(colorScale.rgb * colorMultiplier, colorScale.a);
-    if (fadeOut < 0.5)
-    {
-        return saturate(color);
-    }
-
-    float lifetime = max(lifetimeSeconds, 1e-4);
-    float start = clamp(fadeOutStartTime, 0.0, lifetime);
-    float fade = ageSeconds > start
-        ? saturate((ageSeconds - start) / max(lifetime - start, 1e-4))
-        : 0.0;
-
-    // UE applies the fade subtractively to every runtime BGRA channel.
-    return max(color - fade.xxxx, 0.0);
+    return L2Fx_MeshColorFade_Apply(
+        colorScale,
+        colorMultiplier,
+        ageSeconds,
+        lifetimeSeconds,
+        0.0,
+        0.0,
+        fadeOut,
+        fadeOutStartTime,
+        1.0);
 }
 
 float4 L2Fx_MeshColorFade_FullKeys6(
@@ -84,8 +129,11 @@ float4 L2Fx_MeshColorFade_FullKeys6(
     float lifetimeSeconds,
     float colorScaleRepeats,
     float3 colorMultiplier,
+    float fadeIn,
+    float fadeInEndTime,
     float fadeOut,
     float fadeOutStartTime,
+    float opacity,
     float4 color0,
     float time1, float4 color1,
     float time2, float4 color2,
@@ -118,8 +166,44 @@ float4 L2Fx_MeshColorFade_FullKeys6(
         colorMultiplier,
         ageSeconds,
         lifetimeSeconds,
+        fadeIn,
+        fadeInEndTime,
         fadeOut,
-        fadeOutStartTime);
+        fadeOutStartTime,
+        opacity);
+}
+
+// Backward-compatible FullKeys6 (no FadeIn, Opacity=1).
+float4 L2Fx_MeshColorFade_FullKeys6(
+    float ageSeconds,
+    float lifetimeSeconds,
+    float colorScaleRepeats,
+    float3 colorMultiplier,
+    float fadeOut,
+    float fadeOutStartTime,
+    float4 color0,
+    float time1, float4 color1,
+    float time2, float4 color2,
+    float time3, float4 color3,
+    float time4, float4 color4,
+    float time5, float4 color5)
+{
+    return L2Fx_MeshColorFade_FullKeys6(
+        ageSeconds,
+        lifetimeSeconds,
+        colorScaleRepeats,
+        colorMultiplier,
+        0.0,
+        0.0,
+        fadeOut,
+        fadeOutStartTime,
+        1.0,
+        color0,
+        time1, color1,
+        time2, color2,
+        time3, color3,
+        time4, color4,
+        time5, color5);
 }
 
 uint4 L2Fx_MeshColorFade_ToByte(float4 color)

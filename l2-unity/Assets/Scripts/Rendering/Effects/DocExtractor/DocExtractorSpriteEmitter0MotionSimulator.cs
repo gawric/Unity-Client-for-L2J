@@ -61,9 +61,23 @@ public static class DocExtractorSpriteEmitter0MotionSimulator
         public Vector3 DisplacementUe;
     }
 
+    private static readonly int ColorMulMinId = Shader.PropertyToID("_ColorMulMin");
+
     public static bool IsSpriteEmitter0Material(Material mat)
     {
-        return mat != null && mat.HasProperty(SpriteMotionRandStateBitsId);
+        // SE0 calib has StartLocationOffsetUU; kirakira SE7 shares _SpriteMotionRandStateBits
+        // but must not take this path (wrong labels, no ColorScale A8 log).
+        return mat != null &&
+               mat.HasProperty(SpriteMotionRandStateBitsId) &&
+               mat.HasProperty(StartLocationOffsetUuId);
+    }
+
+    public static bool IsKirakiraSpriteEmitter7Material(Material mat)
+    {
+        return mat != null &&
+               mat.HasProperty(SpriteMotionRandStateBitsId) &&
+               mat.HasProperty(ColorMulMinId) &&
+               !mat.HasProperty(StartLocationOffsetUuId);
     }
 
     public static bool TryEvaluate(
@@ -74,7 +88,8 @@ public static class DocExtractorSpriteEmitter0MotionSimulator
         out MotionSample sample)
     {
         sample = default;
-        if (groupTransform == null || !IsSpriteEmitter0Material(mat))
+        if (groupTransform == null ||
+            (!IsSpriteEmitter0Material(mat) && !IsKirakiraSpriteEmitter7Material(mat)))
         {
             return false;
         }
@@ -94,17 +109,18 @@ public static class DocExtractorSpriteEmitter0MotionSimulator
         SpawnSnapshot spawn = EvaluateSpawn(mat, state);
         float ageSeconds = Mathf.Max(0f, now - startTime);
         float ageNorm = Mathf.Clamp01(ageSeconds / Mathf.Max(1e-4f, spawn.LifetimeSeconds));
-        float sizeMul = EvaluateDynamicSizeScale(
-            ageNorm,
-            mat.GetFloat(SizeScaleRepeatsId),
-            mat.GetVector(SizeKey0Id),
-            mat.GetVector(SizeKey1Id),
-            mat.GetVector(SizeKey2Id),
-            mat.GetVector(SizeKey3Id),
-            mat.GetVector(SizeKey4Id));
+        float repeats = mat.HasProperty(SizeScaleRepeatsId) ? mat.GetFloat(SizeScaleRepeatsId) : 0f;
+        Vector4 key0 = ReadSizeKey(mat, SizeKey0Id, new Vector4(0f, 1f, 0f, 0f));
+        Vector4 key1 = ReadSizeKey(mat, SizeKey1Id, key0);
+        Vector4 key2 = ReadSizeKey(mat, SizeKey2Id, key1);
+        Vector4 key3 = ReadSizeKey(mat, SizeKey3Id, new Vector4(1f, key2.y, 0f, 0f));
+        Vector4 key4 = ReadSizeKey(mat, SizeKey4Id, key3);
+        float sizeMul = EvaluateDynamicSizeScale(ageNorm, repeats, key0, key1, key2, key3, key4);
         float sizeUU = spawn.SpawnSizeUU * sizeMul;
 
-        Vector3 accelerationUe = ToVector3(mat.GetVector(AccelerationUcId));
+        Vector3 accelerationUe = mat.HasProperty(AccelerationUcId)
+            ? ToVector3(mat.GetVector(AccelerationUcId))
+            : Vector3.zero;
         sample.Spawn = spawn;
         sample.DisplacementUe = DisplacementUe(spawn.VelocityAfterPtvdUe, accelerationUe, ageSeconds);
         sample.LocLocalUe = spawn.SpawnPositionUe + sample.DisplacementUe;
@@ -152,9 +168,13 @@ public static class DocExtractorSpriteEmitter0MotionSimulator
         AppRand(ref state);
         AppRand(ref state);
 
-        Vector3 offsetUe = ToVector3(mat.GetVector(StartLocationOffsetUuId));
+        Vector3 offsetUe = mat.HasProperty(StartLocationOffsetUuId)
+            ? ToVector3(mat.GetVector(StartLocationOffsetUuId))
+            : Vector3.zero;
         Vector3 spawnPositionUe = offsetUe + polarUe;
-        Vector3 accelerationUe = ToVector3(mat.GetVector(AccelerationUcId));
+        Vector3 accelerationUe = mat.HasProperty(AccelerationUcId)
+            ? ToVector3(mat.GetVector(AccelerationUcId))
+            : Vector3.zero;
         float spawnDeltaTime = mat.HasProperty(SpawnDeltaTimeId) ? mat.GetFloat(SpawnDeltaTimeId) : 0.012f;
         Vector3 velocityBeforePtvdUe = rawVelocityUe + accelerationUe * spawnDeltaTime;
 
@@ -214,6 +234,11 @@ public static class DocExtractorSpriteEmitter0MotionSimulator
     private static Vector3 UcPositionToUnityMetersInternal(Vector3 uePositionUu, float worldCalibK)
     {
         return UcPositionToUnityMeters(uePositionUu, worldCalibK);
+    }
+
+    private static Vector4 ReadSizeKey(Material mat, int propertyId, Vector4 fallback)
+    {
+        return mat != null && mat.HasProperty(propertyId) ? mat.GetVector(propertyId) : fallback;
     }
 
     private static float EvaluateDynamicSizeScale(

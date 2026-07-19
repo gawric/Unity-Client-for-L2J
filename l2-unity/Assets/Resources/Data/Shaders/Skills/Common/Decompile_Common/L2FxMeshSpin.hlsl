@@ -14,8 +14,8 @@
 //   in [0, 65535], and all spin velocities are zero. This path is confirmed.
 // - LineageEffect.m_u008_b_2 / MeshEmitter6:
 //   StartSpinRange.X=0.255 -> Yaw=16711.4238 (=0.255*65535);
-//   SpinsPerSecondRange.X=0.1 -> Yaw speed=+6553.5 (=0.1*65535).
-//   Thus UC X maps to runtime Yaw and SpinCCWorCW.X=0 yields a positive rate.
+//   SpinsPerSecondRange.X=0.1 -> Yaw speed magnitude 0.1*65535.
+//   UC X maps to runtime slot c0 / Yaw. SpinCCWorCW sign: see pending notes.
 //
 // Exact StartSpin RNG path (verified 2026-07-13):
 // - UParticleEmitter::SpawnParticle calls FRangeVector::GetRand;
@@ -25,9 +25,12 @@
 // - FRange::GetRand is Max + appFrand() * (Min - Max).
 //
 // Still pending before declaring every mesh setting universal:
-// - SpinCCWorCW axis value 1 direction;
-// - UC Y/Z -> runtime Pitch/Roll mapping;
-// - replaying the full CRT TLS stream before every emitter spawn.
+// - SpinCCWorCW per-slot ± when UC omits the property (Wave live shows both);
+// - Non-uniform StartSize (thin Z) + Unity-remapped mesh: Wave looks flat with
+//   S only, but tips with R — fix inside this library / basis conjugation, do
+//   not bypass with yaw-only helpers in effect shaders.
+// - L2FxPTRS_Actor is for UseRotationFrom=PTRS_Actor WorldMat (owner TRS), not
+//   a substitute for this spin module.
 
 #include "../L2FxEmitterSpawn.hlsl"
 #include "L2FxAppRand.hlsl"
@@ -71,7 +74,8 @@ float3 L2Fx_MeshSpin_StartYawPitchRollUruFromAppRandState(
 }
 
 // Inputs are already in runtime order (Yaw, Pitch, Roll). directionSign must
-// be derived from verified SpinCCWorCW semantics; +1 is confirmed for UC X=0.
+// be derived from SpinCCWorCW: L2Fx_ApplySpinCCWorCW_Scalar uses
+// (ccw==0 ? -1 : +1). Wave live spinRate is often -19660.5 when UC omits CCW.
 float3 L2Fx_MeshSpin_VelocityYawPitchRollUruPerSecond(
     float3 spinsPerSecond,
     float3 directionSign)

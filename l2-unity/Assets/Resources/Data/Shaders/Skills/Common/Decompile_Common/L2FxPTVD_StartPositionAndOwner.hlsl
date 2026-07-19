@@ -4,6 +4,8 @@
 // L2FxPTVD_StartPositionAndOwner
 //
 // Status: VERIFIED ON LIVE CLIENT DATA (m_u004_b / SpriteEmitter0).
+// UC enum: GetVelocityDirectionFrom=PTVD_StartPositionAndOwner (mode 1).
+// Sibling mode 2 is L2FxPTVD_OwnerAndStartPosition (no negate) — do not swap.
 //
 // SpawnParticleSnapshot captures confirmed, with 0.0 validation error:
 //   velocityBeforePtvd = rawVelocity + acceleration * spawnDeltaTime

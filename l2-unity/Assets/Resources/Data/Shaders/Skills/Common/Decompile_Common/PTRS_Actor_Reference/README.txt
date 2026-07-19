@@ -83,6 +83,11 @@ Do not directly feed the UE row-vector matrix to a Unity column-vector
 mul(matrix, vector) call. Either use L2FxPTRSActor_TransformPositionUnity or
 transpose/conjugate the matrix deliberately.
 
+When the Unity GameObject already applies owner TRS (TransformObjectToWorld),
+use L2FxPTRSActor_TransformLocalMeshUnity for the S(FinalSize)*R(Spin) piece
+only. finalSizeUe must remain UE-ordered (X,Y,Z); never pre-swap thin Z onto
+Unity Y before building R.
+
 Live validation evidence
 ------------------------
 Capture method:

@@ -53,6 +53,12 @@ public static class DocExtractorParticleSnapshotLogger
         public float Se0TickParticleTime;
         public float Se0TickWorldK = 1.8f;
         public bool Se0L2MotionReplayDiagnosticLogged;
+        public bool WaveAxisDiagLogged;
+        public int WaveBurstIndex;
+        public int WaveSpawnSlotsThisBurst;
+        public readonly List<float> WaveBurstLocZ = new List<float>(5);
+        public readonly List<float> WaveBurstVelZ = new List<float>(5);
+        public readonly List<string> WaveBurstGapSummaries = new List<string>(10);
     }
 
     private readonly struct SpriteSpinSnapshot
@@ -104,6 +110,8 @@ public static class DocExtractorParticleSnapshotLogger
         bool isTargetLayer =
             layerName.IndexOf("SpriteEmitter0", StringComparison.OrdinalIgnoreCase) >= 0 ||
             layerName.IndexOf("SpriteEmitter2", StringComparison.OrdinalIgnoreCase) >= 0 ||
+            layerName.IndexOf("SpriteEmitter7", StringComparison.OrdinalIgnoreCase) >= 0 ||
+            layerName.IndexOf("MeshEmitter0", StringComparison.OrdinalIgnoreCase) >= 0 ||
             layerName.IndexOf("MeshEmitter3", StringComparison.OrdinalIgnoreCase) >= 0;
         if (!isTargetLayer)
         {
@@ -171,6 +179,11 @@ public static class DocExtractorParticleSnapshotLogger
         session.Se0TickSampleCount = 0;
         session.Se0TickParticleTime = 0f;
         session.Se0L2MotionReplayDiagnosticLogged = false;
+        session.WaveAxisDiagLogged = false;
+        session.WaveBurstIndex += 1;
+        session.WaveSpawnSlotsThisBurst = 0;
+        session.WaveBurstLocZ.Clear();
+        session.WaveBurstVelZ.Clear();
 
         L2Particle owner = group.OwnerParticle;
         Transform caster = group.FollowTarget != null
@@ -796,9 +809,23 @@ public static class DocExtractorParticleSnapshotLogger
             return;
         }
 
+        if (mat.HasProperty("_StartSizeXY") && mat.HasProperty("_StartVelocityZRangeUU"))
+        {
+            WriteMeshEmitter0WaveSample(
+                group, session, slot, renderer, mat, now, shaderStartTime, seed, isSpawnEvent: force);
+            return;
+        }
+
         if (mat.HasProperty("_StartSize"))
         {
             WriteMeshEmitter3Sample(group, session, slot, renderer, mat, now, shaderStartTime, seed, isSpawnEvent: force);
+            return;
+        }
+
+        // Kirakira SE7 shares appRand props with SE0 calib but needs ColorScale A8 logging.
+        if (IsHealingPotionSpriteEmitter7(group, mat))
+        {
+            WriteSpriteEmitter7KirakiraSample(group, session, slot, renderer, mat, now, shaderStartTime, seed, force);
             return;
         }
 
@@ -846,12 +873,18 @@ public static class DocExtractorParticleSnapshotLogger
         string aEmitterHex = FormatPointer(group);
         string subEmitterHex = FormatPointer(group);
         string effectName = ResolveEffectName(owner);
+        bool isKirakiraSe7 =
+            !string.IsNullOrEmpty(group.name) &&
+            group.name.IndexOf("SpriteEmitter7", StringComparison.OrdinalIgnoreCase) >= 0;
+        int spriteLogIndex = isKirakiraSe7 ? 7 : SpriteEmitterLogIndex;
+        string subLayerName = isKirakiraSe7 ? "SpriteEmitter7" : "?";
+        int layerIndex = isKirakiraSe7 ? 7 : UplineUcLayerIndex;
 
         var body = new StringBuilder(640);
         body.AppendFormat(
             CultureInfo.InvariantCulture,
             "SpriteEmitter[{0}] Particle[{1}] Tick{2}{3}",
-            SpriteEmitterLogIndex,
+            spriteLogIndex,
             slot,
             session.TickCounter,
             Environment.NewLine);
@@ -859,8 +892,8 @@ public static class DocExtractorParticleSnapshotLogger
             "  aEmitter=" + aEmitterHex + " aEmitterName=? effect=" + effectName + " spawnKind=self");
         body.AppendLine(
             "  subEmitter=" + subEmitterHex +
-            " layerIndex=" + UplineUcLayerIndex +
-            " subLayerName=?");
+            " layerIndex=" + layerIndex +
+            " subLayerName=" + subLayerName);
         body.AppendLine("  caster=" + casterHex + " sourceActor=" + casterHex);
         body.AppendFormat(
             CultureInfo.InvariantCulture,
@@ -945,27 +978,28 @@ public static class DocExtractorParticleSnapshotLogger
         body.AppendLine("  flags=0x00000001 alive=1 hitCount=0 boneIndex=-1");
         body.AppendFormat(
             CultureInfo.InvariantCulture,
-            "  colorMultiplier=({0:F4}, {1:F4}, {2:F4}) hdrPeak={3:F4}{4}",
+            "  colorMultiplier=({0:F4}, {1:F4}, {2:F4}) hdrPeak={3:F4} opacity={4:F4}{5}",
             motion.ColorMultiplier.x,
             motion.ColorMultiplier.y,
             motion.ColorMultiplier.z,
             motion.HdrPeak,
+            motion.Opacity,
             Environment.NewLine);
-        // Additive One+One: Color_14 (+0xA0) BGR is 0 in L2; mirror that for format parity.
+        // Brighten / additive: Color_14 (+0xA0) BGR is 0 in L2; mirror that for format parity.
         body.AppendLine("  colorByteBgr@+0xA0=(0, 0, 0) note=Color_14 BGR only; A omitted (0 for additive)");
-        // runtimeColorA8 (+0xA8) draw color, BGRA. Unity fade is MULTIPLICATIVE (tint*lifeAlpha),
-        // whereas L2 is SUBTRACTIVE — comparing these rows shows the hue-evolution difference.
+        // runtimeColorA8 (+0xA8): ColorScale*ColorMul - subtractive Fade (matches L2 A8; Opacity not in A8).
         int rB = ToByte(motion.RuntimeColorRgba.b);
         int rG = ToByte(motion.RuntimeColorRgba.g);
         int rR = ToByte(motion.RuntimeColorRgba.r);
         int rA = ToByte(motion.RuntimeColorRgba.a);
         body.AppendFormat(
             CultureInfo.InvariantCulture,
-            "  runtimeColorA8@+0xA8=({0}, {1}, {2}, {3}) note=draw BGRA; A drives color fade",
+            "  runtimeColorA8@+0xA8=({0}, {1}, {2}, {3}) note=CPU ColorScale*Mul-Fade BGRA; Opacity={4:F2} not in A8; Brighten RGB ignores A",
             rB,
             rG,
             rR,
-            rA);
+            rA,
+            motion.Opacity);
 
         session.PrevLocLocalUe[slot] = motion.LocLocalUe;
         session.PrevLocWorldUe[slot] = motion.LocWorldUe;
@@ -1241,6 +1275,232 @@ public static class DocExtractorParticleSnapshotLogger
         Append(body.ToString());
     }
 
+    private static bool IsHealingPotionSpriteEmitter7(ParticleGroup group, Material mat)
+    {
+        if (group != null &&
+            !string.IsNullOrEmpty(group.name) &&
+            group.name.IndexOf("SpriteEmitter7", StringComparison.OrdinalIgnoreCase) >= 0)
+        {
+            return true;
+        }
+
+        return DocExtractorSpriteEmitter0MotionSimulator.IsKirakiraSpriteEmitter7Material(mat);
+    }
+
+    private static void WriteSpriteEmitter7KirakiraSample(
+        ParticleGroup group,
+        GroupSession session,
+        int slot,
+        Renderer renderer,
+        Material mat,
+        float now,
+        float shaderStartTime,
+        float seed,
+        bool force)
+    {
+        if (!DocExtractorSpriteEmitter0MotionSimulator.TryEvaluate(
+                group.transform,
+                mat,
+                now,
+                shaderStartTime,
+                out DocExtractorSpriteEmitter0MotionSimulator.MotionSample motion))
+        {
+            return;
+        }
+
+        if (!force && motion.ParticleTime < 1e-4f)
+        {
+            return;
+        }
+
+        if (force)
+        {
+            AppendSpriteEmitter7SpawnVerification(session, slot, now, shaderStartTime, seed, motion.Spawn);
+            session.PrevLocLocalUe[slot] = motion.LocLocalUe;
+            session.PrevLocWorldUe[slot] = motion.LocWorldUe;
+            session.PrevSampleTimeBySlot[slot] = now;
+        }
+
+        if (!session.PrevLocLocalUe.TryGetValue(slot, out Vector3 oldLocalUe))
+        {
+            oldLocalUe = motion.LocLocalUe;
+        }
+
+        if (!session.PrevLocWorldUe.TryGetValue(slot, out Vector3 oldWorldUe))
+        {
+            oldWorldUe = motion.LocWorldUe;
+        }
+
+        float tickDeltaSec = 0f;
+        if (session.PrevSampleTimeBySlot.TryGetValue(slot, out float previousSampleTime))
+        {
+            tickDeltaSec = now - previousSampleTime;
+        }
+
+        DocExtractorParticleMotionSimulator.TryEvaluateColor(
+            mat,
+            seed,
+            shaderStartTime,
+            motion.ParticleTime,
+            motion.MaxLifetime,
+            out Vector3 colorMul,
+            out float hdrPeak,
+            out float opacity,
+            out Color runtimeColor);
+
+        session.TickCounter += 1;
+        L2Particle owner = group.OwnerParticle;
+        Transform caster = group.FollowTarget != null
+            ? group.FollowTarget
+            : owner != null
+                ? owner.transform
+                : group.transform;
+        string effectName = ResolveEffectName(owner);
+
+        var body = new StringBuilder(896);
+        body.AppendFormat(
+            CultureInfo.InvariantCulture,
+            "SpriteEmitter[{0}] Particle[{1}] Tick{2}{3}",
+            7,
+            slot,
+            session.TickCounter,
+            Environment.NewLine);
+        body.AppendLine(
+            "  aEmitter=" + FormatPointer(group) +
+            " aEmitterName=ParticleGroup/SpriteEmitter7 effect=" + effectName + " spawnKind=self");
+        body.AppendLine(
+            "  subEmitter=" + FormatPointer(renderer) +
+            " layerIndex=7 subLayerName=SpriteEmitter7");
+        body.AppendLine("  caster=" + FormatPointer(caster) + " sourceActor=" + FormatPointer(caster));
+        body.AppendFormat(
+            CultureInfo.InvariantCulture,
+            "  locLocal=({0:F3}, {1:F3}, {2:F3}){3}",
+            motion.LocLocalUe.x,
+            motion.LocLocalUe.y,
+            motion.LocLocalUe.z,
+            Environment.NewLine);
+        body.AppendFormat(
+            CultureInfo.InvariantCulture,
+            "  oldLocal=({0:F3}, {1:F3}, {2:F3}){3}",
+            oldLocalUe.x,
+            oldLocalUe.y,
+            oldLocalUe.z,
+            Environment.NewLine);
+        body.AppendFormat(
+            CultureInfo.InvariantCulture,
+            "  locWorld=({0:F2}, {1:F2}, {2:F2}){3}",
+            motion.LocWorldUe.x,
+            motion.LocWorldUe.y,
+            motion.LocWorldUe.z,
+            Environment.NewLine);
+        body.AppendFormat(
+            CultureInfo.InvariantCulture,
+            "  oldWorld=({0:F2}, {1:F2}, {2:F2}){3}",
+            oldWorldUe.x,
+            oldWorldUe.y,
+            oldWorldUe.z,
+            Environment.NewLine);
+        body.AppendFormat(
+            CultureInfo.InvariantCulture,
+            "  size=({0:F2}, {1:F2}, {2:F2}) spawnSizeUU={3:F4}{4}",
+            motion.SizeUe.x,
+            motion.SizeUe.y,
+            motion.SizeUe.z,
+            motion.Spawn.SpawnSizeUU,
+            Environment.NewLine);
+        body.AppendFormat(
+            CultureInfo.InvariantCulture,
+            "  particleTime={0:F4} maxLifetime={1:F4} lifeRemain={2:F4} lifeNorm={3:F4}{4}",
+            motion.ParticleTime,
+            motion.MaxLifetime,
+            motion.LifeRemain,
+            motion.AgeNorm,
+            Environment.NewLine);
+        body.AppendFormat(
+            CultureInfo.InvariantCulture,
+            "  colorMultiplier=({0:F4}, {1:F4}, {2:F4}) hdrPeak={3:F4} opacity={4:F4}{5}",
+            colorMul.x,
+            colorMul.y,
+            colorMul.z,
+            hdrPeak,
+            opacity,
+            Environment.NewLine);
+        body.AppendLine("  colorByteBgr@+0xA0=(0, 0, 0) note=Color_14 BGR only; A omitted (Brighten)");
+        body.AppendFormat(
+            CultureInfo.InvariantCulture,
+            "  runtimeColorA8@+0xA8=({0}, {1}, {2}, {3}) note=CPU ColorScale*Mul-Fade BGRA; Opacity not in A8; Brighten RGB ignores A{4}",
+            ToByte(runtimeColor.b),
+            ToByte(runtimeColor.g),
+            ToByte(runtimeColor.r),
+            ToByte(runtimeColor.a),
+            Environment.NewLine);
+        body.AppendFormat(
+            CultureInfo.InvariantCulture,
+            "  appRandStateBeforeSpawn=0x{0:X8} shaderStartTime={1:F4} seed={2:F4} tickDeltaSec={3:F4}{4}",
+            motion.Spawn.AppRandStateBeforeSpawn,
+            shaderStartTime,
+            seed,
+            tickDeltaSec,
+            Environment.NewLine);
+
+        session.PrevLocLocalUe[slot] = motion.LocLocalUe;
+        session.PrevLocWorldUe[slot] = motion.LocWorldUe;
+        session.PrevSampleTimeBySlot[slot] = now;
+        Append(body.ToString());
+    }
+
+    private static void AppendSpriteEmitter7SpawnVerification(
+        GroupSession session,
+        int slot,
+        float now,
+        float shaderStartTime,
+        float seed,
+        DocExtractorSpriteEmitter0MotionSimulator.SpawnSnapshot spawn)
+    {
+        var body = new StringBuilder(512);
+        body.AppendFormat(
+            CultureInfo.InvariantCulture,
+            "SpawnParticleBegin Unity SpriteEmitter7 slot={0} spawnTime={1:F6} shaderStartTime={2:F6} seed={3:F6}{4}",
+            slot,
+            now,
+            shaderStartTime,
+            seed,
+            Environment.NewLine);
+        body.AppendFormat(
+            CultureInfo.InvariantCulture,
+            "  appRandStateBeforeSpawn=0x{0:X8}{1}",
+            spawn.AppRandStateBeforeSpawn,
+            Environment.NewLine);
+        body.AppendFormat(
+            CultureInfo.InvariantCulture,
+            "  rawVelocityUU=({0:F6}, {1:F6}, {2:F6}) polarOffsetUU=({3:F6}, {4:F6}, {5:F6}) spawnPositionUU=({6:F6}, {7:F6}, {8:F6}){9}",
+            spawn.RawVelocityUe.x,
+            spawn.RawVelocityUe.y,
+            spawn.RawVelocityUe.z,
+            spawn.PolarOffsetUe.x,
+            spawn.PolarOffsetUe.y,
+            spawn.PolarOffsetUe.z,
+            spawn.SpawnPositionUe.x,
+            spawn.SpawnPositionUe.y,
+            spawn.SpawnPositionUe.z,
+            Environment.NewLine);
+        body.AppendFormat(
+            CultureInfo.InvariantCulture,
+            "  velocityAfterPtvdUU=({0:F6}, {1:F6}, {2:F6}) note=CPU SE0-style PTVD mirror; shader uses PTVD_OwnerAndStartPosition{3}",
+            spawn.VelocityAfterPtvdUe.x,
+            spawn.VelocityAfterPtvdUe.y,
+            spawn.VelocityAfterPtvdUe.z,
+            Environment.NewLine);
+        body.AppendFormat(
+            CultureInfo.InvariantCulture,
+            "  lifetimeSec={0:F6} spawnSizeUU={1:F6}{2}",
+            spawn.LifetimeSeconds,
+            spawn.SpawnSizeUU,
+            Environment.NewLine);
+        body.AppendLine("SpawnParticleEnd Unity SpriteEmitter7 slot=" + slot);
+        Append(body.ToString());
+    }
+
     private static void AppendSpriteEmitter0SpawnVerification(
         GroupSession session,
         int slot,
@@ -1475,6 +1735,585 @@ public static class DocExtractorParticleSnapshotLogger
         Append(body.ToString());
     }
 
+    private static void AppendWaveBurstSummary(StringBuilder body, GroupSession session)
+    {
+        if (session.WaveBurstLocZ.Count == 0)
+        {
+            return;
+        }
+
+        float[] sorted = session.WaveBurstLocZ.ToArray();
+        Array.Sort(sorted);
+        var gaps = new List<float>(sorted.Length - 1);
+        for (int i = 0; i + 1 < sorted.Length; i++)
+        {
+            gaps.Add(sorted[i + 1] - sorted[i]);
+        }
+
+        float worldK = 1.8f;
+        body.AppendFormat(
+            CultureInfo.InvariantCulture,
+            "  WaveBurstSummary burst={0}/10 slots={1} baseNote=LCG31 appRandLocVelSize=1{2}",
+            session.WaveBurstIndex,
+            session.WaveBurstLocZ.Count,
+            Environment.NewLine);
+        body.Append("  WaveBurstLocZUU=[");
+        for (int i = 0; i < session.WaveBurstLocZ.Count; i++)
+        {
+            if (i > 0)
+            {
+                body.Append(", ");
+            }
+
+            body.Append(session.WaveBurstLocZ[i].ToString("F4", CultureInfo.InvariantCulture));
+        }
+
+        body.Append(']').Append(Environment.NewLine);
+        body.Append("  WaveBurstLocZSortedUU=[");
+        for (int i = 0; i < sorted.Length; i++)
+        {
+            if (i > 0)
+            {
+                body.Append(", ");
+            }
+
+            body.Append(sorted[i].ToString("F4", CultureInfo.InvariantCulture));
+        }
+
+        body.Append(']').Append(Environment.NewLine);
+        body.Append("  WaveBurstGapsUU=[");
+        for (int i = 0; i < gaps.Count; i++)
+        {
+            if (i > 0)
+            {
+                body.Append(", ");
+            }
+
+            body.Append(gaps[i].ToString("F4", CultureInfo.InvariantCulture));
+        }
+
+        body.Append(']').Append(Environment.NewLine);
+        body.Append("  WaveBurstGapsCmK18=[");
+        for (int i = 0; i < gaps.Count; i++)
+        {
+            if (i > 0)
+            {
+                body.Append(", ");
+            }
+
+            float cm = gaps[i] / 52.5f * worldK * 100f;
+            body.Append(cm.ToString("F2", CultureInfo.InvariantCulture));
+        }
+
+        body.Append(']').Append(Environment.NewLine);
+
+        float minGap = gaps.Count > 0 ? gaps[0] : 0f;
+        float maxGap = gaps.Count > 0 ? gaps[0] : 0f;
+        for (int i = 1; i < gaps.Count; i++)
+        {
+            minGap = Mathf.Min(minGap, gaps[i]);
+            maxGap = Mathf.Max(maxGap, gaps[i]);
+        }
+
+        string line = string.Format(
+            CultureInfo.InvariantCulture,
+            "burst{0}: minGapUU={1:F4} maxGapUU={2:F4} minCm={3:F2} maxCm={4:F2}",
+            session.WaveBurstIndex,
+            minGap,
+            maxGap,
+            minGap / 52.5f * worldK * 100f,
+            maxGap / 52.5f * worldK * 100f);
+        session.WaveBurstGapSummaries.Add(line);
+        body.Append("  ").Append(line).Append(Environment.NewLine);
+
+        if (session.WaveBurstIndex == 10)
+        {
+            body.AppendLine("  WaveBurstCampaignDone=10 note=compare minGap clustering vs L2 SpawnWaveCapture");
+            for (int i = 0; i < session.WaveBurstGapSummaries.Count; i++)
+            {
+                body.Append("  ").Append(session.WaveBurstGapSummaries[i]).Append(Environment.NewLine);
+            }
+        }
+    }
+
+    // CPU mirror of MeshEmitter0_Wave.shader / L2 MeshEmitter4 (Wave) live slots.
+    // Compare Unity_ParticleSnapshot.log vs ParticleSnapshot.log MeshEmitter[1] MeshEmitter4.
+    private static void WriteMeshEmitter0WaveSample(
+        ParticleGroup group,
+        GroupSession session,
+        int slot,
+        Renderer renderer,
+        Material mat,
+        float now,
+        float shaderStartTime,
+        float seed,
+        bool isSpawnEvent)
+    {
+        Vector4 delayRange = mat.GetVector("_InitialDelayRange");
+        Vector4 lifetimeRange = mat.GetVector("_LifetimeRange");
+        float delay = RandomRange(delayRange.x, delayRange.y, seed, shaderStartTime, 3f);
+        float lifetime = Mathf.Max(1e-4f, RandomRange(lifetimeRange.x, lifetimeRange.y, seed, shaderStartTime, 7f));
+        float particleTime = Mathf.Max(0f, now - shaderStartTime - delay);
+        float lifeNorm = Mathf.Clamp01(particleTime / lifetime);
+
+        float sizeMul = SampleScalarKeys(
+            lifeNorm,
+            mat.GetVector("_SizeKey0"),
+            mat.GetVector("_SizeKey1"),
+            mat.GetVector("_SizeKey2"),
+            mat.GetVector("_SizeKey3"),
+            mat.GetVector("_SizeKey4"));
+
+        float startSizeXY = mat.GetFloat("_StartSizeXY");
+        Vector4 startSizeZRange = mat.GetVector("_StartSizeZRange");
+        Vector4 startLocZRange = mat.GetVector("_StartLocationZRangeUU");
+        Vector4 startVelZRange = mat.GetVector("_StartVelocityZRangeUU");
+
+        float startSizeZ;
+        float startLocZ;
+        float startVelZ;
+        uint meshSpawnState = L2MaterialPropertyCopier.ReadMeshSpawnRandState(mat);
+        bool usedMeshSpawnAppRand = meshSpawnState != 0u;
+        if (usedMeshSpawnAppRand)
+        {
+            L2MaterialPropertyCopier.SampleMeshSpawnLocVelSizeZ(
+                mat,
+                meshSpawnState,
+                out startLocZ,
+                out startVelZ,
+                out startSizeZ);
+        }
+        else
+        {
+            startSizeZ = RandomRange(startSizeZRange.x, startSizeZRange.y, seed, shaderStartTime, 11f);
+            startLocZ = RandomRange(startLocZRange.x, startLocZRange.y, seed, shaderStartTime, 13f);
+            startVelZ = RandomRange(startVelZRange.x, startVelZRange.y, seed, shaderStartTime, 17f);
+        }
+
+        Vector3 startSizeUe = new Vector3(startSizeXY, startSizeXY, startSizeZ);
+        Vector3 finalSizeUe = startSizeUe * sizeMul;
+
+        float worldK = mat.HasProperty("_L2FxWorldCalibration") ? mat.GetFloat("_L2FxWorldCalibration") : 1.8f;
+        Vector3 locLocalUe = new Vector3(0f, 0f, startLocZ + startVelZ * particleTime);
+        Vector3 motionUnity = DocExtractorSpriteEmitter0MotionSimulator.UcPositionToUnityMeters(locLocalUe, worldK);
+        Vector3 locWorldUe = DocExtractorParticleMotionSimulator.UnityWorldToUe(
+            renderer.transform.position + motionUnity);
+
+        Vector4 sps = mat.HasProperty("_SpsYawPitchRollUc")
+            ? mat.GetVector("_SpsYawPitchRollUc")
+            : Vector4.zero;
+        Vector4 spinCcw = mat.HasProperty("_SpinCCWorCW")
+            ? mat.GetVector("_SpinCCWorCW")
+            : Vector4.zero;
+        // PTRS_Actor / RenderParticles: slot c0,c1,c2; FRotationMatrix(Pitch,Yaw,Roll)=(c1,c0,c2).
+        // SpinCCWorCW.X==0 => negate (matches L2Fx_ApplySpinCCWorCW_Scalar).
+        float sps0 = (spinCcw.x == 0f ? -1f : 1f) * sps.x;
+        float sps1 = (spinCcw.y == 0f ? -1f : 1f) * sps.y;
+        float sps2 = (spinCcw.z == 0f ? -1f : 1f) * sps.z;
+        Vector3 spinRateC012 = new Vector3(sps0, sps1, sps2) * SpinUcToUru;
+
+        MeshStartSpinSnapshot startSpin = ReadMeshStartSpinSnapshot(
+            mat,
+            renderer != null && renderer.sharedMaterials != null && renderer.sharedMaterials.Length > 0
+                ? renderer.sharedMaterials[0]
+                : null,
+            slot,
+            group.MeshEmitter3AppRandBaseState);
+        Vector3 startSpinC012;
+        if (startSpin.HasAppRand)
+        {
+            startSpinC012 = startSpin.YawPitchRollUru;
+        }
+        else
+        {
+            Vector4 yawRange = mat.HasProperty("_StartSpinYawRangeUc")
+                ? mat.GetVector("_StartSpinYawRangeUc")
+                : Vector4.zero;
+            Vector4 pitchRange = mat.HasProperty("_StartSpinPitchRangeUc")
+                ? mat.GetVector("_StartSpinPitchRangeUc")
+                : Vector4.zero;
+            Vector4 rollRange = mat.HasProperty("_StartSpinRollRangeUc")
+                ? mat.GetVector("_StartSpinRollRangeUc")
+                : Vector4.zero;
+            startSpinC012 = new Vector3(
+                RandomRange(yawRange.x, yawRange.y, seed, shaderStartTime, 401f) * SpinUcToUru,
+                RandomRange(pitchRange.x, pitchRange.y, seed, shaderStartTime, 409f) * SpinUcToUru,
+                RandomRange(rollRange.x, rollRange.y, seed, shaderStartTime, 419f) * SpinUcToUru);
+        }
+
+        // Runtime FRotationMatrix input (Pitch,Yaw,Roll)=(c1,c0,c2).
+        Vector3 runtimeC012 = new Vector3(
+            Mathf.Floor(startSpinC012.x + spinRateC012.x * particleTime),
+            Mathf.Floor(startSpinC012.y + spinRateC012.y * particleTime),
+            Mathf.Floor(startSpinC012.z + spinRateC012.z * particleTime));
+        Vector3 runtimePitchYawRoll = new Vector3(runtimeC012.y, runtimeC012.x, runtimeC012.z);
+        Vector3 spinVelUru = spinRateC012;
+        Vector3 runtimeRotUru = runtimeC012;
+
+        Vector4 colorMul = mat.HasProperty("_ColorMultiplier")
+            ? mat.GetVector("_ColorMultiplier")
+            : Vector4.one;
+        float opacity = mat.HasProperty("_Opacity") ? mat.GetFloat("_Opacity") : 1f;
+        float fadeInEnd = mat.HasProperty("_FadeInEndTime") ? mat.GetFloat("_FadeInEndTime") : 0f;
+        float fadeOutStart = mat.HasProperty("_FadeOutStartTime") ? mat.GetFloat("_FadeOutStartTime") : lifetime;
+        bool fadeIn = !mat.HasProperty("_FadeIn") || mat.GetFloat("_FadeIn") > 0.5f;
+        bool fadeOut = !mat.HasProperty("_FadeOut") || mat.GetFloat("_FadeOut") > 0.5f;
+        float fadeInAmt = fadeIn && fadeInEnd > 1e-6f && particleTime < fadeInEnd
+            ? (fadeInEnd - particleTime) / fadeInEnd
+            : 0f;
+        float fadeOutAmt = fadeOut && particleTime > fadeOutStart
+            ? (particleTime - fadeOutStart) / Mathf.Max(1e-4f, lifetime - fadeOutStart)
+            : 0f;
+        // Live L2: ColorScale*ColorMultiplier - fade, then Opacity multiplies RGB only.
+        float r = Mathf.Max(0f, 1f * colorMul.x - fadeInAmt - fadeOutAmt) * opacity;
+        float g = Mathf.Max(0f, 1f * colorMul.y - fadeInAmt - fadeOutAmt) * opacity;
+        float b = Mathf.Max(0f, 1f * colorMul.z - fadeInAmt - fadeOutAmt) * opacity;
+        float a = Mathf.Max(0f, 1f - fadeInAmt - fadeOutAmt);
+
+        if (!session.PrevLocLocalUe.TryGetValue(slot, out Vector3 prevLoc))
+        {
+            prevLoc = locLocalUe;
+        }
+
+        Vector3 deltaLoc = locLocalUe - prevLoc;
+        session.PrevLocLocalUe[slot] = locLocalUe;
+        session.PrevSampleTimeBySlot.TryGetValue(slot, out float prevSampleTime);
+        float dt = prevSampleTime > 0f ? Mathf.Max(1e-4f, now - prevSampleTime) : 0f;
+        session.PrevSampleTimeBySlot[slot] = now;
+
+        session.TickCounter += 1;
+        var body = new StringBuilder(1400);
+        body.AppendFormat(
+            CultureInfo.InvariantCulture,
+            "MeshEmitter0[{0}] MeshParticle[{1}] Tick{2}{3}",
+            0,
+            slot,
+            session.TickCounter,
+            Environment.NewLine);
+        body.AppendLine(
+            "  aEmitter=" + FormatPointer(group) +
+            " aEmitterName=ParticleGroup/MeshEmitter0 effect=UnityEffect.it_healing_potion_ta spawnKind=self");
+        body.AppendLine(
+            "  subEmitter=" + FormatPointer(renderer) +
+            " layerIndex=2 kind=Mesh name=Wave class=MeshEmitter note=L2 log name=MeshEmitter4");
+        if (isSpawnEvent)
+        {
+            body.AppendFormat(
+                CultureInfo.InvariantCulture,
+                "  MeshParticleSpawn slot={0} seed={1:F4} shaderStart={2:F4} startLocZUU={3:F4} startVelZUU={4:F4} startSizeZ={5:F4} appRand={6} meshSpawnState=0x{7:X8}{8}",
+                slot,
+                seed,
+                shaderStartTime,
+                startLocZ,
+                startVelZ,
+                startSizeZ,
+                usedMeshSpawnAppRand ? 1 : 0,
+                meshSpawnState,
+                Environment.NewLine);
+
+            session.WaveSpawnSlotsThisBurst += 1;
+            session.WaveBurstLocZ.Add(startLocZ);
+            session.WaveBurstVelZ.Add(startVelZ);
+            if (session.WaveSpawnSlotsThisBurst >= 5)
+            {
+                AppendWaveBurstSummary(body, session);
+            }
+        }
+
+        body.AppendFormat(
+            CultureInfo.InvariantCulture,
+            "  locLocal@+0x00=({0:F4}, {1:F4}, {2:F4}){3}" +
+            "  locWorld=({4:F2}, {5:F2}, {6:F2}){3}" +
+            "  startSize@+0x24=({7:F4}, {8:F4}, {9:F4}){3}" +
+            "  finalSize@+0x6C=({10:F4}, {11:F4}, {12:F4}){3}" +
+            "  particleTime={13:F4} maxLifetime={14:F4} lifeNorm={15:F4} sizeMul={16:F4}{3}",
+            locLocalUe.x, locLocalUe.y, locLocalUe.z,
+            Environment.NewLine,
+            locWorldUe.x, locWorldUe.y, locWorldUe.z,
+            startSizeUe.x, startSizeUe.y, startSizeUe.z,
+            finalSizeUe.x, finalSizeUe.y, finalSizeUe.z,
+            particleTime, lifetime, lifeNorm, sizeMul);
+        body.AppendFormat(
+            CultureInfo.InvariantCulture,
+            "  spinVelocityURU@+0x30=(c0={0:F4},c1={1:F4},c2={2:F4}) trunc=({3},{4},{5}){6}" +
+            "  startRotationURU@+0x3C=(c0={7:F4},c1={8:F4},c2={9:F4}) trunc=({10},{11},{12}){6}" +
+            "  runtimeC012=(c0={13:F0},c1={14:F0},c2={15:F0}) FRotationMatrix(Pitch,Yaw,Roll)=({16:F0},{17:F0},{18:F0}){6}",
+            spinVelUru.x, spinVelUru.y, spinVelUru.z,
+            (int)spinVelUru.x, (int)spinVelUru.y, (int)spinVelUru.z,
+            Environment.NewLine,
+            startSpinC012.x, startSpinC012.y, startSpinC012.z,
+            (int)startSpinC012.x, (int)startSpinC012.y, (int)startSpinC012.z,
+            runtimeRotUru.x, runtimeRotUru.y, runtimeRotUru.z,
+            runtimePitchYawRoll.x, runtimePitchYawRoll.y, runtimePitchYawRoll.z);
+        AppendWaveSpinNormalDiagnostics(body, runtimePitchYawRoll);
+        body.AppendFormat(
+            CultureInfo.InvariantCulture,
+            "  colorMultiplier@+0x84=({0:F4}, {1:F4}, {2:F4}) opacity={3:F4} hdrPeak={4:F4}{5}" +
+            "  runtimeColorA8@+0xA8=({6}, {7}, {8}, {9}) note=CPU MeshColorFade+Opacity mirror{5}",
+            colorMul.x, colorMul.y, colorMul.z,
+            opacity,
+            Mathf.Max(colorMul.x, Mathf.Max(colorMul.y, colorMul.z)),
+            Environment.NewLine,
+            ToFloorByte(b), ToFloorByte(g), ToFloorByte(r), ToFloorByte(a));
+        body.AppendFormat(
+            CultureInfo.InvariantCulture,
+            "  unityDiag motionUnityMeters=({0:F4}, {1:F4}, {2:F4}) finalSizeUe=(XY,XY,Z)=({3:F4}, {3:F4}, {4:F4}) K={5:F3}{6}" +
+            "  unityDiag deltaLocLocalUU=({7:F4}, {8:F4}, {9:F4}) dt={10:F4}s impliedVelZUU={11:F4}{6}" +
+            "  unityDiag spinPath=L2FxMeshSpin S(XY,Z,XY)*R(c1,c0,c2) note=no PTRS_Actor on Wave{6}",
+            motionUnity.x, motionUnity.y, motionUnity.z,
+            startSizeXY * sizeMul * worldK,
+            startSizeZ * sizeMul * worldK,
+            worldK,
+            Environment.NewLine,
+            deltaLoc.x, deltaLoc.y, deltaLoc.z,
+            dt,
+            dt > 0f ? deltaLoc.z / dt : 0f);
+        if (startSpin.HasAppRand)
+        {
+            AppendMeshStartSpinSnapshot(body, startSpin);
+        }
+
+        AppendWaveAxisDiagnostics(
+            body,
+            session,
+            renderer,
+            scaleXy: startSizeXY * sizeMul * worldK,
+            scaleZ: startSizeZ * sizeMul * worldK,
+            runtimeRotUru,
+            particleTime);
+        Append(body.ToString());
+    }
+
+    // Mirrors L2Fx_MeshSpin_RotateUnityLocalPositionPitchYawRoll for the
+    // remapped Wave plane normal. This logs the GPU formula's expected result;
+    // it is not Transform.rotation (spin is applied in the vertex shader).
+    private static void AppendWaveSpinNormalDiagnostics(
+        StringBuilder body,
+        Vector3 pitchYawRollUru)
+    {
+        Vector3 pitchYawRollRadians = new Vector3(
+            pitchYawRollUru.x * Mathf.PI * 2f / 65536f,
+            pitchYawRollUru.y * Mathf.PI * 2f / 65536f,
+            pitchYawRollUru.z * Mathf.PI * 2f / 65536f);
+        Vector3 normalAfterSpin = RotateUnityLocalAsMeshSpin(
+            Vector3.up,
+            pitchYawRollRadians).normalized;
+        float tiltDeg = Mathf.Acos(Mathf.Clamp(
+            Mathf.Abs(Vector3.Dot(normalAfterSpin, Vector3.up)),
+            -1f,
+            1f)) * Mathf.Rad2Deg;
+        body.AppendFormat(
+            CultureInfo.InvariantCulture,
+            "  spinNormalDiag preUnity=(0,1,0) postUnity=({0:F5},{1:F5},{2:F5}) tiltFromUnityY={3:F3}deg{4}",
+            normalAfterSpin.x,
+            normalAfterSpin.y,
+            normalAfterSpin.z,
+            tiltDeg,
+            Environment.NewLine);
+    }
+
+    /// <summary>
+    /// Compares mesh AABB under two StartSize axis layouts:
+    /// A) UE-layout mesh (bakeAxisConversion=0): scale (XY, XY, Z)
+    /// B) Unity-remapped mesh: scale (XY, Z, XY)
+    /// A flat ring should stay thin on its thickness axis after scale.
+    /// </summary>
+    private static void AppendWaveAxisDiagnostics(
+        StringBuilder body,
+        GroupSession session,
+        Renderer renderer,
+        float scaleXy,
+        float scaleZ,
+        Vector3 runtimeRotUru,
+        float particleTime)
+    {
+        MeshFilter filter = renderer != null ? renderer.GetComponent<MeshFilter>() : null;
+        Mesh mesh = filter != null ? filter.sharedMesh : null;
+        if (mesh == null)
+        {
+            body.AppendLine("  axisDiag=unavailable note=missing MeshFilter/sharedMesh");
+            return;
+        }
+
+        Bounds raw = mesh.bounds;
+        Vector3 rawSize = raw.size;
+        string thinAxis = DescribeThinnestAxis(rawSize);
+        Vector3 scaleUeLayout = new Vector3(scaleXy, scaleXy, scaleZ);
+        Vector3 scaleUnityRemap = new Vector3(scaleXy, scaleZ, scaleXy);
+        Vector3 sizeUeLayout = AbsMul(rawSize, scaleUeLayout);
+        Vector3 sizeUnityRemap = AbsMul(rawSize, scaleUnityRemap);
+
+        Vector3 sizeAfterSpinRemap = MeasureAabbSizeAfterScaleAndMeshSpin(
+            raw,
+            scaleUnityRemap,
+            runtimeRotUru);
+        Vector3 sizeAfterSpinUe = MeasureAabbSizeAfterScaleAndUeRotator(
+            raw,
+            scaleUeLayout,
+            runtimeRotUru);
+
+        body.AppendFormat(
+            CultureInfo.InvariantCulture,
+            "  axisDiag mesh='{0}' rawBoundsSize=({1:F4}, {2:F4}, {3:F4}) thinAxis={4} age={5:F4}s{6}" +
+            "  axisDiag scaleUeLayout(XY,XY,Z)=({7:F4}, {7:F4}, {8:F4}) -> size=({9:F4}, {10:F4}, {11:F4}) thin={12}{6}" +
+            "  axisDiag scaleUnityRemap(XY,Z,XY)=({7:F4}, {8:F4}, {7:F4}) -> size=({13:F4}, {14:F4}, {15:F4}) thin={16}{6}" +
+            "  axisDiag afterSpinUeLayout size=({17:F4}, {18:F4}, {19:F4}) thin={20}{6}" +
+            "  axisDiag afterSpinUnityRemap size=({21:F4}, {22:F4}, {23:F4}) thin={24}{6}",
+            mesh.name,
+            rawSize.x, rawSize.y, rawSize.z,
+            thinAxis,
+            particleTime,
+            Environment.NewLine,
+            scaleXy, scaleZ,
+            sizeUeLayout.x, sizeUeLayout.y, sizeUeLayout.z,
+            DescribeThinnestAxis(sizeUeLayout),
+            sizeUnityRemap.x, sizeUnityRemap.y, sizeUnityRemap.z,
+            DescribeThinnestAxis(sizeUnityRemap),
+            sizeAfterSpinUe.x, sizeAfterSpinUe.y, sizeAfterSpinUe.z,
+            DescribeThinnestAxis(sizeAfterSpinUe),
+            sizeAfterSpinRemap.x, sizeAfterSpinRemap.y, sizeAfterSpinRemap.z,
+            DescribeThinnestAxis(sizeAfterSpinRemap));
+
+        if (!session.WaveAxisDiagLogged)
+        {
+            session.WaveAxisDiagLogged = true;
+            string verdict;
+            if (thinAxis == "Y")
+            {
+                verdict =
+                    "raw mesh thin on Y => Unity-remapped verts. " +
+                    "L2FxPTRSActor Unity->UE, S(XY,XY,Z)*R(c1,c0,c2), UE->Unity is " +
+                    "algebraically equivalent to Unity scale (XY,Z,XY) followed by " +
+                    "the conjugated UE rotator. Do not apply scaleUeLayout directly " +
+                    "to raw Unity vertices; that leaves the thin axis on Unity Z.";
+            }
+            else if (thinAxis == "Z")
+            {
+                verdict =
+                    "raw mesh thin on Z => UE-axis verts. S(XY,XY,Z)*R in place is enough.";
+            }
+            else
+            {
+                verdict =
+                    "raw mesh thin on X (unexpected for ring). Inspect FBX import/orientation.";
+            }
+
+            body.AppendLine("  axisDiagVerdict=" + verdict);
+        }
+    }
+
+    private static Vector3 AbsMul(Vector3 a, Vector3 b)
+    {
+        return new Vector3(Mathf.Abs(a.x * b.x), Mathf.Abs(a.y * b.y), Mathf.Abs(a.z * b.z));
+    }
+
+    private static string DescribeThinnestAxis(Vector3 size)
+    {
+        float ax = Mathf.Abs(size.x);
+        float ay = Mathf.Abs(size.y);
+        float az = Mathf.Abs(size.z);
+        if (ax <= ay && ax <= az)
+        {
+            return "X";
+        }
+
+        if (ay <= ax && ay <= az)
+        {
+            return "Y";
+        }
+
+        return "Z";
+    }
+
+    private static Vector3 MeasureAabbSizeAfterScaleAndMeshSpin(Bounds raw, Vector3 scale, Vector3 yawPitchRollUru)
+    {
+        Vector3 pitchYawRollRad = YawPitchRollUruToPitchYawRollRadians(yawPitchRollUru);
+        Vector3 min = new Vector3(float.PositiveInfinity, float.PositiveInfinity, float.PositiveInfinity);
+        Vector3 max = new Vector3(float.NegativeInfinity, float.NegativeInfinity, float.NegativeInfinity);
+        foreach (Vector3 corner in EnumerateBoundsCorners(raw))
+        {
+            Vector3 scaled = Vector3.Scale(corner, scale);
+            Vector3 rotated = RotateUnityLocalAsMeshSpin(scaled, pitchYawRollRad);
+            min = Vector3.Min(min, rotated);
+            max = Vector3.Max(max, rotated);
+        }
+
+        return max - min;
+    }
+
+    private static Vector3 MeasureAabbSizeAfterScaleAndUeRotator(Bounds raw, Vector3 scale, Vector3 yawPitchRollUru)
+    {
+        Vector3 pitchYawRollRad = YawPitchRollUruToPitchYawRollRadians(yawPitchRollUru);
+        Vector3 min = new Vector3(float.PositiveInfinity, float.PositiveInfinity, float.PositiveInfinity);
+        Vector3 max = new Vector3(float.NegativeInfinity, float.NegativeInfinity, float.NegativeInfinity);
+        foreach (Vector3 corner in EnumerateBoundsCorners(raw))
+        {
+            Vector3 scaled = Vector3.Scale(corner, scale);
+            Vector3 rotated = RotateUeLocalPitchYawRoll(scaled, pitchYawRollRad);
+            min = Vector3.Min(min, rotated);
+            max = Vector3.Max(max, rotated);
+        }
+
+        return max - min;
+    }
+
+    private static IEnumerable<Vector3> EnumerateBoundsCorners(Bounds b)
+    {
+        Vector3 c = b.center;
+        Vector3 e = b.extents;
+        for (int ix = -1; ix <= 1; ix += 2)
+        {
+            for (int iy = -1; iy <= 1; iy += 2)
+            {
+                for (int iz = -1; iz <= 1; iz += 2)
+                {
+                    yield return c + new Vector3(e.x * ix, e.y * iy, e.z * iz);
+                }
+            }
+        }
+    }
+
+    private static Vector3 YawPitchRollUruToPitchYawRollRadians(Vector3 yawPitchRollUru)
+    {
+        const float uruToRad = (Mathf.PI * 2f) / 65536f;
+        return new Vector3(
+            yawPitchRollUru.y * uruToRad,
+            yawPitchRollUru.x * uruToRad,
+            yawPitchRollUru.z * uruToRad);
+    }
+
+    private static Vector3 RotateUnityLocalAsMeshSpin(Vector3 unityLocal, Vector3 pitchYawRollRadians)
+    {
+        Vector3 ue = new Vector3(unityLocal.x, unityLocal.z, unityLocal.y);
+        Vector3 rotatedUe = RotateUeLocalPitchYawRoll(ue, pitchYawRollRadians);
+        return new Vector3(rotatedUe.x, rotatedUe.z, rotatedUe.y);
+    }
+
+    private static Vector3 RotateUeLocalPitchYawRoll(Vector3 ueLocal, Vector3 pitchYawRollRadians)
+    {
+        float sinPitch = Mathf.Sin(pitchYawRollRadians.x);
+        float cosPitch = Mathf.Cos(pitchYawRollRadians.x);
+        float sinYaw = Mathf.Sin(pitchYawRollRadians.y);
+        float cosYaw = Mathf.Cos(pitchYawRollRadians.y);
+        float sinRoll = Mathf.Sin(pitchYawRollRadians.z);
+        float cosRoll = Mathf.Cos(pitchYawRollRadians.z);
+
+        float m00 = cosPitch * cosYaw;
+        float m01 = cosPitch * sinYaw;
+        float m02 = sinPitch;
+        float m10 = sinRoll * sinPitch * cosYaw - cosRoll * sinYaw;
+        float m11 = sinRoll * sinPitch * sinYaw + cosRoll * cosYaw;
+        float m12 = -sinRoll * cosPitch;
+        float m20 = -(cosRoll * sinPitch * cosYaw + sinRoll * sinYaw);
+        float m21 = cosYaw * sinRoll - cosRoll * sinPitch * sinYaw;
+        float m22 = cosRoll * cosPitch;
+
+        return new Vector3(
+            ueLocal.x * m00 + ueLocal.y * m10 + ueLocal.z * m20,
+            ueLocal.x * m01 + ueLocal.y * m11 + ueLocal.z * m21,
+            ueLocal.x * m02 + ueLocal.y * m12 + ueLocal.z * m22);
+    }
+
     private static void WriteMeshEmitter3Sample(
         ParticleGroup group,
         GroupSession session,
@@ -1629,8 +2468,13 @@ public static class DocExtractorParticleSnapshotLogger
         }
 
         uint runtimeStateBeforeRoll = L2MaterialPropertyCopier.ReadStartSpinRandState(mat);
+        // Mesh spawn base = before StartVelocity (+22 to StartSpin). MeshEmitter3 base = before StartSpin.
+        bool isMeshSpawn = L2MaterialPropertyCopier.IsMeshSpawnParticleMaterial(sharedMat) ||
+            L2MaterialPropertyCopier.IsMeshSpawnParticleMaterial(mat);
         uint expectedStateBeforeRoll = liveBaseState != 0u
-            ? L2MaterialPropertyCopier.ComputeMeshEmitter3StartSpinState(liveBaseState, slotIndex)
+            ? (isMeshSpawn
+                ? L2MaterialPropertyCopier.ComputeMeshSpawnStartSpinState(liveBaseState, slotIndex)
+                : L2MaterialPropertyCopier.ComputeMeshEmitter3StartSpinState(liveBaseState, slotIndex))
             : runtimeStateBeforeRoll;
         if (runtimeStateBeforeRoll == 0u && expectedStateBeforeRoll != 0u)
         {
@@ -1899,6 +2743,16 @@ public static class DocExtractorParticleSnapshotLogger
         if (groupName.IndexOf("SpriteEmitter0", StringComparison.OrdinalIgnoreCase) >= 0)
         {
             return "ParticleGroup/SpriteEmitter0";
+        }
+
+        if (groupName.IndexOf("SpriteEmitter7", StringComparison.OrdinalIgnoreCase) >= 0)
+        {
+            return "ParticleGroup/SpriteEmitter7";
+        }
+
+        if (groupName.IndexOf("MeshEmitter0", StringComparison.OrdinalIgnoreCase) >= 0)
+        {
+            return "ParticleGroup/MeshEmitter0";
         }
 
         if (groupName.IndexOf("MeshEmitter3", StringComparison.OrdinalIgnoreCase) >= 0)

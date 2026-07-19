@@ -155,6 +155,33 @@ float3 L2FxPTRSActor_UeVectorToUnity(float3 vectorUe)
     return float3(vectorUe.x, vectorUe.z, vectorUe.y);
 }
 
+float3 L2FxPTRSActor_UnityVectorToUe(float3 vectorUnity)
+{
+    return float3(vectorUnity.x, vectorUnity.z, vectorUnity.y);
+}
+
+// Local mesh path used when the Unity GameObject already carries owner TRS
+// (TransformObjectToWorld). Matches the S(FinalSize)*R(Spin) portion of
+// RenderParticles WorldMat. finalSizeUe must stay in UE axis order (X,Y,Z),
+// e.g. Wave StartSize (XY, XY, Z) — do not pre-swap thin Z onto Unity Y.
+float3 L2FxPTRSActor_TransformLocalMeshUnity(
+    float3 localPositionUnity,
+    float3 finalSizeUe,
+    float3 spinRateC012,
+    float3 startSpinC012,
+    float particleTimeSeconds)
+{
+    float3 localPositionUe = L2FxPTRSActor_UnityVectorToUe(localPositionUnity);
+    float3 spinPitchYawRollUru = L2FxPTRSActor_EvaluateSpinPitchYawRollUru(
+        spinRateC012,
+        startSpinC012,
+        particleTimeSeconds);
+    float4x4 scale = L2FxPTRSActor_ScaleUe(finalSizeUe);
+    float4x4 spin = L2FxPTRSActor_RotationUruPitchYawRoll(spinPitchYawRollUru);
+    float3 spunUe = mul(float4(localPositionUe, 1.0), mul(scale, spin)).xyz;
+    return L2FxPTRSActor_UeVectorToUnity(spunUe);
+}
+
 float3 L2FxPTRSActor_TransformPositionUnity(
     float3 localPositionUnity,
     float3 ownerLocationUe,

@@ -54,6 +54,37 @@
 //   Rule of thumb: engine byte = BGRA, engine multiplier vector = RGB (XYZ),
 //                  this shader = RGB float4. Keep RGB here; never reorder.
 //
+// !!! TEXTURE sRGB — THE #2 MISTAKE (core vs soft gel / "lamp without aura") !!!
+//   L2 Interlude (D3D9 fixed-function) multiplies atlas texels ~as authored bytes:
+//       out = tex * vertexColor   (PTDS_Brighten: Blend One OneMinusSrcColor)
+//   Unity URP samples sRGB textures into linear. Dim soft "gel" / plasma around a
+//   bright core is crushed (~8–10× darker); only the hot core remains visible.
+//   Raising _RgbBoost to ~8 is a false fix — it compensates gamma decode.
+//
+//   RULE: import L2 particle/effect atlases as Linear (Inspector: sRGB = OFF).
+//     Path family: Assets/Resources/Data/SysTextures/LineageEffectsTextures/fx_m_t*
+//     Also *_A variants when RGB carries color/plasma (not UI / character albedo).
+//   Do NOT disable sRGB on UI icons, skins, or PBR albedo.
+//
+//   VERIFIED EXAMPLE (2026-07-18):
+//     Effect:   it_healing_potion_ta / SpriteEmitter7 Name="kirakira"
+//     Texture:  LineageEffectsTextures/fx_m_t0005.png
+//               (atlas cells SubdivisionStart..End = 6..8: white core + blue gel)
+//     ColorMul: (1.0, 0.553, 0.120) from .uc — formula OK; gel missing was sRGB.
+//     Fix:      TextureImporter sRGBTexture = 0  →  gel + core visible at _RgbBoost=1.
+//     Same atlas with sRGB=1: only the center "lamp", gel invisible without Boost≈8.
+//
+// !!! COLORSPACE Linear — THE #3 MISTAKE (peak washes white / "zebra") !!!
+//   Even with atlas sRGB OFF, ColorMul/ColorScale midtones (e.g. G=0.553) are
+//   still L2 display/gamma numbers. In Unity Linear they read too bright → peak
+//   looks white while mid-life looks OK. Do NOT hack Fade or crush with _RgbBoost.
+//   After this facade's FullKeys/WithScale/White, optionally apply:
+//     #include "L2FxSpriteColorGammaLinear.hlsl"
+//     color = L2Fx_SpriteColor_ApplyGammaToLinearIfEnabled(color, _L2SpriteColorGammaToLinear);
+//   Verified: it_healing_potion_ta SpriteEmitter7 kirakira; also MeshEmitter0 Wave
+//   + MeshEmitter2 needlelight (mat toggle ON). FX + sRGB tex OFF —
+//   see L2FxSpriteColorGammaLinear.hlsl for full contract.
+//
 // INPUTS ARE 1:1 WITH .uc: every uniform equals one SpriteEmitter field. Copy
 // authored .uc values straight into the material; do not convert or rescale.
 //

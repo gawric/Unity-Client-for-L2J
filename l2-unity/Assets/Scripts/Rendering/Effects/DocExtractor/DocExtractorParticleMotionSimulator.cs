@@ -46,6 +46,18 @@ public static class DocExtractorParticleMotionSimulator
     private static readonly int FadeoutStartTimeId = Shader.PropertyToID("_FadeoutStartTime");
     private static readonly int ColorMultMinId = Shader.PropertyToID("_ColorMultMin");
     private static readonly int ColorMultMaxId = Shader.PropertyToID("_ColorMultMax");
+    private static readonly int ColorMulMinId = Shader.PropertyToID("_ColorMulMin");
+    private static readonly int ColorMulMaxId = Shader.PropertyToID("_ColorMulMax");
+    private static readonly int ColorScaleCountId = Shader.PropertyToID("_ColorScaleCount");
+    private static readonly int ColorScaleParamId = Shader.PropertyToID("_ColorScaleParam");
+    private static readonly int ColorKey0Id = Shader.PropertyToID("_ColorKey0");
+    private static readonly int ColorKey1TimeId = Shader.PropertyToID("_ColorKey1Time");
+    private static readonly int ColorKey1Id = Shader.PropertyToID("_ColorKey1");
+    private static readonly int ColorKey2TimeId = Shader.PropertyToID("_ColorKey2Time");
+    private static readonly int ColorKey2Id = Shader.PropertyToID("_ColorKey2");
+    private static readonly int ColorKey3TimeId = Shader.PropertyToID("_ColorKey3Time");
+    private static readonly int ColorKey3Id = Shader.PropertyToID("_ColorKey3");
+    private static readonly int OpacityId = Shader.PropertyToID("_Opacity");
 
     private const float SpinDisabledSentinel = -11796480f;
     private const float DegToRad = 0.01745329252f;
@@ -68,9 +80,10 @@ public static class DocExtractorParticleMotionSimulator
         // Color mirror of the shader vertex path (in_Color0 == L2 runtimeColorA8 analog).
         public Vector3 ColorMultiplier; // (R, G, B), fixed at spawn from ColorMultRange
         public float ColorMultiplierA;
+        public float Opacity;            // .uc Opacity (draw-stage; not in L2 runtimeColorA8)
         public float HdrPeak;
-        public float LifeAlpha;          // multiplicative fade (Unity), 0..1
-        public Color RuntimeColorRgba;   // colorMult * colorScale * lifeAlpha, 0..1 RGBA
+        public float LifeAlpha;          // post-fade alpha (A8), 0..1
+        public Color RuntimeColorRgba;   // ColorScale*ColorMul - fade (A8 mirror), 0..1 RGBA
     }
 
     public static bool TryEvaluate(
@@ -138,9 +151,9 @@ public static class DocExtractorParticleMotionSimulator
         return true;
     }
 
-    // Mirrors TeleportCaSpriteUpline.shader runtime path via L2FxSpriteColorFade.hlsl:
-    // per-channel random ColorMultiplier + SUBTRACTIVE fade (fade-to-black on all RGBA).
-    // This is Unity's analog of the L2 engine runtimeColorA8 (@+0xA8) the parser compares.
+    // Mirrors L2Fx_SpriteColorFade_FullKeys (engine runtimeColorA8 @+0xA8):
+    // ColorScale(+Repeats) -> * ColorMultiplier -> subtractive FadeIn/Out.
+    // Opacity is NOT folded into A8 (engine draw-stage only; Brighten ignores A for RGB).
     private static void ComputeColor(
         Material mat,
         float seed,
@@ -151,8 +164,8 @@ public static class DocExtractorParticleMotionSimulator
         float ageNorm,
         ref MotionSample sample)
     {
-        Color multMin = mat.HasProperty(ColorMultMinId) ? mat.GetColor(ColorMultMinId) : new Color(0.5f, 0.5f, 0.8f, 1f);
-        Color multMax = mat.HasProperty(ColorMultMaxId) ? mat.GetColor(ColorMultMaxId) : new Color(0.7f, 0.7f, 1.0f, 1f);
+        Color multMin = ReadColorMulMin(mat);
+        Color multMax = ReadColorMulMax(mat);
 
         // L2Fx_ApplyColorMultiplier: independent random per channel (seed, seed+1, seed+2).
         float r = RandomRange(new Vector2(multMin.r, multMax.r), seed, startTime, 197f);
@@ -161,12 +174,132 @@ public static class DocExtractorParticleMotionSimulator
 
         sample.ColorMultiplier = new Vector3(r, g, b);
         sample.ColorMultiplierA = 1f;
+        sample.Opacity = mat.HasProperty(OpacityId) ? mat.GetFloat(OpacityId) : 1f;
         sample.HdrPeak = Mathf.Max(r, Mathf.Max(g, b));
 
-        // Subtractive fade (L2Fx_SpriteColorFade_Apply): spawn color (a=1) minus scalar.
-        Color runtime = ApplySubtractiveFade(mat, new Color(r, g, b, 1f), age, lifetime);
+        Color scale = SampleColorScaleFull(mat, ageNorm);
+        Color spawn = new Color(scale.r * r, scale.g * g, scale.b * b, scale.a);
+        Color runtime = ApplySubtractiveFade(mat, spawn, age, lifetime);
         sample.RuntimeColorRgba = runtime;
         sample.LifeAlpha = runtime.a;
+    }
+
+    /// <summary>
+    /// Color-only mirror of L2Fx_SpriteColorFade_FullKeys for snapshot compare
+    /// (ColorScale*ColorMul - Fade). Opacity is reported separately and is not in A8.
+    /// </summary>
+    public static bool TryEvaluateColor(
+        Material mat,
+        float seed,
+        float startTime,
+        float ageSeconds,
+        float lifetimeSeconds,
+        out Vector3 colorMultiplier,
+        out float hdrPeak,
+        out float opacity,
+        out Color runtimeColorRgba)
+    {
+        colorMultiplier = Vector3.one;
+        hdrPeak = 1f;
+        opacity = 1f;
+        runtimeColorRgba = Color.white;
+        if (mat == null)
+        {
+            return false;
+        }
+
+        MotionSample sample = default;
+        float lifetime = Mathf.Max(1e-4f, lifetimeSeconds);
+        float ageNorm = Mathf.Clamp01(ageSeconds / lifetime);
+        ComputeColor(mat, seed, startTime, ageSeconds, 0f, lifetime, ageNorm, ref sample);
+        colorMultiplier = sample.ColorMultiplier;
+        hdrPeak = sample.HdrPeak;
+        opacity = sample.Opacity;
+        runtimeColorRgba = sample.RuntimeColorRgba;
+        return true;
+    }
+
+    private static Color ReadColorMulMin(Material mat)
+    {
+        if (mat.HasProperty(ColorMulMinId))
+        {
+            return mat.GetColor(ColorMulMinId);
+        }
+
+        if (mat.HasProperty(ColorMultMinId))
+        {
+            return mat.GetColor(ColorMultMinId);
+        }
+
+        return new Color(0.5f, 0.5f, 0.8f, 1f);
+    }
+
+    private static Color ReadColorMulMax(Material mat)
+    {
+        if (mat.HasProperty(ColorMulMaxId))
+        {
+            return mat.GetColor(ColorMulMaxId);
+        }
+
+        if (mat.HasProperty(ColorMultMaxId))
+        {
+            return mat.GetColor(ColorMultMaxId);
+        }
+
+        return new Color(0.7f, 0.7f, 1.0f, 1f);
+    }
+
+    // CPU mirror of L2Fx_SampleColorScale (L2FxEmitterSpawn.hlsl).
+    private static Color SampleColorScaleFull(Material mat, float ageNorm)
+    {
+        int count = mat.HasProperty(ColorScaleCountId) ? Mathf.RoundToInt(mat.GetFloat(ColorScaleCountId)) : 0;
+        if (count <= 0)
+        {
+            return Color.white;
+        }
+
+        float param = mat.HasProperty(ColorScaleParamId) ? mat.GetFloat(ColorScaleParamId) : 0f;
+        float sp = Mathf.Repeat((param + 1f) * Mathf.Clamp01(ageNorm), 1f);
+
+        Color c0 = mat.HasProperty(ColorKey0Id) ? mat.GetColor(ColorKey0Id) : Color.white;
+        float t1 = mat.HasProperty(ColorKey1TimeId) ? mat.GetFloat(ColorKey1TimeId) : 1f;
+        Color c1 = mat.HasProperty(ColorKey1Id) ? mat.GetColor(ColorKey1Id) : Color.white;
+        float t2 = mat.HasProperty(ColorKey2TimeId) ? mat.GetFloat(ColorKey2TimeId) : 1f;
+        Color c2 = mat.HasProperty(ColorKey2Id) ? mat.GetColor(ColorKey2Id) : Color.white;
+        float t3 = mat.HasProperty(ColorKey3TimeId) ? mat.GetFloat(ColorKey3TimeId) : 1f;
+        Color c3 = mat.HasProperty(ColorKey3Id) ? mat.GetColor(ColorKey3Id) : Color.white;
+
+        float[] times = { 0f, t1, t2, t3 };
+        Color[] colors = { c0, c1, c2, c3 };
+        count = Mathf.Clamp(count, 1, 4);
+
+        int idx = 0;
+        while (idx < count && times[idx] < sp)
+        {
+            idx++;
+        }
+
+        Color prevCol;
+        float prevT;
+        Color nextCol;
+        float nextT;
+        if (idx == 0)
+        {
+            prevCol = Color.white;
+            prevT = 0f;
+            nextCol = colors[0];
+            nextT = times[0];
+        }
+        else
+        {
+            prevCol = colors[idx - 1];
+            prevT = times[idx - 1];
+            nextCol = idx < count ? colors[idx] : prevCol;
+            nextT = idx < count ? times[idx] : prevT + 1e-4f;
+        }
+
+        float ts = (sp - prevT) / Mathf.Max(nextT - prevT, 1e-4f);
+        return Color.Lerp(prevCol, nextCol, ts);
     }
 
     // Mirror of L2Fx_SpriteColorFade_Apply (L2FxSpriteColorFade.hlsl): subtract the same
