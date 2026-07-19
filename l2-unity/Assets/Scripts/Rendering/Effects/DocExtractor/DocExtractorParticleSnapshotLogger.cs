@@ -54,6 +54,7 @@ public static class DocExtractorParticleSnapshotLogger
         public float Se0TickWorldK = 1.8f;
         public bool Se0L2MotionReplayDiagnosticLogged;
         public bool WaveAxisDiagLogged;
+        public bool WavePivotDiagLogged;
         public int WaveBurstIndex;
         public int WaveSpawnSlotsThisBurst;
         public readonly List<float> WaveBurstLocZ = new List<float>(5);
@@ -87,7 +88,7 @@ public static class DocExtractorParticleSnapshotLogger
         }
 
         return ParticleGroupLifetimeDebug.ShouldTraceUpline(group.name, group.OwnerParticle, group.transform)
-            || ShouldTraceHealingPotionLayer(group.name, group.transform);
+            || ShouldTracePotionLayer(group.name, group.transform);
     }
 
     public static bool ShouldTrace(ParticleSingle single)
@@ -97,10 +98,10 @@ public static class DocExtractorParticleSnapshotLogger
             return false;
         }
 
-        return ShouldTraceHealingPotionLayer(single.name, single.transform);
+        return ShouldTracePotionLayer(single.name, single.transform);
     }
 
-    private static bool ShouldTraceHealingPotionLayer(string layerName, Transform transform)
+    private static bool ShouldTracePotionLayer(string layerName, Transform transform)
     {
         if (string.IsNullOrEmpty(layerName))
         {
@@ -112,6 +113,7 @@ public static class DocExtractorParticleSnapshotLogger
             layerName.IndexOf("SpriteEmitter2", StringComparison.OrdinalIgnoreCase) >= 0 ||
             layerName.IndexOf("SpriteEmitter7", StringComparison.OrdinalIgnoreCase) >= 0 ||
             layerName.IndexOf("MeshEmitter0", StringComparison.OrdinalIgnoreCase) >= 0 ||
+            layerName.IndexOf("MeshEmitter2", StringComparison.OrdinalIgnoreCase) >= 0 ||
             layerName.IndexOf("MeshEmitter3", StringComparison.OrdinalIgnoreCase) >= 0;
         if (!isTargetLayer)
         {
@@ -121,14 +123,40 @@ public static class DocExtractorParticleSnapshotLogger
         Transform current = transform;
         for (int depth = 0; current != null && depth < 16; depth++, current = current.parent)
         {
-            if (!string.IsNullOrEmpty(current.name) &&
-                current.name.IndexOf("it_healing_potion", StringComparison.OrdinalIgnoreCase) >= 0)
+            if (string.IsNullOrEmpty(current.name))
+            {
+                continue;
+            }
+
+            if (current.name.IndexOf("it_healing_potion", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                current.name.IndexOf("it_quick_step_potion", StringComparison.OrdinalIgnoreCase) >= 0)
             {
                 return true;
             }
         }
 
         return false;
+    }
+
+    private static bool IsMeshEmitter3CalibMaterial(Material mat)
+    {
+        // Healing MeshEmitter3 calib uses _StartSize + ColorKey0..5.
+        // Needlelight also has _StartSize but only ColorKey0/1 — must not enter ME3 sample path.
+        return mat != null &&
+               mat.HasProperty("_StartSize") &&
+               mat.HasProperty("_ColorKey5");
+    }
+
+    private static bool IsNeedlelightMeshMaterial(ParticleGroup group, Material mat)
+    {
+        if (mat != null && mat.HasProperty("_StartSize") && !mat.HasProperty("_ColorKey5"))
+        {
+            return true;
+        }
+
+        return group != null &&
+               !string.IsNullOrEmpty(group.name) &&
+               group.name.IndexOf("MeshEmitter2", StringComparison.OrdinalIgnoreCase) >= 0;
     }
 
     public static void OnPlayPart(ParticleGroup group)
@@ -180,6 +208,7 @@ public static class DocExtractorParticleSnapshotLogger
         session.Se0TickParticleTime = 0f;
         session.Se0L2MotionReplayDiagnosticLogged = false;
         session.WaveAxisDiagLogged = false;
+        session.WavePivotDiagLogged = false;
         session.WaveBurstIndex += 1;
         session.WaveSpawnSlotsThisBurst = 0;
         session.WaveBurstLocZ.Clear();
@@ -427,9 +456,15 @@ public static class DocExtractorParticleSnapshotLogger
             return;
         }
 
-        if (mat.HasProperty("_StartSize"))
+        if (IsMeshEmitter3CalibMaterial(mat))
         {
             WriteMeshEmitter3Sample(single, session, renderer, mat, now, shaderStartTime, seed);
+            return;
+        }
+
+        if (mat.HasProperty("_StartSize"))
+        {
+            // Needlelight / other _StartSize meshes that are not ME3 calib.
             return;
         }
 
@@ -816,9 +851,16 @@ public static class DocExtractorParticleSnapshotLogger
             return;
         }
 
-        if (mat.HasProperty("_StartSize"))
+        // MeshEmitter3 calib ring (6 ColorScale keys). Needlelight also has _StartSize but only Key0/1.
+        if (IsMeshEmitter3CalibMaterial(mat))
         {
             WriteMeshEmitter3Sample(group, session, slot, renderer, mat, now, shaderStartTime, seed, isSpawnEvent: force);
+            return;
+        }
+
+        // Potion needlelight (MeshEmitter2): traced for session, but not ME3 ColorKey path.
+        if (IsNeedlelightMeshMaterial(group, mat))
+        {
             return;
         }
 
@@ -1990,9 +2032,10 @@ public static class DocExtractorParticleSnapshotLogger
             slot,
             session.TickCounter,
             Environment.NewLine);
+        string effectName = ResolveEffectName(group.OwnerParticle);
         body.AppendLine(
             "  aEmitter=" + FormatPointer(group) +
-            " aEmitterName=ParticleGroup/MeshEmitter0 effect=UnityEffect.it_healing_potion_ta spawnKind=self");
+            " aEmitterName=ParticleGroup/MeshEmitter0 effect=" + effectName + " spawnKind=self");
         body.AppendLine(
             "  subEmitter=" + FormatPointer(renderer) +
             " layerIndex=2 kind=Mesh name=Wave class=MeshEmitter note=L2 log name=MeshEmitter4");
@@ -2081,7 +2124,249 @@ public static class DocExtractorParticleSnapshotLogger
             scaleZ: startSizeZ * sizeMul * worldK,
             runtimeRotUru,
             particleTime);
+        AppendWavePivotShiftDiagnostics(
+            body,
+            session,
+            group,
+            renderer,
+            locLocalUe,
+            motionUnity);
         Append(body.ToString());
+    }
+
+    /// <summary>
+    /// Separates Wave "looks shifted" into attach/origin vs particle locLocal vs mesh bounds bias.
+    /// Written once per EFFECT SESSION into Unity_ParticleSnapshot.log.
+    /// </summary>
+    private static void AppendWavePivotShiftDiagnostics(
+        StringBuilder body,
+        GroupSession session,
+        ParticleGroup group,
+        Renderer renderer,
+        Vector3 locLocalUe,
+        Vector3 motionUnity)
+    {
+        if (session.WavePivotDiagLogged)
+        {
+            return;
+        }
+
+        session.WavePivotDiagLogged = true;
+
+        Transform emitterTf = group != null ? group.transform : null;
+        Transform rendererTf = renderer != null ? renderer.transform : emitterTf;
+        Transform effectRoot = FindPotionEffectRoot(emitterTf);
+        L2Particle owner = group != null ? group.OwnerParticle : null;
+        Transform ownerTf = group != null && group.FollowTarget != null
+            ? group.FollowTarget
+            : owner != null
+                ? owner.transform
+                : null;
+
+        Vector3 emitterWorld = emitterTf != null ? emitterTf.position : Vector3.zero;
+        Vector3 rendererWorld = rendererTf != null ? rendererTf.position : emitterWorld;
+        Vector3 effectRootWorld = effectRoot != null ? effectRoot.position : emitterWorld;
+        Vector3 particlePivotWorld = rendererWorld + motionUnity;
+
+        Vector3 charCenterWorld = Vector3.zero;
+        string charCenterSource = "none";
+        if (TryResolveCharacterVisualCenter(ownerTf, out charCenterWorld, out charCenterSource))
+        {
+            // ok
+        }
+        else if (ownerTf != null)
+        {
+            charCenterWorld = ownerTf.position;
+            charCenterSource = "ownerRoot.position";
+        }
+        else
+        {
+            charCenterWorld = effectRootWorld;
+            charCenterSource = "effectRoot.fallback";
+        }
+
+        Vector3 emitterVsChar = emitterWorld - charCenterWorld;
+        Vector2 emitterVsCharHoriz = new Vector2(emitterVsChar.x, emitterVsChar.z);
+        float emitterHorizMeters = emitterVsCharHoriz.magnitude;
+
+        Vector3 meshCenterLocal = Vector3.zero;
+        Vector3 meshCenterWorld = particlePivotWorld;
+        float meshCentroidHorizMeters = 0f;
+        string meshName = "none";
+        MeshFilter filter = renderer != null ? renderer.GetComponent<MeshFilter>() : null;
+        if (filter != null && filter.sharedMesh != null)
+        {
+            meshName = filter.sharedMesh.name;
+            meshCenterLocal = filter.sharedMesh.bounds.center;
+            meshCenterWorld = rendererTf != null
+                ? rendererTf.TransformPoint(meshCenterLocal) + motionUnity
+                : particlePivotWorld + meshCenterLocal;
+            Vector3 meshVsPivot = meshCenterWorld - particlePivotWorld;
+            meshCentroidHorizMeters = new Vector2(meshVsPivot.x, meshVsPivot.z).magnitude;
+        }
+
+        const float attachShiftWarnMeters = 0.05f;
+        const float meshBiasWarnMeters = 0.03f;
+        bool attachShifted = emitterHorizMeters >= attachShiftWarnMeters;
+        bool meshShifted = meshCentroidHorizMeters >= meshBiasWarnMeters;
+        bool spawnXyZero = Mathf.Abs(locLocalUe.x) < 1e-4f && Mathf.Abs(locLocalUe.y) < 1e-4f;
+
+        string verdict;
+        if (attachShifted && meshShifted)
+        {
+            verdict = "BOTH_ATTACH_AND_MESH";
+        }
+        else if (attachShifted)
+        {
+            verdict = "SHIFT_ATTACH_HORIZ note=rings follow effect origin; fix composite spawn/attachment not Wave locLocal";
+        }
+        else if (meshShifted)
+        {
+            verdict = "SHIFT_MESH_BOUNDS note=particle pivot centered but mesh AABB center off";
+        }
+        else if (!spawnXyZero)
+        {
+            verdict = "SHIFT_SPAWN_XY note=unexpected locLocal XY (UC Wave should be 0,0,z)";
+        }
+        else
+        {
+            verdict = "OK_CENTERED note=emitter≈charCenter XY; spawn XY=0; mesh bias small";
+        }
+
+        body.AppendFormat(
+            CultureInfo.InvariantCulture,
+            "  pivotDiag locLocalUe=({0:F4}, {1:F4}, {2:F4}) spawnXyZero={3}{4}" +
+            "  pivotDiag emitterWorldUnity=({5:F4}, {6:F4}, {7:F4}) rendererWorldUnity=({8:F4}, {9:F4}, {10:F4}){4}" +
+            "  pivotDiag effectRoot='{11}' worldUnity=({12:F4}, {13:F4}, {14:F4}){4}" +
+            "  pivotDiag owner='{15}' follow='{16}' charCenterUnity=({17:F4}, {18:F4}, {19:F4}) source={20}{4}" +
+            "  pivotDiag emitterVsCharUnity=({21:F4}, {22:F4}, {23:F4}) horizMeters={24:F4}{4}" +
+            "  pivotDiag particlePivotWorldUnity=({25:F4}, {26:F4}, {27:F4}) mesh='{28}' meshCenterLocal=({29:F4}, {30:F4}, {31:F4}) meshCentroidHorizMeters={32:F4}{4}" +
+            "  pivotDiag localChain={33}{4}" +
+            "  pivotDiagVerdict={34}{4}",
+            locLocalUe.x, locLocalUe.y, locLocalUe.z,
+            spawnXyZero ? 1 : 0,
+            Environment.NewLine,
+            emitterWorld.x, emitterWorld.y, emitterWorld.z,
+            rendererWorld.x, rendererWorld.y, rendererWorld.z,
+            effectRoot != null ? effectRoot.name : "null",
+            effectRootWorld.x, effectRootWorld.y, effectRootWorld.z,
+            owner != null ? owner.name : "null",
+            group != null && group.FollowTarget != null ? group.FollowTarget.name : "null",
+            charCenterWorld.x, charCenterWorld.y, charCenterWorld.z,
+            charCenterSource,
+            emitterVsChar.x, emitterVsChar.y, emitterVsChar.z,
+            emitterHorizMeters,
+            particlePivotWorld.x, particlePivotWorld.y, particlePivotWorld.z,
+            meshName,
+            meshCenterLocal.x, meshCenterLocal.y, meshCenterLocal.z,
+            meshCentroidHorizMeters,
+            BuildLocalPositionChain(rendererTf, effectRoot),
+            verdict);
+    }
+
+    private static Transform FindPotionEffectRoot(Transform start)
+    {
+        Transform current = start;
+        for (int depth = 0; current != null && depth < 16; depth++, current = current.parent)
+        {
+            if (string.IsNullOrEmpty(current.name))
+            {
+                continue;
+            }
+
+            if (current.name.IndexOf("it_healing_potion", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                current.name.IndexOf("it_quick_step_potion", StringComparison.OrdinalIgnoreCase) >= 0)
+            {
+                return current;
+            }
+        }
+
+        return start;
+    }
+
+    private static bool TryResolveCharacterVisualCenter(
+        Transform ownerRoot,
+        out Vector3 centerWorld,
+        out string source)
+    {
+        centerWorld = Vector3.zero;
+        source = "none";
+        if (ownerRoot == null)
+        {
+            return false;
+        }
+
+        CharacterController controller = ownerRoot.GetComponent<CharacterController>();
+        if (controller == null)
+        {
+            controller = ownerRoot.GetComponentInChildren<CharacterController>(true);
+        }
+
+        if (controller != null)
+        {
+            centerWorld = controller.transform.TransformPoint(controller.center);
+            source = "CharacterController.center";
+            return true;
+        }
+
+        Renderer[] renderers = ownerRoot.GetComponentsInChildren<Renderer>(true);
+        bool hasBounds = false;
+        Bounds bounds = default;
+        for (int i = 0; i < renderers.Length; i++)
+        {
+            Renderer r = renderers[i];
+            if (r == null || r.GetComponentInParent<BaseEffect>() != null)
+            {
+                continue;
+            }
+
+            if (!hasBounds)
+            {
+                bounds = r.bounds;
+                hasBounds = true;
+            }
+            else
+            {
+                bounds.Encapsulate(r.bounds);
+            }
+        }
+
+        if (hasBounds && bounds.size.sqrMagnitude > 1e-5f)
+        {
+            centerWorld = bounds.center;
+            source = "characterRendererBounds.center";
+            return true;
+        }
+
+        return false;
+    }
+
+    private static string BuildLocalPositionChain(Transform from, Transform stopAt)
+    {
+        if (from == null)
+        {
+            return "null";
+        }
+
+        var parts = new List<string>(8);
+        Transform current = from;
+        for (int depth = 0; current != null && depth < 12; depth++)
+        {
+            Vector3 lp = current.localPosition;
+            parts.Add(string.Format(
+                CultureInfo.InvariantCulture,
+                "{0}@({1:F4},{2:F4},{3:F4})",
+                current.name,
+                lp.x, lp.y, lp.z));
+            if (stopAt != null && current == stopAt)
+            {
+                break;
+            }
+
+            current = current.parent;
+        }
+
+        return string.Join(" <- ", parts);
     }
 
     // Mirrors L2Fx_MeshSpin_RotateUnityLocalPositionPitchYawRoll for the
