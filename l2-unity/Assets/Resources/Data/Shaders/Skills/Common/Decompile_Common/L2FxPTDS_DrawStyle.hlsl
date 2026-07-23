@@ -24,5 +24,12 @@
 //   AlphaMod:    Blend One OneMinusSrcAlpha
 //   Darken:      Blend Zero OneMinusSrcColor
 //   Brighten:    Blend One OneMinusSrcColor
+//
+// Opacity + Brighten (smog / shot_N_atk SpriteEmitter325, live e_u505_c):
+//   Blend ignores vertex A for coverage. UpdateParticles with AlphaBlend=0
+//   multiplies runtimeColorA8.RGB by Opacity (not A).
+//   In L2Fx_SpriteColorFade_FullKeys pass alphaBlend=0 so ApplyOpacity does
+//   color.rgb *= Opacity. Do NOT use alphaBlend=1 (A-only) with this blend —
+//   smoke stays too dense. See L2FxSpriteColorFade.hlsl ApplyOpacity.
 
 #endif

@@ -5,7 +5,7 @@ using UnityEngine;
 public class SetupDurationHelper
 {
     public const int ScrollOfEscapeSkillId = 2013;
-    public const int UseHealPotionEscapeSkillId = 2031;
+    public static readonly HashSet<int> PotionSkillIds = new HashSet<int> { 2031  , 2011};
 
     public static bool IsLongCastSkill(MagicSkillUse useSkill)
     {
@@ -14,7 +14,7 @@ public class SetupDurationHelper
 
     public static bool IsUsePotion(MagicSkillUse useSkill)
     {
-        return useSkill != null && useSkill.SkillId == UseHealPotionEscapeSkillId;
+        return useSkill != null && PotionSkillIds.Contains(useSkill.SkillId);
     }
 
     public static void SetupLongCastDurationIfHitTimeNot0(MagicSkillUse useSkill, int objectId, Entity entity, AnimationCombo selfCombo)

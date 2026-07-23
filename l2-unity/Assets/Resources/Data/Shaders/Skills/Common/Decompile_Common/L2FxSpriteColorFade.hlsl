@@ -88,9 +88,8 @@
 // INPUTS ARE 1:1 WITH .uc: every uniform equals one SpriteEmitter field. Copy
 // authored .uc values straight into the material; do not convert or rescale.
 //
-// WHAT THIS DOES NOT DO: mesh emitters (use L2FxMesh* helpers); it also does not
-// bake Opacity into the particle color the way the engine skips it — instead the
-// Opacity helper folds it into final alpha for convenience (see ApplyOpacity).
+// WHAT THIS DOES NOT DO: mesh emitters (use L2FxMesh* helpers). Opacity is applied
+// in ApplyOpacity like UpdateParticles: AlphaBlend→A, Brighten/0→RGB (smog live).
 // ═══════════════════════════════════════════════════════════════════════════
 //
 // ─── HOW TO USE (быстрый старт) ──────────────────────────────────────────────
@@ -141,7 +140,10 @@
 //     Same subtractive mirror of fade-out, applied equally to R,G,B,A.
 //   * e_u031_a specifically has FadeIn=OFF — set _FadeIn=0 for that effect.
 //     Enable _FadeIn when .uc has FadeIn=true (now confirmed accurate).
-//   * Opacity / OpacityRatio are NOT baked into the particle color in the engine.
+//   * Opacity: UpdateParticles (+836 AlphaBlend). Modes 1/2/4 scale A only;
+//     else (Brighten / AlphaBlend=0) scale RGB into runtimeColorA8. Live smog
+//     Opacity=0.6: A8.rgb *= 0.6, A from Fade only — see ApplyOpacity.
+//     e_u031_a Translucent may leave A=255 at spawn; draw-stage still applies.
 //     If you need them, apply them at the material/blend stage, not here.
 //
 // ─── NOTE: effects WITH a real ColorScale gradient ───────────────────────────
@@ -315,14 +317,37 @@ float4 L2Fx_SpriteColorFade_WithScale(
         fadeOutStart);
 }
 
-// ─── Opacity (draw-stage only) ───────────────────────────────────────────────
-// Opacity / OpacityRatio are NOT stored in runtimeColorA8 by the engine; they act
-// at the render/blend stage. This helper folds .uc Opacity * OpacityRatio into the
-// final alpha so a single material output covers the whole L2 look.
-float4 L2Fx_SpriteColorFade_ApplyOpacity(float4 color, float opacity, float opacityRatio)
+// ─── Opacity (UpdateParticles → runtimeColorA8) ──────────────────────────────
+// LIVE (e_u505_c smog, PTDS_Brighten, Opacity=0.6): after ColorScale*Mul*Fade,
+// UpdateParticles scales RGB by Opacity*OpacityRatio when emitter AlphaBlend
+// byte (+836) is NOT in {1,2,4}. Alpha stays from fade only.
+//   Tick3 age=0.0403: fade → A=85; RGB after *0.6 → A8=(17,24,7,85) PASS.
+// AlphaBlend modes 1/2/4 (typical AlphaBlend draw): scale A only; RGB untouched.
+// e_u031_a Translucent Opacity note (A stays 255 at spawn) still holds for
+// AlphaBlend-style paths; Brighten smog bakes Opacity into A8.rgb.
+float4 L2Fx_SpriteColorFade_ApplyOpacity(
+    float4 color,
+    float opacity,
+    float opacityRatio,
+    float alphaBlend)
 {
     float o = saturate(opacity) * saturate(opacityRatio);
-    color.a *= o;
+    if (o >= 0.9999)
+    {
+        return color;
+    }
+
+    // Hex-Rays MeshSpawning_* block: +836 in {1,2,4} → A; else → RGB.
+    // Callers pass 0/1 toggles; treat >=0.5 as alpha-scaling path.
+    if (alphaBlend >= 0.5)
+    {
+        color.a *= o;
+    }
+    else
+    {
+        color.rgb *= o;
+    }
+
     return color;
 }
 
@@ -398,8 +423,8 @@ float4 L2Fx_SpriteColorFade_Full(
         seed,
         startTime);
 
-    // 4. Opacity (draw stage).
-    return L2Fx_SpriteColorFade_ApplyOpacity(col, opacity, opacityRatio);
+    // 4. Opacity (UpdateParticles): AlphaBlend→A, else→RGB (Brighten smog).
+    return L2Fx_SpriteColorFade_ApplyOpacity(col, opacity, opacityRatio, alphaBlend);
 }
 
 // FULL PIPELINE (individual key uniforms): the recommended one-call entry point.

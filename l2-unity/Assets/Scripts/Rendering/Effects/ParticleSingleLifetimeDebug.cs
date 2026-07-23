@@ -11,6 +11,7 @@ public static class ParticleSingleLifetimeDebug
         "wh_heal",
         "wh_might",
         "wh_teleport",
+        "it_teleport",
         "wind_strike",
         "el_wind_strike",
         "it_healing_potion"

@@ -14,6 +14,12 @@ public static class DocExtractorSpriteEmitter0MotionSimulator
     private static readonly int StartTimeId = Shader.PropertyToID("_StartTime");
     private static readonly int SpriteMotionRandStateBitsId = Shader.PropertyToID("_SpriteMotionRandStateBits");
     private static readonly int StartLocationOffsetUuId = Shader.PropertyToID("_StartLocationOffsetUU");
+    private static readonly int StartLocationOffsetUcId = Shader.PropertyToID("_StartLocationOffsetUc");
+    private static readonly int StartLocationRangeXUcId = Shader.PropertyToID("_StartLocationRangeXUc");
+    private static readonly int StartLocationRangeYUcId = Shader.PropertyToID("_StartLocationRangeYUc");
+    private static readonly int StartLocationRangeZUcId = Shader.PropertyToID("_StartLocationRangeZUc");
+    private static readonly int StartVelocityRadialRangeUcId = Shader.PropertyToID("_StartVelocityRadialRangeUc");
+    private static readonly int VelocityLossRangeUcId = Shader.PropertyToID("_VelocityLossRangeUc");
     private static readonly int PolarThetaRangeUcId = Shader.PropertyToID("_PolarThetaRangeUc");
     private static readonly int PolarPhiRangeUcId = Shader.PropertyToID("_PolarPhiRangeUc");
     private static readonly int PolarRadiusRangeUcId = Shader.PropertyToID("_PolarRadiusRangeUc");
@@ -23,7 +29,11 @@ public static class DocExtractorSpriteEmitter0MotionSimulator
     private static readonly int AccelerationUcId = Shader.PropertyToID("_AccelerationUc");
     private static readonly int SpawnDeltaTimeId = Shader.PropertyToID("_SpawnDeltaTime");
     private static readonly int LifetimeRangeId = Shader.PropertyToID("_LifetimeRange");
+    private static readonly int InitialDelayRangeId = Shader.PropertyToID("_InitialDelayRange");
     private static readonly int SizeRangeId = Shader.PropertyToID("_SizeRange");
+    private static readonly int SizeRangeXUcId = Shader.PropertyToID("_SizeRangeXUc");
+    private static readonly int ColorMulMinId = Shader.PropertyToID("_ColorMulMin");
+    private static readonly int ColorMulMaxId = Shader.PropertyToID("_ColorMulMax");
     private static readonly int SizeScaleRepeatsId = Shader.PropertyToID("_SizeScaleRepeats");
     private static readonly int SizeKey0Id = Shader.PropertyToID("_SizeKey0");
     private static readonly int SizeKey1Id = Shader.PropertyToID("_SizeKey1");
@@ -43,6 +53,7 @@ public static class DocExtractorSpriteEmitter0MotionSimulator
         public Vector3 VelocityBeforePtvdUe;
         public Vector3 VelocityAfterPtvdUe;
         public Vector3 PtvdDirectionUe;
+        public Vector3 ColorMulRgb;
         public float LifetimeSeconds;
         public float SpawnSizeUU;
     }
@@ -61,8 +72,6 @@ public static class DocExtractorSpriteEmitter0MotionSimulator
         public Vector3 DisplacementUe;
     }
 
-    private static readonly int ColorMulMinId = Shader.PropertyToID("_ColorMulMin");
-
     public static bool IsSpriteEmitter0Material(Material mat)
     {
         // SE0 calib has StartLocationOffsetUU; kirakira SE7 shares _SpriteMotionRandStateBits
@@ -74,10 +83,43 @@ public static class DocExtractorSpriteEmitter0MotionSimulator
 
     public static bool IsKirakiraSpriteEmitter7Material(Material mat)
     {
+        // SE324/SE325 also have ColorMul + motion rand; exclude via OffsetUc / LocRange / VelLoss.
         return mat != null &&
                mat.HasProperty(SpriteMotionRandStateBitsId) &&
                mat.HasProperty(ColorMulMinId) &&
-               !mat.HasProperty(StartLocationOffsetUuId);
+               !mat.HasProperty(StartLocationOffsetUuId) &&
+               !IsShotNAtkSpriteEmitter324Material(mat) &&
+               !IsShotNAtkSpriteEmitter325Material(mat);
+    }
+
+    /// <summary>
+    /// shot_N_atk_v1_ta / SpriteEmitter324 "Particle": OffsetUc + Polar + PTVD2 + VelLoss.
+    /// Distinct from teleport upline (uses _SizeRangeXUc / _SizeRangeYUc, not _SizeRange).
+    /// </summary>
+    public static bool IsShotNAtkSpriteEmitter324Material(Material mat)
+    {
+        return mat != null &&
+               mat.HasProperty(SpriteMotionRandStateBitsId) &&
+               mat.HasProperty(StartLocationOffsetUcId) &&
+               mat.HasProperty(VelocityLossRangeUcId) &&
+               mat.HasProperty(SizeRangeId) &&
+               mat.HasProperty(PolarRadiusRangeUcId) &&
+               !mat.HasProperty(SizeRangeXUcId);
+    }
+
+    /// <summary>
+    /// shot_N_atk_v1_ta / SpriteEmitter325 "smog": shape0 LocRange stream + VelLoss, no Polar/PTVD.
+    /// </summary>
+    public static bool IsShotNAtkSpriteEmitter325Material(Material mat)
+    {
+        return mat != null &&
+               mat.HasProperty(SpriteMotionRandStateBitsId) &&
+               mat.HasProperty(VelocityLossRangeUcId) &&
+               mat.HasProperty(SizeRangeId) &&
+               mat.HasProperty(StartLocationRangeXUcId) &&
+               !mat.HasProperty(PolarRadiusRangeUcId) &&
+               !mat.HasProperty(StartLocationOffsetUcId) &&
+               !mat.HasProperty(SizeRangeXUcId);
     }
 
     public static bool TryEvaluate(
@@ -88,8 +130,13 @@ public static class DocExtractorSpriteEmitter0MotionSimulator
         out MotionSample sample)
     {
         sample = default;
+        bool isSe324 = IsShotNAtkSpriteEmitter324Material(mat);
+        bool isSe325 = IsShotNAtkSpriteEmitter325Material(mat);
         if (groupTransform == null ||
-            (!IsSpriteEmitter0Material(mat) && !IsKirakiraSpriteEmitter7Material(mat)))
+            (!IsSpriteEmitter0Material(mat) &&
+             !IsKirakiraSpriteEmitter7Material(mat) &&
+             !isSe324 &&
+             !isSe325))
         {
             return false;
         }
@@ -106,7 +153,11 @@ public static class DocExtractorSpriteEmitter0MotionSimulator
             return false;
         }
 
-        SpawnSnapshot spawn = EvaluateSpawn(mat, state);
+        SpawnSnapshot spawn = isSe325
+            ? EvaluateSpawnParticle325(mat, state)
+            : isSe324
+                ? EvaluateSpawnParticle324(mat, state)
+                : EvaluateSpawn(mat, state);
         float ageSeconds = Mathf.Max(0f, now - startTime);
         float ageNorm = Mathf.Clamp01(ageSeconds / Mathf.Max(1e-4f, spawn.LifetimeSeconds));
         float repeats = mat.HasProperty(SizeScaleRepeatsId) ? mat.GetFloat(SizeScaleRepeatsId) : 0f;
@@ -122,9 +173,21 @@ public static class DocExtractorSpriteEmitter0MotionSimulator
             ? ToVector3(mat.GetVector(AccelerationUcId))
             : Vector3.zero;
         sample.Spawn = spawn;
-        sample.DisplacementUe = DisplacementUe(spawn.VelocityAfterPtvdUe, accelerationUe, ageSeconds);
+        if (isSe324 || isSe325)
+        {
+            Vector3 lossUe = ToVector3(mat.GetVector(VelocityLossRangeUcId));
+            sample.DisplacementUe = DisplacementUeWithDrag(
+                spawn.VelocityAfterPtvdUe, accelerationUe, lossUe, ageSeconds);
+            sample.VelocityNowUe = VelocityNowWithDrag(
+                spawn.VelocityAfterPtvdUe, accelerationUe, lossUe, ageSeconds);
+        }
+        else
+        {
+            sample.DisplacementUe = DisplacementUe(spawn.VelocityAfterPtvdUe, accelerationUe, ageSeconds);
+            sample.VelocityNowUe = spawn.VelocityAfterPtvdUe + accelerationUe * ageSeconds;
+        }
+
         sample.LocLocalUe = spawn.SpawnPositionUe + sample.DisplacementUe;
-        sample.VelocityNowUe = spawn.VelocityAfterPtvdUe + accelerationUe * ageSeconds;
 
         float worldK = mat.HasProperty(WorldCalibrationId) ? mat.GetFloat(WorldCalibrationId) : 1.8f;
         Vector3 offsetUnity = UcPositionToUnityMetersInternal(sample.LocLocalUe, worldK);
@@ -185,6 +248,7 @@ public static class DocExtractorSpriteEmitter0MotionSimulator
             ptvdDirectionUe /= directionLength;
         }
 
+        // SE0 / mode 1: negated (PTVD_StartPositionAndOwner).
         Vector3 velocityAfterPtvdUe = directionLength > 1e-5f
             ? Vector3.Scale(-velocityBeforePtvdUe, ptvdDirectionUe)
             : Vector3.zero;
@@ -198,8 +262,145 @@ public static class DocExtractorSpriteEmitter0MotionSimulator
             VelocityBeforePtvdUe = velocityBeforePtvdUe,
             VelocityAfterPtvdUe = velocityAfterPtvdUe,
             PtvdDirectionUe = ptvdDirectionUe,
+            ColorMulRgb = Vector3.one,
             LifetimeSeconds = lifetimeSeconds,
             SpawnSizeUU = spawnSizeUU
+        };
+    }
+
+    /// <summary>
+    /// CPU mirror of SpriteEmitter324_Particle.shader spawn:
+    /// Vel → Polar → Lifetime → Size; OffsetUc+Polar; PTVD_OwnerAndStartPosition (no negate).
+    /// </summary>
+    public static SpawnSnapshot EvaluateSpawnParticle324(Material mat, uint stateBeforeSpawn)
+    {
+        uint state = stateBeforeSpawn;
+        Vector2 velX = ToMinMax(mat.GetVector(StartVelocityRangeXUcId));
+        Vector2 velY = ToMinMax(mat.GetVector(StartVelocityRangeYUcId));
+        Vector2 velZ = ToMinMax(mat.GetVector(StartVelocityRangeZUcId));
+        Vector3 rawVelocityUe = FRangeVectorGetRandYawPitchRoll(velX, velY, velZ, ref state);
+
+        Vector3 polarUe = SpritePolarGetRandUe(
+            ToMinMax(mat.GetVector(PolarThetaRangeUcId)),
+            ToMinMax(mat.GetVector(PolarPhiRangeUcId)),
+            ToMinMax(mat.GetVector(PolarRadiusRangeUcId)),
+            ref state);
+
+        Vector2 lifetimeRange = ToMinMax(mat.GetVector(LifetimeRangeId));
+        float lifetimeSeconds = FRangeGetRand(lifetimeRange, ref state);
+        Vector2 sizeRange = ToMinMax(mat.GetVector(SizeRangeId));
+        float spawnSizeUU = FRangeGetRand(sizeRange, ref state);
+
+        Vector3 offsetUe = mat.HasProperty(StartLocationOffsetUcId)
+            ? ToVector3(mat.GetVector(StartLocationOffsetUcId))
+            : Vector3.zero;
+        Vector3 spawnPositionUe = offsetUe + polarUe;
+        Vector3 accelerationUe = mat.HasProperty(AccelerationUcId)
+            ? ToVector3(mat.GetVector(AccelerationUcId))
+            : Vector3.zero;
+        float spawnDeltaTime = mat.HasProperty(SpawnDeltaTimeId) ? mat.GetFloat(SpawnDeltaTimeId) : 0.012f;
+        Vector3 velocityBeforePtvdUe = rawVelocityUe + accelerationUe * spawnDeltaTime;
+
+        Vector3 ptvdDirectionUe = spawnPositionUe;
+        float directionLength = ptvdDirectionUe.magnitude;
+        if (directionLength > 1e-5f)
+        {
+            ptvdDirectionUe /= directionLength;
+        }
+
+        Vector3 velocityAfterPtvdUe = directionLength > 1e-5f
+            ? Vector3.Scale(velocityBeforePtvdUe, ptvdDirectionUe)
+            : Vector3.zero;
+
+        return new SpawnSnapshot
+        {
+            AppRandStateBeforeSpawn = stateBeforeSpawn,
+            RawVelocityUe = rawVelocityUe,
+            PolarOffsetUe = polarUe,
+            SpawnPositionUe = spawnPositionUe,
+            VelocityBeforePtvdUe = velocityBeforePtvdUe,
+            VelocityAfterPtvdUe = velocityAfterPtvdUe,
+            PtvdDirectionUe = ptvdDirectionUe,
+            ColorMulRgb = Vector3.one,
+            LifetimeSeconds = lifetimeSeconds,
+            SpawnSizeUU = spawnSizeUU
+        };
+    }
+
+    /// <summary>
+    /// CPU mirror of SpriteEmitter325_Smog.shader / L2FxSpriteSpawnParticle shape0:
+    /// Vel → LocRange → +0x2FC → 2×zeroVec → ColorMul → Life → Delay → Radial → Size(vector.x).
+    /// No Polar / PTVD. VelocityAfter = raw + Accel*SpawnDeltaTime.
+    /// </summary>
+    public static SpawnSnapshot EvaluateSpawnParticle325(Material mat, uint stateBeforeSpawn)
+    {
+        uint state = stateBeforeSpawn;
+        Vector2 velX = ToMinMax(mat.GetVector(StartVelocityRangeXUcId));
+        Vector2 velY = ToMinMax(mat.GetVector(StartVelocityRangeYUcId));
+        Vector2 velZ = ToMinMax(mat.GetVector(StartVelocityRangeZUcId));
+        Vector3 rawVelocityUe = FRangeVectorGetRandYawPitchRoll(velX, velY, velZ, ref state);
+
+        Vector2 locX = mat.HasProperty(StartLocationRangeXUcId)
+            ? ToMinMax(mat.GetVector(StartLocationRangeXUcId))
+            : Vector2.zero;
+        Vector2 locY = mat.HasProperty(StartLocationRangeYUcId)
+            ? ToMinMax(mat.GetVector(StartLocationRangeYUcId))
+            : Vector2.zero;
+        Vector2 locZ = mat.HasProperty(StartLocationRangeZUcId)
+            ? ToMinMax(mat.GetVector(StartLocationRangeZUcId))
+            : Vector2.zero;
+        Vector3 locationUe = FRangeVectorGetRandYawPitchRoll(locX, locY, locZ, ref state);
+
+        // [6] +0x2FC [0,1]
+        FRangeGetRand(new Vector2(0f, 1f), ref state);
+        // [7..12] unused zero vectors
+        for (int i = 0; i < 6; i++)
+        {
+            AppFrand(ref state);
+        }
+
+        Vector2 mulX = mat.HasProperty(ColorMulMinId) && mat.HasProperty(ColorMulMaxId)
+            ? new Vector2(mat.GetVector(ColorMulMinId).x, mat.GetVector(ColorMulMaxId).x)
+            : new Vector2(0.716f, 0.716f);
+        Vector2 mulY = mat.HasProperty(ColorMulMinId) && mat.HasProperty(ColorMulMaxId)
+            ? new Vector2(mat.GetVector(ColorMulMinId).y, mat.GetVector(ColorMulMaxId).y)
+            : new Vector2(0.83f, 0.83f);
+        Vector2 mulZ = mat.HasProperty(ColorMulMinId) && mat.HasProperty(ColorMulMaxId)
+            ? new Vector2(mat.GetVector(ColorMulMinId).z, mat.GetVector(ColorMulMaxId).z)
+            : new Vector2(0.784f, 0.784f);
+        Vector3 colorMulRgb = FRangeVectorGetRandYawPitchRoll(mulX, mulY, mulZ, ref state);
+
+        float lifetimeSeconds = FRangeGetRand(ToMinMax(mat.GetVector(LifetimeRangeId)), ref state);
+        Vector2 delayRange = mat.HasProperty(InitialDelayRangeId)
+            ? ToMinMax(mat.GetVector(InitialDelayRangeId))
+            : Vector2.zero;
+        FRangeGetRand(delayRange, ref state);
+        Vector2 radialRange = mat.HasProperty(StartVelocityRadialRangeUcId)
+            ? ToMinMax(mat.GetVector(StartVelocityRadialRangeUcId))
+            : new Vector2(1f, 1f);
+        FRangeGetRand(radialRange, ref state);
+
+        Vector2 sizeRange = ToMinMax(mat.GetVector(SizeRangeId));
+        Vector3 sizeUu = FRangeVectorGetRandYawPitchRoll(sizeRange, sizeRange, sizeRange, ref state);
+
+        Vector3 accelerationUe = mat.HasProperty(AccelerationUcId)
+            ? ToVector3(mat.GetVector(AccelerationUcId))
+            : Vector3.zero;
+        float spawnDeltaTime = mat.HasProperty(SpawnDeltaTimeId) ? mat.GetFloat(SpawnDeltaTimeId) : 0.012f;
+        Vector3 velocity0Ue = rawVelocityUe + accelerationUe * spawnDeltaTime;
+
+        return new SpawnSnapshot
+        {
+            AppRandStateBeforeSpawn = stateBeforeSpawn,
+            RawVelocityUe = rawVelocityUe,
+            PolarOffsetUe = Vector3.zero,
+            SpawnPositionUe = locationUe,
+            VelocityBeforePtvdUe = velocity0Ue,
+            VelocityAfterPtvdUe = velocity0Ue,
+            PtvdDirectionUe = Vector3.zero,
+            ColorMulRgb = colorMulRgb,
+            LifetimeSeconds = lifetimeSeconds,
+            SpawnSizeUU = sizeUu.x
         };
     }
 
@@ -223,6 +424,57 @@ public static class DocExtractorSpriteEmitter0MotionSimulator
     {
         float t = Mathf.Max(0f, ageSeconds);
         return velocity0Ue * t + 0.5f * accelerationUe * t * t;
+    }
+
+    // Mirrors L2Fx_SpriteMotion_DisplacementUeWithDrag / DisplacementComponentWithDrag.
+    private static Vector3 DisplacementUeWithDrag(
+        Vector3 velocity0Ue,
+        Vector3 accelerationUe,
+        Vector3 lossPerSecUe,
+        float ageSeconds)
+    {
+        float t = Mathf.Max(0f, ageSeconds);
+        Vector3 res = Vector3.zero;
+        for (int i = 0; i < 3; i++)
+        {
+            float k = lossPerSecUe[i];
+            if (k > 1e-6f)
+            {
+                float vInf = accelerationUe[i] / k;
+                res[i] = vInf * t + (velocity0Ue[i] - vInf) * (1f - Mathf.Exp(-k * t)) / k;
+            }
+            else
+            {
+                res[i] = velocity0Ue[i] * t + 0.5f * accelerationUe[i] * t * t;
+            }
+        }
+
+        return res;
+    }
+
+    private static Vector3 VelocityNowWithDrag(
+        Vector3 velocity0Ue,
+        Vector3 accelerationUe,
+        Vector3 lossPerSecUe,
+        float ageSeconds)
+    {
+        float t = Mathf.Max(0f, ageSeconds);
+        Vector3 res = Vector3.zero;
+        for (int i = 0; i < 3; i++)
+        {
+            float k = lossPerSecUe[i];
+            if (k > 1e-6f)
+            {
+                float vInf = accelerationUe[i] / k;
+                res[i] = vInf + (velocity0Ue[i] - vInf) * Mathf.Exp(-k * t);
+            }
+            else
+            {
+                res[i] = velocity0Ue[i] + accelerationUe[i] * t;
+            }
+        }
+
+        return res;
     }
 
     public static Vector3 UcPositionToUnityMeters(Vector3 uePositionUu, float worldCalibK)

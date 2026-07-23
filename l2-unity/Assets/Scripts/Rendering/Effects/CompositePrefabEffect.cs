@@ -107,7 +107,8 @@ public class CompositePrefabPart
 
 public class CompositePrefabEffect : TimedCompositeEffectBase
 {
-    private const float HIT_DIRECTION_YAW_OFFSET_DEGREES = 90f;
+    // LookRotation aligns +Z; shot_N_atk travel is local +X → yaw -90 maps +X onto hit dir.
+    private const float HIT_DIRECTION_YAW_OFFSET_DEGREES = -90f;
     [SerializeField] private CompositePrefabPart[] _parts;
     [SerializeField] private float _serverHitLifetimeTailSeconds = 0f;
 
@@ -185,7 +186,24 @@ public class CompositePrefabEffect : TimedCompositeEffectBase
 
     private void RefreshResolveContext()
     {
+        bool hadHitPoint = _context != null && _context.HasHitPoint;
+        Vector3 hitPoint = hadHitPoint ? _context.HitPoint : Vector3.zero;
+        bool hadHitDirection = _context != null && _context.HasHitDirection;
+        Vector3 hitDirection = hadHitDirection ? _context.HitDirection : Vector3.forward;
+
         _context = CompositeEffectUtilities.BuildContext(_owner, _castData);
+
+        if (hadHitPoint)
+        {
+            _context.HasHitPoint = true;
+            _context.HitPoint = hitPoint;
+        }
+
+        if (hadHitDirection)
+        {
+            _context.HasHitDirection = true;
+            _context.HitDirection = hitDirection;
+        }
     }
 
     private void SpawnPart(CompositePrefabPart part)
@@ -518,17 +536,34 @@ public class CompositePrefabEffect : TimedCompositeEffectBase
         return instance;
     }
 
+    /// <summary>
+    /// Melee soulshot / impact: set before Play so child parts can orient without relying on sword collider dir.
+    /// </summary>
+    public void SetImpactHit(Vector3 hitPoint, Vector3 hitDirection)
+    {
+        if (_context == null)
+        {
+            _context = CompositeEffectUtilities.BuildContext(_owner, _castData);
+        }
+
+        Vector3 flat = hitDirection;
+        flat.y = 0f;
+        _context.HasHitPoint = true;
+        _context.HitPoint = hitPoint;
+        if (flat.sqrMagnitude > 0.0001f)
+        {
+            _context.HasHitDirection = true;
+            _context.HitDirection = flat.normalized;
+        }
+    }
+
     private Quaternion ResolvePartSpawnRotation(CompositePrefabPart part, Transform resolvedTransform)
     {
-        if (part != null &&
-            part.attachmentPoint == EffectAttachmentPoint.WorldHitPoint &&
-            _context != null &&
+        if (_context != null &&
             _context.HasHitDirection &&
             _context.HitDirection.sqrMagnitude > 0.0001f)
         {
-            // Impact VFX meshes are authored with local forward offset from Unity Z forward.
-            // Apply yaw compensation so hit flashes face the incoming hit direction visually.
-            return Quaternion.LookRotation(_context.HitDirection.normalized) *
+            return Quaternion.LookRotation(_context.HitDirection.normalized, Vector3.up) *
                    Quaternion.Euler(0f, HIT_DIRECTION_YAW_OFFSET_DEGREES, 0f);
         }
 

@@ -82,6 +82,17 @@ public static class L2MaterialPropertyCopier
     public static readonly int StartVelocityRangeXUcId = Shader.PropertyToID("_StartVelocityRangeXUc");
     public static readonly int StartVelocityRangeYUcId = Shader.PropertyToID("_StartVelocityRangeYUc");
     public static readonly int StartVelocityRangeZUcId = Shader.PropertyToID("_StartVelocityRangeZUc");
+    public static readonly int StartLocationOffsetUeId = Shader.PropertyToID("_StartLocationOffsetUe");
+    public static readonly int StartLocationRangeXUcId = Shader.PropertyToID("_StartLocationRangeXUc");
+    public static readonly int StartLocationRangeYUcId = Shader.PropertyToID("_StartLocationRangeYUc");
+    public static readonly int StartLocationRangeZUcId = Shader.PropertyToID("_StartLocationRangeZUc");
+    public static readonly int StartSizeRangeXUcId = Shader.PropertyToID("_StartSizeRangeXUc");
+    public static readonly int StartSizeRangeYUcId = Shader.PropertyToID("_StartSizeRangeYUc");
+    public static readonly int StartSizeRangeZUcId = Shader.PropertyToID("_StartSizeRangeZUc");
+    public static readonly int SpsYawRangeUcId = Shader.PropertyToID("_SpsYawRangeUc");
+    public static readonly int SpsPitchRangeUcId = Shader.PropertyToID("_SpsPitchRangeUc");
+    public static readonly int SpsRollRangeUcId = Shader.PropertyToID("_SpsRollRangeUc");
+    public static readonly int SpinCCWorCWId = Shader.PropertyToID("_SpinCCWorCW");
     public static readonly int L2MotionReplayEnabledId = Shader.PropertyToID("_L2MotionReplayEnabled");
     public static readonly int SpawnDeltaTimeId = Shader.PropertyToID("_SpawnDeltaTime");
 
@@ -95,28 +106,73 @@ public static class L2MaterialPropertyCopier
     // This is emitter-specific, not a general StartSpin rule.
     public const int MeshEmitter3SlotToSlotDrawCount = 31;
     // MeshEmitter SpawnParticle Loc/Vel/Size stream (L2FxMeshSpawnParticle).
-    // VERIFIED ONLY (so far): it_healing_potion_ta Name="Wave"
-    // (Unity MeshEmitter0 / L2 MeshEmitter4). 28 GetRand + 3 trailing appFrand = 31.
+    // LIVE VERIFIED: it_healing_potion_ta Name="Wave" (LocZ/VelZ path).
+    // LIVE VERIFIED: shot_N_atk / e_u505 MeshEmitter225 "Spirit" (full XYZ),
+    //   SpawnSoulShotSpiritCapture 2026-07-22 draws=28 scopes=12.
     // Base state is BEFORE StartVelocity. StartSpin = +22.
     public const int MeshSpawnSlotToSlotDrawCount = 31;
     public const int MeshSpawnDrawsBeforeStartSpin = 22;
 
     /// <summary>
-    /// Opt-in: material exposes MeshSpawn TLS + LocZ/VelZ ranges.
-    /// Verified so far only on it_healing_potion_ta Name="Wave".
+    /// Opt-in: material exposes MeshSpawn TLS (_MeshSpawnRandStateBits).
+    /// LIVE: Wave (LocZ/VelZ) + Spirit MeshEmitter225 (full XYZ).
     /// </summary>
     public static bool IsMeshSpawnParticleMaterial(Material mat)
     {
-        return mat != null &&
-            mat.HasProperty(MeshSpawnRandStateBitsId) &&
-            mat.HasProperty(StartLocationZRangeUUId) &&
-            mat.HasProperty(StartVelocityZRangeUUId);
+        return mat != null && mat.HasProperty(MeshSpawnRandStateBitsId);
+    }
+
+    /// <summary>
+    /// shot_N_atk MeshEmitter225 Spirit: MeshSpawn + anisotropic Size XYZ + OffsetUe X=-5.
+    /// </summary>
+    public static bool IsShotNAtkMeshEmitter225SpiritMaterial(Material mat)
+    {
+        if (mat == null ||
+            !mat.HasProperty(MeshSpawnRandStateBitsId) ||
+            !mat.HasProperty(StartSizeRangeXUcId) ||
+            !mat.HasProperty(StartLocationOffsetUeId) ||
+            mat.HasProperty(StartSizeXYId))
+        {
+            return false;
+        }
+
+        // Distinguish from ShockWave (Offset=0, short FadeOut).
+        Vector4 offset = mat.GetVector(StartLocationOffsetUeId);
+        return offset.x < -1f;
+    }
+
+    /// <summary>
+    /// shot_N_atk MeshEmitter226 ShockWave: MeshSpawn + short life flash FadeOut~0.0375.
+    /// </summary>
+    public static bool IsShotNAtkMeshEmitter226ShockWaveMaterial(Material mat)
+    {
+        if (mat == null ||
+            !mat.HasProperty(MeshSpawnRandStateBitsId) ||
+            !mat.HasProperty(StartSizeRangeXUcId) ||
+            mat.HasProperty(StartSizeXYId))
+        {
+            return false;
+        }
+
+        if (IsShotNAtkMeshEmitter225SpiritMaterial(mat))
+        {
+            return false;
+        }
+
+        // UC FadeOutStartTime=0.0375; Spirit uses ~0.41.
+        int fadeOutId = Shader.PropertyToID("_FadeOutStartTime");
+        if (!mat.HasProperty(fadeOutId))
+        {
+            return false;
+        }
+
+        return mat.GetFloat(fadeOutId) < 0.1f;
     }
 
     /// <summary>
     /// MeshEmitter SpawnParticle TLS stream. <paramref name="baseState"/> is
     /// immediately before slot 0 StartVelocityRange GetRand.
-    /// Verified so far only on it_healing_potion_ta Name="Wave".
+    /// LIVE: Wave + Spirit (same 31-draw slot stride).
     /// </summary>
     public static void CopyMeshSpawnAppRandFromBaseState(
         Material runtimeMat,
@@ -133,9 +189,23 @@ public static class L2MaterialPropertyCopier
         CopyVectorIfPresent(runtimeMat, sharedMat, StartVelocityZRangeUUId);
         CopyVectorIfPresent(runtimeMat, sharedMat, StartSizeZRangeId);
         CopyFloatIfPresent(runtimeMat, sharedMat, StartSizeXYId);
+        CopyVectorIfPresent(runtimeMat, sharedMat, StartLocationOffsetUeId);
+        CopyVectorIfPresent(runtimeMat, sharedMat, StartLocationRangeXUcId);
+        CopyVectorIfPresent(runtimeMat, sharedMat, StartLocationRangeYUcId);
+        CopyVectorIfPresent(runtimeMat, sharedMat, StartLocationRangeZUcId);
+        CopyVectorIfPresent(runtimeMat, sharedMat, StartVelocityRangeXUcId);
+        CopyVectorIfPresent(runtimeMat, sharedMat, StartVelocityRangeYUcId);
+        CopyVectorIfPresent(runtimeMat, sharedMat, StartVelocityRangeZUcId);
+        CopyVectorIfPresent(runtimeMat, sharedMat, StartSizeRangeXUcId);
+        CopyVectorIfPresent(runtimeMat, sharedMat, StartSizeRangeYUcId);
+        CopyVectorIfPresent(runtimeMat, sharedMat, StartSizeRangeZUcId);
         CopyVectorIfPresent(runtimeMat, sharedMat, StartSpinYawRangeUcId);
         CopyVectorIfPresent(runtimeMat, sharedMat, StartSpinPitchRangeUcId);
         CopyVectorIfPresent(runtimeMat, sharedMat, StartSpinRollRangeUcId);
+        CopyVectorIfPresent(runtimeMat, sharedMat, SpsYawRangeUcId);
+        CopyVectorIfPresent(runtimeMat, sharedMat, SpsPitchRangeUcId);
+        CopyVectorIfPresent(runtimeMat, sharedMat, SpsRollRangeUcId);
+        CopyVectorIfPresent(runtimeMat, sharedMat, SpinCCWorCWId);
         CopyVectorIfPresent(runtimeMat, sharedMat, ColorMultiplierId);
         CopyVectorIfPresent(runtimeMat, sharedMat, LifetimeRangeId);
         CopyVectorIfPresent(runtimeMat, sharedMat, InitialDelayRangeId);
@@ -229,6 +299,67 @@ public static class L2MaterialPropertyCopier
             ref state);
     }
 
+    /// <summary>
+    /// CPU mirror of L2Fx_MeshSpawnParticle_SampleLocVelSize (Spirit / anisotropic mesh).
+    /// Leaves state at StartSpin entry (draw 22).
+    /// </summary>
+    public static void SampleMeshSpawnLocVelSize(
+        Material mat,
+        uint stateBeforeVelocity,
+        out Vector3 velocityUe,
+        out Vector3 locationUe,
+        out Vector3 colorMulRgb,
+        out float lifetimeSeconds,
+        out float initialDelaySeconds,
+        out Vector3 sizeUe)
+    {
+        uint state = stateBeforeVelocity;
+        Vector2 velX = ReadMinMax(mat, StartVelocityRangeXUcId, 10f, 10f);
+        Vector2 velY = ReadMinMax(mat, StartVelocityRangeYUcId, -20f, 20f);
+        Vector2 velZ = ReadMinMax(mat, StartVelocityRangeZUcId, -20f, 20f);
+        Vector2 locX = ReadMinMax(mat, StartLocationRangeXUcId, 0f, 0f);
+        Vector2 locY = ReadMinMax(mat, StartLocationRangeYUcId, 0f, 0f);
+        Vector2 locZ = ReadMinMax(mat, StartLocationRangeZUcId, 0f, 0f);
+        Vector4 colorMul = mat != null && mat.HasProperty(ColorMultiplierId)
+            ? mat.GetVector(ColorMultiplierId)
+            : new Vector4(0.6f, 0.6f, 0.6f, 0f);
+        Vector2 life = ReadMinMax(mat, LifetimeRangeId, 1f, 1.5f);
+        Vector2 delay = ReadMinMax(mat, InitialDelayRangeId, 0f, 0f);
+        Vector2 sizeX = ReadMinMax(mat, StartSizeRangeXUcId, 0.015f, 0.015f);
+        Vector2 sizeY = ReadMinMax(mat, StartSizeRangeYUcId, 0.1f, 0.1f);
+        Vector2 sizeZ = ReadMinMax(mat, StartSizeRangeZUcId, 0.1f, 0.1f);
+
+        velocityUe = AppRandFRangeVector(velX, velY, velZ, ref state);
+        locationUe = AppRandFRangeVector(locX, locY, locZ, ref state);
+
+        AppRandFRange(0f, 1f, ref state);
+        for (int i = 0; i < 6; i++)
+        {
+            AppRandFrand(ref state);
+        }
+
+        colorMulRgb = AppRandFRangeVector(
+            new Vector2(colorMul.x, colorMul.x),
+            new Vector2(colorMul.y, colorMul.y),
+            new Vector2(colorMul.z, colorMul.z),
+            ref state);
+        lifetimeSeconds = AppRandFRange(life.x, life.y, ref state);
+        initialDelaySeconds = AppRandFRange(delay.x, delay.y, ref state);
+        AppRandFRange(1f, 1f, ref state);
+        sizeUe = AppRandFRangeVector(sizeX, sizeY, sizeZ, ref state);
+    }
+
+    private static Vector2 ReadMinMax(Material mat, int propertyId, float defaultMin, float defaultMax)
+    {
+        if (mat != null && mat.HasProperty(propertyId))
+        {
+            Vector4 v = mat.GetVector(propertyId);
+            return new Vector2(v.x, v.y);
+        }
+
+        return new Vector2(defaultMin, defaultMax);
+    }
+
     private static uint AppRandStep(ref uint state)
     {
         state = unchecked(state * AppRandMultiplier + AppRandIncrement);
@@ -255,6 +386,19 @@ public static class L2MaterialPropertyCopier
         AppRandFRange(yMin, yMax, ref state);
         AppRandFRange(xMin, xMax, ref state);
         return z;
+    }
+
+    // FRangeVector::GetRand draw order Z→Y→X; return (X,Y,Z)=(yaw,pitch,roll).
+    private static Vector3 AppRandFRangeVector(
+        Vector2 xRange,
+        Vector2 yRange,
+        Vector2 zRange,
+        ref uint state)
+    {
+        float z = AppRandFRange(zRange.x, zRange.y, ref state);
+        float y = AppRandFRange(yRange.x, yRange.y, ref state);
+        float x = AppRandFRange(xRange.x, xRange.y, ref state);
+        return new Vector3(x, y, z);
     }
 
     public static void CopyLifetimeFadeAndFxFromShared(Material runtimeMat, Material sharedMat)
@@ -374,8 +518,7 @@ public static class L2MaterialPropertyCopier
 
     /// <summary>
     /// Mesh SpawnParticle: sharedBase is before StartVelocity. StartSpin is +22 draws
-    /// within the slot (slot*31 + 22 from sharedBase).
-    /// Verified so far only on it_healing_potion_ta Name="Wave".
+    /// within the slot (slot*31 + 22 from sharedBase). LIVE: Wave + Spirit.
     /// </summary>
     public static uint ComputeMeshSpawnStartSpinState(uint sharedBaseState, int slotIndex)
     {

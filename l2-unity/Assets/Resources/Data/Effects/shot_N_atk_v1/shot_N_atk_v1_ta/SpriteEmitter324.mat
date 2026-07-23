@@ -1,0 +1,94 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &-6120483918274501834
+MonoBehaviour:
+  m_ObjectHideFlags: 11
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d0353a89b1f911e48b9e16bdc9f2e058, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  version: 10
+--- !u!21 &2100000
+Material:
+  serializedVersion: 8
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: SpriteEmitter324
+  m_Shader: {fileID: 4800000, guid: a8f3c2914e6b7d0a5c9e2f1b3847560a, type: 3}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
+  m_ValidKeywords: []
+  m_InvalidKeywords:
+  - _FADEOUT_ON
+  - _USESIZESCALE_ON
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: -1
+  stringTagMap:
+    RenderType: Transparent
+  disabledShaderPasses: []
+  m_LockedProperties: 
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - _MainTex:
+        m_Texture: {fileID: 2800000, guid: 4dc8f6c2844732a4f979f07269f3927c, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Ints: []
+    m_Floats:
+    - _ColorKey1Time: 0.8
+    - _ColorKey2Time: 1
+    - _ColorScaleCount: 3
+    - _ColorScaleParam: 12
+    - _FadeIn: 0
+    - _FadeInEndTime: 0
+    - _Fadeout: 1
+    - _FadeoutStartTime: 0.66
+    - _L2FxWorldCalibration: 1.1
+    - _L2SpriteColorGammaToLinear: 0
+    - _Opacity: 1
+    - _RgbBoost: 1
+    - _SizeScaleRepeats: 0
+    - _SpawnDeltaTime: 0.012
+    - _SpriteMotionRandStateBits: 0
+    - _SpriteSpinRandStateBits: 0
+    - _StartTime: 0
+    - _SubdivisionEnd: 32
+    - _SubdivisionStart: 31
+    - _TextureUSubdivisions: 4
+    - _TextureVSubdivisions: 8
+    - _UseSizeScale: 1
+    m_Colors:
+    - _AccelerationUc: {r: 0, g: 0, b: 0, a: 0}
+    - _ColorKey0: {r: 1, g: 1, b: 1, a: 1}
+    - _ColorKey1: {r: 0.286275, g: 0.278431, b: 0.572549, a: 1}
+    - _ColorKey2: {r: 1, g: 1, b: 1, a: 1}
+    - _ColorMulMax: {r: 1, g: 1, b: 0.6, a: 0}
+    - _ColorMulMin: {r: 1, g: 1, b: 0.6, a: 0}
+    - _InitialDelayRange: {r: 0, g: 0, b: 0, a: 0}
+    - _LifetimeRange: {r: 0.8, g: 2, b: 0, a: 0}
+    - _PolarPhiRangeUc: {r: -140, g: 140, b: 0, a: 0}
+    - _PolarRadiusRangeUc: {r: 10, g: 20, b: 0, a: 0}
+    - _PolarThetaRangeUc: {r: 90, g: 90, b: 0, a: 0}
+    - _SizeKey0: {r: 0.2, g: 1, b: 0, a: 0}
+    - _SizeKey1: {r: 1, g: 0.2, b: 0, a: 0}
+    - _SizeRange: {r: 1, g: 4, b: 0, a: 0}
+    - _SpriteSpinCcwOrCw: {r: 1, g: 0, b: 0, a: 0}
+    - _SpriteSpinSpsRangeUc: {r: 0.2, g: 0.2, b: 0, a: 0}
+    - _SpriteSpinStartRangeUc: {r: 0.1, g: 0.1, b: 0, a: 0}
+    - _StartLocationOffsetUc: {r: 2, g: 0, b: 0, a: 0}
+    - _StartVelocityRangeXUc: {r: 300, g: 300, b: 0, a: 0}
+    - _StartVelocityRangeYUc: {r: 300, g: 300, b: 0, a: 0}
+    - _StartVelocityRangeZUc: {r: 300, g: 300, b: 0, a: 0}
+    - _VelocityLossRangeUc: {r: 6, g: 6, b: 6, a: 0}
+  m_BuildTextureStacks: []
+  m_AllowLocking: 1

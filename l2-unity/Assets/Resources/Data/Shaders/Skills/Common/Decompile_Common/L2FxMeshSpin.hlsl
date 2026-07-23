@@ -139,6 +139,11 @@ float3 L2Fx_MeshSpin_RotateUeLocalPositionPitchYawRoll(
 // Mesh vertex coordinates imported from UE follow the same basis bridge as
 // positional data: Unity(X,Y,Z) = UE(X,Z,Y). Conjugating the UE FRotator by
 // that basis preserves the original rotation in Unity object coordinates.
+//
+// The Y↔Z swap is improper (det=-1). Slot URU / SpinCCWorCW still match L2
+// ParticleSnapshot numerically, but visual CW sense on the Unity mesh flips —
+// same class of port fix as L2Fx_SpriteSpin_RotateBillboardOffset (negate only
+// at Unity apply). Do not invert .uc SpinCCWorCW on materials to compensate.
 float3 L2Fx_MeshSpin_RotateUnityLocalPositionPitchYawRoll(
     float3 unityLocalPosition,
     float3 pitchYawRollRadians)
@@ -149,7 +154,7 @@ float3 L2Fx_MeshSpin_RotateUnityLocalPositionPitchYawRoll(
         unityLocalPosition.y);
     float3 ueRotatedPosition = L2Fx_MeshSpin_RotateUeLocalPositionPitchYawRoll(
         ueLocalPosition,
-        pitchYawRollRadians);
+        -pitchYawRollRadians);
     return float3(
         ueRotatedPosition.x,
         ueRotatedPosition.z,

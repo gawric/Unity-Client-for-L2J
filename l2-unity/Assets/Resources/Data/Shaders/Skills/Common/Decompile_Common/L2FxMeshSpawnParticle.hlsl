@@ -4,16 +4,21 @@
 //
 // UMeshEmitter::SpawnParticle TLS appRand stream (shared by MeshEmitter slots).
 //
-// VERIFIED ONLY (so far): it_healing_potion_ta, Name="Wave"
-//   (Unity MeshEmitter0 / L2 MeshEmitter4), live SpawnParticleSnapshot 2026-07-17.
+// LIVE VERIFIED: it_healing_potion_ta, Name="Wave"
+//   (Unity MeshEmitter0 / L2 MeshEmitter4), SpawnParticleSnapshot 2026-07-17.
 //   Same Core GetRand order as the MeshEmitter3 StartSpin chain (31 draws/slot).
-//   Do not assume other MeshEmitters match this property walk until checked.
+// LIVE VERIFIED: shot_N_atk / e_u505 MeshEmitter225 "Spirit"
+//   via L2Fx_MeshSpawnParticle_SampleLocVelSize (full XYZ),
+//   SpawnSoulShotSpiritCapture 2026-07-22 draws=28 scopes=12 truncated=0.
 //
 // Formula:
 //   Vel FRangeVector → Loc FRangeVector → scalar[0,1] → 2×zeroVec (6 frands)
 //   → ColorMultiplier FRangeVector → Lifetime → InitialDelay → scalar1
 //   → Size FRangeVector → StartSpin → SPS → 3×appFrand (SpinCCW)
 //   = 28 logged GetRand draws + 3 trailing appFrand = 31 draws / slot.
+//
+// Same FRange walk also LIVE on SpriteEmitter325 "smog" (shape=0); sprite
+// callers use L2FxSpriteSpawnParticle.hlsl for full Vel/Loc/Life/Size outs.
 //
 // Input state = TLS appRand immediately before StartVelocityRange GetRand.
 // All ranges come from the effect material / UC — this module does not bake
@@ -115,6 +120,57 @@ uint L2Fx_MeshSpawnParticle_StateBeforeVelocity(uint burstBaseState, int slotInd
         state = state * L2FX_APP_RAND_MULTIPLIER + L2FX_APP_RAND_INCREMENT;
     }
     return state;
+}
+
+// Full Loc/Vel/Size XYZ through draw 21 (same stream as Sprite shape-0 /
+// L2FxSpriteSpawnParticle). Leaves state at StartSpin entry (draw 22).
+// Use for anisotropic mesh emitters (e.g. shot_N_atk MeshEmitter225 Spirit).
+void L2Fx_MeshSpawnParticle_SampleLocVelSize(
+    float2 velocityXRange,
+    float2 velocityYRange,
+    float2 velocityZRange,
+    float2 locationXRange,
+    float2 locationYRange,
+    float2 locationZRange,
+    float2 colorMulXRange,
+    float2 colorMulYRange,
+    float2 colorMulZRange,
+    float2 lifetimeRange,
+    float2 initialDelayRange,
+    float2 trailingScalarRange,
+    float2 sizeXRange,
+    float2 sizeYRange,
+    float2 sizeZRange,
+    inout uint state,
+    out float3 velocityUe,
+    out float3 locationUe,
+    out float3 colorMulRgb,
+    out float lifetimeSeconds,
+    out float initialDelaySeconds,
+    out float3 sizeUe)
+{
+    velocityUe = L2Fx_FRangeVector_GetRandYawPitchRoll(
+        velocityXRange, velocityYRange, velocityZRange, state);
+
+    locationUe = L2Fx_FRangeVector_GetRandYawPitchRoll(
+        locationXRange, locationYRange, locationZRange, state);
+
+    // +0x2FC scalar [0,1]
+    L2Fx_FRange_GetRand(float2(0.0, 1.0), state);
+    [unroll]
+    for (int i = 0; i < 6; ++i)
+    {
+        L2Fx_AppFrand(state);
+    }
+
+    colorMulRgb = L2Fx_FRangeVector_GetRandYawPitchRoll(
+        colorMulXRange, colorMulYRange, colorMulZRange, state);
+    lifetimeSeconds = L2Fx_FRange_GetRand(lifetimeRange, state);
+    initialDelaySeconds = L2Fx_FRange_GetRand(initialDelayRange, state);
+    L2Fx_FRange_GetRand(trailingScalarRange, state);
+
+    sizeUe = L2Fx_FRangeVector_GetRandYawPitchRoll(
+        sizeXRange, sizeYRange, sizeZRange, state);
 }
 
 #endif // L2_FX_MESH_SPAWN_PARTICLE_INCLUDED
