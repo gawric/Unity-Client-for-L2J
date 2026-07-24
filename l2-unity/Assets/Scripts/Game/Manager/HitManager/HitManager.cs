@@ -6,6 +6,8 @@ public class HitManager : MonoBehaviour
     public static HitManager Instance { get; private set; }
     private const string ETC_NAME = "etc_";
     private const string IMPACT_DEBUG_TAG = "[HIT_DEBUG]";
+    private const int SoulshotImpactEffectId = 99998;
+    private const int NormalImpactEffectId = 99997;
 
     private void Awake()
     {
@@ -52,18 +54,19 @@ public class HitManager : MonoBehaviour
             targetStateMachine.NotifyEvent(Event.HIT_REACTION);
         }
 
+        Entity targetEntity = ResolveTargetEntity(targetStateMachine);
+        Vector3 impactDir = ResolveSoulshotImpactDirection(attaker, targetEntity, hitCollider);
+        Vector3 spawnPoint = ResolveSoulshotSpawnPoint(targetEntity, impactDir, hitCollider);
+
         if (attaker != null && attaker.IsSoulshotCharged)
         {
-            Entity targetEntity = ResolveTargetEntity(targetStateMachine);
-            Vector3 impactDir = ResolveSoulshotImpactDirection(attaker, targetEntity, hitCollider);
-            Vector3 spawnPoint = ResolveSoulshotSpawnPoint(targetEntity, impactDir, hitCollider);
             LogSoulshotImpactOrientation(attaker, targetEntity, hitCollider, spawnPoint, impactDir);
-            EffectManager.Instance.PlayerImpactEffect(99998, spawnPoint, impactDir);
+            EffectManager.Instance.PlayerImpactEffect(SoulshotImpactEffectId, spawnPoint, impactDir);
             attaker.IsSoulshotCharged = false;
         }
         else
         {
-            WorldCombat.Instance.InflictAttack(hitCollider, hitColliderDirection);
+            EffectManager.Instance.PlayerImpactEffect(NormalImpactEffectId, spawnPoint, impactDir);
         }
     }
 
@@ -105,11 +108,15 @@ public class HitManager : MonoBehaviour
             resolvedHitDirection = flat.sqrMagnitude > 0.0001f ? flat.normalized : Vector3.forward;
         }
 
+        Vector3 spawnPoint = ResolveSoulshotSpawnPoint(targetEntity, resolvedHitDirection, resolvedHitPoint);
         if (attackerEntity != null && attackerEntity.IsSoulshotCharged)
         {
-            Vector3 spawnPoint = ResolveSoulshotSpawnPoint(targetEntity, resolvedHitDirection, resolvedHitPoint);
-            EffectManager.Instance.PlayerImpactEffect(99998, spawnPoint, resolvedHitDirection);
+            EffectManager.Instance.PlayerImpactEffect(SoulshotImpactEffectId, spawnPoint, resolvedHitDirection);
             attackerEntity.IsSoulshotCharged = false;
+        }
+        else
+        {
+            EffectManager.Instance.PlayerImpactEffect(NormalImpactEffectId, spawnPoint, resolvedHitDirection);
         }
 
         return true;

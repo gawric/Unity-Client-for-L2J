@@ -18,8 +18,11 @@
 // This library intentionally remains in UE-space. Apply UE -> Unity axis/world
 // calibration separately after motion evaluation; that bridge is project-specific.
 //
-// Not covered here: random range selection, damping, velocity loss, revolution,
-// mesh attachment, and collision/owner tracking.
+// Not covered here: random range selection, revolution, mesh attachment,
+// and collision/owner tracking.
+//
+// VelocityLoss: same UParticleEmitter proportional drag as L2FxSpriteMotion
+// (live BlueDust / UpdateParticles). Per-axis VelocityLossRange units are 1/s.
 
 float3 L2Fx_MeshMotion_EvaluatePositionUe(
     float3 startLocationOffsetUe,
@@ -40,6 +43,48 @@ float3 L2Fx_MeshMotion_EvaluateDisplacementUe(
 {
     float t = max(ageSeconds, 0.0);
     return startVelocityUe * t + 0.5 * accelerationUe * t * t;
+}
+
+// Per-axis: p(t) = (a/loss)*t + (v0 - a/loss)*(1 - exp(-loss*t))/loss
+// loss<=0 falls back to ballistic v0*t + 0.5*a*t^2.
+float L2Fx_MeshMotion_DisplacementComponentWithDrag(
+    float v0, float a, float loss, float t)
+{
+    if (loss <= 1e-6)
+        return v0 * t + 0.5 * a * t * t;
+    float vInf = a / loss;
+    return vInf * t + (v0 - vInf) * (1.0 - exp(-loss * t)) / loss;
+}
+
+float3 L2Fx_MeshMotion_EvaluateDisplacementUeWithDrag(
+    float3 startVelocityUe,
+    float3 accelerationUe,
+    float3 velocityLossPerSecUe,
+    float ageSeconds)
+{
+    float t = max(ageSeconds, 0.0);
+    float3 disp;
+    disp.x = L2Fx_MeshMotion_DisplacementComponentWithDrag(
+        startVelocityUe.x, accelerationUe.x, velocityLossPerSecUe.x, t);
+    disp.y = L2Fx_MeshMotion_DisplacementComponentWithDrag(
+        startVelocityUe.y, accelerationUe.y, velocityLossPerSecUe.y, t);
+    disp.z = L2Fx_MeshMotion_DisplacementComponentWithDrag(
+        startVelocityUe.z, accelerationUe.z, velocityLossPerSecUe.z, t);
+    return disp;
+}
+
+float3 L2Fx_MeshMotion_EvaluatePositionUeWithDrag(
+    float3 startLocationOffsetUe,
+    float3 startVelocityUe,
+    float3 accelerationUe,
+    float3 velocityLossPerSecUe,
+    float ageSeconds)
+{
+    return startLocationOffsetUe + L2Fx_MeshMotion_EvaluateDisplacementUeWithDrag(
+        startVelocityUe,
+        accelerationUe,
+        velocityLossPerSecUe,
+        ageSeconds);
 }
 
 #endif // L2_FX_MESH_MOTION_INCLUDED

@@ -115,6 +115,19 @@ public class CompositePrefabEffect : TimedCompositeEffectBase
     [Tooltip("Если включено: не вызывать DestoryEffect по lifetime корня — дочерние префабы (например wh_heal_ca) не уничтожаются вместе с композитом. Только для отладки шейдеров/Hold.")]
     [SerializeField] private bool _skipDestroyCompositeByLifetime;
 
+    [Header("Effect Light")]
+    [Tooltip(
+        "Spawn FNManagerLight once per composite Play when a part SpawnPart succeeds. " +
+        "Not wired to ParticleGroup/ParticleSingle — only CompositePrefabEffect.SpawnPart → StartSpawn.")]
+    [SerializeField] private bool _useLight;
+    [SerializeField] private LightEffectSetting _lightSettings;
+
+    /// <summary>
+    /// Fired after a composite part instance is Play()'d.
+    /// Independent of ParticleGroup / ParticleSingle emitters.
+    /// </summary>
+    public event Action<CompositePrefabEffect, EffectResolveContext> StartSpawn;
+
     private readonly IEffectAttachmentResolver _resolver = new DefaultEffectAttachmentResolver();
     private EffectResolveContext _context;
     private readonly List<PendingCompositePart> _pendingParts = new List<PendingCompositePart>();
@@ -131,6 +144,7 @@ public class CompositePrefabEffect : TimedCompositeEffectBase
     private float _playStartedAt;
     private bool _isSubscribedToAnyShoot;
     private bool _isSubscribedToProjectileEffectHit;
+    private bool _lightSpawned;
     protected override string DebugPrefix => "[CompositePrefabEffect]";
     protected override float RuntimeLifeTimeTailSeconds => _serverHitLifetimeTailSeconds;
 
@@ -144,6 +158,7 @@ public class CompositePrefabEffect : TimedCompositeEffectBase
         _launchedHomeProjectileParts.Clear();
         _pendingHitColliderParts.Clear();
         _pendingAnimationShootParts.Clear();
+        _lightSpawned = false;
         SubscribeShootEventIfNeeded();
         SubscribeProjectileHitEventIfNeeded();
     }
@@ -156,7 +171,8 @@ public class CompositePrefabEffect : TimedCompositeEffectBase
             Debug.LogWarning("CompositePrefabEffect: no parts configured.");
             return;
         }
-    
+
+        _lightSpawned = false;
         _playStartedAt = Time.time;
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
         Debug.Log(
@@ -258,6 +274,29 @@ public class CompositePrefabEffect : TimedCompositeEffectBase
         TryLaunchPartAsHomeProjectileImmediately(part, instance);
 
         LogSpawnedPart(part, partSettings, setupOwner);
+        RaiseStartSpawnAndMaybeSpawnLight();
+    }
+
+    /// <summary>
+    /// Light is created here — composite part spawn — never inside ParticleGroup/ParticleSingle.
+    /// Chain: CompositePrefabEffect.SpawnPart → StartSpawn → FNManagerLight (if useLight).
+    /// </summary>
+    private void RaiseStartSpawnAndMaybeSpawnLight()
+    {
+        StartSpawn?.Invoke(this, _context);
+        if (!_useLight || _lightSettings == null || _lightSpawned)
+        {
+            return;
+        }
+
+        if (!EffectLightPlacement.TryResolve(_context, _lightSettings, out Vector3 lightPoint, out Vector3 lightDir))
+        {
+            Debug.LogWarning($"{DebugPrefix} useLight=true but light placement failed (settings={_lightSettings.name}).");
+            return;
+        }
+
+        _lightSpawned = true;
+        FNManagerLight.Ensure().SpawnHitFlash(lightPoint, lightDir, _lightSettings);
     }
 
     private void SubscribeShootEventIfNeeded()

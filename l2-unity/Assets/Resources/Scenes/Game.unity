@@ -2601,6 +2601,7 @@ GameObject:
   - component: {fileID: 2004756540}
   - component: {fileID: 2004756541}
   - component: {fileID: 2004756542}
+  - component: {fileID: 2004756543}
   m_Layer: 0
   m_Name: Game
   m_TagString: Untagged
@@ -2918,6 +2919,26 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 03b85cc9e47c68b40ac3a76f0d47ba21, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &2004756543
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2004756523}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b7e4c91a2f0d4e6a9c8b5d3e1a0f7c42, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _color: {r: 1, g: 1, b: 1, a: 1}
+  _intensity: 0.6
+  _durationSeconds: 0.4
+  _rangeMeters: 2
+  _spotAngle: 71.5
+  _innerSpotAngle: 32.5
+  _poolSize: 8
+  _debugLog: 1
 --- !u!1 &2023806015
 GameObject:
   m_ObjectHideFlags: 0

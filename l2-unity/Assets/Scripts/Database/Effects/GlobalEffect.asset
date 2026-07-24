@@ -108,3 +108,8 @@ MonoBehaviour:
     comment: it-haste-potion-effect
     settings: {fileID: 11400000, guid: cf003ce1643c62640a960af58930287b, type: 2}
     ignoreFlightTimeForCast: 1
+  - id: 99997
+    prefab: {fileID: 720686262775047825, guid: a6591ce429474df46874126c3dc0c6a4, type: 3}
+    comment: simple_atk_effect
+    settings: {fileID: 11400000, guid: 39ad4dfd5fe718841a26f54f9f4b3702, type: 2}
+    ignoreFlightTimeForCast: 1
