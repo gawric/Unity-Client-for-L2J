@@ -20,6 +20,10 @@ public class AbstractProjectile : MonoBehaviour
 
     public ProjectileData CreateData(int projectileId , float distance, GameObject readyProjectile , Vector3 startPos , Transform target , Vector3 adjustedTarget , float requiredSpeed , ProjectileData settings, ProjectileData defaultSettings)
     {
+        AnimationCurve curve = settings?.speedCurve ?? defaultSettings?.speedCurve;
+        if (curve == null)
+            curve = ProjectileData.CreateDefaultSpeedCurve();
+
         return new ProjectileData
         {
             id = projectileId,
@@ -31,7 +35,7 @@ public class AbstractProjectile : MonoBehaviour
             speed = requiredSpeed,
             damage = settings?.damage ?? defaultSettings.damage,
             lifetime = settings?.lifetime ?? defaultSettings.lifetime,
-            speedCurve = settings?.speedCurve ?? defaultSettings.speedCurve,
+            speedCurve = curve,
             startTime = Time.time,
             distance = distance,
             useGravity = settings?.useGravity ?? defaultSettings.useGravity,

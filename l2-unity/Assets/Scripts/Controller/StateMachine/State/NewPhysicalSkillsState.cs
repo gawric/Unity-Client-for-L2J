@@ -1,6 +1,8 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 using UnityEditorInternal;
 using UnityEngine;
+using static UnityEngine.EventSystems.EventTrigger;
 
 
 public class NewPhysicalSkillsState : AbstractAttackEvents
@@ -17,6 +19,8 @@ public class NewPhysicalSkillsState : AbstractAttackEvents
     public override void HandleEvent(Event evt , object payload = null)
     {
         MagicSkillUse useSkill = GetPayload(payload);
+
+
         switch (evt)
         {
             case Event.READY_TO_ACT:
@@ -32,8 +36,28 @@ public class NewPhysicalSkillsState : AbstractAttackEvents
                 break;
             case Event.APPLY_SELF_SKILL:
                 Skillgrp skillgrp = useSkill.SkillGrp;
-                AnimationCombo combo = new AnimationCombo("-1", new string[1] { skillgrp.GetAnimOperationType3() }, "");
-                SkillExecutor.Instance.ExecuteSkill(_stateMachine.Player, combo , _events);
+                //2013 scroll effect
+                if (SetupDurationHelper.IsLongCastSkill(useSkill))
+                {
+                    AnimationCombo selfCombo = SkillgrpTable.Instance.GetAnimComboBySkillId(useSkill.SkillId, useSkill.SkillLvl);
+                    Entity entity = _stateMachine.Player;
+                    int objectId = entity.IdentityInterlude.Id;
+                    SetupDurationHelper.SetupLongCastDurationIfHitTimeNot0(useSkill, objectId, entity, selfCombo);
+
+                    SkillExecutor.Instance.ExecuteSkillOverride(useSkill.SkillGrp, entity, selfCombo, _events, isLong: true);
+                } //2031 potion heal , 2011 haste potion
+                else if (SetupDurationHelper.IsUsePotion(useSkill))
+                {
+                    Entity entity = _stateMachine.Player;
+                    EffectManager.Instance.PlayEffect(useSkill.SkillId, entity.transform, entity.GetMagicCastData());
+                }
+                else
+                {
+                    AnimationCombo combo = new AnimationCombo("-1", new string[1] { skillgrp.GetAnimOperationType3() }, "");
+                    SkillExecutor.Instance.ExecuteSkill(_stateMachine.Player, combo, _events);
+                }
+
+
                 break;
             case Event.APPLY_SOULSHOT_CHARGED:
                 Debug.Log("NewPhysicalSkillsState Charge sulshots");

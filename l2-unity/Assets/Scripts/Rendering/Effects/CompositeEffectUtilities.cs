@@ -2,7 +2,10 @@ using UnityEngine;
 
 public static class CompositeEffectUtilities
 {
-    public static float ResolveSpawnDelay(CompositePartSpawnTiming timing, MagicCastData castData)
+    public static float ResolveSpawnDelay(
+        CompositePartSpawnTiming timing,
+        MagicCastData castData,
+        float hitLeadSeconds = 0f)
     {
         if (castData == null)
         {
@@ -16,9 +19,11 @@ public static class CompositeEffectUtilities
             case CompositePartSpawnTiming.OnFlightTimeElapsed:
                 return Mathf.Max(0f, castData.FlightTime);
             case CompositePartSpawnTiming.OnHitTime:
-                return Mathf.Max(0f, castData.HitTime);
+                return Mathf.Max(0f, castData.HitTime - Mathf.Max(0f, hitLeadSeconds));
             case CompositePartSpawnTiming.OnHitCollider:
                 // Spawned by runtime collider-hit event, not by time delay.
+                return float.PositiveInfinity;
+            case CompositePartSpawnTiming.OnAnimationShoot:
                 return float.PositiveInfinity;
             default:
                 return 0f;
@@ -29,7 +34,10 @@ public static class CompositeEffectUtilities
     {
         if (resolvedTransform != null)
         {
-            return resolvedTransform.TransformPoint(positionOffset);
+            // Attachment world anchor (e.g. pelvis, controller center) often differs from the follow pivot (entity root).
+            // Apply offset in follow-transform local space without dropping the anchor.
+            Vector3 local = resolvedTransform.InverseTransformPoint(resolvedWorldPosition) + positionOffset;
+            return resolvedTransform.TransformPoint(local);
         }
 
         return resolvedWorldPosition + positionOffset;
@@ -58,15 +66,25 @@ public static class CompositeEffectUtilities
             context.CasterEntity = casterEntity;
             context.CasterUserId = casterEntity.IdentityInterlude != null ? casterEntity.IdentityInterlude.Id : 0;
 
-            if (casterEntity.TargetId > 0 && World.Instance != null)
+            int resolvedTargetId = 0;
+            if (castData != null && castData.TargetObjectId > 0)
             {
-                Entity targetEntity = World.Instance.GetEntityNoLockSync(casterEntity.TargetId);
+                resolvedTargetId = castData.TargetObjectId;
+            }
+            else if (casterEntity.TargetId > 0)
+            {
+                resolvedTargetId = casterEntity.TargetId;
+            }
+
+            if (resolvedTargetId > 0 && World.Instance != null)
+            {
+                Entity targetEntity = World.Instance.GetEntityNoLockSync(resolvedTargetId);
                 if (targetEntity != null)
                 {
                     context.TargetEntity = targetEntity;
                     context.TargetUserId = targetEntity.IdentityInterlude != null
                         ? targetEntity.IdentityInterlude.Id
-                        : casterEntity.TargetId;
+                        : resolvedTargetId;
                     context.TargetTransform = targetEntity.transform;
                 }
             }

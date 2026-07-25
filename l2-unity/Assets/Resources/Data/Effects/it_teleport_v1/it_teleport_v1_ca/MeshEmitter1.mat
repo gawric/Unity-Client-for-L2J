@@ -1,0 +1,80 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &-4123456789012345679
+MonoBehaviour:
+  m_ObjectHideFlags: 11
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d0353a89b1f911e48b9e16bdc9f2e058, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  version: 10
+--- !u!21 &2100000
+Material:
+  serializedVersion: 8
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: MeshEmitter1
+  m_Shader: {fileID: 4800000, guid: b8c1d2e3f4a5566778899aabbccddeef, type: 3}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
+  m_ValidKeywords: []
+  m_InvalidKeywords:
+  - _FADEIN_ON
+  - _FADEOUT_ON
+  - _USESIZESCALE_ON
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: -1
+  stringTagMap:
+    RenderType: Transparent
+  disabledShaderPasses: []
+  m_LockedProperties: 
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - _MainTex:
+        m_Texture: {fileID: 2800000, guid: d6506fa87d59cd7419e40326676f2f79, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Ints: []
+    m_Floats:
+    - _ColorKey1Time: 0.725
+    - _ColorKey2Time: 1
+    - _ColorScaleRepeats: 300
+    - _FadeIn: 1
+    - _FadeInEndTime: 0.6
+    - _FadeOut: 1
+    - _FadeOutStartTime: 30
+    - _L2FxWorldCalibration: 1.8
+    - _L2SpriteColorGammaToLinear: 0
+    - _ManualAge: 0
+    - _Opacity: 1
+    - _Seed: 0
+    - _StartSize: 0.6
+    - _StartTime: 0
+    - _UseManualAge: 0
+    - _UseSizeScale: 1
+    m_Colors:
+    - _ColorKey0: {r: 1, g: 1, b: 1, a: 1}
+    - _ColorKey1: {r: 0.717647, g: 0.717647, b: 0.717647, a: 1}
+    - _ColorKey2: {r: 1, g: 1, b: 1, a: 1}
+    - _ColorMultiplier: {r: 0.4, g: 0.5, b: 0.9, a: 0}
+    - _InitialDelayRange: {r: 0, g: 0, b: 0, a: 0}
+    - _LifetimeRange: {r: 30, g: 30, b: 0, a: 0}
+    - _SizeKey0: {r: 0, g: 0.8, b: 0, a: 0}
+    - _SizeKey1: {r: 0.5, g: 1.3, b: 0, a: 0}
+    - _SizeKey2: {r: 0.95, g: 1.3, b: 0, a: 0}
+    - _SizeKey3: {r: 0.98, g: 1, b: 0, a: 0}
+    - _SizeKey4: {r: 0.99, g: 0.7, b: 0, a: 0}
+    - _SizeKey5: {r: 1, g: 0.2, b: 0, a: 0}
+    - _StartLocationOffsetUU: {r: 0, g: 0, b: 7, a: 0}
+  m_BuildTextureStacks: []
+  m_AllowLocking: 1

@@ -1,10 +1,17 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
-public class L2Particle : BaseEffect
+public class L2Particle : BaseEffect, IRegisteredBillboard
 {
     private const string LifetimeTraceEffectName = "el_wind_strike_ta";
 
+    [Tooltip("Не вызывать DestoryEffect при Play — объект не удаляется по таймеру (отладка шейдера, Hold и т.п.). Выключено по умолчанию.")]
+    [SerializeField] private bool _skipScheduledDestroyForDebug;
+
     [SerializeField] private Vector3 _surfaceNormal;
+    [Header("Billboard")]
+    [SerializeField] private bool _billboardToCamera;
+    [SerializeField] private Vector3 _billboardRotationOffsetEuler;
     [SerializeField] private PooledEffect _pooledEffect;
     [SerializeField] private EffectPart[] _particleGroups;
     private EffectSettings _settings;
@@ -13,12 +20,52 @@ public class L2Particle : BaseEffect
     public PooledEffect PooledEffect { get { return _pooledEffect; } }
     public Vector3 SurfaceNormal { get { return _surfaceNormal; } set { _surfaceNormal = value; } }
 
+    private void OnEnable()
+    {
+        if (_billboardToCamera)
+        {
+            RegisteredBillboards.Register(this);
+        }
+    }
+
+    private void OnDisable()
+    {
+        if (_billboardToCamera)
+        {
+            RegisteredBillboards.Unregister(this);
+        }
+    }
+
     private void Awake()
     {
         _pooledEffect.ResetTimerCallback = () =>
         {
             ResetTimer();
         };
+    }
+
+    public void OnCameraPreRender(Camera camera)
+    {
+        ApplyBillboardRotation(camera);
+    }
+
+    private void LateUpdate()
+    {
+        if (_billboardToCamera)
+        {
+            ApplyBillboardRotation(Camera.main);
+        }
+    }
+
+    private void ApplyBillboardRotation(Camera camera)
+    {
+        if (!_billboardToCamera || camera == null)
+        {
+            return;
+        }
+
+        // Copy camera orientation so the whole mesh turns as an object, preserving its authored 3D shape.
+        transform.rotation = camera.transform.rotation * Quaternion.Euler(_billboardRotationOffsetEuler);
     }
 
     public override void Setup(EffectSettings settings, MagicCastData castData, Transform owner)
@@ -61,24 +108,30 @@ public class L2Particle : BaseEffect
     {
         _playStartedAt = Time.time;
         ResetTimer();
-        DestoryEffect(_settings,  _castData);
+        if (!_skipScheduledDestroyForDebug && !IsDestroyDeferredUntilHomeArrival)
+        {
+            DestoryEffect(_settings, _castData);
+        }
+
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
+        if (_skipScheduledDestroyForDebug)
+        {
+            Debug.Log($"[L2Particle] SkipScheduledDestroyForDebug: '{name}' — DestoryEffect не вызывается.");
+        }
+
         if (ShouldTraceLifetime())
         {
             Debug.Log(
                 $"[TA_LIFETIME_PLAY] effect='{name}' playAt={_playStartedAt:F3}s " +
                 $"scheduledLife={(_settings != null ? _settings.defaultLifeTime : -1f):F3}s " +
-                $"scheduledHide={(_settings != null ? _settings.hideTime : -1f):F3}s.");
+                $"scheduledHide={(_settings != null ? _settings.hideTime : -1f):F3}s skipDestroy={_skipScheduledDestroyForDebug}.");
         }
 #endif
     }
 
     public void ResetTimer()
     {
-        if (_particleGroups == null || _particleGroups.Length == 0)
-        {
-            _particleGroups = GetComponentsInChildren<EffectPart>();
-        }
+        RefreshParticleGroups();
 
         for (int i = 0; i < _particleGroups.Length; i++)
         {
@@ -104,6 +157,41 @@ public class L2Particle : BaseEffect
 
             _particleGroups[i].PlayPart();
         }
+    }
+
+    private void RefreshParticleGroups()
+    {
+        if (_particleGroups == null || _particleGroups.Length == 0)
+        {
+            _particleGroups = GetComponentsInChildren<EffectPart>();
+            return;
+        }
+
+        List<EffectPart> refreshed = new List<EffectPart>(_particleGroups.Length + 1);
+        for (int i = 0; i < _particleGroups.Length; i++)
+        {
+            if (_particleGroups[i] != null && !refreshed.Contains(_particleGroups[i]))
+            {
+                refreshed.Add(_particleGroups[i]);
+            }
+        }
+
+        EffectPart[] children = GetComponentsInChildren<EffectPart>();
+        for (int i = 0; i < children.Length; i++)
+        {
+            EffectPart part = children[i];
+            if (part == null || refreshed.Contains(part))
+            {
+                continue;
+            }
+
+            if (part is ParticleGroup group && group.IsHomeFlightAnchor)
+            {
+                refreshed.Add(part);
+            }
+        }
+
+        _particleGroups = refreshed.ToArray();
     }
 
     protected override void OnDestroy()

@@ -92,10 +92,22 @@ public class TargetWindow : L2Window {
             }
             if(_HPBarBG != null && _HPBar != null) {
 
-                float hpRatio = (float)targetData.Status.GetHp() / targetData.Stats.MaxHp;
+                // 1. Проверяем MaxHp, чтобы избежать деления на ноль или NaN
+                float maxHp = targetData.Stats.MaxHp;
+                float hpRatio = (maxHp > 0) ? Mathf.Clamp01((float)targetData.Status.GetHp() / maxHp) : 0f;
+
+                // 2. Получаем ширину подложки и проверяем, что она корректна (больше нуля и не NaN)
                 float bgWidth = _HPBarBG.resolvedStyle.width;
+                if (float.IsNaN(bgWidth) || bgWidth <= 0)
+                {
+                    bgWidth = _targetWindowMinWidth; // Временный дефолтный размер, пока UI не просчитался
+                }
+
+                // 3. Считаем финальную ширину полоски
                 float barWidth = bgWidth * hpRatio;
-                _HPBar.style.width = barWidth;
+
+                // 4. Если ширина 0, принудительно ставим 0, иначе Unity UI может сбросить её в "Auto" (весь экран)
+                _HPBar.style.width = (barWidth > 0) ? barWidth : 0f;
 
                 TooogleHide(targetData.Identity.IsHideHpBar);
             }

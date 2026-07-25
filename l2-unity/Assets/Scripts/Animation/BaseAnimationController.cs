@@ -24,6 +24,10 @@ public class BaseAnimationController : AnimationEventsBase, IAnimationController
 
     private AnimatorOverrideController _overrideController;
 
+    // Дубли OnAnimationShoot на одном кадре (два ивента на клипе / два слоя) — в подписчики уходит один раз.
+    private int _lastDuplicateShootFrame = int.MinValue;
+    private string _lastDuplicateShootAnim;
+
     public virtual void Initialize()
     {
         _animator = gameObject.GetComponentInChildren<Animator>(true);
@@ -328,6 +332,11 @@ public class BaseAnimationController : AnimationEventsBase, IAnimationController
         return _animator.GetInteger(_animator.name);
     }
 
+    public void SetAnimatorSpeed(float value)
+    {
+        _animator.speed = value;
+    }
+
     public string GetAnimatorName()
     {
        return _animator?.runtimeAnimatorController.name;
@@ -359,4 +368,66 @@ public class BaseAnimationController : AnimationEventsBase, IAnimationController
     {
         return AnimationDataCache.GetEventTimeByName(_animator, clip, eventName);
     }
+
+    public override void OnAnimationShoot(string animationName)
+    {
+        if (_animator == null)
+        {
+            base.OnAnimationShoot(animationName);
+            return;
+        }
+
+        int objectId = _animator.GetInteger(AnimatorUtils.OBJECT_ID);
+
+        if (Time.frameCount == _lastDuplicateShootFrame &&
+            string.Equals(_lastDuplicateShootAnim, animationName, StringComparison.Ordinal))
+        {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            AnimationManager.LogAnimationShootFromAnimator(
+                objectId,
+                "SKIP_DEDUP_SAME_FRAME",
+                animationName,
+                BuildAnimatorShootDebugContext());
+#endif
+            return;
+        }
+
+        _lastDuplicateShootFrame = Time.frameCount;
+        _lastDuplicateShootAnim = animationName;
+
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        AnimationManager.LogAnimationShootFromAnimator(
+            objectId,
+            "DISPATCH",
+            animationName,
+            BuildAnimatorShootDebugContext());
+#endif
+
+        base.OnAnimationShoot(animationName);
+    }
+
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+    private string BuildAnimatorShootDebugContext()
+    {
+        AnimatorStateInfo s0 = _animator.GetCurrentAnimatorStateInfo(0);
+        AnimatorClipInfo[] clipInfos = _animator.GetCurrentAnimatorClipInfo(0);
+        string clip0 = clipInfos.Length > 0 && clipInfos[0].clip != null ? clipInfos[0].clip.name : "(no clip info)";
+        float clipLen = clipInfos.Length > 0 && clipInfos[0].clip != null ? clipInfos[0].clip.length : -1f;
+
+        int layerCount = _animator.layerCount;
+        string layer1 = "";
+        if (layerCount > 1)
+        {
+            AnimatorStateInfo s1 = _animator.GetCurrentAnimatorStateInfo(1);
+            AnimatorClipInfo[] c1 = _animator.GetCurrentAnimatorClipInfo(1);
+            string n1 = c1.Length > 0 && c1[0].clip != null ? c1[0].clip.name : "?";
+            layer1 = $" | L1 clip={n1} normT={s1.normalizedTime:F3}";
+        }
+
+        return
+            $"controller='{GetAnimatorName()}' L0 clip={clip0} clipLen={clipLen:F3}s " +
+            $"normT={s0.normalizedTime:F3} speed={_animator.speed:F3} shortNameHash={s0.shortNameHash}" +
+            layer1;
+    }
+#endif
 }

@@ -1,0 +1,108 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!21 &2100000
+Material:
+  serializedVersion: 8
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: MeshEmitter1
+  m_Shader: {fileID: 4800000, guid: a74b1c2d3e4f567890abcdef12345678, type: 3}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
+  m_ValidKeywords: []
+  m_InvalidKeywords:
+  - _ALPHAFROMLUMA_ON
+  - _BALPHABLEND_ON
+  - _FADEOUT_ON
+  - _HASLIFETIME_ON
+  - _IGNOREMAINTEXALPHA_ON
+  - _SIZESCALEHORIZONTALONLY_ON
+  - _SPINPARTICLES_ON
+  - _UNIFORMSIZE_ON
+  - _USESIZESCALE_ON
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: 3000
+  stringTagMap: {}
+  disabledShaderPasses:
+  - MOTIONVECTORS
+  m_LockedProperties: 
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - _MainTex:
+        m_Texture: {fileID: 2800000, guid: 0eb799b46a9ac16408f938314e03d640, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Ints: []
+    m_Floats:
+    - _AlphaEdgeFeather: 0.02
+    - _AlphaFromLuma: 1
+    - _ApplyUuToStartSize: 0
+    - _ClipDepthBias: 0.001
+    - _ColorScaleCount: 2
+    - _ColorScaleTime1: 1
+    - _EmitterAlpha: 1
+    - _FadeIn: 0
+    - _FadeInEndTime: 0
+    - _Fadeout: 1
+    - _FadeoutStartTime: 1
+    - _HasLifetime: 1
+    - _IgnoreMainTexAlpha: 1
+    - _LumaAlphaFloor: 0.02
+    - _MeshYOffset: 0.01
+    - _Opacity: 0.82
+    - _Seed: 0
+    - _SizeScaleCount: 3
+    - _SizeScaleHorizontalOnly: 1
+    - _SizeScaleParam: 1
+    - _SizeScaleRepeats: 0
+    - _SizeScaleTime0: 0
+    - _SizeScaleTime1: 0.25
+    - _SizeScaleTime2: 1
+    - _SizeScaleTime3: 1
+    - _SizeScaleTime4: 1
+    - _SizeScaleVal0: 1.7
+    - _SizeScaleVal1: 4.2
+    - _SizeScaleVal2: 6
+    - _SizeScaleVal3: 6
+    - _SizeScaleVal4: 6
+    - _SpinCCWorCW: 0
+    - _SpinParticles: 1
+    - _SpinsPerSecond: 1.2
+    - _StartTime: 0
+    - _UniformSize: 1
+    - _UseRegularSizeScale: 0
+    - _UseSizeScale: 1
+    - _bAlphaBlend: 1
+    m_Colors:
+    - _ColorMultMax: {r: 1, g: 1, b: 1, a: 1}
+    - _ColorMultMin: {r: 1, g: 1, b: 1, a: 1}
+    - _ColorScale0: {r: 1, g: 1, b: 1, a: 1}
+    - _ColorScale1: {r: 1, g: 1, b: 1, a: 1}
+    - _InitialDelayRange: {r: 0, g: 0, b: 0, a: 0}
+    - _LifetimeRange: {r: 1.2, g: 1.5, b: 0, a: 0}
+    - _PlanarUvMeshHalfExtents: {r: 0.5, g: 0.5, b: 0, a: 0}
+    - _RandomZOffsetUU: {r: -3, g: 3, b: 0, a: 0}
+    - _SphereRadiusUU: {r: 3, g: 3, b: 0, a: 0}
+    - _StartLocationOffset: {r: 0, g: 0, b: 20, a: 0}
+    - _StartSize: {r: 1, g: 1, b: 1, a: 0}
+    - _StartSpinRange: {r: 0, g: 1, b: 0, a: 0}
+  m_BuildTextureStacks: []
+  m_AllowLocking: 1
+--- !u!114 &6173178982728970885
+MonoBehaviour:
+  m_ObjectHideFlags: 11
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d0353a89b1f911e48b9e16bdc9f2e058, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  version: 10

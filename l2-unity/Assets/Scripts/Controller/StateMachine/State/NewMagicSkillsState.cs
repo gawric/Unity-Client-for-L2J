@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
+using static UnityEngine.EventSystems.EventTrigger;
 
 public class NewMagicSkillsState  : AbstractAttackEvents
 {
@@ -11,7 +13,7 @@ public class NewMagicSkillsState  : AbstractAttackEvents
 
     public override void Enter()
     {
-
+        base.Enter();
     }
     public override void HandleEvent(Event evt, object payload = null)
     {
@@ -24,10 +26,11 @@ public class NewMagicSkillsState  : AbstractAttackEvents
             case Event.READY_TO_ACT:
 
                 AnimationCombo readyCombo = SkillgrpTable.Instance.GetAnimComboBySkillId(useSkill.SkillId, useSkill.SkillLvl);
-                float[] durations = AnimationManager.Instance.GetOverrideClipsDurations(objectId, readyCombo.GetAnimCycle());
-                float shotEventTime = AnimationManager.Instance.GetOverrideEventTimeByName(objectId, readyCombo.GetAnimCycle(), "OnAnimationShoot");
-                float flightTimeMs = ResolveMagicFlightTimeMs(entity);
-                entity.SetupTotalCastDuration(useSkill.HitTime, flightTimeMs, durations, shotEventTime);
+                string[] orderedReadyCycle = SetupDurationHelper.BuildOrderedCycleForOverrideTiming(readyCombo.GetAnimCycle());
+                float[] durations = AnimationManager.Instance.GetOverrideClipsDurations(objectId, orderedReadyCycle);
+                float shotEventTime = SetupDurationHelper.ResolveShotEventTime(objectId, orderedReadyCycle);
+                float flightTimeMs = ResolveMagicFlightTimeMs(entity, useSkill.SkillId);
+                entity.SetupTotalCastDuration(useSkill.HitTime, flightTimeMs, durations, shotEventTime, useSkill.TargetId);
 
                 SkillExecutor.Instance.ExecuteSkillOverride(useSkill.SkillGrp, entity, readyCombo, _events);
                 break;
@@ -35,18 +38,32 @@ public class NewMagicSkillsState  : AbstractAttackEvents
                 Debug.Log("NewMagicSkillsState Use Sate> Отмена скорее всего запрос пришел из ActionFaild");
                 break;
             case Event.APPLY_SELF_SKILL:
+
                 AnimationCombo selfCombo = SkillgrpTable.Instance.GetAnimComboBySkillId(useSkill.SkillId, useSkill.SkillLvl);
+                SetupDurationHelper.SetupDurationIfHitTimeNot0(useSkill, objectId, entity, selfCombo);
                 SkillExecutor.Instance.ExecuteSkillOverride(useSkill.SkillGrp, entity, selfCombo, _events);
                 break;
 
         }
     }
 
-    private static float ResolveMagicFlightTimeMs(PlayerEntity entity)
+
+
+
+
+
+
+    private static float ResolveMagicFlightTimeMs(PlayerEntity entity, int skillId)
     {
         const float fallbackFlightMs = 1000f;
         const float projectileHitOffsetSeconds = 0.3f;
         const float minFlightMs = 350f;
+
+        if (EffectManager.Instance != null && EffectManager.Instance.database != null &&
+            EffectManager.Instance.database.ShouldIgnoreFlightTimeForCast(skillId))
+        {
+            return 0f;
+        }
 
         if (entity == null || entity.Target == null)
         {

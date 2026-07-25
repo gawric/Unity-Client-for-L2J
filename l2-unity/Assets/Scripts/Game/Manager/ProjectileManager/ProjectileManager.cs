@@ -8,6 +8,8 @@ using UnityEngine.ProBuilder;
 public class ProjectileManager : AbstractProjectile, IProjectileManager
 {
     private const string PROJECTILE_TIMER_LOG = "[PROJECTILE_TIMER]";
+    private const string MagicProjectileSyncTag = "[MAGIC_PROJECTILE_SYNC]";
+
     [SerializeField] public ProjectileData defaultSettings;
     public event Action<GameObject, Transform, Vector3, Vector3> OnHitMonster;
     public event Action<GameObject, Transform, Vector3, Vector3, int> OnHitEffectProjectile;
@@ -106,10 +108,10 @@ public class ProjectileManager : AbstractProjectile, IProjectileManager
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
         Debug.Log(
-            $"[ProjectileLaunchTiming] id={projectile.id} impactType={projectile.impactType} " +
+            $"{MagicProjectileSyncTag} LAUNCH id={projectile.id} impactType={projectile.impactType} " +
             $"launchGlobalFromCast={projectile.projectileLaunchGlobalFromCast:F3}s " +
             $"serverShoot={projectile.castServerShootSnapshot:F3}s serverHit={projectile.castServerHitSnapshot:F3}s " +
-            $"deltaToServerShoot={projectile.projectileLaunchGlobalFromCast - projectile.castServerShootSnapshot:F3}s " +
+            $"deltaLaunchToShoot={projectile.projectileLaunchGlobalFromCast - projectile.castServerShootSnapshot:F3}s " +
             $"configuredFly={projectile.flytime:F3}s distance={projectile.distance:F3}m.");
 #endif
     }
@@ -213,10 +215,16 @@ public class ProjectileManager : AbstractProjectile, IProjectileManager
             if (projectile.impactType == ProjectileImpactType.EffectOnly)
             {
                 bool hasSubscribers = OnHitEffectProjectile != null;
+                float gs = projectile.castStartTimeSnapshot > 0f ? Time.time - projectile.castStartTimeSnapshot : -1f;
                 Debug.Log(
                     $"{PROJECTILE_TIMER_LOG} EffectOnlyTimeHit id={projectile.id} " +
                     $"elapsedSec={(Time.time - projectile.startTime):F3} flyTimeSec={projectile.flytime:F3} " +
                     $"eventSubscribers={hasSubscribers} hitPoint={projectile.hitPoint}");
+                Debug.Log(
+                    $"{MagicProjectileSyncTag} EFFECT_ONLY_HIT_FIRE id={projectile.id} " +
+                    $"globalSinceCast={gs:F3}s serverHit={projectile.castServerHitSnapshot:F3}s " +
+                    $"deltaToServerHit={(gs >= 0f ? gs - projectile.castServerHitSnapshot : -1f):F3}s " +
+                    $"elapsedSinceLaunch={(Time.time - projectile.startTime):F3}s");
                 OnHitEffectProjectile?.Invoke(
                     projectile.prefab,
                     projectile.targetTransform,
@@ -295,20 +303,20 @@ public class ProjectileManager : AbstractProjectile, IProjectileManager
         float projectileElapsed = Time.time - projectile.startTime;
         if (projectile.castStartTimeSnapshot <= 0f)
         {
-            Debug.Log(
-                $"[ProjectileImpactTiming] id={projectile.id} impactType={projectile.impactType} " +
-                $"globalSinceCastStart=-1 castDataSnapshot=null flytime={projectile.flytime:F3}s elapsed={projectileElapsed:F3}s.");
+        Debug.Log(
+            $"{MagicProjectileSyncTag} IMPACT id={projectile.id} impactType={projectile.impactType} " +
+            $"globalSinceCastStart=-1 castSnapshot=null flytime={projectile.flytime:F3}s elapsed={projectileElapsed:F3}s.");
             return;
         }
 
         float globalSinceCastStart = Time.time - projectile.castStartTimeSnapshot;
         Debug.Log(
-            $"[ProjectileImpactTiming] id={projectile.id} impactType={projectile.impactType} " +
+            $"{MagicProjectileSyncTag} IMPACT id={projectile.id} impactType={projectile.impactType} " +
             $"launchGlobalFromCast={projectile.projectileLaunchGlobalFromCast:F3}s " +
             $"globalSinceCastStart={globalSinceCastStart:F3}s serverShoot={projectile.castServerShootSnapshot:F3}s serverHit={projectile.castServerHitSnapshot:F3}s " +
-            $"deltaLaunchToServerShoot={projectile.projectileLaunchGlobalFromCast - projectile.castServerShootSnapshot:F3}s " +
+            $"deltaLaunchToShoot={projectile.projectileLaunchGlobalFromCast - projectile.castServerShootSnapshot:F3}s " +
             $"deltaToServerHit={globalSinceCastStart - projectile.castServerHitSnapshot:F3}s " +
-            $"projectileFlyConfigured={projectile.flytime:F3}s projectileElapsed={projectileElapsed:F3}s.");
+            $"configuredFly={projectile.flytime:F3}s elapsedSinceLaunch={projectileElapsed:F3}s.");
 #endif
     }
 

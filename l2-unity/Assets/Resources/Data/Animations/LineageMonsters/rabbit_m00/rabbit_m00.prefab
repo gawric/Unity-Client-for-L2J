@@ -59,6 +59,9 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -280,7 +283,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: a1ddbbe4ceba69141ac77021d7de5981, type: 3}
       propertyPath: m_Name
-      value: rabbit_prefab
+      value: rabbit_m00
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: a1ddbbe4ceba69141ac77021d7de5981, type: 3}
       propertyPath: m_Layer
@@ -401,11 +404,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _animator: {fileID: 0}
   _resetStateOnReceive: 1
-  _atk01ClipLength: 1000
   _spAtk01ClipLength: 1000
 --- !u!95 &5656802138117430609
 Animator:
-  serializedVersion: 5
+  serializedVersion: 7
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -419,6 +421,7 @@ Animator:
   m_ApplyRootMotion: 0
   m_LinearVelocityBlending: 0
   m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
   m_WarningMessage: 
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1
@@ -439,7 +442,6 @@ CharacterController:
     serializedVersion: 2
     m_Bits: 0
   m_LayerOverridePriority: 0
-  m_IsTrigger: 0
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
@@ -464,14 +466,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _serverPosition: {x: 0, y: 0, z: 0}
   _positionSyncProtection: 1
-  _positionSyncNodesThreshold: 2
   _positionSynced: 0
   _positionSyncPaused: 0
-  _lerpDuration: 0.3
   _positionDelta: 0
   _lastDesyncTime: 0
   _lastDesyncDuration: 0
-  _maximumAllowedDesyncTimeMs: 300
 --- !u!114 &3151075192338717712
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -488,7 +487,6 @@ MonoBehaviour:
   _speed: 0
   _destination: {x: 0, y: 0, z: 0}
   _gravity: 28
-  _moveSpeedMultiplier: 1
 --- !u!114 &7862623731142274172
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -528,12 +526,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 89e8f6bf2a22cde488eee1ee4f91bd94, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _entityLoaded: 0
   _identity:
     _entityType: 3
     _id: 0
     _name: 
     _title: 
-    _type: 
+    _titleColor: 9CE8A9FF
+    _resetTick: 0
     _npcId: 0
     _npcClass: 
     _playerClass: 0
@@ -541,20 +541,42 @@ MonoBehaviour:
     _position: {x: 0, y: 0, z: 0}
     _heading: 0
     _owned: 0
-  _status:
-    _hp: 0
-    _maxHp: 0
-    _level: 0
+  _identityInterlude:
+    _entityType: 0
+    _id: 0
+    _name: 
+    _title: 
+    _titleColor: 9CE8A9FF
+    _resetTick: 0
+    _npcId: 0
+    _npcClass: 
+    _playerClass: 0
+    _position: {x: 4724, y: -68, z: -1731}
+    _heading: {x: 0, y: 0, z: 0, w: 0}
+    _owned: 0
   _stats:
+    _level: 0
     _speed: 0
     _scaledSpeed: 0
+    _walkSpeed: 0
     _pAtkSpd: 0
     _mAtkSpd: 0
+    _maxHp: 0
+    _maxMp: 0
+    _maxCp: 0
+    _scaledRunSpeed: 0
+    _scaledWalkSpeed: 0
+    _basePAtkSpeed: 0
   _appearance:
-    _collisonHeight: 0
-    _collisionRadius: 0
-    _lhand: 0
-    _rhand: 0
+    CollisionHeight: 0
+    CollisionRadius: 0
+    LHand: 0
+    RHand: 0
+  _running: 0
+  _dead: 0
+  _race: 0
+  _raceId: 0
+  _bodyType: 2
   _targetId: 0
   _target: {fileID: 0}
   _attackTarget: {fileID: 0}
@@ -572,6 +594,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4057a068ca79edd469897aa33319d243, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  allBone:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
   _rightHandType: 0
   _rightHandBone: {fileID: 0}
   _rightHand: {fileID: 0}

@@ -1,0 +1,70 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!21 &2100000
+Material:
+  serializedVersion: 8
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: SpriteEmitter2
+  m_Shader: {fileID: 4800000, guid: c2d3e4f5a6b74890a1b2c3d4e5f60702, type: 3}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
+  m_ValidKeywords: []
+  m_InvalidKeywords:
+  - _FADEIN_ON
+  - _FADEOUT_ON
+  - _LOOPSIZESCALEPREVIEW_ON
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: -1
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_LockedProperties: 
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - _MainTex:
+        m_Texture: {fileID: 2800000, guid: e5d092c20f5692e448dde7d8e892ed94, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Ints: []
+    m_Floats:
+    - _FadeIn: 1
+    - _FadeInEndTime: 0.049
+    - _Fadeout: 1
+    - _FadeoutStartTime: 0.154
+    - _HasLifetime: 1
+    - _L2FxWorldCalibration: 1.1
+    - _LoopSizeScalePreview: 1
+    - _LumaAlphaFloor: 0.003
+    - _RgbBoost: 7
+    - _Seed: 0
+    - _SpriteMotionRandStateBits: 0
+    - _SpriteSpinRandStateBits: 0
+    - _StartTime: 0
+    - _SubdivisionEnd: 7
+    - _SubdivisionStart: 4
+    - _TestSpinRadians: 0
+    - _TextureUSubdivisions: 4
+    - _TextureVSubdivisions: 4
+    m_Colors:
+    - _InitialDelayRange: {r: 0, g: 0.01, b: 0, a: 0}
+    - _LifetimeRange: {r: 2, g: 2, b: 0, a: 0}
+    - _SizeKey0: {r: 0, g: 0.6, b: 0, a: 0}
+    - _SizeKey1: {r: 0.07, g: 1.8, b: 0, a: 0}
+    - _SizeKey2: {r: 0.14, g: 2.6, b: 0, a: 0}
+    - _SizeKey3: {r: 0.34, g: 3, b: 0, a: 0}
+    - _SizeKey4: {r: 1, g: 3.4, b: 0, a: 0}
+    - _SizeRange: {r: 5.5, g: 5.5, b: 0, a: 0}
+    - _SpriteSpinCcwOrCw: {r: 0, g: 1, b: 1, a: 0}
+    - _SpriteSpinSpsRangeUc: {r: 0, g: 0.3, b: 0, a: 0}
+    - _SpriteSpinStartRangeUc: {r: 0, g: 360, b: 0, a: 0}
+    - _StartLocationOffsetUU: {r: 0, g: 0, b: 8, a: 0}
+    - _StartVelocityRangeXUc: {r: -0.001, g: 0.001, b: 0, a: 0}
+    - _StartVelocityRangeYUc: {r: -0.001, g: 0.001, b: 0, a: 0}
+    - _StartVelocityRangeZUc: {r: 0.004, g: 0.004, b: 0, a: 0}
+  m_BuildTextureStacks: []
+  m_AllowLocking: 1

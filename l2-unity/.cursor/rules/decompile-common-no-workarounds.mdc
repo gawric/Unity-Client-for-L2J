@@ -1,0 +1,17 @@
+---
+description: Decompile_Common formula debugging — no workarounds
+alwaysApply: true
+---
+
+# Decompile_Common formula policy
+
+When porting or debugging L2 particle/mesh effects in this project:
+
+1. **Fix formulas in `Assets/Resources/Data/Shaders/Skills/Common/Decompile_Common/`**, not with one-off hacks in effect shaders.
+2. **No workarounds** that bypass a broken library path (e.g. `ApplyMeshSpinAroundY` instead of `L2FxMeshSpin` FRotator, hard-coded axis cheats, effect-local reimplementations of library math).
+3. Effect shaders **call** the correct Decompile_Common module for that UC feature:
+   - SpinParticles → `L2FxMeshSpin`
+   - UseRotationFrom=PTRS_Actor WorldMat → `L2FxPTRS_Actor`
+   - Do not substitute PTRS_Actor for MeshSpin (or the reverse).
+4. If Unity visuals disagree with L2 while slot logs match, **isolate and fix the library conjugation/matrix/order** so the fix applies to all future effects.
+5. Diagnostic toggles that only zero inputs to the same formula are OK for A/B; replacing the formula with a different path is not.

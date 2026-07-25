@@ -108,12 +108,20 @@ public class AmbientSoundEmitter : EventHandler {
     }
 
     private bool ShouldPlayEvent() {
-        if(_ambientSoundType == AmbientSoundType.AST1_Day && WorldClock.Instance.IsNightTime()) {
-            return false;
+        WorldClock clock = WorldClock.Instance;
+        if (clock != null)
+        {
+            if (_ambientSoundType == AmbientSoundType.AST1_Day && clock.IsNightTime())
+            {
+                return false;
+            }
+
+            if (_ambientSoundType == AmbientSoundType.AST1_Night && !clock.IsNightTime())
+            {
+                return false;
+            }
         }
-        if(_ambientSoundType == AmbientSoundType.AST1_Night && !WorldClock.Instance.IsNightTime()) {
-            return false;
-        }
+
         if(Random.Range(1, 100) <= _playChancePercent) {
             return true;
         }

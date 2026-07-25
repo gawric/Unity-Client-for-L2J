@@ -17,27 +17,99 @@ MonoBehaviour:
     prefab: {fileID: 6218837199439611435, guid: 87a0d43ba0915b447a8370030fc8eedc, type: 3}
     comment: WndStrike(OldVersion_Disabled)
     settings: {fileID: 11400000, guid: c02f996917eecba46986a49309d210d1, type: 2}
+    ignoreFlightTimeForCast: 0
   - id: 99999
     prefab: {fileID: 8500736706040560274, guid: 60f4bfabf7d4afa40887a508ef09dcb7, type: 3}
     comment: LevelUp
     settings: {fileID: 11400000, guid: 19c27f6b5bdc15f438b14170676fbf4b, type: 2}
+    ignoreFlightTimeForCast: 1
   - id: 2039
     prefab: {fileID: -3189580720888355194, guid: 774acae02234dc14d94f0308a71c24e9, type: 3}
     comment: soulshot-ng
     settings: {fileID: 11400000, guid: 525f3348611dff143bfa0da70228506f, type: 2}
+    ignoreFlightTimeForCast: 1
   - id: 2061
     prefab: {fileID: 4380878508081750752, guid: 4ccf38bff8b76e94a968cc862bebb021, type: 3}
     comment: spiritshot-ng
     settings: {fileID: 11400000, guid: 1ffc492d749ea054f9c03ebb11d95032, type: 2}
+    ignoreFlightTimeForCast: 1
   - id: 99998
-    prefab: {fileID: 143770393737063303, guid: 05e266bb1af97c64db23e079e5cba7ed, type: 3}
+    prefab: {fileID: 2165087678591533806, guid: da427266e77111640b2c85a67e7f0ffe, type: 3}
     comment: soulshot-fog
     settings: {fileID: 11400000, guid: 1ffc492d749ea054f9c03ebb11d95032, type: 2}
+    ignoreFlightTimeForCast: 1
   - id: 1177
     prefab: {fileID: 7332513459391841777, guid: 7e4bddd3c30f0504c91b922211faa2fe, type: 3}
     comment: wind-strike-composite-effect
     settings: {fileID: 11400000, guid: c02f996917eecba46986a49309d210d1, type: 2}
+    ignoreFlightTimeForCast: 0
   - id: 1184
     prefab: {fileID: -7507245368011384688, guid: 2b43c8bfea230ca489bfd062d4e3bc4d, type: 3}
     comment: ice-bolt-composite-effect
     settings: {fileID: 11400000, guid: e540cb9c791a7e444b8e4801c60e1a70, type: 2}
+    ignoreFlightTimeForCast: 1
+  - id: 1011
+    prefab: {fileID: -2331866982259287529, guid: 785a831417b3cda4984eab6e66a512c4, type: 3}
+    comment: heal-composite-effect
+    settings: {fileID: 11400000, guid: 71be8ca0eae2cd44fbcbd0243ca6ff9f, type: 2}
+    ignoreFlightTimeForCast: 1
+  - id: 1216
+    prefab: {fileID: -2331866982259287529, guid: 785a831417b3cda4984eab6e66a512c4, type: 3}
+    comment: heal-composite-effect
+    settings: {fileID: 11400000, guid: 71be8ca0eae2cd44fbcbd0243ca6ff9f, type: 2}
+    ignoreFlightTimeForCast: 1
+  - id: 1168
+    prefab: {fileID: -3238118204883760824, guid: 9b901fe81afbe024b9140f04af7f15ca, type: 3}
+    comment: curse-poison-effect
+    settings: {fileID: 11400000, guid: 32b8e356a6514494cb7425f31ee60898, type: 2}
+    ignoreFlightTimeForCast: 1
+  - id: 1147
+    prefab: {fileID: -3238118204883760824, guid: 7e9c873da8301df4eb47aabe93145e6f, type: 3}
+    comment: vampiric-touch-effect
+    settings: {fileID: 11400000, guid: 5b8dc6046d4381541bf1b9e6b1e707ee, type: 2}
+    ignoreFlightTimeForCast: 1
+  - id: 1164
+    prefab: {fileID: -3238118204883760824, guid: 66d26d0635a594043b2d5f942f4d6de8, type: 3}
+    comment: curse-weakness-effect
+    settings: {fileID: 11400000, guid: 5de638f04240ef249a0d92a299aca7bf, type: 2}
+    ignoreFlightTimeForCast: 1
+  - id: 1015
+    prefab: {fileID: -2331866982259287529, guid: 0a1ab700809977949bd61dd85067c905, type: 3}
+    comment: battle-heal-effect
+    settings: {fileID: 11400000, guid: 8a59a8af482172b45ae1974088ba7b1e, type: 2}
+    ignoreFlightTimeForCast: 1
+  - id: 1012
+    prefab: {fileID: -2331866982259287529, guid: 6f984f99a4852004f8aea8a601c2af6b, type: 3}
+    comment: cure-poison-effect
+    settings: {fileID: 11400000, guid: 379a78eda0ba8ef40961f6ef9d85878a, type: 2}
+    ignoreFlightTimeForCast: 1
+  - id: 1040
+    prefab: {fileID: -2331866982259287529, guid: d1b012004056a204199b49bc2dbe78a5, type: 3}
+    comment: shield-composite-effect
+    settings: {fileID: 11400000, guid: a8f3c2e1d4b5678901234abcdef56789, type: 2}
+    ignoreFlightTimeForCast: 1
+  - id: 1068
+    prefab: {fileID: -2331866982259287529, guid: 6318d4c82b090cd4c8c287625d958b1f, type: 3}
+    comment: might-composite-effect
+    settings: {fileID: 11400000, guid: e73b899fdfd5e1243a008820002a9c0e, type: 2}
+    ignoreFlightTimeForCast: 1
+  - id: 2013
+    prefab: {fileID: 1435013334709449354, guid: 1eaec3ad6bfc2c84e89567ee20786e0c, type: 3}
+    comment: teleport-composite-effect
+    settings: {fileID: 11400000, guid: dd6f482471331114da04e05ef1d9dddb, type: 2}
+    ignoreFlightTimeForCast: 1
+  - id: 2031
+    prefab: {fileID: 2165087678591533806, guid: da427266e77111640b2c85a67e7f0ffe, type: 3}
+    comment: it-healing-potion-effect
+    settings: {fileID: 11400000, guid: 304118563f04a3c46812acac35e7ba2e, type: 2}
+    ignoreFlightTimeForCast: 1
+  - id: 2011
+    prefab: {fileID: 8950294488946584971, guid: 673a363b6152ee94695a2b7d0958da24, type: 3}
+    comment: it-haste-potion-effect
+    settings: {fileID: 11400000, guid: cf003ce1643c62640a960af58930287b, type: 2}
+    ignoreFlightTimeForCast: 1
+  - id: 99997
+    prefab: {fileID: 720686262775047825, guid: a6591ce429474df46874126c3dc0c6a4, type: 3}
+    comment: simple_atk_effect
+    settings: {fileID: 11400000, guid: 39ad4dfd5fe718841a26f54f9f4b3702, type: 2}
+    ignoreFlightTimeForCast: 1

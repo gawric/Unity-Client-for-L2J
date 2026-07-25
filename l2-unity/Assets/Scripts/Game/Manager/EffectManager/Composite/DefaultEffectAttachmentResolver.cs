@@ -32,6 +32,12 @@ public class DefaultEffectAttachmentResolver : IEffectAttachmentResolver
                 return ResolveRoot(context.TargetTransform, out resolvedTransform, out worldPosition);
             case EffectAttachmentPoint.TargetLowerBody:
                 return ResolveLowerBody(context.TargetEntity, context.TargetTransform, out resolvedTransform, out worldPosition);
+            case EffectAttachmentPoint.TargetCenter:
+                return ResolveTargetCenter(context.TargetEntity, context.TargetTransform, out resolvedTransform, out worldPosition);
+            case EffectAttachmentPoint.TargetOverHead:
+                return ResolveTargetOverHead(context.TargetEntity, context.TargetTransform, out resolvedTransform, out worldPosition);
+            case EffectAttachmentPoint.CasterCenter:
+                return ResolveTargetCenter(context.CasterEntity, context.CasterTransform, out resolvedTransform, out worldPosition);
             case EffectAttachmentPoint.WorldHitPoint:
                 if (context.HasHitPoint)
                 {
@@ -86,6 +92,203 @@ public class DefaultEffectAttachmentResolver : IEffectAttachmentResolver
         return context.CasterTransform != null || context.TargetTransform != null || context.HasHitPoint;
     }
 
+    private bool ResolveTargetCenter(Entity entity, Transform fallbackRoot, out Transform resolvedTransform, out Vector3 worldPosition)
+    {
+        resolvedTransform = null;
+        worldPosition = Vector3.zero;
+
+        if (fallbackRoot == null)
+        {
+            return false;
+        }
+
+        resolvedTransform = fallbackRoot;
+
+        CharacterController controller = ResolveCharacterController(entity, fallbackRoot);
+
+        if (controller != null)
+        {
+            worldPosition = controller.transform.TransformPoint(controller.center);
+            return true;
+        }
+
+        Transform searchRoot = entity != null ? entity.transform : fallbackRoot;
+        Renderer[] renderers = searchRoot.GetComponentsInChildren<Renderer>(true);
+        if (renderers != null && renderers.Length > 0)
+        {
+            Bounds bounds = renderers[0].bounds;
+            for (int i = 1; i < renderers.Length; i++)
+            {
+                if (renderers[i] != null)
+                {
+                    bounds.Encapsulate(renderers[i].bounds);
+                }
+            }
+
+            if (bounds.size.sqrMagnitude > 0.00001f)
+            {
+                worldPosition = bounds.center;
+                return true;
+            }
+        }
+
+        worldPosition = fallbackRoot.position;
+        return true;
+    }
+
+    private bool ResolveTargetOverHead(Entity entity, Transform fallbackRoot, out Transform resolvedTransform, out Vector3 worldPosition)
+    {
+        resolvedTransform = null;
+        worldPosition = Vector3.zero;
+
+        if (fallbackRoot == null)
+        {
+            return false;
+        }
+
+        resolvedTransform = fallbackRoot;
+        EntityBodyType bodyType = entity != null ? entity.BodyType : EntityBodyType.Humanoid;
+
+        CharacterController controller = ResolveCharacterController(entity, fallbackRoot);
+        if (controller != null)
+        {
+            Vector3 localPoint = controller.center;
+            float radius = Mathf.Max(0.01f, controller.radius);
+            float overheadMargin = Mathf.Max(0.04f, radius * 0.2f);
+            localPoint += Vector3.up * (controller.height * 0.5f + overheadMargin);
+            worldPosition = controller.transform.TransformPoint(localPoint);
+            return true;
+        }
+
+        Transform searchRoot = entity != null ? entity.transform : fallbackRoot;
+        if (TryEncapsulateCharacterRenderBounds(searchRoot, out Bounds bounds))
+        {
+            float margin = Mathf.Max(0.04f, bounds.extents.y * 0.08f);
+            Vector3 horizontal = ResolveCharacterHorizontalWorld(entity, fallbackRoot);
+            worldPosition = new Vector3(horizontal.x, bounds.max.y + margin, horizontal.z);
+            return true;
+        }
+
+        return ResolveTargetOverHeadFromRenderers(entity, fallbackRoot, bodyType, out resolvedTransform, out worldPosition);
+    }
+
+    private static Vector3 ResolveCharacterHorizontalWorld(Entity entity, Transform fallbackRoot)
+    {
+        CharacterController controller = null;
+        if (entity != null)
+        {
+            controller = entity.GetComponent<CharacterController>();
+            if (controller == null)
+            {
+                controller = entity.GetComponentInChildren<CharacterController>(true);
+            }
+        }
+
+        if (controller == null && fallbackRoot != null)
+        {
+            controller = fallbackRoot.GetComponent<CharacterController>();
+            if (controller == null)
+            {
+                controller = fallbackRoot.GetComponentInChildren<CharacterController>(true);
+            }
+        }
+
+        if (controller != null)
+        {
+            return controller.transform.TransformPoint(controller.center);
+        }
+
+        return fallbackRoot != null ? fallbackRoot.position : Vector3.zero;
+    }
+
+    private static bool ShouldIncludeRendererForCharacterBounds(Renderer renderer)
+    {
+        if (renderer == null)
+        {
+            return false;
+        }
+
+        return renderer.GetComponentInParent<BaseEffect>() == null;
+    }
+
+    private static bool TryEncapsulateCharacterRenderBounds(Transform searchRoot, out Bounds bounds)
+    {
+        bounds = default;
+        if (searchRoot == null)
+        {
+            return false;
+        }
+
+        Renderer[] renderers = searchRoot.GetComponentsInChildren<Renderer>(true);
+        bool hasBounds = false;
+        for (int i = 0; i < renderers.Length; i++)
+        {
+            Renderer renderer = renderers[i];
+            if (!ShouldIncludeRendererForCharacterBounds(renderer))
+            {
+                continue;
+            }
+
+            if (!hasBounds)
+            {
+                bounds = renderer.bounds;
+                hasBounds = true;
+            }
+            else
+            {
+                bounds.Encapsulate(renderer.bounds);
+            }
+        }
+
+        return hasBounds && bounds.size.sqrMagnitude > 0.00001f;
+    }
+
+    private CharacterController ResolveCharacterController(Entity entity, Transform fallbackRoot)
+    {
+        CharacterController controller = null;
+        if (entity != null)
+        {
+            controller = entity.GetComponent<CharacterController>();
+            if (controller == null)
+            {
+                controller = entity.GetComponentInChildren<CharacterController>(true);
+            }
+        }
+
+        if (controller == null && fallbackRoot != null)
+        {
+            controller = fallbackRoot.GetComponent<CharacterController>();
+            if (controller == null)
+            {
+                controller = fallbackRoot.GetComponentInChildren<CharacterController>(true);
+            }
+        }
+
+        return controller;
+    }
+
+    private bool ResolveTargetOverHeadFromRenderers(
+        Entity entity,
+        Transform fallbackRoot,
+        EntityBodyType bodyType,
+        out Transform resolvedTransform,
+        out Vector3 worldPosition)
+    {
+        resolvedTransform = fallbackRoot;
+        worldPosition = Vector3.zero;
+
+        if (TryEncapsulateCharacterRenderBounds(entity != null ? entity.transform : fallbackRoot, out Bounds bounds))
+        {
+            float margin = Mathf.Max(0.04f, bounds.extents.y * 0.08f);
+            Vector3 horizontal = ResolveCharacterHorizontalWorld(entity, fallbackRoot);
+            worldPosition = new Vector3(horizontal.x, bounds.max.y + margin, horizontal.z);
+            return true;
+        }
+
+        worldPosition = fallbackRoot.position;
+        return true;
+    }
+
     private bool ResolveRoot(Transform src, out Transform resolvedTransform, out Vector3 worldPosition)
     {
         resolvedTransform = src;
@@ -98,16 +301,17 @@ public class DefaultEffectAttachmentResolver : IEffectAttachmentResolver
         resolvedTransform = null;
         worldPosition = Vector3.zero;
 
-        // Prefer pelvis/hips first so "LowerBody" is near torso center, not near floor.
+        // Prefer pelvis/hips for choosing follow transform when root is missing; world anchor matches follow pivot
+        // when following entity root so Composite prefab positionOffset (tuned as root-local TransformPoint) stays valid.
+        // For bone-centered hits without that offset, use TargetCenter / WorldHitPoint instead.
         Gear gear = entity != null ? entity.Gear : null;
         if (gear != null)
         {
             Transform pelvis = gear.FindRecursiveBone("Bip01_Pelvis") ?? gear.FindRecursiveBone("Bip01_Hips");
             if (pelvis != null)
             {
-                // Keep lower-body spawn point, but follow root for stability across rigs.
                 resolvedTransform = fallbackRoot != null ? fallbackRoot : pelvis;
-                worldPosition = pelvis.position;
+                worldPosition = resolvedTransform.position;
                 return true;
             }
 
@@ -116,7 +320,9 @@ public class DefaultEffectAttachmentResolver : IEffectAttachmentResolver
             if (leftFoot != null && rightFoot != null)
             {
                 resolvedTransform = fallbackRoot;
-                worldPosition = (leftFoot.position + rightFoot.position) * 0.5f;
+                worldPosition = resolvedTransform != null
+                    ? resolvedTransform.position
+                    : (leftFoot.position + rightFoot.position) * 0.5f;
                 return true;
             }
         }
@@ -127,9 +333,8 @@ public class DefaultEffectAttachmentResolver : IEffectAttachmentResolver
             Transform hips = animator.GetBoneTransform(HumanBodyBones.Hips);
             if (hips != null)
             {
-                // Keep lower-body spawn point, but follow root for stability across rigs.
                 resolvedTransform = fallbackRoot != null ? fallbackRoot : hips;
-                worldPosition = hips.position;
+                worldPosition = resolvedTransform.position;
                 return true;
             }
 
@@ -139,13 +344,16 @@ public class DefaultEffectAttachmentResolver : IEffectAttachmentResolver
             if (left != null && right != null)
             {
                 resolvedTransform = fallbackRoot;
-                worldPosition = (left.position + right.position) * 0.5f;
+                worldPosition = resolvedTransform != null
+                    ? resolvedTransform.position
+                    : (left.position + right.position) * 0.5f;
                 return true;
             }
         }
 
         if (fallbackRoot != null)
         {
+            resolvedTransform = fallbackRoot;
             worldPosition = fallbackRoot.position;
             return true;
         }

@@ -75,10 +75,7 @@ public class NetworkIdentityInterlude
         _position = VectorUtils.ConvertPosToUnity(l2jpos);
     }
 
-    public Vector3 GetXZPos()
-    {
-        return _position;
-    }
+
 
     public void SetHideHp(int npcId)
     {
@@ -106,6 +103,11 @@ public class NetworkIdentityInterlude
     public Vector3 GetL2jPos()
     {
         return VectorUtils.ConvertPosUnityToL2j(_position);
+    }
+
+    public Vector3 GetL2jPos(Vector3 originPosition)
+    {
+        return VectorUtils.ConvertPosUnityToL2j(originPosition);
     }
 
 }

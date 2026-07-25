@@ -31,7 +31,17 @@ public class EffectManager : MonoBehaviour
         instance.Play();
     }
 
+    // L2 Action_Attack: FVector::Rotation(targetLoc - attackerLoc) on XZ.
+    // shot_N_atk travel = local +X. LookRotation aligns +Z; yaw -90 maps +X onto dir
+    // (yaw +90 was mapping +X onto -dir — cone flew back toward the player).
+    private const float IMPACT_HIT_DIRECTION_YAW_OFFSET_DEGREES = -90f;
+
     public void PlayerImpactEffect(int id, Vector3 point, MagicCastData castData = null)
+    {
+        PlayerImpactEffect(id, point, Vector3.zero, castData);
+    }
+
+    public void PlayerImpactEffect(int id, Vector3 point, Vector3 impactDirection, MagicCastData castData = null)
     {
         var data = database.effects.Find(e => e.id == id);
 
@@ -41,10 +51,18 @@ public class EffectManager : MonoBehaviour
             return;
         }
 
-        GameObject dummy = new GameObject("HitPointProxy");
-        dummy.transform.position = point;
+        Vector3 dir = ResolveImpactDirection(point, impactDirection);
+        Quaternion rotation = Quaternion.LookRotation(dir, Vector3.up) *
+            Quaternion.Euler(0f, IMPACT_HIT_DIRECTION_YAW_OFFSET_DEGREES, 0f);
 
-        BaseEffect instance = Instantiate(data.prefab, point, Quaternion.identity, dummy.transform);
+        GameObject dummy = new GameObject("HitPointProxy");
+        dummy.transform.SetPositionAndRotation(point, rotation);
+        if (_activeEffectsContainer != null)
+        {
+            dummy.transform.SetParent(_activeEffectsContainer, true);
+        }
+
+        BaseEffect instance = Instantiate(data.prefab, point, rotation, dummy.transform);
         _impactSpawnCounter += 1;
         string pointKey = $"{Mathf.Round(point.x * 10f) / 10f},{Mathf.Round(point.y * 10f) / 10f},{Mathf.Round(point.z * 10f) / 10f}";
         float now = Time.time;
@@ -62,11 +80,79 @@ public class EffectManager : MonoBehaviour
             _impactWindowByPoint[pointKey] = (1, now);
             state = _impactWindowByPoint[pointKey];
         }
-        Debug.Log($"{IMPACT_DEBUG_TAG} PlayerImpactEffect spawn#{_impactSpawnCounter} effectId={id} point={point} countNearPointWindow={state.count} windowSec={IMPACT_WINDOW_SEC:F2}");
+        Vector3 emitterRight = rotation * Vector3.right;
+        Vector3 emitterFwd = rotation * Vector3.forward;
+        Vector3 playerToHit = Vector3.zero;
+        Vector3 playerFwd = Vector3.zero;
+        if (PlayerEntity.Instance != null)
+        {
+            playerToHit = hitPointFlat(point - PlayerEntity.Instance.transform.position);
+            playerFwd = hitPointFlat(PlayerEntity.Instance.transform.forward);
+        }
+
+        float angDirVsPlayerToHit = AngleFlatDeg(dir, playerToHit);
+        Debug.Log(
+            $"{IMPACT_DEBUG_TAG} PlayerImpactEffect spawn#{_impactSpawnCounter} effectId={id} " +
+            $"point={point} dirIn={impactDirection} dirResolved={dir} " +
+            $"emitterRight(+X travel)={emitterRight} emitterFwd={emitterFwd} " +
+            $"playerToHit={playerToHit} playerFwd={playerFwd} angDirVsPlayerToHit={angDirVsPlayerToHit:F1} " +
+            $"yawOffset={IMPACT_HIT_DIRECTION_YAW_OFFSET_DEGREES} " +
+            $"countNearPointWindow={state.count} windowSec={IMPACT_WINDOW_SEC:F2}");
 
         instance.gameObject.SetActive(true);
         instance.Setup(data.settings, castData, dummy.transform);
-        instance.Play();
+        // Child parts often use inheritRotation=0 / CasterCenter — push dir into composite context
+        // so ResolvePartSpawnRotation orients meshes even when proxy rotation would be ignored.
+        if (instance is CompositePrefabEffect composite)
+        {
+            composite.SetImpactHit(point, dir);
+        }
 
+        instance.Play();
+    }
+
+    private static Vector3 hitPointFlat(Vector3 v)
+    {
+        v.y = 0f;
+        return v.sqrMagnitude > 0.0001f ? v.normalized : Vector3.zero;
+    }
+
+    private static float AngleFlatDeg(Vector3 a, Vector3 b)
+    {
+        Vector3 af = hitPointFlat(a);
+        Vector3 bf = hitPointFlat(b);
+        if (af.sqrMagnitude < 0.0001f || bf.sqrMagnitude < 0.0001f)
+        {
+            return -1f;
+        }
+
+        return Vector3.Angle(af, bf);
+    }
+
+    private static Vector3 ResolveImpactDirection(Vector3 hitPoint, Vector3 impactDirection)
+    {
+        // Always flatten: sword hitDirection carries pitch and tilts the emitter.
+        if (impactDirection.sqrMagnitude > 0.0001f)
+        {
+            Vector3 flat = impactDirection;
+            flat.y = 0f;
+            if (flat.sqrMagnitude > 0.0001f)
+            {
+                return flat.normalized;
+            }
+        }
+
+        // L2: targetLoc - attackerLoc (horizontal).
+        if (PlayerEntity.Instance != null)
+        {
+            Vector3 fromAttacker = hitPoint - PlayerEntity.Instance.transform.position;
+            fromAttacker.y = 0f;
+            if (fromAttacker.sqrMagnitude > 0.0001f)
+            {
+                return fromAttacker.normalized;
+            }
+        }
+
+        return Vector3.forward;
     }
 }

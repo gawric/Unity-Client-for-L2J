@@ -1,0 +1,226 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &3407451541169557743
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2522490527146848082}
+  - component: {fileID: -2331866982259287529}
+  m_Layer: 0
+  m_Name: wh_might_composite
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2522490527146848082
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3407451541169557743}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &-2331866982259287529
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3407451541169557743}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 62c54513227c16f4eb5c8009ec8e165e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _owner: {fileID: 0}
+  _parts:
+  - name: wh_might_ca
+    prefab: {fileID: 810000000000000001, guid: 08d51cff568c45b2b54c2058f72f91c1, type: 3}
+    settingsOverride: {fileID: 0}
+    attachmentPoint: 6
+    spawnTiming: 0
+    hitLeadSeconds: 0
+    positionOffset: {x: 0, y: 0.1, z: 0}
+    normalizeOffsetByOwnerHeight: 0
+    referenceHeight: 1.8
+    scale: 1.3
+    followResolvedTransform: 0
+    inheritRotation: 0
+    passCastDataToPart: 1
+    passShaderTargetPosition: 1
+    shaderTargetAttachmentPoint: 10
+    shaderTargetPositionOffset: {x: 0, y: -0.3, z: 0}
+    useCastTimedLifetime: 1
+    overrideContinuousLoop: 1
+    continuousLoop: 1
+    disableShaderLifetime: 0
+    overrideHideTime: 0
+    customHideTime: 0.5
+    enableFinalShaderLifetimeOnFade: 0
+    finalShaderLifetimeMin: 2
+    finalShaderLifetimeMax: 2
+    projectile:
+      launchMode: 0
+      showBeforeAnimationShoot: 0
+      impactType: 0
+      settingsOverride:
+        id: 0
+        prefab: {fileID: 0}
+        transform: {fileID: 0}
+        startPosition: {x: 0, y: 0, z: 0}
+        targetTransform: {fileID: 0}
+        targetPosition: {x: 0, y: 0, z: 0}
+        speed: 0
+        damage: 0
+        lifetime: 0
+        speedCurve:
+          serializedVersion: 2
+          m_Curve: []
+          m_PreInfinity: 0
+          m_PostInfinity: 0
+          m_RotationOrder: 0
+        startTime: 0
+        distance: 0
+        useGravity: 0
+        gravityScale: 0
+        isActive: 0
+        hitPoint: {x: 0, y: 0, z: 0}
+        hitNormal: {x: 0, y: 0, z: 0}
+        flytime: 0
+        hitPointCollider: {x: 0, y: 0, z: 0}
+        hitNormalCollider: {x: 0, y: 0, z: 0}
+        hitDirection: {x: 0, y: 0, z: 0}
+        arrowCollider: {fileID: 0}
+        impactType: 0
+        lastPosition: {x: 0, y: 0, z: 0}
+        castStartTimeSnapshot: 0
+        castServerShootSnapshot: 0
+        castServerHitSnapshot: 0
+        projectileLaunchGlobalFromCast: 0
+        attackerEntityId: 0
+    homeProjectile:
+      launchMode: 0
+      speed: 4.5
+      acceleration: 0
+      fadeStartDistance: 0.5
+      fadeOutSeconds: 0.35
+      arriveDistance: 0.2
+      maxLifetime: 0
+      homeAttachmentPoint: 10
+      homeOffset: {x: 0, y: 0.1, z: 0}
+      usePathArc: 1
+      pathStartLineFactor: -0.15
+      pathPeelAlongLine: 0.16
+      pathApexAlongLine: 0
+      pathPeakHeightAlongLine: 0
+      pathSideOffset: 1.25
+      pathHeightOffset: 0.44
+      pathDistanceHeightFactor: 0.112
+      pathEarlyClimbFactor: 0.2
+      pathAscentSpeedScale: 1
+      pathDescentSpeedScale: 1
+      rotateToVelocity: 1
+      destroyOnArrive: 1
+      mirrorDualFlight: 0
+  - name: wh_might_ta
+    prefab: {fileID: 820000000000000001, guid: fee55f73c2674e3d9039e73a67058be6, type: 3}
+    settingsOverride: {fileID: 0}
+    attachmentPoint: 8
+    spawnTiming: 5
+    hitLeadSeconds: 0
+    positionOffset: {x: 0, y: 0.1, z: 0}
+    normalizeOffsetByOwnerHeight: 0
+    referenceHeight: 1.8
+    scale: 1.3
+    followResolvedTransform: 0
+    inheritRotation: 0
+    passCastDataToPart: 0
+    passShaderTargetPosition: 1
+    shaderTargetAttachmentPoint: 7
+    shaderTargetPositionOffset: {x: 0, y: 0, z: 0}
+    useCastTimedLifetime: 0
+    overrideContinuousLoop: 0
+    continuousLoop: 0
+    disableShaderLifetime: 0
+    overrideHideTime: 0
+    customHideTime: 0.5
+    enableFinalShaderLifetimeOnFade: 0
+    finalShaderLifetimeMin: 2
+    finalShaderLifetimeMax: 2
+    projectile:
+      launchMode: 0
+      showBeforeAnimationShoot: 0
+      impactType: 0
+      settingsOverride:
+        id: 0
+        prefab: {fileID: 0}
+        transform: {fileID: 0}
+        startPosition: {x: 0, y: 0, z: 0}
+        targetTransform: {fileID: 0}
+        targetPosition: {x: 0, y: 0, z: 0}
+        speed: 0
+        damage: 0
+        lifetime: 0
+        speedCurve:
+          serializedVersion: 2
+          m_Curve: []
+          m_PreInfinity: 0
+          m_PostInfinity: 0
+          m_RotationOrder: 0
+        startTime: 0
+        distance: 0
+        useGravity: 0
+        gravityScale: 0
+        isActive: 0
+        hitPoint: {x: 0, y: 0, z: 0}
+        hitNormal: {x: 0, y: 0, z: 0}
+        flytime: 0
+        hitPointCollider: {x: 0, y: 0, z: 0}
+        hitNormalCollider: {x: 0, y: 0, z: 0}
+        hitDirection: {x: 0, y: 0, z: 0}
+        arrowCollider: {fileID: 0}
+        impactType: 0
+        lastPosition: {x: 0, y: 0, z: 0}
+        castStartTimeSnapshot: 0
+        castServerShootSnapshot: 0
+        castServerHitSnapshot: 0
+        projectileLaunchGlobalFromCast: 0
+        attackerEntityId: 0
+    homeProjectile:
+      launchMode: 0
+      speed: 4.5
+      acceleration: 0
+      fadeStartDistance: 0.5
+      fadeOutSeconds: 0.35
+      arriveDistance: 0.2
+      maxLifetime: 0
+      homeAttachmentPoint: 10
+      homeOffset: {x: 0, y: 0.1, z: 0}
+      usePathArc: 1
+      pathStartLineFactor: -0.15
+      pathPeelAlongLine: 0.16
+      pathApexAlongLine: 0
+      pathPeakHeightAlongLine: 0
+      pathSideOffset: 1.25
+      pathHeightOffset: 0.44
+      pathDistanceHeightFactor: 0.112
+      pathEarlyClimbFactor: 0.2
+      pathAscentSpeedScale: 1
+      pathDescentSpeedScale: 1
+      rotateToVelocity: 1
+      destroyOnArrive: 1
+      mirrorDualFlight: 0
+  _serverHitLifetimeTailSeconds: 0
+  _skipDestroyCompositeByLifetime: 0

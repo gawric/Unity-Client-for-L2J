@@ -553,15 +553,14 @@ public class GameServerInterludePacketHandler : ServerPacketHandler
 
     private void ShowHtmlPage(NpcHtmlMessage npcHtmlMessage)
     {
-        HtmlWindow.Instance.InjectToWindow(npcHtmlMessage.Elements());
+        HtmlWindow.Instance.InjectToWindow(npcHtmlMessage.Html);
         HtmlWindow.Instance.ShowWindowToCenter();
     }
 
     private void ShowHtmlBrightToFront(NpcHtmlMessage npcHtmlMessage)
     {
-        HtmlWindow.Instance.InjectToWindow(npcHtmlMessage.Elements());
+        HtmlWindow.Instance.InjectToWindow(npcHtmlMessage.Html);
         HtmlWindow.Instance.ShowWindowToCenterAndBringToFront();
-
     }
 
     private void OnPackageToList(byte[] data)
@@ -595,8 +594,9 @@ public class GameServerInterludePacketHandler : ServerPacketHandler
         }
         else
         {
-            EventProcessor.Instance.QueueEvent(() => {
-                HtmlWindow.Instance.InjectToWindow(htmlMessage.Elements());
+            EventProcessor.Instance.QueueEvent(() =>
+            {
+                HtmlWindow.Instance.InjectToWindow(htmlMessage.Html);
                 HtmlWindow.Instance.ShowWindowToCenter();
             });
         }

@@ -210,11 +210,6 @@ public abstract class TimedCompositeEffectBase : BaseEffect
         }
 
         ParticleGroup[] groups = instanceTransform.GetComponentsInChildren<ParticleGroup>(true);
-        if (groups == null || groups.Length == 0)
-        {
-            return;
-        }
-
         for (int i = 0; i < groups.Length; i++)
         {
             ParticleGroup group = groups[i];
@@ -223,13 +218,79 @@ public abstract class TimedCompositeEffectBase : BaseEffect
                 group.SetRuntimeContinuousLoopOverride(part.overrideContinuousLoop, part.continuousLoop);
             }
         }
+
+        ParticleSingle[] singles = instanceTransform.GetComponentsInChildren<ParticleSingle>(true);
+        for (int i = 0; i < singles.Length; i++)
+        {
+            ParticleSingle single = singles[i];
+            if (single != null)
+            {
+                single.SetRuntimeContinuousLoopOverride(part.overrideContinuousLoop, part.continuousLoop);
+            }
+        }
+    }
+
+    protected void ApplyPartHomeFlightOverrides(CompositePrefabPart part, Transform instanceTransform)
+    {
+        if (part == null || instanceTransform == null || !CompositeHomeProjectileLaunchHelper.IsEnabled(part))
+        {
+            return;
+        }
+
+        ParticleGroup[] groups = instanceTransform.GetComponentsInChildren<ParticleGroup>(true);
+        bool hasAnchor = false;
+        int anchorCount = 0;
+        for (int i = 0; i < groups.Length; i++)
+        {
+            if (groups[i] != null && groups[i].IsHomeFlightAnchor)
+            {
+                hasAnchor = true;
+                anchorCount++;
+            }
+        }
+
+        if (!hasAnchor && groups.Length > 0 && groups[0] != null)
+        {
+            groups[0].ApplyRuntimeHomeFlightProfile(ParticleGroupHomeFlightProfile.DefaultAnchor);
+            hasAnchor = true;
+        }
+
+        if (!hasAnchor || part.homeProjectile == null || !part.homeProjectile.mirrorDualFlight || anchorCount != 1)
+        {
+            return;
+        }
+
+        groups = instanceTransform.GetComponentsInChildren<ParticleGroup>(true);
+        for (int i = 0; i < groups.Length; i++)
+        {
+            ParticleGroup source = groups[i];
+            if (source == null || !source.IsHomeFlightAnchor || source.name.EndsWith("_Mirror"))
+            {
+                continue;
+            }
+
+            GameObject mirrorObject = Instantiate(source.gameObject, source.transform.parent);
+            mirrorObject.name = source.gameObject.name + "_Mirror";
+            Transform mirrorTransform = mirrorObject.transform;
+            mirrorTransform.SetPositionAndRotation(source.transform.position, source.transform.rotation);
+            mirrorTransform.localScale = source.transform.localScale;
+
+            ParticleGroup mirrorGroup = mirrorObject.GetComponent<ParticleGroup>();
+            if (mirrorGroup != null)
+            {
+                mirrorGroup.ApplyRuntimeHomeFlightProfile(ParticleGroupHomeFlightProfile.MirroredAnchor);
+            }
+
+            break;
+        }
     }
 
     protected void AttachToResolvedTransformIfNeeded(
         CompositePrefabPart part,
         Transform resolvedTransform,
         Transform instanceTransform,
-        Vector3 adjustedOffset)
+        Vector3 adjustedOffset,
+        Vector3 resolvedWorldPosition)
     {
         if (part == null || instanceTransform == null || !part.followResolvedTransform || resolvedTransform == null)
         {
@@ -237,8 +298,9 @@ public abstract class TimedCompositeEffectBase : BaseEffect
         }
 
         instanceTransform.SetParent(resolvedTransform, true);
-        // Keep stable offset while following attachment point movement/rotation.
-        instanceTransform.localPosition = adjustedOffset;
+        // Match spawn math in CompositeEffectUtilities.ResolveSpawnPosition: anchor in world can differ from follow pivot.
+        Vector3 localAnchor = resolvedTransform.InverseTransformPoint(resolvedWorldPosition);
+        instanceTransform.localPosition = localAnchor + adjustedOffset;
     }
 
     protected override void OnDestroy()

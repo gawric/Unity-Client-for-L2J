@@ -1,0 +1,145 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!21 &2100000
+Material:
+  serializedVersion: 8
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: SpriteEmitter7
+  m_Shader: {fileID: 4800000, guid: 198fd10316d74a8f8d5197b840117b31, type: 3}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
+  m_ValidKeywords: []
+  m_InvalidKeywords:
+  - _ALPHAFROMLUMA_ON
+  - _BALPHABLEND_ON
+  - _FADEOUT_ON
+  - _HASLIFETIME_ON
+  - _IGNOREMAINTEXALPHA_ON
+  - _SPINPARTICLES_ON
+  - _UNIFORMSIZE_ON
+  - _USEFULL3DVELOCITYFROMOWNER_ON
+  - _USEOWNERFROMSHADERTARGET_ON
+  - _USERANDOMSUBDIVISION_ON
+  - _USESIZESCALE_ON
+  - _USESOFTLUMAALPHA_ON
+  - _USEVELOCITYTOWARDFOCAL_ON
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: -1
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_LockedProperties: 
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - _MainTex:
+        m_Texture: {fileID: 2800000, guid: 0e69dac3d602aed48954e500375f1e59, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Ints:
+    - _ColorScaleCount: 4
+    - _SizeScaleCount: 4
+    m_Floats:
+    - _AlphaBoost: 1
+    - _AlphaFromLuma: 1
+    - _ArcTangentialWeight: 0
+    - _BillboardScale: 0
+    - _BlendBetweenSubdivisions: 0
+    - _ColorScaleCount: 4
+    - _ColorScaleRepeats: 2
+    - _ColorScaleTime1: 0.089286
+    - _ColorScaleTime2: 0.467857
+    - _ColorScaleTime3: 1
+    - _DebugAtlasPreview: 0
+    - _DebugAtlasPreviewAge: 0.088
+    - _DebugAtlasPreviewAlpha: 0.9
+    - _DebugAtlasPreviewBoost: 8
+    - _DebugAtlasPreviewLoop: 0
+    - _DebugAtlasPreviewSizeScale: 11.7
+    - _DebugSpawnRegion: 0
+    - _FadeIn: 0
+    - _FadeInEndTime: 0
+    - _FadeOutPower: 2
+    - _Fadeout: 1
+    - _FadeoutStartTime: 0
+    - _FocalConvergePower: 2.5
+    - _FocalConvergeStart: 1
+    - _FunnelArcScale: 0.06
+    - _FunnelEasePower: 2.5
+    - _HasLifetime: 1
+    - _IgnoreMainTexAlpha: 1
+    - _L2FxEffectScale: 1
+    - _L2FxSpriteScale: 1.4
+    - _LumaAlphaFloor: 0
+    - _LumaAlphaPower: 1
+    - _Opacity: 1
+    - _PlasmaLumaMax: 0.215
+    - _PlasmaRgbScale: 1.032
+    - _RgbBoost: 0.7
+    - _Seed: 0
+    - _SizeScaleCount: 4
+    - _SizeScaleParam: 0
+    - _SizeScaleRepeats: 6
+    - _SizeScaleTime0: 0.17
+    - _SizeScaleTime1: 0.37
+    - _SizeScaleTime2: 0.5
+    - _SizeScaleTime3: 0.62
+    - _SizeScaleVal0: 1
+    - _SizeScaleVal1: 1
+    - _SizeScaleVal2: 0.8
+    - _SizeScaleVal3: 1
+    - _SpawnUnitScale: 0.01
+    - _SpinCCWorCW: 0
+    - _SpinParticles: 1
+    - _StartTime: 0
+    - _SubdivisionEnd: 8
+    - _SubdivisionStart: 6
+    - _TextureDilateTexels: 0
+    - _TextureUSubdivisions: 4
+    - _TextureVSubdivisions: 4
+    - _UcAccelerationScale: 0.32
+    - _UcPolarRadiusScale: 0.32142857
+    - _UcStartLocationOffsetScale: 0.24
+    - _UcStartLocationRangeScale: 0.16
+    - _UcVelocityScale: 0.33333334
+    - _UniformSize: 1
+    - _UseExternalTargetPosition: 0
+    - _UseFull3DVelocityFromOwner: 1
+    - _UseOwnerFromShaderTarget: 1
+    - _UseRandomSubdivision: 1
+    - _UseRegularSizeScale: 0
+    - _UseSpawnUnitScale: 0
+    - _UseSizeScale: 1
+    - _UseSoftLumaAlpha: 1
+    - _UseVelocityTowardFocal: 1
+    - _bAlphaBlend: 1
+    m_Colors:
+    - _Acceleration: {r: 0, g: 0, b: 100, a: 0}
+    - _ColorScale0: {r: 1, g: 1, b: 1, a: 1}
+    - _ColorScale1: {r: 0.99215686, g: 0.99215686, b: 0.99215686, a: 1}
+    - _ColorScale2: {r: 1, g: 1, b: 1, a: 1}
+    - _ColorScale3: {r: 1, g: 1, b: 1, a: 1}
+    - _DebugAtlasBackground: {r: 0.03, g: 0.04, b: 0.08, a: 1}
+    - _DebugSpawnRegionColor: {r: 1, g: 0.15, b: 0.55, a: 1}
+    - _InitialDelayRange: {r: 0.2, g: 0.2, b: 0, a: 0}
+    - _L2FxTargetWorldPos: {r: 0, g: 0, b: 0, a: 0}
+    - _LifetimeRange: {r: 0.5, g: 0.5, b: 0, a: 0}
+    - _OwnerWorldPos: {r: 0, g: 0, b: 0, a: 0}
+    - _PolarAzimuthDeg: {r: 0, g: 360, b: 0, a: 0}
+    - _PolarPitchDeg: {r: 75, g: 105, b: 0, a: 0}
+    - _PolarRadius: {r: 14, g: 14, b: 0, a: 0}
+    - _SizeRange: {r: 4, g: 8, b: 0, a: 0}
+    - _SpinsPerSecondRange: {r: 0, g: 0, b: 0, a: 0}
+    - _StartLocationOffset: {r: 0, g: 0, b: 10, a: 0}
+    - _StartLocationRangeX: {r: -10, g: 10, b: 0, a: 0}
+    - _StartLocationRangeY: {r: -10, g: 10, b: 0, a: 0}
+    - _StartLocationRangeZ: {r: -10, g: 10, b: 0, a: 0}
+    - _StartSpinRange: {r: 0, g: 1, b: 0, a: 0}
+    - _VelocityRangeX: {r: 30, g: 30, b: 0, a: 0}
+    - _VelocityRangeY: {r: 30, g: 30, b: 0, a: 0}
+  m_BuildTextureStacks: []
+  m_AllowLocking: 1

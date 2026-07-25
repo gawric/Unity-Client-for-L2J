@@ -1,0 +1,98 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &-6120483918274501834
+MonoBehaviour:
+  m_ObjectHideFlags: 11
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d0353a89b1f911e48b9e16bdc9f2e058, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  version: 10
+--- !u!21 &2100000
+Material:
+  serializedVersion: 8
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: SpriteEmitter325
+  m_Shader: {fileID: 4800000, guid: b7e4c1a92d5f8e3b6a0c4d7f1e9a2583, type: 3}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
+  m_ValidKeywords: []
+  m_InvalidKeywords:
+  - _FADEIN_ON
+  - _FADEOUT_ON
+  - _L2SPRITECOLORGAMMATOLINEAR_ON
+  - _USESIZESCALE_ON
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: -1
+  stringTagMap:
+    RenderType: Transparent
+  disabledShaderPasses: []
+  m_LockedProperties: 
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - _MainTex:
+        m_Texture: {fileID: 2800000, guid: db0a55d1a903a524eb5a0ca727989135, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Ints: []
+    m_Floats:
+    - _ColorKey1Time: 1
+    - _ColorKey2Time: 1
+    - _ColorScaleCount: 2
+    - _ColorScaleParam: 0
+    - _FadeIn: 1
+    - _FadeInEndTime: 0.12
+    - _Fadeout: 1
+    - _FadeoutStartTime: 0.32
+    - _L2FxWorldCalibration: 1.4
+    - _L2SpriteColorGammaToLinear: 1
+    - _Opacity: 0.6
+    - _RgbBoost: 1
+    - _SizeScaleRepeats: 0
+    - _SpawnDeltaTime: 0.012
+    - _SpriteMotionRandStateBits: 0
+    - _SpriteSpinRandStateBits: 0
+    - _StartTime: 0
+    - _SubdivisionEnd: 3
+    - _SubdivisionStart: 2
+    - _TextureUSubdivisions: 2
+    - _TextureVSubdivisions: 4
+    - _UseSizeScale: 1
+    m_Colors:
+    - _AccelerationUc: {r: 20, g: 0, b: 30, a: 0}
+    - _ColorKey0: {r: 1, g: 1, b: 1, a: 1}
+    - _ColorKey1: {r: 1, g: 1, b: 1, a: 1}
+    - _ColorKey2: {r: 1, g: 1, b: 1, a: 1}
+    - _ColorMulMax: {r: 0.716, g: 0.83, b: 0.784, a: 0}
+    - _ColorMulMin: {r: 0.716, g: 0.83, b: 0.784, a: 0}
+    - _InitialDelayRange: {r: 0, g: 0, b: 0, a: 0}
+    - _LifetimeRange: {r: 0.486, g: 1.3, b: 0, a: 0}
+    - _SizeKey0: {r: 0.07, g: 1.6, b: 0, a: 0}
+    - _SizeKey1: {r: 0.24, g: 2, b: 0, a: 0}
+    - _SizeKey2: {r: 0.53, g: 2.3, b: 0, a: 0}
+    - _SizeKey3: {r: 1, g: 2.5, b: 0, a: 0}
+    - _SizeRange: {r: 12, g: 18, b: 0, a: 0}
+    - _SpriteSpinCcwOrCw: {r: 0, g: 0, b: 0, a: 0}
+    - _SpriteSpinSpsRangeUc: {r: 0.05, g: 0.1, b: 0, a: 0}
+    - _SpriteSpinStartRangeUc: {r: 0, g: 1, b: 0, a: 0}
+    - _StartLocationRangeXUc: {r: 0, g: 0, b: 0, a: 0}
+    - _StartLocationRangeYUc: {r: 0, g: 0, b: 0, a: 0}
+    - _StartLocationRangeZUc: {r: 0, g: 0, b: 0, a: 0}
+    - _StartVelocityRadialRangeUc: {r: 1, g: 1, b: 0, a: 0}
+    - _StartVelocityRangeXUc: {r: 130, g: 130, b: 0, a: 0}
+    - _StartVelocityRangeYUc: {r: -100, g: 100, b: 0, a: 0}
+    - _StartVelocityRangeZUc: {r: -100, g: 100, b: 0, a: 0}
+    - _VelocityLossRangeUc: {r: 8, g: 8, b: 8, a: 0}
+  m_BuildTextureStacks: []
+  m_AllowLocking: 1

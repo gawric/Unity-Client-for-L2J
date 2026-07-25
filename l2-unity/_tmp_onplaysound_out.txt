@@ -1,0 +1,288 @@
+﻿HIT_LINES 120
+25254                                         ; UGameEngine::OnPlaySound(L2ParamStack &)+15F\u2193p ...
+43008 ; Exported entry 6482. ?OnPlaySound@UGameEngine@@UAEXAAVL2ParamStack@@@Z
+43009 ; [00000005 BYTES: COLLAPSED FUNCTION UGameEngine::OnPlaySound(L2ParamStack &). PRESS CTRL-NUMPAD+ TO EXPAND]
+590097 ; void __thiscall UGameEngine::OnPlaySound(UGameEngine *__hidden this, struct L2ParamStack *)
+590098 ?OnPlaySound@UGameEngine@@UAEXAAVL2ParamStack@@@Z_0 proc near
+590099                                         ; CODE XREF: UGameEngine::OnPlaySound(L2ParamStack &)\u2191j
+590179 loc_1049DF74:                           ; CODE XREF: UGameEngine::OnPlaySound(L2ParamStack &)+47\u2191j
+590215 loc_1049DFD4:                           ; CODE XREF: UGameEngine::OnPlaySound(L2ParamStack &)+3E\u2191j
+590236 loc_1049E00A:                           ; CODE XREF: UGameEngine::OnPlaySound(L2ParamStack &)+133\u2191j
+590237                                         ; UGameEngine::OnPlaySound(L2ParamStack &)+144\u2191j
+590251 loc_1049E02B:                           ; CODE XREF: UGameEngine::OnPlaySound(L2ParamStack &)+148\u2191j
+590293 loc_1049E0A7:                           ; CODE XREF: UGameEngine::OnPlaySound(L2ParamStack &)+4C\u2191j
+590294                                         ; UGameEngine::OnPlaySound(L2ParamStack &)+54\u2191j ...
+590301 ?OnPlaySound@UGameEngine@@UAEXAAVL2ParamStack@@@Z_0 endp
+1106285 loc_10624DD3:                           ; DATA XREF: UGameEngine::OnPlaySound(L2ParamStack &)+84\u2191o
+1106286                                         ; UGameEngine::OnPlaySound(L2ParamStack &)+E6\u2191o ...
+1848603                 dd offset ?OnPlaySound@UGameEngine@@UAEXAAVL2ParamStack@@@Z ; UGameEngine::OnPlaySound(L2ParamStack &)
+2086893                 dd rva ?OnPlaySound@UGameEngine@@UAEXAAVL2ParamStack@@@Z ; UGameEngine::OnPlaySound(L2ParamStack &)
+2091426                 dd rva aOnplaneFpolyQa, rva aOnplayanimatio, rva aOnplaysoundUga ; "?OnPlane@FPoly@@QAEHVFVector@@@Z" "?OnPlayAnimation@UGameEngine@@UAEXPAVAP"... "?OnPlaySound@UGameEngine@@UAEXAAVL2Para"...
+2106527 aOnplaysoundUga db '?OnPlaySound@UGameEngine@@UAEXAAVL2ParamStack@@@Z',0
+2170622                                         ; UGameEngine::OnPlaySound(L2ParamStack &)+15F\u2193p ...
+2188377 ; Exported entry 6482. ?OnPlaySound@UGameEngine@@UAEXAAVL2ParamStack@@@Z
+2188378 ; [00000005 BYTES: COLLAPSED FUNCTION UGameEngine::OnPlaySound(L2ParamStack &). PRESS CTRL-NUMPAD+ TO EXPAND]
+2735468 ; void __thiscall UGameEngine::OnPlaySound(UGameEngine *__hidden this, struct L2ParamStack *)
+2735469 ?OnPlaySound@UGameEngine@@UAEXAAVL2ParamStack@@@Z_0 proc near
+2735470                                         ; CODE XREF: UGameEngine::OnPlaySound(L2ParamStack &)\u2191j
+2735550 loc_1049DF74:                           ; CODE XREF: UGameEngine::OnPlaySound(L2ParamStack &)+47\u2191j
+2735586 loc_1049DFD4:                           ; CODE XREF: UGameEngine::OnPlaySound(L2ParamStack &)+3E\u2191j
+2735607 loc_1049E00A:                           ; CODE XREF: UGameEngine::OnPlaySound(L2ParamStack &)+133\u2191j
+2735608                                         ; UGameEngine::OnPlaySound(L2ParamStack &)+144\u2191j
+
+--- DUMP around proc at 25254 ---
+25249 ; =============== S U B R O U T I N E =======================================
+25250 
+25251 ; Attributes: thunk
+25252 
+25253 sub_103089A4    proc near               ; CODE XREF: UGameEngine::OnInterfaceStopSound(FString const &)+4A\u2193p
+25254                                         ; UGameEngine::OnPlaySound(L2ParamStack &)+15F\u2193p ...
+25255                 jmp     sub_10494060
+25256 sub_103089A4    endp
+25257 
+25258 ; Exported entry 6641. ?OnStartBuyList@UGameEngine@@UAEHHH@Z
+25259 ; [00000005 BYTES: COLLAPSED FUNCTION UGameEngine::OnStartBuyList(int,int). PRESS CTRL-NUMPAD+ TO EXPAND]
+25260 ; Exported entry 5285. ?GetValidated@UTexModifier@@UAEHXZ
+25261 ; [00000005 BYTES: COLLAPSED FUNCTION UTexModifier::GetValidated(void). PRESS CTRL-NUMPAD+ TO EXPAND]
+25262 
+25263 ; =============== S U B R O U T I N E =======================================
+25264 
+25265 ; Attributes: thunk
+25266 
+25267 sub_103089B3    proc near               ; DATA XREF: .code:const FVertexPool::`vftable'\u2193o
+25268                 jmp     sub_10676D20
+25269 sub_103089B3    endp
+25270 
+25271 
+25272 ; =============== S U B R O U T I N E =======================================
+25273 
+25274 ; Attributes: thunk
+25275 
+25276 ; int __cdecl sub_103089B8(int, void *Src)
+25277 sub_103089B8    proc near               ; DATA XREF: .code:108372C2\u2193o
+25278 
+25279 Src             = dword ptr  8
+25280 
+25281                 jmp     sub_104152B0
+25282 sub_103089B8    endp
+25283 
+25284 ; Exported entry 7551. ?RequestSendMsnChatLog@UNetworkHandler@@UAEXPAG0H@Z
+25285 ; [00000005 BYTES: COLLAPSED FUNCTION UNetworkHandler::RequestSendMsnChatLog(ushort *,ushort *,int). PRESS CTRL-NUMPAD+ TO EXPAND]
+25286 ; ---------------------------------------------------------------------------
+25287                 jmp     loc_10588730
+25288 ; Exported entry 287. ??0FBspSection@@QAE@ABV0@@Z
+25289 ; [00000005 BYTES: COLLAPSED FUNCTION FBspSection::FBspSection(FBspSection const &). PRESS CTRL-NUMPAD+ TO EXPAND]
+25290 ; Exported entry 2371. ??4FPlayerSceneNode@@QAEAAV0@ABV0@@Z
+25291 ; [00000005 BYTES: COLLAPSED FUNCTION FPlayerSceneNode::operator=(FPlayerSceneNode const &). PRESS CTRL-NUMPAD+ TO EXPAND]
+25292 ; Exported entry 1746. ??2AVolume@@SAPAXIPAVUObject@@VFName@@K@Z
+25293 ; [00000005 BYTES: COLLAPSED FUNCTION AVolume::operator new(uint,UObject *,FName,ulong). PRESS CTRL-NUMPAD+ TO EXPAND]
+25294 ; Exported entry 8659. ?TriggerTransientEffect@USkillVisualEffect@@QAEXPAVAPawn@@PAVAActor@@H@Z
+25295 ; [00000005 BYTES: COLLAPSED FUNCTION USkillVisualEffect::TriggerTransientEffect(APawn *,AActor *,int). PRESS CTRL-NUMPAD+ TO EXPAND]
+25296 ; Exported entry 4468. ?GetCloakMeshInstance@APawn@@UAEPAVUMeshInstance@@XZ
+25297 ; [00000005 BYTES: COLLAPSED FUNCTION APawn::GetCloakMeshInstance(void). PRESS CTRL-NUMPAD+ TO EXPAND]
+25298 off_103089E0    dd offset byte_11847BE9 ; DATA XREF: .code:1088B5A0\u2193o
+25299                                         ; .code:1088BD68\u2193o
+25300                 db 0
+25301 ; Exported entry  59. ??0AEmitterLight@@QAE@ABV0@@Z
+25302 ; [00000005 BYTES: COLLAPSED FUNCTION AEmitterLight::AEmitterLight(AEmitterLight const &). PRESS CTRL-NUMPAD+ TO EXPAND]
+25303 
+25304 ; =============== S U B R O U T I N E =======================================
+25305 
+25306 ; Attributes: thunk
+25307 
+25308 sub_103089EA    proc near               ; CODE XREF: UBaseGUIController::delegateOnAdminReply(FString const &)+4822BC\u2193j
+25309                 jmp     sub_10352D10
+25310 sub_103089EA    endp
+25311 
+25312 ; Exported entry 1905. ??2UL2ColorModifier@@SAPAXIPAW4EInternal@@@Z
+25313 ; [00000005 BYTES: COLLAPSED FUNCTION UL2ColorModifier::operator new(uint,EInternal *). PRESS CTRL-NUMPAD+ TO EXPAND]
+25314 ; Exported entry 1530. ??2ACarriedObject@@SAPAXIPAVUObject@@VFName@@K@Z
+25315 ; [00000005 BYTES: COLLAPSED FUNCTION ACarriedObject::operator new(uint,UObject *,FName,ulong). PRESS CTRL-NUMPAD+ TO EXPAND]
+25316 ; ---------------------------------------------------------------------------
+25317                 jmp     loc_1058B240
+25318 ; Exported entry 4866. ?GetOptimizedRepList@APawn@@UAEPAHPAEPAUFPropertyRetirement@@PAHPAVUPackageMap@@PAVUActorChannel@@@Z
+25319 ; [00000005 BYTES: COLLAPSED FUNCTION APawn::GetOptimizedRepList(uchar *,FPropertyRetirement *,int *,UPackageMap *,UActorChannel *). PRESS CTRL-NUMPAD+ TO EXPAND]
+25320 ; Exported entry 3522. ?CheckCircularReferences@UMaterial@@UAEHAAV?$TArray@PAVUMaterial@@@@@Z
+25321 ; [00000005 BYTES: COLLAPSED FUNCTION UMaterial::CheckCircularReferences(TArray<UMaterial *> &). PRESS CTRL-NUMPAD+ TO EXPAND]
+25322 ; Exported entry 8606. ?Tick@APawn@@UAEHMW4ELevelTick@@@Z
+25323 ; [00000005 BYTES: COLLAPSED FUNCTION APawn::Tick(float,ELevelTick). PRESS CTRL-NUMPAD+ TO EXPAND]
+25324 ; ---------------------------------------------------------------------------
+25325                 jmp     sub_10650890
+25326 ; ---------------------------------------------------------------------------
+25327                 jmp     loc_10650930
+25328 ; Exported entry 2682. ??6@YAAAVFArchive@@AAV0@AAVFStaticMeshSection@@@Z
+25329 ; [00000005 BYTES: COLLAPSED FUNCTION operator<<(FArchive &,FStaticMeshSection &). PRESS CTRL-NUMPAD+ TO EXPAND]
+25330 ; Exported entry 1839. ??2UConstantColor@@SAPAXIPAW4EInternal@@@Z
+25331 ; [00000005 BYTES: COLLAPSED FUNCTION UConstantColor::operator new(uint,EInternal *). PRESS CTRL-NUMPAD+ TO EXPAND]
+25332 ; Exported entry 5352. ?HasFallback@UShader@@UAEHXZ
+25333 ; [00000005 BYTES: COLLAPSED FUNCTION UShader::HasFallback(void). PRESS CTRL-NUMPAD+ TO EXPAND]
+25334 ; ---------------------------------------------------------------------------
+25335                 jmp     loc_1036F000
+25336 ; Exported entry 1428. ??1URenderedMaterial@@UAE@XZ
+25337 ; [00000005 BYTES: COLLAPSED FUNCTION URenderedMaterial::~URenderedMaterial(void). PRESS CTRL-NUMPAD+ TO EXPAND]
+25338 
+25339 ; =============== S U B R O U T I N E =======================================
+25340 
+25341 ; Attributes: thunk
+25342 
+25343 sub_10308A30    proc near               ; CODE XREF: sub_1042C5F0+39\u2193p
+25344                 jmp     sub_10423840
+25345 sub_10308A30    endp
+25346 
+25347 ; Exported entry 6373. ?OnEventMatchSpellInfoEnd@UGameEngine@@UAEXXZ
+25348 ; [00000005 BYTES: COLLAPSED FUNCTION UGameEngine::OnEventMatchSpellInfoEnd(void). PRESS CTRL-NUMPAD+ TO EXPAND]
+25349 ; Exported entry 4769. ?GetMesh@ULodMeshInstance@@UAEPAVUMesh@@XZ
+25350 ; [00000005 BYTES: COLLAPSED FUNCTION ULodMeshInstance::GetMesh(void). PRESS CTRL-NUMPAD+ TO EXPAND]
+25351 
+25352 ; =============== S U B R O U T I N E =======================================
+25353 
+25354 ; Attributes: thunk
+25355 
+25356 sub_10308A3F    proc near               ; DATA XREF: .code:108DCFD8\u2193o
+25357                 jmp     sub_10666E20
+25358 sub_10308A3F    endp
+25359 
+25360 ; Exported entry 5219. ?GetSurrenderWarID@User@@QAEHXZ
+25361 ; [00000005 BYTES: COLLAPSED FUNCTION User::GetSurrenderWarID(void). PRESS CTRL-NUMPAD+ TO EXPAND]
+25362 ; ---------------------------------------------------------------------------
+25363                 jmp     loc_10459190
+25364 ; Exported entry 1059. ??1ADecoration@@UAE@XZ
+25365 ; [00000005 BYTES: COLLAPSED FUNCTION ADecoration::~ADecoration(void). PRESS CTRL-NUMPAD+ TO EXPAND]
+25366 ; ---------------------------------------------------------------------------
+25367                 jmp     loc_1059AE20
+25368 ; Exported entry 1161. ??1AViewportWindowController@@UAE@XZ
+25369 ; [00000005 BYTES: COLLAPSED FUNCTION AViewportWindowController::~AViewportWindowController(void). PRESS CTRL-NUMPAD+ TO EXPAND]
+25370 ; ---------------------------------------------------------------------------
+25371                 jmp     loc_1036EAE0
+25372 ; ---------------------------------------------------------------------------
+25373                 jmp     sub_10369B40
+25374 ; Exported entry 7956. ?SetOwner@FSkinVertexStream@@UAEHPAVFVertexStream@@@Z
+25375 ; [00000005 BYTES: COLLAPSED FUNCTION FSkinVertexStream::SetOwner(FVertexStream *). PRESS CTRL-NUMPAD+ TO EXPAND]
+25376 ; Exported entry 9460. ?removePaths@FPathBuilder@@QAEHPAVULevel@@@Z
+25377 ; [00000005 BYTES: COLLAPSED FUNCTION FPathBuilder::removePaths(ULevel *). PRESS CTRL-NUMPAD+ TO EXPAND]
+25378 
+25379 ; =============== S U B R O U T I N E =======================================
+25380 
+25381 ; Attributes: thunk
+25382 
+25383 ; int __stdcall sub_10308A71(void *)
+25384 sub_10308A71    proc near               ; DATA XREF: .code:108C4100\u2193o
+25385                 jmp     sub_10581AF0
+25386 sub_10308A71    endp
+25387 
+25388 ; Exported entry 2192. ??4AMatDemoActor@@QAEAAV0@ABV0@@Z
+25389 ; [00000005 BYTES: COLLAPSED FUNCTION AMatDemoActor::operator=(AMatDemoActor const &). PRESS CTRL-NUMPAD+ TO EXPAND]
+25390 ; Exported entry 366. ??0FLightMapTexture@@QAE@PAVULevel@@@Z
+25391 ; [00000005 BYTES: COLLAPSED FUNCTION FLightMapTexture::FLightMapTexture(ULevel *). PRESS CTRL-NUMPAD+ TO EXPAND]
+25392 
+25393 ; =============== S U B R O U T I N E =======================================
+25394 
+25395 ; Attributes: thunk
+25396 
+25397 sub_10308A80    proc near               ; DATA XREF: .code:108D3DE0\u2193o
+25398                 jmp     sub_105EFAB0
+25399 sub_10308A80    endp
+25400 
+25401 ; ---------------------------------------------------------------------------
+25402 
+25403 loc_10308A85:                           ; DATA XREF: .code:1083832B\u2193o
+25404                 jmp     sub_10419160
+25405 
+25406 ; =============== S U B R O U T I N E =======================================
+25407 
+25408 ; Attributes: thunk
+25409 
+25410 sub_10308A8A    proc near               ; DATA XREF: .code:10877058\u2193o
+25411                 jmp     sub_103E12B0
+25412 sub_10308A8A    endp
+25413 
+25414 ; ---------------------------------------------------------------------------
+25415                 jmp     loc_103BDE70
+25416 ; ---------------------------------------------------------------------------
+25417                 jmp     loc_1035C9F0
+25418 ; ---------------------------------------------------------------------------
+25419                 jmp     sub_10725B20
+25420 
+25421 ; =============== S U B R O U T I N E =======================================
+25422 
+25423 ; Attributes: thunk
+25424 
+25425 sub_10308A9E    proc near               ; CODE XREF: sub_10326B30+21\u2193p
+25426                                         ; AActor::~AActor(void)+C4\u2193p ...
+25427                 jmp     sub_10326800
+25428 sub_10308A9E    endp
+25429 
+25430 ; Exported entry 4996. ?GetRenderInterface@UNullRenderDevice@@UAEPAVFRenderInterface@@XZ
+25431 ; [00000005 BYTES: COLLAPSED FUNCTION UNullRenderDevice::GetRenderInterface(void). PRESS CTRL-NUMPAD+ TO EXPAND]
+25432 ; ---------------------------------------------------------------------------
+25433                 jmp     loc_105E4700
+25434 ; Exported entry 4120. ?EnableFaceRotation@APawn@@QAEXXZ
+25435 ; [00000005 BYTES: COLLAPSED FUNCTION APawn::EnableFaceRotation(void). PRESS CTRL-NUMPAD+ TO EXPAND]
+25436 
+25437 ; =============== S U B R O U T I N E =======================================
+25438 
+25439 ; Attributes: thunk
+25440 
+25441 ; int __stdcall sub_10308AB2(int, float)
+25442 sub_10308AB2    proc near               ; DATA XREF: .code:const FNDeleteNpcAction::`vftable'\u2193o
+25443                 jmp     sub_104BDCD0
+25444 sub_10308AB2    endp
+25445 
+25446 
+25447 ; =============== S U B R O U T I N E =======================================
+25448 
+25449 ; Attributes: thunk
+25450 
+25451 ; void __thiscall sub_10308AB7(void *)
+25452 sub_10308AB7    proc near               ; DATA XREF: UParticleMaterial::UParticleMaterial(void)+3D\u2193o
+25453                 jmp     sub_103483A0
+25454 sub_10308AB7    endp
+25455 
+25456 ; Exported entry 8823. ?Vertices@ATerrainInfo@@QAE?AVFVector@@H@Z
+25457 ; [00000005 BYTES: COLLAPSED FUNCTION ATerrainInfo::Vertices(int). PRESS CTRL-NUMPAD+ TO EXPAND]
+25458 ; ---------------------------------------------------------------------------
+25459                 jmp     loc_1043D0C0
+25460 ; Exported entry 8470. ?StaticClass@UStaticMeshInstance@@SAPAVUClass@@XZ
+25461 ; [00000005 BYTES: COLLAPSED FUNCTION UStaticMeshInstance::StaticClass(void). PRESS CTRL-NUMPAD+ TO EXPAND]
+25462 ; ---------------------------------------------------------------------------
+25463                 jmp     loc_1040B110
+25464 
+25465 ; =============== S U B R O U T I N E =======================================
+25466 
+25467 ; Attributes: thunk
+25468 
+25469 sub_10308AD0    proc near               ; CODE XREF: APawn::DeleteAllWeaponEffect(void)+4C\u2193p
+25470                 jmp     sub_103854E0
+25471 sub_10308AD0    endp
+25472 
+25473 
+25474 ; =============== S U B R O U T I N E =======================================
+25475 
+25476 ; Attributes: thunk
+25477 
+25478 sub_10308AD5    proc near               ; CODE XREF: sub_106EA2C0+A5E\u2193p
+25479                                         ; sub_106EB320+AC8\u2193p ...
+25480                 jmp     sub_106E81E0
+25481 sub_10308AD5    endp
+25482 
+25483 ; ---------------------------------------------------------------------------
+25484                 jmp     loc_1045BA90
+25485 ; Exported entry 5940. ?IsSameInfo@FNPawnResource@@QAEHPAVAPawn@@HH@Z
+25486 ; [00000005 BYTES: COLLAPSED FUNCTION FNPawnResource::IsSameInfo(APawn *,int,int). PRESS CTRL-NUMPAD+ TO EXPAND]
+25487 ; Exported entry 2202. ??4ANSkillProjectile@@QAEAAV0@AAV0@@Z
+25488 ; [00000005 BYTES: COLLAPSED FUNCTION ANSkillProjectile::operator=(ANSkillProjectile &). PRESS CTRL-NUMPAD+ TO EXPAND]
+25489 ; ---------------------------------------------------------------------------
+25490                 jmp     loc_1036E8A0
+25491 ; Exported entry 4343. ?GetAllAnimName@APawn@@QAEXAAV?$TArray@VFName@@@@@Z
+25492 ; [00000005 BYTES: COLLAPSED FUNCTION APawn::GetAllAnimName(TArray<FName> &). PRESS CTRL-NUMPAD+ TO EXPAND]
+25493 ; Exported entry 7428. ?RequestExEnchantSkill@UNetworkHandler@@UAEXAAVL2ParamStack@@@Z
+25494 ; [00000005 BYTES: COLLAPSED FUNCTION UNetworkHandler::RequestExEnchantSkill(L2ParamStack &). PRESS CTRL-NUMPAD+ TO EXPAND]
+25495 ; Exported entry 5748. ?InternalConstructor@USpriteEmitter@@SAXPAX@Z
+25496 ; [00000005 BYTES: COLLAPSED FUNCTION USpriteEmitter::InternalConstructor(void *). PRESS CTRL-NUMPAD+ TO EXPAND]
+25497 ; Exported entry 165. ??0ANMoon@@QAE@ABV0@@Z
+25498 ; [00000005 BYTES: COLLAPSED FUNCTION ANMoon::ANMoon(ANMoon const &). PRESS CTRL-NUMPAD+ TO EXPAND]
+25499 ; Exported entry 6251. ?Notify@USkillAction_LocateEffect@@UAEPAVAEmitter@@PAVAActor@@0@Z
+25500 ; [00000005 BYTES: COLLAPSED FUNCTION USkillAction_LocateEffect::Notify(AActor *,AActor *). PRESS CTRL-NUMPAD+ TO EXPAND]
+25501 
+25502 ; =============== S U B R O U T I N E =======================================
+25503 

@@ -184,24 +184,7 @@ public class TargetManager : MonoBehaviour
         } 
     }
 
-    public ObjectData GetTargetByIdUseLocator(int id)
-    {
-        var _entitiesInRange = Physics.SphereCastAll(_playerTransform.position, 50f, transform.forward, 0, _areaMask);
-
-        foreach (var entity in _entitiesInRange)
-        {
-            if (entity.transform.parent != null)
-            {
-                var _entity = entity.transform.parent.GetComponent<Entity>();
-
-                if (_entity != null & _entity.IdentityInterlude.Id == id)
-                {
-                    return  new ObjectData(entity.transform.parent.gameObject);
-                }
-            }
-        }
-        return null;
-    }
+   
 
     public void SetTarget(ObjectData target , string hexColor)
     {
@@ -216,7 +199,6 @@ public class TargetManager : MonoBehaviour
 
         PlayerEntity.Instance.TargetId = _target.Identity.Id;
         PlayerEntity.Instance.Target = _target.Data.ObjectTransform;
-        //GameClient.Instance.ClientPacketHandler.SendRequestSetTarget(_target.Identity.Id);
     }
 
     public void SetAttackTarget()

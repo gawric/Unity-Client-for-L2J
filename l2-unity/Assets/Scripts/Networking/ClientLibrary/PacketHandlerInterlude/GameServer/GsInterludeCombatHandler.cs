@@ -123,8 +123,15 @@ public class GsInterludeCombatHandler : ServerPacketHandler
         MyTargetSelect tagetPacket = new MyTargetSelect(data);
 
         EventProcessor.Instance.QueueEvent(() =>{
-            TargetManager.Instance.NextTargetById(tagetPacket.ObjectId, tagetPacket.Color);
-            _pp_sender.SendServerArrivedPosition(PlayerController.Instance.transform.position);
+            if(tagetPacket.ObjectId == PlayerEntity.Instance.IdentityInterlude.Id)
+            {
+                TargetManager.Instance.SetTarget(new ObjectData(PlayerEntity.Instance.transform.gameObject), "#ffffff");
+            }
+            else
+            {
+                TargetManager.Instance.NextTargetById(tagetPacket.ObjectId, tagetPacket.Color);
+                _pp_sender.SendServerArrivedPosition(PlayerController.Instance.transform.position);
+            }
         });
     }
 

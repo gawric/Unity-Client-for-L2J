@@ -25,11 +25,13 @@ public class NewMagicAttackIntention : IntentionBase
     {
         if (objectId != useSkill.TargetId)
         {
+
             _stateMachine.ChangeState(PlayerState.MAGIC_SKILLS);
             _stateMachine.NotifyEvent(Event.READY_TO_ACT, useSkill);
         }
         else
         {
+            TargetManager.Instance.SetTarget(new ObjectData(_stateMachine.Player.gameObject), "#ffffff");
             _stateMachine.ChangeState(PlayerState.MAGIC_SKILLS);
             _stateMachine.NotifyEvent(Event.APPLY_SELF_SKILL, useSkill);
         }
