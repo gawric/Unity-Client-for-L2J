@@ -39,6 +39,7 @@ public class InitPacketsLoadWord
         Task.Run(() =>
         {
             SpawnNpc();
+            SpawnDroppedItems();
             UpdateItemsInventory();
             UpdateShortCuts();
             UpdateInventoryBar();
@@ -65,6 +66,28 @@ public class InitPacketsLoadWord
 
         //RemoveByListId(remove);
     }
+
+    private void SpawnDroppedItems()
+    {
+        for (int i = 0; i < listPackets.Count; i++)
+        {
+            if (listPackets[i] is SpawnItem spawnItem)
+            {
+                EventProcessor.Instance.QueueEvent(() => {
+                    World.Instance.DropItemOnTheGround(0, spawnItem.ItemObjectId, spawnItem.ItemId, spawnItem.Coordinats, spawnItem.Count, spawnItem.Stackable);
+                });
+                Thread.Sleep(10);
+            }
+            else if (listPackets[i] is DropItem dropItem)
+            {
+                EventProcessor.Instance.QueueEvent(() => {
+                    World.Instance.DropItemOnTheGround(dropItem.ObjectId, dropItem.ItemObjectId, dropItem.ItemId, dropItem.Coordinats, dropItem.Count, dropItem.Stackable);
+                });
+                Thread.Sleep(10);
+            }
+        }
+    }
+
     private void UpdateItemsInventory()
     {
         var items = StorageItems.getInstance().GetItems();

@@ -318,11 +318,57 @@ public class L2SlotManager : L2PopupWindow
         slot.UseItem();
     }
 
+    private int _pendingDropCount;
+
     private void DropItem()
     {
-        // Drop item logic
         InventorySlot slot = (InventorySlot)_draggedSlot;
-        Debug.Log($"Drop {slot.Id}.");
+        _slotTemp = slot;
+
+        if (slot.Count > 1)
+        {
+            QuantityInput.Instance.ShowWindow(slot.Count);
+            QuantityInput.Instance.OnButtonOk += OnDropQuantitySelected;
+        }
+        else
+        {
+            ShowDropConfirmation(1);
+        }
+    }
+
+    private void OnDropQuantitySelected(string value)
+    {
+        QuantityInput.Instance.OnButtonOk -= OnDropQuantitySelected;
+        ShowDropConfirmation(int.Parse(value));
+    }
+
+    private void ShowDropConfirmation(int count)
+    {
+        _pendingDropCount = count;
+        string message = count > 1
+            ? $"Do you want to drop {_slotTemp.Name} x{count}?"
+            : $"Do you want to drop your {_slotTemp.Name}?";
+
+        SystemMessageWindow.Instance.OnButtonOk += OkDropItem;
+        SystemMessageWindow.Instance.OnButtonClosed += OnCancelDrop;
+        SystemMessageWindow.Instance.ShowWindowDialogYesOrNot(message);
+    }
+
+    private void OkDropItem()
+    {
+        PlayerInventory.Instance.DropItem(_slotTemp.ObjectId, _pendingDropCount);
+        CancelDropEvent();
+    }
+
+    public void OnCancelDrop()
+    {
+        CancelDropEvent();
+    }
+
+    private void CancelDropEvent()
+    {
+        SystemMessageWindow.Instance.OnButtonOk -= OkDropItem;
+        SystemMessageWindow.Instance.OnButtonClosed -= OnCancelDrop;
     }
 
     private InventorySlot _slotTemp = null;

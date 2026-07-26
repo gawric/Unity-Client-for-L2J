@@ -574,6 +574,19 @@ public class PlayerInventory : MonoBehaviour
         }
     }
 
+    public void DropItem(int objectId, int quantity)
+    {
+        if (!_playerInventory.ContainsKey(objectId))
+        {
+            Debug.Log("Drop item not found " + objectId);
+            return;
+        }
+
+        var sendPaket = CreatorPacketsUser.CreateRequestDropItem(objectId, quantity, PlayerEntity.Instance.transform.position);
+        bool enable = GameClient.Instance.IsCryptEnabled();
+        SendGameDataQueue.Instance().AddItem(sendPaket, enable, enable);
+    }
+
     public bool IsContaineInventory(int objectId)
     {
         return _playerInventory.ContainsKey(objectId);

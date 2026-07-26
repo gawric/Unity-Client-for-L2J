@@ -70,6 +70,7 @@ public class FilterAccessType
         { GameInterludeServerPacketType.TradePressOtherOk, true },
         { GameInterludeServerPacketType.TradePressOwnOk, true },
         { GameInterludeServerPacketType.CharInfo, true },
+        { GameInterludeServerPacketType.SpawnItem, true },
         { GameInterludeServerPacketType.DropItem, true },
         { GameInterludeServerPacketType.GetItem, true },
 

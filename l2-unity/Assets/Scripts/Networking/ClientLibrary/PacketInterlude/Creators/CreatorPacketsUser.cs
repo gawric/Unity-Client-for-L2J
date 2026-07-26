@@ -28,6 +28,11 @@ public class CreatorPacketsUser
         return new RequestDestroyItem(_objectId, _count);
     }
 
+    public static RequestDropItem CreateRequestDropItem(int objectId, int count, Vector3 position)
+    {
+        return new RequestDropItem(objectId, count, position);
+    }
+
 
     public static TradeDone CreateTradeDone(int result)
     {

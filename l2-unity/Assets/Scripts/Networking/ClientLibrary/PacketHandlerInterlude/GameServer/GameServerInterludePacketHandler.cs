@@ -266,6 +266,9 @@ public class GameServerInterludePacketHandler : ServerPacketHandler
             case GameInterludeServerPacketType.GetItem:
                 OnGetItem(itemQueue.DecodeData());
                 break;
+            case GameInterludeServerPacketType.SpawnItem:
+                OnSpawnItem(itemQueue.DecodeData());
+                break;
             case GameInterludeServerPacketType.DropItem:
                 OnDropItem(itemQueue.DecodeData());
                 break;
@@ -1307,14 +1310,41 @@ public class GameServerInterludePacketHandler : ServerPacketHandler
         }
     }
 
-    private void OnDropItem(byte[] data)
+    /// <summary>
+    /// Items already lying on the ground entering our visibility range - on zone entry (buffered
+    /// like NpcInfo, until the initial load finishes) or later, by walking closer (processed live).
+    /// </summary>
+    private void OnSpawnItem(byte[] data)
     {
-        if (!InitPacketsLoadWord.getInstance().IsInit)
+        SpawnItem packet = new SpawnItem(data);
+
+        if (InitPacketsLoadWord.getInstance().IsInit)
         {
-            DropItem packet = new DropItem(data);
+            InitPacketsLoadWord.getInstance().AddPacketsInit(packet);
+        }
+        else
+        {
             EventProcessor.Instance.QueueEvent(() =>
             {
-                //todo: у предмета должно быть  stackable и тогда нужен count
+                World.Instance.DropItemOnTheGround(0, packet.ItemObjectId, packet.ItemId, packet.Coordinats, packet.Count, packet.Stackable);
+            });
+        }
+    }
+
+    private void OnDropItem(byte[] data)
+    {
+        DropItem packet = new DropItem(data);
+
+        // Items dropped just now shouldn't normally arrive while we're still loading (SpawnItem is
+        // what the server uses for what's already on the ground) - buffered defensively all the same.
+        if (InitPacketsLoadWord.getInstance().IsInit)
+        {
+            InitPacketsLoadWord.getInstance().AddPacketsInit(packet);
+        }
+        else
+        {
+            EventProcessor.Instance.QueueEvent(() =>
+            {
                 World.Instance.DropItemOnTheGround(packet.ObjectId, packet.ItemObjectId, packet.ItemId, packet.Coordinats, packet.Count, packet.Stackable);
             });
         }
