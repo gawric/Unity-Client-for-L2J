@@ -25,9 +25,12 @@ public class SkillSlot : L2DraggableSlot
 
     protected override void HandleLeftClick()
     {
-        Debug.Log("Handle Left Click");
-        EventLeftClick?.Invoke(_position);
-
+        if (!_isPassive)
+        {
+            Debug.Log("Handle Left Click");
+            EventLeftClick?.Invoke(_position);
+            PlayerActions.Instance.UseSkill(_id);
+        }
     }
 
     public void AssignSkill(int skillId, int level , bool isPassive)

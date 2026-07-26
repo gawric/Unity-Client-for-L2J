@@ -74,4 +74,6 @@ public enum GameInterludeServerPacketType : byte
     CharInfo = 0x03,
     DropItem = 0x0c,
     GetItem = 0x0d,
+
+    ShowBoard = 0x6e,
 }

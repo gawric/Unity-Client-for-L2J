@@ -269,6 +269,9 @@ public class GameServerInterludePacketHandler : ServerPacketHandler
                 break;
             case GameInterludeServerPacketType.CharInfo:
                 break;
+            case GameInterludeServerPacketType.ShowBoard:
+                OnShowBoard(itemQueue.DecodeData());
+                break;
 
             default:
                 var s = 1;
@@ -1327,6 +1330,17 @@ public class GameServerInterludePacketHandler : ServerPacketHandler
             }
            
         }
+    }
+
+    private void OnShowBoard(byte[] data)
+    {
+        if (EventProcessor.Instance == null || World.Instance == null)
+            return;
+
+        EventProcessor.Instance.QueueEvent(() =>
+        {
+            _ = new ShowCBoard(data);
+        });
     }
 
     private void OnTargetUnselected(byte[] data)
