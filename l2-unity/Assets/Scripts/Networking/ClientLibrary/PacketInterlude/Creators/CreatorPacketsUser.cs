@@ -28,6 +28,7 @@ public class CreatorPacketsUser
         return new RequestDestroyItem(_objectId, _count);
     }
 
+
     public static TradeDone CreateTradeDone(int result)
     {
         return new TradeDone(result);

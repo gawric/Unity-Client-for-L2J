@@ -8,6 +8,7 @@ public class NpcCursorManager : MonoBehaviour
     private Texture2D _defaultCursor;
     private Texture2D _hoverCursorTalk;
     private Texture2D _hoverCursorAtk;
+    private Texture2D _hoverCursorPickup;
     private Collider[] colliders;
     private LayerMask _entityMask = 8192;
     private ObjectData _hoverObjectData;
@@ -17,11 +18,13 @@ public class NpcCursorManager : MonoBehaviour
     private int defaultCursorId = 0;
     private int atkCursorId = 1;
     private int talkCursorId = 2;
+    private int pickupCursorId = 3;
     void Start()
     {
         _defaultCursor = IconManager.Instance.LoadCursorByName("Default");
         _hoverCursorAtk = IconManager.Instance.LoadCursorByName("Attack");
         _hoverCursorTalk = IconManager.Instance.LoadCursorByName("Talk");
+        _hoverCursorPickup = IconManager.Instance.LoadCursorByName("Pickup");
         _currentCursor = -1;
 
     }
@@ -71,13 +74,31 @@ public class NpcCursorManager : MonoBehaviour
                 }
            
             }
+            else if (hit.collider.GetComponent<DroppedItemEntity>() != null)
+            {
+                SetPickupCursor();
+            }
             else
             {
                 OnMouseExitTest(lastHoveredObject);
             }
-           
+
         }
 
+    }
+
+    private void SetPickupCursor()
+    {
+        if (L2GameUI.Instance.MouseOverUI)
+        {
+            return;
+        }
+
+        if (_currentCursor != pickupCursorId)
+        {
+            _currentCursor = pickupCursorId;
+            Cursor.SetCursor(_hoverCursorPickup, Vector2.zero, CursorMode.Auto);
+        }
     }
 
     private void OnMouseEnterTest(ObjectData obj)

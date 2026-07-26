@@ -207,6 +207,33 @@ public class World : MonoBehaviour {
         RemoveDroppedItem(itemObjectId);
     }
 
+    /// <summary>
+    /// Closest dropped item to fromPosition within maxDistance, or null - used by the "Pick Up"
+    /// action (/pickup) to grab whatever is lying around without having to click it directly.
+    /// </summary>
+    public GameObject GetNearestDroppedItem(Vector3 fromPosition, float maxDistance)
+    {
+        GameObject nearest = null;
+        float nearestDistance = maxDistance;
+
+        foreach (GameObject itemGo in _droppedItems.Values)
+        {
+            if (itemGo == null)
+            {
+                continue;
+            }
+
+            float distance = Vector3.Distance(fromPosition, itemGo.transform.position);
+            if (distance <= nearestDistance)
+            {
+                nearest = itemGo;
+                nearestDistance = distance;
+            }
+        }
+
+        return nearest;
+    }
+
     /// <param name="dropperId">Object id of the character that dropped the item.</param>
     /// <param name="itemObjectId">World id of the dropped item, unique per drop.</param>
     /// <param name="itemId">Item template id, the one the dat tables are keyed by.</param>
@@ -224,10 +251,8 @@ public class World : MonoBehaviour {
             GameObject itemGo = DroppedItemFactory.Create(itemId, position, GetDroppedItemsContainer());
             itemGo.transform.name = DroppedItemFactory.GetItemName(itemId);
 
-            WorldItemManager adapter = itemGo.AddComponent<WorldItemManager>();
-            adapter.SetTooltipText(BuildDropTooltip(itemId, count, stackable));
-            adapter.SetItemsCount(count);
-            adapter.SetTooltipHeight(DroppedItemFactory.GetVisualHeight(itemGo));
+            DroppedItemEntity droppedItem = itemGo.AddComponent<DroppedItemEntity>();
+            droppedItem.Initialize(itemObjectId, BuildDropTooltip(itemId, count, stackable), count, DroppedItemFactory.GetVisualHeight(itemGo));
 
             itemGo.SetActive(true);
 
@@ -242,7 +267,7 @@ public class World : MonoBehaviour {
     private string BuildDropTooltip(int itemId, int count, bool stackable)
     {
         StringBuilder sb = new StringBuilder(DroppedItemFactory.GetItemName(itemId));
-        if (stackable)
+        if (stackable && count > 1)
         {
             sb.Append(" (");
             sb.Append(count);

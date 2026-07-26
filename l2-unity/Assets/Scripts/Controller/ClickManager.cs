@@ -84,6 +84,9 @@ public class ClickManager : MonoBehaviour
                     else if (_targetObjectData != null)
                     {
                         OnClickToMove(hit);
+
+                        DroppedItemEntity droppedItem = hit.collider.GetComponent<DroppedItemEntity>();
+                        droppedItem?.RequestPickup();
                     }
                 }
             }

@@ -57,17 +57,21 @@ public class ActionSlot : L2DraggableSlot
         {
             return "action003";
         }
-        else if (id == 4)
+        else if (id == 3)
         {
             return "action005";
         }
-        else if (id == 5)
+        else if (id == 4)
         {
             return "action007";
         }
-        else if (id == 6)
+        else if (id == 5)
         {
             return "action008";
+        }
+        else if (id == 6)
+        {
+            return "action010";
         }
 
         return ActionNameTable.Instance.GetAction(actionType)._icon;
