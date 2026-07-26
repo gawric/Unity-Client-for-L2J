@@ -13,11 +13,17 @@ public class DropItem : ServerPacket
 
     public Vector3 Coordinats { get; set; }
 
-    private int _itemId { get; set; }
-    public int ItemId { get => _itemId; }
+    private int _itemObjectId { get; set; }
+    /// <summary>
+    /// Мировой id выброшенного предмета, уникален для каждого дропа (getObjectId на сервере).
+    /// </summary>
+    public int ItemObjectId { get => _itemObjectId; }
 
-    private int _displayId { get; set; }
-    public int DisplayId { get => _displayId; }
+    private int _itemId { get; set; }
+    /// <summary>
+    /// Id предмета из dat-таблиц (getItemId на сервере).
+    /// </summary>
+    public int ItemId { get => _itemId; }
 
     private int _count { get; set; }
 
@@ -33,10 +39,8 @@ public class DropItem : ServerPacket
     public override void Parse()
     {
         _objectId = ReadI();
-        var itemId = ReadI();
-        _itemId = itemId;
-        var displayId = ReadI();
-        _displayId = displayId;
+        _itemObjectId = ReadI();
+        _itemId = ReadI();
         var x = ReadI();
         var y = ReadI();
         var z = ReadI();

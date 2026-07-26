@@ -1,112 +1,78 @@
-﻿using UnityEngine;
-using UnityEngine.UIElements;
+using UnityEngine;
 
+/// <summary>
+/// Shows the L2TransparentTooltip (the same popup slots/skills use) while the mouse hovers a
+/// dropped item. Hover state comes from ClickManager.HoverObjectData - the same raycast it already
+/// runs every frame for entities and click-to-move - which requires the item to carry a collider
+/// (added by DroppedItemFactory).
+/// </summary>
 public class WorldItemManager : MonoBehaviour
 {
+    // Floor for the tooltip lift - keeps flat/tiny drops from anchoring the tooltip right at ground level.
+    private const float MIN_TOOLTIP_HEIGHT = 0.15f;
+    // Extra gap above the model so the tooltip doesn't clip into it.
+    private const float TOOLTIP_GAP = 0.05f;
 
-    private static WorldItemManager _instance;
+    [SerializeField] private string _tooltipText = "";
+    [SerializeField] private long _itemsCount = 0;
+    [SerializeField] private float _tooltipHeight = 0f;
 
-    public static WorldItemManager Instance { get { return _instance; } }
-    [SerializeField] private UIDocument uiDocument;
-    [SerializeField] private string tooltipText = "thing";
-    [SerializeField] private long itemsCount = 0;
-    [SerializeField] private Vector2 uiSize = new Vector2(100, 100); //todo: в идеале передать сюда размеры модели и ее кординаты
-
-    //todo: думается даже лучше чтоб он сам все спавнил и грузил модели? 
-
-    private VisualElement uiProxy;
-    private TransparentTooltipManipulator manipulator;
-
-    void Start()
-    {
-        CreateUIProxy();
-    }
-
-    void CreateUIProxy()
-    {
-        if (uiDocument == null)
-            uiDocument = FindObjectOfType<UIDocument>();
-
-        var root = uiDocument.rootVisualElement;
-
-        uiProxy = new VisualElement
-        {
-            name = $"Proxy_{gameObject.name}",
-            style =
-            {
-                position = Position.Absolute,
-                width = uiSize.x,
-                height = uiSize.y,
-                backgroundColor = new Color(0, 0, 0, 0)
-            }
-        };
-
-        root.Add(uiProxy);
-
-        manipulator = new TransparentTooltipManipulator(uiProxy, tooltipText);
-        manipulator.target = uiProxy;
-
-        // Обновляем позицию прокси
-        UpdateProxyPosition();
-    }
+    private bool _isHovered = false;
 
     void Update()
     {
-        if (uiProxy != null)
+        bool isHoveredNow = ClickManager.Instance != null
+            && ClickManager.Instance.HoverObjectData != null
+            && ClickManager.Instance.HoverObjectData.ObjectTransform == transform;
+
+        if (isHoveredNow == _isHovered)
         {
-            UpdateProxyPosition();
+            return;
         }
-    }
 
-    void UpdateProxyPosition()
-    {
-        // Конвертируем мировую позицию в экранные координаты
-        Vector3 screenPos = Camera.main.WorldToScreenPoint(transform.position);
-
-        // UI Toolkit использует Y-ось сверху вниз
-        screenPos.y = Screen.height - screenPos.y;
-
-        // Устанавливаем позицию с учетом центра
-        uiProxy.style.left = screenPos.x - uiSize.x / 2;
-        uiProxy.style.top = screenPos.y - uiSize.y / 2;
-
-        // Проверяем видимость объекта
-        Vector3 viewportPos = Camera.main.WorldToViewportPoint(transform.position);
-        bool isVisible = viewportPos.x >= 0 && viewportPos.x <= 1 &&
-                        viewportPos.y >= 0 && viewportPos.y <= 1 &&
-                        viewportPos.z > 0;
-
-        uiProxy.style.display = isVisible ? DisplayStyle.Flex : DisplayStyle.None;
+        _isHovered = isHoveredNow;
+        UpdateTooltipVisibility();
     }
 
     void OnDestroy()
     {
-        if (uiProxy != null && uiProxy.panel != null)
+        if (_isHovered)
         {
-            uiProxy.RemoveFromHierarchy();
+            _isHovered = false;
+            L2TransparentTooltip.Instance?.HideWindow();
         }
-        manipulator?.Clear();
+    }
+
+    private void UpdateTooltipVisibility()
+    {
+        if (L2TransparentTooltip.Instance == null)
+        {
+            return;
+        }
+
+        if (_isHovered)
+        {
+            Vector3 anchor = transform.position + Vector3.up * (Mathf.Max(_tooltipHeight, MIN_TOOLTIP_HEIGHT) + TOOLTIP_GAP);
+            L2TransparentTooltip.Instance.UpdateTooltipWorld(_tooltipText, anchor, Camera.main);
+        }
+        else
+        {
+            L2TransparentTooltip.Instance.HideWindow();
+        }
     }
 
     public void SetTooltipText(string text)
     {
-        tooltipText = text;
-        if (manipulator != null)
-        {
-            manipulator.SetText(text);
-        }
+        _tooltipText = text;
     }
+
     public void SetItemsCount(long count)
     {
-        itemsCount = count;
-        if (manipulator != null)
-        {
-            //manipulator.SetText(text);
-        }
+        _itemsCount = count;
     }
 
-    public void SetSize(Vector3 vec) //todo: сделать
+    public void SetTooltipHeight(float height)
     {
-
+        _tooltipHeight = height;
     }
 }

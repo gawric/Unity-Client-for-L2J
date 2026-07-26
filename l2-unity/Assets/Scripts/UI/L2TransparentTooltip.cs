@@ -123,7 +123,7 @@ public class L2TransparentTooltip : L2PopupWindow //todo: кажется не н
             float x = screenPos.x;
             float y = panelHeight - screenPos.y;
 
-            _windowEle.style.left = x;
+            _windowEle.style.left = x - _windowEle.resolvedStyle.width / 2f;
             _windowEle.style.top = y - _windowEle.resolvedStyle.height;
 
             _windowEle.style.opacity = 1;

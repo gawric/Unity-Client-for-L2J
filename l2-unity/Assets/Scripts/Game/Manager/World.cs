@@ -89,15 +89,18 @@ public class World : MonoBehaviour {
     }
 
     public void RemoveObject(int id) {
+        if (RemoveDroppedItem(id)) {
+            return;
+        }
+
         Entity transform;
         if (_objects.TryGetValue(id, out transform)) {
             _players.Remove(id);
             _npcs.Remove(id);
             _objects.Remove(id);
-            _droppedItems.Remove(id);
 
             Destroy(transform.gameObject);
-            
+
         }
     }
 
@@ -198,60 +201,82 @@ public class World : MonoBehaviour {
 
     bool isSinglSpawn = false;
 
-    public void PickupItemFromTheGround(int objectId, int playerId, Vector3 position)
+    /// <param name="itemObjectId">World id of the dropped item, not the item template id.</param>
+    public void PickupItemFromTheGround(int itemObjectId, int playerId, Vector3 position)
     {
-        try
-        {
-            var res = _droppedItems.TryGetValue(objectId, out var obj);
-            if(res)
-            {
-                Destroy(obj);
-                obj.SetActive(false);
-            }
-        }
-        catch (Exception e)
-        { 
-
-        }
+        RemoveDroppedItem(itemObjectId);
     }
 
-    public void DropItemOnTheGround(int objectId, int itemId, int displayId, Vector3 position, int count, bool stackable = false)
+    /// <param name="dropperId">Object id of the character that dropped the item.</param>
+    /// <param name="itemObjectId">World id of the dropped item, unique per drop.</param>
+    /// <param name="itemId">Item template id, the one the dat tables are keyed by.</param>
+    public void DropItemOnTheGround(int dropperId, int itemObjectId, int itemId, Vector3 position, int count, bool stackable = false)
     {
+        if (_droppedItems.ContainsKey(itemObjectId))
+        {
+            return;
+        }
+
         try
         {
-            ItemInstance i = new(itemId, displayId, ItemLocation.Void, 0, count, ItemCategory.Item, false, ItemSlot.none, 999, 0);
+            position.y = GetDroppedItemGroundHeight(position);
 
-            var itemModel = ModelTable.Instance.GetWeapon("LineageWeapons.small_sword_m00_wp"); //todo: replase by items model
-            itemModel.transform.localScale = new Vector3(100, 100, 100);
-            itemModel.transform.rotation = Quaternion.Euler(90f, 90f, 0f);
-            position.y = GetGroundHeight(position);
-            GameObject itemGo = Instantiate(itemModel, position, Quaternion.identity);
-            itemGo.transform.name = i.GetName();
+            GameObject itemGo = DroppedItemFactory.Create(itemId, position, GetDroppedItemsContainer());
+            itemGo.transform.name = DroppedItemFactory.GetItemName(itemId);
 
-            itemGo.transform.SetParent(_droppedItemsContainer.transform);
-
-            
-
-            var adapter = itemGo.AddComponent<WorldItemManager>();
-            StringBuilder sb = new StringBuilder();
-            sb.Append(i.GetName());
-            if(stackable)
-            { 
-                sb.Append("(");
-                sb.Append(count);
-                sb.Append(")");
-            }
-            adapter.SetTooltipText(sb.ToString());
+            WorldItemManager adapter = itemGo.AddComponent<WorldItemManager>();
+            adapter.SetTooltipText(BuildDropTooltip(itemId, count, stackable));
+            adapter.SetItemsCount(count);
+            adapter.SetTooltipHeight(DroppedItemFactory.GetVisualHeight(itemGo));
 
             itemGo.SetActive(true);
 
-            _droppedItems.Add(itemId, itemGo);
-
+            _droppedItems.Add(itemObjectId, itemGo);
         }
         catch (Exception e)
         {
-
+            Debug.LogError($"DropItemOnTheGround - Can't spawn item {itemId} (object {itemObjectId}) - {e}");
         }
+    }
+
+    private string BuildDropTooltip(int itemId, int count, bool stackable)
+    {
+        StringBuilder sb = new StringBuilder(DroppedItemFactory.GetItemName(itemId));
+        if (stackable)
+        {
+            sb.Append(" (");
+            sb.Append(count);
+            sb.Append(")");
+        }
+
+        return sb.ToString();
+    }
+
+    private Transform GetDroppedItemsContainer()
+    {
+        if (_droppedItemsContainer == null)
+        {
+            _droppedItemsContainer = GameObject.Find("DroppedItems") ?? new GameObject("DroppedItems");
+        }
+
+        return _droppedItemsContainer.transform;
+    }
+
+    private bool RemoveDroppedItem(int itemObjectId)
+    {
+        if (!_droppedItems.TryGetValue(itemObjectId, out GameObject itemGo))
+        {
+            return false;
+        }
+
+        _droppedItems.Remove(itemObjectId);
+
+        if (itemGo != null)
+        {
+            Destroy(itemGo);
+        }
+
+        return true;
     }
 
     public void SpawnNpcInterlude(NetworkIdentityInterlude identity, NpcStatusInterlude status, Stats stats)
@@ -493,7 +518,18 @@ public class World : MonoBehaviour {
 
     public async Task DeleteObject(int objectId)
     {
+        // Items on the ground are not entities, the server despawns them with the same packet.
+        if (RemoveDroppedItem(objectId))
+        {
+            return;
+        }
+
         Entity entity = await GetEntityNoLock(objectId);
+        if (entity == null)
+        {
+            return;
+        }
+
         if(entity.GetType() == typeof(MonsterEntity))
         {
             if (entity.IsDead())
@@ -517,6 +553,35 @@ public class World : MonoBehaviour {
         }
 
         return pos.y;
+    }
+
+    private static readonly RaycastHit[] _groundProbeHits = new RaycastHit[16];
+
+    /// <summary>
+    /// _groundMask includes StaticMesh/Brush (needed for entities to stand on bridges, rocks, etc),
+    /// so a plain single-hit raycast lands a drop on the first thing above it - a tree's canopy or
+    /// root collider, if the drop happens to be underneath one. A drop has no reason to rest
+    /// anywhere but the actual lowest surface below it, so every collider along the ray is
+    /// considered and the deepest hit wins, ducking under any overhanging prop geometry.
+    /// </summary>
+    public float GetDroppedItemGroundHeight(Vector3 pos)
+    {
+        int hitCount = Physics.RaycastNonAlloc(pos + Vector3.up * 1.5f, Vector3.down, _groundProbeHits, 5f, _groundMask);
+        if (hitCount == 0)
+        {
+            return GetGroundHeight(pos);
+        }
+
+        float lowestY = float.MaxValue;
+        for (int i = 0; i < hitCount; i++)
+        {
+            if (_groundProbeHits[i].point.y < lowestY)
+            {
+                lowestY = _groundProbeHits[i].point.y;
+            }
+        }
+
+        return lowestY;
     }
 
     public string getEntityName(int id)

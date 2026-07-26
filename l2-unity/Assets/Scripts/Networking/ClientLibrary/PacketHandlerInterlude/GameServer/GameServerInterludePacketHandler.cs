@@ -1315,7 +1315,7 @@ public class GameServerInterludePacketHandler : ServerPacketHandler
             EventProcessor.Instance.QueueEvent(() =>
             {
                 //todo: у предмета должно быть  stackable и тогда нужен count
-                World.Instance.DropItemOnTheGround(packet.ObjectId, packet.ItemId, packet.DisplayId, packet.Coordinats, packet.Count, packet.Stackable);
+                World.Instance.DropItemOnTheGround(packet.ObjectId, packet.ItemObjectId, packet.ItemId, packet.Coordinats, packet.Count, packet.Stackable);
             });
         }
     }
