@@ -146,6 +146,13 @@ public class GsInterludeCombatHandler : ServerPacketHandler
         {
             SkillbarWindow.Instance.ShowCooldown(magicSkill.SkillId, Shortcut.TYPE_SKILL , magicSkill.Reusedelay);
 
+            // SoulShot/SpiritShot: charge FX only — never steal ATTACKING/RUNNING/WALKING intention.
+            if (IsWeaponChargeShot(magicSkill.SkillId))
+            {
+                ApplyWeaponChargeShot(magicSkill);
+                return;
+            }
+
             PlayerStateMachine.Instance.ChangeIntention(
                 magicSkill.SkillGrp.IsMagic == 1 ?
                     Intention.INTENTION_MAGIC_ATTACK :
@@ -153,6 +160,33 @@ public class GsInterludeCombatHandler : ServerPacketHandler
                 magicSkill);
         });
 
+    }
+
+    private static bool IsWeaponChargeShot(int skillId)
+    {
+        return skillId == (int)SpecialSkillType.SoulshotNg ||
+               skillId == (int)SpecialSkillType.SpiritshotNg;
+    }
+
+    private static void ApplyWeaponChargeShot(MagicSkillUse useSkill)
+    {
+        PlayerEntity player = PlayerEntity.Instance;
+        if (player == null) return;
+
+        PlayerState state = PlayerStateMachine.Instance != null
+            ? PlayerStateMachine.Instance.State
+            : PlayerState.IDLE;
+        Intention intention = PlayerStateMachine.Instance != null
+            ? PlayerStateMachine.Instance.Intention
+            : Intention.INTENTION_IDLE;
+
+        player.IsSoulshotCharged = true;
+        Transform weapon = player.GetWeaponTransform();
+        EffectManager.Instance.PlayEffect(useSkill.SkillId, weapon);
+
+        Debug.Log(
+            $"[SS_CHARGE_SM] ApplyWeaponChargeShot skillId={useSkill.SkillId} " +
+            $"keepState={state} keepIntention={intention} (no ChangeIntention/ChangeState)");
     }
 
     private void SetupGauge(byte[] data)

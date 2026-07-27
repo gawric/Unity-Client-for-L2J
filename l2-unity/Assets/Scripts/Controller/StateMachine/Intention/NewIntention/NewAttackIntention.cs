@@ -31,8 +31,16 @@ public class NewAttackIntention : IntentionBase
             targetEntity.SetDamage(playerHit.Damage);
             PlayerEntity.Instance.IsAttack = true;
             PlayerEntity.Instance.SetSelfHit(playerHit);
+            // Attack packet SS flag — recharge every swing (otherwise only first Hit shows SoulShot).
+            PlayerEntity.Instance.IsSoulshotCharged = playerHit.hasSoulshot();
+            Debug.Log(
+                $"[ATK_HIT_CHAIN] 0.AttackPacket ss={playerHit.hasSoulshot()} miss={playerHit.isMiss()} " +
+                $"crit={playerHit.isCrit()} dmg={playerHit.Damage}");
 
-            _stateMachine.ChangeState(PlayerState.ATTACKING);
+            if (_stateMachine.State != PlayerState.ATTACKING)
+            {
+                _stateMachine.ChangeState(PlayerState.ATTACKING);
+            }
             _stateMachine.NotifyEvent(Event.READY_TO_ACT);
 
         }

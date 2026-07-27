@@ -80746,6 +80746,13 @@ AnimationClip:
     floatParameter: 0
     intParameter: 0
     messageOptions: 0
+  - time: 1.0416666
+    functionName: AttackShot
+    data: jatk01_pole
+    objectReferenceParameter: {fileID: 0}
+    floatParameter: 0
+    intParameter: 0
+    messageOptions: 0
   - time: 1.25
     functionName: OnAnimationAttackHitEnd
     data: jatk01_pole

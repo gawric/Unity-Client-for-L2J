@@ -58,7 +58,8 @@ public class PlayerStateMachine : MonoBehaviour
 
     public void ChangeState(PlayerState newState)
     {
-        if (_enableLogs) Debug.Log("[StateMachine][STATE] " + newState);
+        PlayerState prev = _currentState;
+        if (_enableLogs) Debug.Log($"[StateMachine][STATE] {prev} → {newState}");
 
         _stateInstance?.Exit();
         _currentState = newState;
@@ -73,8 +74,8 @@ public class PlayerStateMachine : MonoBehaviour
 
     public void ChangeIntention(Intention newIntention, object arg0)
     {
-
-        if (_enableLogs) Debug.Log("[Player->StateMachine][INTENTION] " + newIntention);
+        Intention prev = _currentIntention;
+        if (_enableLogs) Debug.Log($"[Player->StateMachine][INTENTION] {prev} → {newIntention}");
         _intentionInstance?.Exit();
         _currentIntention = newIntention;
         InitializeIntention();

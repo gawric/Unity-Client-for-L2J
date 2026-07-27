@@ -1,12 +1,29 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 using UnityEngine;
 
 public class FastSinglExecuter : MonoBehaviour
 {
+    private const string PKT_ORD_LOG = "[PKT_ORD]";
+    private static int _pktSeq;
+
     private SynchronizationContext synchronizationContext;
 
     private static FastSinglExecuter _instance;
     public static FastSinglExecuter Instance { get { return _instance; } }
+
+    private static int NextPktSeq() => Interlocked.Increment(ref _pktSeq);
+
+    private static string PktStamp()
+    {
+        // Queue/receive thread must not touch UnityEngine.Time.
+        return $"utcMs={DateTime.UtcNow:HH:mm:ss.fff}";
+    }
+
+    private static string PktStampMain()
+    {
+        return $"frame={Time.frameCount} t={Time.time:F3} rt={Time.realtimeSinceStartup:F3} utcMs={DateTime.UtcNow:HH:mm:ss.fff}";
+    }
 
     private void Awake()
     {
@@ -68,33 +85,75 @@ public class FastSinglExecuter : MonoBehaviour
 
     private void Attack(byte[] data)
     {
+        int seq = NextPktSeq();
         Attack attackPacket = new Attack(data);
-        AttackTest(attackPacket);
+        Debug.Log(
+            $"{PKT_ORD_LOG} #{seq} ATTACK QUEUE {PktStamp()} " +
+            $"attackerId={attackPacket.AttackerObjId} targetId={attackPacket.TargetId} " +
+            $"dmg={attackPacket.Damage} (parsed on queue thread → Post main)");
+        AttackTest(attackPacket, seq);
     }
 
 
  
-    private void AttackTest(Attack attackPacket)
+    private void AttackTest(Attack attackPacket, int seq)
     {
         synchronizationContext.Post(_ =>
         {
+            Debug.Log(
+                $"{PKT_ORD_LOG} #{seq} ATTACK MAIN_BEGIN {PktStampMain()} " +
+                $"attackerId={attackPacket.AttackerObjId} targetId={attackPacket.TargetId} dmg={attackPacket.Damage}");
+
             Entity targetEntity = World.Instance.GetEntityNoLockSync(attackPacket.TargetId);
             Entity attakerEntity = World.Instance.GetEntityNoLockSync(attackPacket.AttackerObjId);
 
-            if (attakerEntity != null) PlayerAttack(attackPacket, attakerEntity, targetEntity);
+            bool attackerDead = attakerEntity != null && attakerEntity.IsDead();
+            bool targetDead = targetEntity != null && targetEntity.IsDead();
+            string playerState = PlayerStateMachine.Instance != null
+                ? PlayerStateMachine.Instance.State.ToString()
+                : "null";
+            string playerIntention = PlayerStateMachine.Instance != null
+                ? PlayerStateMachine.Instance.Intention.ToString()
+                : "null";
+
+            Debug.Log(
+                $"{PKT_ORD_LOG} #{seq} ATTACK MAIN_CTX {PktStampMain()} " +
+                $"attackerNull={attakerEntity == null} targetNull={targetEntity == null} " +
+                $"attackerDead={attackerDead} targetDead={targetDead} " +
+                $"playerState={playerState} intention={playerIntention}");
+
+            if (attakerEntity != null) PlayerAttack(attackPacket, attakerEntity, targetEntity, seq);
             if (targetEntity != null) MonsterAttack(attakerEntity, attackPacket);
+
+            Debug.Log($"{PKT_ORD_LOG} #{seq} ATTACK MAIN_END {PktStampMain()}");
 
         }, null);
 
     }
 
-    private void PlayerAttack(Attack attackPacket, Entity attakerEntity, Entity targetEntity)
+    private void PlayerAttack(Attack attackPacket, Entity attakerEntity, Entity targetEntity, int seq)
     {
         if (attakerEntity.GetType() == typeof(PlayerEntity))
         {
-            if (attakerEntity == null | targetEntity == null) return;
-            if (attakerEntity.IsDead() == true | targetEntity.IsDead() == true) return;
+            if (attakerEntity == null | targetEntity == null)
+            {
+                Debug.LogWarning($"{PKT_ORD_LOG} #{seq} ATTACK SKIP null entity");
+                return;
+            }
+
+            if (attakerEntity.IsDead() == true | targetEntity.IsDead() == true)
+            {
+                Debug.LogWarning(
+                    $"{PKT_ORD_LOG} #{seq} ATTACK SKIP alreadyDead " +
+                    $"attackerDead={attakerEntity.IsDead()} targetDead={targetEntity.IsDead()} " +
+                    $"{PktStampMain()} " +
+                    $"(Die likely processed before this Attack on main thread)");
+                return;
+            }
        
+            Debug.Log(
+                $"{PKT_ORD_LOG} #{seq} ATTACK APPLY→INTENTION_ATTACK {PktStampMain()} " +
+                $"targetId={attackPacket.TargetId} dmg={attackPacket.Damage}");
             PlayerStateMachine.Instance.ChangeIntention(Intention.INTENTION_ATTACK, attackPacket);
            
             OnEventPlaVsMonster(attakerEntity, targetEntity);
@@ -234,26 +293,49 @@ public class FastSinglExecuter : MonoBehaviour
 
     private void Die(byte[] data)
     {
-
+        int seq = NextPktSeq();
         Die diePacket = new Die(data);
+
+        Debug.Log(
+            $"{PKT_ORD_LOG} #{seq} DIE QUEUE {PktStamp()} objectId={diePacket.ObjectId} " +
+            $"(parsed on queue thread → Post main)");
 
         if (InitPacketsLoadWord.getInstance().IsInit)
         {
+            Debug.Log($"{PKT_ORD_LOG} #{seq} DIE deferred→AddPacketsInit (world init)");
             InitPacketsLoadWord.getInstance().AddPacketsInit(diePacket);
         }
         else
         {
             synchronizationContext.Post(_ =>
             {
-                WhoDied(diePacket);
+                Debug.Log(
+                    $"{PKT_ORD_LOG} #{seq} DIE MAIN_BEGIN {PktStampMain()} " +
+                    $"objectId={diePacket.ObjectId}");
+                WhoDied(diePacket, seq);
+                Debug.Log($"{PKT_ORD_LOG} #{seq} DIE MAIN_END {PktStampMain()}");
             }, null);
         }
 
     }
 
-    private void WhoDied(Die diePacket)
+    private void WhoDied(Die diePacket, int seq)
     {
         Entity entity = World.Instance.GetEntityNoLockSync(diePacket.ObjectId);
+
+        string playerState = PlayerStateMachine.Instance != null
+            ? PlayerStateMachine.Instance.State.ToString()
+            : "null";
+        string playerIntention = PlayerStateMachine.Instance != null
+            ? PlayerStateMachine.Instance.Intention.ToString()
+            : "null";
+        bool isAttack = PlayerEntity.Instance != null && PlayerEntity.Instance.IsAttack;
+
+        Debug.Log(
+            $"{PKT_ORD_LOG} #{seq} DIE WhoDied {PktStampMain()} " +
+            $"objectId={diePacket.ObjectId} entityNull={entity == null} " +
+            $"entityType={(entity != null ? entity.GetType().Name : "null")} " +
+            $"playerState={playerState} intention={playerIntention} IsAttack={isAttack}");
 
         if (entity != null)
         {
@@ -268,6 +350,9 @@ public class FastSinglExecuter : MonoBehaviour
                 entity.SetDead(true);
                 var monsterEnity = (MonsterEntity)entity;
                 MonsterDead(monsterEnity);
+                Debug.Log(
+                    $"{PKT_ORD_LOG} #{seq} DIE → OnWaitReturn (monster dead) {PktStampMain()} " +
+                    $"playerState={playerState}");
                 PlayerStateMachine.Instance.OnWaitReturn();
             }
         }

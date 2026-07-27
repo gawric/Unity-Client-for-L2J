@@ -60,10 +60,21 @@ public class NewPhysicalSkillsState : AbstractAttackEvents
 
                 break;
             case Event.APPLY_SOULSHOT_CHARGED:
-                Debug.Log("NewPhysicalSkillsState Charge sulshots");
+                Debug.Log(
+                    $"[SS_CHARGE_SM] State.APPLY_SOULSHOT_CHARGED state={_stateMachine.State} " +
+                    $"intention={_stateMachine.Intention} running={_stateMachine.Player != null && _stateMachine.Player.Running}");
                 Transform transform = _stateMachine.Player.GetWeaponTransform();
                 _stateMachine.Player.IsSoulshotCharged = true;
                 EffectManager.Instance.PlayEffect(useSkill.SkillId , transform);
+                break;
+
+            case Event.ARRIVED:
+                // Arrived while charged / physical-skills — locomotion finished, go IDLE.
+                Debug.Log(
+                    $"[SS_CHARGE_SM] State.ARRIVED while PHYSICAL_SKILLS → IDLE " +
+                    $"(arrived overrides charged)");
+                PlayerStateMachine.Instance.ChangeIntention(Intention.INTENTION_IDLE);
+                PlayerStateMachine.Instance.NotifyEvent(Event.ARRIVED);
                 break;
 
         }

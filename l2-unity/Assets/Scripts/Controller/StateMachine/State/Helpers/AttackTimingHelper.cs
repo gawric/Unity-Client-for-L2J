@@ -2,6 +2,9 @@ using UnityEngine;
 
 public static class AttackTimingHelper
 {
+    // Player 1HS (server): HitTime/full = timeAtk, onHitTimer sAtk = timeAtk / 2 → fraction 0.5
+    private const float SIMPLE_MELEE_HIT_OVER_FULL = 0.5f;
+
     public static void RotateFaceToMonster(Entity entity)
     {
         Transform monster = PlayerEntity.Instance.Target;
@@ -33,31 +36,31 @@ public static class AttackTimingHelper
         });
     }
 
+    /// <summary>
+    /// Full attack cycle = Formulas.calculateTimeBetweenAttacks (500000 / pAtkSpd) ≈ HitTime.
+    /// </summary>
     public static float ResolveServerLikeAttackDurationMs(PlayerEntity player)
     {
-        float baseTimeAtkMs = CalcBaseParam.CalculateTimeL2j(player.Stats.BasePAtkSpeed);
-        string weaponAnim = player.GetCurrentAnimName();
-        if (string.IsNullOrEmpty(weaponAnim)) return baseTimeAtkMs / 2f;
-
-        string lower = weaponAnim.ToLowerInvariant();
-        if (lower.Contains("bow"))
-        {
-            return baseTimeAtkMs;
-        }
-
-        return baseTimeAtkMs / 2f;
+        return CalcBaseParam.CalculateTimeL2j(player.Stats.BasePAtkSpeed);
     }
 
+    /// <summary>
+    /// Fraction of full cycle when server fires onHitTimer.
+    /// Player simple melee: doAttackHitSimple(..., timeAtk / 2) → 0.5.
+    /// </summary>
     public static float ResolveHitFractionByWeapon(PlayerEntity player)
     {
         string weaponAnim = player.GetCurrentAnimName();
-        if (string.IsNullOrEmpty(weaponAnim)) return 0.88f;
+        if (string.IsNullOrEmpty(weaponAnim)) return SIMPLE_MELEE_HIT_OVER_FULL;
 
         string lower = weaponAnim.ToLowerInvariant();
         if (lower.Contains("bow")) return 0.82f;
-        if (lower.Contains("dual")) return 0.84f;
-        if (lower.Contains("pole")) return 0.86f;
-        if (lower.Contains("2hs")) return 0.90f;
-        return 0.88f;
+
+        return SIMPLE_MELEE_HIT_OVER_FULL;
+    }
+
+    public static float ResolveServerLikeHitMs(PlayerEntity player)
+    {
+        return ResolveServerLikeAttackDurationMs(player) * ResolveHitFractionByWeapon(player);
     }
 }

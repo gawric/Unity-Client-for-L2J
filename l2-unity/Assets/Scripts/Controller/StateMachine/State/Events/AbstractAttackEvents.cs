@@ -26,7 +26,8 @@ public abstract class AbstractAttackEvents : StateBase
             _events.OnAnimationStartShoot += CallBackStartShoot;
             _events.OnAnimationFinishedHit += CallBackFinishedHit;
             _events.OnAnimationStartLoadArrow += CallBackLoadArrow;
-            _events.OnAnimationStartHit += CallBackStartHit;
+            // Melee Hit/SoulShot: AttackShot anim event (not wall-clock). Bow stays on StartShoot.
+            _events.OnAnimationAttackShot += CallBackAttackShot;
         }
 
         if (ProjectileManager.Instance != null)
@@ -61,7 +62,7 @@ public abstract class AbstractAttackEvents : StateBase
             _events.OnAnimationStartShoot -= CallBackStartShoot;
             _events.OnAnimationFinishedHit -= CallBackFinishedHit;
             _events.OnAnimationStartLoadArrow -= CallBackLoadArrow;
-            _events.OnAnimationStartHit -= CallBackStartHit;
+            _events.OnAnimationAttackShot -= CallBackAttackShot;
         }
 
         SkillExecutor.Instance.OnAllAnimationFinished -= OnAllAnimationFinishedFromExecutor;
@@ -121,20 +122,18 @@ public abstract class AbstractAttackEvents : StateBase
 
     private void CallBackFinishedHit(string animName)
     {
-        foreach (Animation special in _specialsBows)
+        if (!IsMeleeJatkAnim(animName))
         {
-            if (animName == special.ToString())
-            {
-
-                if (special.Type == TypesAnimation.MeleeAttack)
-                {
-                    Transform[] swordBasePoints = _stateMachine.Player.GetSwordBasePoints();
-                    if (swordBasePoints.Length > 1) SwordCollisionService.Instance.UnregisterSword(swordBasePoints[0]);
-                    PlayerEntity.Instance.RemoveProceduralPose();
-                    break;
-                }
-            }
+            return;
         }
+
+        Transform[] swordBasePoints = _stateMachine.Player.GetSwordBasePoints();
+        if (swordBasePoints != null && swordBasePoints.Length > 1)
+        {
+            SwordCollisionService.Instance.UnregisterSword(swordBasePoints[0]);
+        }
+
+        PlayerEntity.Instance.RemoveProceduralPose();
     }
 
     private void IfMonsterDead(Entity target)
@@ -203,17 +202,80 @@ public abstract class AbstractAttackEvents : StateBase
         PlayerEntity.Instance.EquipArrow(WOODEN_ARROW);
     }
 
-    private void CallBackStartHit(string animName)
+    /// <summary>
+    /// L2-like AttackShot: fire melee Hit/SoulShot when clip notify fires.
+    /// Accepts jatk*_1HS / _2HS / _dual / _pole. Bow uses <see cref="CallBackStartShoot"/>.
+    /// </summary>
+    private void CallBackAttackShot(string animName)
     {
-        //Animation[] specials = SpecialAnimationNames.GetSpecialsAttackAnimations();
-        foreach (Animation special in _specialsBows)
+        if (!IsMeleeJatkAnim(animName))
         {
-            if (special.Type == TypesAnimation.MeleeAttack)
-            {
-                RegisterSwordCollision(_stateMachine.Player);
-            }
+            return;
         }
 
+        PlayerEntity player = _stateMachine != null ? _stateMachine.Player : null;
+        if (player == null || SwordCollisionService.Instance == null)
+        {
+            return;
+        }
+
+        Transform[] swordBasePoints = player.GetSwordBasePoints();
+        if (swordBasePoints == null || swordBasePoints.Length <= 1)
+        {
+            Debug.LogWarning($"[ATK_HIT_CHAIN] AttackShot SKIP — no sword points anim={animName}");
+            return;
+        }
+
+        Entity targetEntity = player.GetTargetEntity();
+        Transform target = targetEntity != null ? targetEntity.transform : player.Target;
+        int attackerEntityId = player.IdentityInterlude != null ? player.IdentityInterlude.Id : 0;
+        int targetEntityId = targetEntity != null && targetEntity.IdentityInterlude != null
+            ? targetEntity.IdentityInterlude.Id
+            : 0;
+
+        Debug.Log(
+            $"[ATK_HIT_CHAIN] 2.AnimEvent_AttackShot frame={Time.frameCount} t={Time.time:F3} " +
+            $"anim={animName} attackerId={attackerEntityId} → EmitHitNow");
+
+        if (SwordCollisionService.Instance != null &&
+            attackerEntityId > 0 &&
+            player.Stats != null)
+        {
+            float serverCycleMs = AttackTimingHelper.ResolveServerLikeAttackDurationMs(player);
+            float serverHitMs = AttackTimingHelper.ResolveServerLikeHitMs(player);
+            Debug.Log(
+                $"[ATK_TIMING_CMP] AttackShot fire anim={animName} " +
+                $"serverTimeAtkMs={serverCycleMs:F1} serverHitMs={serverHitMs:F1} " +
+                $"(compare with Enter AttackShotWallMs and Exit wallElapsedMs)");
+        }
+
+        SwordCollisionService.Instance.EmitHitFromAttackShot(
+            attackerEntityId,
+            targetEntityId,
+            swordBasePoints[0],
+            swordBasePoints[1],
+            target);
+    }
+
+    /// <summary>jatk01_1HS / jatk02_pole / … — not bow.</summary>
+    private static bool IsMeleeJatkAnim(string animName)
+    {
+        if (string.IsNullOrEmpty(animName))
+        {
+            return false;
+        }
+
+        if (animName.IndexOf("jatk", System.StringComparison.OrdinalIgnoreCase) < 0)
+        {
+            return false;
+        }
+
+        if (animName.IndexOf("bow", System.StringComparison.OrdinalIgnoreCase) >= 0)
+        {
+            return false;
+        }
+
+        return true;
     }
 
     protected void RegisterSwordCollision(PlayerEntity entity)
@@ -231,6 +293,10 @@ public abstract class AbstractAttackEvents : StateBase
             int attackerEntityId = entity.IdentityInterlude != null ? entity.IdentityInterlude.Id : 0;
             int targetEntityId = targetEntity != null && targetEntity.IdentityInterlude != null ? targetEntity.IdentityInterlude.Id : 0;
             SwordCollisionService.Instance.RegisterSwordByEntityId(attackerEntityId, targetEntityId, swordBase, swordTip, target, 0);
+        }
+        else
+        {
+            Debug.LogWarning($"[ATK_HIT_CHAIN] RegisterSword SKIP — no sword points on player");
         }
     }
 

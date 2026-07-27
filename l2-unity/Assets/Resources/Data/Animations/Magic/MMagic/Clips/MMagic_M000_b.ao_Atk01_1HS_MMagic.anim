@@ -72022,6 +72022,13 @@ AnimationClip:
     floatParameter: 0
     intParameter: 0
     messageOptions: 0
+  - time: 0.875
+    functionName: AttackShot
+    data: jatk01_1HS
+    objectReferenceParameter: {fileID: 0}
+    floatParameter: 0
+    intParameter: 0
+    messageOptions: 0
   - time: 1.4583334
     functionName: OnAnimationAttackHitEnd
     data: jatk01_1HS

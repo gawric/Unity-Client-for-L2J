@@ -33,7 +33,14 @@ public class NewAttackState : AbstractAttackEvents
                 int targetEntityId = targetEntity != null && targetEntity.IdentityInterlude != null ? targetEntity.IdentityInterlude.Id : 0;
                 float attackDurationMs = AttackTimingHelper.ResolveServerLikeAttackDurationMs(_stateMachine.Player);
                 float hitFraction = AttackTimingHelper.ResolveHitFractionByWeapon(_stateMachine.Player);
-               
+                float pAtkSpd = _stateMachine.Player.Stats != null ? _stateMachine.Player.Stats.BasePAtkSpeed : 0f;
+
+                Debug.Log(
+                    $"[ATK_TIMING_CMP] BeginAttack packet→serverCycle " +
+                    $"pAtkSpd={pAtkSpd:F1} serverTimeAtkMs={attackDurationMs:F1} " +
+                    $"(L2J 500000/pAtkSpd) serverHitMs={attackDurationMs * hitFraction:F1} " +
+                    $"hitFraction={hitFraction:F2} targetId={targetEntityId}");
+
                 SwordCollisionService.Instance.BeginAttack(
                     _stateMachine.Player.IdentityInterlude.Id,
                     targetEntityId,
@@ -41,6 +48,9 @@ public class NewAttackState : AbstractAttackEvents
                     targetEntity != null ? targetEntity.transform : _stateMachine.Player.Target,
                     attackDurationMs,
                     hitFraction);
+
+                // Melee Hit/SoulShot: AttackShot on jatk*_1HS/_2HS/_dual/_pole (not wall-clock).
+                // RegisterSwordCollision(_stateMachine.Player);
 
                 PlayerEntity.Instance.RefreshRandomPAttack();
                 Animation random = PlayerEntity.Instance.RandomName;

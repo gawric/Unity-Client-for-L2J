@@ -82,7 +82,22 @@ public static class SpecialAnimationNames
     public static readonly Animation ATK_BOW_ATK1 = new Animation("jatk01_bow", TypesAnimation.BowAttack);
     public static readonly Animation ATK_BOW_ATK2 = new Animation("jatk02_bow", TypesAnimation.BowAttack);
     public static readonly Animation ATK_BOW_ATK3 = new Animation("jatk03_bow", TypesAnimation.BowAttack);
+
     public static readonly Animation ATK01_1HS = new Animation("jatk01_1HS", TypesAnimation.MeleeAttack);
+    public static readonly Animation ATK02_1HS = new Animation("jatk02_1HS", TypesAnimation.MeleeAttack);
+    public static readonly Animation ATK03_1HS = new Animation("jatk03_1HS", TypesAnimation.MeleeAttack);
+
+    public static readonly Animation ATK01_2HS = new Animation("jatk01_2HS", TypesAnimation.MeleeAttack);
+    public static readonly Animation ATK02_2HS = new Animation("jatk02_2HS", TypesAnimation.MeleeAttack);
+    public static readonly Animation ATK03_2HS = new Animation("jatk03_2HS", TypesAnimation.MeleeAttack);
+
+    public static readonly Animation ATK01_DUAL = new Animation("jatk01_dual", TypesAnimation.MeleeAttack);
+    public static readonly Animation ATK02_DUAL = new Animation("jatk02_dual", TypesAnimation.MeleeAttack);
+    public static readonly Animation ATK03_DUAL = new Animation("jatk03_dual", TypesAnimation.MeleeAttack);
+
+    public static readonly Animation ATK01_POLE = new Animation("jatk01_pole", TypesAnimation.MeleeAttack);
+    public static readonly Animation ATK02_POLE = new Animation("jatk02_pole", TypesAnimation.MeleeAttack);
+    public static readonly Animation ATK03_POLE = new Animation("jatk03_pole", TypesAnimation.MeleeAttack);
 
     public static readonly Animation SpAtk_01 = new Animation("SpAtk01_1HS", TypesAnimation.MeleeAttack);
     public static readonly Animation SpAtk_01_bow = new Animation("SpAtk01_bow", TypesAnimation.BowAttack);
@@ -91,7 +106,14 @@ public static class SpecialAnimationNames
     public static readonly Animation CastMid = new Animation("CastMid", TypesAnimation.MagicAttack , MagicPhase.Start);
     public static readonly Animation CastEnd = new Animation("CastEnd", TypesAnimation.MagicAttack, MagicPhase.Shot);
 
-    public static readonly Animation[]  arrayAtkSpecials = new Animation[]{ ATK_BOW_ATK1 , ATK_BOW_ATK2 , ATK_BOW_ATK3 , ATK01_1HS };
+    public static readonly Animation[]  arrayAtkSpecials = new Animation[]
+    {
+        ATK_BOW_ATK1, ATK_BOW_ATK2, ATK_BOW_ATK3,
+        ATK01_1HS, ATK02_1HS, ATK03_1HS,
+        ATK01_2HS, ATK02_2HS, ATK03_2HS,
+        ATK01_DUAL, ATK02_DUAL, ATK03_DUAL,
+        ATK01_POLE, ATK02_POLE, ATK03_POLE
+    };
 
     public static readonly Animation[] arrayPhisicalAtkSpecials = new Animation[] { SpAtk_01 , SpAtk_01_bow };
 
