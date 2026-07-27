@@ -16,8 +16,18 @@ public class NetworkCharacterControllerReceive : MonoBehaviour
    
     private float _moveSpeedMultiplier = 1f;
 
+    // Other players move via MoveAllCharacters (MovementData), which drives the CharacterController
+    // directly and never touches _direction - so IsMoving() (read by the UserState* animator state
+    // behaviours to auto-switch Wait/Run) would otherwise always report false for them, even while
+    // they're visibly sliding across the ground.
+    private bool _externalMoveActive = false;
+
     public Vector3 MoveDirection { get { return _direction; } set { _direction = value; } }
     public NetworkAnimationController NetworkAnimationController { get { return _animationReceive; } }
+
+    public void SetExternalMoveActive(bool isMoving) {
+        _externalMoveActive = isMoving;
+    }
 
     void Start() {
         if(World.Instance.OfflineMode) {
@@ -103,6 +113,6 @@ public class NetworkCharacterControllerReceive : MonoBehaviour
     }
 
     public bool IsMoving() {
-        return !VectorUtils.IsVectorZero2D(_direction);
+        return !VectorUtils.IsVectorZero2D(_direction) || _externalMoveActive;
     }
 }

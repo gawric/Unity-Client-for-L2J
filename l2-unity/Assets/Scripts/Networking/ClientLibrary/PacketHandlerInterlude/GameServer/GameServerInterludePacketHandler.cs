@@ -993,6 +993,11 @@ public class GameServerInterludePacketHandler : ServerPacketHandler
             }
 
         }
+        else if (entity.GetType() == typeof(UserEntity))
+        {
+            var user = (UserEntity)entity;
+            UserMove(user, moveToLocation);
+        }
         //}
 
     }
@@ -1029,6 +1034,18 @@ public class GameServerInterludePacketHandler : ServerPacketHandler
             nsm.ChangeIntention(NpcIntention.INTENTION_MOVE_TO, moveToLocation);
         }
 
+    }
+
+    /// <summary>
+    /// Other players have no state machine (no AI, purely network-driven), so this drives
+    /// MoveAllCharacters directly - the same mover NPCs eventually reach via
+    /// MoveToNpcIntention.Enter, just without the intention/state-machine layer in between.
+    /// </summary>
+    private async Task UserMove(UserEntity user, CharMoveToLocation moveToLocation)
+    {
+        int id = user.IdentityInterlude.Id;
+        MovementTarget movementTarget = new MovementTarget(moveToLocation.NewPosition, 0.1f, user.Running);
+        MoveAllCharacters.Instance.AddMoveData(id, new MovementData(user, movementTarget));
     }
 
     private void OnValidateLocation(byte[] data)
@@ -1352,17 +1369,25 @@ public class GameServerInterludePacketHandler : ServerPacketHandler
     #endregion
 
     #region CharRegion
+    /// <summary>
+    /// Another player entering our visibility range - sent once (not per movement tick, see
+    /// CharMoveToLocation/ValidateLocation/MoveWithDelta for that), so buffered like NpcInfo while
+    /// still loading into the zone.
+    /// </summary>
     private void OnCharInfo(byte[] data)
     {
-        if (!InitPacketsLoadWord.getInstance().IsInit)
-        {
-            //TradeStart packet = new TradeStart(data);
+        CharInfo packet = new CharInfo(data);
 
-            //EventProcessor.Instance.QueueEvent(() =>
-            //{
-            //    TradeWindow.Instance.AddData(packet);
-            //    TradeWindow.Instance.ShowWindow();
-            //});
+        if (InitPacketsLoadWord.getInstance().IsInit)
+        {
+            InitPacketsLoadWord.getInstance().AddPacketsInit(packet);
+        }
+        else
+        {
+            EventProcessor.Instance.QueueEvent(() =>
+            {
+                World.Instance.SpawnUserInterlude(packet.Identity, packet.Status, packet.Stats, packet.Appearance);
+            });
         }
     }
     #endregion

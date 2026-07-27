@@ -194,8 +194,73 @@ public class World : MonoBehaviour {
         PlayerStateMachine.Instance.Player = player;
     
         _players.Add(identity.Id, player);
-      
+
         _objects.Add(identity.Id, player);
+    }
+
+    /// <summary>
+    /// Spawns another player entering our visibility range (CharInfo). Unlike
+    /// SpawnPlayerInterlude (our own avatar - camera, input, PlayerStateMachine), this is purely
+    /// network-driven, same shape as an NPC: no local control, movement/animation come from
+    /// packets via NetworkAnimationController/NetworkCharacterControllerReceive.
+    /// </summary>
+    public void SpawnUserInterlude(NetworkIdentityInterlude identity, PlayerStatusInterlude status, PlayerInterludeStats stats, PlayerInterludeAppearance appearance)
+    {
+        if (_objects.ContainsKey(identity.Id))
+        {
+            return;
+        }
+
+        identity.SetPosY(GetGroundHeight(identity.Position));
+        identity.EntityType = EntityType.User;
+
+        CharacterRace race = (CharacterRace)appearance.Race;
+        CharacterRaceAnimation raceId = CharacterRaceAnimationParser.ParseRaceInterlude(race, appearance.Sex, appearance.BaseClass);
+
+        GameObject go = CharacterBuilder.Instance.BuildCharacterBaseInterlude(raceId, appearance, identity.EntityType);
+        if (go == null)
+        {
+            Debug.LogWarning($"SpawnUserInterlude - could not build character model for {identity.Name} ({identity.Id})");
+            return;
+        }
+
+        go.transform.SetParent(_usersContainer.transform);
+        go.transform.position = identity.Position;
+        go.transform.rotation = identity.Heading;
+        go.transform.name = identity.Name;
+
+        UserEntity user = go.GetComponent<UserEntity>();
+        user.Status = status;
+        user.IdentityInterlude = identity;
+        user.Stats = stats;
+        user.Appearance = appearance;
+        user.Race = race;
+        user.RaceId = raceId;
+
+        user.SetDead(false);
+
+        go.SetActive(true);
+
+        var animationController = user.GetComponent<NetworkAnimationController>();
+        animationController.Initialize();
+
+        go.GetComponent<Gear>().Initialize(user.IdentityInterlude.Id, user.RaceId);
+        user.Initialize();
+
+        AnimationManager.Instance.RegisterController(identity.Id, animationController, user);
+        user.UpdateNpcPAtkSpd((int)stats.PAtkSpd);
+        user.UpdateRunSpeed(stats.RunRealSpeed);
+        user.UpdateWalkSpeed(stats.WalkRealSpeed);
+        user.Running = identity.IsRunning;
+
+        // The local player gets kicked into "wait_<weapon>" on ENTER_WORLD (NewIdleState), which is
+        // what puts its Animator into the state the UserState* StateMachineBehaviours are attached
+        // to (Wait, then auto-switching to Run via IsMoving()). Nothing does that for other
+        // players, so without this their Animator never leaves its default entry state.
+        AnimationManager.Instance.PlayMonsterAnimation(identity.Id, AnimationNames.WAIT.ToString() + user.Gear.WeaponAnim);
+
+        _players.Add(identity.Id, user);
+        _objects.Add(identity.Id, user);
     }
 
 
@@ -568,7 +633,11 @@ public class World : MonoBehaviour {
             }
 
         }
-        // RemoveObject(objectId);
+        else
+        {
+            // NPCs and other players leaving visibility range - no death/corpse handling needed.
+            RemoveObject(objectId);
+        }
     }
 
     public float GetGroundHeight(Vector3 pos) {

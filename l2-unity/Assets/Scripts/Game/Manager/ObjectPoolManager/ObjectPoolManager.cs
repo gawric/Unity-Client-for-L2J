@@ -119,11 +119,15 @@ public class ObjectPoolManager : AbstractPoolManager, IPoolManager
 
         if (objectPool.Count == 0)
         {
+            // Pool ran dry - hand the caller a freshly instantiated object directly. It must NOT
+            // also be enqueued here: this object is about to be parented/activated by the caller
+            // (still in active use), so leaving it in the queue too meant a later SpawnFromPool
+            // call for this prefab could dequeue and re-parent the SAME instance out from under
+            // whoever is currently using it (e.g. an equipped armor piece silently disappearing
+            // from one character and reappearing on another).
             GameObject newObj = Instantiate(prefab, poolParent);
             newObj.SetActive(false);
-            objectPool.Enqueue(newObj);
             Plus1Create(prefab);
-            Debug.LogError($"ObjectPoolManager->SpawnFromPool: Критическая ошибка. Object pooling перестал работать; все объекты теперь будут уничтожаться Unity и создаваться через Instantiate.");
             return newObj;
         }
 

@@ -39,6 +39,7 @@ public class InitPacketsLoadWord
         Task.Run(() =>
         {
             SpawnNpc();
+            SpawnOtherPlayers();
             SpawnDroppedItems();
             UpdateItemsInventory();
             UpdateShortCuts();
@@ -65,6 +66,20 @@ public class InitPacketsLoadWord
         }
 
         //RemoveByListId(remove);
+    }
+
+    private void SpawnOtherPlayers()
+    {
+        for (int i = 0; i < listPackets.Count; i++)
+        {
+            if (listPackets[i] is CharInfo charInfo)
+            {
+                EventProcessor.Instance.QueueEvent(() => {
+                    World.Instance.SpawnUserInterlude(charInfo.Identity, charInfo.Status, charInfo.Stats, charInfo.Appearance);
+                });
+                Thread.Sleep(10);
+            }
+        }
     }
 
     private void SpawnDroppedItems()
