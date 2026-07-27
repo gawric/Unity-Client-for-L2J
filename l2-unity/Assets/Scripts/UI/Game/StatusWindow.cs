@@ -17,6 +17,9 @@ public class StatusWindow : L2Window
     private VisualElement _HPBarBG;
     private VisualElement _MPBar;
     private VisualElement _MPBarBG;
+    private Label _ExpTextLabel;
+    private VisualElement _ExpBar;
+    private VisualElement _ExpBarBG;
 
     [SerializeField] private float _statusWindowMinWidth = 175.0f;
     [SerializeField] private float _statusWindowMaxWidth = 400.0f;
@@ -109,6 +112,21 @@ public class StatusWindow : L2Window
         _MPBar = GetElementById("MPBar");
         if(_MPBar == null) {
             Debug.LogError("Status windowar MPBar is null");
+        }
+
+        _ExpTextLabel = (Label)GetElementById("ExpText");
+        if(_ExpTextLabel == null) {
+            Debug.LogError("Status window ExpText is null.");
+        }
+
+        _ExpBarBG = GetElementById("ExpBarBG");
+        if(_ExpBarBG == null) {
+            Debug.LogError("Status window ExpBarBG is null");
+        }
+
+        _ExpBar = GetElementById("ExpBar");
+        if(_ExpBar == null) {
+            Debug.LogError("Status window ExpBar is null");
         }
     }
 
@@ -210,6 +228,18 @@ public class StatusWindow : L2Window
             float bgWidth = _MPBarBG.resolvedStyle.width;
             float barWidth = bgWidth * mpRatio;
             _MPBar.style.width = barWidth;
+        }
+
+        double expPercent = stats.ExpPercent(stats.Level);
+
+        if(_ExpTextLabel != null) {
+            _ExpTextLabel.text = expPercent.ToString("0.00") + "%";
+        }
+
+        if(_ExpBarBG != null && _ExpBar != null) {
+            float bgWidth = _ExpBarBG.resolvedStyle.width;
+            float barWidth = bgWidth * (float)(expPercent / 100.0);
+            _ExpBar.style.width = barWidth;
         }
     }
 }

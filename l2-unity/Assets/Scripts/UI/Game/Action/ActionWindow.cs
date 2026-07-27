@@ -99,6 +99,7 @@ public class ActionWindow : L2PopupWindow
         _slots[3].AssignAction(ActionType.NextTarget);
         _slots[4].AssignAction(ActionType.Pickup);
         _slots[5].AssignAction(ActionType.Assist);
+        _slots[SLOTS_PER_ROW * 4].AssignAction(ActionType.PartyInvite); // first slot of PartySlots
     }
 
     private void AddSlot(int position, VisualElement container)

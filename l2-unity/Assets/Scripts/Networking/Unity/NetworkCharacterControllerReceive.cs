@@ -74,7 +74,7 @@ public class NetworkCharacterControllerReceive : MonoBehaviour
         else
         {
             Vector3 ajustedDirection = _direction * _speed * _moveSpeedMultiplier + Vector3.down * 8;
-            Debug.Log("FixedUpdate>>>>>>>>>>>>> RECIEVe EVENT ajustedDirection DEAD USE " + ajustedDirection);
+            //Debug.Log("FixedUpdate>>>>>>>>>>>>> RECIEVe EVENT ajustedDirection DEAD USE " + ajustedDirection);
             _characterController.Move(ajustedDirection * Time.deltaTime);
         }
        

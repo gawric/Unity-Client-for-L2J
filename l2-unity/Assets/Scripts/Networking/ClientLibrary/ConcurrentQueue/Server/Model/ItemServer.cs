@@ -19,6 +19,11 @@ public class ItemServer :  IData
         packetType = (GameInterludeServerPacketType)data[0];
         _byteType = data[0];
         _data = data;
+
+        if (PartyDebugRawLog.Enabled)
+        {
+            UnityEngine.Debug.Log($"[PartyDebug] RAW packet id=0x{data[0]:X2} len={data.Length}");
+        }
     }
 
     public byte[] DecodeData() { return _data; }

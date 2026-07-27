@@ -1,0 +1,59 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
+    <Style src="project://database/Assets/Resources/Data/UI/_Elements/L2StyleSheet.uss?fileID=7433441132597879392&amp;guid=72e99cc94b130bf4ba100dceaa830b13&amp;type=3#L2StyleSheet" />
+    <ui:VisualElement name="MemberRow" class="party-window" style="flex-direction: column; margin-bottom: 4px; padding-top: 2px; padding-bottom: 2px; padding-left: 3px; padding-right: 3px;">
+        <ui:VisualElement name="NameLine" style="flex-direction: row; align-items: center; margin-bottom: 2px;">
+            <ui:VisualElement name="ClassIcon" style="width: 14px; height: 14px; margin-right: 4px; -unity-background-scale-mode: scale-to-fit;" />
+            <ui:Label text="Name" name="NameLabel" style="-unity-font-definition: url(&apos;project://database/Assets/Resources/Data/UI/Font/tahoma.ttf?fileID=12800000&amp;guid=96fb7a735e76e0742bf125e2d4734bf3&amp;type=3#tahoma&apos;); color: rgb(255, 255, 255); font-size: 11px; text-shadow: 0.5px 0.5px 0 rgb(0, 0, 0); letter-spacing: 3px; -unity-text-outline-color: rgba(0, 0, 0, 0.99); -unity-text-outline-width: 0.1px; margin: 0; padding: 0; flex-grow: 1;" />
+        </ui:VisualElement>
+        <ui:VisualElement name="CPBarContainer" class="bar-container" style="margin-bottom: 0;">
+            <ui:GroupBox name="CPBarBG" class="bar-inner">
+                <ui:VisualElement name="BGLeft" class="left bar-height" style="background-image: url(&apos;project://database/Assets/Resources/Data/UI/Status/Gauge/Gauge_DF_Large_CP/Gauge_DF_Large_CP_bg_Left.png?fileID=2800000&amp;guid=4c4058b994ed4f948b5aa240e0acca90&amp;type=3#Gauge_DF_Large_CP_bg_Left&apos;);" />
+                <ui:VisualElement name="BGCenter" class="center bar-height" style="background-image: url(&apos;project://database/Assets/Resources/Data/UI/Status/Gauge/Gauge_DF_Large_CP/Gauge_DF_Large_CP_bg_Center.png?fileID=2800000&amp;guid=156a82f256ea31140a677eef90d4eba7&amp;type=3#Gauge_DF_Large_CP_bg_Center&apos;);" />
+                <ui:VisualElement name="BGRight" class="right bar-height" style="background-image: url(&apos;project://database/Assets/Resources/Data/UI/Status/Gauge/Gauge_DF_Large_CP/Gauge_DF_Large_CP_bg_Right.png?fileID=2800000&amp;guid=167a9d7a08fa285419db69c1fb153ab6&amp;type=3#Gauge_DF_Large_CP_bg_Right&apos;);" />
+            </ui:GroupBox>
+            <ui:GroupBox name="CPBar" class="bar-inner" style="overflow: hidden;">
+                <ui:VisualElement name="BGLeft" class="left bar-height" style="background-image: url(&apos;project://database/Assets/Resources/Data/UI/Status/Gauge/Gauge_DF_Large_CP/Gauge_DF_Large_CP_Left.png?fileID=2800000&amp;guid=dcbb3efeedee79d4796ac11367b893b2&amp;type=3#Gauge_DF_Large_CP_Left&apos;);" />
+                <ui:VisualElement name="BGCenter" class="center bar-height" style="background-image: url(&apos;project://database/Assets/Resources/Data/UI/Status/Gauge/Gauge_DF_Large_CP/Gauge_DF_Large_CP_Center.png?fileID=2800000&amp;guid=9706336a5cf6cea4f960cdfa788efe4d&amp;type=3#Gauge_DF_Large_CP_Center&apos;);" />
+                <ui:VisualElement name="BGRight" class="right bar-height" style="background-image: url(&apos;project://database/Assets/Resources/Data/UI/Status/Gauge/Gauge_DF_Large_CP/Gauge_DF_Large_CP_Right.png?fileID=2800000&amp;guid=0a7077d7011e8ae4a9ed022a55ec5cac&amp;type=3#Gauge_DF_Large_CP_Right&apos;);" />
+            </ui:GroupBox>
+        </ui:VisualElement>
+        <ui:VisualElement name="HPBarContainer" class="bar-container" style="margin-bottom: 0;">
+            <ui:GroupBox name="HPBarBG" class="bar-inner">
+                <ui:VisualElement name="BGLeft" class="left bar-height" style="background-image: url(&apos;project://database/Assets/Resources/Data/UI/Status/Gauge/Gauge_DF_Large_HP/Gauge_DF_Large_HP_bg_Left.png?fileID=2800000&amp;guid=eb4faf84cfe537245a613ac946a5eb78&amp;type=3#Gauge_DF_Large_HP_bg_Left&apos;);" />
+                <ui:VisualElement name="BGCenter" class="center bar-height" style="background-image: url(&apos;project://database/Assets/Resources/Data/UI/Status/Gauge/Gauge_DF_Large_HP/Gauge_DF_Large_HP_bg_Center.png?fileID=2800000&amp;guid=9a39b86abc753c1468dc586de59e7d7c&amp;type=3#Gauge_DF_Large_HP_bg_Center&apos;);" />
+                <ui:VisualElement name="BGRight" class="right bar-height" style="background-image: url(&apos;project://database/Assets/Resources/Data/UI/Status/Gauge/Gauge_DF_Large_HP/Gauge_DF_Large_HP_bg_Right.png?fileID=2800000&amp;guid=527fbaec86a1c30488274d5fa95ee8cb&amp;type=3#Gauge_DF_Large_HP_bg_Right&apos;);" />
+            </ui:GroupBox>
+            <ui:GroupBox name="HPBar" class="bar-inner" style="overflow: hidden;">
+                <ui:VisualElement name="BGLeft" class="left bar-height" style="background-image: url(&apos;project://database/Assets/Resources/Data/UI/Status/Gauge/Gauge_DF_Large_HP/Gauge_DF_Large_HP_Left.png?fileID=2800000&amp;guid=8f1fe67ab14eb824f9f0a2e508beb448&amp;type=3#Gauge_DF_Large_HP_Left&apos;);" />
+                <ui:VisualElement name="BGCenter" class="center bar-height" style="background-image: url(&apos;project://database/Assets/Resources/Data/UI/Status/Gauge/Gauge_DF_Large_HP/Gauge_DF_Large_HP_Center.png?fileID=2800000&amp;guid=7df1dce37f179ab4fa24cf38b6f08d7a&amp;type=3#Gauge_DF_Large_HP_Center&apos;);" />
+                <ui:VisualElement name="BGRight" class="right bar-height" style="background-image: url(&apos;project://database/Assets/Resources/Data/UI/Status/Gauge/Gauge_DF_Large_HP/Gauge_DF_Large_HP_Right.png?fileID=2800000&amp;guid=830973b84f348384fa261d0a752100dc&amp;type=3#Gauge_DF_Large_HP_Right&apos;);" />
+            </ui:GroupBox>
+        </ui:VisualElement>
+        <ui:VisualElement name="MPBarContainer" class="bar-container">
+            <ui:GroupBox name="MPBarBG" class="bar-inner">
+                <ui:VisualElement name="BGLeft" class="left bar-height" style="background-image: url(&apos;project://database/Assets/Resources/Data/UI/Status/Gauge/Gauge_DF_Large_MP/Gauge_DF_Large_MP_bg_Left.png?fileID=2800000&amp;guid=cf8fdbe4839d13f4ea316b7c674ef0ad&amp;type=3#Gauge_DF_Large_MP_bg_Left&apos;);" />
+                <ui:VisualElement name="BGCenter" class="center bar-height" style="background-image: url(&apos;project://database/Assets/Resources/Data/UI/Status/Gauge/Gauge_DF_Large_MP/Gauge_DF_Large_MP_bg_Center.png?fileID=2800000&amp;guid=aa9ab8608a1abe34d9f0eea51ea214da&amp;type=3#Gauge_DF_Large_MP_bg_Center&apos;);" />
+                <ui:VisualElement name="BGRight" class="right bar-height" style="background-image: url(&apos;project://database/Assets/Resources/Data/UI/Status/Gauge/Gauge_DF_Large_MP/Gauge_DF_Large_MP_bg_Right.png?fileID=2800000&amp;guid=8f794f09f30e63d4893b10cd1a20df79&amp;type=3#Gauge_DF_Large_MP_bg_Right&apos;);" />
+            </ui:GroupBox>
+            <ui:GroupBox name="MPBar" class="bar-inner" style="overflow: hidden;">
+                <ui:VisualElement name="BGLeft" class="left bar-height" style="background-image: url(&apos;project://database/Assets/Resources/Data/UI/Status/Gauge/Gauge_DF_Large_MP/Gauge_DF_Large_MP_Left.png?fileID=2800000&amp;guid=4da7c9501a8a97b49a12e93caf1233aa&amp;type=3#Gauge_DF_Large_MP_Left&apos;);" />
+                <ui:VisualElement name="BGCenter" class="center bar-height" style="background-image: url(&apos;project://database/Assets/Resources/Data/UI/Status/Gauge/Gauge_DF_Large_MP/Gauge_DF_Large_MP_Center.png?fileID=2800000&amp;guid=46f31309dd1ee004c8149a33a06f742e&amp;type=3#Gauge_DF_Large_MP_Center&apos;);" />
+                <ui:VisualElement name="BGRight" class="right bar-height" style="background-image: url(&apos;project://database/Assets/Resources/Data/UI/Status/Gauge/Gauge_DF_Large_MP/Gauge_DF_Large_MP_Right.png?fileID=2800000&amp;guid=ea7838896e067454c8ec9292bc91504a&amp;type=3#Gauge_DF_Large_MP_Right&apos;);" />
+            </ui:GroupBox>
+        </ui:VisualElement>
+        <ui:VisualElement name="BuffRow" style="flex-direction: row; flex-wrap: wrap; margin-top: 2px; display: none;">
+            <ui:VisualElement name="BuffIcon0" class="party-buff-icon" style="width: 14px; height: 14px; margin-right: 1px; display: none;" />
+            <ui:VisualElement name="BuffIcon1" class="party-buff-icon" style="width: 14px; height: 14px; margin-right: 1px; display: none;" />
+            <ui:VisualElement name="BuffIcon2" class="party-buff-icon" style="width: 14px; height: 14px; margin-right: 1px; display: none;" />
+            <ui:VisualElement name="BuffIcon3" class="party-buff-icon" style="width: 14px; height: 14px; margin-right: 1px; display: none;" />
+            <ui:VisualElement name="BuffIcon4" class="party-buff-icon" style="width: 14px; height: 14px; margin-right: 1px; display: none;" />
+            <ui:VisualElement name="BuffIcon5" class="party-buff-icon" style="width: 14px; height: 14px; margin-right: 1px; display: none;" />
+            <ui:VisualElement name="BuffIcon6" class="party-buff-icon" style="width: 14px; height: 14px; margin-right: 1px; display: none;" />
+            <ui:VisualElement name="BuffIcon7" class="party-buff-icon" style="width: 14px; height: 14px; margin-right: 1px; display: none;" />
+            <ui:VisualElement name="BuffIcon8" class="party-buff-icon" style="width: 14px; height: 14px; margin-right: 1px; display: none;" />
+            <ui:VisualElement name="BuffIcon9" class="party-buff-icon" style="width: 14px; height: 14px; margin-right: 1px; display: none;" />
+            <ui:VisualElement name="BuffIcon10" class="party-buff-icon" style="width: 14px; height: 14px; margin-right: 1px; display: none;" />
+            <ui:VisualElement name="BuffIcon11" class="party-buff-icon" style="width: 14px; height: 14px; margin-right: 1px; display: none;" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

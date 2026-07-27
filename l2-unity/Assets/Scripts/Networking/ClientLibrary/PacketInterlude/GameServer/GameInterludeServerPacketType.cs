@@ -69,6 +69,12 @@ public enum GameInterludeServerPacketType : byte
 
     AskJoinParty = 0x39,
     JoinParty = 0x3a,
+    PartySmallWindowAll = 0x4E,
+    PartySmallWindowAdd = 0x4F,
+    PartySmallWindowDeleteAll = 0x50,
+    PartySmallWindowDelete = 0x51,
+    PartySmallWindowUpdate = 0x52,
+    PartySpelled = 0xEE,
 
 
     CharInfo = 0x03,

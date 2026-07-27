@@ -136,7 +136,7 @@ public class NameplatesManager : MonoBehaviour
 
                 if (objectEntity is UserEntity)
                 {
-                    Debug.Log($"[NameplateDebug] SphereCast hit '{hit.transform.name}' (layer={LayerMask.LayerToName(hit.transform.gameObject.layer)}) -> UserEntity found, id={objectEntity.IdentityInterlude.Id}");
+                    //Debug.Log($"[NameplateDebug] SphereCast hit '{hit.transform.name}' (layer={LayerMask.LayerToName(hit.transform.gameObject.layer)}) -> UserEntity found, id={objectEntity.IdentityInterlude.Id}");
                 }
 
                 if (objectEntity != null)
@@ -162,7 +162,7 @@ public class NameplatesManager : MonoBehaviour
         if(!IsNameplateVisible(entity.transform)) {
             if (entity is UserEntity)
             {
-                Debug.Log($"[NameplateDebug] UserEntity id={entity.IdentityInterlude.Id} failed IsNameplateVisible");
+                //Debug.Log($"[NameplateDebug] UserEntity id={entity.IdentityInterlude.Id} failed IsNameplateVisible");
             }
             return;
         }
@@ -170,7 +170,7 @@ public class NameplatesManager : MonoBehaviour
         float height = GetHeight(entity);
         if (entity is UserEntity)
         {
-            Debug.Log($"[NameplateDebug] UserEntity id={entity.IdentityInterlude.Id} passed visibility, creating nameplate. Name={entity.IdentityInterlude.Name}, CollisionHeight={entity.Appearance.CollisionHeight}, offsetHeight={height}, entityPos={entity.transform.position}, titleColor='{entity.IdentityInterlude.TitleColor}'");
+            //Debug.Log($"[NameplateDebug] UserEntity id={entity.IdentityInterlude.Id} passed visibility, creating nameplate. Name={entity.IdentityInterlude.Name}, CollisionHeight={entity.Appearance.CollisionHeight}, offsetHeight={height}, entityPos={entity.transform.position}, titleColor='{entity.IdentityInterlude.TitleColor}'");
         }
 
         VisualElement visualElement = _nameplateTemplate.Instantiate()[0];
@@ -283,7 +283,7 @@ public class NameplatesManager : MonoBehaviour
             nameplate.NameplateEle.style.left = nameplatePos.x - nameplate.NameplateEle.resolvedStyle.width / 2f;
             nameplate.NameplateEle.style.top = Screen.height - nameplatePos.y - nameplate.NameplateEle.resolvedStyle.height;
             if (nameplate.Target != null && nameplate.Target.GetComponent<UserEntity>() != null) {
-                Debug.Log($"[NameplateDebug] UserEntity '{nameplate.Name}' position update: screenPos={nameplatePos}, left={nameplate.NameplateEle.style.left}, top={nameplate.NameplateEle.style.top}, resolvedWidth={nameplate.NameplateEle.resolvedStyle.width}, resolvedHeight={nameplate.NameplateEle.resolvedStyle.height}, display={nameplate.NameplateEle.resolvedStyle.display}, opacity={nameplate.NameplateEle.resolvedStyle.opacity}");
+                //Debug.Log($"[NameplateDebug] UserEntity '{nameplate.Name}' position update: screenPos={nameplatePos}, left={nameplate.NameplateEle.style.left}, top={nameplate.NameplateEle.style.top}, resolvedWidth={nameplate.NameplateEle.resolvedStyle.width}, resolvedHeight={nameplate.NameplateEle.resolvedStyle.height}, display={nameplate.NameplateEle.resolvedStyle.display}, opacity={nameplate.NameplateEle.resolvedStyle.opacity}");
             }
         }
         catch (NullReferenceException) { } 
@@ -305,12 +305,12 @@ public class NameplatesManager : MonoBehaviour
         bool isTarget = TargetManager.Instance.HasTarget() && TargetManager.Instance.Target.Data.ObjectTransform == target;
         bool isTooFar = Vector3.Distance(_playerTransform.position, target.position) > _nameplateViewDistance;
         if(isTooFar && !isTarget) {
-            if (isDebugTarget) Debug.Log($"[NameplateDebug] too far: distance={Vector3.Distance(_playerTransform.position, target.position)} max={_nameplateViewDistance}");
+            //if (isDebugTarget) Debug.Log($"[NameplateDebug] too far: distance={Vector3.Distance(_playerTransform.position, target.position)} max={_nameplateViewDistance}");
             return false;
         }
 
         bool isCamera = CameraController.Instance.IsObjectVisible(target);
-        if (isDebugTarget) Debug.Log($"[NameplateDebug] IsObjectVisible={isCamera}");
+        //if (isDebugTarget) Debug.Log($"[NameplateDebug] IsObjectVisible={isCamera}");
         return isCamera;
     }
 }

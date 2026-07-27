@@ -30,6 +30,7 @@ public class PlayerActions : MonoBehaviour
         _actions.Add(ActionType.WalkRun, new WalkRunAction());
         _actions.Add(ActionType.NextTarget, new NextTargetAction());
         _actions.Add(ActionType.Pickup, new PickupAction());
+        _actions.Add(ActionType.PartyInvite, new PartyInviteAction());
     }
 
     private void OnDestroy()

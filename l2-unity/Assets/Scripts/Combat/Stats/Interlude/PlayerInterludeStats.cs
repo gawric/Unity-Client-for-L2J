@@ -90,23 +90,25 @@ public class PlayerInterludeStats : Stats
 
     public int Level { get { return _level; } set { _level = value; } }
 
+    /// <summary>
+    /// Progress toward the next level, as a 0-100 percentage - NOT total exp against level's
+    /// threshold (that older formula returned >100% almost immediately after leveling, since total
+    /// Exp is always >= GetExp(level) once that level is reached).
+    /// </summary>
     public double ExpPercent(int level)
     {
-        if(Exp == 0)
+        int clampedLevel = LevelServer.ClampLevel(level);
+        long expForCurrentLevel = LevelServer.GetExp(clampedLevel);
+        long expForNextLevel = LevelServer.GetExp(clampedLevel + 1);
+
+        if (expForNextLevel <= expForCurrentLevel)
         {
-            return 0;
+            // Max level (or a bad table lookup) - no next threshold to measure progress against.
+            return 100;
         }
 
-        long MaxExp = LevelServer.GetExp(level);
-        if (MaxExp == 0 & Exp > 0) return 100;
-        if(MaxExp != 0)
-        {
-            double persent = (double)100 / MaxExp;
-            double currentPerxent = persent * Exp;
-            return Math.Round(currentPerxent, 2);
-        }
-
-        return 0; 
+        double percent = (Exp - expForCurrentLevel) / (double)(expForNextLevel - expForCurrentLevel) * 100.0;
+        return Math.Round(Math.Clamp(percent, 0, 100), 2);
     }
 
 

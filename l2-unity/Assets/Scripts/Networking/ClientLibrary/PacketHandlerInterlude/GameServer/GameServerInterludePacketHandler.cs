@@ -240,6 +240,34 @@ public class GameServerInterludePacketHandler : ServerPacketHandler
                 OnAskJoinParty(itemQueue.DecodeData());
                 break;
 
+            case GameInterludeServerPacketType.JoinParty:
+                OnJoinParty(itemQueue.DecodeData());
+                break;
+
+            case GameInterludeServerPacketType.PartySmallWindowAll:
+                OnPartySmallWindowAll(itemQueue.DecodeData());
+                break;
+
+            case GameInterludeServerPacketType.PartySmallWindowAdd:
+                OnPartySmallWindowAdd(itemQueue.DecodeData());
+                break;
+
+            case GameInterludeServerPacketType.PartySmallWindowUpdate:
+                OnPartySmallWindowUpdate(itemQueue.DecodeData());
+                break;
+
+            case GameInterludeServerPacketType.PartySmallWindowDelete:
+                OnPartySmallWindowDelete(itemQueue.DecodeData());
+                break;
+
+            case GameInterludeServerPacketType.PartySmallWindowDeleteAll:
+                OnPartySmallWindowDeleteAll(itemQueue.DecodeData());
+                break;
+
+            case GameInterludeServerPacketType.PartySpelled:
+                OnPartySpelled(itemQueue.DecodeData());
+                break;
+
             case GameInterludeServerPacketType.SendTradeRequest:
                 OnTradeRequest(itemQueue.DecodeData());
                 break;
@@ -277,6 +305,7 @@ public class GameServerInterludePacketHandler : ServerPacketHandler
                 break;
 
             default:
+                Debug.Log($"[PartyDebug] Unhandled server packet type: 0x{(byte)item.PaketType():X2} ({item.PaketType()})");
                 var s = 1;
                 break;
 
@@ -312,6 +341,7 @@ public class GameServerInterludePacketHandler : ServerPacketHandler
                 OnExPledgeReceivePowerInfo(itemQueue.DecodeExData());
                 break;
             default:
+                Debug.Log($"[PartyDebug] Unhandled Ex server packet type: 0x{exPacket:X4} ({exPacket})");
                 break;
         }
     }
@@ -1200,7 +1230,7 @@ public class GameServerInterludePacketHandler : ServerPacketHandler
     #region PartyRegion
     private void OnAskJoinParty(byte[] data)
     {
-        
+
         if (!InitPacketsLoadWord.getInstance().IsInit)
         {
             AskJoinParty packet = new AskJoinParty(data);
@@ -1208,6 +1238,95 @@ public class GameServerInterludePacketHandler : ServerPacketHandler
             EventProcessor.Instance.QueueEvent(() => {
                 PartyInvitationWindow.Instance.AddData(packet);
                 PartyInvitationWindow.Instance.ShowWindow();
+            });
+        }
+    }
+
+    private void OnJoinParty(byte[] data)
+    {
+        Debug.Log($"[PartyDebug] OnJoinParty received, IsInit={InitPacketsLoadWord.getInstance().IsInit}");
+        if (!InitPacketsLoadWord.getInstance().IsInit)
+        {
+            JoinParty packet = new JoinParty(data);
+
+            EventProcessor.Instance.QueueEvent(() => {
+                // Just confirms to the inviter whether their invite was accepted/declined - the
+                // actual roster update for either side arrives via PartySmallWindowAll/Add.
+                Debug.Log("[PartyDebug] " + (packet.Accepted ? "Party invitation accepted." : "Party invitation declined."));
+            });
+        }
+    }
+
+    private void OnPartySmallWindowAll(byte[] data)
+    {
+        Debug.Log($"[PartyDebug] OnPartySmallWindowAll received, dataLength={data.Length}, IsInit={InitPacketsLoadWord.getInstance().IsInit}");
+        if (!InitPacketsLoadWord.getInstance().IsInit)
+        {
+            PartySmallWindowAll packet = new PartySmallWindowAll(data);
+
+            EventProcessor.Instance.QueueEvent(() => {
+                PartyManager.Instance.ApplyAll(packet);
+            });
+        }
+    }
+
+    private void OnPartySmallWindowAdd(byte[] data)
+    {
+        Debug.Log($"[PartyDebug] OnPartySmallWindowAdd received, dataLength={data.Length}, IsInit={InitPacketsLoadWord.getInstance().IsInit}");
+        if (!InitPacketsLoadWord.getInstance().IsInit)
+        {
+            PartySmallWindowAdd packet = new PartySmallWindowAdd(data);
+
+            EventProcessor.Instance.QueueEvent(() => {
+                PartyManager.Instance.ApplyAdd(packet);
+            });
+        }
+    }
+
+    private void OnPartySmallWindowUpdate(byte[] data)
+    {
+        if (!InitPacketsLoadWord.getInstance().IsInit)
+        {
+            PartySmallWindowUpdate packet = new PartySmallWindowUpdate(data);
+
+            EventProcessor.Instance.QueueEvent(() => {
+                PartyManager.Instance.ApplyUpdate(packet);
+            });
+        }
+    }
+
+    private void OnPartySmallWindowDelete(byte[] data)
+    {
+        if (!InitPacketsLoadWord.getInstance().IsInit)
+        {
+            PartySmallWindowDelete packet = new PartySmallWindowDelete(data);
+
+            EventProcessor.Instance.QueueEvent(() => {
+                PartyManager.Instance.ApplyDelete(packet);
+            });
+        }
+    }
+
+    private void OnPartySmallWindowDeleteAll(byte[] data)
+    {
+        if (!InitPacketsLoadWord.getInstance().IsInit)
+        {
+            PartySmallWindowDeleteAll packet = new PartySmallWindowDeleteAll(data);
+
+            EventProcessor.Instance.QueueEvent(() => {
+                PartyManager.Instance.ApplyDeleteAll();
+            });
+        }
+    }
+
+    private void OnPartySpelled(byte[] data)
+    {
+        if (!InitPacketsLoadWord.getInstance().IsInit)
+        {
+            PartySpelled packet = new PartySpelled(data);
+
+            EventProcessor.Instance.QueueEvent(() => {
+                PartyManager.Instance.ApplySpelled(packet);
             });
         }
     }

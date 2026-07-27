@@ -22,6 +22,10 @@
     position: absolute;
 }
 
+.party-window {
+    position: absolute;
+}
+
 .chat-window {
     -unity-font-definition: resource('Data/UI/Assets/Font/tahoma');
     background-color: rgba(0, 0, 0, 0.25);
@@ -885,6 +889,47 @@
 
 .target-window .bar-inner .center {
     flex-grow: 1;
+}
+
+.party-window .bar-container {
+    height: 8px;
+}
+
+.party-window .bar-inner {
+    min-height: 8px;
+    max-height: 8px;
+    flex-direction: row;
+    flex: 0;
+    margin: 0;
+    padding: 0;
+    position: absolute;
+    left: 0;
+    right: 0;
+    overflow: hidden;
+}
+
+.party-window .bar-inner .bar-height {
+    min-height: 8px;
+    max-height: 8px;
+}
+
+.party-window .bar-inner .left {
+    min-width: 2px;
+    max-width: 2px;
+}
+
+.party-window .bar-inner .right {
+    min-width: 2px;
+    max-width: 2px;
+}
+
+.party-window .bar-inner .center {
+    flex-grow: 1;
+}
+
+.party-buff-icon {
+    -unity-background-scale-mode: scale-to-fit;
+    background-color: rgba(0, 0, 0, 0.35);
 }
 
 .close-btn {
@@ -4042,12 +4087,12 @@
     font-size: 12px;
 }
 
-/* Прозрачный DropdownField с рамкой и размером текста 12 */
+/* пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ DropdownField пїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ 12 */
 
 .dropdown-field {
-    background-color: transparent; /* Прозрачный фон */
+    background-color: transparent; /* пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ */
     /*border-color: rgba(149, 149, 149 , 0.0);*/
-    font-size: 12px; /* Размер текста */
+    font-size: 12px; /* пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ */
 }
 
 .dropdown-field .unity-text-field__input {
@@ -4056,8 +4101,8 @@
 }
 
 
-/* применить к конкретному полю: <DropdownField class="small-dropdown" /> */
-/* или заменить .small-dropdown на тип DropdownField для глобального эффекта */
+/* пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ: <DropdownField class="small-dropdown" /> */
+/* пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ .small-dropdown пїЅпїЅ пїЅпїЅпїЅ DropdownField пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ */
 
 .small-dropdown .unity-base-field__input {
   height: 16px;
@@ -4102,9 +4147,9 @@
 
 
 
-/* Стили для элементов списка */
+/* пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ */
 .dropdown-field .unity-base-popup-field__arrow {
-    color: black; /* Цвет текста элементов списка */
+    color: black; /* пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ */
 }
 
 .dropdown-field .unity-base-field__input.selected  {
@@ -4112,14 +4157,14 @@
 }
 
 .dropdown-field  .unity-base-dropdown__item:hover{
-    color: black; /* Цвет текста элементов списка */
+    color: black; /* пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ */
 }
 
 .dropdown-field .VisualElement{
      background-color: transparent;
 }
 .dropdown-field .unity-base-popup-field__arrow{
-   /* position: absolute; /* Позволяет изображению быть позиционированным относительно контейнера 
+   /* position: absolute; /* пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ 
     margin-left:87%;
     width: 17px;
     height: 18px;*/
@@ -4133,7 +4178,7 @@
     -unity-slice-right: 2;
     -unity-slice-scale: 0;
     border-width: 0;
-    /* Он перекрывает фон кнопки!!!!! */
+    /* пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ!!!!! */
     -unity-background-image-tint-color: rgb(255,255,255);
 }
 

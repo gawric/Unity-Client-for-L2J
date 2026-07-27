@@ -1,0 +1,13 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
+    <Style src="project://database/Assets/Resources/Data/UI/_Elements/L2StyleSheet.uss?fileID=7433441132597879392&amp;guid=72e99cc94b130bf4ba100dceaa830b13&amp;type=3#L2StyleSheet" />
+    <ui:GroupBox name="PartyWindow" class="party-window" style="width: 176px; height: auto; max-height: 420px; flex-direction: column; margin: 0; padding: 0; background-color: rgba(0, 0, 0, 0); top: 90px; left: 3px;">
+        <ui:GroupBox name="CenterContainer" class="ui-bg" style="flex-direction: column; flex-grow: 1; padding-top: 3px; padding-right: 3px; padding-bottom: 3px; padding-left: 3px; margin: 0;">
+            <ui:VisualElement name="HeaderRow" class="drag-area" style="flex-direction: row; align-items: center; height: 14px; margin-bottom: 3px;">
+                <ui:Button text="&#9634;" name="ToggleSizeButton" style="width: 14px; height: 14px; font-size: 8px; margin: 0 2px 0 0; padding: 0; -unity-text-align: middle-center;" />
+                <ui:Button text="E" name="ToggleEffectsButton" style="width: 14px; height: 14px; font-size: 8px; margin: 0; padding: 0; -unity-text-align: middle-center;" />
+                <ui:VisualElement style="flex-grow: 1;" />
+            </ui:VisualElement>
+            <ui:VisualElement name="MemberList" style="flex-direction: column; flex-grow: 1;" />
+        </ui:GroupBox>
+    </ui:GroupBox>
+</ui:UXML>

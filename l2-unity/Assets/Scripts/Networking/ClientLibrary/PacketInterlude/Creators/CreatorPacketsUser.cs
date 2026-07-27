@@ -59,6 +59,11 @@ public class CreatorPacketsUser
         return new RequestAnswerJoinParty(answer);
     }
 
+    public static RequestJoinParty CreateRequestJoinParty(string targetName, int partyDistributionTypeId)
+    {
+        return new RequestJoinParty(targetName, partyDistributionTypeId);
+    }
+
     public static RequestOustPledgeMember CreateRequestOustPledgeMember(string memberName)
     {
         return new RequestOustPledgeMember(memberName);
