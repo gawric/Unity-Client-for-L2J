@@ -101,7 +101,12 @@ public class CharacterArmorDresser : AbstractArmorDresser
                         var defaultArmor = baseArmor[0];
                         EquipNewArmor(slotArmor, defaultArmor, defaultPiece);
                         OnSyncMash?.Invoke(1);
-                        defaultPiece.SetActive(true);
+                        // defaultPiece can be null when the fallback ("naked") mesh failed to load
+                        // (missing asset for this race) - EquipNewArmor already no-ops on a null
+                        // piece and keeps whatever was equipped before, so don't NRE here too; an
+                        // NRE at this point used to abort the ENTIRE RefreshEquipment call (legs/
+                        // gloves/feet/weapons never got processed either).
+                        if (defaultPiece != null) defaultPiece.SetActive(true);
                         isUseDefault = true;
                     }
                 }
@@ -224,6 +229,14 @@ public class CharacterArmorDresser : AbstractArmorDresser
         if (ArmorDresserModel.ArmorPart.Unknow == mainPart)
         {
             Debug.LogWarning($"CharacterArmorDresser: EquipNewArmor-> Unknown armor part detected for slot {slot}. Armor will not be equipped.");
+            return;
+        }
+        if (armorPiece == null)
+        {
+            // Whatever mesh is currently in this slot failed to get replaced (the new/fallback
+            // piece never loaded, likely a missing asset for this race) - keep the old mesh visible
+            // instead of destroying it and leaving the slot empty.
+            Debug.LogWarning($"CharacterArmorDresser->EquipNewArmor: new armor piece is null for slot {slot} (armor id {armor?.Id}) - keeping previous mesh instead of removing it.");
             return;
         }
         Debug.Log("EquipNewArmor destroy " + GetGameObject(slot, mainPart));

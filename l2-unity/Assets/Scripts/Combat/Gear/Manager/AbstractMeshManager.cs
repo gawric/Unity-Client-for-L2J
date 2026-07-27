@@ -218,6 +218,12 @@ public class AbstractMeshManager : MonoBehaviour
         for (int i = 0; i < armorArrPiece.Length; i++)
         {
             var armorPiece = armorArrPiece[i];
+            if (armorPiece == null)
+            {
+                Debug.LogWarning($"AbstractMeshManager->CreateCopyOrGetPool: default armor data missing for slot {slot} index {i} (LoadMesh returned null - check ItemTable/ModelTable for the default item id).");
+                arrGo[i] = null;
+                continue;
+            }
             arrGo[i] = CreateArmorMesh(armorPiece.baseArmorModel, armorPiece.material);
         }
         return arrGo;

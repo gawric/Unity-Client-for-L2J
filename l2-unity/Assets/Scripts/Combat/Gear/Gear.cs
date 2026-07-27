@@ -77,9 +77,10 @@ public class Gear : AbstractMeshManager
         GameObject go = CreateCopy(weaponPrefab, shieldNameId, ObjectType.Weapon);
         _lastWeaponAnim = _weaponAnim;
         ActivateGameObject(go, type, true, refreshAllBone);
+        Debug.Log($"[ShieldDebug] EquipShield {weaponId}: shieldBone={GetShieldBone()?.GetInstanceID()} ({GetShieldBone()?.name}), go parented under={go?.transform.parent?.name} (id={go?.transform.parent?.GetInstanceID()}), go.name={go?.name}");
 
-        if (_rightHandType != _lastRightHandType | type != _lastShieldHandType 
-            | _rightHandType == WeaponType.pole 
+        if (_rightHandType != _lastRightHandType | type != _lastShieldHandType
+            | _rightHandType == WeaponType.pole
             | _rightHandType == WeaponType.staff)
         {
             OnEquipAnimationRefresh?.Invoke(-1, weapon);
@@ -362,7 +363,10 @@ public class Gear : AbstractMeshManager
     public void UnequipShield(int shieldId)
     {
         string shieldNameId = shieldName + shieldId;
-        Transform shield = GetShieldBone()?.Find(shieldNameId);
+        Transform shieldBone = GetShieldBone();
+        Transform shield = shieldBone?.Find(shieldNameId);
+        Debug.Log($"[ShieldDebug] UnequipShield {shieldId}: shieldBone={shieldBone?.GetInstanceID()} ({shieldBone?.name}), looking for '{shieldNameId}', found={shield != null}" +
+            (shieldBone != null ? $", boneChildren=[{string.Join(", ", System.Linq.Enumerable.Range(0, shieldBone.childCount).Select(i => shieldBone.GetChild(i).name))}]" : ""));
 
 
 

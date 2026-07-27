@@ -58,6 +58,55 @@ public class UserEntity : NetworkEntity
         return scaled;
     }
 
+    /// <summary>
+    /// L2J has no lightweight "equip changed" packet for other players - the server just re-sends
+    /// a full CharInfo, which World.SpawnUserInterlude routes here instead of treating as a fresh
+    /// spawn. Unequips whatever was actually worn before (falling back to the same "naked"
+    /// substitutes EquipAllArmors uses for an empty slot) so the old mesh doesn't linger once the
+    /// new gear from the fresh appearance is equipped.
+    /// </summary>
+    public void RefreshEquipment(PlayerInterludeAppearance newAppearance)
+    {
+        PlayerInterludeAppearance oldAppearance = (PlayerInterludeAppearance)_appearance;
+
+        UnequipCurrentWeapons(oldAppearance);
+        UnequipCurrentArmors(oldAppearance);
+
+        Appearance = newAppearance;
+
+        EquipAllWeapons();
+        EquipAllArmors();
+    }
+
+    private void UnequipCurrentWeapons(PlayerInterludeAppearance oldAppearance)
+    {
+        // lrDestroy=true checks both hand bones regardless of which one it actually ended up on -
+        // EquipWeapon internally overrides handedness for some weapon types (e.g. bows), so we
+        // can't reliably guess which bone the old mesh is parented to from the appearance data alone.
+        if (oldAppearance.RHand != 0)
+        {
+            UnequipWeapon(false, oldAppearance.RHand, true);
+        }
+
+        if (oldAppearance.LHand != 0 && oldAppearance.LHand != oldAppearance.RHand)
+        {
+            UnequipWeapon(false, oldAppearance.LHand, true);
+            // UnequipWeapon only ever looks for a "weapon_<id>" child under the hand bones - a
+            // shield is named "shield_<id>" and lives on the shield bone instead, so it's never
+            // found/removed there. UnequipShield no-ops safely if LHand wasn't actually a shield.
+            _gear.UnequipShield(oldAppearance.LHand);
+        }
+    }
+
+    private void UnequipCurrentArmors(PlayerInterludeAppearance oldAppearance)
+    {
+        UserGear gear = (UserGear)_gear;
+        gear.UnequipArmor(oldAppearance.Chest != 0 ? oldAppearance.Chest : ItemTable.NAKED_CHEST, ItemSlot.chest);
+        gear.UnequipArmor(oldAppearance.Legs != 0 ? oldAppearance.Legs : ItemTable.NAKED_LEGS, ItemSlot.legs);
+        gear.UnequipArmor(oldAppearance.Gloves != 0 ? oldAppearance.Gloves : ItemTable.NAKED_GLOVES, ItemSlot.gloves);
+        gear.UnequipArmor(oldAppearance.Feet != 0 ? oldAppearance.Feet : ItemTable.NAKED_BOOTS, ItemSlot.feet);
+    }
+
     public void EquipAllArmors()
     {
         PlayerInterludeAppearance appearance = (PlayerInterludeAppearance)_appearance;

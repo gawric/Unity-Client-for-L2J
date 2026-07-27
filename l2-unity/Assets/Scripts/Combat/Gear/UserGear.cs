@@ -232,6 +232,7 @@ public class UserGear : Gear
 
     public void OnDestroyGameObject(GameObject go)
     {
+        Debug.Log($"[ShieldDebug] UserGear.OnDestroyGameObject: {go?.name} (parent={go?.transform.parent?.name})");
         if(ObjectPoolManager.Instance != null)
         {
             if (!ObjectPoolManager.Instance.ReturnToPool(ObjectType.Armor , go))

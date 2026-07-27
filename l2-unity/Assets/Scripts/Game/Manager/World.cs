@@ -206,8 +206,16 @@ public class World : MonoBehaviour {
     /// </summary>
     public void SpawnUserInterlude(NetworkIdentityInterlude identity, PlayerStatusInterlude status, PlayerInterludeStats stats, PlayerInterludeAppearance appearance)
     {
-        if (_objects.ContainsKey(identity.Id))
+        if (_objects.TryGetValue(identity.Id, out Entity existingEntity))
         {
+            // Same packet is re-sent when this player's visible equipment changes - not just on
+            // first entering view range - so an already-spawned user gets a gear refresh instead
+            // of being silently ignored.
+            if (existingEntity is UserEntity existingUser)
+            {
+                existingUser.RefreshEquipment(appearance);
+            }
+
             return;
         }
 

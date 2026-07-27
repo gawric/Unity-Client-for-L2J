@@ -164,7 +164,16 @@ public class Entity : MonoBehaviour {
             return;
         }
         if (_appearance.LHand != 0) {
-            _gear.EquipWeapon(_appearance.LHand, true);
+            // EquipWeapon overrides leftSlot internally (only bows end up leftSlot=true there), so
+            // calling it for a shield forces it into the right hand instead. The live inventory
+            // equip path (Entity.HandleShieldArmorItem) already tells shields apart from off-hand
+            // weapons this same way - EquipAllWeapons (spawn-time only) never did.
+            Weapongrp lhandGrp = WeapongrpTable.Instance.GetWeapon(_appearance.LHand);
+            if (lhandGrp != null && lhandGrp.WeaponType == WeaponType.shield) {
+                _gear.EquipShield(_appearance.LHand);
+            } else {
+                _gear.EquipWeapon(_appearance.LHand, true);
+            }
         }
         if (_appearance.RHand != 0) {
             var weapon =  WeapongrpTable.Instance.GetWeapon(_appearance.RHand);

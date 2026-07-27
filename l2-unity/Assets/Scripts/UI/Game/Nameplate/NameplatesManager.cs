@@ -18,7 +18,13 @@ public class NameplatesManager : MonoBehaviour
 
     private static NameplatesManager _instance;
     //private bool _isRemoveNamePlate = false;
-    private int _removeObjId = 0;
+    // -1 (not 0) so this never accidentally matches a real object id. Remove() sets this to
+    // suppress CreateNameplateForEntities from immediately recreating a nameplate for an entity
+    // removed the same frame (e.g. a monster whose collider is still briefly hit by the SphereCast
+    // right after it died) - it must be cleared every frame, otherwise it permanently blocks any
+    // future entity that happens to reuse that same object id (found via [NameplateDebug]: another
+    // player's nameplate never appeared because their id had previously been used by a removed entity).
+    private int _removeObjId = -1;
     public static NameplatesManager Instance { get { return _instance; } }
 
     private void Awake() {
@@ -83,6 +89,7 @@ public class NameplatesManager : MonoBehaviour
 
         _entitiesInRange = Physics.SphereCastAll(_playerTransform.position, _nameplateViewDistance, transform.forward, 0, _entityMask);
         CreateNameplateForEntities();
+        _removeObjId = -1;
         CheckNameplateVisibility();
         CheckMouseOver();
         CheckTarget();
@@ -126,7 +133,11 @@ public class NameplatesManager : MonoBehaviour
             foreach (RaycastHit hit in _entitiesInRange)
             {
                 Entity objectEntity = hit.transform.GetComponent<Entity>();
-                //Debug.Log("Create NamePlate IDDDDDDDD " + objectEntity.IdentityInterlude.Id + " Remove OBjID " + _removeObjId);
+
+                if (objectEntity is UserEntity)
+                {
+                    Debug.Log($"[NameplateDebug] SphereCast hit '{hit.transform.name}' (layer={LayerMask.LayerToName(hit.transform.gameObject.layer)}) -> UserEntity found, id={objectEntity.IdentityInterlude.Id}");
+                }
 
                 if (objectEntity != null)
                 {
@@ -139,7 +150,7 @@ public class NameplatesManager : MonoBehaviour
                             CreateNameplate(objectEntity);
                         }
                     }
-    
+
                 }
             }
         }
@@ -149,7 +160,17 @@ public class NameplatesManager : MonoBehaviour
     private void CreateNameplate(Entity entity) {
         if (entity == null) return;
         if(!IsNameplateVisible(entity.transform)) {
+            if (entity is UserEntity)
+            {
+                Debug.Log($"[NameplateDebug] UserEntity id={entity.IdentityInterlude.Id} failed IsNameplateVisible");
+            }
             return;
+        }
+
+        float height = GetHeight(entity);
+        if (entity is UserEntity)
+        {
+            Debug.Log($"[NameplateDebug] UserEntity id={entity.IdentityInterlude.Id} passed visibility, creating nameplate. Name={entity.IdentityInterlude.Name}, CollisionHeight={entity.Appearance.CollisionHeight}, offsetHeight={height}, entityPos={entity.transform.position}, titleColor='{entity.IdentityInterlude.TitleColor}'");
         }
 
         VisualElement visualElement = _nameplateTemplate.Instantiate()[0];
@@ -161,7 +182,7 @@ public class NameplatesManager : MonoBehaviour
             entity.transform,
             entity.IdentityInterlude.Title,
             entity.IdentityInterlude.TitleColor,
-            GetHeight(entity),
+            height,
             entity.IdentityInterlude.Name,
             entity.IdentityInterlude.Id,
             true
@@ -177,10 +198,18 @@ public class NameplatesManager : MonoBehaviour
 
     private float GetHeight(Entity entity)
     {
-        if(entity is PlayerEntity)
+        if(entity is PlayerEntity playerEntity)
         {
-            PlayerEntity playerEntity = (PlayerEntity)entity;
             return CharacterHeight.GetHeight(playerEntity.RaceId);
+        }
+
+        // Other players use the exact same rig/model as the local player (per race), so the same
+        // fixed race-based head height belongs here too, rather than the CollisionHeight-derived
+        // formula below - that's tuned for NPCs/monsters, whose Appearance.CollisionHeight is
+        // pre-converted to Unity meters by NpcgrpTable, unlike CharInfo (raw L2 UU).
+        if(entity is UserEntity)
+        {
+            return CharacterHeight.GetHeight(entity.RaceId);
         }
 
         return entity.Appearance.CollisionHeight * 2.1f;
@@ -253,12 +282,17 @@ public class NameplatesManager : MonoBehaviour
             Vector2 nameplatePos = Camera.main.WorldToScreenPoint(nameplate.Target.position + Vector3.up * nameplate.NameplateOffsetHeight);
             nameplate.NameplateEle.style.left = nameplatePos.x - nameplate.NameplateEle.resolvedStyle.width / 2f;
             nameplate.NameplateEle.style.top = Screen.height - nameplatePos.y - nameplate.NameplateEle.resolvedStyle.height;
-        } 
+            if (nameplate.Target != null && nameplate.Target.GetComponent<UserEntity>() != null) {
+                Debug.Log($"[NameplateDebug] UserEntity '{nameplate.Name}' position update: screenPos={nameplatePos}, left={nameplate.NameplateEle.style.left}, top={nameplate.NameplateEle.style.top}, resolvedWidth={nameplate.NameplateEle.resolvedStyle.width}, resolvedHeight={nameplate.NameplateEle.resolvedStyle.height}, display={nameplate.NameplateEle.resolvedStyle.display}, opacity={nameplate.NameplateEle.resolvedStyle.opacity}");
+            }
+        }
         catch (NullReferenceException) { } 
         catch (MissingReferenceException) { }
     }
 
     private bool IsNameplateVisible(Transform target) {
+        bool isDebugTarget = target != null && target.GetComponent<UserEntity>() != null;
+
         if(target == null) {
             return false;
         }
@@ -271,11 +305,12 @@ public class NameplatesManager : MonoBehaviour
         bool isTarget = TargetManager.Instance.HasTarget() && TargetManager.Instance.Target.Data.ObjectTransform == target;
         bool isTooFar = Vector3.Distance(_playerTransform.position, target.position) > _nameplateViewDistance;
         if(isTooFar && !isTarget) {
+            if (isDebugTarget) Debug.Log($"[NameplateDebug] too far: distance={Vector3.Distance(_playerTransform.position, target.position)} max={_nameplateViewDistance}");
             return false;
         }
 
         bool isCamera = CameraController.Instance.IsObjectVisible(target);
-        //Debug.Log("IsNameplateVisible xxxxxxxxxxxxxxxxxxxx+ " + isCamera);
+        if (isDebugTarget) Debug.Log($"[NameplateDebug] IsObjectVisible={isCamera}");
         return isCamera;
     }
 }
