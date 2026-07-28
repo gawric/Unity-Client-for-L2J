@@ -3,6 +3,8 @@ using UnityEngine;
 
 public class NewPhysicalSkillsIntention : IntentionBase
 {
+    private const string SS_SM_LOG = "[SS_CHARGE_SM]";
+
     public NewPhysicalSkillsIntention(PlayerStateMachine stateMachine) : base(stateMachine)
     {
     }
@@ -15,9 +17,15 @@ public class NewPhysicalSkillsIntention : IntentionBase
 
             if (IsSpecialSkill(useSkill.SkillId))
             {
-                _stateMachine.ChangeState(PlayerState.PHYSICAL_SKILLS);
-                _stateMachine.NotifyEvent(Event.APPLY_SOULSHOT_CHARGED, useSkill);
-                return; 
+                // Backup path: charge must never leave current state (ATTACK/RUN/WALK/IDLE).
+                PlayerState prevState = _stateMachine.State;
+                Intention prevIntention = _stateMachine.Intention;
+                ApplySoulshotCharge(useSkill);
+                Debug.Log(
+                    $"{SS_SM_LOG} Intention backup charge skillId={useSkill.SkillId} " +
+                    $"keepState={prevState} intentionNow={_stateMachine.Intention} " +
+                    $"(prefer GsInterludeCombatHandler.ApplyWeaponChargeShot)");
+                return;
             }
 
 
@@ -29,6 +37,19 @@ public class NewPhysicalSkillsIntention : IntentionBase
             IfUseSelf(objectId, useSkill);
 
         }
+    }
+
+    private void ApplySoulshotCharge(MagicSkillUse useSkill)
+    {
+        if (_stateMachine.Player == null) return;
+
+        _stateMachine.Player.IsSoulshotCharged = true;
+        Transform weapon = _stateMachine.Player.GetWeaponTransform();
+        EffectManager.Instance.PlayEffect(useSkill.SkillId, weapon);
+
+        Debug.Log(
+            $"{SS_SM_LOG} ApplySoulshotCharge skillId={useSkill.SkillId} " +
+            $"state={_stateMachine.State} IsSoulshotCharged=True");
     }
 
     private void IfUseSelf(int objectId , MagicSkillUse useSkill)

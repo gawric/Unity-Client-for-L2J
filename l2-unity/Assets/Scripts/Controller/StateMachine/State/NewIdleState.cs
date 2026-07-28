@@ -50,13 +50,18 @@ public class NewIdleState : StateBase
 
     private void HandleWaitReturn()
     {
-        if (!_stateMachine.Player.IsAttack)
+        // Combat swing finished (or target died). Always leave attack latch and show wait pose.
+        if (PlayerEntity.Instance != null)
         {
-            PlayAnimation(AnimationNames.ATK_WAIT);
-            Debug.Log("HandleArrival: Handle_Wait_Return ");
+            PlayerEntity.Instance.IsAttack = false;
+            PlayerEntity.Instance.LastAtkAnimation = null;
         }
 
-        PlayerEntity.Instance.LastAtkAnimation = null;
+        var animation = _stateMachine.Player != null && _stateMachine.Player.isAutoAttack
+            ? AnimationNames.ATK_WAIT
+            : AnimationNames.WAIT;
+        PlayAnimation(animation);
+        Debug.Log($"[SS_CHARGE_SM] HandleWaitReturn → {animation} IsAttack=false");
     }
 
 

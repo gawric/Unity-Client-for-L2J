@@ -1,84 +1,198 @@
 ﻿using UnityEngine;
 
+/// <summary>
+/// Melee attack anim — linear rate over the FULL L2 attack cycle (timeAtk).
+/// Server: timeAtk = calculateTimeBetweenAttacks; Hit at timeAtk/2 (BeginAttack HitFraction ~0.5).
+/// Do not stretch the clip into timeAtk/2 — that makes the swing ~2x faster than SoulShot.
+/// </summary>
 public class PlayerStateJAtk : StateMachineBehaviour
 {
     private const string JATK_TIMING_LOG = "[JATK_TIMING]";
-    private float _startTime = -1;
-    private float _endTime = -1;
-    private float _remainingTime = 0f;
+
+    private float _startTime = -1f;
+    private float _endTime = -1f;
+    private float _linearPatkSpd = 1f;
+    private float _lastAnimNormalized = 0f;
+    private float _fullCycleMs = 0f;
+    private int _milestoneMask = 0;
+    private int _attackEpoch = 0;
     private bool _isSwordHitLogged = false;
     private bool _isColliderSubscribed = false;
+    private bool _isSwitchIdle = false;
 
     public string parameterName;
-    private AnimationCurve _animationCurve;
-    private bool _isSwitchIdle = false;
-    override public void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
+
+    public override void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
-
         AnimatorClipInfo[] clipInfos = animator.GetNextAnimatorClipInfo(layerIndex);
-
         if (clipInfos == null || clipInfos.Length == 0)
         {
             clipInfos = animator.GetCurrentAnimatorClipInfo(layerIndex);
         }
 
-        _animationCurve = new AnimationCurve();
         _isSwitchIdle = false;
         _isSwordHitLogged = false;
+        _milestoneMask = 0;
+        _lastAnimNormalized = 0f;
 
-
-        float timeAtk = GetTimeAtk(parameterName);
-
-
+        _fullCycleMs = GetFullAttackCycleMs(parameterName);
         _startTime = Time.time;
-        _endTime = TimeUtils.ConvertMsToSec(timeAtk);
-        _remainingTime = _endTime; // Initialize remaining time
-        float timeAnimation = clipInfos[0].clip.length;
-        //default
-        //RecreateAnimationCurve(_animationCurve, _endTime, timeAnimation , 1.0f, 1.3f);
-        RecreateAnimationCurve(_animationCurve, _endTime, timeAnimation, 1.0f, 1.1f);
+        _endTime = TimeUtils.ConvertMsToSec(_fullCycleMs);
 
-        PlayerAnimationController.Instance.UpdateAnimatorAtkSpeedL2j(timeAtk, timeAnimation);
+        float timeAnimation = (clipInfos != null && clipInfos.Length > 0 && clipInfos[0].clip != null)
+            ? clipInfos[0].clip.length
+            : 1f;
+
+        // Linear rate: play whole clip over full server attack cycle (not timeAtk/2).
+        _linearPatkSpd = timeAnimation * 1000f / Mathf.Max(1f, _fullCycleMs);
+        PlayerAnimationController.Instance.SetPAtkSpeed(_linearPatkSpd);
+
         TrySubscribeSwordCollider();
 
-        float attackMs = TimeUtils.ConvertSecToMs(_endTime);
-        float halfMs = attackMs * 0.5f;
-        int entityId = PlayerEntity.Instance != null && PlayerEntity.Instance.IdentityInterlude != null ? PlayerEntity.Instance.IdentityInterlude.Id : 0;
+        int entityId = ResolvePlayerEntityId();
         if (entityId > 0 && SwordCollisionService.Instance != null)
         {
+            _attackEpoch = SwordCollisionService.Instance.GetAttackEpoch(entityId);
             SwordCollisionService.Instance.UpdateAttackProgress(entityId, 0f);
         }
-        Debug.Log($"{JATK_TIMING_LOG} Enter anim={parameterName} attackMs={attackMs:F1} halfMs={halfMs:F1} clipLenSec={timeAnimation:F3} player={PlayerEntity.Instance?.RandomName}");
+        else
+        {
+            _attackEpoch = 0;
+        }
+
+        float hitFraction = PlayerEntity.Instance != null
+            ? AttackTimingHelper.ResolveHitFractionByWeapon(PlayerEntity.Instance)
+            : 0.5f;
+        float hitAtMs = _fullCycleMs * hitFraction;
+
+        float attackShotSec = -1f;
+        float onAnimHitSec = -1f;
+        string clipName = "null";
+        if (clipInfos != null && clipInfos.Length > 0 && clipInfos[0].clip != null)
+        {
+            AnimationClip clip = clipInfos[0].clip;
+            clipName = clip.name;
+            attackShotSec = AnimationDataCache.GetEventTimeByName(animator, clip, "AttackShot");
+            onAnimHitSec = AnimationDataCache.GetEventTimeByName(animator, clip, "OnAnimationHit");
+        }
+
+        float clipLenMs = timeAnimation * 1000f;
+        float attackShotNorm = timeAnimation > 0f && attackShotSec >= 0f ? attackShotSec / timeAnimation : -1f;
+        float attackShotWallMs = attackShotNorm >= 0f ? _fullCycleMs * attackShotNorm : -1f;
+        float onAnimHitNorm = timeAnimation > 0f && onAnimHitSec >= 0f ? onAnimHitSec / timeAnimation : -1f;
+
+        float pAtkSpd = PlayerEntity.Instance != null && PlayerEntity.Instance.Stats != null
+            ? PlayerEntity.Instance.Stats.BasePAtkSpeed
+            : 0f;
+
+        // Client wall duration of the swing = server timeAtk (clip is rate-scaled to fit).
+        // If clipLenMs >> serverTimeAtkMs, anim feels long only if rate is wrong; compare these.
+        Debug.Log(
+            $"[ATK_TIMING_CMP] Enter anim={parameterName} clip={clipName} " +
+            $"pAtkSpd={pAtkSpd:F1} serverTimeAtkMs={_fullCycleMs:F1} (500000/pAtkSpd) " +
+            $"serverHitMs={hitAtMs:F1} (timeAtk*{hitFraction:F2}) " +
+            $"clipLenMs={clipLenMs:F1} clipLenSec={timeAnimation:F3} " +
+            $"patkspd={_linearPatkSpd:F3} (=clipMs/serverMs) " +
+            $"clientWallCycleMs={_fullCycleMs:F1} " +
+            $"deltaClipVsServerMs={clipLenMs - _fullCycleMs:F1} " +
+            $"AttackShotSec={attackShotSec:F3} AttackShotNorm={attackShotNorm:F3} AttackShotWallMs~={attackShotWallMs:F1} " +
+            $"OnAnimationHitSec={onAnimHitSec:F3} OnAnimationHitNorm={onAnimHitNorm:F3} " +
+            $"epoch={_attackEpoch}");
+
+        Debug.Log(
+            $"[ATK_HIT_CHAIN] 1b.JAtkEnter frame={Time.frameCount} t={Time.time:F3} anim={parameterName} " +
+            $"fullCycleMs={_fullCycleMs:F1} hitFraction={hitFraction:F3} hitAtMs~={hitAtMs:F1} " +
+            $"clipLenSec={timeAnimation:F3} AttackShotNorm={attackShotNorm:F3} " +
+            $"patkspd={_linearPatkSpd:F3} player={PlayerEntity.Instance?.RandomName}");
+        Debug.Log(
+            $"{JATK_TIMING_LOG} Enter LINEAR anim={parameterName} serverTimeAtkMs={_fullCycleMs:F1} " +
+            $"clipLenMs={clipLenMs:F1} patkspd={_linearPatkSpd:F3} AttackShotWallMs~={attackShotWallMs:F1} " +
+            $"player={PlayerEntity.Instance?.RandomName}");
 
         StopAnimationTrigger(animator, parameterName);
     }
 
-    override public void OnStateUpdate(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
+    public override void OnStateUpdate(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
-        float currentTime = Time.time;
-        float timeOut = currentTime - _startTime;
+        float timeOut = Time.time - _startTime;
+        _lastAnimNormalized = stateInfo.normalizedTime % 1f;
+        LogAnimMilestones(timeOut);
 
-        _remainingTime = Mathf.Max(0, _endTime - timeOut);
-        float normalizedTime = timeOut / _endTime;
-        float speed = _animationCurve.Evaluate(normalizedTime);
-        if (timeOut >= _endTime) SwitchToIdle(stateInfo);
-        int entityId = PlayerEntity.Instance != null && PlayerEntity.Instance.IdentityInterlude != null ? PlayerEntity.Instance.IdentityInterlude.Id : 0;
+        if (timeOut >= _endTime)
+        {
+            SwitchToIdle(stateInfo);
+        }
+
+        int entityId = ResolvePlayerEntityId();
         if (entityId > 0 && SwordCollisionService.Instance != null)
         {
             SwordCollisionService.Instance.UpdateAttackProgress(entityId, TimeUtils.ConvertSecToMs(timeOut));
         }
 
-        PlayerAnimationController.Instance.SetPAtkSpeed(speed);
+        // Keep constant rate — do not remould mid-swing.
+        PlayerAnimationController.Instance.SetPAtkSpeed(_linearPatkSpd);
+    }
+
+    private void LogAnimMilestones(float elapsedSec)
+    {
+        float elapsedMs = TimeUtils.ConvertSecToMs(elapsedSec);
+        float wallNorm = _fullCycleMs > 0f ? elapsedMs / _fullCycleMs : 0f;
+        TryLogMilestone(0, 0.25f, elapsedMs, wallNorm);
+        TryLogMilestone(1, 0.40f, elapsedMs, wallNorm);
+        TryLogMilestone(2, 0.50f, elapsedMs, wallNorm);
+        TryLogMilestone(3, 0.75f, elapsedMs, wallNorm);
+    }
+
+    private void TryLogMilestone(int bit, float animThreshold, float elapsedMs, float wallNorm)
+    {
+        int flag = 1 << bit;
+        if ((_milestoneMask & flag) != 0) return;
+        if (_lastAnimNormalized < animThreshold) return;
+
+        _milestoneMask |= flag;
+        Debug.Log(
+            $"[ATK_HIT_CHAIN] AnimMilestone anim={parameterName} animNorm>={animThreshold:F2} " +
+            $"animNorm={_lastAnimNormalized:F3} wallElapsedMs={elapsedMs:F1} wallNorm={wallNorm:F3} " +
+            $"frame={Time.frameCount}");
+    }
+
+    public override void OnStateExit(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
+    {
+        TryUnsubscribeSwordCollider();
+
+        float elapsedMs = TimeUtils.ConvertSecToMs(Time.time - _startTime);
+        float expectedMs = TimeUtils.ConvertSecToMs(_endTime);
+        int entityId = ResolvePlayerEntityId();
+        if (entityId > 0 && SwordCollisionService.Instance != null)
+        {
+            SwordCollisionService.Instance.EndAttack(entityId, _attackEpoch);
+        }
+
+        Debug.Log(
+            $"[ATK_TIMING_CMP] Exit anim={parameterName} epoch={_attackEpoch} " +
+            $"wallElapsedMs={elapsedMs:F1} expectedServerCycleMs={expectedMs:F1} " +
+            $"deltaMs={elapsedMs - expectedMs:F1} " +
+            $"earlyExit={elapsedMs + 50f < expectedMs} swordHit={_isSwordHitLogged} " +
+            $"animNorm={_lastAnimNormalized:F3}");
+        Debug.Log(
+            $"{JATK_TIMING_LOG} Exit anim={parameterName} elapsedMs={elapsedMs:F1} " +
+            $"expectedMs={expectedMs:F1} swordHit={_isSwordHitLogged} epoch={_attackEpoch}");
+
+        // Do not clear IsAttack here — next Attack packet may already own the combo.
     }
 
     private void SwitchToIdle(AnimatorStateInfo stateInfo)
     {
-
         float currentNormalizedTime = stateInfo.normalizedTime;
 
-        if (!_isSwitchIdle & currentNormalizedTime > 0.9f & IsDieTarget() | !_isSwitchIdle & currentNormalizedTime > 0.9f & !PlayerEntity.Instance.IsAttack)
+        if (!_isSwitchIdle && currentNormalizedTime > 0.9f &&
+            (IsDieTarget() || (PlayerEntity.Instance != null && !PlayerEntity.Instance.IsAttack)))
         {
-            PlayerEntity.Instance.IsAttack = false;
+            if (PlayerEntity.Instance != null)
+            {
+                PlayerEntity.Instance.IsAttack = false;
+            }
+
             _isSwitchIdle = true;
             PlayerStateMachine.Instance.ChangeIntention(Intention.INTENTION_IDLE);
             PlayerStateMachine.Instance.NotifyEvent(Event.WAIT_RETURN);
@@ -87,134 +201,110 @@ public class PlayerStateJAtk : StateMachineBehaviour
 
     private bool IsDieTarget()
     {
+        if (PlayerEntity.Instance == null || World.Instance == null)
+        {
+            return false;
+        }
+
         Entity entity = World.Instance.GetEntityNoLockSync(PlayerEntity.Instance.TargetId);
-        if (entity != null) return entity.IsDead();
-        return false;
-    }
-    private void StopAnimationTrigger(Animator animator, string parameterName)
-    {
-        if (animator.GetBool(parameterName) != false)
-        {
-            AnimationManager.Instance.StopCurrentAnimation(animator.GetInteger(AnimatorUtils.OBJECT_ID), parameterName, "player");
-        }
-
+        return entity != null && entity.IsDead();
     }
 
-    override public void OnStateExit(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
+    private void StopAnimationTrigger(Animator animator, string animParameterName)
     {
-        TryUnsubscribeSwordCollider();
-        float elapsedMs = TimeUtils.ConvertSecToMs(Time.time - _startTime);
-        int entityId = PlayerEntity.Instance != null && PlayerEntity.Instance.IdentityInterlude != null ? PlayerEntity.Instance.IdentityInterlude.Id : 0;
-        if (entityId > 0 && SwordCollisionService.Instance != null)
+        if (animator.GetBool(animParameterName))
         {
-            SwordCollisionService.Instance.EndAttack(entityId);
-        }
-        Debug.Log($"{JATK_TIMING_LOG} Exit anim={parameterName} elapsedMs={elapsedMs:F1} expectedMs={TimeUtils.ConvertSecToMs(_endTime):F1} swordHit={_isSwordHitLogged}");
-        PlayerEntity.Instance.IsAttack = false;
-    }
-
-
-
-
-    // Normal speed
-    //RecreateAnimationCurve(myCurve, baseTimeAtk, baseTimeAnimation);
-
-    // 2-5% faster attack (speedMultiplier = 0.95-0.98)
-    //RecreateAnimationCurve(myCurve, baseTimeAtk, baseTimeAnimation, 0.96f, 1.0f);
-
-    // Slower attack (if needed)
-    //RecreateAnimationCurve(myCurve, baseTimeAtk, baseTimeAnimation, 1.0f, 1.2f);
-
-    // Faster and slower combination
-    // RecreateAnimationCurve(myCurve, baseTimeAtk, baseTimeAnimation, 0.97f, 1.1f);
-    private void RecreateAnimationCurve(AnimationCurve animationCurve, float timeAtk, float timeAnimation,
-    float speedMultiplier = 1.0f, float slowDownFactor = 1.0f)
-    {
-
-        float adjustedTimeAtk = timeAtk * speedMultiplier;
-
-        float adjustedTimeAnimation = timeAnimation * slowDownFactor;
-
-        animationCurve.keys = new Keyframe[0];
-
-        Keyframe startKey = new Keyframe(0f, 0f);
-        Keyframe windupKey = new Keyframe(adjustedTimeAtk * 0.2f, adjustedTimeAnimation * 0.15f); 
-        Keyframe slowDownKey = new Keyframe(adjustedTimeAtk * 0.5f, adjustedTimeAnimation * 0.4f); 
-        Keyframe powerKey = new Keyframe(adjustedTimeAtk * 0.8f, adjustedTimeAnimation * 0.8f);  
-        Keyframe endKey = new Keyframe(adjustedTimeAtk, adjustedTimeAnimation); 
-
-
-        animationCurve.AddKey(startKey);
-        animationCurve.AddKey(windupKey);
-        animationCurve.AddKey(slowDownKey);
-        animationCurve.AddKey(powerKey);
-        animationCurve.AddKey(endKey);
-
-
-        animationCurve.preWrapMode = WrapMode.ClampForever;
-        animationCurve.postWrapMode = WrapMode.ClampForever;
-
-        for (int i = 1; i < animationCurve.keys.Length - 1; i++)
-        {
-            animationCurve.SmoothTangents(i, 0);
+            AnimationManager.Instance.StopCurrentAnimation(
+                animator.GetInteger(AnimatorUtils.OBJECT_ID),
+                animParameterName,
+                "player");
         }
     }
 
-
-
-
-    private bool IsBow(string animName) => animName.IndexOf("bow") != -1;
+    private bool IsBow(string animName) =>
+        !string.IsNullOrEmpty(animName) && animName.IndexOf("bow", System.StringComparison.OrdinalIgnoreCase) >= 0;
 
     private void TrySubscribeSwordCollider()
     {
-        if (_isColliderSubscribed || SwordCollisionService.Instance == null) return;
+        if (_isColliderSubscribed || SwordCollisionService.Instance == null)
+        {
+            return;
+        }
+
         SwordCollisionService.Instance.OnHitCollider += OnSwordColliderHit;
         _isColliderSubscribed = true;
     }
 
     private void TryUnsubscribeSwordCollider()
     {
-        if (!_isColliderSubscribed || SwordCollisionService.Instance == null) return;
+        if (!_isColliderSubscribed || SwordCollisionService.Instance == null)
+        {
+            return;
+        }
+
         SwordCollisionService.Instance.OnHitCollider -= OnSwordColliderHit;
         _isColliderSubscribed = false;
     }
 
     private void OnSwordColliderHit(Transform attacker, Transform target, Vector3 hitPointCollider, Vector3 hitDirection)
     {
-        if (_startTime < 0f || _isSwordHitLogged || PlayerEntity.Instance == null) return;
+        if (_startTime < 0f || _isSwordHitLogged || PlayerEntity.Instance == null)
+        {
+            return;
+        }
 
         _isSwordHitLogged = true;
         float elapsedMs = TimeUtils.ConvertSecToMs(Time.time - _startTime);
         float expectedMs = TimeUtils.ConvertSecToMs(_endTime);
-        float normalized = _endTime > 0f ? (Time.time - _startTime) / _endTime : 0f;
-        bool sameRoot = false;
-        if (attacker != null && PlayerEntity.Instance.transform != null)
-        {
-            sameRoot = attacker.root == PlayerEntity.Instance.transform.root;
-        }
+        float wallNorm = _endTime > 0f ? (Time.time - _startTime) / _endTime : 0f;
+        bool sameRoot = attacker != null &&
+                        PlayerEntity.Instance.transform != null &&
+                        attacker.root == PlayerEntity.Instance.transform.root;
 
         string attackerName = attacker != null ? attacker.name : "null";
         string targetName = target != null ? target.name : "null";
-        Debug.Log($"{JATK_TIMING_LOG} SwordHit anim={parameterName} elapsedMs={elapsedMs:F1} expectedMs={expectedMs:F1} normalized={normalized:F3} sameRoot={sameRoot} attacker={attackerName} target={targetName} hitPoint={hitPointCollider}");
+        Debug.Log(
+            $"[ATK_HIT_CHAIN] 5.JAtkSawHit anim={parameterName} frame={Time.frameCount} t={Time.time:F3} " +
+            $"wallElapsedMs={elapsedMs:F1}/{expectedMs:F1} wallNorm={wallNorm:F3} " +
+            $"animNorm={_lastAnimNormalized:F3} sameRoot={sameRoot} " +
+            $"attacker={attackerName} target={targetName} hitPoint={hitPointCollider}");
+        Debug.Log(
+            $"{JATK_TIMING_LOG} SwordHit anim={parameterName} elapsedMs={elapsedMs:F1} " +
+            $"expectedMs={expectedMs:F1} wallNorm={wallNorm:F3} animNorm={_lastAnimNormalized:F3} " +
+            $"sameRoot={sameRoot} attacker={attackerName} target={targetName} hitPoint={hitPointCollider}");
     }
 
-    private float GetTimeAtk(string animName)
+    /// <summary>
+    /// Full attack cycle ms (same as AttackTimingHelper / L2J calculateTimeBetweenAttacks).
+    /// Bow: draw portion after subtracting flight time.
+    /// </summary>
+    private float GetFullAttackCycleMs(string animName)
     {
+        if (PlayerEntity.Instance == null || PlayerEntity.Instance.Stats == null)
+        {
+            return 1000f;
+        }
+
+        float baseTimeAtkMs = CalcBaseParam.CalculateTimeL2j(PlayerEntity.Instance.Stats.BasePAtkSpeed);
+
         if (IsBow(animName))
         {
-            //return CalcBaseParam.CalculateTimeL2j(PlayerEntity.Instance.Stats.BasePAtkSpeed);
-            float baseAttackTime = CalcBaseParam.CalculateTimeL2j(PlayerEntity.Instance.Stats.BasePAtkSpeed);
             float targetDistance = PlayerEntity.Instance.TargetDistance();
-            float[] timeAndFlye = CalcBaseParam.CalculateAttackAndFlightTimes(targetDistance, baseAttackTime);
-
-
+            float[] timeAndFlye = CalcBaseParam.CalculateAttackAndFlightTimes(targetDistance, baseTimeAtkMs);
             return timeAndFlye[0];
-            // return CalcBaseParam.CalculateTimeL2j(PlayerEntity.Instance.Stats.BasePAtkSpeed) / 2;
         }
-        return CalcBaseParam.CalculateTimeL2j(PlayerEntity.Instance.Stats.BasePAtkSpeed) / 2;
+
+        // 1HS / default: full cycle. Melee Hit/SoulShot from AttackShot anim event.
+        return baseTimeAtkMs;
     }
 
+    private static int ResolvePlayerEntityId()
+    {
+        if (PlayerEntity.Instance == null || PlayerEntity.Instance.IdentityInterlude == null)
+        {
+            return 0;
+        }
 
-
-
+        return PlayerEntity.Instance.IdentityInterlude.Id;
+    }
 }

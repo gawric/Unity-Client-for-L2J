@@ -538,6 +538,8 @@ public sealed class L2HtmlRenderer
         label.style.minWidth = 0;
         label.style.maxWidth = Length.Percent(100);
 
+        label.style.letterSpacing = 0;
+
         label.style.whiteSpace = (_preMode || _noWrapMode)
             ? WhiteSpace.NoWrap
             : WhiteSpace.Normal;
@@ -720,6 +722,7 @@ public sealed class L2HtmlRenderer
 
         table.AddToClassList("html_table");
 
+        table.style.overflow = Overflow.Visible;
         table.style.flexDirection = FlexDirection.Column;
         table.style.alignItems = Align.Stretch;
         table.style.justifyContent = Justify.FlexStart;
@@ -797,11 +800,17 @@ public sealed class L2HtmlRenderer
             cell.style.minWidth = 0;
         }
 
+        cell.style.minWidth = 0;
+        cell.style.maxWidth = Length.Percent(100);
+        cell.style.flexDirection = FlexDirection.Row;
+        cell.style.flexWrap = Wrap.NoWrap;
+
         float padding = _activeCellPadding;
 
         if (TryFloat(GetAttr("padding", ""), out float customPadding))
             padding = customPadding;
 
+        cell.style.overflow = Overflow.Visible;
         cell.style.paddingLeft = padding;
         cell.style.paddingRight = padding;
         cell.style.paddingTop = padding;
@@ -1612,7 +1621,8 @@ public sealed class L2HtmlRenderer
                    .Replace("\t", " ")
                    .Replace("&nbsp;", " ");
 
-        return MultiSpaceRegex.Replace(text, "  ");
+        // collapse ONLY extreme spacing, keep single spaces
+        return Regex.Replace(text, @" {2,}", " ");
     }
 
     private string NormalizeColor(string color)

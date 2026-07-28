@@ -80,7 +80,7 @@ public class FilterAccessType
         { GameInterludeServerPacketType.SpawnItem, true },
         { GameInterludeServerPacketType.DropItem, true },
         { GameInterludeServerPacketType.GetItem, true },
-
+        { GameInterludeServerPacketType.ShowBoard, true },
     };
 
     private static readonly Dictionary<GSInterludeCombatPacketType, bool> CombatPacketTypes = new Dictionary<GSInterludeCombatPacketType, bool>

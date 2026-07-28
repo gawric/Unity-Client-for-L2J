@@ -81,4 +81,6 @@ public enum GameInterludeServerPacketType : byte
     SpawnItem = 0x0b,
     DropItem = 0x0c,
     GetItem = 0x0d,
+
+    ShowBoard = 0x6e,
 }

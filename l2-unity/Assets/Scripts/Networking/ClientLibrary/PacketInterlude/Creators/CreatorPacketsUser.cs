@@ -250,4 +250,9 @@ public class CreatorPacketsUser
         return new RequestTargetCanceld();
     }
 
+    public static RequestShowBoard CreateRequestShowBoard()
+    {
+        return new RequestShowBoard();
+    }
+
 }

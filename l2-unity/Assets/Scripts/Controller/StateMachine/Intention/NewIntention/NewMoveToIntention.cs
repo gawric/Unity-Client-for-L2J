@@ -44,12 +44,42 @@ public class NewMoveToIntention : IntentionBase
 
     private void StartAnimMoveTo()
     {
+        PlayerState before = _stateMachine.State;
+        bool runningFlag = PlayerEntity.Instance != null && PlayerEntity.Instance.Running;
+
         if (_stateMachine.State == PlayerState.IDLE |
             _stateMachine.State == PlayerState.ATTACKING |
             _stateMachine.State == PlayerState.PHYSICAL_SKILLS)
         {
+            // Leaving combat/skills for locomotion — clear attack latch so WAIT_RETURN/ATK_WAIT don't stick.
+            if (PlayerEntity.Instance != null)
+            {
+                PlayerEntity.Instance.IsAttack = false;
+            }
+
+            Debug.Log(
+                $"[SS_CHARGE_SM] MoveTo.StartAnimMoveTo beforeState={before} " +
+                $"player.Running={runningFlag} → ChangeState(WALKING) + MOVE_TO");
+
             _stateMachine.ChangeState(PlayerState.WALKING);
             _stateMachine.NotifyEvent(Event.MOVE_TO);
+        }
+        else if (_stateMachine.State == PlayerState.RUNNING ||
+                 _stateMachine.State == PlayerState.WALKING)
+        {
+            // Already locomoting — still re-fire MOVE_TO so RUN/WALK anim restarts
+            // if ATK_WAIT / attack end left the animator on wait while state stayed RUNNING.
+            Debug.Log(
+                $"[SS_CHARGE_SM] MoveTo.StartAnimMoveTo beforeState={before} " +
+                $"player.Running={runningFlag} → keep state, re-Notify MOVE_TO (refresh anim)");
+
+            _stateMachine.NotifyEvent(Event.MOVE_TO);
+        }
+        else
+        {
+            Debug.Log(
+                $"[SS_CHARGE_SM] MoveTo.StartAnimMoveTo beforeState={before} " +
+                $"player.Running={runningFlag} → NO anim refresh");
         }
     }
 
