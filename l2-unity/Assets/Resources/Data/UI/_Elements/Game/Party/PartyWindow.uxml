@@ -1,13 +1,24 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
     <Style src="project://database/Assets/Resources/Data/UI/_Elements/L2StyleSheet.uss?fileID=7433441132597879392&amp;guid=72e99cc94b130bf4ba100dceaa830b13&amp;type=3#L2StyleSheet" />
-    <ui:GroupBox name="PartyWindow" class="party-window" style="width: 176px; height: auto; max-height: 420px; flex-direction: column; margin: 0; padding: 0; background-color: rgba(0, 0, 0, 0); top: 90px; left: 3px;">
-        <ui:GroupBox name="CenterContainer" class="ui-bg" style="flex-direction: column; flex-grow: 1; padding-top: 3px; padding-right: 3px; padding-bottom: 3px; padding-left: 3px; margin: 0;">
-            <ui:VisualElement name="HeaderRow" class="drag-area" style="flex-direction: row; align-items: center; height: 14px; margin-bottom: 3px;">
-                <ui:Button text="&#9634;" name="ToggleSizeButton" style="width: 14px; height: 14px; font-size: 8px; margin: 0 2px 0 0; padding: 0; -unity-text-align: middle-center;" />
-                <ui:Button text="E" name="ToggleEffectsButton" style="width: 14px; height: 14px; font-size: 8px; margin: 0; padding: 0; -unity-text-align: middle-center;" />
-                <ui:VisualElement style="flex-grow: 1;" />
+    <ui:GroupBox name="PartyWindow" class="party-window drag-area" style="width: 175px; height: 46px; align-self: auto; justify-content: space-evenly; align-items: flex-start; flex-direction: row; margin-top: -1px; margin-right: -1px; margin-bottom: -1px; margin-left: -2px; padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0; background-color: rgba(0, 0, 0, 0); transform-origin: left top; max-width: 175px; max-height: 46px;">
+        <ui:VisualElement name="Frame_DF_Ver" template="Frame_DF_Ver" class="drag-area" style="height: auto; width: 16px; max-width: 16px; flex-grow: 1; align-items: flex-start; justify-content: flex-start; align-self: auto; -unity-background-scale-mode: stretch-to-fill; padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0; margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0;">
+            <ui:GroupBox name="Frame_DF_Ver" style="height: auto; width: 16px; max-width: 16px; margin-top: -1px; margin-right: 0; margin-bottom: 0; margin-left: 0; padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0; flex-grow: 1;">
+                <ui:VisualElement style="flex-grow: 1; background-image: url(&quot;project://database/Assets/Resources/Data/UI/Frame/Frame_DF_Ver/Frame_DF_Ver_Small_Top.png?fileID=2800000&amp;guid=3616eb66b6343964d92d1c6d7d5a936d&amp;type=3#Frame_DF_Ver_Small_Top&quot;); height: 8px; max-height: 8px;" />
+                <ui:VisualElement name="VisualElement" style="flex-grow: 1; background-image: url(&quot;project://database/Assets/Resources/Data/UI/Frame/Frame_DF_Ver/Frame_DF_Ver_Small_Center.png?fileID=2800000&amp;guid=3adb856d45b78b242a89388ef2b70652&amp;type=3#Frame_DF_Ver_Small_Center&quot;);" />
+                <ui:VisualElement name="VisualElement" style="flex-grow: 1; background-image: url(&quot;project://database/Assets/Resources/Data/UI/Frame/Frame_DF_Ver/Frame_DF_Ver_Small_Center.png?fileID=2800000&amp;guid=3adb856d45b78b242a89388ef2b70652&amp;type=3#Frame_DF_Ver_Small_Center&quot;);" />
+                <ui:VisualElement name="VisualElement" style="flex-grow: 1; background-image: url(&quot;project://database/Assets/Resources/Data/UI/Frame/Frame_DF_Ver/Frame_DF_Ver_Small_Bottom.png?fileID=2800000&amp;guid=4e98b48730be8f04ba5e021a1a1a32bc&amp;type=3#Frame_DF_Ver_Small_Bottom&quot;); height: 8px; max-height: 8px;" />
+            </ui:GroupBox>
+        </ui:VisualElement>
+        <ui:GroupBox name="CenterContainer" class="ui-bg ui-border" style="flex-grow: 1; margin-top: 1px; margin-right: 1px; margin-bottom: 2px; margin-left: 0; padding-top: 4px; padding-right: 5px; padding-bottom: 2px; padding-left: 4px; height: auto; border-right-width: 0; border-bottom-width: 0; border-left-width: 0; flex-shrink: 0; flex-direction: column; align-items: auto; align-self: stretch;">
+            <ui:VisualElement style="flex-grow: 1;">
+                <ui:VisualElement style="flex-grow: 1; max-width: 147px; width: 147px;">
+                    <ui:VisualElement name="MemberList" data-source-type="System.Linq.Expressions.MemberListBinding, System.Core" style="flex-direction: column; align-self: flex-start;" />
+                </ui:VisualElement>
             </ui:VisualElement>
-            <ui:VisualElement name="MemberList" style="flex-direction: column; flex-grow: 1;" />
         </ui:GroupBox>
+        <ui:VisualElement name="SizeControl" style="flex-grow: 1; flex-shrink: 0; height: auto; max-width: 5px; margin-top: 1px; margin-bottom: 2px; flex-direction: column; justify-content: flex-start; align-items: auto; margin-right: 0; margin-left: -3px; padding-top: 0; padding-bottom: 0; flex-basis: auto; padding-right: 0; padding-left: 0; background-image: url(&quot;project://database/Assets/Resources/Data/UI/Frame/Frame_DF_Ver/ps_sizecontrol1.png?fileID=2800000&amp;guid=4fee6573590340f46b46bf6fd6a7834c&amp;type=3#ps_sizecontrol1&quot;); -unity-slice-scale: 1px; -unity-slice-top: 3; -unity-slice-bottom: 3; -unity-slice-right: 0; -unity-slice-left: 0; width: 5px;">
+            <ui:VisualElement name="SizeControl" class="hor-resize-handle resize-hor" style="flex-grow: 1; flex-shrink: 0; height: 16px; max-width: 16px; margin-top: 0; margin-bottom: 0; flex-direction: column; justify-content: flex-start; align-items: auto; margin-right: 0; margin-left: 0; padding-top: 0; padding-bottom: 0; flex-basis: auto; padding-right: 0; padding-left: 0; background-image: url(&quot;project://database/Assets/Resources/Data/UI/Frame/Frame_DF_Ver/ps_sizecontrol2.png?fileID=2800000&amp;guid=79a5ea15512e50b41ab4f842c26a184f&amp;type=3#ps_sizecontrol2&quot;); -unity-slice-scale: 0; -unity-slice-top: 0; -unity-slice-bottom: 0; -unity-slice-right: 8; -unity-slice-left: 0; width: 7px; max-height: 16px; position: absolute; top: 5px; left: 0;" />
+            <ui:VisualElement style="flex-grow: 1;" />
+        </ui:VisualElement>
     </ui:GroupBox>
 </ui:UXML>

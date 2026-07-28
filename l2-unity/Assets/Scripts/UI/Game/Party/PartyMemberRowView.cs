@@ -23,6 +23,7 @@ public class PartyMemberRowView
     private readonly VisualElement[] _buffIcons;
 
     private bool _forceHideBuffRow;
+    private PartyMemberData _lastMember;
 
     public PartyMemberRowView(VisualElement root)
     {
@@ -41,6 +42,23 @@ public class PartyMemberRowView
         {
             _buffIcons[i] = root.Q<VisualElement>("BuffIcon" + i);
         }
+
+        // The bar background's resolvedStyle.width is 0 until UI Toolkit has actually run a layout
+        // pass for this row (e.g. right when a member is first bound, before the row has ever been
+        // laid out) - reapplying the ratio here once real geometry is known is what makes the bars
+        // fill in correctly on the very first display, not just after a later HP/MP change forces
+        // a second RefreshStats call.
+        _cpBarBg?.RegisterCallback<GeometryChangedEvent>(OnBarGeometryChanged);
+        _hpBarBg?.RegisterCallback<GeometryChangedEvent>(OnBarGeometryChanged);
+        _mpBarBg?.RegisterCallback<GeometryChangedEvent>(OnBarGeometryChanged);
+    }
+
+    private void OnBarGeometryChanged(GeometryChangedEvent evt)
+    {
+        if (_lastMember != null)
+        {
+            RefreshStats(_lastMember);
+        }
     }
 
     public void Show(bool show)
@@ -56,6 +74,8 @@ public class PartyMemberRowView
 
     public void RefreshStats(PartyMemberData member)
     {
+        _lastMember = member;
+
         if (_nameLabel != null)
         {
             _nameLabel.text = member.Name;

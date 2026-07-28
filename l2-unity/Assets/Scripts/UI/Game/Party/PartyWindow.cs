@@ -7,6 +7,7 @@ using UnityEngine.UIElements;
 /// Party roster HUD - a fixed pool of PartyMemberRow instances (party is capped at 9 members,
 /// i.e. 8 others besides the local player), kept in sync with PartyManager's live state.
 /// Auto-shows/hides based on whether the local player is currently in a party.
+/// Stripped down to name + CP/HP/MP bars for now - no header controls, no buffs yet.
 /// </summary>
 public class PartyWindow : L2Window
 {
@@ -59,11 +60,14 @@ public class PartyWindow : L2Window
         dragArea.AddManipulator(drag);
 
         _memberListContainer = GetElementById("MemberList");
-        _toggleSizeButton = (Button)GetElementById("ToggleSizeButton");
-        _toggleEffectsButton = (Button)GetElementById("ToggleEffectsButton");
 
-        _toggleSizeButton.RegisterCallback<ClickEvent>(OnToggleSizeClicked);
-        _toggleEffectsButton.RegisterCallback<ClickEvent>(OnToggleEffectsClicked);
+        // Optional - the current layout doesn't have these yet. Wired up only if/when present,
+        // instead of assuming they exist and crashing BuildWindow's coroutine if they don't.
+        _toggleSizeButton = _windowEle.Q<Button>("ToggleSizeButton");
+        _toggleEffectsButton = _windowEle.Q<Button>("ToggleEffectsButton");
+
+        _toggleSizeButton?.RegisterCallback<ClickEvent>(OnToggleSizeClicked);
+        _toggleEffectsButton?.RegisterCallback<ClickEvent>(OnToggleEffectsClicked);
 
         for (int i = 0; i < MAX_VISIBLE_MEMBERS; i++)
         {
@@ -77,7 +81,6 @@ public class PartyWindow : L2Window
 
         yield return new WaitForEndOfFrame();
 
-        Debug.Log("[PartyDebug] PartyWindow.BuildWindow complete.");
         SubscribeToPartyManager();
         RefreshFromManagerState();
     }
@@ -93,7 +96,6 @@ public class PartyWindow : L2Window
         PartyManager.Instance.OnPartyChanged += OnPartyChanged;
         PartyManager.Instance.OnMemberUpdated += OnMemberUpdated;
         PartyManager.Instance.OnMemberBuffsUpdated += OnMemberBuffsUpdated;
-        Debug.Log("[PartyDebug] PartyWindow subscribed to PartyManager events.");
     }
 
     private void UnsubscribeFromPartyManager()
@@ -146,8 +148,6 @@ public class PartyWindow : L2Window
         {
             _rows[i].Show(false);
         }
-
-        Debug.Log($"[PartyDebug] OnPartyChanged: rowsBound={rowIndex}, IsInParty={PartyManager.Instance.IsInParty} -> {(PartyManager.Instance.IsInParty ? "ShowWindow" : "HideWindow")}");
 
         if (PartyManager.Instance.IsInParty)
         {
