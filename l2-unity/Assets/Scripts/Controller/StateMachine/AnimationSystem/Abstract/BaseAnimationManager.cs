@@ -183,6 +183,17 @@ public abstract class BaseAnimationManager
         }
     }
 
+    /// <summary>
+    /// Code-driven locomotion entry via <see cref="PlayerLocomotionCrossFade"/>.
+    /// </summary>
+    protected bool PlayLocomotionCrossFade(
+        IAnimationController controller,
+        string stateName,
+        float? fixedDuration = null)
+    {
+        return PlayerLocomotionCrossFade.TryPlay(controller, stateName, fixedDuration);
+    }
+
 
     protected void SetRecentName(int objectId, string animationName)
     {

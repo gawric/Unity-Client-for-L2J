@@ -105,18 +105,28 @@ public abstract class AbstractAttackEvents : StateBase
     {
         foreach (Animation special in _specialsBows)
         {
-            
-            if (animName == special.ToString())
+            if (animName != special.ToString())
             {
-                if(special.Type == TypesAnimation.MagicAttack && special.Phase != MagicPhase.End)
-                {
-                    return;
-                }
-
-                PlayerStateMachine.Instance.ChangeIntention(Intention.INTENTION_IDLE);
-                PlayerStateMachine.Instance.NotifyEvent(Event.WAIT_RETURN);
-                break;
+                continue;
             }
+
+            if (special.Type == TypesAnimation.MagicAttack && special.Phase != MagicPhase.End)
+            {
+                return;
+            }
+
+            // Melee jatk / SpAtk return is owned by SMB SwitchToIdle (not Complete).
+            // A second WAIT_RETURN CrossFades mid-transition and can freeze the Animator.
+            if (special.Type == TypesAnimation.MeleeAttack ||
+                (!string.IsNullOrEmpty(animName) &&
+                 animName.StartsWith("SpAtk", System.StringComparison.Ordinal)))
+            {
+                return;
+            }
+
+            PlayerStateMachine.Instance.ChangeIntention(Intention.INTENTION_IDLE);
+            PlayerStateMachine.Instance.NotifyEvent(Event.WAIT_RETURN);
+            break;
         }
     }
 

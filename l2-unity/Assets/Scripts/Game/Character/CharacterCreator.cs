@@ -213,9 +213,9 @@ public class CharacterCreator : MonoBehaviour
         UserGear gear = pawnObject.GetComponent<UserGear>();
         BaseAnimationController animController = pawnObject.GetComponent<BaseAnimationController>();
         animController.Initialize();
-        string nameAnim = "wait_" + gear.WeaponAnim;
-        animController.SetBool("wait_" + gear.WeaponAnim, true);
-        //animController.SetWaitSpeedLobby("wait_" + gear.WeaponAnim, 0.1f);
+        // Unarmed starter → wait_hand; armed → wait_1HS / wait_bow / …
+        string waitState = AnimationNames.WAIT.ToString() + gear.WeaponAnim;
+        AnimationManager.Instance.PlayLobbyLocomotion(animController, waitState);
     }
 
     public void UpdatePawnPosAndRot(GameObject pawnObject, Logongrp pawnData) {

@@ -158,12 +158,42 @@ public class BaseAnimationController : AnimationEventsBase, IAnimationController
         _animator.CrossFade(name, duration, 0);
     }
 
+    public void CrossFadeInFixedTime(string stateName, float fixedDuration, int layer = 0)
+    {
+        if (_animator == null || string.IsNullOrEmpty(stateName))
+        {
+            return;
+        }
+
+        _animator.CrossFadeInFixedTime(stateName, fixedDuration, layer);
+        _lastAnimationVariableName = stateName;
+        Debug.Log(
+            $"[ANIM_CROSSFADE] launch state={stateName} fixedDuration={fixedDuration:F3}s layer={layer}");
+    }
+
+    public Animator GetAnimator() => _animator;
+
+    public void ReleasePriorityQueueIfBusy(string reason)
+    {
+        ForceReleasePriorityQueue(reason);
+    }
+
+    public void NotifyPriorityAttackStarting(string stateName)
+    {
+        if (string.IsNullOrEmpty(stateName))
+        {
+            return;
+        }
+
+        IfSpecialAnimationsCreateProcessQueue(stateName, ref _isProcessingQueue, _priorityAnimations, true);
+    }
+
     public void SetBool(string name, bool value , string entityName = "")
     {
         const string ANIM_Q_LOG = "[ANIM_PRIORITY_Q]";
 
         // Walk/run/wait must never stay blocked behind an interrupted jatk that never got OnAnimationComplete.
-        if (value && IsLocomotionOrWaitAnim(name) && (_isProcessingQueue || HasAnyActivePriorityFlag()))
+        if (value && PlayerLocomotionCrossFade.IsLocomotionStateName(name) && (_isProcessingQueue || HasAnyActivePriorityFlag()))
         {
             ForceReleasePriorityQueue($"locomotion_bypass:{name}");
         }
@@ -247,15 +277,6 @@ public class BaseAnimationController : AnimationEventsBase, IAnimationController
                 $"[ANIM_PRIORITY_Q] SKIP enqueue anim={animName} — already a priority key " +
                 $"flag={priorityAnimations[animName]} isProcessingQueue={_isProcessingQueue}");
         }
-    }
-
-    private static bool IsLocomotionOrWaitAnim(string name)
-    {
-        if (string.IsNullOrEmpty(name)) return false;
-        return name.StartsWith("walk", StringComparison.OrdinalIgnoreCase)
-            || name.StartsWith("run", StringComparison.OrdinalIgnoreCase)
-            || name.StartsWith("wait", StringComparison.OrdinalIgnoreCase)
-            || name.StartsWith("atkwait", StringComparison.OrdinalIgnoreCase);
     }
 
     private bool HasAnyActivePriorityFlag()

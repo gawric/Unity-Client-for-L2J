@@ -350,6 +350,15 @@ public class FastSinglExecuter : MonoBehaviour
                 entity.SetDead(true);
                 var monsterEnity = (MonsterEntity)entity;
                 MonsterDead(monsterEnity);
+
+                // Clear attack latch so JAtk SwitchToIdle can leave the swing even if
+                // a follow-up Attack already set IsAttack=true before Die was processed.
+                if (PlayerEntity.Instance != null &&
+                    PlayerEntity.Instance.TargetId == diePacket.ObjectId)
+                {
+                    PlayerEntity.Instance.IsAttack = false;
+                }
+
                 Debug.Log(
                     $"{PKT_ORD_LOG} #{seq} DIE → OnWaitReturn (monster dead) {PktStampMain()} " +
                     $"playerState={playerState}");

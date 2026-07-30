@@ -183,20 +183,24 @@ public class PlayerStateJAtk : StateMachineBehaviour
 
     private void SwitchToIdle(AnimatorStateInfo stateInfo)
     {
-        float currentNormalizedTime = stateInfo.normalizedTime;
-
-        if (!_isSwitchIdle && currentNormalizedTime > 0.9f &&
-            (IsDieTarget() || (PlayerEntity.Instance != null && !PlayerEntity.Instance.IsAttack)))
+        // Only called after wall-clock attack cycle ends. Do not also require anim norm —
+        // pole/slow clips can still be <0.9 when server cycle is done; that skipped WAIT_RETURN.
+        bool dieTarget = IsDieTarget();
+        bool isAttack = PlayerEntity.Instance != null && PlayerEntity.Instance.IsAttack;
+        bool canSwitch = !_isSwitchIdle && (dieTarget || !isAttack);
+        if (!canSwitch)
         {
-            if (PlayerEntity.Instance != null)
-            {
-                PlayerEntity.Instance.IsAttack = false;
-            }
-
-            _isSwitchIdle = true;
-            PlayerStateMachine.Instance.ChangeIntention(Intention.INTENTION_IDLE);
-            PlayerStateMachine.Instance.NotifyEvent(Event.WAIT_RETURN);
+            return;
         }
+
+        if (PlayerEntity.Instance != null)
+        {
+            PlayerEntity.Instance.IsAttack = false;
+        }
+
+        _isSwitchIdle = true;
+        PlayerStateMachine.Instance.ChangeIntention(Intention.INTENTION_IDLE);
+        PlayerStateMachine.Instance.NotifyEvent(Event.WAIT_RETURN);
     }
 
     private bool IsDieTarget()
@@ -206,8 +210,15 @@ public class PlayerStateJAtk : StateMachineBehaviour
             return false;
         }
 
-        Entity entity = World.Instance.GetEntityNoLockSync(PlayerEntity.Instance.TargetId);
-        return entity != null && entity.IsDead();
+        int targetId = PlayerEntity.Instance.TargetId;
+        if (targetId == 0)
+        {
+            return false;
+        }
+
+        // Despawned after Die → null; treat as dead so we still leave jatk.
+        Entity entity = World.Instance.GetEntityNoLockSync(targetId);
+        return entity == null || entity.IsDead();
     }
 
     private void StopAnimationTrigger(Animator animator, string animParameterName)

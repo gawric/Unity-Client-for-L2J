@@ -54,13 +54,90 @@ public class AnimationManager : BaseAnimationManager , IAnimationManager
         string finalAnimName = GetFinalNameAnim(objectId , animationName );
 
         Entity entity = GetEntity(objectId);
+
+        // Locomotion: wait_/walk_/run_/atkwait_* → CrossFadeInFixedTime (bool graph bypass).
+        if (PlayerLocomotionAnim.TryResolve(finalAnimName, out string locoStateName, out PlayerLocomotionFamily family))
+        {
+            // Dedicated AtkWait path — breakpoint here to see callers / skip vs play.
+            if (family == PlayerLocomotionFamily.AtkWait)
+            {
+                HandleAtkWaitCrossFade(objectId, controller, locoStateName);
+                return;
+            }
+
+            if (PlayerLocomotionCrossFade.ShouldSkip(controller, locoStateName, GetCurrentAnimationName(objectId)))
+            {
+                SetRecentName(objectId, locoStateName);
+                Debug.Log(
+                    $"AnimationManager> skip crossfade {family} player {entity.name} " +
+                    $"state={locoStateName} reason=already_playing");
+                return;
+            }
+
+            DesableLastPlayerAnimationElseTrue(objectId, controller);
+            SetRecentName(objectId, locoStateName);
+            PlayerLocomotionCrossFade.TryPlay(controller, locoStateName);
+            Debug.Log(
+                $"AnimationManager> start crossfade {family} player {entity.name} " +
+                $"state={locoStateName} duration={LocomotionCrossFadeSettings.FixedDuration:F3}s");
+            return;
+        }
+
         DesableLastPlayerAnimationElseTrue(objectId, controller);
-
-
         SetRecentName(objectId , finalAnimName);
    
         controller.SetBool(finalAnimName, true, entity.name);
         Debug.Log($"AnimationManager> start bool name player  {entity.name} animation {finalAnimName}");
+    }
+
+    /// <summary>
+    /// Lobby character select / create pawns (no World Entity id).
+    /// Full name e.g. wait_hand, walk_1HS — same CrossFade path as in-world locomotion.
+    /// </summary>
+    public void PlayLobbyLocomotion(IAnimationController controller, string stateOrPrefixWithWeapon)
+    {
+        if (controller == null || string.IsNullOrEmpty(stateOrPrefixWithWeapon))
+        {
+            return;
+        }
+
+        if (!PlayerLocomotionAnim.TryResolve(stateOrPrefixWithWeapon, out string stateName, out PlayerLocomotionFamily family))
+        {
+            Debug.LogWarning(
+                $"AnimationManager> lobby locomotion unresolved '{stateOrPrefixWithWeapon}'");
+            return;
+        }
+
+        // Always play — lobby has no recent-name cache; force pose on place / walk stop.
+        controller.ReleasePriorityQueueIfBusy($"lobby_locomotion:{stateName}");
+        controller.CrossFadeInFixedTime(stateName, LocomotionCrossFadeSettings.FixedDuration);
+        Debug.Log(
+            $"AnimationManager> start crossfade lobby {family} state={stateName} " +
+            $"duration={LocomotionCrossFadeSettings.FixedDuration:F3}s");
+    }
+
+    /// <summary>
+    /// AtkWait only. Does not skip on "already playing" — code owns the pose after attack
+    /// (animator exit-transition + PlayAnimation used to race and sometimes skip).
+    /// </summary>
+    private void HandleAtkWaitCrossFade(
+        int objectId,
+        IAnimationController controller,
+        string atkWaitStateName)
+    {
+        DesableLastPlayerAnimationElseTrue(objectId, controller);
+        SetRecentName(objectId, atkWaitStateName);
+
+        // Leave attack playback rate so atkwait does not stay frozen at last swing speed.
+        controller.SetAnimatorSpeed(1f);
+        if (PlayerAnimationController.Instance != null)
+        {
+            PlayerAnimationController.Instance.SetPAtkSpeed(1f);
+        }
+
+        // Always CrossFade — even if animator already in atkwait (stale transition / same pose).
+        controller.ReleasePriorityQueueIfBusy($"atkwait_crossfade:{atkWaitStateName}");
+        controller.CrossFadeInFixedTime(atkWaitStateName, LocomotionCrossFadeSettings.FixedDuration);
     }
 
     public void PlayAnimationTrigger(int objectId, string animationName)
@@ -69,9 +146,48 @@ public class AnimationManager : BaseAnimationManager , IAnimationManager
         string triggerName = GetFinalNameAnim(objectId , animationName);
         Entity entity = GetEntity(objectId);
         DesableLastPlayerAnimationElseTrue(objectId, controller);
+
+        // Basic melee (jatk*) and SpAtk* → CrossFade; MagicShot/Cast stay on Trigger.
+        if (TryPlayCombatCrossFade(objectId, controller, entity, triggerName))
+        {
+            return;
+        }
+
         controller.ToggleAnimationTrigger(triggerName);
 
         Debug.Log($"AnimationManager> start trigger name player  {entity.name} animation {triggerName}");
+    }
+
+    /// <summary>
+    /// jatk01/02/03_* and SpAtk01/02_* → CrossFade + priority lock.
+    /// </summary>
+    private bool TryPlayCombatCrossFade(
+        int objectId,
+        IAnimationController controller,
+        Entity entity,
+        string resolvedStateName)
+    {
+        string stateName = null;
+        string family = null;
+        if (PlayerBasicAttackAnim.TryResolve(resolvedStateName, out stateName))
+        {
+            family = "basicAtk";
+        }
+        else if (PlayerSpAtkAnim.TryResolve(resolvedStateName, out stateName))
+        {
+            family = "spAtk";
+        }
+        else
+        {
+            return false;
+        }
+
+        SetRecentName(objectId, stateName);
+        PlayerBasicAttackCrossFade.TryPlay(controller, stateName);
+        Debug.Log(
+            $"AnimationManager> start crossfade {family} player {entity.name} " +
+            $"state={stateName} duration={LocomotionCrossFadeSettings.FixedDuration:F3}s");
+        return true;
     }
 
 
@@ -281,6 +397,12 @@ public class AnimationManager : BaseAnimationManager , IAnimationManager
             controller.ResetAnimationTrigger(CAST_TRIGGER_END_2P);
             controller.ResetAnimationTrigger(CAST_TRIGGER_SHOT_2P);
             ResetLongCastTriggers(controller);
+        }
+
+        // Skill runner / async path — same CrossFade for jatk / SpAtk as PlayAnimationTrigger.
+        if (TryPlayCombatCrossFade(objectId, controller, entity, animationName))
+        {
+            return;
         }
 
         controller.ToggleAnimationTrigger(animationName);

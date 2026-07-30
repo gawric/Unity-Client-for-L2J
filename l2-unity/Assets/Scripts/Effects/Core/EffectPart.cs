@@ -43,18 +43,25 @@ public abstract class EffectPart : MonoBehaviour
 
     protected void UpdateShaderFloat(string name, float value)
     {
-        if (targetRenderer != null)
+        if (targetRenderer == null)
         {
-            // Сначала получаем текущий блок из рендерера
-            targetRenderer.GetPropertyBlock(propBlock);
-
-            // Устанавливаем значение
-            propBlock.SetFloat(name, value);
-
-            // ПРИНУДИТЕЛЬНО отдаем его обратно
-            targetRenderer.SetPropertyBlock(propBlock);
+            return;
         }
 
+        // L2Particle calls Setup/PlayPart without Initialize — create on demand.
+        if (propBlock == null)
+        {
+            propBlock = new MaterialPropertyBlock();
+        }
+
+        // Сначала получаем текущий блок из рендерера
+        targetRenderer.GetPropertyBlock(propBlock);
+
+        // Устанавливаем значение
+        propBlock.SetFloat(name, value);
+
+        // ПРИНУДИТЕЛЬНО отдаем его обратно
+        targetRenderer.SetPropertyBlock(propBlock);
     }
 
 
