@@ -135,6 +135,7 @@ MonoBehaviour:
       destroyOnArrive: 1
       mirrorDualFlight: 0
   _serverHitLifetimeTailSeconds: 0
+  _matchLifetimeToSkillAnimation: 1
   _skipDestroyCompositeByLifetime: 0
   _useLight: 0
   _lightSettings: {fileID: 0}

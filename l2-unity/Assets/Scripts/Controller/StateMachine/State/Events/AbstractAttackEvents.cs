@@ -220,19 +220,24 @@ public abstract class AbstractAttackEvents : StateBase
     {
         if (!IsMeleeJatkAnim(animName))
         {
+            Debug.Log(
+                $"[HIT_FX] 2.CallBackAttackShot SKIP not-melee-jatk frame={Time.frameCount} anim={animName}");
             return;
         }
 
         PlayerEntity player = _stateMachine != null ? _stateMachine.Player : null;
         if (player == null || SwordCollisionService.Instance == null)
         {
+            Debug.LogWarning(
+                $"[HIT_FX] 2.CallBackAttackShot SKIP playerNull={player == null} " +
+                $"swordSvcNull={SwordCollisionService.Instance == null} anim={animName}");
             return;
         }
 
         Transform[] swordBasePoints = player.GetSwordBasePoints();
         if (swordBasePoints == null || swordBasePoints.Length <= 1)
         {
-            Debug.LogWarning($"[ATK_HIT_CHAIN] AttackShot SKIP — no sword points anim={animName}");
+            Debug.LogWarning($"[HIT_FX] 2.CallBackAttackShot SKIP no sword points anim={animName}");
             return;
         }
 
@@ -243,9 +248,18 @@ public abstract class AbstractAttackEvents : StateBase
             ? targetEntity.IdentityInterlude.Id
             : 0;
 
+        if (target == null)
+        {
+            Debug.LogWarning(
+                $"[HIT_FX] 2.CallBackAttackShot SKIP target=null anim={animName} " +
+                $"attackerId={attackerEntityId} targetEntityId={targetEntityId}");
+            return;
+        }
+
         Debug.Log(
-            $"[ATK_HIT_CHAIN] 2.AnimEvent_AttackShot frame={Time.frameCount} t={Time.time:F3} " +
-            $"anim={animName} attackerId={attackerEntityId} → EmitHitNow");
+            $"[HIT_FX] 2.CallBackAttackShot OK frame={Time.frameCount} t={Time.time:F3} " +
+            $"anim={animName} attackerId={attackerEntityId} targetId={targetEntityId} " +
+            $"target={target.name} → EmitHitFromAttackShot");
 
         if (SwordCollisionService.Instance != null &&
             attackerEntityId > 0 &&
@@ -317,21 +331,54 @@ public abstract class AbstractAttackEvents : StateBase
 
     private void OnHitColliderMonster(Transform attacker, Transform target, Vector3 hitPointCollider, Vector3 hitDirection)
     {
-        Entity entity = PlayerEntity.Instance.GetTargetEntity();
-       
+        string attackerName = attacker != null ? attacker.name : "null";
+        string targetName = target != null ? target.name : "null";
+        Entity entity = PlayerEntity.Instance != null ? PlayerEntity.Instance.GetTargetEntity() : null;
+
+        Debug.Log(
+            $"[HIT_FX] 5.OnHitColliderMonster frame={Time.frameCount} t={Time.time:F3} " +
+            $"attacker={attackerName} target={targetName} " +
+            $"playerTarget={(entity != null ? entity.name : "null")} " +
+            $"isMonster={entity is MonsterEntity} point={hitPointCollider}");
+
         if (entity is MonsterEntity)
         {
             MonsterEntity monster = (MonsterEntity)entity;
-         
-            if (!_stateMachine.Player.HitIsMissed())
+            bool missed = _stateMachine != null &&
+                          _stateMachine.Player != null &&
+                          _stateMachine.Player.HitIsMissed();
+
+            if (missed)
             {
-                
-                HitManager.Instance.HandleHitCollider(PlayerEntity.Instance , attacker, monster.GetStateMachine(), hitPointCollider, hitDirection);
+                Debug.Log(
+                    $"[HIT_FX] 5.OnHitColliderMonster SKIP HitIsMissed=true " +
+                    $"monster={monster.name} — EffectManager NOT called");
+            }
+            else if (HitManager.Instance == null)
+            {
+                Debug.LogWarning("[HIT_FX] 5.OnHitColliderMonster SKIP HitManager.Instance=null");
+            }
+            else
+            {
+                Debug.Log(
+                    $"[HIT_FX] 5.OnHitColliderMonster → HitManager.HandleHitCollider " +
+                    $"monster={monster.name}");
+                HitManager.Instance.HandleHitCollider(
+                    PlayerEntity.Instance,
+                    attacker,
+                    monster.GetStateMachine(),
+                    hitPointCollider,
+                    hitDirection);
             }
 
             IfMonsterDead(PlayerEntity.Instance.GetTargetEntity());
         }
-
+        else
+        {
+            Debug.Log(
+                $"[HIT_FX] 5.OnHitColliderMonster SKIP not MonsterEntity " +
+                $"type={(entity != null ? entity.GetType().Name : "null")}");
+        }
     }
 
     private void OnHitEffectProjectile(GameObject prefab, Transform target, Vector3 hitPointCollider, Vector3 hitDirection, int attackerEntityId)

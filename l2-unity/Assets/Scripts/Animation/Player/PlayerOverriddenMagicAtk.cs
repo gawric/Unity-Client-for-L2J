@@ -19,10 +19,14 @@ public class PlayerOverriddenMagicAtk : StateMachineBehaviour
     private const string ShotSourceForceSync = "ForceSync";
     private const string MagicSpeedTraceTag = "[MAGIC_SPEED_TRACE]";
 
+    private const string MagicExitLogTag = "[MAGIC_SMB_EXIT]";
+
     private MagicCastData _castData;
     private bool _isSwitchIdle;
     private float _stateEnterTime;
     private bool _forcedShotTriggered;
+    private float _lastExitDiagLogTime;
+    private float _clipLengthAtEnter;
 
     [Header("Settings")]
     public string parameterName; 
@@ -35,6 +39,7 @@ public class PlayerOverriddenMagicAtk : StateMachineBehaviour
         _isSwitchIdle = false;
         _forcedShotTriggered = false;
         _stateEnterTime = Time.time;
+        _lastExitDiagLogTime = -1f;
 
         _castData = PlayerEntity.Instance.GetMagicCastData();
         float targetSpeed = 1.0f;
@@ -49,6 +54,7 @@ public class PlayerOverriddenMagicAtk : StateMachineBehaviour
 
         // ПОЛУЧАЕМ ВРЕМЯ ИВЕНТА
         AnimationClip clip = AnimationDataCache.GetActiveClip(animator, layerIndex);
+        _clipLengthAtEnter = clip != null ? clip.length : stateInfo.length;
         if (clip != null)
         {
             _eventTimeInClip = AnimationDataCache.GetEventTimeByName(animator, clip, "OnAnimationShoot");
@@ -66,7 +72,9 @@ public class PlayerOverriddenMagicAtk : StateMachineBehaviour
             $"flight={(_castData != null ? _castData.FlightTime.ToString("F3") : "null")} " +
             $"shootAt={(_castData != null ? _castData.serverTimeToShoot.ToString("F3") : "null")} " +
             $"globalAtEnter={(_castData != null ? (Time.time - _castData.StartTime).ToString("F3") : "null")} " +
-            $"animSpeed={animator.speed:F3} animId={animator.GetInstanceID()}");
+            $"animSpeed={animator.speed:F3} clipLen={_clipLengthAtEnter:F3} " +
+            $"exitGate={(isFinalShotState ? "norm>=1→SwitchToIdle" : "no-SMB-exit")} " +
+            $"animId={animator.GetInstanceID()}");
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
         float globalSinceCastStart = (_castData != null) ? (Time.time - _castData.StartTime) : -1f;
@@ -111,12 +119,23 @@ public class PlayerOverriddenMagicAtk : StateMachineBehaviour
 
     override public void OnStateUpdate(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
-        if (_castData == null) return;
+        if (_castData == null)
+        {
+            // Without castData the whole update (including SwitchToIdle) is skipped.
+            if (isFinalShotState && (Time.time - _lastExitDiagLogTime) >= 0.5f)
+            {
+                _lastExitDiagLogTime = Time.time;
+                Debug.Log(
+                    $"{MagicExitLogTag} SKIP_UPDATE state={parameterName} reason=castData_null " +
+                    $"final={isFinalShotState} idx={stateIndex} norm={stateInfo.normalizedTime:F3} " +
+                    $"speed={animator.speed:F3} local={(Time.time - _stateEnterTime):F3}s");
+            }
+            return;
+        }
 
 
         float localElapsed = Time.time - _stateEnterTime;
         float globalElapsed = Time.time - _castData.StartTime;
-         Debug.Log($"[AnimLog] {parameterName} | Local: {localElapsed:F3}s | Global: {globalElapsed:F3}s | Layer: {layerIndex} | Animator: {animator.GetInstanceID()}");
 
         if (!_forcedShotTriggered && stateIndex == 1 && !isFinalShotState && ShouldUseForceSync(_castData))
         {
@@ -186,9 +205,47 @@ public class PlayerOverriddenMagicAtk : StateMachineBehaviour
         }
 
 
-        if (isFinalShotState && stateInfo.normalizedTime >= 1.0f)
+        if (isFinalShotState)
         {
-            SwitchToIdle();
+            if (_isSwitchIdle)
+            {
+                return;
+            }
+
+            bool normDone = stateInfo.normalizedTime >= 1.0f;
+            float speed = Mathf.Max(0.0001f, animator.speed);
+            float wallNeed = _clipLengthAtEnter / speed;
+            bool wallDone = localElapsed >= wallNeed;
+            bool wouldExit = normDone; // current gate only — wallDone is diag only
+
+            // Throttled while stuck; always log the moment the gate would fire.
+            bool shouldDiag =
+                wouldExit ||
+                _lastExitDiagLogTime < 0f ||
+                (localElapsed - _lastExitDiagLogTime) >= 0.5f;
+            if (shouldDiag)
+            {
+                _lastExitDiagLogTime = localElapsed;
+                Debug.Log(
+                    $"{MagicExitLogTag} CHECK state={parameterName} idx={stateIndex} " +
+                    $"local={localElapsed:F3}s global={globalElapsed:F3}s " +
+                    $"norm={stateInfo.normalizedTime:F3} (need>=1) normDone={normDone} " +
+                    $"speed={animator.speed:F3} clipLen={_clipLengthAtEnter:F3} wallNeed={wallNeed:F3}s wallDone={wallDone} " +
+                    $"alreadySwitched={_isSwitchIdle} gateWillCallSwitch={wouldExit && !_isSwitchIdle}");
+            }
+
+            if (normDone)
+            {
+                SwitchToIdle();
+            }
+        }
+        else if (_lastExitDiagLogTime < 0f || (localElapsed - _lastExitDiagLogTime) >= 1.0f)
+        {
+            // CastMid/CastEnd: confirm SMB is alive but exit gate is intentionally off.
+            _lastExitDiagLogTime = localElapsed;
+            Debug.Log(
+                $"{MagicExitLogTag} NO_EXIT_GATE state={parameterName} idx={stateIndex} final=False " +
+                $"local={localElapsed:F3}s norm={stateInfo.normalizedTime:F3} speed={animator.speed:F3}");
         }
     }
 
@@ -218,10 +275,22 @@ public class PlayerOverriddenMagicAtk : StateMachineBehaviour
 
     private void SwitchToIdle()
     {
-        if (_isSwitchIdle) return;
-        _isSwitchIdle = true;
+        if (_isSwitchIdle)
+        {
+            return;
+        }
 
-        PlayerEntity.Instance.IsAttack = false;
+        _isSwitchIdle = true;
+        float localElapsed = Time.time - _stateEnterTime;
+        Debug.Log(
+            $"{MagicExitLogTag} SwitchToIdle FIRE state={parameterName} local={localElapsed:F3}s " +
+            $"→ INTENTION_IDLE + WAIT_RETURN");
+
+        if (PlayerEntity.Instance != null)
+        {
+            PlayerEntity.Instance.IsAttack = false;
+        }
+
         PlayerStateMachine.Instance.ChangeIntention(Intention.INTENTION_IDLE);
         PlayerStateMachine.Instance.NotifyEvent(Event.WAIT_RETURN);
     }

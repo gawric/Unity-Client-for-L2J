@@ -119,12 +119,15 @@ public class L2Particle : BaseEffect, IRegisteredBillboard
             Debug.Log($"[L2Particle] SkipScheduledDestroyForDebug: '{name}' — DestoryEffect не вызывается.");
         }
 
-        if (ShouldTraceLifetime())
+        if (ShouldTraceLifetime() || IsPowerStrikeEffect())
         {
             Debug.Log(
-                $"[TA_LIFETIME_PLAY] effect='{name}' playAt={_playStartedAt:F3}s " +
+                $"[POWER_STRIKE_TIMING] FX_PLAY effect='{name}' playAt={_playStartedAt:F3}s " +
                 $"scheduledLife={(_settings != null ? _settings.defaultLifeTime : -1f):F3}s " +
-                $"scheduledHide={(_settings != null ? _settings.hideTime : -1f):F3}s skipDestroy={_skipScheduledDestroyForDebug}.");
+                $"scheduledHide={(_settings != null ? _settings.hideTime : -1f):F3}s " +
+                $"settingsAsset='{(_settings != null ? _settings.name : "null")}' " +
+                $"shaderLife={BuildShaderLifetimeRangesSnapshot()} " +
+                $"skipDestroy={_skipScheduledDestroyForDebug}.");
         }
 #endif
     }
@@ -197,13 +200,13 @@ public class L2Particle : BaseEffect, IRegisteredBillboard
     protected override void OnDestroy()
     {
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-        if (ShouldTraceLifetime())
+        if (ShouldTraceLifetime() || IsPowerStrikeEffect())
         {
             float now = Time.time;
             float elapsed = _playStartedAt > 0f ? now - _playStartedAt : -1f;
             Debug.Log(
-                $"[TA_LIFETIME_DESTROY] effect='{name}' now={now:F3}s elapsedSincePlay={elapsed:F3}s " +
-                $"configuredLife={(_settings != null ? _settings.defaultLifeTime : -1f):F3}s " +
+                $"[POWER_STRIKE_TIMING] FX_DESTROY effect='{name}' now={now:F3}s " +
+                $"wallLived={elapsed:F3}s configuredLife={(_settings != null ? _settings.defaultLifeTime : -1f):F3}s " +
                 $"castHit={(_castData != null ? _castData.HitTime : -1f):F3}s.");
         }
 #endif
@@ -213,6 +216,58 @@ public class L2Particle : BaseEffect, IRegisteredBillboard
     private bool ShouldTraceLifetime()
     {
         return !string.IsNullOrEmpty(name) && name.IndexOf(LifetimeTraceEffectName, System.StringComparison.OrdinalIgnoreCase) >= 0;
+    }
+
+    private bool IsPowerStrikeEffect()
+    {
+        return !string.IsNullOrEmpty(name) &&
+               name.IndexOf("power_striker", System.StringComparison.OrdinalIgnoreCase) >= 0;
+    }
+
+    private string BuildShaderLifetimeRangesSnapshot()
+    {
+        Renderer[] renderers = GetComponentsInChildren<Renderer>(true);
+        if (renderers == null || renderers.Length == 0)
+        {
+            return "no_renderers";
+        }
+
+        System.Text.StringBuilder sb = new System.Text.StringBuilder();
+        int logged = 0;
+        for (int i = 0; i < renderers.Length && logged < 6; i++)
+        {
+            Renderer r = renderers[i];
+            if (r == null)
+            {
+                continue;
+            }
+
+            Material[] mats = r.sharedMaterials;
+            if (mats == null)
+            {
+                continue;
+            }
+
+            for (int m = 0; m < mats.Length && logged < 6; m++)
+            {
+                Material mat = mats[m];
+                if (mat == null || !mat.HasProperty("_LifetimeRange"))
+                {
+                    continue;
+                }
+
+                Vector4 life = mat.GetVector("_LifetimeRange");
+                if (sb.Length > 0)
+                {
+                    sb.Append(" | ");
+                }
+
+                sb.Append(mat.name).Append(" life=(").Append(life.x.ToString("F3")).Append(',').Append(life.y.ToString("F3")).Append(')');
+                logged++;
+            }
+        }
+
+        return sb.Length > 0 ? sb.ToString() : "no_LifetimeRange";
     }
 
 }

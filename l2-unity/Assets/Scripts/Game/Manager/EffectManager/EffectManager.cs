@@ -31,6 +31,56 @@ public class EffectManager : MonoBehaviour
         instance.Play();
     }
 
+    /// <summary>
+    /// Melee skill FX attached to weapon (fallback: entity). Builds cast data with
+    /// <see cref="MagicCastData.SkillAnimationDuration"/> from SpAtk wall-time so composites
+    /// with Match Lifetime To Skill Animation end with the swing.
+    /// </summary>
+    public void PlayEffectSyncedToSkillAnimation(
+        int effectId,
+        Entity entity,
+        int hitTimeMs,
+        AnimationCombo animCombo)
+    {
+        if (entity == null)
+        {
+            Debug.LogWarning($"[SKILL_ANIM_FX] PlayEffectSyncedToSkillAnimation entity is null effectId={effectId}");
+            return;
+        }
+
+        Transform weapon = null;
+        if (entity is PlayerEntity player)
+        {
+            weapon = player.GetWeaponTransform();
+        }
+
+        Transform attach = weapon != null ? weapon : entity.transform;
+        MagicCastData castData = SkillAnimationCastDataBuilder.Build(entity, hitTimeMs, animCombo);
+
+        EffectDatabase.EffectData effectData = database != null
+            ? database.effects.Find(e => e.id == effectId)
+            : null;
+        float settingsLife = effectData != null && effectData.settings != null
+            ? effectData.settings.defaultLifeTime
+            : -1f;
+        float settingsHide = effectData != null && effectData.settings != null
+            ? effectData.settings.hideTime
+            : -1f;
+        string[] cycle = animCombo != null ? animCombo.GetAnimCycle() : null;
+
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        Debug.Log(
+            $"[SKILL_ANIM_FX] SPAWN now={Time.time:F3}s effectId={effectId} hitTimeMs={hitTimeMs} " +
+            $"hitSec={castData.HitTime:F3}s skillAnimDur={castData.SkillAnimationDuration:F3}s " +
+            $"effectSettingsLife={settingsLife:F3}s hide={settingsHide:F3}s " +
+            $"settingsAsset='{(effectData != null && effectData.settings != null ? effectData.settings.name : "null")}' " +
+            $"prefab='{(effectData != null && effectData.prefab != null ? effectData.prefab.name : "null")}' " +
+            $"animCycle={(cycle != null ? string.Join("->", cycle) : "null")} attach='{attach.name}'");
+#endif
+
+        PlayEffect(effectId, attach, castData);
+    }
+
     // L2 Action_Attack: FVector::Rotation(targetLoc - attackerLoc) on XZ.
     // shot_N_atk travel = local +X. LookRotation aligns +Z; yaw -90 maps +X onto dir
     // (yaw +90 was mapping +X onto -dir — cone flew back toward the player).
@@ -43,11 +93,18 @@ public class EffectManager : MonoBehaviour
 
     public void PlayerImpactEffect(int id, Vector3 point, Vector3 impactDirection, MagicCastData castData = null)
     {
-        var data = database.effects.Find(e => e.id == id);
+        Debug.Log(
+            $"[HIT_FX] 7.EffectManager.PlayerImpactEffect ENTER frame={Time.frameCount} t={Time.time:F3} " +
+            $"effectId={id} point={point} dir={impactDirection}");
+
+        var data = database != null ? database.effects.Find(e => e.id == id) : null;
 
         if (data == null || data.prefab == null || _activeEffectsContainer == null)
         {
-            Debug.LogWarning($"EffectManager: PlayEffect data == null || data.prefab == null || _activeEffectsContainer == null");
+            Debug.LogWarning(
+                $"[HIT_FX] 7.EffectManager SKIP Play failed effectId={id} " +
+                $"dataNull={data == null} prefabNull={data == null || data.prefab == null} " +
+                $"containerNull={_activeEffectsContainer == null}");
             return;
         }
 
@@ -109,6 +166,9 @@ public class EffectManager : MonoBehaviour
         }
 
         instance.Play();
+        Debug.Log(
+            $"[HIT_FX] 7.EffectManager PLAY OK spawn#{_impactSpawnCounter} effectId={id} " +
+            $"prefab={data.prefab.name} point={point}");
     }
 
     private static Vector3 hitPointFlat(Vector3 v)

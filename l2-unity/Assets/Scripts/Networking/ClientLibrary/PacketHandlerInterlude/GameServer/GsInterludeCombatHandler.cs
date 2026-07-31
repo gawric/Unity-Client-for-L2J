@@ -242,6 +242,19 @@ public class GsInterludeCombatHandler : ServerPacketHandler
                 {
                     PlayerEntity ent1 = (PlayerEntity)entity;
                     ent1.isAutoAttack = false;
+
+                    // AutoAttackStop during cast must not CrossFade wait_ — that FORCE-unlocks
+                    // CastMid/MagicShot mid-skill (Shield→Might mid-cast → wait).
+                    PlayerState castState = PlayerStateMachine.Instance.State;
+                    if (castState == PlayerState.MAGIC_SKILLS ||
+                        castState == PlayerState.PHYSICAL_SKILLS ||
+                        castState == PlayerState.ATTACKING)
+                    {
+                        Debug.Log(
+                            $"[StopAutoAttack] SKIP idle/ARRIVED — cast in progress state={castState}");
+                        return;
+                    }
+
                     if (!PlayerController.Instance.RunningToDestination & !ent1.IsDead())
                     {
                         PlayerStateMachine.Instance.ChangeState(PlayerState.IDLE);

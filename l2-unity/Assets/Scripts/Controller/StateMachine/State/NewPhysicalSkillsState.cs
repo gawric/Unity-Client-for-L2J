@@ -29,6 +29,15 @@ public class NewPhysicalSkillsState : AbstractAttackEvents
                 //not use bow atk
                 //RotateFaceToMonster(_stateMachine.Player);
                 SkillExecutor.Instance.ExecuteSkill(_stateMachine.Player, animComboAct, _events);
+                // Only skills with a ready EffectDatabase entry (e.g. Power Strike = 3).
+                if (useSkill.SkillId == 3)
+                {
+                    EffectManager.Instance.PlayEffectSyncedToSkillAnimation(
+                        useSkill.SkillId,
+                        _stateMachine.Player,
+                        useSkill.HitTime,
+                        animComboAct);
+                }
                 break;
             case Event.CANCEL:
                 Debug.Log("NewPhysicalSkillsState Use Sate> Отмена скорее всего запрос пришел из ActionFaild");
@@ -79,6 +88,7 @@ public class NewPhysicalSkillsState : AbstractAttackEvents
 
         }
     }
+
 
 
     private MagicSkillUse GetPayload(object payload)

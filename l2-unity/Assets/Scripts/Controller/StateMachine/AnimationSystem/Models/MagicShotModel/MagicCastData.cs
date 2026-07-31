@@ -37,6 +37,12 @@ public class MagicCastData
     public float HitTime;
     public float FlightTime;
 
+    /// <summary>
+    /// Wall-clock skill animation duration (e.g. SpAtk until SwitchToIdle).
+    /// When &gt; 0 and composite has Match Lifetime To Skill Animation, FX lifetime uses this instead of HitTime.
+    /// </summary>
+    public float SkillAnimationDuration;
+
     /// <summary>Неучтённые в таймлинке переходы/оверлапы (масштаб от server HitTime), только если penalty включён.</summary>
     public float AnimatorWallPenaltySeconds { get; private set; }
 

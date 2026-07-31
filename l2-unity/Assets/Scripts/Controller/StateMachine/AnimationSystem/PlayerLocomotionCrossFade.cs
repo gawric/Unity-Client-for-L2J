@@ -69,12 +69,20 @@ public static class PlayerLocomotionCrossFade
             return true;
         }
 
-        if (string.Equals(recentAnimationName, stateName, StringComparison.Ordinal))
+        // Trust Animator only. Recent-name short-circuit was wrong for MagicShot/Cast:
+        // PlayerAnimationTrigger never SetRecentName, so recent stays wait_* from before cast.
+        // WAIT_RETURN then skipped CrossFade → character stuck in MagicShot forever.
+        bool animPlaying = IsAlreadyPlaying(controller, stateName);
+        if (!animPlaying &&
+            !string.IsNullOrEmpty(recentAnimationName) &&
+            string.Equals(recentAnimationName, stateName, StringComparison.Ordinal))
         {
-            return true;
+            Debug.Log(
+                $"[ANIM_CROSSFADE] stale_recent_ignored recent={recentAnimationName} " +
+                $"want={stateName} (animator not in that state — will CrossFade)");
         }
 
-        return IsAlreadyPlaying(controller, stateName);
+        return animPlaying;
     }
 
     public static bool TryPlay(

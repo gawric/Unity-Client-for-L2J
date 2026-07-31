@@ -36,9 +36,9 @@ Material:
     - _ColorScaleCount: 4
     - _ColorScaleParam: 20
     - _FadeIn: 1
-    - _FadeInEndTime: 0.435
+    - _FadeInEndTime: 0.2132
     - _Fadeout: 1
-    - _FadeoutStartTime: 1.2
+    - _FadeoutStartTime: 0.588
     - _L2FxWorldCalibration: 1.8
     - _L2SpriteColorGammaToLinear: 0
     - _ManualAge: 0
@@ -62,7 +62,7 @@ Material:
     - _ColorMulMax: {r: 1, g: 1, b: 1, a: 0}
     - _ColorMulMin: {r: 1, g: 1, b: 1, a: 0}
     - _InitialDelayRange: {r: 0, g: 0, b: 0, a: 0}
-    - _LifetimeRange: {r: 1.5, g: 1.5, b: 0, a: 0}
+    - _LifetimeRange: {r: 0.735, g: 0.735, b: 0, a: 0}
     - _SizeKey0: {r: 0.25, g: 1.4, b: 0, a: 0}
     - _SizeKey1: {r: 0.65, g: 1.7, b: 0, a: 0}
     - _SizeKey2: {r: 0.9, g: 1.9, b: 0, a: 0}

@@ -44,8 +44,15 @@ public class HitManager : MonoBehaviour
         Vector3 hitCollider,
         Vector3 hitColliderDirection)
     {
+        string attackerName = attacker != null ? attacker.name : "null";
+        Debug.Log(
+            $"[HIT_FX] 6.HitManager.HandleHitCollider ENTER frame={Time.frameCount} t={Time.time:F3} " +
+            $"attacker={attackerName} smNull={targetStateMachine == null} " +
+            $"soulshot={(attaker != null && attaker.IsSoulshotCharged)} point={hitCollider}");
+
         if (targetStateMachine == null)
         {
+            Debug.LogWarning("[HIT_FX] 6.HitManager SKIP targetStateMachine=null");
             return;
         }
 
@@ -58,14 +65,26 @@ public class HitManager : MonoBehaviour
         Vector3 impactDir = ResolveSoulshotImpactDirection(attaker, targetEntity, hitCollider);
         Vector3 spawnPoint = ResolveSoulshotSpawnPoint(targetEntity, impactDir, hitCollider);
 
+        if (EffectManager.Instance == null)
+        {
+            Debug.LogWarning("[HIT_FX] 6.HitManager SKIP EffectManager.Instance=null");
+            return;
+        }
+
         if (attaker != null && attaker.IsSoulshotCharged)
         {
             LogSoulshotImpactOrientation(attaker, targetEntity, hitCollider, spawnPoint, impactDir);
+            Debug.Log(
+                $"[HIT_FX] 6.HitManager → EffectManager.PlayerImpactEffect " +
+                $"id={SoulshotImpactEffectId} (soulshot) spawn={spawnPoint} dir={impactDir}");
             EffectManager.Instance.PlayerImpactEffect(SoulshotImpactEffectId, spawnPoint, impactDir);
             attaker.IsSoulshotCharged = false;
         }
         else
         {
+            Debug.Log(
+                $"[HIT_FX] 6.HitManager → EffectManager.PlayerImpactEffect " +
+                $"id={NormalImpactEffectId} (normal) spawn={spawnPoint} dir={impactDir}");
             EffectManager.Instance.PlayerImpactEffect(NormalImpactEffectId, spawnPoint, impactDir);
         }
     }

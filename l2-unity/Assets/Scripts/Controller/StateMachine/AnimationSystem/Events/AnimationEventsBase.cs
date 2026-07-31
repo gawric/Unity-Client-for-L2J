@@ -84,104 +84,153 @@ public abstract class AnimationEventsBase : MonoBehaviour
     {
         animationName = NormalizeAnimationEventName(animationName);
 
-        if (_priorityAnimations.ContainsKey(animationName))
-        {
-            if (Time.frameCount == _lastDuplicateCompleteFrame &&
-                string.Equals(_lastDuplicateCompleteAnim, animationName, StringComparison.Ordinal))
-            {
-                Debug.Log(
-                    $"[ANIM_PRIORITY_Q] OnAnimationComplete DEDUP_FRAME anim={animationName} " +
-                    $"(same frame duplicate — flag NOT cleared)");
-                return;
-            }
+        // Clip events use base names (CastEnd / MagicShot). 2P/Long triggers lock CastEnd2P etc.
+        // Without remap, Complete=CastEnd + lock=CastEnd2P → STALE_IGNORE → runner never advances.
+        string eventName = animationName;
+        string lockKey = ResolvePriorityLockKeyForComplete(eventName);
 
-            float nowRt = Time.time;
-            if (_lastPriorityCompleteRealtime.TryGetValue(animationName, out float prevRt) &&
-                nowRt - prevRt < PriorityCompleteDebounceSeconds)
-            {
-                Debug.Log(
-                    $"[ANIM_PRIORITY_Q] OnAnimationComplete DEDUP_DEBOUNCE anim={animationName} " +
-                    $"dt={nowRt - prevRt:F3}s < {PriorityCompleteDebounceSeconds}s " +
-                    $"(flag NOT cleared — queue stays locked!)");
-                return;
-            }
-
-            bool wasTrue = _priorityAnimations[animationName];
-            var activeNow = _priorityAnimations.Where(kv => kv.Value).Select(kv => kv.Key).ToArray();
-
-            // Interrupted swing: flag already cleared when a newer jatk locked.
-            // Must NOT Idle/WAIT_RETURN — that FORCE-unlocks the live attack.
-            if (!wasTrue)
-            {
-                Debug.Log(
-                    $"[ANIM_PRIORITY_Q] OnAnimationComplete STALE_IGNORE anim={animationName} " +
-                    $"activePriority=[{string.Join(",", activeNow)}] " +
-                    $"(not live lock — skip Finished/Idle so next swing survives)");
-                return;
-            }
-
-            // Same-name re-lock: ignore Completes from the previous clip instance.
-            if (_suppressCompleteUntilRealtime.TryGetValue(animationName, out float suppressUntil) &&
-                nowRt < suppressUntil)
-            {
-                Debug.Log(
-                    $"[ANIM_PRIORITY_Q] OnAnimationComplete STALE_IGNORE anim={animationName} " +
-                    $"activePriority=[{string.Join(",", activeNow)}] " +
-                    $"remainSuppress={suppressUntil - nowRt:F3}s " +
-                    $"(same-name relock — skip Finished/Idle so new swing survives)");
-                return;
-            }
-
-            // Only the live priority anim may finish the queue / notify subscribers.
-            if (activeNow.Length > 0 &&
-                !activeNow.Any(a => string.Equals(a, animationName, StringComparison.Ordinal)))
-            {
-                Debug.Log(
-                    $"[ANIM_PRIORITY_Q] OnAnimationComplete STALE_IGNORE anim={animationName} " +
-                    $"activePriority=[{string.Join(",", activeNow)}] " +
-                    $"(complete is not the active lock)");
-                return;
-            }
-
-            _lastDuplicateCompleteFrame = Time.frameCount;
-            _lastDuplicateCompleteAnim = animationName;
-            _lastPriorityCompleteRealtime[animationName] = nowRt;
-
-            _priorityAnimations[animationName] = false;
-            _isProcessingQueue = false;
-
-            var activeLeft = _priorityAnimations.Where(kv => kv.Value).Select(kv => kv.Key).ToArray();
-            Debug.Log(
-                $"[ANIM_PRIORITY_Q] OnAnimationComplete CLEAR anim={animationName} wasTrue={wasTrue} " +
-                $"isProcessingQueue=False queueCount={_animationQueue.Count} " +
-                $"stillActive=[{string.Join(",", activeLeft)}] " +
-                $"queue=[{string.Join(",", _animationQueue)}]");
-
-            OnAnimationFinished?.Invoke(animationName);
-
-            if (_animationQueue.Count > 0)
-            {
-                var lastAnimation = _animationQueue.Last();
-
-                foreach(string animName in _animationQueue)
-                {
-                    Debug.Log($"AnimationManager> start name убираем в листе ожиданий iteration animName " +animName+ " _animationQueue  " + _animationQueue.Count);
-                }
-                
-
-                Debug.Log($"[ANIM_PRIORITY_Q] Drain queue → play last={lastAnimation}");
-                HandleQueueAnimation(lastAnimation);
-                _animationQueue.Clear();
-            }
-
-        }
-        else
+        if (!_priorityAnimations.ContainsKey(lockKey) && !_priorityAnimations.ContainsKey(eventName))
         {
             Debug.Log(
-                $"[ANIM_PRIORITY_Q] OnAnimationComplete IGNORED anim={animationName} " +
+                $"[ANIM_PRIORITY_Q] OnAnimationComplete IGNORED anim={eventName} " +
                 $"(not in priority dict — will NOT unlock queue)");
+            return;
         }
 
+        if (!_priorityAnimations.ContainsKey(lockKey))
+        {
+            lockKey = eventName;
+        }
+
+        if (Time.frameCount == _lastDuplicateCompleteFrame &&
+            string.Equals(_lastDuplicateCompleteAnim, lockKey, StringComparison.Ordinal))
+        {
+            Debug.Log(
+                $"[ANIM_PRIORITY_Q] OnAnimationComplete DEDUP_FRAME anim={eventName} lock={lockKey} " +
+                $"(same frame duplicate — flag NOT cleared)");
+            return;
+        }
+
+        float nowRt = Time.time;
+        if (_lastPriorityCompleteRealtime.TryGetValue(lockKey, out float prevRt) &&
+            nowRt - prevRt < PriorityCompleteDebounceSeconds)
+        {
+            Debug.Log(
+                $"[ANIM_PRIORITY_Q] OnAnimationComplete DEDUP_DEBOUNCE anim={eventName} lock={lockKey} " +
+                $"dt={nowRt - prevRt:F3}s < {PriorityCompleteDebounceSeconds}s " +
+                $"(flag NOT cleared — queue stays locked!)");
+            return;
+        }
+
+        bool wasTrue = _priorityAnimations[lockKey];
+        var activeNow = _priorityAnimations.Where(kv => kv.Value).Select(kv => kv.Key).ToArray();
+
+        if (!string.Equals(lockKey, eventName, StringComparison.Ordinal) && wasTrue)
+        {
+            Debug.Log(
+                $"[ANIM_PRIORITY_Q] OnAnimationComplete REMAP event={eventName} → lock={lockKey} " +
+                $"activePriority=[{string.Join(",", activeNow)}]");
+        }
+
+        // Interrupted swing: flag already cleared when a newer jatk locked.
+        // Must NOT Idle/WAIT_RETURN — that FORCE-unlocks the live attack.
+        if (!wasTrue)
+        {
+            Debug.Log(
+                $"[ANIM_PRIORITY_Q] OnAnimationComplete STALE_IGNORE anim={eventName} lock={lockKey} " +
+                $"activePriority=[{string.Join(",", activeNow)}] " +
+                $"(not live lock — skip Finished/Idle so next swing survives)");
+            return;
+        }
+
+        // Same-name re-lock: ignore Completes from the previous clip instance.
+        if (_suppressCompleteUntilRealtime.TryGetValue(lockKey, out float suppressUntil) &&
+            nowRt < suppressUntil)
+        {
+            Debug.Log(
+                $"[ANIM_PRIORITY_Q] OnAnimationComplete STALE_IGNORE anim={eventName} lock={lockKey} " +
+                $"activePriority=[{string.Join(",", activeNow)}] " +
+                $"remainSuppress={suppressUntil - nowRt:F3}s " +
+                $"(same-name relock — skip Finished/Idle so new swing survives)");
+            return;
+        }
+
+        // Only the live priority anim may finish the queue / notify subscribers.
+        if (activeNow.Length > 0 &&
+            !activeNow.Any(a => string.Equals(a, lockKey, StringComparison.Ordinal)))
+        {
+            Debug.Log(
+                $"[ANIM_PRIORITY_Q] OnAnimationComplete STALE_IGNORE anim={eventName} lock={lockKey} " +
+                $"activePriority=[{string.Join(",", activeNow)}] " +
+                $"(complete is not the active lock)");
+            return;
+        }
+
+        _lastDuplicateCompleteFrame = Time.frameCount;
+        _lastDuplicateCompleteAnim = lockKey;
+        _lastPriorityCompleteRealtime[lockKey] = nowRt;
+
+        _priorityAnimations[lockKey] = false;
+        _isProcessingQueue = false;
+
+        // Await expects clip event name (CastEnd), not trigger key (CastEnd2P).
+        string finishedName = SkillAnimationDatabase.ResolveOverrideCompletionEventName(lockKey);
+
+        var activeLeft = _priorityAnimations.Where(kv => kv.Value).Select(kv => kv.Key).ToArray();
+        Debug.Log(
+            $"[ANIM_PRIORITY_Q] OnAnimationComplete CLEAR anim={eventName} lock={lockKey} " +
+            $"finishedName={finishedName} wasTrue={wasTrue} " +
+            $"isProcessingQueue=False queueCount={_animationQueue.Count} " +
+            $"stillActive=[{string.Join(",", activeLeft)}] " +
+            $"queue=[{string.Join(",", _animationQueue)}]");
+
+        OnAnimationFinished?.Invoke(finishedName);
+
+        if (_animationQueue.Count > 0)
+        {
+            var lastAnimation = _animationQueue.Last();
+
+            foreach (string animName in _animationQueue)
+            {
+                Debug.Log($"AnimationManager> start name убираем в листе ожиданий iteration animName " + animName + " _animationQueue  " + _animationQueue.Count);
+            }
+
+            Debug.Log($"[ANIM_PRIORITY_Q] Drain queue → play last={lastAnimation}");
+            HandleQueueAnimation(lastAnimation);
+            _animationQueue.Clear();
+        }
+    }
+
+    /// <summary>
+    /// Maps Complete event (CastEnd) to the live priority lock (CastEnd2P / CastEndLong / …).
+    /// </summary>
+    private string ResolvePriorityLockKeyForComplete(string completeEventName)
+    {
+        if (string.IsNullOrEmpty(completeEventName))
+        {
+            return completeEventName;
+        }
+
+        if (_priorityAnimations.TryGetValue(completeEventName, out bool directLive) && directLive)
+        {
+            return completeEventName;
+        }
+
+        foreach (var kv in _priorityAnimations)
+        {
+            if (!kv.Value)
+            {
+                continue;
+            }
+
+            string completionForLock = SkillAnimationDatabase.ResolveOverrideCompletionEventName(kv.Key);
+            if (string.Equals(completionForLock, completeEventName, StringComparison.Ordinal))
+            {
+                return kv.Key;
+            }
+        }
+
+        return completeEventName;
     }
 
 
@@ -240,6 +289,10 @@ public abstract class AnimationEventsBase : MonoBehaviour
     public void AttackShot(string animationName)
     {
         animationName = NormalizeAnimationEventName(animationName);
+        int listeners = OnAnimationAttackShot != null ? OnAnimationAttackShot.GetInvocationList().Length : 0;
+        Debug.Log(
+            $"[HIT_FX] 1.AnimEvent AttackShot frame={Time.frameCount} t={Time.time:F3} " +
+            $"anim={animationName} listeners={listeners}");
         OnAnimationAttackShot?.Invoke(animationName);
     }
 

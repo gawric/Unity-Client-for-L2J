@@ -62,6 +62,11 @@ public class NewIdleState : StateBase
         bool useAtkWait = (_stateMachine.Player != null && _stateMachine.Player.isAutoAttack) || targetDead;
         var animation = useAtkWait ? AnimationNames.ATK_WAIT : AnimationNames.WAIT;
 
+        Debug.Log(
+            $"[MAGIC_WAIT_RETURN] Idle WAIT_RETURN → {(useAtkWait ? "atkwait_" : "wait_")} " +
+            $"autoAtk={(_stateMachine.Player != null && _stateMachine.Player.isAutoAttack)} " +
+            $"targetDead={targetDead} (deferred CrossFade)");
+
         // Defer one frame: CrossFade from inside JAtk OnStateUpdate is unreliable, and a
         // same-frame second CrossFade (Complete → CallBack) can leave the Animator stuck.
         PlayAnimationDeferred(animation);

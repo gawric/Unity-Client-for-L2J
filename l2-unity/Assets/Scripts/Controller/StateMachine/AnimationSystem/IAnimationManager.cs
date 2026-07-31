@@ -11,10 +11,13 @@ public interface IAnimationManager
     void PlayAnimation(int objectId , string animationName , bool disableTriggerAfterStart);
     public void PlayAnimationTrigger(int objectId , string triggerName);
 
-    Task AsyncPlayAnimationTrigger(int objectId, string animationName);
-    Task AsyncPlayAnimationRaceOverrides(int objectId, string tiggerName , string overrideAnimationName);
+    /// <returns>true = clip finished; false = superseded by a newer cast (do not IDLE/WAIT_RETURN).</returns>
+    Task<bool> AsyncPlayAnimationTrigger(int objectId, string animationName);
+    /// <returns>true = clip finished; false = superseded by a newer cast (do not IDLE/WAIT_RETURN).</returns>
+    Task<bool> AsyncPlayAnimationRaceOverrides(int objectId, string tiggerName , string overrideAnimationName);
     Task AsyncPlayLongCastLoopPhase(int objectId, string triggerName, string overrideAnimationName);
-    Task AsyncAwaitOverrideAnimationFinish(int objectId, string expectedFinishName);
+    /// <returns>true = finish event received; false = superseded by a newer cast.</returns>
+    Task<bool> AsyncAwaitOverrideAnimationFinish(int objectId, string expectedFinishName);
 
     public float[] GetOverrideClipsDurations(int objectId, string[] cycle);
     public float GetOverrideEventTimeByName(int objectId, string[] cycle , string eventName);

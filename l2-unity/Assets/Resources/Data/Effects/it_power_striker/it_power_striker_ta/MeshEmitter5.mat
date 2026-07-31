@@ -49,9 +49,9 @@ Material:
     - _ColorKey1Time: 1
     - _ColorScaleRepeats: 0
     - _FadeIn: 1
-    - _FadeInEndTime: 0.039
+    - _FadeInEndTime: 0.0191
     - _FadeOut: 1
-    - _FadeOutStartTime: 0.069
+    - _FadeOutStartTime: 0.0338
     - _L2FxWorldCalibration: 1.8
     - _L2SpriteColorGammaToLinear: 0
     - _ManualAge: 0
@@ -67,8 +67,8 @@ Material:
     - _ColorKey0: {r: 1, g: 1, b: 1, a: 1}
     - _ColorKey1: {r: 1, g: 1, b: 1, a: 1}
     - _ColorMultiplier: {r: 1, g: 1, b: 1, a: 0}
-    - _InitialDelayRange: {r: 0.5, g: 0.5, b: 0, a: 0}
-    - _LifetimeRange: {r: 0.4, g: 0.4, b: 0, a: 0}
+    - _InitialDelayRange: {r: 0.245, g: 0.245, b: 0, a: 0}
+    - _LifetimeRange: {r: 0.196, g: 0.196, b: 0, a: 0}
     - _SpinCCWorCW: {r: 0, g: 0, b: 0, a: 0}
     - _SpsYawPitchRollUc: {r: 0.3, g: 0.3, b: 0.3, a: 0}
     - _StartSpinPitchRangeUc: {r: 0, g: 1, b: 0, a: 0}

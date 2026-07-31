@@ -76,6 +76,8 @@ public class AnimationManager : BaseAnimationManager , IAnimationManager
 
             DesableLastPlayerAnimationElseTrue(objectId, controller);
             SetRecentName(objectId, locoStateName);
+            // MagicShot leaves animator.speed scaled (SpeedShot); wait must not keep that rate.
+            controller.SetAnimatorSpeed(1f);
             PlayerLocomotionCrossFade.TryPlay(controller, locoStateName);
             Debug.Log(
                 $"AnimationManager> start crossfade {family} player {entity.name} " +
@@ -154,6 +156,7 @@ public class AnimationManager : BaseAnimationManager , IAnimationManager
         }
 
         controller.ToggleAnimationTrigger(triggerName);
+        SetRecentName(objectId, triggerName);
 
         Debug.Log($"AnimationManager> start trigger name player  {entity.name} animation {triggerName}");
     }
@@ -192,18 +195,16 @@ public class AnimationManager : BaseAnimationManager , IAnimationManager
 
 
     //Async Wait End Event
-    public async Task AsyncPlayAnimationTrigger(int objectId, string triggerName)
+    public async Task<bool> AsyncPlayAnimationTrigger(int objectId, string triggerName)
     {
         float startedAt = Time.time;
         string expectedFinishName = GetFinalNameAnim(objectId, triggerName);
 
-      
         if (_tcsMap.TryGetValue(objectId, out var oldTcs))
         {
             oldTcs.TrySetResult(false);
         }
 
-    
         var tcs = new TaskCompletionSource<bool>();
         _tcsMap[objectId] = tcs;
         _expectedFinishNameByObjectId[objectId] = expectedFinishName;
@@ -215,18 +216,23 @@ public class AnimationManager : BaseAnimationManager , IAnimationManager
         Debug.Log($"[AnimAwait] START objectId={objectId} trigger='{triggerName}' mode=default now={Time.time:F3}");
         PlayerAnimationTrigger(objectId, triggerName);
 
-  
-        await tcs.Task;
-        _expectedFinishNameByObjectId.Remove(objectId);
-        Debug.Log($"[AnimAwait] END objectId={objectId} trigger='{triggerName}' mode=default elapsed={Time.time - startedAt:F3}s now={Time.time:F3}");
+        bool completed = await tcs.Task;
+        FinishOverrideAwait(objectId, tcs, expectedFinishName, completed);
+        Debug.Log(
+            $"[AnimAwait] {(completed ? "END" : "CANCELLED")} objectId={objectId} trigger='{triggerName}' " +
+            $"mode=default elapsed={Time.time - startedAt:F3}s now={Time.time:F3}");
+        return completed;
     }
 
-    public async Task AsyncPlayAnimationRaceOverrides(int objectId, string triggerName , string overrideAnimationName)
+    public async Task<bool> AsyncPlayAnimationRaceOverrides(int objectId, string triggerName , string overrideAnimationName)
     {
         float startedAt = Time.time;
         string expectedFinishName = SkillAnimationDatabase.ResolveOverrideCompletionEventName(triggerName);
         if (_tcsMap.TryGetValue(objectId, out var oldTcs))
         {
+            Debug.Log(
+                $"[AnimAwait] SUPERSEDE objectId={objectId} newTrigger='{triggerName}' " +
+                $"override='{overrideAnimationName}' (prev await → false, no WAIT_RETURN)");
             oldTcs.TrySetResult(false);
         }
 
@@ -249,13 +255,12 @@ public class AnimationManager : BaseAnimationManager , IAnimationManager
 
         PlayerAnimationTrigger(objectId, triggerName , false);
 
-
-
-        await tcs.Task;
-        _expectedFinishNameByObjectId.Remove(objectId);
+        bool completed = await tcs.Task;
+        FinishOverrideAwait(objectId, tcs, expectedFinishName, completed);
         Debug.Log(
-            $"[AnimAwait] END objectId={objectId} trigger='{triggerName}' override='{overrideAnimationName}' " +
-            $"mode=override elapsed={Time.time - startedAt:F3}s now={Time.time:F3}");
+            $"[AnimAwait] {(completed ? "END" : "CANCELLED")} objectId={objectId} trigger='{triggerName}' " +
+            $"override='{overrideAnimationName}' mode=override elapsed={Time.time - startedAt:F3}s now={Time.time:F3}");
+        return completed;
     }
 
     public async Task AsyncPlayLongCastLoopPhase(int objectId, string triggerName, string overrideAnimationName)
@@ -286,7 +291,7 @@ public class AnimationManager : BaseAnimationManager , IAnimationManager
             $"elapsed={Time.time - startedAt:F3}s now={Time.time:F3}");
     }
 
-    public async Task AsyncAwaitOverrideAnimationFinish(int objectId, string expectedFinishNameOrTrigger)
+    public async Task<bool> AsyncAwaitOverrideAnimationFinish(int objectId, string expectedFinishNameOrTrigger)
     {
         float startedAt = Time.time;
         string sanitizedExpected = SkillAnimationDatabase.ResolveOverrideCompletionEventName(
@@ -311,12 +316,41 @@ public class AnimationManager : BaseAnimationManager , IAnimationManager
 
         _ = WarnIfAwaitStuck(objectId, "await_finish", sanitizedExpected, startedAt);
 
-        await tcs.Task;
-        _expectedFinishNameByObjectId.Remove(objectId);
+        bool completed = await tcs.Task;
+        FinishOverrideAwait(objectId, tcs, sanitizedExpected, completed);
 
         Debug.Log(
-            $"[AnimAwait] END objectId={objectId} expectedFinish='{sanitizedExpected}' mode=await_finish " +
-            $"elapsed={Time.time - startedAt:F3}s now={Time.time:F3}");
+            $"[AnimAwait] {(completed ? "END" : "CANCELLED")} objectId={objectId} expectedFinish='{sanitizedExpected}' " +
+            $"mode=await_finish elapsed={Time.time - startedAt:F3}s now={Time.time:F3}");
+        return completed;
+    }
+
+    /// <summary>
+    /// After await: clear maps only if this TCS still owns the slot / expected name.
+    /// Superseded awaits must not wipe the newer cast's expectedFinish.
+    /// </summary>
+    private void FinishOverrideAwait(
+        int objectId,
+        TaskCompletionSource<bool> tcs,
+        string expectedFinishName,
+        bool completed)
+    {
+        if (_tcsMap.TryGetValue(objectId, out TaskCompletionSource<bool> live) &&
+            ReferenceEquals(live, tcs))
+        {
+            _tcsMap.Remove(objectId);
+        }
+
+        if (!completed)
+        {
+            return;
+        }
+
+        if (_expectedFinishNameByObjectId.TryGetValue(objectId, out string exp) &&
+            string.Equals(exp, expectedFinishName, StringComparison.Ordinal))
+        {
+            _expectedFinishNameByObjectId.Remove(objectId);
+        }
     }
 
     private async Task WarnIfAwaitStuck(int objectId, string triggerName, string expectedFinishName, float startedAt)
@@ -406,6 +440,7 @@ public class AnimationManager : BaseAnimationManager , IAnimationManager
         }
 
         controller.ToggleAnimationTrigger(animationName);
+        SetRecentName(objectId, animationName);
 
         Debug.Log($"AnimationManager> start Async AnimationTrigger(  {entity} animation  {animationName}");
 

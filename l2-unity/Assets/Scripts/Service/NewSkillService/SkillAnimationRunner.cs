@@ -38,9 +38,15 @@ public class SkillAnimationRunner
 
             string sanitizedAnimName = animName.Trim();
             string triggerToPlay = sanitizedAnimName + "_";
-     
-            await animationManager.AsyncPlayAnimationTrigger(objectId, triggerToPlay);
 
+            bool phaseOk = await animationManager.AsyncPlayAnimationTrigger(objectId, triggerToPlay);
+            if (!phaseOk)
+            {
+                Debug.Log(
+                    $"[SkillRun] ABORT superseded objectId={objectId} idx={i} trigger='{triggerToPlay}' " +
+                    $"(no onComplete / WAIT_RETURN)");
+                return;
+            }
         }
 
         onComplete?.Invoke();
@@ -90,7 +96,16 @@ public class SkillAnimationRunner
             Debug.Log(
                 $"[SkillRunOverride] BEFORE await logicalIdx={logicalIndex} trigger='{triggerName}' override='{overrideAnimName}' " +
                 $"sinceChainStart={Time.time - chainStartTime:F3}s objectId={objectId}");
-            await animationManager.AsyncPlayAnimationRaceOverrides(objectId, triggerName  , overrideAnimName);
+            bool phaseOk = await animationManager.AsyncPlayAnimationRaceOverrides(objectId, triggerName, overrideAnimName);
+            if (!phaseOk)
+            {
+                Debug.Log(
+                    $"[SkillRunOverride] ABORT superseded objectId={objectId} logicalIdx={logicalIndex} " +
+                    $"trigger='{triggerName}' sinceChainStart={Time.time - chainStartTime:F3}s " +
+                    $"(newer cast owns animator — no onComplete / WAIT_RETURN)");
+                return;
+            }
+
             Debug.Log(
                 $"[SkillRunOverride] AFTER await logicalIdx={logicalIndex} trigger='{triggerName}' override='{overrideAnimName}' " +
                 $"sinceChainStart={Time.time - chainStartTime:F3}s objectId={objectId}");
@@ -99,7 +114,7 @@ public class SkillAnimationRunner
             {
                 await HoldInCastEndPoseBeforeShot(objectId);
             }
-            }
+        }
 
         Debug.Log($"[SkillRunOverride] COMPLETE sinceChainStart={Time.time - chainStartTime:F3}s objectId={objectId}");
         onComplete?.Invoke();
@@ -141,15 +156,27 @@ public class SkillAnimationRunner
             $"[SkillRunLongOverride] START objectId={objectId} mid='{midClip}' end='{endClip}' shot='{shotClip}'");
 
         Debug.Log($"[SkillRunLongOverride] phase=CastMidLong objectId={objectId}");
-        await animationManager.AsyncPlayAnimationRaceOverrides(objectId, CAST_TRIGGER_MID_LONG, midClip);
+        bool midOk = await animationManager.AsyncPlayAnimationRaceOverrides(objectId, CAST_TRIGGER_MID_LONG, midClip);
+        if (!midOk)
+        {
+            Debug.Log($"[SkillRunLongOverride] ABORT superseded at CastMidLong objectId={objectId}");
+            return;
+        }
+
         Debug.Log($"[SkillRunLongOverride] phase=CastMidLong done sinceStart={Time.time - chainStartTime:F3}s objectId={objectId}");
 
-        Task shotAwaitTask = animationManager.AsyncAwaitOverrideAnimationFinish(objectId, CAST_TRIGGER_SHOT_LONG);
+        Task<bool> shotAwaitTask = animationManager.AsyncAwaitOverrideAnimationFinish(objectId, CAST_TRIGGER_SHOT_LONG);
         Debug.Log($"[SkillRunLongOverride] phase=CastEndLong loop start objectId={objectId}");
         await animationManager.AsyncPlayLongCastLoopPhase(objectId, CAST_TRIGGER_END_LONG, endClip);
         Debug.Log($"[SkillRunLongOverride] phase=CastEndLong loop done sinceStart={Time.time - chainStartTime:F3}s objectId={objectId}");
 
-        await shotAwaitTask;
+        bool shotOk = await shotAwaitTask;
+        if (!shotOk)
+        {
+            Debug.Log($"[SkillRunLongOverride] ABORT superseded at MagicShotLong objectId={objectId}");
+            return;
+        }
+
         Debug.Log($"[SkillRunLongOverride] phase=MagicShotLong done COMPLETE sinceStart={Time.time - chainStartTime:F3}s objectId={objectId}");
 
         onComplete?.Invoke();

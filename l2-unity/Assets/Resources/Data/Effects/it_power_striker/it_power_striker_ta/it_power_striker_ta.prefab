@@ -299,7 +299,7 @@ MonoBehaviour:
   _preserveShaderTimeInContinuousLoop: 0
   _isBurstSpawning: 0
   _relativeWarmupTime: 0
-  _duration: 1.5
+  _duration: 0.735
   _hasFixedDuration: 1
   _instantKillAtCastEnd: 0
   _fitToBounds: 0
@@ -1332,7 +1332,7 @@ MonoBehaviour:
   _preserveShaderTimeInContinuousLoop: 0
   _isBurstSpawning: 0
   _relativeWarmupTime: 0
-  _duration: 0.45
+  _duration: 0.2205
   _hasFixedDuration: 1
   _instantKillAtCastEnd: 0
   _fitToBounds: 0
@@ -1659,7 +1659,7 @@ MonoBehaviour:
   - {fileID: 2287427611204826912}
   - {fileID: 4625057469796030186}
   - {fileID: 1030160720585074598}
-  _startDelay: 0.5
+  _startDelay: 0.245
   _countPerSecond: 10
   _maxCount: 7
   _cloneParticlesToMaxCount: 0
@@ -1668,7 +1668,7 @@ MonoBehaviour:
   _preserveShaderTimeInContinuousLoop: 0
   _isBurstSpawning: 0
   _relativeWarmupTime: 0
-  _duration: 0.4
+  _duration: 0.196
   _hasFixedDuration: 1
   _instantKillAtCastEnd: 0
   _fitToBounds: 0
@@ -2039,14 +2039,17 @@ MonoBehaviour:
   _l2ToUnityScale: 0.2
   _edgeRatio: 0.5
   _sampleRate: 0.002
-  _maxPoints: 80
+  _maxPoints: 88
   _minPoints: 20
+  _maxSegmentMeters: 0.0154
+  _maxSheetsPerSample: 48
+  _arcSheetInterpolation: 1
   _widthAxisSource: 0
   _customWidthAxisLocal: {x: 1, y: 0, z: 0}
   _sampleBone: {fileID: 0}
   _autoBoneName: Weapon_R_Bone
   _storeInOwnerLocal: 0
-  _minSampleDistance: 0.01
+  _minSampleDistance: 0.0077
   _fadeAlphaAlongTrail: 1
   _headAlpha: 1
   _tailAlpha: 0

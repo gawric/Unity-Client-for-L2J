@@ -112,6 +112,12 @@ public class CompositePrefabEffect : TimedCompositeEffectBase
     [SerializeField] private CompositePrefabPart[] _parts;
     [SerializeField] private float _serverHitLifetimeTailSeconds = 0f;
 
+    [Header("Lifetime")]
+    [Tooltip(
+        "If enabled: root/part cast-timed lifetime uses MagicCastData.SkillAnimationDuration " +
+        "(wall-clock SpAtk until idle) instead of HitTime. For melee skill FX that must end with the swing.")]
+    [SerializeField] private bool _matchLifetimeToSkillAnimation;
+
     [Tooltip("Если включено: не вызывать DestoryEffect по lifetime корня — дочерние префабы (например wh_heal_ca) не уничтожаются вместе с композитом. Только для отладки шейдеров/Hold.")]
     [SerializeField] private bool _skipDestroyCompositeByLifetime;
 
@@ -147,6 +153,18 @@ public class CompositePrefabEffect : TimedCompositeEffectBase
     private bool _lightSpawned;
     protected override string DebugPrefix => "[CompositePrefabEffect]";
     protected override float RuntimeLifeTimeTailSeconds => _serverHitLifetimeTailSeconds;
+
+    protected override float ResolveCastTimedLifetimeSeconds()
+    {
+        if (_matchLifetimeToSkillAnimation &&
+            _castData != null &&
+            _castData.SkillAnimationDuration > 0f)
+        {
+            return _castData.SkillAnimationDuration;
+        }
+
+        return base.ResolveCastTimedLifetimeSeconds();
+    }
 
     public override void Setup(EffectSettings settings, MagicCastData castData, Transform owner)
     {
@@ -191,6 +209,18 @@ public class CompositePrefabEffect : TimedCompositeEffectBase
         else
         {
             Debug.Log($"{DebugPrefix} SkipDestroyCompositeByLifetime=true — корень композита не будет уничтожен по lifetime (дочерние объекты остаются в сцене).");
+        }
+
+        if (gameObject.name.IndexOf("power_striker", System.StringComparison.OrdinalIgnoreCase) >= 0)
+        {
+            EffectSettings life = SelectLifetimeSettings();
+            float scheduled = life != null ? life.defaultLifeTime : -1f;
+            Debug.Log(
+                $"[POWER_STRIKE_TIMING] FX_COMPOSITE_PLAY name={gameObject.name} scheduledLife={scheduled:F3}s " +
+                $"defaultLife={life?.defaultLifeTime:F3} hide={life?.hideTime:F3} " +
+                $"matchAnim={_matchLifetimeToSkillAnimation} skillAnimDur={(_castData != null ? _castData.SkillAnimationDuration : -1f):F3}s " +
+                $"castData={( _castData != null ? "yes" : "null")} skipDestroy={_skipDestroyCompositeByLifetime} " +
+                $"t={Time.time:F3}");
         }
 #endif
     }
