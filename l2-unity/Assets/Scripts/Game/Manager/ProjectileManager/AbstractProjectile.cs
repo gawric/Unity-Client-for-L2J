@@ -15,15 +15,6 @@ public class AbstractProjectile : MonoBehaviour
         OnHitCollider?.Invoke(attacker, target, hitPoint, hitDirection);
     }
 
-    protected float GetSpeed(float distance)
-    {
-        return ProjectileFlightTimeCalculator.GetSpeed(distance);
-    }
-    protected float CalculateFlightTime(float distance , float speed)
-    {
-        return ProjectileFlightTimeCalculator.CalculateFlightTime(distance, speed, HIT_OFFSET);
-    }
-
     public ProjectileData CreateData(int projectileId , float distance, GameObject readyProjectile , Vector3 startPos , Transform target , Vector3 adjustedTarget , float requiredSpeed , ProjectileData settings, ProjectileData defaultSettings)
     {
         AnimationCurve curve = settings?.speedCurve ?? defaultSettings?.speedCurve;

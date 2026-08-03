@@ -3,14 +3,6 @@ using UnityEngine;
 
 public class CalcBaseParam
 {
-    // OLD distance-tier bow speed (replaced by L2 constant 1500 UU/s = 15 m/s):
-    // private const float SPEED_RANGE_1 = 8f;
-    // private const float SPEED_RANGE_2_MAX = 11f;
-    // private const float SPEED_RANGE_3_MAX = 12f;
-    // private const float DISTANCE_SPLIT_1 = 4f;
-    // private const float DISTANCE_SPLIT_2 = 8f;
-    // private const float DISTANCE_SPLIT_3 = 12f;
-
     private const float MAX_ATTACK_TIME = 1000f;
 
     public static float CalculateTimeL2j(float patkSpeed)
