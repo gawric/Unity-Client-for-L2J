@@ -31,6 +31,10 @@ public class ProjectileManager : AbstractProjectile, IProjectileManager
         }
         _entityMask = LayerMask.GetMask("EntityClick");
         Instance = this;
+        if (HitManager.Instance != null)
+        {
+            HitManager.Instance.BindProjectileHits();
+        }
     }
     #endregion
 
@@ -48,13 +52,40 @@ public class ProjectileManager : AbstractProjectile, IProjectileManager
         Vector3 adjustedTarget = VectorUtils.GetCollision(startPos, target);
 
         float distance = Vector3.Distance(startPos, adjustedTarget);
-        float speed = GetSpeed(distance);
-        float flightTime = CalculateFlightTime(distance, speed);
-        flightTime = ResolveVisibleFlightTimeForEffectOnly(settings, flightTime);
-        float requiredSpeed = distance / flightTime;
+        bool isArrowStick = settings != null && settings.impactType == ProjectileImpactType.ArrowStick;
+
+        float speed;
+        float flightTime;
+        // NArrow + skill bolt share ANProjectile accel (dirMul=3000).
+        speed = ProjectileFlightTimeCalculator.L2ProjectileAccelUnityPerSec2;
+        flightTime = ProjectileFlightTimeCalculator.CalculateL2AccelFlightTimeSeconds(distance);
+        if (isArrowStick)
+        {
+            flightTime = ResolveArrowStickFlightTime(settings, flightTime);
+        }
+
+        float requiredSpeed = distance / Mathf.Max(flightTime, 0.01f);
         int projectileId = nextId++;
 
-        Debug.Log($"CalculateAttackAndFlightTimes: LaunchProjectile dist={distance}, speed={speed}, fly={flightTime}");
+        if (isArrowStick)
+        {
+            float settingsFly = settings != null ? settings.flytime : -1f;
+            float flyIfDist1500 =
+                ProjectileFlightTimeCalculator.CalculateL2ArrowFlightTimeIfConstantSpeed(distance);
+            Debug.Log(
+                $"[BOW_ARROW] LAUNCH id={projectileId} dist3d={distance:F3} " +
+                $"accel={speed:F3} avgSpeed={requiredSpeed:F3} flySec={flightTime:F3} " +
+                $"settingsFly={settingsFly:F3} flyIfDist1500={flyIfDist1500:F3} " +
+                $"start={startPos} aim={adjustedTarget} uuAccel=3000 path=(t/T)^2");
+        }
+        else
+        {
+            Debug.Log(
+                $"[MAGIC_PROJ] LAUNCH id={projectileId} dist3d={distance:F3} " +
+                $"accel={speed:F3} avgSpeed={requiredSpeed:F3} flySec={flightTime:F3} " +
+                $"impact={(settings != null ? settings.impactType.ToString() : "null")} " +
+                $"uuAccel=3000 path=(t/T)^2 uu→unity=/52.5");
+        }
 
         ProjectileData projectileData = CreateData(projectileId, distance, readyProjectile, startPos, target,
             adjustedTarget, requiredSpeed, settings, defaultSettings);
@@ -62,6 +93,7 @@ public class ProjectileManager : AbstractProjectile, IProjectileManager
 
 
         projectileData.flytime = flightTime;
+        projectileData.lifetime = flightTime;
         projectileData.lastPosition = Vector3.zero;
         AttachCastTimingSnapshot(projectileData);
         SetPosition(readyProjectile, startPos);
@@ -72,21 +104,23 @@ public class ProjectileManager : AbstractProjectile, IProjectileManager
         return projectileId;
     }
 
-    private static float ResolveVisibleFlightTimeForEffectOnly(ProjectileData settings, float fallbackFlightTime)
+    /// <summary>
+    /// Prefer shoot-time accel flytime; reject ProjectileData default 5s.
+    /// </summary>
+    private static float ResolveArrowStickFlightTime(ProjectileData settings, float fallbackFlightTime)
     {
-        if (settings == null || settings.impactType != ProjectileImpactType.EffectOnly)
+        if (settings == null)
         {
             return fallbackFlightTime;
         }
 
-        float minVisibleFlightTime = 0.35f;
-        MagicCastData castData = PlayerEntity.Instance != null ? PlayerEntity.Instance.GetMagicCastData() : null;
-        if (castData != null && castData.FlightTime > 0f)
+        float configured = settings.flytime;
+        if (configured > 0.05f && configured < 4.5f)
         {
-            return Mathf.Max(fallbackFlightTime, minVisibleFlightTime, castData.FlightTime);
+            return configured;
         }
 
-        return Mathf.Max(fallbackFlightTime, minVisibleFlightTime);
+        return fallbackFlightTime;
     }
 
     private void AttachCastTimingSnapshot(ProjectileData projectile)
@@ -177,39 +211,25 @@ public class ProjectileManager : AbstractProjectile, IProjectileManager
        
         CalcNewTargetPosition(projectile);
 
-        float baseJourneyProgress = (Time.time - projectile.startTime) / projectile.flytime;
+        float elapsed = Time.time - projectile.startTime;
+        float timeProgress = elapsed / Mathf.Max(projectile.flytime, 0.01f);
 
-
-        float speedMultiplier = 0.3f;
-        speedMultiplier = GetCurveSpeed(projectile, baseJourneyProgress , speedMultiplier);
-
-
-
-        float journeyProgress = baseJourneyProgress * speedMultiplier;
-
-
-        journeyProgress = Mathf.Clamp01(journeyProgress);
+        // NArrow + skill: Accel=dir*3000 from rest → path (t/T)² (not linear).
+        float journeyProgress = ProjectileFlightTimeCalculator.CalculateL2AccelJourneyProgress(
+            elapsed, projectile.flytime);
 
         Vector3 currentPosition = GetCurrentPosition(projectile, journeyProgress);
   
         RefreshHitPosition(projectile);
 
-        if (journeyProgress >= 1f)
+        // Hit Time = end of scheduled flytime (wall clock), not collider.
+        if (timeProgress >= 1f)
         {
-            if (projectile.impactType != ProjectileImpactType.EffectOnly)
-            {
-                CheckProjectileCollision(projectile, currentPosition, projectile.lastPosition);
-            }
+            // ArrowStick / EffectOnly: Hit Time = end of flytime. No NPC collider dependency.
             SetPosition(projectile, projectile.targetPosition);
             projectile.lastPosition = currentPosition;
-            if (projectile.impactType == ProjectileImpactType.EffectOnly)
-            {
-                RefreshHitPositionFromAnchor(projectile);
-            }
-            else
-            {
-                RefreshHitPosition(projectile);
-            }
+            RefreshHitPositionFromAnchor(projectile);
+            projectile.hitPointCollider = projectile.hitPoint;
             LogProjectileImpactTiming(projectile);
 
             if (projectile.impactType == ProjectileImpactType.EffectOnly)
@@ -234,15 +254,21 @@ public class ProjectileManager : AbstractProjectile, IProjectileManager
             }
             else
             {
-                OnHitMonster?.Invoke(projectile.prefab, projectile.targetTransform, projectile.hitPoint, projectile.hitDirection);
+                // Bow: Soulshot / shoot impact on Hit Time, then stick arrow.
+                Debug.Log(
+                    $"{PROJECTILE_TIMER_LOG} ArrowStickTimeHit id={projectile.id} " +
+                    $"elapsedSec={elapsed:F3} flyTimeSec={projectile.flytime:F3} " +
+                    $"hitPoint={projectile.hitPoint}");
+
+                OnHitMonster?.Invoke(
+                    projectile.prefab,
+                    projectile.targetTransform,
+                    projectile.hitPoint,
+                    projectile.hitDirection);
             }
             return false;
         }
 
-        if (projectile.impactType != ProjectileImpactType.EffectOnly)
-        {
-            CheckProjectileCollision(projectile, currentPosition, projectile.lastPosition);
-        }
         SetPosition(projectile, currentPosition);
 
         if (projectile.targetTransform != null)

@@ -84022,6 +84022,13 @@ AnimationClip:
     floatParameter: 0
     intParameter: 0
     messageOptions: 0
+  - time: 1.3333334
+    functionName: AttackShot
+    data: SpAtk01_pole
+    objectReferenceParameter: {fileID: 0}
+    floatParameter: 0
+    intParameter: 0
+    messageOptions: 0
   - time: 1.375
     functionName: OnAnimationAttackHitEnd
     data: SpAtk01_pole

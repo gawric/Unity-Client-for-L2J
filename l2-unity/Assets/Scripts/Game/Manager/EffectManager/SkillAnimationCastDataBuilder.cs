@@ -69,22 +69,15 @@ public static class SkillAnimationCastDataBuilder
                 spatkName,
                 hitTimeMs,
                 out float wallDuration,
-                out string motionName))
+                out _))
         {
             castData.SkillAnimationDuration = wallDuration;
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
-            Debug.Log(
-                $"[SKILL_ANIM_FX] CAST_DATA now={Time.time:F3}s spatk='{spatkName}' motion='{motionName}' " +
-                $"hitSec={castData.HitTime:F3}s skillAnimDur={wallDuration:F3}s animator='{animator.name}'");
-#endif
         }
         else
         {
-            int behaviourCount = animator.GetBehaviours<PlayerStateSpAtk>()?.Length ?? 0;
             Debug.LogWarning(
                 $"[SKILL_ANIM_FX] CAST_DATA could not estimate SpAtk wall duration spatk='{spatkName}' " +
-                $"hitMs={hitTimeMs} behaviours={behaviourCount} animator='{animator.name}' " +
-                $"— FX will fall back to HitTime/settings lifetime.");
+                $"hitMs={hitTimeMs} — FX will fall back to HitTime/settings lifetime.");
         }
 
         return castData;

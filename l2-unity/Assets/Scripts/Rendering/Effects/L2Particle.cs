@@ -119,10 +119,10 @@ public class L2Particle : BaseEffect, IRegisteredBillboard
             Debug.Log($"[L2Particle] SkipScheduledDestroyForDebug: '{name}' — DestoryEffect не вызывается.");
         }
 
-        if (ShouldTraceLifetime() || IsPowerStrikeEffect())
+        if (ShouldTraceLifetime())
         {
             Debug.Log(
-                $"[POWER_STRIKE_TIMING] FX_PLAY effect='{name}' playAt={_playStartedAt:F3}s " +
+                $"[L2Particle] FX_PLAY effect='{name}' playAt={_playStartedAt:F3}s " +
                 $"scheduledLife={(_settings != null ? _settings.defaultLifeTime : -1f):F3}s " +
                 $"scheduledHide={(_settings != null ? _settings.hideTime : -1f):F3}s " +
                 $"settingsAsset='{(_settings != null ? _settings.name : "null")}' " +
@@ -200,12 +200,12 @@ public class L2Particle : BaseEffect, IRegisteredBillboard
     protected override void OnDestroy()
     {
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-        if (ShouldTraceLifetime() || IsPowerStrikeEffect())
+        if (ShouldTraceLifetime())
         {
             float now = Time.time;
             float elapsed = _playStartedAt > 0f ? now - _playStartedAt : -1f;
             Debug.Log(
-                $"[POWER_STRIKE_TIMING] FX_DESTROY effect='{name}' now={now:F3}s " +
+                $"[L2Particle] FX_DESTROY effect='{name}' now={now:F3}s " +
                 $"wallLived={elapsed:F3}s configuredLife={(_settings != null ? _settings.defaultLifeTime : -1f):F3}s " +
                 $"castHit={(_castData != null ? _castData.HitTime : -1f):F3}s.");
         }
@@ -216,12 +216,6 @@ public class L2Particle : BaseEffect, IRegisteredBillboard
     private bool ShouldTraceLifetime()
     {
         return !string.IsNullOrEmpty(name) && name.IndexOf(LifetimeTraceEffectName, System.StringComparison.OrdinalIgnoreCase) >= 0;
-    }
-
-    private bool IsPowerStrikeEffect()
-    {
-        return !string.IsNullOrEmpty(name) &&
-               name.IndexOf("power_striker", System.StringComparison.OrdinalIgnoreCase) >= 0;
     }
 
     private string BuildShaderLifetimeRangesSnapshot()

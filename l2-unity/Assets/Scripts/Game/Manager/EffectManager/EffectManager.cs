@@ -56,28 +56,6 @@ public class EffectManager : MonoBehaviour
 
         Transform attach = weapon != null ? weapon : entity.transform;
         MagicCastData castData = SkillAnimationCastDataBuilder.Build(entity, hitTimeMs, animCombo);
-
-        EffectDatabase.EffectData effectData = database != null
-            ? database.effects.Find(e => e.id == effectId)
-            : null;
-        float settingsLife = effectData != null && effectData.settings != null
-            ? effectData.settings.defaultLifeTime
-            : -1f;
-        float settingsHide = effectData != null && effectData.settings != null
-            ? effectData.settings.hideTime
-            : -1f;
-        string[] cycle = animCombo != null ? animCombo.GetAnimCycle() : null;
-
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
-        Debug.Log(
-            $"[SKILL_ANIM_FX] SPAWN now={Time.time:F3}s effectId={effectId} hitTimeMs={hitTimeMs} " +
-            $"hitSec={castData.HitTime:F3}s skillAnimDur={castData.SkillAnimationDuration:F3}s " +
-            $"effectSettingsLife={settingsLife:F3}s hide={settingsHide:F3}s " +
-            $"settingsAsset='{(effectData != null && effectData.settings != null ? effectData.settings.name : "null")}' " +
-            $"prefab='{(effectData != null && effectData.prefab != null ? effectData.prefab.name : "null")}' " +
-            $"animCycle={(cycle != null ? string.Join("->", cycle) : "null")} attach='{attach.name}'");
-#endif
-
         PlayEffect(effectId, attach, castData);
     }
 

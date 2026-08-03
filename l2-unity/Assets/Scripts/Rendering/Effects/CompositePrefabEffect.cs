@@ -210,18 +210,6 @@ public class CompositePrefabEffect : TimedCompositeEffectBase
         {
             Debug.Log($"{DebugPrefix} SkipDestroyCompositeByLifetime=true — корень композита не будет уничтожен по lifetime (дочерние объекты остаются в сцене).");
         }
-
-        if (gameObject.name.IndexOf("power_striker", System.StringComparison.OrdinalIgnoreCase) >= 0)
-        {
-            EffectSettings life = SelectLifetimeSettings();
-            float scheduled = life != null ? life.defaultLifeTime : -1f;
-            Debug.Log(
-                $"[POWER_STRIKE_TIMING] FX_COMPOSITE_PLAY name={gameObject.name} scheduledLife={scheduled:F3}s " +
-                $"defaultLife={life?.defaultLifeTime:F3} hide={life?.hideTime:F3} " +
-                $"matchAnim={_matchLifetimeToSkillAnimation} skillAnimDur={(_castData != null ? _castData.SkillAnimationDuration : -1f):F3}s " +
-                $"castData={( _castData != null ? "yes" : "null")} skipDestroy={_skipDestroyCompositeByLifetime} " +
-                $"t={Time.time:F3}");
-        }
 #endif
     }
 

@@ -165,6 +165,30 @@ public static class L2FxRibbonGetPoint
         return swapped;
     }
 
+    /// <summary>
+    /// Prefer proximity matching over axis-dot polarity (Dot&lt;0 false-swaps on &gt;90° swings).
+    /// </summary>
+    public static Edges StabilizeEdgeEndsByProximity(in Edges current, in Edges reference)
+    {
+        float keep =
+            Vector3.Distance(current.A2, reference.A2) +
+            Vector3.Distance(current.A3, reference.A3);
+        float swap =
+            Vector3.Distance(current.A2, reference.A3) +
+            Vector3.Distance(current.A3, reference.A2);
+
+        if (swap + 1e-5f < keep)
+        {
+            Edges swapped;
+            swapped.A2 = current.A3;
+            swapped.A3 = current.A2;
+            swapped.A4 = current.A4;
+            return swapped;
+        }
+
+        return current;
+    }
+
     public static Vector3 EdgeMid(Vector3 a2, Vector3 a3)
     {
         return (a2 + a3) * 0.5f;

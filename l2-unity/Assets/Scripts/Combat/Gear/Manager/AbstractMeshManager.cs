@@ -170,7 +170,10 @@ public class AbstractMeshManager : MonoBehaviour
         }
         else if (weaponType == WeaponType.arrow)
         {
+            // Expect arrow mesh pivot at nock (reimport). No runtime shaft offset.
             go.transform.SetParent(allBone[3], false);
+            go.transform.localPosition = Vector3.zero;
+            go.transform.localRotation = Quaternion.identity;
         }
         else if (leftSlot)
         {

@@ -8,6 +8,7 @@ public class HitManager : MonoBehaviour
     private const string IMPACT_DEBUG_TAG = "[HIT_DEBUG]";
     private const int SoulshotImpactEffectId = 99998;
     private const int NormalImpactEffectId = 99997;
+    private bool _projectileHitSubscribed;
 
     private void Awake()
     {
@@ -19,6 +20,118 @@ public class HitManager : MonoBehaviour
         else
         {
             Destroy(gameObject);
+        }
+    }
+
+    private void OnEnable()
+    {
+        TrySubscribeProjectileHits();
+    }
+
+    private void Start()
+    {
+        TrySubscribeProjectileHits();
+    }
+
+    private void OnDisable()
+    {
+        UnsubscribeProjectileHits();
+    }
+
+    /// <summary>
+    /// Called from ProjectileManager.Awake when Instance becomes available (order-safe).
+    /// Subscribe once for HitManager lifetime; unsubscribe only on HitManager disable/destroy.
+    /// </summary>
+    public void BindProjectileHits()
+    {
+        TrySubscribeProjectileHits();
+    }
+
+    private void TrySubscribeProjectileHits()
+    {
+        if (_projectileHitSubscribed || ProjectileManager.Instance == null)
+        {
+            return;
+        }
+
+        ProjectileManager.Instance.OnHitMonster += OnProjectileHitMonster;
+        _projectileHitSubscribed = true;
+    }
+
+    private void UnsubscribeProjectileHits()
+    {
+        if (!_projectileHitSubscribed)
+        {
+            return;
+        }
+
+        if (ProjectileManager.Instance != null)
+        {
+            ProjectileManager.Instance.OnHitMonster -= OnProjectileHitMonster;
+        }
+
+        _projectileHitSubscribed = false;
+    }
+
+    /// <summary>
+    /// Bow ArrowStick Hit Time — lives on HitManager so Attack→Idle cannot drop the subscription.
+    /// </summary>
+    private void OnProjectileHitMonster(
+        GameObject prefab,
+        Transform target,
+        Vector3 hitPointCollider,
+        Vector3 hitDirection)
+    {
+        if (prefab != null && target != null)
+        {
+            HandleHitBody(prefab, target, hitPointCollider, hitDirection);
+        }
+
+        Entity attacker = PlayerEntity.Instance;
+        Entity targetEntity = target != null
+            ? target.GetComponentInParent<Entity>()
+            : null;
+        if (targetEntity == null && PlayerEntity.Instance != null)
+        {
+            targetEntity = PlayerEntity.Instance.GetTargetEntity();
+        }
+
+        MonsterEntity monster = targetEntity as MonsterEntity;
+        if (monster == null)
+        {
+            Debug.Log(
+                $"[HIT_FX] OnProjectileHitMonster SKIP not MonsterEntity " +
+                $"type={(targetEntity != null ? targetEntity.GetType().Name : "null")}");
+            return;
+        }
+
+        if (attacker != null && attacker.HitIsMissed())
+        {
+            Debug.Log(
+                $"[HIT_FX] OnProjectileHitMonster SKIP HitIsMissed=true monster={monster.name}");
+            return;
+        }
+
+        Transform attackerTf = prefab != null ? prefab.transform : null;
+        Debug.Log(
+            $"[HIT_FX] OnProjectileHitMonster → HandleHitCollider monster={monster.name} " +
+            $"soulshot={(attacker != null && attacker.IsSoulshotCharged)}");
+        HandleHitCollider(
+            attacker,
+            attackerTf,
+            monster.GetStateMachine(),
+            hitPointCollider,
+            hitDirection);
+
+        if (monster.IsDead() || monster.CalculateRemainingHp() <= 0)
+        {
+            monster.SetDead(true);
+            MonsterStateMachine stateMachine = monster.GetStateMachine();
+            if (stateMachine != null)
+            {
+                stateMachine.ChangeState(MonsterState.DEAD);
+                stateMachine.NotifyEvent(Event.FORCE_DEATH);
+            }
         }
     }
 

@@ -77,14 +77,17 @@ public class ProjectileData
 
     }
 
+    /// <summary>
+    /// Default easing unused for ArrowStick/EffectOnly — both use ANProjectile (t/T)².
+    /// </summary>
     public static AnimationCurve CreateDefaultSpeedCurve()
     {
         return new AnimationCurve(
-            new Keyframe(0, 0.3f, 0, 0.5f),     // Start: 30% speed, smooth start
-            new Keyframe(0.25f, 0.5f, 0, 1f),    // 25% journey: 50% speed
-            new Keyframe(0.5f, 1f, 0, 0),        // Middle: 100% speed (no acceleration)
-            new Keyframe(0.75f, 1f, 0, 0),       // 75% journey: 100% speed (constant)
-            new Keyframe(1, 1f, 0, 0));          // End: 100% speed
+            new Keyframe(0, 0.3f, 0, 0.5f),
+            new Keyframe(0.25f, 0.5f, 0, 1f),
+            new Keyframe(0.5f, 1f, 0, 0),
+            new Keyframe(0.75f, 1f, 0, 0),
+            new Keyframe(1, 1f, 0, 0));
     }
 
     public int id;

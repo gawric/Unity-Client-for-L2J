@@ -56,8 +56,6 @@ public class NewMagicSkillsState  : AbstractAttackEvents
     private static float ResolveMagicFlightTimeMs(PlayerEntity entity, int skillId)
     {
         const float fallbackFlightMs = 1000f;
-        const float projectileHitOffsetSeconds = 0.3f;
-        const float minFlightMs = 350f;
 
         if (EffectManager.Instance != null && EffectManager.Instance.database != null &&
             EffectManager.Instance.database.ShouldIgnoreFlightTimeForCast(skillId))
@@ -70,16 +68,23 @@ public class NewMagicSkillsState  : AbstractAttackEvents
             return fallbackFlightMs;
         }
 
-        float distance = entity.TargetDistance();
+        // Same 3D aim path as ProjectileManager.LaunchProjectile (not 2D TargetDistance).
+        Vector3 startPos = entity.GetPositionRightHand();
+        Transform target = entity.Target;
+        if (target == null)
+        {
+            return fallbackFlightMs;
+        }
+
+        Vector3 aimPos = VectorUtils.GetCollision(startPos, target);
+        float distance = Vector3.Distance(startPos, aimPos);
         if (distance <= 0f)
         {
             return fallbackFlightMs;
         }
 
-        float speed = ProjectileFlightTimeCalculator.GetSpeed(distance);
-        float flightSeconds = ProjectileFlightTimeCalculator.CalculateFlightTime(distance, speed, projectileHitOffsetSeconds);
-        float resolvedFlightMs = Mathf.Max(minFlightMs, flightSeconds * 1000f);
-
-        return resolvedFlightMs;
+        // L2 skill bolt: accel 3000 UU/s² from rest → flySec = sqrt(2*Dist/3000).
+        float flightSeconds = ProjectileFlightTimeCalculator.CalculateL2SkillFlightTimeSeconds(distance);
+        return flightSeconds * 1000f;
     }
 }

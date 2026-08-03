@@ -64,14 +64,14 @@ public sealed class L2RibbonEmitter : EffectPart
     [SerializeField] private float _starterStripMeters = 0.05f;
 
     [Header("Debug")]
-    [SerializeField] private bool _debugLog = true;
+    [SerializeField] private bool _debugLog = false;
     [Tooltip("Per-frame sword tip/base motion + ribbon head (compare to L2 RibbonSnapshot).")]
-    [SerializeField] private bool _debugTraceMotion = true;
+    [SerializeField] private bool _debugTraceMotion = false;
     [Tooltip("Dump first/last ribbon points + segment lengths when buffer changes.")]
-    [SerializeField] private bool _debugTracePoints = true;
+    [SerializeField] private bool _debugTracePoints = false;
     [SerializeField] private float _debugLogInterval = 0.1f;
     [SerializeField] private int _debugTraceFirstFrames = 90;
-    [SerializeField] private bool _drawGizmos = true;
+    [SerializeField] private bool _drawGizmos = false;
 
     private struct RibbonPoint
     {
@@ -207,14 +207,7 @@ public sealed class L2RibbonEmitter : EffectPart
 
     public override void StopPart()
     {
-        Log($"StopPart points={_points.Count} attempts={_sampleAttempts} accepted={_sampleAccepted}");
-        _playing = false;
-        _points.Clear();
-        ClearMesh();
-        if (targetRenderer != null)
-        {
-            targetRenderer.enabled = false;
-        }
+        // Keep sampling until destroy — BeginFadeOut would otherwise freeze/clear the trail mid-swing.
     }
 
     private void Awake()
@@ -233,6 +226,9 @@ public sealed class L2RibbonEmitter : EffectPart
 
     private void OnDestroy()
     {
+        _playing = false;
+        _points.Clear();
+        ClearMesh();
         if (_mesh != null)
         {
             if (Application.isPlaying)
@@ -257,7 +253,6 @@ public sealed class L2RibbonEmitter : EffectPart
 
         if (!_loggedPlayOnce)
         {
-            // Safety if PlayPart was skipped somehow.
             ResolveBladeAnchors();
             Log("LateUpdate playing but PlayPart flag missing — forcing first sample");
             TrySample(force: true);
@@ -269,7 +264,6 @@ public sealed class L2RibbonEmitter : EffectPart
             return;
         }
 
-        // One animated pose per frame — sample once; large mid jumps get Lerp sheets.
         TrySample(force: false);
 
         if (_points.Count > 0)
@@ -795,6 +789,20 @@ public sealed class L2RibbonEmitter : EffectPart
         return true;
     }
 
+    /// <summary>
+    /// MeshBounds tip/hilt are fixed local AABB ends — do not re-stabilize (false tip↔hilt swaps on large arcs).
+    /// Stabilize only for markers / bone fallback where naming can flip.
+    /// </summary>
+    private bool ShouldStabilizeEdgePolarity()
+    {
+        if (string.IsNullOrEmpty(_lastSampleSource))
+        {
+            return true;
+        }
+
+        return _lastSampleSource.IndexOf("MeshBounds", System.StringComparison.OrdinalIgnoreCase) < 0;
+    }
+
     private bool TrySample(bool force)
     {
         _sampleAttempts++;
@@ -814,7 +822,7 @@ public sealed class L2RibbonEmitter : EffectPart
         Vector3 a2 = space != null ? space.InverseTransformPoint(edges.A2) : edges.A2;
         Vector3 a3 = space != null ? space.InverseTransformPoint(edges.A3) : edges.A3;
 
-        if (_stabilizeEdgePolarity && _points.Count > 0)
+        if (_stabilizeEdgePolarity && _points.Count > 0 && ShouldStabilizeEdgePolarity())
         {
             L2FxRibbonGetPoint.Edges cur = new L2FxRibbonGetPoint.Edges
             {
@@ -828,17 +836,11 @@ public sealed class L2RibbonEmitter : EffectPart
                 A3 = _points[0].A3,
                 A4 = _points[0].A4,
             };
-            L2FxRibbonGetPoint.Edges stable = L2FxRibbonGetPoint.StabilizeEdgePolarity(cur, reference);
+            L2FxRibbonGetPoint.Edges stable = L2FxRibbonGetPoint.StabilizeEdgeEndsByProximity(cur, reference);
             if (!Mathf.Approximately(stable.A2.x, a2.x) ||
                 !Mathf.Approximately(stable.A2.y, a2.y) ||
                 !Mathf.Approximately(stable.A2.z, a2.z))
             {
-                if (_debugLog && _debugTraceMotion && (_sampleAccepted < 8 || _traceFrame < 12))
-                {
-                    Log($"POLARITY flip corrected source={_lastSampleSource}");
-                }
-
-                // World tip/base for MOTION logs must match stored a2/a3.
                 _lastTipWorld = space != null ? space.TransformPoint(stable.A2) : stable.A2;
                 _lastBaseWorld = space != null ? space.TransformPoint(stable.A3) : stable.A3;
             }

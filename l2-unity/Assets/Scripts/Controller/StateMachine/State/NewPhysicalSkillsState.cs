@@ -14,7 +14,7 @@ public class NewPhysicalSkillsState : AbstractAttackEvents
 
     public override void Enter()
     {
-   
+        base.Enter();
     }
     public override void HandleEvent(Event evt , object payload = null)
     {
