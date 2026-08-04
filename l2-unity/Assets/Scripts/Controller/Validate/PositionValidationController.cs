@@ -126,24 +126,17 @@ public class PositionValidationController : MonoBehaviour
 
     private void NewCalcGravityNpc(Entity npcEntity, Vector3 newPosition)
     {
-        newPosition.y = 0;
-        Vector3 newPositionPlusGravity = VectorUtils.ApplyGravityGround(newPosition, Time.time);
-        npcEntity.transform.position = newPositionPlusGravity;
+        npcEntity.transform.position = GroundSnapHelper.SnapToGroundOrKeep(newPosition);
     }
 
 
     private void NewCalcGravityMonster(MonsterEntity monsterEntity , Vector3 newPosition)
     {
-        newPosition.y = 0;
-        Vector3 newPositionPlusGravity = VectorUtils.ApplyGravityGround(newPosition, Time.time);
-        monsterEntity.transform.position = newPositionPlusGravity;
+        monsterEntity.transform.position = GroundSnapHelper.SnapToGroundOrKeep(newPosition);
     }
     private void NewCalcGravity(PlayerController playerController , Vector3 newPosition)
     {
-        //reset gravity
-        newPosition.y = 0;
-        Vector3 newPositionPlusGravity = VectorUtils.ApplyGravityGround(newPosition, Time.time);
-        playerController.transform.position = newPositionPlusGravity;
+        playerController.transform.position = GroundSnapHelper.SnapToGroundOrKeep(newPosition);
     }
 
     private void ReStartAnimationPlayer(PlayerStateMachine stateMachine)

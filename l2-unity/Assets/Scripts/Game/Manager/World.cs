@@ -495,8 +495,13 @@ public class World : MonoBehaviour {
         return ExecuteWithEntityAsync(id, entity => {
             if (entity.GetType() == typeof(PlayerEntity))
             {
-                entity.GetComponent<PlayerTeleport>().TeleportTo(position);
-                SendValidatePosition(position);
+                PlayerTeleport teleport = entity.GetComponent<PlayerTeleport>();
+                teleport.TeleportTo(position);
+                Vector3 grounded = teleport.LastTeleportPosition;
+                // Match original client after TeleportToLocation / L2_Teleport:
+                // ValidatePosition then Appearing → server onTeleported() + UserInfo / knownlist.
+                SendValidatePosition(grounded);
+                SendAppearing();
             }
         });
     }
@@ -506,6 +511,13 @@ public class World : MonoBehaviour {
         ValidatePosition sendPaket = CreatorPacketsUser.CreateValidatePosition(position.x, position.y, position.z);
         bool enable = GameClient.Instance.IsCryptEnabled();
         SendGameDataQueue.Instance().AddItem(sendPaket, enable, enable);
+    }
+
+    private void SendAppearing()
+    {
+        Appearing packet = CreatorPacketsUser.CreateAppearing();
+        bool enable = GameClient.Instance.IsCryptEnabled();
+        SendGameDataQueue.Instance().AddItem(packet, enable, enable);
     }
 
 
