@@ -150,8 +150,20 @@ public class PlayerStateSpAtk : StateMachineBehaviour
         _isSwitchIdle = true;
         animator.speed = 1f;
         PlayerEntity.Instance.IsAttack = false;
+
+        int objectId = animator.GetInteger(AnimatorUtils.OBJECT_ID);
+        string phaseName = AnimationManager.Instance != null
+            ? AnimationManager.Instance.GetCurrentAnimationName(objectId)
+            : null;
+        if (string.IsNullOrEmpty(phaseName))
+        {
+            phaseName = motionName;
+        }
+
+        AnimationManager.Instance?.NotifyMagicPhaseFinished(objectId, phaseName);
+
         PlayerStateMachine.Instance.ChangeIntention(Intention.INTENTION_IDLE);
-        PlayerStateMachine.Instance.NotifyEvent(Event.WAIT_RETURN);
+        PlayerStateMachine.Instance.NotifyEvent(Event.WAIT_RETURN, NewIdleState.WaitReturnFromCombatSmb);
     }
 
     override public void OnStateExit(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)

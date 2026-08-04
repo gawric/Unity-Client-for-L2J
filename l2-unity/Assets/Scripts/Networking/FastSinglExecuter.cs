@@ -360,9 +360,9 @@ public class FastSinglExecuter : MonoBehaviour
                 }
 
                 Debug.Log(
-                    $"{PKT_ORD_LOG} #{seq} DIE → OnWaitReturn (monster dead) {PktStampMain()} " +
-                    $"playerState={playerState}");
-                PlayerStateMachine.Instance.OnWaitReturn();
+            $"{PKT_ORD_LOG} #{seq} DIE → OnWaitReturn (monster dead) {PktStampMain()} " +
+            $"playerState={playerState}");
+        PlayerStateMachine.Instance.OnWaitReturn();
             }
         }
 

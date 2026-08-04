@@ -20,9 +20,12 @@ public class PlayerOverriddenMagicAtk : StateMachineBehaviour
     private const string MagicSpeedTraceTag = "[MAGIC_SPEED_TRACE]";
 
     private const string MagicExitLogTag = "[MAGIC_SMB_EXIT]";
+    /// <summary>Same gate as <see cref="PlayerStateSpAtk.SwitchToIdleNormalizedTime"/>.</summary>
+    private const float PhaseDoneNormalizedTime = 0.95f;
 
     private MagicCastData _castData;
     private bool _isSwitchIdle;
+    private bool _phaseFinished;
     private float _stateEnterTime;
     private bool _forcedShotTriggered;
     private float _lastExitDiagLogTime;
@@ -37,6 +40,7 @@ public class PlayerOverriddenMagicAtk : StateMachineBehaviour
     override public void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
         _isSwitchIdle = false;
+        _phaseFinished = false;
         _forcedShotTriggered = false;
         _stateEnterTime = Time.time;
         _lastExitDiagLogTime = -1f;
@@ -73,7 +77,7 @@ public class PlayerOverriddenMagicAtk : StateMachineBehaviour
             $"shootAt={(_castData != null ? _castData.serverTimeToShoot.ToString("F3") : "null")} " +
             $"globalAtEnter={(_castData != null ? (Time.time - _castData.StartTime).ToString("F3") : "null")} " +
             $"animSpeed={animator.speed:F3} clipLen={_clipLengthAtEnter:F3} " +
-            $"exitGate={(isFinalShotState ? "norm>=1→SwitchToIdle" : "no-SMB-exit")} " +
+            $"exitGate=wall|norm>={PhaseDoneNormalizedTime:F2}→NotifyPhase{(isFinalShotState ? "+SwitchToIdle" : "")} " +
             $"animId={animator.GetInstanceID()}");
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
@@ -121,14 +125,10 @@ public class PlayerOverriddenMagicAtk : StateMachineBehaviour
     {
         if (_castData == null)
         {
-            // Without castData the whole update (including SwitchToIdle) is skipped.
-            if (isFinalShotState && (Time.time - _lastExitDiagLogTime) >= 0.5f)
+            // Without castData still allow phase finish / idle so runner is not stuck forever.
+            if (!_phaseFinished)
             {
-                _lastExitDiagLogTime = Time.time;
-                Debug.Log(
-                    $"{MagicExitLogTag} SKIP_UPDATE state={parameterName} reason=castData_null " +
-                    $"final={isFinalShotState} idx={stateIndex} norm={stateInfo.normalizedTime:F3} " +
-                    $"speed={animator.speed:F3} local={(Time.time - _stateEnterTime):F3}s");
+                TryFinishPhase(animator, stateInfo, globalElapsed: -1f);
             }
             return;
         }
@@ -204,48 +204,60 @@ public class PlayerOverriddenMagicAtk : StateMachineBehaviour
             }
         }
 
+        if (!_phaseFinished)
+        {
+            TryFinishPhase(animator, stateInfo, globalElapsed);
+        }
+    }
+
+    private void TryFinishPhase(Animator animator, AnimatorStateInfo stateInfo, float globalElapsed)
+    {
+        if (_phaseFinished)
+        {
+            return;
+        }
+
+        float localElapsed = Time.time - _stateEnterTime;
+        float speed = Mathf.Max(0.0001f, animator.speed);
+        float wallNeed = _clipLengthAtEnter / speed;
+        bool wallDone = localElapsed >= wallNeed;
+        bool normDone = stateInfo.normalizedTime >= PhaseDoneNormalizedTime;
+        bool phaseDone = wallDone || normDone;
+
+        bool shouldDiag =
+            phaseDone ||
+            _lastExitDiagLogTime < 0f ||
+            (localElapsed - _lastExitDiagLogTime) >= 0.5f;
+        if (shouldDiag)
+        {
+            _lastExitDiagLogTime = localElapsed;
+            Debug.Log(
+                $"{MagicExitLogTag} CHECK state={parameterName} idx={stateIndex} final={isFinalShotState} " +
+                $"local={localElapsed:F3}s global={globalElapsed:F3}s " +
+                $"norm={stateInfo.normalizedTime:F3} (need>={PhaseDoneNormalizedTime:F2}) normDone={normDone} " +
+                $"speed={animator.speed:F3} clipLen={_clipLengthAtEnter:F3} wallNeed={wallNeed:F3}s wallDone={wallDone} " +
+                $"alreadyFinished={_phaseFinished} gateWillFire={phaseDone}");
+        }
+
+        if (!phaseDone)
+        {
+            return;
+        }
+
+        _phaseFinished = true;
+        int objectId = animator.GetInteger(AnimatorUtils.OBJECT_ID);
+        Debug.Log(
+            $"{MagicExitLogTag} PHASE_DONE state={parameterName} idx={stateIndex} final={isFinalShotState} " +
+            $"local={localElapsed:F3}s norm={stateInfo.normalizedTime:F3} wallDone={wallDone} → NotifyMagicPhaseFinished");
+
+        if (AnimationManager.Instance != null)
+        {
+            AnimationManager.Instance.NotifyMagicPhaseFinished(objectId, parameterName);
+        }
 
         if (isFinalShotState)
         {
-            if (_isSwitchIdle)
-            {
-                return;
-            }
-
-            bool normDone = stateInfo.normalizedTime >= 1.0f;
-            float speed = Mathf.Max(0.0001f, animator.speed);
-            float wallNeed = _clipLengthAtEnter / speed;
-            bool wallDone = localElapsed >= wallNeed;
-            bool wouldExit = normDone; // current gate only — wallDone is diag only
-
-            // Throttled while stuck; always log the moment the gate would fire.
-            bool shouldDiag =
-                wouldExit ||
-                _lastExitDiagLogTime < 0f ||
-                (localElapsed - _lastExitDiagLogTime) >= 0.5f;
-            if (shouldDiag)
-            {
-                _lastExitDiagLogTime = localElapsed;
-                Debug.Log(
-                    $"{MagicExitLogTag} CHECK state={parameterName} idx={stateIndex} " +
-                    $"local={localElapsed:F3}s global={globalElapsed:F3}s " +
-                    $"norm={stateInfo.normalizedTime:F3} (need>=1) normDone={normDone} " +
-                    $"speed={animator.speed:F3} clipLen={_clipLengthAtEnter:F3} wallNeed={wallNeed:F3}s wallDone={wallDone} " +
-                    $"alreadySwitched={_isSwitchIdle} gateWillCallSwitch={wouldExit && !_isSwitchIdle}");
-            }
-
-            if (normDone)
-            {
-                SwitchToIdle();
-            }
-        }
-        else if (_lastExitDiagLogTime < 0f || (localElapsed - _lastExitDiagLogTime) >= 1.0f)
-        {
-            // CastMid/CastEnd: confirm SMB is alive but exit gate is intentionally off.
-            _lastExitDiagLogTime = localElapsed;
-            Debug.Log(
-                $"{MagicExitLogTag} NO_EXIT_GATE state={parameterName} idx={stateIndex} final=False " +
-                $"local={localElapsed:F3}s norm={stateInfo.normalizedTime:F3} speed={animator.speed:F3}");
+            SwitchToIdle();
         }
     }
 
@@ -292,7 +304,7 @@ public class PlayerOverriddenMagicAtk : StateMachineBehaviour
         }
 
         PlayerStateMachine.Instance.ChangeIntention(Intention.INTENTION_IDLE);
-        PlayerStateMachine.Instance.NotifyEvent(Event.WAIT_RETURN);
+        PlayerStateMachine.Instance.NotifyEvent(Event.WAIT_RETURN, NewIdleState.WaitReturnFromCombatSmb);
     }
 
     private static bool ShouldUseForceSync(MagicCastData castData)

@@ -70,7 +70,7 @@ public class PlayerStateJatkBow : StateMachineBehaviour
         PlayerAnimationController.Instance.SetPAtkSpeed(1.0f);
         PlayerEntity.Instance.IsAttack = false;
         PlayerStateMachine.Instance.ChangeIntention(Intention.INTENTION_IDLE);
-        PlayerStateMachine.Instance.NotifyEvent(Event.WAIT_RETURN);
+        PlayerStateMachine.Instance.NotifyEvent(Event.WAIT_RETURN, NewIdleState.WaitReturnFromCombatSmb);
     }
 
     private void StopAnimationTrigger(Animator animator, string parameterName)

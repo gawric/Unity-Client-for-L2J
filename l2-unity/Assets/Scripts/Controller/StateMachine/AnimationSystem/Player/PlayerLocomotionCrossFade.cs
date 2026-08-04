@@ -101,11 +101,6 @@ public static class PlayerLocomotionCrossFade
             return false;
         }
 
-        if (IsLocomotionStateName(stateName))
-        {
-            controller.ReleasePriorityQueueIfBusy($"locomotion_crossfade:{stateName}");
-        }
-
         float duration = fixedDuration ?? LocomotionCrossFadeSettings.FixedDuration;
         controller.CrossFadeInFixedTime(stateName, duration);
         return true;

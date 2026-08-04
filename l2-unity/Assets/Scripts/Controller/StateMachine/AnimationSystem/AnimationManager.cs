@@ -78,10 +78,11 @@ public class AnimationManager : BaseAnimationManager , IAnimationManager
             SetRecentName(objectId, locoStateName);
             // MagicShot leaves animator.speed scaled (SpeedShot); wait must not keep that rate.
             controller.SetAnimatorSpeed(1f);
-            PlayerLocomotionCrossFade.TryPlay(controller, locoStateName);
+            float waitExitDuration = LocomotionCrossFadeSettings.ResolveExitDuration(controller);
+            PlayerLocomotionCrossFade.TryPlay(controller, locoStateName, waitExitDuration);
             Debug.Log(
                 $"AnimationManager> start crossfade {family} player {entity.name} " +
-                $"state={locoStateName} duration={LocomotionCrossFadeSettings.FixedDuration:F3}s");
+                $"state={locoStateName} duration={waitExitDuration:F3}s");
             return;
         }
 
@@ -111,7 +112,6 @@ public class AnimationManager : BaseAnimationManager , IAnimationManager
         }
 
         // Always play — lobby has no recent-name cache; force pose on place / walk stop.
-        controller.ReleasePriorityQueueIfBusy($"lobby_locomotion:{stateName}");
         controller.CrossFadeInFixedTime(stateName, LocomotionCrossFadeSettings.FixedDuration);
         Debug.Log(
             $"AnimationManager> start crossfade lobby {family} state={stateName} " +
@@ -138,8 +138,9 @@ public class AnimationManager : BaseAnimationManager , IAnimationManager
         }
 
         // Always CrossFade — even if animator already in atkwait (stale transition / same pose).
-        controller.ReleasePriorityQueueIfBusy($"atkwait_crossfade:{atkWaitStateName}");
-        controller.CrossFadeInFixedTime(atkWaitStateName, LocomotionCrossFadeSettings.FixedDuration);
+        // Dual jatk often still mid-clip when wall cycle ends — longer blend softens the cut.
+        float duration = LocomotionCrossFadeSettings.ResolveExitDuration(controller);
+        controller.CrossFadeInFixedTime(atkWaitStateName, duration);
     }
 
     public void PlayAnimationTrigger(int objectId, string animationName)
@@ -380,25 +381,77 @@ public class AnimationManager : BaseAnimationManager , IAnimationManager
     }
     public void OnAnimationFinished(string name, int objectId)
     {
-        Debug.Log($"[AnimFinishedEvent] objectId={objectId} finishedName='{name}' now={Time.time:F3}");
+        TryCompleteAwaitFromPhaseFinish(objectId, name, "clip_complete");
+    }
+
+    /// <summary>
+    /// SMB-driven phase end (Cast/MagicShot / SpAtk). Completes runner await
+    /// without relying on clip OnAnimationComplete.
+    /// </summary>
+    public void NotifyMagicPhaseFinished(int objectId, string phaseName)
+    {
+        TryCompleteAwaitFromPhaseFinish(objectId, phaseName, "smb_phase");
+    }
+
+    private bool TryCompleteAwaitFromPhaseFinish(int objectId, string name, string source)
+    {
+        Debug.Log(
+            $"[AnimFinishedEvent] objectId={objectId} finishedName='{name}' source={source} now={Time.time:F3}");
+
+        // SpAtk / jatk / Cast / MagicShot awaits are completed by SMB NotifyMagicPhaseFinished.
+        // Early clip OnAnimationComplete must not finish the skill runner mid-dual.
+        if (string.Equals(source, "clip_complete", StringComparison.Ordinal) &&
+            IsSmbOwnedCombatOrMagicPhase(name))
+        {
+            Debug.Log(
+                $"[AnimFinishedEvent] IGNORE clip_complete objectId={objectId} finishedName='{name}' " +
+                $"(SMB owns phase finish)");
+            return false;
+        }
 
         if (_expectedFinishNameByObjectId.TryGetValue(objectId, out string expectedName))
         {
+            if (string.Equals(source, "clip_complete", StringComparison.Ordinal) &&
+                IsSmbOwnedCombatOrMagicPhase(expectedName))
+            {
+                Debug.Log(
+                    $"[AnimFinishedEvent] IGNORE clip_complete objectId={objectId} " +
+                    $"finishedName='{name}' expected='{expectedName}' (SMB owns phase finish)");
+                return false;
+            }
+
             if (!string.Equals(name, expectedName, StringComparison.Ordinal) &&
                 !string.Equals(SkillAnimationDatabase.ResolveOverrideCompletionEventName(name), expectedName, StringComparison.Ordinal))
             {
                 Debug.Log(
-                    $"[AnimFinishedEvent] IGNORE objectId={objectId} finishedName='{name}' expected='{expectedName}' now={Time.time:F3}");
-                return;
+                    $"[AnimFinishedEvent] IGNORE objectId={objectId} finishedName='{name}' expected='{expectedName}' " +
+                    $"source={source} now={Time.time:F3}");
+                return false;
             }
         }
 
         if (_tcsMap.TryGetValue(objectId, out var tcs))
         {
             _tcsMap.Remove(objectId);
-
             tcs.TrySetResult(true);
+            return true;
         }
+
+        return false;
+    }
+
+    private static bool IsSmbOwnedCombatOrMagicPhase(string name)
+    {
+        if (string.IsNullOrEmpty(name))
+        {
+            return false;
+        }
+
+        return name.StartsWith("SpAtk", StringComparison.OrdinalIgnoreCase)
+            || name.StartsWith("jatk", StringComparison.OrdinalIgnoreCase)
+            || name.StartsWith("CastMid", StringComparison.Ordinal)
+            || name.StartsWith("CastEnd", StringComparison.Ordinal)
+            || name.StartsWith("MagicShot", StringComparison.Ordinal);
     }
 
     public void PlayerAnimationTrigger(int objectId , string animationName , bool useFinalName = true)
@@ -495,10 +548,30 @@ public class AnimationManager : BaseAnimationManager , IAnimationManager
 
     public void PlayMonsterAnimation(int objectId, string animationName)
     {
-        IAnimationController controllerAnimator = GetMonsterController(objectId);
-        DisableLastMonsterAnimationElseTrue(objectId, controllerAnimator, animationName);
+        IAnimationController controller = GetMonsterController(objectId);
+        if (controller == null)
+        {
+            Debug.LogWarning(
+                $"AnimationManager>PlayMonsterAnimation: no controller objectId={objectId} anim='{animationName}'");
+            return;
+        }
+
+        if (MonsterAnim.TryResolve(animationName, out string stateName, out MonsterAnimState family))
+        {
+            SetMonsterRecentName(objectId, stateName);
+            MonsterCrossFade.TryPlay(controller, stateName, family);
+            // Debug.Log(
+            //     $"AnimationManager> start crossfade monster objectId={objectId} " +
+            //     $"family={family} state={stateName} duration={LocomotionCrossFadeSettings.FixedDuration:F3}s");
+            return;
+        }
+
+        // Legacy names still used by state machine (e.g. damageaction) until added to MonsterAnim.
         SetMonsterRecentName(objectId, animationName);
-        controllerAnimator.SetBool(animationName, true);
+        MonsterCrossFade.TryPlayRaw(controller, animationName);
+        Debug.LogWarning(
+            $"AnimationManager> monster crossfade unresolved '{animationName}' objectId={objectId} " +
+            $"action=raw_crossfade");
     }
    
     public Dictionary<string, float> PlayerGetAllFloat(int objectId)

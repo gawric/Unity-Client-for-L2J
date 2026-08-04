@@ -70,7 +70,19 @@ public class PlayerStateSpAtkBow : StateMachineBehaviour
         _isSwitchIdle = true;
         PlayerAnimationController.Instance.SetPAtkSpeed(1.0f);
         PlayerEntity.Instance.IsAttack = false;
+
+        int objectId = animator.GetInteger(AnimatorUtils.OBJECT_ID);
+        string phaseName = AnimationManager.Instance != null
+            ? AnimationManager.Instance.GetCurrentAnimationName(objectId)
+            : null;
+        if (string.IsNullOrEmpty(phaseName))
+        {
+            phaseName = !string.IsNullOrEmpty(parameterName) ? parameterName : motionName;
+        }
+
+        AnimationManager.Instance?.NotifyMagicPhaseFinished(objectId, phaseName);
+
         PlayerStateMachine.Instance.ChangeIntention(Intention.INTENTION_IDLE);
-        PlayerStateMachine.Instance.NotifyEvent(Event.WAIT_RETURN);
+        PlayerStateMachine.Instance.NotifyEvent(Event.WAIT_RETURN, NewIdleState.WaitReturnFromCombatSmb);
     }
 }

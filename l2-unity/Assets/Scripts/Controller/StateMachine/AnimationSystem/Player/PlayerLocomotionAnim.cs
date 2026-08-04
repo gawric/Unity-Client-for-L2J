@@ -14,11 +14,15 @@ public enum PlayerLocomotionFamily
 
 /// <summary>
 /// Shared fade tuning for player CrossFadeInFixedTime (locomotion + basic atk).
+/// Per-state exit overrides live on <see cref="Animation.ExitCrossFadeDuration"/>.
 /// </summary>
 public static class LocomotionCrossFadeSettings
 {
     public const float DefaultFixedDuration = 0.15f;
     public static float FixedDuration = DefaultFixedDuration;
+
+    public static float ResolveExitDuration(IAnimationController controller) =>
+        AnimationExitCrossFade.Resolve(controller);
 }
 
 /// <summary>

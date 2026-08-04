@@ -1,7 +1,7 @@
 using UnityEngine;
 
 /// <summary>
-/// CrossFade for combat swings that lock the priority queue (jatk* / SpAtk*).
+/// CrossFade for combat swings (jatk* / SpAtk*).
 /// Always restarts (same-name re-attack must not be skipped).
 /// </summary>
 public static class PlayerBasicAttackCrossFade
@@ -17,7 +17,6 @@ public static class PlayerBasicAttackCrossFade
         }
 
         float duration = fixedDuration ?? LocomotionCrossFadeSettings.FixedDuration;
-        controller.NotifyPriorityAttackStarting(stateName);
         controller.CrossFadeInFixedTime(stateName, duration);
         return true;
     }

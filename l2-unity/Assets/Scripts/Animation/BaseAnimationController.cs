@@ -1,10 +1,6 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Security.Cryptography.X509Certificates;
 using UnityEngine;
-using static UnityEngine.Rendering.DebugUI;
 
 public class BaseAnimationController : AnimationEventsBase, IAnimationController
 {
@@ -32,7 +28,6 @@ public class BaseAnimationController : AnimationEventsBase, IAnimationController
     {
         _animator = gameObject.GetComponentInChildren<Animator>(true);
         _lastAnimationVariableName = "wait_hand";
-        InitializePriority();
         SkillAnimationDatabase.LoadRaceAnimations(_animator?.runtimeAnimatorController.name);
 
         _base_motion.Add("CastMid" , BASE_MOTION_CAST_MID);
@@ -54,11 +49,7 @@ public class BaseAnimationController : AnimationEventsBase, IAnimationController
 
   
 
-    protected override void HandleQueueAnimation(string animationName)
-    {
-        Debug.Log($"AnimationManager> start name убираем из ожидания и запускаем {animationName}");
-        SetBool(animationName, true, "player");
-    }
+  
 
     public void SetRunSpeed(float value)
     {
@@ -143,7 +134,6 @@ public class BaseAnimationController : AnimationEventsBase, IAnimationController
 
     public void ToggleAnimationTrigger(string name)
     {
-        IfSpecialAnimationsCreateProcessQueue(name, ref _isProcessingQueue, _priorityAnimations, true);
         _animator.SetTrigger(name);
     }
 
@@ -154,7 +144,6 @@ public class BaseAnimationController : AnimationEventsBase, IAnimationController
 
     public void ToggleAnimationCrossFade(string name , float duration)
     {
-        IfSpecialAnimationsCreateProcessQueue(name, ref _isProcessingQueue, _priorityAnimations, true);
         _animator.CrossFade(name, duration, 0);
     }
 
@@ -173,173 +162,15 @@ public class BaseAnimationController : AnimationEventsBase, IAnimationController
 
     public Animator GetAnimator() => _animator;
 
-    public void ReleasePriorityQueueIfBusy(string reason)
-    {
-        ForceReleasePriorityQueue(reason);
-    }
-
-    public void NotifyPriorityAttackStarting(string stateName)
-    {
-        if (string.IsNullOrEmpty(stateName))
-        {
-            return;
-        }
-
-        IfSpecialAnimationsCreateProcessQueue(stateName, ref _isProcessingQueue, _priorityAnimations, true);
-    }
-
     public void SetBool(string name, bool value , string entityName = "")
     {
-        const string ANIM_Q_LOG = "[ANIM_PRIORITY_Q]";
-
-        // Walk/run/wait must never stay blocked behind an interrupted jatk that never got OnAnimationComplete.
-        if (value && PlayerLocomotionCrossFade.IsLocomotionStateName(name) && (_isProcessingQueue || HasAnyActivePriorityFlag()))
-        {
-            ForceReleasePriorityQueue($"locomotion_bypass:{name}");
-        }
-
-        if(_isProcessingQueue && value == true)
-        {
-            IfAnimationNeedsWait( _priorityAnimations, name);
-
-            Debug.Log(
-                $"{ANIM_Q_LOG} SetBool BLOCKED name={name} value={value} " +
-                $"isProcessingQueue={_isProcessingQueue} queueCount={_animationQueue.Count} " +
-                $"activePriority={DumpActivePriorityFlags()} " +
-                $"dict={DumpPriorityDict()} " +
-                $"(OnAnimationComplete must clear flag or locomotion stays on wait)");
-
-            if (value) return;
-            Debug.Log($"AnimationManager> start name player  добавление в список ожидания {name} статус {value} продолжение return ");
-        }
-
-
-        IfSpecialAnimationsCreateProcessQueue(name , ref _isProcessingQueue, _priorityAnimations, value);
-
-        // Save the last animation name
-        if (value == true)
+        if (value)
         {
             _lastAnimationVariableName = name;
         }
-        
+
         _animator.SetBool(name, value);
-
-        if (!string.IsNullOrEmpty(entityName) || value)
-        {
-            Debug.Log(
-                $"{ANIM_Q_LOG} SetBool APPLY name={name} value={value} " +
-                $"isProcessingQueue={_isProcessingQueue} lastAnim={_lastAnimationVariableName} " +
-                $"activePriority={DumpActivePriorityFlags()}");
-        }
-
     }
-
-    private void IfSpecialAnimationsCreateProcessQueue(string animName , ref bool isProcessingQueue , Dictionary<string, bool> priorityAnimations , bool value)
-    {
-        if (!priorityAnimations.ContainsKey(animName) || value != true)
-        {
-            return;
-        }
-
-        if (priorityAnimations[animName])
-        {
-            // Same clip re-fired while still locked (jatk03→jatk03). Keep lock;
-            // suppress the old clip's OnAnimationComplete so it cannot IDLE the new swing.
-            MarkSameNamePriorityRelock(animName);
-            isProcessingQueue = true;
-            return;
-        }
-
-        // New priority swing — drop stale flags from previous jatk that never completed.
-        ClearOtherPriorityFlags(animName);
-        _animationQueue.Clear();
-
-        priorityAnimations[animName] = true;
-        isProcessingQueue = true;
-        Debug.Log(
-            $"[ANIM_PRIORITY_Q] LOCK queue anim={animName} isProcessingQueue=True " +
-            $"activePriority={DumpActivePriorityFlags()} dict={DumpPriorityDict()}");
-    }
-
-    private void IfAnimationNeedsWait(Dictionary<string, bool> priorityAnimations , string animName)
-    {
-        if (!priorityAnimations.ContainsKey(animName))
-        {
-            _animationQueue.Enqueue(animName);
-            Debug.Log(
-                $"[ANIM_PRIORITY_Q] ENQUEUE wait anim={animName} queueCount={_animationQueue.Count} " +
-                $"queue=[{string.Join(",", _animationQueue)}] " +
-                $"(not a priority key — waits until OnAnimationComplete)");
-        }
-        else
-        {
-            Debug.Log(
-                $"[ANIM_PRIORITY_Q] SKIP enqueue anim={animName} — already a priority key " +
-                $"flag={priorityAnimations[animName]} isProcessingQueue={_isProcessingQueue}");
-        }
-    }
-
-    private bool HasAnyActivePriorityFlag()
-    {
-        if (_priorityAnimations == null) return false;
-        foreach (var kv in _priorityAnimations)
-        {
-            if (kv.Value) return true;
-        }
-        return false;
-    }
-
-    private void ClearOtherPriorityFlags(string exceptAnim)
-    {
-        if (_priorityAnimations == null) return;
-        // ToList — avoid modifying during enumeration
-        var keys = _priorityAnimations.Keys.ToList();
-        foreach (string key in keys)
-        {
-            if (key == exceptAnim) continue;
-            if (!_priorityAnimations[key]) continue;
-            _priorityAnimations[key] = false;
-            Debug.Log($"[ANIM_PRIORITY_Q] STALE clear flag={key} (new lock={exceptAnim})");
-        }
-    }
-
-    private void ForceReleasePriorityQueue(string reason)
-    {
-        bool hadLock = _isProcessingQueue || HasAnyActivePriorityFlag() || _animationQueue.Count > 0;
-        if (!hadLock) return;
-
-        string before = DumpActivePriorityFlags();
-        var keys = _priorityAnimations.Keys.ToList();
-        foreach (string key in keys)
-        {
-            _priorityAnimations[key] = false;
-        }
-        _isProcessingQueue = false;
-        _animationQueue.Clear();
-        Debug.Log(
-            $"[ANIM_PRIORITY_Q] FORCE unlock reason={reason} wasActive={before} " +
-            $"isProcessingQueue=False queueCleared");
-    }
-
-    private string DumpActivePriorityFlags()
-    {
-        if (_priorityAnimations == null || _priorityAnimations.Count == 0) return "(empty)";
-        var active = _priorityAnimations.Where(kv => kv.Value).Select(kv => kv.Key).ToArray();
-        return active.Length == 0 ? "(none true)" : string.Join(",", active);
-    }
-
-    private string DumpPriorityDict()
-    {
-        if (_priorityAnimations == null || _priorityAnimations.Count == 0) return "{}";
-        // Only dump true flags + a few known combat keys to keep log short.
-        var parts = _priorityAnimations
-            .Where(kv => kv.Value || kv.Key.StartsWith("jatk") || kv.Key.StartsWith("SpAtk") || kv.Key.StartsWith("Magic") || kv.Key.StartsWith("Cast"))
-            .Select(kv => $"{kv.Key}={kv.Value}");
-        return "{" + string.Join(", ", parts) + "}";
-    }
-
-
-
 
     public void SetBoolDisabledOther(string nameAnim  , bool value, string[] disableds)
     {

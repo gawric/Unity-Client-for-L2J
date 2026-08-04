@@ -84,8 +84,8 @@ public abstract class AbstractAttackEvents : StateBase
             AnimationManager.Instance.ResetPlayerAnimatorSpeed(objectId);
         }
 
-        PlayerStateMachine.Instance.ChangeIntention(Intention.INTENTION_IDLE);
-        PlayerStateMachine.Instance.NotifyEvent(Event.WAIT_RETURN);
+        // Pose return is owned by combat SMB (SpAtk / Magic / jatk SwitchToIdle).
+        // Early clip-Complete used to call WAIT_RETURN here and CrossFade atkwait mid-dual.
     }
 
 
@@ -103,9 +103,10 @@ public abstract class AbstractAttackEvents : StateBase
                 return;
             }
 
-            // Melee jatk / SpAtk return is owned by SMB SwitchToIdle (not Complete).
+            // Melee / SpAtk / Magic return is owned by SMB SwitchToIdle (not Complete).
             // A second WAIT_RETURN CrossFades mid-transition and can freeze the Animator.
             if (special.Type == TypesAnimation.MeleeAttack ||
+                special.Type == TypesAnimation.MagicAttack ||
                 (!string.IsNullOrEmpty(animName) &&
                  animName.StartsWith("SpAtk", System.StringComparison.Ordinal)))
             {

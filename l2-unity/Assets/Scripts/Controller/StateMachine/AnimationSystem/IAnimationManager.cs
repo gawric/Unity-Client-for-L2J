@@ -19,6 +19,11 @@ public interface IAnimationManager
     /// <returns>true = finish event received; false = superseded by a newer cast.</returns>
     Task<bool> AsyncAwaitOverrideAnimationFinish(int objectId, string expectedFinishName);
 
+    /// <summary>
+    /// SMB magic phase end — completes runner await without clip OnAnimationComplete.
+    /// </summary>
+    void NotifyMagicPhaseFinished(int objectId, string phaseName);
+
     public float[] GetOverrideClipsDurations(int objectId, string[] cycle);
     public float GetOverrideEventTimeByName(int objectId, string[] cycle , string eventName);
     void PlayOriginalAnimation(int objectId , string animationName);

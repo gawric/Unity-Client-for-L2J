@@ -1,16 +1,29 @@
 ﻿using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 public class Animation
 {
     public string Value { get; set; }
     public TypesAnimation Type { get; set; }
     public MagicPhase Phase { get; set; }
-    public Animation(string value , TypesAnimation type , MagicPhase phase = MagicPhase.None)
+
+    /// <summary>
+    /// Fixed CrossFade duration when leaving this Animator state (e.g. into wait_/atkwait_).
+    /// null = <see cref="LocomotionCrossFadeSettings.FixedDuration"/>.
+    /// </summary>
+    public float? ExitCrossFadeDuration { get; }
+
+    public Animation(
+        string value,
+        TypesAnimation type,
+        MagicPhase phase = MagicPhase.None,
+        float? exitCrossFadeDuration = null)
     {
         Value = value;
         Type = type;
         Phase = phase;
+        ExitCrossFadeDuration = exitCrossFadeDuration;
     }
 
     public string Concat(string name)
@@ -91,9 +104,13 @@ public static class SpecialAnimationNames
     public static readonly Animation ATK02_2HS = new Animation("jatk02_2HS", TypesAnimation.MeleeAttack);
     public static readonly Animation ATK03_2HS = new Animation("jatk03_2HS", TypesAnimation.MeleeAttack);
 
-    public static readonly Animation ATK01_DUAL = new Animation("jatk01_dual", TypesAnimation.MeleeAttack);
-    public static readonly Animation ATK02_DUAL = new Animation("jatk02_dual", TypesAnimation.MeleeAttack);
-    public static readonly Animation ATK03_DUAL = new Animation("jatk03_dual", TypesAnimation.MeleeAttack);
+    // Dual swings often finish after wall cycle — longer blend into wait/atkwait.
+    public static readonly Animation ATK01_DUAL = new Animation(
+        "jatk01_dual", TypesAnimation.MeleeAttack, exitCrossFadeDuration: 0.25f);
+    public static readonly Animation ATK02_DUAL = new Animation(
+        "jatk02_dual", TypesAnimation.MeleeAttack, exitCrossFadeDuration: 0.25f);
+    public static readonly Animation ATK03_DUAL = new Animation(
+        "jatk03_dual", TypesAnimation.MeleeAttack, exitCrossFadeDuration: 0.25f);
 
     public static readonly Animation ATK01_POLE = new Animation("jatk01_pole", TypesAnimation.MeleeAttack);
     public static readonly Animation ATK02_POLE = new Animation("jatk02_pole", TypesAnimation.MeleeAttack);
@@ -135,5 +152,74 @@ public static class SpecialAnimationNames
 
 }
 
+/// <summary>
+/// Resolves CrossFade duration when leaving a registered Animator state.
+/// Override per clip via <see cref="Animation.ExitCrossFadeDuration"/>; else default.
+/// </summary>
+public static class AnimationExitCrossFade
+{
+    static Animation[] _exitOverrides;
 
+    static Animation[] ExitOverrides
+    {
+        get
+        {
+            if (_exitOverrides != null)
+            {
+                return _exitOverrides;
+            }
 
+            var list = new List<Animation>(8);
+            CollectExitOverrides(SpecialAnimationNames.arrayAtkSpecials, list);
+            CollectExitOverrides(SpecialAnimationNames.arrayPhisicalAtkSpecials, list);
+            CollectExitOverrides(SpecialAnimationNames.arrayMagicAtkSpecials, list);
+            _exitOverrides = list.ToArray();
+            return _exitOverrides;
+        }
+    }
+
+    static void CollectExitOverrides(Animation[] source, List<Animation> dest)
+    {
+        if (source == null)
+        {
+            return;
+        }
+
+        for (int i = 0; i < source.Length; i++)
+        {
+            Animation anim = source[i];
+            if (anim != null && anim.ExitCrossFadeDuration.HasValue)
+            {
+                dest.Add(anim);
+            }
+        }
+    }
+
+    public static float Resolve(IAnimationController controller)
+    {
+        float fallback = LocomotionCrossFadeSettings.FixedDuration;
+        if (controller == null)
+        {
+            return fallback;
+        }
+
+        Animator animator = controller.GetAnimator();
+        if (animator == null)
+        {
+            return fallback;
+        }
+
+        AnimatorStateInfo current = animator.GetCurrentAnimatorStateInfo(0);
+        Animation[] overrides = ExitOverrides;
+        for (int i = 0; i < overrides.Length; i++)
+        {
+            Animation anim = overrides[i];
+            if (current.IsName(anim.Value))
+            {
+                return anim.ExitCrossFadeDuration.Value;
+            }
+        }
+
+        return fallback;
+    }
+}
