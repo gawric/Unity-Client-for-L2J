@@ -3,22 +3,23 @@ using UnityEngine;
 
 /// <summary>
 /// Lobby names — L2 canvas path: Project → glyph quads → one mesh / one material draw
-/// (atlas * vertexColor). Size/height tuned later via _pixelScale / _worldCalibK.
+/// (atlas * vertexColor). Tune via _pixelScale / _headHeightOffset.
 /// </summary>
 public class LobbyNameplatesManager : MonoBehaviour
 {
     private const int MaxSlots = 8;
-    private const float L2UuToMeters = 1f / 52.5f;
     private const string ShaderResourcePath = "Data/Shaders/UI/L2BitmapFont";
     private const string ShaderName = "L2/UI/BitmapFont";
 
     [SerializeField] private Camera _camera;
     [SerializeField] private float _nameplateViewDistance = 80f;
     [SerializeField] private Color _defaultNameColor = Color.white;
-    [Tooltip("L2Fx worldCalibK for UU→meters. Lobby meshes already Unity-scaled — start at 1.")]
+    [Tooltip("Reserved for UU→meters when porting world offsets. Unused while head uses CharacterController.")]
     [SerializeField] private float _worldCalibK = 1f;
     [Tooltip("Glyph pixel scale. Tune later to match L2; 1 = native atlas pixels.")]
     [SerializeField] private float _pixelScale = 1f;
+    [Tooltip("Meters added after CharacterController capsule top. Negative lowers names (CC is often taller than mesh).")]
+    [SerializeField] private float _headHeightOffset = -0.12f;
     [SerializeField] private string _atlasResourcePath = "Data/UI/Font/L2Lobby/l2_lobby_font_atlas";
     [SerializeField] private string _csvResourcePath = "Data/UI/Font/L2Lobby/ul2font_ascii";
 
@@ -285,31 +286,22 @@ public class LobbyNameplatesManager : MonoBehaviour
 
     private Vector3 GetHeadWorldPos(Transform target, CharSelectInfoPackage info)
     {
-        float collisionHeightUu = GetPlayerCollisionHeightUu(info);
-        float offsetUu = collisionHeightUu * 0.5f + 7f;
+        _ = info;
 
-        CharacterRaceAnimation race = info.CharacterRaceAnimation;
-        if (race == CharacterRaceAnimation.FDwarf || race == CharacterRaceAnimation.MDwarf)
+        CharacterController cc = target.GetComponent<CharacterController>();
+        if (cc == null)
         {
-            offsetUu += 4f;
+            cc = target.GetComponentInChildren<CharacterController>();
         }
 
-        float k = _worldCalibK > 0f ? _worldCalibK : 1f;
-        float offsetMeters = offsetUu * L2UuToMeters * k;
-        return target.position + Vector3.up * offsetMeters;
-    }
-
-    private static float GetPlayerCollisionHeightUu(CharSelectInfoPackage info)
-    {
-        switch (info.Race)
+        if (cc != null)
         {
-            case 1: return 23.5f;
-            case 2: return 24f;
-            case 3: return 25.5f;
-            case 4: return 18.5f;
-            case 5: return 23.5f;
-            default: return 23.5f;
+            // Capsule top = center + up * (height * 0.5); offset tunes CC vs real head.
+            Vector3 localTop = cc.center + Vector3.up * (cc.height * 0.5f);
+            return target.TransformPoint(localTop) + Vector3.up * _headHeightOffset;
         }
+
+        return target.position + Vector3.up * (0.92f + _headHeightOffset);
     }
 
     private Color ResolveNameColor(int karma)

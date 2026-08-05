@@ -3,6 +3,10 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
 
+/// <summary>
+/// Legacy UITK nameplate widget. World drawing uses L2 atlas batch in NameplatesManager;
+/// kept to avoid breaking old references until removed.
+/// </summary>
 [System.Serializable]
 public class Nameplate {
 

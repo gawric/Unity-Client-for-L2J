@@ -3,6 +3,8 @@ Shader "L2/UI/BitmapFont"
     Properties
     {
         _MainTex ("Atlas", 2D) = "white" {}
+        // 0 = world/object verts (lobby). 1 = verts already in clip NDC xy (world nameplates).
+        _ClipSpace ("Clip Space", Float) = 0
     }
 
     SubShader
@@ -33,6 +35,8 @@ Shader "L2/UI/BitmapFont"
             TEXTURE2D(_MainTex);
             SAMPLER(sampler_MainTex);
 
+            float _ClipSpace;
+
             struct Attributes
             {
                 float4 positionOS : POSITION;
@@ -50,8 +54,15 @@ Shader "L2/UI/BitmapFont"
             Varyings vert(Attributes v)
             {
                 Varyings o;
-                // World-space verts submitted with identity matrix via Graphics.DrawMesh.
-                o.positionCS = TransformObjectToHClip(v.positionOS.xyz);
+                if (_ClipSpace > 0.5)
+                {
+                    // positionOS.xy = NDC (-1..1). Overlay — depth unused (ZTest Always).
+                    o.positionCS = float4(v.positionOS.x, v.positionOS.y, UNITY_NEAR_CLIP_VALUE, 1.0);
+                }
+                else
+                {
+                    o.positionCS = TransformObjectToHClip(v.positionOS.xyz);
+                }
                 o.uv = v.uv;
                 o.color = v.color;
                 return o;
@@ -60,7 +71,6 @@ Shader "L2/UI/BitmapFont"
             half4 frag(Varyings i) : SV_Target
             {
                 half4 tex = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, i.uv);
-                // L2 canvas: sample * vertexColor (baked black outline stays black).
                 return tex * i.color;
             }
             ENDHLSL
@@ -83,6 +93,7 @@ Shader "L2/UI/BitmapFont"
             #include "UnityCG.cginc"
 
             sampler2D _MainTex;
+            float _ClipSpace;
 
             struct appdata
             {
@@ -101,7 +112,14 @@ Shader "L2/UI/BitmapFont"
             v2f vert(appdata v)
             {
                 v2f o;
-                o.pos = UnityObjectToClipPos(v.vertex);
+                if (_ClipSpace > 0.5)
+                {
+                    o.pos = float4(v.vertex.x, v.vertex.y, UNITY_NEAR_CLIP_VALUE, 1.0);
+                }
+                else
+                {
+                    o.pos = UnityObjectToClipPos(v.vertex);
+                }
                 o.uv = v.uv;
                 o.color = v.color;
                 return o;

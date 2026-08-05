@@ -16,6 +16,8 @@ public class CameraController : MonoBehaviour
     [SerializeField] private Vector3 _camOffset = new Vector3(0, 0.8f, 0);
     [SerializeField] private float _smoothness = 8f;
     [SerializeField] private float _camSpeed = 25f;
+    [Tooltip("A/B: skip collision pull-in; camera stays at zoom distance (test nameplate wave).")]
+    [SerializeField] private bool _disableCollisionZoom = false;
 
     [Header("Zoom controls")]
     [SerializeField] private float _minDistance = .5f;
@@ -170,7 +172,11 @@ public class CameraController : MonoBehaviour
         Quaternion rotation = Quaternion.Euler(_y, _x, 0);
         transform.rotation = rotation;
 
-        if (_collisionDetector.AdjustedDistance > Vector3.Distance(_targetPos + _camOffset, transform.position))
+        if (_disableCollisionZoom)
+        {
+            _currentDistance = _camDistance;
+        }
+        else if (_collisionDetector.AdjustedDistance > Vector3.Distance(_targetPos + _camOffset, transform.position))
         {
             _currentDistance += (_collisionDetector.AdjustedDistance - _currentDistance) / 0.2f * Time.deltaTime;
         }

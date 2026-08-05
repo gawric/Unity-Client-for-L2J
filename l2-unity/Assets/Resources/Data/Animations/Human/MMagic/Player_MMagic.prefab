@@ -151,14 +151,15 @@ MonoBehaviour:
     _scaledWalkSpeed: 0
     _basePAtkSpeed: 0
   _appearance:
-    _collisonHeight: 0
-    _collisionRadius: 0
-    _lhand: 0
-    _rhand: 0
+    CollisionHeight: 0
+    CollisionRadius: 0
+    LHand: 0
+    RHand: 0
   _running: 0
   _dead: 0
   _race: 0
   _raceId: 13
+  _bodyType: 0
   _targetId: 0
   _target: {fileID: 0}
   _attackTarget: {fileID: 0}
@@ -182,13 +183,13 @@ CharacterController:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Height: 0.85
-  m_Radius: 0.15
+  m_Height: 0.84
+  m_Radius: 0.13
   m_SlopeLimit: 45
   m_StepOffset: 0.3
   m_SkinWidth: 0.08
   m_MinMoveDistance: 0.001
-  m_Center: {x: 0, y: 0.5, z: 0}
+  m_Center: {x: 0, y: 0.45, z: 0}
 --- !u!114 &5186500308137901694
 MonoBehaviour:
   m_ObjectHideFlags: 0
