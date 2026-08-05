@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 
 
-public class PlayerStateAtk : PlayerStateAction
+public class PlayerStateAtk : PlayerStateBase
 {
     override public void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
@@ -18,7 +18,6 @@ public class PlayerStateAtk : PlayerStateAction
         }
 
         PlayerAnimationController.Instance.UpdateAnimatorAtkSpdMultiplier(clipInfos[0].clip.length);
-       // Debug.Log("PlayerStateAtk > OnStateEnter ");
 
         SetBool("atk01", true, false, false);
 
@@ -35,42 +34,6 @@ public class PlayerStateAtk : PlayerStateAction
 
         SetBool("atkwait", true, false, false);
         SetBool("atk01", true, false, false);
-
-        if (ShouldDie())
-        {
-           // Debug.Log("1");
-            return;
-        }
-
-        if (ShouldAttack())
-        {
-            //Debug.Log("2");
-            return;
-        }
-
-        if (ShouldRun())
-        {
-            //Debug.Log("3");
-            return;
-        }
-
-        if (ShouldWalk())
-        {
-           // Debug.Log("4");
-            return;
-        }
-
-        if (ShouldSit())
-        {
-           // Debug.Log("5");
-            return;
-        }
-
-        if (ShouldIdle())
-        {
-           // Debug.Log("6");
-            return;
-        }
     }
     
     override public void OnStateExit(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)

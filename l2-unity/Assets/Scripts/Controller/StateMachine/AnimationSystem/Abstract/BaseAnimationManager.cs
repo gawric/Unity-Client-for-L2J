@@ -101,7 +101,25 @@ public abstract class BaseAnimationManager
 
     public void PlayOriginalAnimation(int objectId , string animationName)
     {
-        IAnimationController controllerAnimator = GetPlayerController(objectId);
+        IAnimationController controller = GetPlayerController(objectId);
+        if (controller == null)
+        {
+            return;
+        }
+
+        // death / rebirth (no weapon suffix) → CrossFade, not SetBool.
+        if (PlayerDeathAnim.TryResolve(animationName, out string bareState))
+        {
+            DesableLastPlayerAnimationElseTrue(objectId, controller);
+            SetRecentName(objectId, bareState);
+            controller.SetAnimatorSpeed(1f);
+            controller.CrossFadeInFixedTime(bareState, LocomotionCrossFadeSettings.FixedDuration);
+            Debug.Log(
+                $"AnimationManager> start crossfade {bareState} player objectId={objectId} " +
+                $"duration={LocomotionCrossFadeSettings.FixedDuration:F3}s");
+            return;
+        }
+
         PlayerAnimationController.Instance.SetBool(animationName, true);
     }
 

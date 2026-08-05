@@ -51,6 +51,21 @@ public class AnimationManager : BaseAnimationManager , IAnimationManager
     public void PlayAnimation(int objectId , string animationName, bool disableTriggerAfterStart)
     {
         IAnimationController controller = GetPlayerController(objectId);
+
+        // Bare names without weapon suffix (death / rebirth) — before GetFinalNameAnim appends _1HS etc.
+        if (PlayerDeathAnim.TryResolve(animationName, out string bareStateName))
+        {
+            Entity bareEntity = GetEntity(objectId);
+            DesableLastPlayerAnimationElseTrue(objectId, controller);
+            SetRecentName(objectId, bareStateName);
+            controller.SetAnimatorSpeed(1f);
+            controller.CrossFadeInFixedTime(bareStateName, LocomotionCrossFadeSettings.FixedDuration);
+            Debug.Log(
+                $"AnimationManager> start crossfade {bareStateName} player {bareEntity?.name} " +
+                $"duration={LocomotionCrossFadeSettings.FixedDuration:F3}s");
+            return;
+        }
+
         string finalAnimName = GetFinalNameAnim(objectId , animationName );
 
         Entity entity = GetEntity(objectId);

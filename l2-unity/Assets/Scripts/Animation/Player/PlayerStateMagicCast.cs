@@ -1,8 +1,7 @@
 ﻿using UnityEngine;
 
-public class PlayerStateMagicCast : PlayerStateAction
+public class PlayerStateMagicCast : PlayerStateBase
 {
-    private bool _exit = false;
     override public void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
         LoadComponents(animator);
@@ -11,12 +10,10 @@ public class PlayerStateMagicCast : PlayerStateAction
             return;
         }
         SetBool("cast_short", false, false, false);
-        //PlayerController.Instance.SetCanMove(false);
     }
 
     override public void OnStateUpdate(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
-
         if (!_enabled)
         {
             return;
@@ -26,35 +23,6 @@ public class PlayerStateMagicCast : PlayerStateAction
         {
             return;
         }
-
-        if (ShouldIdle())
-        {
-            return;
-        }
-
-        //if (ShouldCastShot())
-        //{
-        //    return;
-        //}
-
-        ////if (PlayerStateMachine.Instance.State == PlayerState.MAGIC_CAST_SHOT)
-       // {
-        //    return;
-        //}
-
-
-       // if (IsFinishAnimation("cast_short"))
-        //{
-          // PlayerStateMachine.Instance.ChangeState(PlayerState.MAGIC_CAST_SHOT);
-        //}
-
-        //if (ShouldCastLoop())
-        //{
-        //    return;
-        //}
-
-        //SetBool("cast_short", false, true, false);
-
     }
 
     override public void OnStateExit(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)

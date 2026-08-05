@@ -1,103 +1,180 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-public class LobbyNameplatesManager : MonoBehaviour {
+/// <summary>
+/// Floating names above character-select pawns (login lobby).
+/// Driven by <see cref="CharacterSelector"/> pawns — keyed by list index
+/// (server ObjId in CharSelectionInfo can collide across slots).
+/// </summary>
+public class LobbyNameplatesManager : MonoBehaviour
+{
     private VisualElement _rootElement;
     private VisualTreeAsset _nameplateTemplate;
     private readonly Dictionary<int, Nameplate> _nameplates = new Dictionary<int, Nameplate>();
 
     [SerializeField] private Camera _camera;
-    [SerializeField] private float _nameplateViewDistance = 50f;
-    [SerializeField] private LayerMask _entityMask;
-    [SerializeField] public RaycastHit[] _entitiesInRange;
+    [SerializeField] private float _nameplateViewDistance = 80f;
 
-    public Camera Camera { get { return _camera; }  set { _camera = value; } }
+    public Camera Camera { get { return _camera; } set { _camera = value; } }
 
     private static LobbyNameplatesManager _instance;
     public static LobbyNameplatesManager Instance { get { return _instance; } }
 
-    private void Awake() {
-        if (_instance == null) {
+    private void Awake()
+    {
+        if (_instance == null)
+        {
             _instance = this;
-        } else {
+        }
+        else
+        {
             Destroy(this);
         }
     }
 
-    private void OnDestroy() {
+    private void OnDestroy()
+    {
         _nameplates.Clear();
         _instance = null;
     }
 
-    void Start() {
-        if (_nameplateTemplate == null) {
+    void Start()
+    {
+        if (_nameplateTemplate == null)
+        {
             _nameplateTemplate = Resources.Load<VisualTreeAsset>("Data/UI/_Elements/Game/Nameplate");
         }
-        if (_nameplateTemplate == null) {
-            Debug.LogError("Could not load chat window template.");
+        if (_nameplateTemplate == null)
+        {
+            Debug.LogError("LobbyNameplatesManager: could not load Nameplate UXML.");
         }
     }
 
-    public void SetMask(LayerMask mask) {
-        _entityMask = mask;
-    }
+    private const int kUpdatesPerSecond = 60;
+    private const float kUpdateInterval = 1.0f / kUpdatesPerSecond;
+    private float _accumulation;
 
-    private const int kUpdatesPerSecond = 200;
-    private const float kUpdateInterval = 1.0f / kUpdatesPerSecond; // how many seconds pass before an update should happen
-    private float _accumulation = 0.0f; // stores time elapsed
-    private void Update() {
-        // add to the accumulator
+    private void Update()
+    {
         _accumulation += Time.deltaTime;
-
-        // while enough time has passed for an update, call our code we want executed 200 times per second.
-        while (_accumulation >= kUpdateInterval) {
-            UpdateNameplates();
+        while (_accumulation >= kUpdateInterval)
+        {
+            UpdateNameplatePositions();
             _accumulation -= kUpdateInterval;
         }
     }
 
-
-    private void FixedUpdate() {
-        if (_camera == null) {
+    private void FixedUpdate()
+    {
+        if (_camera == null)
+        {
             ClearNameplates();
             return;
         }
 
-        if (!L2LoginUI.Instance.UILoaded) {
+        if (L2LoginUI.Instance == null || !L2LoginUI.Instance.UILoaded)
+        {
             return;
         }
 
-        if (_rootElement == null) {
+        if (_rootElement == null)
+        {
             _rootElement = L2LoginUI.Instance.RootElement.Q<VisualElement>("NameplatesContainer");
             return;
         }
 
-        _entitiesInRange = Physics.SphereCastAll(_camera.transform.position, _nameplateViewDistance, transform.forward, 0, _entityMask);
-        CreateNameplateForEntities();
-        CheckNameplateVisibility();
-    }
-
-    private void CreateNameplateForEntities() {
-        foreach (RaycastHit hit in _entitiesInRange) {
-            SelectableCharacterEntity objectEntity = hit.transform.GetComponent<SelectableCharacterEntity>();
-            if (objectEntity != null) {
-                int objectId = objectEntity.CharacterInfo.Id;
-
-                if (!_nameplates.ContainsKey(objectId)) {
-                    CreateNameplate(objectEntity);
-                }
-            }
-        }
-    }
-
-    private void CreateNameplate(SelectableCharacterEntity entity) {
-        if (!IsNameplateVisible(entity.transform)) {
+        if (_nameplateTemplate == null)
+        {
             return;
         }
-        var height = CharacterHeight.GetHeight(entity.CharacterInfoInterlude.CharacterRaceAnimation);
+
+        SyncNameplatesFromSelector();
+    }
+
+    private void SyncNameplatesFromSelector()
+    {
+        if (CharacterSelector.Instance == null)
+        {
+            return;
+        }
+
+        IReadOnlyList<GameObject> pawns = CharacterSelector.Instance.CharacterPawns;
+        if (pawns == null)
+        {
+            return;
+        }
+
+        var aliveKeys = new HashSet<int>();
+
+        for (int i = 0; i < pawns.Count; i++)
+        {
+            GameObject pawn = pawns[i];
+            if (pawn == null)
+            {
+                continue;
+            }
+
+            SelectableCharacterEntity entity = pawn.GetComponent<SelectableCharacterEntity>();
+            if (entity == null || entity.CharacterInfoInterlude == null)
+            {
+                continue;
+            }
+
+            CharSelectInfoPackage info = entity.CharacterInfoInterlude;
+            int plateKey = i;
+            aliveKeys.Add(plateKey);
+
+            bool visible = IsNameplateVisible(entity.transform);
+
+            if (!_nameplates.ContainsKey(plateKey))
+            {
+                CreateNameplate(entity, plateKey);
+                continue;
+            }
+
+            Nameplate existing = _nameplates[plateKey];
+            if (!string.Equals(existing.Name, info.Name, System.StringComparison.Ordinal))
+            {
+                existing.Name = info.Name;
+                Label label = existing.NameplateEle.Q<Label>("EntityName");
+                if (label != null)
+                {
+                    label.text = info.Name;
+                }
+            }
+
+            existing.Visible = visible;
+            existing.NameplateEle.style.display = visible
+                ? DisplayStyle.Flex
+                : DisplayStyle.None;
+        }
+
+        var toRemove = new List<int>();
+        foreach (int id in _nameplates.Keys)
+        {
+            if (!aliveKeys.Contains(id))
+            {
+                toRemove.Add(id);
+            }
+        }
+
+        for (int r = 0; r < toRemove.Count; r++)
+        {
+            int id = toRemove[r];
+            _nameplates[id].NameplateEle.RemoveFromHierarchy();
+            _nameplates.Remove(id);
+        }
+    }
+
+    private void CreateNameplate(SelectableCharacterEntity entity, int plateKey)
+    {
+        if (!IsNameplateVisible(entity.transform))
+        {
+            return;
+        }
+
+        float height = CharacterHeight.GetHeight(entity.CharacterInfoInterlude.CharacterRaceAnimation);
         VisualElement visualElement = _nameplateTemplate.Instantiate()[0];
 
         Nameplate nameplate = new Nameplate(
@@ -107,75 +184,67 @@ public class LobbyNameplatesManager : MonoBehaviour {
             entity.transform,
             "",
             "9CE8A9FF",
-            // 0.92f, //height
-            height, 
+            height,
             entity.CharacterInfoInterlude.Name,
-            entity.CharacterInfoInterlude.ObjId,
-            true
-            );
-        if (!_nameplates.ContainsKey(entity.CharacterInfoInterlude.ObjId))
+            plateKey,
+            true);
+
+        _nameplates[plateKey] = nameplate;
+        _rootElement.Add(visualElement);
+    }
+
+    private void UpdateNameplatePositions()
+    {
+        if (_camera == null || _rootElement == null)
         {
-            _nameplates.Add(entity.CharacterInfoInterlude.ObjId, nameplate);
-            _rootElement.Add(visualElement);
+            return;
         }
-  
-    }
 
-  
-
-    private void CheckNameplateVisibility() {
-        foreach (var nameplateId in _nameplates.Keys) {
-            var nameplate = _nameplates[nameplateId];
-            if (!IsNameplateVisible(nameplate.Target)) {
-                nameplate.Visible = false;
-            } else {
-                nameplate.Visible = true;
+        foreach (Nameplate nameplate in _nameplates.Values)
+        {
+            if (nameplate == null || !nameplate.Visible || nameplate.Target == null)
+            {
+                continue;
             }
+
+            UpdateNameplatePosition(nameplate);
         }
     }
 
-    private void UpdateNameplates() {
-        var keysToRemove = new List<int>();
-        foreach (var nameplateId in _nameplates.Keys) {
-            var nameplate = _nameplates[nameplateId];
-            if (!nameplate.Visible) {
-                keysToRemove.Add(nameplateId);
-            } else {
-                UpdateNameplatePosition(nameplate);
+    private void UpdateNameplatePosition(Nameplate nameplate)
+    {
+        try
+        {
+            Vector3 world = nameplate.Target.position + Vector3.up * nameplate.NameplateOffsetHeight;
+            Vector3 screen = _camera.WorldToScreenPoint(world);
+            if (screen.z < 0f)
+            {
+                nameplate.NameplateEle.style.display = DisplayStyle.None;
+                return;
             }
+
+            nameplate.NameplateEle.style.display = DisplayStyle.Flex;
+            nameplate.NameplateEle.style.left = screen.x - nameplate.NameplateEle.resolvedStyle.width / 2f;
+            nameplate.NameplateEle.style.top = Screen.height - screen.y - nameplate.NameplateEle.resolvedStyle.height;
         }
-        foreach (var key in keysToRemove) {
-            _rootElement.Remove(_nameplates[key].NameplateEle);
-            _nameplates.Remove(key);
-        }
+        catch (System.NullReferenceException) { }
+        catch (MissingReferenceException) { }
     }
 
-
-    private void UpdateNameplatePosition(Nameplate nameplate) {
-        try {
-            Vector2 nameplatePos = _camera.WorldToScreenPoint(nameplate.Target.position + Vector3.up * nameplate.NameplateOffsetHeight);
-            nameplate.NameplateEle.style.left = nameplatePos.x - nameplate.NameplateEle.resolvedStyle.width / 2f;
-            nameplate.NameplateEle.style.top = Screen.height - nameplatePos.y - nameplate.NameplateEle.resolvedStyle.height;
-        } 
-        catch (NullReferenceException) { } 
-        catch  (MissingReferenceException) { }  
-    }
-
-    private bool IsNameplateVisible(Transform target) {
-        if (target == null) {
+    private bool IsNameplateVisible(Transform target)
+    {
+        if (target == null || _camera == null)
+        {
             return false;
         }
 
-        bool isTooFar = Vector3.Distance(_camera.transform.position, target.position) > _nameplateViewDistance;
-        if (isTooFar) {
-            return false;
-        }
-
-        return true;
+        return Vector3.Distance(_camera.transform.position, target.position) <= _nameplateViewDistance;
     }
 
-    private void ClearNameplates() {
-        foreach (var nameplate in _nameplates.Values) {
+    private void ClearNameplates()
+    {
+        foreach (Nameplate nameplate in _nameplates.Values)
+        {
             nameplate.NameplateEle.RemoveFromHierarchy();
         }
 

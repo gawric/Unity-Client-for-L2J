@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public class PlayerStateAtkWait : PlayerStateAction
+public class PlayerStateAtkWait : PlayerStateBase
 {
     public string parameterName;
     override public void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
