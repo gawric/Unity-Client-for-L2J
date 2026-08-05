@@ -463,10 +463,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _camera: {fileID: 0}
-  _nameplateViewDistance: 50
-  _entityMask:
-    serializedVersion: 2
-    m_Bits: 64
+  _nameplateViewDistance: 80
+  _defaultNameColor: {r: 1, g: 1, b: 1, a: 1}
+  _worldCalibK: 1
+  _pixelScale: 2
+  _atlasResourcePath: Data/UI/Font/L2Lobby/l2_lobby_font_atlas
+  _csvResourcePath: Data/UI/Font/L2Lobby/ul2font_ascii
 --- !u!21 &887235318
 Material:
   serializedVersion: 8

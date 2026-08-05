@@ -1,25 +1,54 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UIElements;
 
 /// <summary>
-/// Floating names above character-select pawns (login lobby).
-/// Driven by <see cref="CharacterSelector"/> pawns — keyed by list index
-/// (server ObjId in CharSelectionInfo can collide across slots).
+/// Lobby names — L2 canvas path: Project → glyph quads → one mesh / one material draw
+/// (atlas * vertexColor). Size/height tuned later via _pixelScale / _worldCalibK.
 /// </summary>
 public class LobbyNameplatesManager : MonoBehaviour
 {
-    private VisualElement _rootElement;
-    private VisualTreeAsset _nameplateTemplate;
-    private readonly Dictionary<int, Nameplate> _nameplates = new Dictionary<int, Nameplate>();
+    private const int MaxSlots = 8;
+    private const float L2UuToMeters = 1f / 52.5f;
+    private const string ShaderResourcePath = "Data/Shaders/UI/L2BitmapFont";
+    private const string ShaderName = "L2/UI/BitmapFont";
 
     [SerializeField] private Camera _camera;
     [SerializeField] private float _nameplateViewDistance = 80f;
+    [SerializeField] private Color _defaultNameColor = Color.white;
+    [Tooltip("L2Fx worldCalibK for UU→meters. Lobby meshes already Unity-scaled — start at 1.")]
+    [SerializeField] private float _worldCalibK = 1f;
+    [Tooltip("Glyph pixel scale. Tune later to match L2; 1 = native atlas pixels.")]
+    [SerializeField] private float _pixelScale = 1f;
+    [SerializeField] private string _atlasResourcePath = "Data/UI/Font/L2Lobby/l2_lobby_font_atlas";
+    [SerializeField] private string _csvResourcePath = "Data/UI/Font/L2Lobby/ul2font_ascii";
 
-    public Camera Camera { get { return _camera; } set { _camera = value; } }
+    private readonly List<PaintItem> _paintList = new List<PaintItem>(MaxSlots);
+    private readonly List<Vector3> _pixelVerts = new List<Vector3>(256);
+    private readonly List<Vector3> _worldVerts = new List<Vector3>(256);
+    private readonly List<Vector2> _uvs = new List<Vector2>(256);
+    private readonly List<Color32> _colors = new List<Color32>(256);
+    private readonly List<int> _indices = new List<int>(384);
+
+    private L2BitmapFont _font;
+    private Material _material;
+    private Mesh _mesh;
+    private bool _loggedReady;
 
     private static LobbyNameplatesManager _instance;
-    public static LobbyNameplatesManager Instance { get { return _instance; } }
+    public static LobbyNameplatesManager Instance => _instance;
+
+    public Camera Camera
+    {
+        get => _camera;
+        set => _camera = value;
+    }
+
+    private struct PaintItem
+    {
+        public Vector3 World;
+        public string Name;
+        public Color Color;
+    }
 
     private void Awake()
     {
@@ -30,70 +59,183 @@ public class LobbyNameplatesManager : MonoBehaviour
         else
         {
             Destroy(this);
+            return;
         }
+
+        EnsureResources();
     }
 
     private void OnDestroy()
     {
-        _nameplates.Clear();
-        _instance = null;
-    }
-
-    void Start()
-    {
-        if (_nameplateTemplate == null)
+        if (_mesh != null)
         {
-            _nameplateTemplate = Resources.Load<VisualTreeAsset>("Data/UI/_Elements/Game/Nameplate");
+            Destroy(_mesh);
+            _mesh = null;
         }
-        if (_nameplateTemplate == null)
+
+        if (_material != null)
         {
-            Debug.LogError("LobbyNameplatesManager: could not load Nameplate UXML.");
+            Destroy(_material);
+            _material = null;
         }
-    }
 
-    private const int kUpdatesPerSecond = 60;
-    private const float kUpdateInterval = 1.0f / kUpdatesPerSecond;
-    private float _accumulation;
-
-    private void Update()
-    {
-        _accumulation += Time.deltaTime;
-        while (_accumulation >= kUpdateInterval)
+        if (_instance == this)
         {
-            UpdateNameplatePositions();
-            _accumulation -= kUpdateInterval;
+            _instance = null;
         }
     }
 
-    private void FixedUpdate()
+    private void EnsureResources()
     {
-        if (_camera == null)
+        if (_font == null)
         {
-            ClearNameplates();
-            return;
+            _font = L2BitmapFont.LoadFromResources(_atlasResourcePath, _csvResourcePath);
+            if (_font != null && !_loggedReady)
+            {
+                _loggedReady = true;
+                Debug.Log($"[LobbyNameplates] Font ready atlas={_font.AtlasWidth}x{_font.AtlasHeight} (batched DrawMesh)");
+            }
         }
 
-        if (L2LoginUI.Instance == null || !L2LoginUI.Instance.UILoaded)
+        if (_material == null)
         {
-            return;
+            Shader shader = Resources.Load<Shader>(ShaderResourcePath);
+            if (shader == null)
+            {
+                shader = Shader.Find(ShaderName);
+            }
+
+            if (shader == null)
+            {
+                Debug.LogError($"[LobbyNameplates] Shader '{ShaderName}' not found.");
+                return;
+            }
+
+            _material = new Material(shader)
+            {
+                name = "L2LobbyBitmapFont (Runtime)",
+                hideFlags = HideFlags.HideAndDontSave,
+                renderQueue = 5000
+            };
+            if (_font != null && _font.Atlas != null)
+            {
+                _material.mainTexture = _font.Atlas;
+                _material.SetTexture("_MainTex", _font.Atlas);
+            }
         }
 
-        if (_rootElement == null)
+        if (_mesh == null)
         {
-            _rootElement = L2LoginUI.Instance.RootElement.Q<VisualElement>("NameplatesContainer");
-            return;
+            _mesh = new Mesh { name = "L2LobbyNameplates", hideFlags = HideFlags.HideAndDontSave };
+            _mesh.MarkDynamic();
         }
-
-        if (_nameplateTemplate == null)
-        {
-            return;
-        }
-
-        SyncNameplatesFromSelector();
     }
 
-    private void SyncNameplatesFromSelector()
+    private Camera ResolveCamera()
     {
+        if (_camera != null)
+        {
+            return _camera;
+        }
+
+        if (CharacterSelector.Instance != null && CharacterSelector.Instance.Camera != null)
+        {
+            return CharacterSelector.Instance.Camera;
+        }
+
+        return null;
+    }
+
+    private void LateUpdate()
+    {
+        EnsureResources();
+        Camera cam = ResolveCamera();
+        if (_font == null || _material == null || _mesh == null || cam == null || !cam.isActiveAndEnabled)
+        {
+            return;
+        }
+
+        BuildPaintList(cam);
+        if (_paintList.Count == 0)
+        {
+            return;
+        }
+
+        if (!RebuildMesh(cam))
+        {
+            return;
+        }
+
+        // One submit for all lobby names (L2 FCanvasUtil flush equivalent).
+        Graphics.DrawMesh(_mesh, Matrix4x4.identity, _material, 0, cam);
+    }
+
+    private bool RebuildMesh(Camera cam)
+    {
+        _pixelVerts.Clear();
+        _worldVerts.Clear();
+        _uvs.Clear();
+        _colors.Clear();
+        _indices.Clear();
+
+        float scale = _pixelScale > 0f ? _pixelScale : 1f;
+        float screenH = Screen.height;
+        float lineH = _font.MeasureHeight(scale);
+
+        for (int i = 0; i < _paintList.Count; i++)
+        {
+            PaintItem item = _paintList[i];
+            Vector3 screen = cam.WorldToScreenPoint(item.World);
+            if (screen.z <= 0f)
+            {
+                continue;
+            }
+
+            float textW = _font.MeasureWidth(item.Name, scale);
+            float x = screen.x - textW * 0.5f;
+            // GUI/L2 Y-down top of string; projected point = bottom of text.
+            float yTop = screenH - screen.y - lineH;
+
+            int vertStart = _pixelVerts.Count;
+            _font.AppendString(
+                item.Name,
+                x,
+                yTop,
+                scale,
+                item.Color,
+                _pixelVerts,
+                _uvs,
+                _colors,
+                _indices);
+
+            float z = screen.z;
+            for (int v = vertStart; v < _pixelVerts.Count; v++)
+            {
+                Vector3 p = _pixelVerts[v];
+                // pixel Y is top-down → Unity screen Y bottom-up
+                float sy = screenH - p.y;
+                _worldVerts.Add(cam.ScreenToWorldPoint(new Vector3(p.x, sy, z)));
+            }
+        }
+
+        _mesh.Clear(false);
+        if (_worldVerts.Count == 0)
+        {
+            return false;
+        }
+
+        _mesh.SetVertices(_worldVerts);
+        _mesh.SetUVs(0, _uvs);
+        _mesh.SetColors(_colors);
+        _mesh.SetTriangles(_indices, 0, false);
+        _mesh.RecalculateBounds();
+        return true;
+    }
+
+    private void BuildPaintList(Camera cam)
+    {
+        _paintList.Clear();
+
         if (CharacterSelector.Instance == null)
         {
             return;
@@ -105,9 +247,8 @@ public class LobbyNameplatesManager : MonoBehaviour
             return;
         }
 
-        var aliveKeys = new HashSet<int>();
-
-        for (int i = 0; i < pawns.Count; i++)
+        int count = Mathf.Min(pawns.Count, MaxSlots);
+        for (int i = 0; i < count; i++)
         {
             GameObject pawn = pawns[i];
             if (pawn == null)
@@ -121,133 +262,74 @@ public class LobbyNameplatesManager : MonoBehaviour
                 continue;
             }
 
+            Transform t = entity.transform;
+            if (!IsNameplateVisible(cam, t))
+            {
+                continue;
+            }
+
             CharSelectInfoPackage info = entity.CharacterInfoInterlude;
-            int plateKey = i;
-            aliveKeys.Add(plateKey);
-
-            bool visible = IsNameplateVisible(entity.transform);
-
-            if (!_nameplates.ContainsKey(plateKey))
-            {
-                CreateNameplate(entity, plateKey);
-                continue;
-            }
-
-            Nameplate existing = _nameplates[plateKey];
-            if (!string.Equals(existing.Name, info.Name, System.StringComparison.Ordinal))
-            {
-                existing.Name = info.Name;
-                Label label = existing.NameplateEle.Q<Label>("EntityName");
-                if (label != null)
-                {
-                    label.text = info.Name;
-                }
-            }
-
-            existing.Visible = visible;
-            existing.NameplateEle.style.display = visible
-                ? DisplayStyle.Flex
-                : DisplayStyle.None;
-        }
-
-        var toRemove = new List<int>();
-        foreach (int id in _nameplates.Keys)
-        {
-            if (!aliveKeys.Contains(id))
-            {
-                toRemove.Add(id);
-            }
-        }
-
-        for (int r = 0; r < toRemove.Count; r++)
-        {
-            int id = toRemove[r];
-            _nameplates[id].NameplateEle.RemoveFromHierarchy();
-            _nameplates.Remove(id);
-        }
-    }
-
-    private void CreateNameplate(SelectableCharacterEntity entity, int plateKey)
-    {
-        if (!IsNameplateVisible(entity.transform))
-        {
-            return;
-        }
-
-        float height = CharacterHeight.GetHeight(entity.CharacterInfoInterlude.CharacterRaceAnimation);
-        VisualElement visualElement = _nameplateTemplate.Instantiate()[0];
-
-        Nameplate nameplate = new Nameplate(
-            visualElement,
-            visualElement.Q<Label>("EntityName"),
-            visualElement.Q<Label>("EntityTitle"),
-            entity.transform,
-            "",
-            "9CE8A9FF",
-            height,
-            entity.CharacterInfoInterlude.Name,
-            plateKey,
-            true);
-
-        _nameplates[plateKey] = nameplate;
-        _rootElement.Add(visualElement);
-    }
-
-    private void UpdateNameplatePositions()
-    {
-        if (_camera == null || _rootElement == null)
-        {
-            return;
-        }
-
-        foreach (Nameplate nameplate in _nameplates.Values)
-        {
-            if (nameplate == null || !nameplate.Visible || nameplate.Target == null)
+            if (string.IsNullOrEmpty(info.Name))
             {
                 continue;
             }
 
-            UpdateNameplatePosition(nameplate);
-        }
-    }
-
-    private void UpdateNameplatePosition(Nameplate nameplate)
-    {
-        try
-        {
-            Vector3 world = nameplate.Target.position + Vector3.up * nameplate.NameplateOffsetHeight;
-            Vector3 screen = _camera.WorldToScreenPoint(world);
-            if (screen.z < 0f)
+            _paintList.Add(new PaintItem
             {
-                nameplate.NameplateEle.style.display = DisplayStyle.None;
-                return;
-            }
-
-            nameplate.NameplateEle.style.display = DisplayStyle.Flex;
-            nameplate.NameplateEle.style.left = screen.x - nameplate.NameplateEle.resolvedStyle.width / 2f;
-            nameplate.NameplateEle.style.top = Screen.height - screen.y - nameplate.NameplateEle.resolvedStyle.height;
+                World = GetHeadWorldPos(t, info),
+                Name = info.Name,
+                Color = ResolveNameColor(info.Karma)
+            });
         }
-        catch (System.NullReferenceException) { }
-        catch (MissingReferenceException) { }
     }
 
-    private bool IsNameplateVisible(Transform target)
+    private Vector3 GetHeadWorldPos(Transform target, CharSelectInfoPackage info)
     {
-        if (target == null || _camera == null)
+        float collisionHeightUu = GetPlayerCollisionHeightUu(info);
+        float offsetUu = collisionHeightUu * 0.5f + 7f;
+
+        CharacterRaceAnimation race = info.CharacterRaceAnimation;
+        if (race == CharacterRaceAnimation.FDwarf || race == CharacterRaceAnimation.MDwarf)
+        {
+            offsetUu += 4f;
+        }
+
+        float k = _worldCalibK > 0f ? _worldCalibK : 1f;
+        float offsetMeters = offsetUu * L2UuToMeters * k;
+        return target.position + Vector3.up * offsetMeters;
+    }
+
+    private static float GetPlayerCollisionHeightUu(CharSelectInfoPackage info)
+    {
+        switch (info.Race)
+        {
+            case 1: return 23.5f;
+            case 2: return 24f;
+            case 3: return 25.5f;
+            case 4: return 18.5f;
+            case 5: return 23.5f;
+            default: return 23.5f;
+        }
+    }
+
+    private Color ResolveNameColor(int karma)
+    {
+        if (karma <= 0)
+        {
+            return _defaultNameColor;
+        }
+
+        float t = Mathf.Clamp01(karma / 1000f);
+        return Color.Lerp(Color.white, new Color(1f, 0.25f, 0.25f, 1f), t);
+    }
+
+    private bool IsNameplateVisible(Camera cam, Transform target)
+    {
+        if (target == null || cam == null)
         {
             return false;
         }
 
-        return Vector3.Distance(_camera.transform.position, target.position) <= _nameplateViewDistance;
-    }
-
-    private void ClearNameplates()
-    {
-        foreach (Nameplate nameplate in _nameplates.Values)
-        {
-            nameplate.NameplateEle.RemoveFromHierarchy();
-        }
-
-        _nameplates.Clear();
+        return Vector3.Distance(cam.transform.position, target.position) <= _nameplateViewDistance;
     }
 }
