@@ -378,9 +378,6 @@ PrefabInstance:
       addedObject: {fileID: 1139883649830340824}
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 6cc7f1c59ab659940914ce8a4584e558, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 2251475048185080607}
-    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 6cc7f1c59ab659940914ce8a4584e558, type: 3}
-      insertIndex: -1
       addedObject: {fileID: 5585337290138571160}
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 6cc7f1c59ab659940914ce8a4584e558, type: 3}
       insertIndex: -1
@@ -454,13 +451,13 @@ CharacterController:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Height: 0.7
-  m_Radius: 0.15
+  m_Height: 0.25
+  m_Radius: 0.1
   m_SlopeLimit: 45
   m_StepOffset: 0.3
   m_SkinWidth: 0.08
   m_MinMoveDistance: 0.001
-  m_Center: {x: 0, y: 0.42, z: 0}
+  m_Center: {x: 0, y: 0.13, z: 0}
 --- !u!114 &1139883649830340824
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -480,22 +477,6 @@ MonoBehaviour:
   _positionDelta: 0
   _lastDesyncTime: 0
   _lastDesyncDuration: 0
---- !u!114 &2251475048185080607
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 757554519874382653}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c0d95d876eae19f4099fa56602b7d22d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _direction: {x: 0, y: 0, z: 0}
-  _speed: 0
-  _destination: {x: 0, y: 0, z: 0}
-  _gravity: 28
 --- !u!114 &5585337290138571160
 MonoBehaviour:
   m_ObjectHideFlags: 0

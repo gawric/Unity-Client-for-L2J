@@ -458,9 +458,6 @@ PrefabInstance:
       addedObject: {fileID: 1281944248312522807}
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 29bb320b63839f34cb3ef40c6c9d823e, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 4386870393722165402}
-    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 29bb320b63839f34cb3ef40c6c9d823e, type: 3}
-      insertIndex: -1
       addedObject: {fileID: 5293514572029962024}
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 29bb320b63839f34cb3ef40c6c9d823e, type: 3}
       insertIndex: -1
@@ -644,22 +641,6 @@ MonoBehaviour:
   _positionDelta: 0
   _lastDesyncTime: 0
   _lastDesyncDuration: 0
---- !u!114 &4386870393722165402
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1374546400499261350}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c0d95d876eae19f4099fa56602b7d22d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _direction: {x: 0, y: 0, z: 0}
-  _speed: 0
-  _destination: {x: 0, y: 0, z: 0}
-  _gravity: 28
 --- !u!114 &5293514572029962024
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -81,13 +81,19 @@ public class MovementData
 
    
 
-    private void StartMove(CharacterController character , Vector3 direction, float speed)
+    private void StartMove(CharacterController character, Vector3 direction, float speed)
     {
-        
-        if (character != null)
+        if (character == null || !character.enabled || !character.gameObject.activeInHierarchy)
         {
-            character.Move(direction * speed * Time.deltaTime);
+            return;
         }
+
+        if (character.radius <= 0.001f || character.height <= 0.001f)
+        {
+            return;
+        }
+
+        character.Move(direction * speed * Time.deltaTime);
     }
 
     private Vector3 ApplyGravity(Vector3 dir)

@@ -2,7 +2,6 @@
 
 [RequireComponent(typeof(NetworkAnimationController)),
     RequireComponent(typeof(NetworkTransformReceive)),
-    RequireComponent(typeof(NetworkCharacterControllerReceive)),
     RequireComponent(typeof(CharacterAnimationAudioHandler))]
 public class NpcEntity : NetworkEntity
 {

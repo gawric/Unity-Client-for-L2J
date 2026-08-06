@@ -534,8 +534,12 @@ public class World : MonoBehaviour {
                 e.UpdateSpeed(speed);
             }
 
-            e.GetComponent<NetworkCharacterControllerReceive>().SetDestination(position);
-            e.GetComponent<NetworkTransformReceive>().LookAt(position);
+            NetworkTransformReceive ntr = e.GetComponent<NetworkTransformReceive>();
+            if (ntr != null)
+            {
+                ntr.LookAt(position);
+            }
+
             e.OnStartMoving(walking);
         });
     }
@@ -561,8 +565,7 @@ public class World : MonoBehaviour {
             if (speed != e.Stats.Speed) {
                 e.UpdateSpeed(speed);
             }
-
-            e.GetComponent<NetworkCharacterControllerReceive>().UpdateMoveDirection(direction);
+            // Movement direction applied via MoveAllCharacters / CharMoveToLocation.
         });
     }
 

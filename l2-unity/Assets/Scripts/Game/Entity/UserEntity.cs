@@ -1,8 +1,7 @@
 ﻿using UnityEngine;
 
 [RequireComponent(typeof(NetworkAnimationController)),
-    RequireComponent(typeof(NetworkTransformReceive)),
-    RequireComponent(typeof(NetworkCharacterControllerReceive))]
+    RequireComponent(typeof(NetworkTransformReceive))]
 
 public class UserEntity : NetworkEntity
 {

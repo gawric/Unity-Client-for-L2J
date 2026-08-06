@@ -33,13 +33,11 @@ public class Entity : MonoBehaviour {
     protected MagicCastData _castData;
     protected NetworkAnimationController _networkAnimationReceive;
     protected NetworkTransformReceive _networkTransformReceive;
-    protected NetworkCharacterControllerReceive _networkCharacterControllerReceive;
     protected Gear _gear;
     public Gear Gear => _gear;
     public bool Running { get { return _running; } set { _running = value; } }
     
     public float GetWeaponRage() { return _gear.GetWeaponRange(); }
-    public NetworkCharacterControllerReceive networkCharacterController { get { return _networkCharacterControllerReceive; } }
     public Status Status { get => _status; set => _status = value; }
     public Stats Stats { get => _stats; set => _stats = value; }
     public Appearance Appearance { get => _appearance; set { _appearance = value; } }
@@ -117,7 +115,6 @@ public class Entity : MonoBehaviour {
     public virtual void Initialize() {
         TryGetComponent(out _networkAnimationReceive);
         TryGetComponent(out _networkTransformReceive);
-        TryGetComponent(out _networkCharacterControllerReceive);
         TryGetComponent(out _gear);
        
         UpdatePAtkSpeed((int)_stats.PAtkSpd);
@@ -194,9 +191,6 @@ public class Entity : MonoBehaviour {
         }
         if (_networkTransformReceive != null) {
             _networkTransformReceive.enabled = false;
-        }
-        if (_networkCharacterControllerReceive != null) {
-            _networkCharacterControllerReceive.enabled = false;
         }
     }
 
