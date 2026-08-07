@@ -46,6 +46,7 @@ public abstract class AbstractAttackEvents : StateBase
     public override void Exit()
     {
         base.Exit();
+        CombatFacingService.Instance?.EndFollow(ResolveFacingObjectId(), "state-exit");
         if (!_isSubscribed) return;
         _isSubscribed = false;
 
@@ -70,6 +71,21 @@ public abstract class AbstractAttackEvents : StateBase
         }
     }
 
+
+    private int ResolveFacingObjectId()
+    {
+        if (_stateMachine != null)
+        {
+            return _stateMachine.GetObjectId();
+        }
+
+        if (PlayerEntity.Instance != null && PlayerEntity.Instance.IdentityInterlude != null)
+        {
+            return PlayerEntity.Instance.IdentityInterlude.Id;
+        }
+
+        return 0;
+    }
 
     private void OnAllAnimationFinishedFromExecutor(AnimationEventsBase actions)
     {
@@ -160,6 +176,9 @@ public abstract class AbstractAttackEvents : StateBase
 
     private void CallBackStartShoot(string animName)
     {
+        // Bow / magic: release aim-follow at projectile launch (not during flight).
+        CombatFacingService.Instance?.EndFollow(ResolveFacingObjectId(), "shoot");
+
         foreach (Animation special in _specialsBows)
         {
             if (animName == special.ToString())

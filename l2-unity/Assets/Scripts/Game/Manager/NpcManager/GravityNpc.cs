@@ -46,7 +46,14 @@ public class GravityNpc : MonoBehaviour, IGravity
             GravityData data = kvp.Value;
             CharacterController controller = data.GetControllerToTypeEntity();
 
-            if (!data.IsDead() && controller != null)
+            if (controller == null || !controller.enabled || !controller.gameObject.activeInHierarchy)
+            {
+                // Pooled/despawned entity left in dict — drop next Delete pass.
+                _remove.Add(kvp.Key);
+                continue;
+            }
+
+            if (!data.IsDead())
             {
                 Vector3 ajustedDirection = _direction * _speed * _moveSpeedMultiplier + Vector3.down * _gravity;
                 controller.Move(ajustedDirection * Time.deltaTime);

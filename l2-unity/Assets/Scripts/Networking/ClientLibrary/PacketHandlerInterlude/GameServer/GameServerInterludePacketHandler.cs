@@ -947,7 +947,9 @@ public class GameServerInterludePacketHandler : ServerPacketHandler
     public void OnDeleteObject(byte[] data)
     {
         DeleteObject deletepacket = new DeleteObject(data);
-        _eventProcessor.QueueEvent(() => { World.Instance.DeleteObject(deletepacket.ObjectId); });
+        int objectId = deletepacket.ObjectId;
+        Debug.Log($"[DeleteObject] PACKET received id={objectId}");
+        _eventProcessor.QueueEvent(() => { World.Instance.DeleteObject(objectId); });
     }
 
     private void OnMoveToLocation(byte[] data)

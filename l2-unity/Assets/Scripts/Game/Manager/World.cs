@@ -82,15 +82,71 @@ public class World : MonoBehaviour {
     }
 
     public void RemoveObject(int id) {
-        Entity transform;
-        if (_objects.TryGetValue(id, out transform)) {
-            _players.Remove(id);
-            _npcs.Remove(id);
-            _objects.Remove(id);
-
-            Destroy(transform.gameObject);
-            
+        Entity entity;
+        if (!_objects.TryGetValue(id, out entity))
+        {
+            Debug.LogWarning($"[DeleteObject] RemoveObject MISS dict id={id} (already gone or never spawned)");
+            return;
         }
+
+        string goName = entity != null ? entity.name : "null";
+        string typeName = entity != null ? entity.GetType().Name : "null";
+        GameObject go = entity != null ? entity.gameObject : null;
+        bool wasActive = go != null && go.activeSelf;
+        string parentBefore = go != null && go.transform.parent != null
+            ? go.transform.parent.name
+            : "null";
+
+        Debug.Log(
+            $"[DeleteObject] RemoveObject START id={id} type={typeName} name={goName} " +
+            $"activeSelf={wasActive} parent={parentBefore}");
+
+        _players.Remove(id);
+        _npcs.Remove(id);
+        _objects.Remove(id);
+        _msObjects.Remove(id);
+
+        if (GravityNpc.Instance != null)
+        {
+            GravityNpc.Instance.DeleteGravity(id);
+        }
+
+        if (AnimationManager.Instance != null)
+        {
+            AnimationManager.Instance.UnregisterController(id);
+        }
+
+        if (go == null)
+        {
+            Debug.LogWarning($"[DeleteObject] RemoveObject id={id} entity.gameObject is null");
+            return;
+        }
+
+        // City NPC + field monsters → pool. If pool fails or leaves object visible → Destroy.
+        if (ObjectPoolManager.Instance != null &&
+            (entity is NpcEntity || entity is MonsterEntity))
+        {
+            ObjectType poolType = entity is MonsterEntity ? ObjectType.Monster : ObjectType.Npc;
+            bool returned = ObjectPoolManager.Instance.ReturnToPool(poolType, go);
+            bool stillVisible = go != null && go.activeInHierarchy;
+            Debug.Log(
+                $"[DeleteObject] RemoveObject {poolType} id={id} returned={returned} " +
+                $"activeSelf={(go != null && go.activeSelf)} " +
+                $"activeInHierarchy={stillVisible} " +
+                $"parent={(go != null && go.transform.parent != null ? go.transform.parent.name : "null")}");
+
+            if (returned && !stillVisible)
+            {
+                return;
+            }
+
+            Debug.LogWarning(
+                $"[DeleteObject] RemoveObject {poolType} id={id} pool did not hide → Destroy " +
+                $"(returned={returned} stillVisible={stillVisible})");
+        }
+
+        Destroy(go);
+        Debug.Log($"[DeleteObject] RemoveObject DESTROY id={id} name={goName}");
     }
 
     public void SpawnPlayerInterlude(NetworkIdentityInterlude identity, PlayerStatusInterlude status, PlayerInterludeStats stats, PlayerInterludeAppearance appearance)
@@ -235,26 +291,20 @@ public class World : MonoBehaviour {
             
             identity.SetPosY(GetGroundHeight(identity.Position));
 
-            //GameObject npcGo = Instantiate(go, identity.Position, identity.Heading);
-            GameObject npcGo = Instantiate(go, identity.Position, identity.Heading);
+            identity.EntityType = EntityTypeParser.ParseEntityType(npcgrp.ClassName);
+            ChangeEntityType(identity);
 
+            GameObject npcGo = AcquireNpcGameObject(go, identity);
 
             NpcData npcData = new NpcData(npcName, npcgrp);
 
-           
-
-            identity.EntityType = EntityTypeParser.ParseEntityType(npcgrp.ClassName);
             Entity npc;
-
-
-            ChangeEntityType(identity);
 
             if (identity.EntityType == EntityType.NPC)
             {
                 npcGo.transform.SetParent(_npcsContainer.transform);
                 npc = npcGo.GetComponent<NpcEntity>();
                 ((NpcEntity)npc).NpcData = npcData;
-
             }
             else
             {
@@ -263,6 +313,9 @@ public class World : MonoBehaviour {
                 npc.Running = npc.IdentityInterlude.IsRunning;
                 ((MonsterEntity)npc).NpcData = npcData;
             }
+
+            // Pooled reuse may still have death latch from a previous corpse fade.
+            npc.SetDead(false);
 
 
 
@@ -296,7 +349,11 @@ public class World : MonoBehaviour {
 
            
 
-            npcGo.transform.name = identity.Name;
+            // Keep prefab name prefix so pool name-fallback still works; show NPC name in suffix.
+            npcGo.transform.name = go != null
+                ? $"{go.name}_{identity.Name}"
+                : identity.Name;
+            SanitizeCharacterControllerStepOffset(npcGo);
             npcGo.SetActive(true);
 
 
@@ -325,6 +382,56 @@ public class World : MonoBehaviour {
         }
     }
 
+    /// <summary>
+    /// City NPC / field monster → ObjectPool. Falls back to Instantiate if pool unavailable.
+    /// </summary>
+    private GameObject AcquireNpcGameObject(GameObject prefab, NetworkIdentityInterlude identity)
+    {
+        if (prefab == null)
+        {
+            return null;
+        }
+
+        ObjectType? poolType = null;
+        if (identity.EntityType == EntityType.NPC)
+        {
+            poolType = ObjectType.Npc;
+        }
+        else if (identity.EntityType == EntityType.Monster)
+        {
+            poolType = ObjectType.Monster;
+        }
+
+        if (poolType.HasValue && ObjectPoolManager.Instance != null)
+        {
+            ObjectType tag = poolType.Value;
+            ObjectPoolManager.Instance.AddPrefabToPool(tag, prefab, 1);
+            GameObject pooled = ObjectPoolManager.Instance.SpawnFromPool(tag, prefab);
+            if (pooled != null)
+            {
+                pooled.transform.SetPositionAndRotation(identity.Position, identity.Heading);
+                Debug.Log(
+                    $"[{tag}Pool] Acquire mesh={prefab.name} name={identity.Name} id={identity.Id}");
+                return pooled;
+            }
+        }
+
+        bool prefabWasActive = prefab.activeSelf;
+        if (prefabWasActive)
+        {
+            prefab.SetActive(false);
+        }
+
+        GameObject npcGo = Instantiate(prefab, identity.Position, identity.Heading);
+
+        if (prefabWasActive)
+        {
+            prefab.SetActive(true);
+        }
+
+        return npcGo;
+    }
+
     private void ChangeEntityType(NetworkIdentityInterlude identity)
     {
         //Cat Npc
@@ -334,6 +441,31 @@ public class World : MonoBehaviour {
             identity.EntityType = EntityType.NPC;
         }
     }
+
+    /// <summary>
+    /// Call after parenting. Broken L2 NPC prefabs often have stepOffset &gt; scaled capsule —
+    /// Unity asserts on SetActive. World NPCs are mostly placeholders → stepOffset = 0.
+    /// </summary>
+    private static void SanitizeCharacterControllerStepOffset(GameObject root)
+    {
+        if (root == null)
+        {
+            return;
+        }
+
+        CharacterController[] controllers = root.GetComponentsInChildren<CharacterController>(true);
+        for (int i = 0; i < controllers.Length; i++)
+        {
+            CharacterController cc = controllers[i];
+            if (cc == null)
+            {
+                continue;
+            }
+
+            cc.stepOffset = 0f;
+        }
+    }
+
     //The only npcs that move in the game
     //Leandro
     //Remy
@@ -430,20 +562,44 @@ public class World : MonoBehaviour {
     public async Task DeleteObject(int objectId)
     {
         Entity entity = await GetEntityNoLock(objectId);
-        if(entity.GetType() == typeof(MonsterEntity))
+        if (entity == null)
+        {
+            Debug.LogWarning(
+                $"[DeleteObject] HANDLER id={objectId} → entity NOT in World._objects " +
+                "(packet arrived but client has no entity — GO may be orphaned in Hierarchy)");
+            return;
+        }
+
+        string typeName = entity.GetType().Name;
+        Debug.Log(
+            $"[DeleteObject] HANDLER id={objectId} found type={typeName} name={entity.name} " +
+            $"activeInHierarchy={entity.gameObject.activeInHierarchy}");
+
+        if (entity.GetType() == typeof(MonsterEntity))
         {
             if (entity.IsDead())
             {
                 DeadManager.Instance.AddDeadAndRemove(objectId , new DeadData(true, entity));
+                Debug.Log($"[DeleteObject] HANDLER id={objectId} Monster DEAD → DeadManager");
             }
             else
             {
                 RemoveObject(objectId);
-                Debug.Log("REMOVEEEEE OBJECT Name " + entity.name + " ID " + entity.Identity.Id);
+                Debug.Log($"[DeleteObject] HANDLER id={objectId} Monster → RemoveObject");
             }
-
         }
-        // RemoveObject(objectId);
+        else if (entity is NpcEntity)
+        {
+            RemoveObject(objectId);
+            Debug.Log($"[DeleteObject] HANDLER id={objectId} NpcEntity → RemoveObject done");
+        }
+        else
+        {
+            // Same as historical catch-all: anything else still must leave the world.
+            Debug.LogWarning(
+                $"[DeleteObject] HANDLER id={objectId} unexpected type={typeName} → RemoveObject");
+            RemoveObject(objectId);
+        }
     }
 
     public float GetGroundHeight(Vector3 pos) {

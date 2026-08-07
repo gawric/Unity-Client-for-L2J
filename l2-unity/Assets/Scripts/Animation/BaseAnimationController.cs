@@ -30,9 +30,11 @@ public class BaseAnimationController : AnimationEventsBase, IAnimationController
         _lastAnimationVariableName = "wait_hand";
         SkillAnimationDatabase.LoadRaceAnimations(_animator?.runtimeAnimatorController.name);
 
-        _base_motion.Add("CastMid" , BASE_MOTION_CAST_MID);
-        _base_motion.Add("CastEnd", BASE_MOTION_END);
-        _base_motion.Add("MagicShoot", BASE_MOTION_MAGIC_SHOOT);
+        // Re-entrant: pooled NPC/monster call Initialize again on each spawn.
+        _base_motion.Clear();
+        _base_motion["CastMid"] = BASE_MOTION_CAST_MID;
+        _base_motion["CastEnd"] = BASE_MOTION_END;
+        _base_motion["MagicShoot"] = BASE_MOTION_MAGIC_SHOOT;
 
         // Создаем экземпляр оверрайда на основе текущего контроллера
         if (_animator.runtimeAnimatorController is not AnimatorOverrideController)
@@ -45,6 +47,12 @@ public class BaseAnimationController : AnimationEventsBase, IAnimationController
             _overrideController = (AnimatorOverrideController)_animator.runtimeAnimatorController;
         }
 
+        // Leave death/corpse pose behind when reusing from ObjectPool.
+        if (_animator != null)
+        {
+            _animator.Rebind();
+            _animator.Update(0f);
+        }
     }
 
   

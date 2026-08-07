@@ -33,7 +33,22 @@ public class NewPhysicalSkillsIntention : IntentionBase
             int objectId = _stateMachine.Player.IdentityInterlude.Id;
             AnimationManager.Instance.SetSpTimeAtk(objectId , useSkill.HitTime);
             Entity targetEntity = World.Instance.GetEntityNoLockSync(useSkill.TargetId);
-            PlayerController.Instance.RotateToAttacker(targetEntity.transform.position);
+            // Bow SpAtk: live follow until shoot. Other phys skills: one-shot snapshot.
+            if (objectId != useSkill.TargetId &&
+                targetEntity != null &&
+                CombatFacingService.IsPlayerUsingBow(PlayerEntity.Instance))
+            {
+                CombatFacingService.Ensure().BeginFollow(
+                    objectId,
+                    PlayerController.Instance.transform,
+                    targetEntity.transform);
+            }
+            else if (targetEntity != null)
+            {
+                CombatFacingService.Instance?.EndFollow(objectId, "non-bow-phys");
+                PlayerController.Instance.RotateToAttacker(targetEntity.transform.position);
+            }
+
             IfUseSelf(objectId, useSkill);
 
         }

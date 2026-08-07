@@ -25,7 +25,7 @@ public class LobbyNameplatesManager : MonoBehaviour
     [SerializeField] private string _csvResourcePath = "Data/UI/Font/L2Lobby/ul2font_ascii";
 
     private readonly List<PaintItem> _paintList = new List<PaintItem>(MaxSlots);
-    private readonly Dictionary<int, Vector2> _snapPixels = new Dictionary<int, Vector2>(MaxSlots);
+    private readonly NameplatePixelSnap _pixelSnap = new NameplatePixelSnap(MaxSlots);
     private readonly L2NameplateScreenBatch _batch = new L2NameplateScreenBatch();
 
     private L2BitmapFont _font;
@@ -85,6 +85,7 @@ public class LobbyNameplatesManager : MonoBehaviour
     private void OnDestroy()
     {
         OnDisable();
+        _pixelSnap.ClearAll();
         _batch.Dispose();
 
         if (_instance == this)
@@ -174,8 +175,9 @@ public class LobbyNameplatesManager : MonoBehaviour
             float ay = screen.y;
             if (_snapAnchorToPixels)
             {
-                ax = SnapAxisWithHysteresis(item.Slot, screen.x, true, screen.z);
-                ay = SnapAxisWithHysteresis(item.Slot, screen.y, false, screen.z);
+                _pixelSnap.HysteresisPx = _snapHysteresisPx;
+                ax = _pixelSnap.Snap(item.Slot, screen.x, true, screen.z);
+                ay = _pixelSnap.Snap(item.Slot, screen.y, false, screen.z);
             }
 
             float textW = _font.MeasureWidth(item.Name, scale);
@@ -188,38 +190,6 @@ public class LobbyNameplatesManager : MonoBehaviour
         }
 
         return _batch.UploadAndDraw(cam);
-    }
-
-    private float SnapAxisWithHysteresis(int id, float raw, bool isX, float distanceAlongView)
-    {
-        float hold = Mathf.Max(0.51f, _snapHysteresisPx);
-        if (distanceAlongView > 0.01f && distanceAlongView < 2.5f)
-        {
-            hold = Mathf.Max(hold, 1.4f / Mathf.Max(0.45f, distanceAlongView));
-        }
-
-        float candidate = Mathf.Round(raw);
-
-        if (!_snapPixels.TryGetValue(id, out Vector2 last))
-        {
-            last = new Vector2(candidate, candidate);
-            _snapPixels[id] = last;
-            return candidate;
-        }
-
-        float prev = isX ? last.x : last.y;
-        float snapped = Mathf.Abs(raw - prev) < hold ? prev : candidate;
-        if (isX)
-        {
-            last.x = snapped;
-        }
-        else
-        {
-            last.y = snapped;
-        }
-
-        _snapPixels[id] = last;
-        return snapped;
     }
 
     private void BuildPaintList(Camera cam)

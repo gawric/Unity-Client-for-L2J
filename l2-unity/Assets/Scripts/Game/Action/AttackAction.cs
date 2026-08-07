@@ -37,7 +37,13 @@ public class AttackAction : L2Action
 
                 if (target != null && !target.IsDead())
                 {
-                    Debug.Log("Trying To Attack");
+                    Entity entity = target.GetEntity();
+                    if (entity is MonsterEntity)
+                    {
+                        Debug.Log("Trying To Attack");
+                        // Melee attack intent (hotkey) — red while closing distance.
+                        TargetManager.Instance.SetAttackTarget();
+                    }
 
                     var l2jpos = target.Identity.GetL2jPos();
                     ClickAction sendPaket = CreatorPacketsUser.CreateActiont(target.Identity.Id, (int)l2jpos.x, (int)l2jpos.y, (int)l2jpos.z, 0);

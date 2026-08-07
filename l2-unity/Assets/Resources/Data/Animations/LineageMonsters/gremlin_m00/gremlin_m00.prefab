@@ -470,9 +470,6 @@ PrefabInstance:
       addedObject: {fileID: 6717147490432428262}
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 2e1ec27bc22348c4a81453d8344aa75e, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 6333226426953791240}
-    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 2e1ec27bc22348c4a81453d8344aa75e, type: 3}
-      insertIndex: -1
       addedObject: {fileID: 4919131280612184501}
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 2e1ec27bc22348c4a81453d8344aa75e, type: 3}
       insertIndex: -1
@@ -659,6 +656,7 @@ MonoBehaviour:
   _dead: 0
   _race: 0
   _raceId: 0
+  _bodyType: 0
   _targetId: 0
   _target: {fileID: 0}
   _attackTarget: {fileID: 0}

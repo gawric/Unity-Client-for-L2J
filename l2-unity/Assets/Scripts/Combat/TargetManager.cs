@@ -194,6 +194,24 @@ public class TargetManager : MonoBehaviour
             return;
         }
 
+        // New select is Target (blue) until Attack/AutoAttackStart marks attack target again.
+        int newId = -1;
+        Entity newEntity = target.Entity;
+        if (newEntity == null && target.ObjectTransform != null)
+        {
+            newEntity = target.ObjectTransform.GetComponent<Entity>();
+        }
+
+        if (newEntity != null && newEntity.IdentityInterlude != null)
+        {
+            newId = newEntity.IdentityInterlude.Id;
+        }
+
+        if (_target != null && _target.Identity != null && _target.Identity.Id != newId)
+        {
+            ClearAttackTarget();
+        }
+
         _target = new TargetData(target);
         _target.SetColor(hexColor);
 
@@ -213,7 +231,17 @@ public class TargetManager : MonoBehaviour
 
     public bool IsAttackTargetSet()
     {
-        return _target != null && _attackTarget != null && _target == _attackTarget;
+        if (_target == null || _attackTarget == null)
+        {
+            return false;
+        }
+
+        if (_target.Identity == null || _attackTarget.Identity == null)
+        {
+            return _target == _attackTarget;
+        }
+
+        return _target.Identity.Id == _attackTarget.Identity.Id;
     }
 
     public bool HasTarget()

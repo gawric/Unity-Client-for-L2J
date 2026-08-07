@@ -7,6 +7,7 @@ using UnityEngine;
 public interface IAnimationManager
 {
     public void RegisterController(int objectId, IAnimationController controller, Entity entity);
+    public void UnregisterController(int objectId);
 
     void PlayAnimation(int objectId , string animationName , bool disableTriggerAfterStart);
     public void PlayAnimationTrigger(int objectId , string triggerName);

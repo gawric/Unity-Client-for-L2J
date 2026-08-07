@@ -15,7 +15,19 @@ public class NewMagicAttackIntention : IntentionBase
             int objectId = _stateMachine.Player.IdentityInterlude.Id;
             AnimationManager.Instance.SetSpTimeAtk(objectId, useSkill.HitTime);
             Entity targetEntity = World.Instance.GetEntityNoLockSync(useSkill.TargetId);
-            PlayerController.Instance.RotateToAttacker(targetEntity.transform.position);
+            // Live follow until shoot; self-cast skips facing.
+            if (objectId != useSkill.TargetId && targetEntity != null)
+            {
+                CombatFacingService.Ensure().BeginFollow(
+                    objectId,
+                    PlayerController.Instance.transform,
+                    targetEntity.transform);
+            }
+            else
+            {
+                CombatFacingService.Instance?.EndFollow(objectId, "self-or-no-target");
+            }
+
             IfUseSelf(objectId, useSkill);
 
         }

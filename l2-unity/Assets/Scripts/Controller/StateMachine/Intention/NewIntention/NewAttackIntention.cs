@@ -24,12 +24,34 @@ public class NewAttackIntention : IntentionBase
 
             Entity targetEntity = World.Instance.GetEntityNoLockSync(targetId);
 
+            if (targetEntity != null)
+            {
+                // Bow: live follow until OnAnimationShoot. Melee: one-shot snapshot only.
+                if (CombatFacingService.IsPlayerUsingBow(PlayerEntity.Instance))
+                {
+                    int localId = PlayerEntity.Instance.IdentityInterlude.Id;
+                    CombatFacingService.Ensure().BeginFollow(
+                        localId,
+                        PlayerController.Instance.transform,
+                        targetEntity.transform);
+                }
+                else
+                {
+                    CombatFacingService.Instance?.EndFollowLocal("melee-snapshot");
+                    PlayerController.Instance.RotateToAttacker(targetEntity.transform.position);
+                }
+            }
 
-            PlayerController.Instance.RotateToAttacker(targetEntity.transform.position);
             Hit playerHit = myModel.FirstHit;
 
             targetEntity.SetDamage(playerHit.Damage);
             PlayerEntity.Instance.IsAttack = true;
+            if (TargetManager.Instance != null &&
+                TargetManager.Instance.HasTarget() &&
+                targetEntity is MonsterEntity)
+            {
+                TargetManager.Instance.SetAttackTarget();
+            }
             PlayerEntity.Instance.SetSelfHit(playerHit);
             // Attack packet SS flag — recharge every swing (otherwise only first Hit shows SoulShot).
             PlayerEntity.Instance.IsSoulshotCharged = playerHit.hasSoulshot();

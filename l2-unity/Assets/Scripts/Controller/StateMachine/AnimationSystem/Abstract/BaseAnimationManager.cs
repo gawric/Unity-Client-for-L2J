@@ -27,6 +27,14 @@ public abstract class BaseAnimationManager
 
     }
 
+    public void UnregisterController(int objectId)
+    {
+        _animationControllers.Remove(objectId);
+        _recentAnimationNames.Remove(objectId);
+        _recentMonsterAnimationNames.Remove(objectId);
+        _tcsMap.Remove(objectId);
+    }
+
 
 
     public bool IsPlayerController(int objectId)
