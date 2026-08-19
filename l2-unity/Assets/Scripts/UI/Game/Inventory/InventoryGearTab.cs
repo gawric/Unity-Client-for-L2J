@@ -93,6 +93,10 @@ public class InventoryGearTab : L2Tab
                     if (changeInventoryData.IsReplaceSourceItem(currentSlotEquip.ObjectId)) continue;
                     EquipItem(currentSlotEquip);
                     EventBus.Instance.Equipped(currentSlotEquip, userId);
+                    GearFlowLog.Info("InventoryGearTab Equipped userId=" + userId +
+                        " itemId=" + currentSlotEquip.ItemId +
+                        " body=" + currentSlotEquip.BodyPart +
+                        " busInstance=" + (EventBus.Instance != null));
                 }
             }
         }
@@ -120,6 +124,9 @@ public class InventoryGearTab : L2Tab
             ItemInstance itemInstance = equipItems[i];
             EquipItem(itemInstance);
             EventBus.Instance.Equipped(itemInstance, userId);
+            GearFlowLog.Info("InventoryGearTab EquipList userId=" + userId +
+                " itemId=" + itemInstance.ItemId +
+                " body=" + itemInstance.BodyPart);
         }
     }
     private void EquipEmptyAll()

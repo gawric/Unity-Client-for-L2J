@@ -1,4 +1,4 @@
-﻿
+
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,7 +19,7 @@ public class MultiSellWindow : L2PopupWindow
     private VisualTreeAsset _windowTemplateAcccesories;
     private VisualTreeAsset _windowTemplateArmor;
     private VisualTreeAsset _itemTemplateIngredient;
-    private MultiSellList _listMultisell;
+    private MultiSellListDto _listMultisell;
     private TooltipDataProvider _dataProvider;
     private MultiSellToolTips _toolTips;
     private TextField _userInput;
@@ -103,7 +103,7 @@ public class MultiSellWindow : L2PopupWindow
     }
 
 
-    public void AddData(List<ItemInstance> allItems , MultiSellList listMultisell)
+    public void AddData(List<ItemInstance> allItems , MultiSellListDto listMultisell)
     {
         if(allItems.Count > 0 && listMultisell != null)
         {
@@ -278,9 +278,7 @@ public class MultiSellWindow : L2PopupWindow
     private void OkExchange()
     {
         string value = ToolTipsUtils.ConvertPriceToNormal(_userInput.value);
-        var sendPaket = CreatorPacketsUser.CreateMultiSellChoose(_listId, _entryId, int.Parse(value));
-        bool enable = GameClient.Instance.IsCryptEnabled();
-        SendGameDataQueue.Instance().AddItem(sendPaket, enable, enable);
+        IncomingPacketActions.Game.Send(new MultiSellChooseCommand(_listId, _entryId, int.Parse(value)));
         CancelEvent();
     }
 

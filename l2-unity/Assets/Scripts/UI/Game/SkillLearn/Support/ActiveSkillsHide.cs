@@ -35,6 +35,9 @@ public class ActiveSkillsHide : AbstractSkills
         _arrDfActiveSelect = new int[5] { 0, 0, 0, 0, 0 };
     }
 
+    public bool IsReady { get { return _activeSkillPanel != null; } }
+    public bool HasSlots { get { return _boxPanelsPhysical != null && _boxPanelsPhysical.Count > 0; } }
+
     public void SetActiveSkillTemplate(VisualTreeAsset templateActiveSkill , VisualTreeAsset templateBoxPanel ,  VisualTreeAsset templatePanel8x1 , VisualTreeAsset templateSlotSkill)
     {
         _activeSkillPanel = ToolTipsUtils.CloneOne(templateActiveSkill);

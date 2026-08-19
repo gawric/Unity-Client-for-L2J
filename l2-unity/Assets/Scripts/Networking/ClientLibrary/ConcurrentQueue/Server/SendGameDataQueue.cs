@@ -1,111 +1,184 @@
-﻿using L2_login;
-using System;
-using System.Collections;
+﻿using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
 
-public class SendGameDataQueue
+public class SendGameDataQueue : IDisposable
 {
-    private ConcurrentQueue<ItemSendServer> _queue;
-    private static SendGameDataQueue _instance;
-    protected ClientPacketHandler _clientPacketHandler;
-    private static CancellationTokenSource _cancelTokenSource;
-    private static CancellationToken _token;
-    private bool _isRunning = false;
-    public static SendGameDataQueue Instance()
-    {
-        if (_instance == null)
-        {
-            _cancelTokenSource = new CancellationTokenSource();
-            _token = _cancelTokenSource.Token;
-            _instance = new SendGameDataQueue();
-        }
+    private readonly object _sync = new object();
+    private readonly IProtocol _protocol;
+    private BlockingCollection<ItemSendServer> _queue;
+    private ClientPacketHandler _clientPacketHandler;
+    private CancellationTokenSource _cancelTokenSource;
+    private Task _worker;
+    private int _running;
 
-        return _instance;
+    public SendGameDataQueue(IProtocol protocol)
+    {
+        _protocol = protocol;
+        _queue = new BlockingCollection<ItemSendServer>();
+        _cancelTokenSource = new CancellationTokenSource();
     }
 
     public void SetPacketHandler(ClientPacketHandler clientPacketHandler)
     {
-        this._clientPacketHandler = clientPacketHandler;
+        lock (_sync)
+            _clientPacketHandler = clientPacketHandler;
+        EnsureWorker();
     }
-    public SendGameDataQueue()
-    {
-        if (_queue == null) _queue = new();
-        WaitSendData();
-    }
-    //public void AddItem(ClientPacket packet, bool encrypt, bool blowfish)
-   // {
-        //if (_queue == null) _queue = new();
-       // _queue.Add(new ItemSendServer(packet, encrypt, blowfish));
-    //}
 
-    public void AddItem(ClientPacket packet, bool encrypt, bool blowfish)
+    public void AddItem(INetworkCommand command, bool encrypt)
     {
+        if (command == null)
+            return;
+
+        BlockingCollection<ItemSendServer> queue;
+        CancellationToken token;
+        lock (_sync)
+        {
+            queue = _queue;
+            token = _cancelTokenSource.Token;
+        }
+
         try
         {
-            if (_queue == null) _queue = new();
-            _queue.Enqueue(new ItemSendServer(packet, encrypt, blowfish));
-
+            EnsureWorker();
+            queue.Add(new ItemSendServer(command, encrypt), token);
+        }
+        catch (OperationCanceledException)
+        {
+        }
+        catch (InvalidOperationException)
+        {
         }
         catch (Exception ex)
         {
-            Debug.LogError("SendGameDataQueue->AddItem " + ex.ToString());
+            Debug.LogError("SendGameDataQueue->AddItem " + ex);
         }
     }
 
-    public void WaitSendData()
+    public void Stop()
     {
-        Debug.Log("Start Wait Send Data Game CLient");
-        Task.Run(() =>
+        Task worker;
+        CancellationTokenSource oldCts;
+        lock (_sync)
+        {
+            oldCts = _cancelTokenSource;
+            try
+            {
+                if (oldCts != null && !oldCts.IsCancellationRequested)
+                    oldCts.Cancel();
+            }
+            catch
+            {
+            }
+
+            try
+            {
+                _queue?.CompleteAdding();
+            }
+            catch
+            {
+            }
+
+            worker = _worker;
+            _worker = null;
+        }
+
+        try
+        {
+            worker?.Wait(500);
+        }
+        catch
+        {
+        }
+
+        lock (_sync)
         {
             try
             {
-                    while (!_token.IsCancellationRequested)
-                    {
-                        if (_queue.TryDequeue(out ItemSendServer item))
-                        {
-                            var sender = (GameClientInterludePacketHandler)_clientPacketHandler;
-                            sender.SendPacket(item.GetPacket());
-                        }
-                    }
+                oldCts?.Dispose();
             }
-            catch (Exception ex)
+            catch
             {
-                Debug.Log("Error in SendGameDataQueue->WaitSendData " + ex.Message);
-                RestartQueue();
-            }
-            finally
-            {
-                _isRunning = false;
             }
 
-        });
-    }
-
-    private void RestartQueue()
-    {
-        if (_queue == null)
-        {
-            _queue = new ConcurrentQueue<ItemSendServer>();
+            _queue = new BlockingCollection<ItemSendServer>();
+            _cancelTokenSource = new CancellationTokenSource();
+            Volatile.Write(ref _running, 0);
         }
-        if (!_isRunning)
-        {
-            _isRunning = true;
-            WaitSendData();
-        }
-
     }
 
     public void Dispose()
     {
-        if (!_cancelTokenSource.IsCancellationRequested)
+        Stop();
+    }
+
+    private void EnsureWorker()
+    {
+        ClientPacketHandler handler;
+        BlockingCollection<ItemSendServer> queue;
+        CancellationToken token;
+
+        lock (_sync)
         {
-            _cancelTokenSource.Cancel();
-            _queue = null;
-            _instance = null;
+            if (_clientPacketHandler == null)
+                return;
+            if (Interlocked.CompareExchange(ref _running, 1, 0) != 0)
+                return;
+
+            handler = _clientPacketHandler;
+            queue = _queue;
+            token = _cancelTokenSource.Token;
+            _worker = Task.Run(() => Run(handler, queue, token));
+        }
+    }
+
+    private void Run(
+        ClientPacketHandler handler,
+        BlockingCollection<ItemSendServer> queue,
+        CancellationToken token)
+    {
+        try
+        {
+            while (!token.IsCancellationRequested)
+            {
+                ItemSendServer item;
+                try
+                {
+                    item = queue.Take(token);
+                }
+                catch (OperationCanceledException)
+                {
+                    break;
+                }
+                catch (InvalidOperationException)
+                {
+                    break;
+                }
+
+                try
+                {
+                    IOutgoingPacket packet = _protocol.EncodeGame(item.Command, item.Encrypt);
+                    if (packet == null)
+                    {
+                        LobbyFlowLog.Warn("TX EncodeGame returned null command=" + item.Command.GetType().Name);
+                        continue;
+                    }
+
+                    LobbyFlowLog.Info("TX " + item.Command.GetType().Name + " encrypt=" + item.Encrypt + " opcode=0x" + packet.GetPacketType().ToString("X2"));
+                    ((GameClientPacketHandler)handler).SendPacket(packet);
+                }
+                catch (Exception ex)
+                {
+                    Debug.LogError("SendGameDataQueue->Send " + ex);
+                }
+            }
+        }
+        finally
+        {
+            Interlocked.Exchange(ref _running, 0);
         }
     }
 }

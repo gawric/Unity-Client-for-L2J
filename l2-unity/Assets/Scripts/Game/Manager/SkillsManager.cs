@@ -59,7 +59,7 @@ public class SkillsManager : MonoBehaviour
         if (!_enabled) return;
 
         _elapsedTime = (Time.time * 1000) - _starttime;
-        EffectSkillsmanager.Instance.UpdateWorldTime(_elapsedTime);
+        IncomingPacketActions.EffectSkills.UpdateWorldTime(_elapsedTime);
 
         if(_elapsedTime >_hitTime * 2 ) _enabled = false;
 

@@ -64,7 +64,7 @@ public static class CompositeEffectUtilities
         if (casterEntity != null)
         {
             context.CasterEntity = casterEntity;
-            context.CasterUserId = casterEntity.IdentityInterlude != null ? casterEntity.IdentityInterlude.Id : 0;
+            context.CasterUserId = casterEntity.Identity != null ? casterEntity.Identity.Id : 0;
 
             int resolvedTargetId = 0;
             if (castData != null && castData.TargetObjectId > 0)
@@ -82,8 +82,8 @@ public static class CompositeEffectUtilities
                 if (targetEntity != null)
                 {
                     context.TargetEntity = targetEntity;
-                    context.TargetUserId = targetEntity.IdentityInterlude != null
-                        ? targetEntity.IdentityInterlude.Id
+                    context.TargetUserId = targetEntity.Identity != null
+                        ? targetEntity.Identity.Id
                         : resolvedTargetId;
                     context.TargetTransform = targetEntity.transform;
                 }

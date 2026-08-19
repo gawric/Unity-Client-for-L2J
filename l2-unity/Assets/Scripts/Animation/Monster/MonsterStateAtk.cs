@@ -36,6 +36,8 @@ public class MonsterStateAtk : MonsterStateBase
     }
 
     override public void OnStateUpdate(Animator animator, AnimatorStateInfo stateInfo, int layerIndex) {
+        if (_entity != null && _entity.ActionSlot.Action != EntityActionKind.Attack)
+            return;
 
         float currentTime = Time.time;
         float timeOut = currentTime - _startTime;
@@ -60,11 +62,11 @@ public class MonsterStateAtk : MonsterStateBase
 
             _isSwitchIdle = true;
 
-            if (!_entity.IsDead())
-            {
-                _monsterStateMachine.ChangeIntention(MonsterIntention.INTENTION_IDLE);
-                _monsterStateMachine.NotifyEvent(Event.ENTER_WORLD);
-            }
+            if (_entity.IsDead() || EntityActionMachine.Instance == null)
+                return;
+            if (_entity.ActionSlot.Action != EntityActionKind.Attack)
+                return;
+            EntityActionMachine.Instance.Set(_entity, EntityActionKind.Idle, null);
         }
     }
 

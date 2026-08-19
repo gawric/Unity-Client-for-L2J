@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -13,7 +13,7 @@ public class ClanWindow : L2TwoPanels
     private ClanDetailedInfo _detailedClan;
     private ICreatorTables _creatorTableWindows;
 
-    private PledgeClanInfo _pladgeClanInfo = new PledgeClanInfo(new byte[1]);
+    private PledgeClanInfoDto _pladgeClanInfo = new PledgeClanInfoDto();
 
     private DropdownField _dropdown;
     private string _selectDropDown = "";
@@ -30,9 +30,10 @@ public class ClanWindow : L2TwoPanels
     private Label _labelInvite;
 
     //data
-    private PledgeShowMemberListAll _packet;
+    private PledgeShowMemberListAllDto _packet;
 
     public static ClanWindow Instance { get { return _instance; } }
+    public bool IsReady { get { return _windowEle != null && _dropdown != null; } }
 
     private void Awake()
     {
@@ -139,16 +140,21 @@ public class ClanWindow : L2TwoPanels
 
         OnCenterScreen(_root);
         EnabledUnkButtons();
+
+        if (_packet != null)
+        {
+            ApplyClanData(_packet);
+        }
     }
 
     //Detailed Clan
-    public void UpdateDetailedInfo(ServerPacket packet)
+    public void UpdateDetailedInfo(object packet)
     {
         _detailedClan.UpdateDetailedInfo(packet , _detailedInfoElement , _packet);
         ShowDetailedInfo();
     }
 
-    public void ShowGradeInfo(ServerPacket packet)
+    public void ShowGradeInfo(object packet)
     {
         _detailedClan.UpdateDetailedInfo(packet, _detailedInfoElement, _packet);
         ShowDetailedInfo();
@@ -156,12 +162,22 @@ public class ClanWindow : L2TwoPanels
 
 
     //Master Clan 
-    public void AddClanData(PledgeShowMemberListAll packet )
+    public void AddClanData(PledgeShowMemberListAllDto packet )
+    {
+        _packet = packet;
+        if (_windowEle == null || _dropdown == null)
+        {
+            return;
+        }
+
+        ApplyClanData(packet);
+    }
+
+    private void ApplyClanData(PledgeShowMemberListAllDto packet)
     {
         _dataProviderClanInfo.SetMasterClanInfo(_windowEle , packet);
         _listDropDown = _masterClan.SetDropdownList(_dropdown , packet.PledgeName);
         _masterClan.CreateMembersTable(packet.Members, _creatorTableWindows);
-        _packet = packet;
         SetDisabledButton(packet.SubPledgeLeaderName , packet.Members);
     }
 
@@ -173,28 +189,28 @@ public class ClanWindow : L2TwoPanels
         //_masterClan.Up(_creatorTableWindows);
     }
 
-    public void UpdateMemberData(PledgeShowMemberListUpdate packetUpdate)
+    public void UpdateMemberData(PledgeShowMemberListUpdateDto packetUpdate)
     {
         ClanMember clanMember = new ClanMember(packetUpdate.MemberName, packetUpdate.Level, packetUpdate.ClassId, packetUpdate.Sex, packetUpdate.Race, packetUpdate.IsOnline, packetUpdate.PledgeType);
         _masterClan.UpdateMemberData(clanMember, _packet, _creatorTableWindows);
     }
 
-    public void DeleteMemberData(PledgeShowMemberListDelete packetDelete)
+    public void DeleteMemberData(PledgeShowMemberListDeleteDto packetDelete)
     {
         _masterClan.DeleteMemeberTable(packetDelete.MemberName, _packet, _creatorTableWindows);
     }
 
-    public void AddMemberData(PledgeShowMemberListAdd packetAdd)
+    public void AddMemberData(PledgeShowMemberListAddDto packetAdd)
     {
         _masterClan.AddMemberData(packetAdd.ClanMember, _packet, _creatorTableWindows);
     }
 
-    public void UpdatePledge(PledgeInfo pledge)
+    public void UpdatePledge(PledgeInfoDto pledge)
     {
         _dataProviderClanInfo.UpdateClanInfo(_windowEle, pledge);
     }
 
-    public void UpdateClanIdInfo(PledgeStatusChanged changed)
+    public void UpdateClanIdInfo(PledgeStatusChangedDto changed)
     {
         if(_packet != null & changed != null)
         {
@@ -210,26 +226,10 @@ public class ClanWindow : L2TwoPanels
 
     private void OnClickShowMember(ClickEvent evt)
     {
-        //if (!string.IsNullOrEmpty(_masterClan.GetSelectMemberName()))
-        //{
-        //    SendGameDataQueue.Instance().AddItem(
-        //        CreatorPacketsUser.CreateRequestPladgeMemberInfo(_masterClan.GetSelectMemberName()), 
-        //        GameClient.Instance.IsCryptEnabled(), 
-        //        GameClient.Instance.IsCryptEnabled());
-        //}
-
     }
 
     private void OnClickPrivileges(ClickEvent evt)
     {
-        //if (!string.IsNullOrEmpty(_masterClan.GetSelectMemberName()))
-        //{
-        //    SendGameDataQueue.Instance().AddItem(
-        //        CreatorPacketsUser.CreateRequestPledgeMemberPowerInfo(_masterClan.GetSelectMemberName()),
-        //        GameClient.Instance.IsCryptEnabled(),
-        //        GameClient.Instance.IsCryptEnabled());
-        //}
-
     }
 
 
@@ -239,10 +239,7 @@ public class ClanWindow : L2TwoPanels
     {
         //if (!string.IsNullOrEmpty(_masterClan.GetSelectMemberName()))
         //{
-        //    SendGameDataQueue.Instance().AddItem(
-        //        CreatorPacketsUser.CreateRequestPledgePowerGradeList(),
-        //        GameClient.Instance.IsCryptEnabled(),
-        //        GameClient.Instance.IsCryptEnabled());
+        //    IncomingPacketActions.Game.Send(//        new RequestPledgePowerGradeList());
         //}
 
     }
@@ -270,19 +267,27 @@ public class ClanWindow : L2TwoPanels
 
     }
 
+    private string GetSelfName()
+    {
+        UserInfoDto user = StorageNpc.getInstance().GetFirstUser();
+        if (user == null || user.PlayerInfoInterlude.Identity == null)
+        {
+            return null;
+        }
+
+        return user.PlayerInfoInterlude.Identity.Name;
+    }
+
     private bool IsLeader(string leaderName)
     {
-        string userName = StorageNpc.getInstance().GetFirstUser().PlayerInfoInterlude.Identity.Name;
-        return leaderName == userName;
+        string userName = GetSelfName();
+        return userName != null && leaderName == userName;
     }
 
     private void OnClickPenalty(ClickEvent evt)
     {
 
-            SendGameDataQueue.Instance().AddItem(
-                CreatorPacketsUser.CreateRequestUserCommand(100),
-                GameClient.Instance.IsCryptEnabled(),
-                GameClient.Instance.IsCryptEnabled());
+            IncomingPacketActions.Game.Send(new RequestUserCommandCommand(100));
         
     }
 
@@ -321,7 +326,12 @@ public class ClanWindow : L2TwoPanels
     private const string USS_STYLE_DISABLED = "button-label-disabled";
     private void SetDisabledButton(string leaderName, List<ClanMember> Members)
     {
-        string userName = StorageNpc.getInstance().GetFirstUser().PlayerInfoInterlude.Identity.Name;
+        string userName = GetSelfName();
+        if (userName == null || _labelEditAuth == null)
+        {
+            return;
+        }
+
         ResetAllButtons();
 
         if (IsLeader(leaderName))
@@ -398,10 +408,7 @@ public class ClanWindow : L2TwoPanels
 
     private void OkLeave()
     {
-        SendGameDataQueue.Instance().AddItem(
-               CreatorPacketsUser.CreateRequestWithdrawPledge(),
-               GameClient.Instance.IsCryptEnabled(),
-               GameClient.Instance.IsCryptEnabled());
+        IncomingPacketActions.Game.Send(new RequestWithdrawPledgeCommand());
         CancelEvent();
     }
 
@@ -409,12 +416,9 @@ public class ClanWindow : L2TwoPanels
     {
         if (TargetManager.Instance.HasTarget() && TargetManager.Instance.Target.GetEntity() != null)
         {
-            int id = TargetManager.Instance.Target != null ? TargetManager.Instance.Target.GetEntity().IdentityInterlude.Id : 0;
+            int id = TargetManager.Instance.Target != null ? TargetManager.Instance.Target.GetEntity().Identity.Id : 0;
 
-            SendGameDataQueue.Instance().AddItem(
-                   CreatorPacketsUser.CreateRequestJoinPledge(id),
-                   GameClient.Instance.IsCryptEnabled(),
-                   GameClient.Instance.IsCryptEnabled());
+            IncomingPacketActions.Game.Send(new RequestJoinPledgeCommand(id));
         }
 
         CancelEvent();

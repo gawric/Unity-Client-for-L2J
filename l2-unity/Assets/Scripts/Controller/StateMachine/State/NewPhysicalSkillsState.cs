@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Threading;
 using UnityEditorInternal;
 using UnityEngine;
@@ -18,7 +18,7 @@ public class NewPhysicalSkillsState : AbstractAttackEvents
     }
     public override void HandleEvent(Event evt , object payload = null)
     {
-        MagicSkillUse useSkill = GetPayload(payload);
+        MagicSkillUseDto useSkill = GetPayload(payload);
 
 
         switch (evt)
@@ -50,7 +50,7 @@ public class NewPhysicalSkillsState : AbstractAttackEvents
                 {
                     AnimationCombo selfCombo = SkillgrpTable.Instance.GetAnimComboBySkillId(useSkill.SkillId, useSkill.SkillLvl);
                     Entity entity = _stateMachine.Player;
-                    int objectId = entity.IdentityInterlude.Id;
+                    int objectId = entity.Identity.Id;
                     SetupDurationHelper.SetupLongCastDurationIfHitTimeNot0(useSkill, objectId, entity, selfCombo);
 
                     SkillExecutor.Instance.ExecuteSkillOverride(useSkill.SkillGrp, entity, selfCombo, _events, isLong: true);
@@ -91,50 +91,35 @@ public class NewPhysicalSkillsState : AbstractAttackEvents
 
 
 
-    private MagicSkillUse GetPayload(object payload)
+    private MagicSkillUseDto GetPayload(object payload)
     {
 
-        if (payload is MagicSkillUse useSkill)
+        if (payload is MagicSkillUseDto useSkill)
         {
             return useSkill;
         }
 
         return null;
     }
-    private void RotateFaceToMonster(Entity entity)
-    {
-        Transform monster = PlayerEntity.Instance.Target;
-        if (monster == null) return;
-
-
-        RotationService.Instance.RotateTowards(entity.transform, monster.position, () =>
-        {
-            float monsterHeight = monster.GetComponent<Entity>().Appearance.CollisionHeight;
-            Vector3 monsterFacePosition = monster.position + Vector3.up * (monsterHeight * 0.8f);
-
-            Vector3 startPoint = entity.transform.position + Vector3.up * 1.5f;
-            Vector3 lookDir = (monsterFacePosition - startPoint).normalized;
-            float verticalAngle = Mathf.Asin(lookDir.y) * Mathf.Rad2Deg;
-
-            // --- НАСТРОЙКА СПИНЫ ---
-            // Берем 40% от общего угла для естественности
-            float spineAngle = Mathf.Clamp(verticalAngle * 0.4f, -15f, 10f);
-            Vector3 spineRotation = new Vector3(0, 0, spineAngle);
-
-            // --- НАСТРОЙКА РУКИ ---
-            // Добавляем еще 30% наклона именно для руки, чтобы она била ниже
-            float armAngle = Mathf.Clamp(verticalAngle * 0.3f, -20f, 10f);
-            Vector3 armRotation = new Vector3(0, 0, armAngle);
-            // ВНИМАНИЕ: Если рука крутится не туда, проверьте ось (возможно, нужна X вместо Z)
-
-            // 4. Применяем через ваш PlayerEntity и SpineProceduralController
-            PlayerEntity playerEntity = (PlayerEntity)entity;
-
-            // Применяем к позвоночнику (вы уже настроили это в SetProceduralPose)
-            playerEntity.SetProceduralSpinePose(spineRotation);
-            playerEntity.SetProceduralRightUpperArmPose(armRotation);
-        });
-
-        //DebugLineDraw.ShowDrawLineDebugNpc(-1, startPoint, lookDir * 3f, Color.black);
-    }
+    // Disabled with AttackTimingHelper.RotateFaceToMonster — clip pose only.
+    // private void RotateFaceToMonster(Entity entity)
+    // {
+    //     Transform monster = PlayerEntity.Instance.Target;
+    //     if (monster == null) return;
+    //     RotationService.Instance.RotateTowards(entity.transform, monster.position, () =>
+    //     {
+    //         float monsterHeight = monster.GetComponent<Entity>().Appearance.CollisionHeight;
+    //         Vector3 monsterFacePosition = monster.position + Vector3.up * (monsterHeight * 0.8f);
+    //         Vector3 startPoint = entity.transform.position + Vector3.up * 1.5f;
+    //         Vector3 lookDir = (monsterFacePosition - startPoint).normalized;
+    //         float verticalAngle = Mathf.Asin(lookDir.y) * Mathf.Rad2Deg;
+    //         float spineAngle = Mathf.Clamp(verticalAngle * 0.4f, -15f, 10f);
+    //         Vector3 spineRotation = new Vector3(0, 0, spineAngle);
+    //         float armAngle = Mathf.Clamp(verticalAngle * 0.3f, -20f, 10f);
+    //         Vector3 armRotation = new Vector3(0, 0, armAngle);
+    //         PlayerEntity playerEntity = (PlayerEntity)entity;
+    //         playerEntity.SetProceduralSpinePose(spineRotation);
+    //         playerEntity.SetProceduralRightUpperArmPose(armRotation);
+    //     });
+    // }
 }

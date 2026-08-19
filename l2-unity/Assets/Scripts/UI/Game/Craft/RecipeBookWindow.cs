@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Linq;
 using UnityEngine;
@@ -12,7 +12,7 @@ public class RecipeBookWindow : L2PopupWindow
     private VisualElement _inventoryTabView;
     private Label _sizelabel;
     private static RecipeBookWindow _instance;
-    private RecipeBookItemList _packet;
+    private RecipeBookItemListDto _packet;
     public static RecipeBookWindow Instance { get { return _instance; } }
     private ICreatorTradeTab _creatorWindow;
 
@@ -60,7 +60,7 @@ public class RecipeBookWindow : L2PopupWindow
         yield return new WaitForEndOfFrame();
     }
 
-    public void AddData(RecipeBookItemList packet)
+    public void AddData(RecipeBookItemListDto packet)
     {
         if(packet.ListRecipes != null)
         {
@@ -91,14 +91,10 @@ public class RecipeBookWindow : L2PopupWindow
 
     private void SendRequestOpenCraftWindow(int recipeId)
     {
-        SendGameDataQueue.Instance().AddItem(
-            CreatorPacketsUser.CreateRequestRecipeItemMakeInfo(recipeId),
-            GameClient.Instance.IsCryptEnabled(),
-            GameClient.Instance.IsCryptEnabled()
-        );
+        IncomingPacketActions.Game.Send(new RequestRecipeItemMakeInfoCommand(recipeId));
     }
 
-    private void UpdateSizeLabel(Label sizeLabel , RecipeBookItemList packet)
+    private void UpdateSizeLabel(Label sizeLabel , RecipeBookItemListDto packet)
     {
         if (sizeLabel != null & packet != null)
         {

@@ -26,9 +26,9 @@ public static class SkillAnimationCastDataBuilder
 
         // Entity.Animator is often unset; SpAtk SMB runs on PlayerAnimationController's animator.
         Animator animator = null;
-        if (AnimationManager.Instance is BaseAnimationManager animMgr)
+        if (IncomingPacketActions.Animations is BaseAnimationManager animMgr)
         {
-            PlayerAnimationController pac = animMgr.GetPlayerController(entity.IdentityInterlude.Id);
+            PlayerAnimationController pac = animMgr.GetPlayerController(entity.Identity.Id);
             if (pac != null)
             {
                 animator = pac.GetAnimator();
@@ -50,7 +50,7 @@ public static class SkillAnimationCastDataBuilder
         if (animator == null)
         {
             Debug.LogWarning(
-                $"[SKILL_ANIM_FX] CAST_DATA no Animator objectId={entity.IdentityInterlude.Id} " +
+                $"[SKILL_ANIM_FX] CAST_DATA no Animator objectId={entity.Identity.Id} " +
                 $"entityAnimatorNull={entity.Animator == null}");
             return castData;
         }

@@ -86,8 +86,7 @@ public class ShowListWindow : L2PopupWindow
         if (_players.ContainsKey(_select))
         {
             int objectId = _players[_select];
-            var sendPaket = CreatorPacketsUser.CreateSendableItemList(objectId);
-            SendGameDataQueue.Instance().AddItem(sendPaket, GameClient.Instance.IsCryptEnabled(), GameClient.Instance.IsCryptEnabled());
+            IncomingPacketActions.Game.Send(new RequestPackageSendableItemListCommand(objectId));
             HideWindow();
         }
     }

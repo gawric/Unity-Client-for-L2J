@@ -1,4 +1,4 @@
-﻿using FMOD.Studio;
+using FMOD.Studio;
 using NUnit.Framework;
 using System;
 using System.Collections.Generic;
@@ -70,31 +70,31 @@ public class ClanDetailedInfo
 
     }
 
-    public void UpdateDetailedInfo(ServerPacket packet, VisualElement detailedInfoElement, PledgeShowMemberListAll packetAll)
+    public void UpdateDetailedInfo(object packet, VisualElement detailedInfoElement, PledgeShowMemberListAllDto packetAll)
     {
         switch (packet)
         {
-            case PledgeReceiveMemberInfo memberInfo:
+            case PledgeReceiveMemberInfoDto memberInfo:
                 _memberInfoContent.PreShow(memberInfo, detailedInfoElement, packetAll);
                 _showPanel = 0;
                 break;
 
-            case PledgeReceivePowerInfo powerInfo:
+            case PledgeReceivePowerInfoDto powerInfo:
                 //if leader max access
                 if (powerInfo.Name == packetAll.SubPledgeLeaderName) powerInfo.PowerGradeByRank = ClanPrivileges.CP_ALL;
 
                 _privilegesInfoContent.PreShow(powerInfo, detailedInfoElement);
                 _showPanel = 1;
                 break;
-            case PledgeClanInfo clanInfo:
+            case PledgeClanInfoDto clanInfo:
                 _clanInfoContent.PreShow(clanInfo, detailedInfoElement, packetAll);
                 _showPanel = 2;
                 break;
-            case PledgePowerGradeList authInfo:
+            case PledgePowerGradeListDto authInfo:
                 _rankingPrivilege.PreShow(authInfo, detailedInfoElement, packetAll);
                 _showPanel = 3;
                 break;
-            case ManagePledgePower pladgePower:
+            case ManagePledgePowerDto pladgePower:
                 _privilegesInfoContent.PreShow(pladgePower, detailedInfoElement);
                 _showPanel = 1;
                 break;
@@ -110,30 +110,18 @@ public class ClanDetailedInfo
 
     private void OnClickOkRank(string memberName, int rank)
     {
-        //SendGameDataQueue.Instance().AddItem(
-        //    CreatorPacketsUser.CreateRequestPledgeSetMemberPowerGrade(memberName , rank),
-        //    GameClient.Instance.IsCryptEnabled(),
-        //    GameClient.Instance.IsCryptEnabled());
-
-        ////Debug.Log("Click OnClickOkRank memberName " + memberName + " Rank " + rank);
     }
 
     private void OnClickOkTitle(string memberName, string title)
     {
-        SendGameDataQueue.Instance().AddItem(
-            CreatorPacketsUser.CreateRequestGiveNickName(memberName, title),
-            GameClient.Instance.IsCryptEnabled(),
-            GameClient.Instance.IsCryptEnabled());
+        IncomingPacketActions.Game.Send(new RequestGiveNickNameCommand(memberName, title));
 
         //Debug.Log("Click Ok OnClickOkTitle memberName " + memberName + " Rank " + title);
     }
 
     private void OnDeleteTitle(string memberName)
     {
-        SendGameDataQueue.Instance().AddItem(
-            CreatorPacketsUser.CreateRequestGiveNickName(memberName, ""),
-            GameClient.Instance.IsCryptEnabled(),
-            GameClient.Instance.IsCryptEnabled());
+        IncomingPacketActions.Game.Send(new RequestGiveNickNameCommand(memberName, ""));
     }
     private string _selectDismiss = "";
     private void OnOkDismiss(string memberName)
@@ -146,10 +134,7 @@ public class ClanDetailedInfo
 
     private void SystemMessageClickOkDismiss()
     {
-        SendGameDataQueue.Instance().AddItem(
-            CreatorPacketsUser.CreateRequestOustPledgeMember(_selectDismiss),
-            GameClient.Instance.IsCryptEnabled(),
-            GameClient.Instance.IsCryptEnabled());
+        IncomingPacketActions.Game.Send(new RequestOustPledgeMemberCommand(_selectDismiss));
         CancelEvent();
     }
 
@@ -176,10 +161,7 @@ public class ClanDetailedInfo
 
         if(newPrivileges != -1)
         {
-            SendGameDataQueue.Instance().AddItem(
-                CreatorPacketsUser.CreateRequestPledgePower(useRank, 2, newPrivileges),
-                GameClient.Instance.IsCryptEnabled(),
-                GameClient.Instance.IsCryptEnabled());
+            IncomingPacketActions.Game.Send(new RequestPledgePowerCommand(useRank, 2, newPrivileges));
 
         }
 
@@ -188,7 +170,7 @@ public class ClanDetailedInfo
 
     private void OnSwitchSubWindow(int id)
     {
-        PledgeReceivePowerInfo powerInfo = new PledgeReceivePowerInfo(new byte[1]);
+        PledgeReceivePowerInfoDto powerInfo = new PledgeReceivePowerInfoDto();
         powerInfo.PowerGrade = id;
         _privilegesInfoContent.PreShow(powerInfo, _detailedInfoElement);
     }

@@ -112,7 +112,7 @@ public class AbstractProjectile : MonoBehaviour
 
         if (targetEntity == null || entity == null) return;
 
-        if (entity.IdentityInterlude.Id == targetEntity.IdentityInterlude.Id)
+        if (entity.Identity.Id == targetEntity.Identity.Id)
         {
 
             projectile.hitPointCollider = hit.point;

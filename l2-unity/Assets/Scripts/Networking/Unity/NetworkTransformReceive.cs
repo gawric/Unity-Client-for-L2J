@@ -18,7 +18,8 @@ public class NetworkTransformReceive : MonoBehaviour {
     private long _maximumAllowedDesyncTimeMs = 0;
 
     void Start() {
-        if(World.Instance.OfflineMode) {
+        World world = IncomingPacketActions.GameWorld;
+        if(world != null && world.OfflineMode) {
             this.enabled = false;
             return;
         }
@@ -40,7 +41,9 @@ public class NetworkTransformReceive : MonoBehaviour {
     /* Set new theorical position */
     public void SetNewPosition(Vector3 pos) {
         /* adjust y to ground height */
-        pos.y = World.Instance.GetGroundHeight(pos);
+        World world = IncomingPacketActions.GameWorld;
+        if (world != null)
+            pos.y = world.GetGroundHeight(pos);
 
         _serverPosition = pos;
 
@@ -73,7 +76,7 @@ public class NetworkTransformReceive : MonoBehaviour {
 
                 transform.position = Vector3.Lerp(_lastPos, _serverPosition, _posLerpValue);
                 _posLerpValue += (1 / _lerpDuration) * Time.deltaTime;
-                Debug.Log("position 3");
+               // Debug.Log("position 3");
             }
 
         }   

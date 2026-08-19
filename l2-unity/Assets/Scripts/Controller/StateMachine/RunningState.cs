@@ -11,7 +11,7 @@ public class RunningState : StateBase
         switch (evt)
         {
             case Event.ARRIVED:
-                if (TargetManager.Instance.HasAttackTarget())
+                if (IncomingPacketActions.Targets.HasAttackTarget())
                 {
                     //_stateMachine.ChangeIntention(Intention.INTENTION_ATTACK, AttackIntentionType.TargetReached);
                 }
@@ -35,28 +35,26 @@ public class RunningState : StateBase
     public override void Update()
     {
         //Arrived to destination
-        if (!InputManager.Instance.Move && !PlayerController.Instance.RunningToDestination)
+        if (!IncomingPacketActions.Input.Move && !IncomingPacketActions.Player.RunningToDestination)
         {
             ////Debug.Log("Input event Move" + InputManager.Instance.Move);
             //Debug.Log("Input event RunningToDestination" + PlayerController.Instance.RunningToDestination);
 
             // Debug.Log("Character position : x " + PlayerController.Instance.GetPlayerPosition().x + " y " + PlayerController.Instance.GetPlayerPosition().y + PlayerController.Instance.GetPlayerPosition().z);
-            SendValidatePosition(PlayerController.Instance.GetPlayerPosition());
+            SendValidatePosition(IncomingPacketActions.Player.GetPlayerPosition());
             _stateMachine.NotifyEvent(Event.ARRIVED);
         }
 
         // If move input is pressed while running to target
-        if (TargetManager.Instance.HasAttackTarget() && InputManager.Instance.Move)
+        if (IncomingPacketActions.Targets.HasAttackTarget() && IncomingPacketActions.Input.Move)
         {
             // Cancel follow target
-            TargetManager.Instance.ClearAttackTarget();
+            IncomingPacketActions.Targets.ClearAttackTarget();
         }
     }
 
     private void SendValidatePosition(Vector3 playerPosition)
     {
-        ValidatePosition sendPaket = CreatorPacketsUser.CreateValidatePosition(playerPosition.x, playerPosition.y, playerPosition.z);
-        bool enable = GameClient.Instance.IsCryptEnabled();
-        SendGameDataQueue.Instance().AddItem(sendPaket, enable, enable);
+        IncomingPacketActions.Game.Send(new ValidatePositionCommand(playerPosition.x, playerPosition.y, playerPosition.z));
     }
 }

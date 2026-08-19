@@ -325,13 +325,13 @@ public class CompositePrefabEffect : TimedCompositeEffectBase
             return;
         }
 
-        if (_context?.CasterEntity?.IdentityInterlude == null || AnimationManager.Instance == null)
+        if (_context?.CasterEntity?.Identity == null || IncomingPacketActions.Animations == null)
         {
             return;
         }
 
-        int casterId = _context.CasterEntity.IdentityInterlude.Id;
-        _animationEvents = AnimationManager.Instance.GetAnimationEvents(casterId);
+        int casterId = _context.CasterEntity.Identity.Id;
+        _animationEvents = IncomingPacketActions.Animations.GetAnimationEvents(casterId);
         TrySubscribeShootSource(_animationEvents, "AnimationManager");
 
         if (!_isSubscribedToAnyShoot)

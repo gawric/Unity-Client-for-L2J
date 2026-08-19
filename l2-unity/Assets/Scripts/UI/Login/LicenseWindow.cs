@@ -2,9 +2,11 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
+using VContainer;
 
 public class LicenseWindow : L2Window
 {
+    [Inject] LoginRuntime _login;
     private static LicenseWindow _instance;
     public static LicenseWindow Instance { get { return _instance; } }
 
@@ -57,10 +59,12 @@ public class LicenseWindow : L2Window
 
     private void AgreeButtonPressed() {
         //LoginClient.Instance.ClientPacketHandler.SendPacket()
-        SendLoginDataQueue.Instance().AddItem(CreatorPackets.CreateServerListPacket(LoginClient.Instance.SessionKey1 , LoginClient.Instance.SessionKey2) , true , true);
+        LoginClient client = _login != null && _login.LoginClient != null ? _login.LoginClient : IncomingPacketActions.Login;
+        client.Send(new RequestServerListCommand(client.SessionKey1 , client.SessionKey2));
     }
 
     private void DisagreeButtonPressed() {
-        LoginClient.Instance.Disconnect();
+        LoginClient client = _login != null && _login.LoginClient != null ? _login.LoginClient : IncomingPacketActions.Login;
+        client.Disconnect();
     }
 }

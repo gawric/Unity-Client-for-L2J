@@ -16,7 +16,7 @@ public class DeadData
 
     public int GetIdEntity()
     {
-        return _entity.IdentityInterlude.Id;
+        return _entity.Identity.Id;
     }
     public void SetRefresh(bool refresh)
     {

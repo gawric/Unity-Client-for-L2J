@@ -181,17 +181,32 @@ public class MoveAllCharacters : MonoBehaviour, IMoveAllCharacters
                 {
                     data.Move(direction, speed);
 
-                    if (data.GetLastPosition() == transform.position)
+                    if (speed > 0.001f && data.HasLastPosition() && data.GetLastPosition() == transform.position)
                     {
-                        data.OnFinish(target);
-                        _removeListMove.Add(key);
-                        //Debug.Log("MoveAllCharacters Stop Run3");
+                        if (!KeepFollowMovingPawn(data))
+                        {
+                            data.OnFinish(target);
+                            _removeListMove.Add(key);
+                        }
                     }
                 }
                 else
                 {
                     _removeListMove.Add(key);
 
+                }
+            }
+            else if (KeepFollowMovingPawn(data))
+            {
+                if (data.ConsumeKeepFollowLog())
+                {
+                    Entity pawn = data.GetMovementTarget().GetActorEntity();
+                    EntityActionCombatLog.LogCiPawn(data.GetEntity(),
+                        "Chase KEEP_FOLLOW nick=" + EntityActionCombatLog.NameOf(data.GetEntity()) +
+                        " nowToPawn=" + distance.ToString("F2") +
+                        " stopDist=" + stopDistance.ToString("F2") +
+                        " pawn=" + EntityActionCombatLog.Describe(pawn) +
+                        EntityActionCombatLog.ChaseDump(data.GetEntity(), pawn));
                 }
             }
             else
@@ -205,9 +220,22 @@ public class MoveAllCharacters : MonoBehaviour, IMoveAllCharacters
         }
     }
 
+    static bool KeepFollowMovingPawn(MovementData data)
+    {
+        if (data == null || !(data.GetEntity() is UserEntity))
+            return false;
+        MovementTarget target = data.GetMovementTarget();
+        if (target == null || !target.IsActorTarget())
+            return false;
+        return EntityActionCombatLog.IsPawnMoving(target.GetActorEntity());
+    }
+
     private void TurnTowardsAttacker(Vector3 attackerPosition, Transform mTranform)
     {
-        Vector3 directionToAttacker = (attackerPosition - mTranform.position).normalized;
+        Vector3 directionToAttacker = attackerPosition - mTranform.position;
+        directionToAttacker.y = 0f;
+        if (directionToAttacker.sqrMagnitude < 0.0001f)
+            return;
         Quaternion lookRotation = Quaternion.LookRotation(directionToAttacker);
         //default 25
         mTranform.rotation = Quaternion.Slerp(mTranform.rotation, lookRotation, Time.deltaTime * 15f);

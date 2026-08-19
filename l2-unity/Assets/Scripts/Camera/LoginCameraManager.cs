@@ -131,6 +131,10 @@ public class LoginCameraManager : MonoBehaviour
     }
 
     private void UpdateListenerPosition() {
+        if (ThirdPersonListener.Instance == null || _activeCamera == null) {
+            return;
+        }
+
         ThirdPersonListener.Instance.transform.position = _activeCamera.transform.position;
         ThirdPersonListener.Instance.Cam = _activeCamera.gameObject;
     }

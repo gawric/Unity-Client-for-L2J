@@ -84,13 +84,13 @@ public class SelectableCharacterEntity : MonoBehaviour
 
     private void StartWalking() {
         _walking = true;
-        AnimationManager.Instance.PlayLobbyLocomotion(
+        IncomingPacketActions.Animations.PlayLobbyLocomotion(
             _baseAnimationController, AnimationNames.WALK.ToString() + WeaponAnim);
     }
 
     private void StopWalking() {
         _walking = false;
-        AnimationManager.Instance.PlayLobbyLocomotion(
+        IncomingPacketActions.Animations.PlayLobbyLocomotion(
             _baseAnimationController, AnimationNames.WAIT.ToString() + WeaponAnim);
         transform.eulerAngles = _destEulerAngles;
     }

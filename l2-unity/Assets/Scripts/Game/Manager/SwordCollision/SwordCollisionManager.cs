@@ -1,9 +1,11 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
+using VContainer;
 
 public class SwordCollisionService : MonoBehaviour
 {
+    [Inject] World _world;
     private const string TIMER_LOG = "[SWORD_TIMER]";
     private const string CHAIN_LOG = "[ATK_HIT_CHAIN]";
     private const float DEFAULT_HIT_FRACTION = 0.88f;
@@ -52,7 +54,7 @@ public class SwordCollisionService : MonoBehaviour
 
     public event Action<Transform, Transform, Vector3, Vector3> OnHitCollider;
 
-    /// <returns>Attack epoch — pass to EndAttack so an older swing cannot clear a newer BeginAttack.</returns>
+    /// <returns>AttackDto epoch — pass to EndAttack so an older swing cannot clear a newer BeginAttack.</returns>
     public int BeginAttack(int entityId, int targetEntityId, Transform attacker, Transform target, float attackDurationMs, float hitFraction = DEFAULT_HIT_FRACTION)
     {
         if (entityId <= 0) return 0;
@@ -333,8 +335,10 @@ public class SwordCollisionService : MonoBehaviour
 
     private Entity GetEntityById(int entityId)
     {
-        if (entityId <= 0 || World.Instance == null) return null;
-        return World.Instance.GetEntityNoLockSync(entityId);
+        World world = _world != null ? _world : World.Instance;
+        if (entityId <= 0 || world == null)
+            return null;
+        return world.GetEntityNoLockSync(entityId);
     }
 
 }

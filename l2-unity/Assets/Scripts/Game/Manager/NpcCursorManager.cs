@@ -54,7 +54,7 @@ public class NpcCursorManager : MonoBehaviour
                 {
                     if(_targetObjectData.Entity != null)
                     {
-                        if (_targetObjectData.Entity.IdentityInterlude.Id == targetID)
+                        if (_targetObjectData.Entity.Identity.Id == targetID)
                         {
                             OnMouseEnterTest(_targetObjectData);
                         }

@@ -10,6 +10,6 @@
             return;
         }
 
-        TargetManager.Instance.NextTarget();
+        IncomingPacketActions.Targets.NextTarget();
     }
 }

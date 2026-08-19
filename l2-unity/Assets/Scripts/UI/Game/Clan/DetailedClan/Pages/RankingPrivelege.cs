@@ -1,4 +1,4 @@
-﻿using FMOD.Studio;
+using FMOD.Studio;
 using NUnit.Framework;
 using System;
 using System.Collections.Generic;
@@ -11,7 +11,7 @@ public class RankingPrivelege : AbstractClanContent
     private Func<string, VisualTreeAsset> _loaderFunc;
     private const string master_table_content = "Content";
     private const string button_edit_auth = "EditAuthButton";
-    private PledgePowerGradeList _rankingList;
+    private PledgePowerGradeListDto _rankingList;
     private GradeList _selectRank;
     private ClanDetailedInfo _detailedClan;
     public Action<int> OnSwitchRank;
@@ -27,7 +27,7 @@ public class RankingPrivelege : AbstractClanContent
     {
         _loaderFunc = loaderFunc;
     }
-    public void PreShow(PledgePowerGradeList rankingList, VisualElement detailedInfoElement, PledgeShowMemberListAll packetAll)
+    public void PreShow(PledgePowerGradeListDto rankingList, VisualElement detailedInfoElement, PledgeShowMemberListAllDto packetAll)
     {
         _rankingList = rankingList;
         content = LoadContent(content, detailedInfoElement);
@@ -37,7 +37,7 @@ public class RankingPrivelege : AbstractClanContent
 
         Show(rankingList, detailedInfoElement, packetAll);
     }
-    public void Show(PledgePowerGradeList rankingList, VisualElement detailedInfoElement, PledgeShowMemberListAll packetAll)
+    public void Show(PledgePowerGradeListDto rankingList, VisualElement detailedInfoElement, PledgeShowMemberListAllDto packetAll)
     {
         VisualElement page = ToolTipsUtils.CloneOne(template);
         VisualElement master_table_content_result = page.Q<VisualElement>(master_table_content);
@@ -52,7 +52,7 @@ public class RankingPrivelege : AbstractClanContent
         }
     }
 
-    private void CreateTable(PledgePowerGradeList rankingList , VisualElement master_table_content , Func<string, VisualTreeAsset> loaderFunc)
+    private void CreateTable(PledgePowerGradeListDto rankingList , VisualElement master_table_content , Func<string, VisualTreeAsset> loaderFunc)
     {
         if(master_table_content != null)
         {
@@ -77,10 +77,7 @@ public class RankingPrivelege : AbstractClanContent
         if (_selectRank != null)
         {
 
-            SendGameDataQueue.Instance().AddItem(
-                CreatorPacketsUser.CreateRequestPledgePower(_selectRank.GetRank(), 1, _selectRank.GetPower()),
-                GameClient.Instance.IsCryptEnabled(),
-                GameClient.Instance.IsCryptEnabled());
+            IncomingPacketActions.Game.Send(new RequestPledgePowerCommand(_selectRank.GetRank(), 1, _selectRank.GetPower()));
 
             //OnSwitchRank?.Invoke(EDIT_MODE_ALL_NOT_CHECKED);
 

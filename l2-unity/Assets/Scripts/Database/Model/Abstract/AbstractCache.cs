@@ -66,21 +66,6 @@ public abstract class AbstractCache : AbstractGetCache
         return armorPiece;
     }
 
-    protected Material LoadArmorMaterial(string texture)
-    {
-        var parts = texture.Split('.');
-        if (parts.Length < 2) return null;
-
-        var materialPath = $"Data/SysTextures/{parts[0]}/Materials/{parts[1]}";
-        var material = Resources.Load<Material>(materialPath);
-
-        Debug.Log(material != null
-            ? $"Successfully loaded armor material at {materialPath}"
-            : $"Can't find armor material at {materialPath}");
-
-        return material;
-    }
-
     protected GameObject LoadNpc(string meshname)
     {
         string[] folderFile = meshname.Split(".");

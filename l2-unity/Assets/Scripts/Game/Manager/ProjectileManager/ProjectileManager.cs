@@ -3,15 +3,16 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.ProBuilder;
-
+using VContainer;
 
 public class ProjectileManager : AbstractProjectile, IProjectileManager
 {
+    [Inject] HitManager _hits;
     private const string PROJECTILE_TIMER_LOG = "[PROJECTILE_TIMER]";
     private const string MagicProjectileSyncTag = "[MAGIC_PROJECTILE_SYNC]";
 
     [SerializeField] public ProjectileData defaultSettings;
-    public event Action<GameObject, Transform, Vector3, Vector3> OnHitMonster;
+    public event Action<GameObject, Transform, Vector3, Vector3, int> OnHitMonster;
     public event Action<GameObject, Transform, Vector3, Vector3, int> OnHitEffectProjectile;
 
     private Dictionary<int, ProjectileData> activeProjectiles = new Dictionary<int, ProjectileData>();
@@ -31,10 +32,13 @@ public class ProjectileManager : AbstractProjectile, IProjectileManager
         }
         _entityMask = LayerMask.GetMask("EntityClick");
         Instance = this;
-        if (HitManager.Instance != null)
-        {
-            HitManager.Instance.BindProjectileHits();
-        }
+    }
+
+    private void Start()
+    {
+        HitManager hits = _hits != null ? _hits : HitManager.Instance;
+        if (hits != null)
+            hits.BindProjectileHits();
     }
     #endregion
 
@@ -264,7 +268,8 @@ public class ProjectileManager : AbstractProjectile, IProjectileManager
                     projectile.prefab,
                     projectile.targetTransform,
                     projectile.hitPoint,
-                    projectile.hitDirection);
+                    projectile.hitDirection,
+                    projectile.attackerEntityId);
             }
             return false;
         }
@@ -293,14 +298,14 @@ public class ProjectileManager : AbstractProjectile, IProjectileManager
         }
 
         Entity ownerEntity = projectilePrefab.GetComponentInParent<Entity>();
-        if (ownerEntity != null && ownerEntity.IdentityInterlude != null)
+        if (ownerEntity != null && ownerEntity.Identity != null)
         {
-            return ownerEntity.IdentityInterlude.Id;
+            return ownerEntity.Identity.Id;
         }
 
-        if (PlayerEntity.Instance != null && PlayerEntity.Instance.IdentityInterlude != null)
+        if (PlayerEntity.Instance != null && PlayerEntity.Instance.Identity != null)
         {
-            return PlayerEntity.Instance.IdentityInterlude.Id;
+            return PlayerEntity.Instance.Identity.Id;
         }
 
         return 0;

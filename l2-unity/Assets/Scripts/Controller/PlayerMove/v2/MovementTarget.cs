@@ -28,6 +28,17 @@ public class MovementTarget
     {
         return _distance;
     }
+
+    public bool IsActorTarget()
+    {
+        return _objectPoint is Transform;
+    }
+    public Entity GetActorEntity()
+    {
+        Transform transform = _objectPoint as Transform;
+        return transform != null ? transform.GetComponent<Entity>() : null;
+    }
+
     public Vector3 GetTarget()
     {
         switch (_objectPoint)

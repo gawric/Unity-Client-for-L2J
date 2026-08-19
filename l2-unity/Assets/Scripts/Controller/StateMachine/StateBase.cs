@@ -1,4 +1,4 @@
-﻿public abstract class StateBase
+public abstract class StateBase
 {
     protected PlayerStateMachine _stateMachine;
 
@@ -7,7 +7,7 @@
         _stateMachine = stateMachine;
     }
 
-    protected MagicSkillUse GetPayload(object payload) => payload is MagicSkillUse useSkill ? useSkill : null;
+    protected MagicSkillUseDto GetPayload(object payload) => payload is MagicSkillUseDto useSkill ? useSkill : null;
 
 
 

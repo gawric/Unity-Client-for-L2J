@@ -49,7 +49,7 @@ public class AnimationModel
  
     private void HandleBaseAnimationFinished(string animName)
     {
-        int objectId = _entity.IdentityInterlude.Id;
+        int objectId = _entity.Identity.Id;
         OnAnimationFinishedWithId?.Invoke(animName, objectId);
     }
 

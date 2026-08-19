@@ -38,10 +38,9 @@ public interface IAnimationManager
     public AnimationEventsBase  GetAnimationEvents(int objectId);
     public void SetSpTimeAtk(int objectId , int timeAtk);
     public void ResetPlayerAnimatorSpeed(int objectId, float speed = 1f);
-
-    /// <summary>
-    /// Lobby / pawn without World Entity: CrossFade wait_/walk_/run_/atkwait_* (e.g. wait_hand).
-    /// </summary>
+    float ApplyLinearMeleePAtkSpeed(int objectId, string animName, float clipLengthSec);
+    void SetPAtkSpeed(int objectId, float patkspd);
     void PlayLobbyLocomotion(IAnimationController controller, string stateOrPrefixWithWeapon);
+    float PlayExactAnimatorState(int objectId, string stateName, bool snapToEnd = false);
 }
 

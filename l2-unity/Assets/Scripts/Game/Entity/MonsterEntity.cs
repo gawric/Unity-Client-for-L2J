@@ -7,7 +7,6 @@ public class MonsterEntity : NetworkEntity
     private MonsterAnimationAudioHandler _monsterAnimationAudioHandler;
     private LayerMask _areaMask = 8192;
     private NpcData _npcData;
-    private MonsterStateMachine _stateMachine;
     private float _defaultRunSpeed;
     private float _defaultWalkSpeed;
     private CharacterController _characterController;
@@ -24,16 +23,10 @@ public class MonsterEntity : NetworkEntity
     {
         base.Initialize();
         _monsterAnimationAudioHandler = GetComponent<MonsterAnimationAudioHandler>();
-        _stateMachine = GetComponent<MonsterStateMachine>();
         _characterController = GetComponent<CharacterController>();
         EntityLoaded = true;
     }
 
-
-    public MonsterStateMachine GetStateMachine()
-    {
-        return _stateMachine;
-    }
 
     public  CharacterController GetCharacterController()
     {
@@ -50,7 +43,7 @@ public class MonsterEntity : NetworkEntity
             {
                 var _entity = entity.transform.parent.GetComponent<Entity>();
 
-                if (_entity != null & _entity.IdentityInterlude.Id == id)
+                if (_entity != null & _entity.Identity.Id == id)
                 {
                     return new ObjectData(entity.transform.parent.gameObject);
                 }
@@ -66,7 +59,6 @@ public class MonsterEntity : NetworkEntity
 
     public void OnDeathL2j()
     {
-        //Debug.Log("Dead Animation 2");
         _networkAnimationReceive.SetAnimationProperty((int)MonsterAnimationEvent.Death, 1f, true);
         _networkAnimationReceive.SetBool("death", true);
     }
@@ -95,13 +87,13 @@ public class MonsterEntity : NetworkEntity
 
     public void OnStopL2jMoving()
     {
-        if (!_networkAnimationReceive.GetBool(_wait))
-        {
-            _networkAnimationReceive.SetAnimationProperty((int)NpcAnimationEvent.Wait, 1f);
-            _networkAnimationReceive.SetBool(_wait, true);
-        }
+        if (_networkAnimationReceive == null)
+            return;
 
-       // Debug.Log("STOPPPPPPPPPPPP L2j MOOOOOOOOVVVVVVVVVVIIIING");
+        _networkAnimationReceive.SetBool(_walk, false);
+        _networkAnimationReceive.SetBool(_run, false);
+        _networkAnimationReceive.SetBool(_wait, true);
+        _networkAnimationReceive.SetAnimationProperty((int)NpcAnimationEvent.Wait, 1f);
     }
 
     public override void OnStartMoving(bool walking)

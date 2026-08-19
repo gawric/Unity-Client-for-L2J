@@ -55,12 +55,12 @@ public sealed class NameplateEntryStore
             }
 
             Entity entity = hitT.GetComponent<Entity>();
-            if (entity == null || entity.IdentityInterlude == null)
+            if (entity == null || entity.Identity == null)
             {
                 continue;
             }
 
-            if (entity.IdentityInterlude.Id == _removeObjId)
+            if (entity.Identity.Id == _removeObjId)
             {
                 continue;
             }
@@ -99,12 +99,12 @@ public sealed class NameplateEntryStore
 
     public void UpsertEntry(Entity entity, Color defaultNameColor)
     {
-        if (entity == null || entity.IdentityInterlude == null || entity.transform == null)
+        if (entity == null || entity.Identity == null || entity.transform == null)
         {
             return;
         }
 
-        NetworkIdentityInterlude idn = entity.IdentityInterlude;
+        EntityIdentity idn = entity.Identity;
         if (string.IsNullOrEmpty(idn.Name))
         {
             return;
@@ -219,9 +219,9 @@ public sealed class NameplateEntryStore
                 continue;
             }
 
-            if (e.Entity != null && e.Entity.IdentityInterlude != null)
+            if (e.Entity != null && e.Entity.Identity != null)
             {
-                NetworkIdentityInterlude idn = e.Entity.IdentityInterlude;
+                EntityIdentity idn = e.Entity.Identity;
                 e.Name = idn.Name;
                 e.Title = idn.Title ?? string.Empty;
                 if (!string.IsNullOrEmpty(idn.TitleColor))

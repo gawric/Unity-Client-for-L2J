@@ -18,7 +18,7 @@ public class PlayerStateMachine : MonoBehaviour
     public int GetObjectId()
     {
         if (Player == null) return -1;
-        return Player.IdentityInterlude.Id;
+        return Player.Identity.Id;
     }
     public PlayerEntity Player { get; set; }
     public bool IsMoveToPawn { get; set; }

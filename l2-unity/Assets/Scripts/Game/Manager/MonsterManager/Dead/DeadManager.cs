@@ -1,8 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class DeadManager : MonoBehaviour, IDead
 {
+    public event Action<int> OnReadyToRemove;
+
     private static IDead _instance;
     public static IDead Instance { get { return _instance; } }
 
@@ -67,7 +70,7 @@ public class DeadManager : MonoBehaviour, IDead
                         }
                         else
                         {
-                            World.Instance.RemoveObject(data.GetIdEntity());
+                            OnReadyToRemove?.Invoke(data.GetIdEntity());
                             data.SetRefresh(false);
                             _remove.Add(kvp.Key);
                         }

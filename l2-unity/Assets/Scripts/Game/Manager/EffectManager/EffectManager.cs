@@ -18,9 +18,9 @@ public class EffectManager : MonoBehaviour
     {
         var data = database.effects.Find(e => e.id == id);
 
-        if (data == null || data.prefab == null || _activeEffectsContainer == null)
+        if (data == null || data.prefab == null || _activeEffectsContainer == null || target == null)
         {
-            Debug.LogWarning($"EffectManager: PlayEffect data == null || data.prefab == null || _activeEffectsContainer == null");
+            Debug.LogWarning($"EffectManager: PlayEffect data == null || data.prefab == null || _activeEffectsContainer == null || target == null");
             return;
         }
 

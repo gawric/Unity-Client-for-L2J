@@ -105,7 +105,8 @@ public static class MonsterAnim
     }
 
     /// <summary>
-    /// One-shot clips must restart even if already in that state (atk / death / spatk).
+    /// Attack one-shots (atk / spatk) restart even if already in that state.
+    /// Death is also a one-shot, but must not rewind: client predict + Die packet would restart the corpse.
     /// Looping locomotion may skip CrossFade when already playing.
     /// </summary>
     public static bool IsOneShot(MonsterAnimState family)

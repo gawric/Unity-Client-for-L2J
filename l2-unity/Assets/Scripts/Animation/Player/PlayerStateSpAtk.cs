@@ -9,6 +9,7 @@ public class PlayerStateSpAtk : StateMachineBehaviour
     private float _startTime;
     private float _eventHitTimeInClip;
     private float _serverHitTime;
+    private float _linearPatkSpd = 1f;
     private bool _isSwitchIdle;
     private bool _hitExecuted;
 
@@ -103,7 +104,7 @@ public class PlayerStateSpAtk : StateMachineBehaviour
         return behaviour != null;
     }
 
-    override public void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
+    public override void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
         _isSwitchIdle = false;
         _hitExecuted = false;
@@ -113,61 +114,75 @@ public class PlayerStateSpAtk : StateMachineBehaviour
         float endHit = AnimationDataCache.GetEventTimeByName(animator, motionName, eventEndHitName);
         _eventHitTimeInClip = (startHit + endHit) / 2f;
 
+        int objectId = AnimatorUtils.GetObjectId(animator);
         int serverTimeMs = animator.GetInteger("sptimeatk");
-        _serverHitTime = (serverTimeMs / 1000f) - HitTimeCompensationSeconds;
-        if (_serverHitTime < MinServerHitSeconds)
+        float clipLength = AnimationDataCache.GetOverrideLength(animator, motionName);
+        if (clipLength <= 0.01f)
+            clipLength = Mathf.Max(stateInfo.length, 0.01f);
+
+        if (serverTimeMs > 0 && _eventHitTimeInClip > 0.01f)
         {
-            _serverHitTime = MinServerHitSeconds;
+            _serverHitTime = (serverTimeMs / 1000f) - HitTimeCompensationSeconds;
+            if (_serverHitTime < MinServerHitSeconds)
+                _serverHitTime = MinServerHitSeconds;
+            _linearPatkSpd = _eventHitTimeInClip / _serverHitTime;
+            AnimationManager.Instance.SetPAtkSpeed(objectId, _linearPatkSpd);
+        }
+        else
+        {
+            Entity entity = World.Instance != null ? World.Instance.GetEntityNoLockSync(objectId) : null;
+            _linearPatkSpd = AnimationManager.Instance.ApplyLinearMeleePAtkSpeed(
+                objectId, motionName, clipLength);
+            float cycleMs = AttackTimingHelper.ResolveAttackCycleMs(entity, motionName);
+            _serverHitTime = Mathf.Max(MinServerHitSeconds, cycleMs / 2000f);
         }
 
-        // One speed for the whole clip; hit lands at server HitTime.
-        animator.speed = _eventHitTimeInClip / _serverHitTime;
         animator.Update(0);
     }
 
-    override public void OnStateUpdate(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
+    public override void OnStateUpdate(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
-        float elapsed = Time.time - _startTime;
+        int objectId = AnimatorUtils.GetObjectId(animator);
+        AnimationManager.Instance.SetPAtkSpeed(objectId, _linearPatkSpd);
 
+        float elapsed = Time.time - _startTime;
         if (elapsed >= _serverHitTime && !_hitExecuted)
-        {
             _hitExecuted = true;
-        }
 
         if (stateInfo.normalizedTime >= SwitchToIdleNormalizedTime)
-        {
             SwitchToIdle(animator);
-        }
     }
 
     private void SwitchToIdle(Animator animator)
     {
         if (_isSwitchIdle)
-        {
             return;
-        }
 
         _isSwitchIdle = true;
+        int objectId = AnimatorUtils.GetObjectId(animator);
+        AnimationManager.Instance.SetPAtkSpeed(objectId, 1f);
         animator.speed = 1f;
-        PlayerEntity.Instance.IsAttack = false;
 
-        int objectId = animator.GetInteger(AnimatorUtils.OBJECT_ID);
         string phaseName = AnimationManager.Instance != null
             ? AnimationManager.Instance.GetCurrentAnimationName(objectId)
             : null;
         if (string.IsNullOrEmpty(phaseName))
-        {
             phaseName = motionName;
-        }
 
         AnimationManager.Instance?.NotifyMagicPhaseFinished(objectId, phaseName);
 
+        if (!AnimatorUtils.IsLocalPlayerAnimator(animator))
+            return;
+
+        if (PlayerEntity.Instance != null)
+            PlayerEntity.Instance.IsAttack = false;
         PlayerStateMachine.Instance.ChangeIntention(Intention.INTENTION_IDLE);
         PlayerStateMachine.Instance.NotifyEvent(Event.WAIT_RETURN, NewIdleState.WaitReturnFromCombatSmb);
     }
 
-    override public void OnStateExit(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
+    public override void OnStateExit(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
+        AnimationManager.Instance.SetPAtkSpeed(AnimatorUtils.GetObjectId(animator), 1f);
         animator.speed = 1f;
     }
 }

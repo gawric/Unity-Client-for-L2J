@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -36,7 +36,7 @@ public class PartyInvitationWindow : L2PopupWindow
         }
     }
 
-    public void AddData(AskJoinParty request)
+    public void AddData(AskJoinPartyDto request)
     {
         _inviterName = request.RequestorName;
         _lootDistribution = request.DistributionType.ToString();
@@ -140,18 +140,14 @@ public class PartyInvitationWindow : L2PopupWindow
 
     private void SendAcceptResponse()
     {
-        var sendPacket = CreatorPacketsUser.CreateRequestAnswerJoinParty(1);
-        bool enable = GameClient.Instance.IsCryptEnabled();
-        SendGameDataQueue.Instance().AddItem(sendPacket, enable, enable);
+        IncomingPacketActions.Game.Send(new RequestAnswerJoinPartyCommand(1));
 
         OnInvitationResponse?.Invoke(true);
     }
 
     private void SendDeclineResponse()
     {
-        var sendPacket = CreatorPacketsUser.CreateRequestAnswerJoinParty(0);
-        bool enable = GameClient.Instance.IsCryptEnabled();
-        SendGameDataQueue.Instance().AddItem(sendPacket, enable, enable);
+        IncomingPacketActions.Game.Send(new RequestAnswerJoinPartyCommand(0));
 
         OnInvitationResponse?.Invoke(false);
     }

@@ -40,29 +40,42 @@ public class AnimationManager : BaseAnimationManager , IAnimationManager
     {
         get
         {
-            if (_instance == null)
+            if (_instance == null && App.HasContainer)
             {
-                _instance = new AnimationManager();
+                try
+                {
+                    _instance = App.Resolve<AnimationManager>();
+                }
+                catch
+                {
+                }
             }
+
+            if (_instance == null)
+                _instance = new AnimationManager();
             return _instance;
         }
     }
 
+    public static void Bind(AnimationManager manager)
+    {
+        if (manager != null)
+            _instance = manager;
+    }
+
     public void PlayAnimation(int objectId , string animationName, bool disableTriggerAfterStart)
     {
-        IAnimationController controller = GetPlayerController(objectId);
+        if (GetModel(objectId) == null)
+            return;
+
+        IAnimationController controller = GetRegisteredController(objectId);
+        if (controller == null)
+            return;
 
         // Bare names without weapon suffix (death / rebirth) — before GetFinalNameAnim appends _1HS etc.
         if (PlayerDeathAnim.TryResolve(animationName, out string bareStateName))
         {
-            Entity bareEntity = GetEntity(objectId);
-            DesableLastPlayerAnimationElseTrue(objectId, controller);
-            SetRecentName(objectId, bareStateName);
-            controller.SetAnimatorSpeed(1f);
-            controller.CrossFadeInFixedTime(bareStateName, LocomotionCrossFadeSettings.FixedDuration);
-            Debug.Log(
-                $"AnimationManager> start crossfade {bareStateName} player {bareEntity?.name} " +
-                $"duration={LocomotionCrossFadeSettings.FixedDuration:F3}s");
+            PlayExactAnimatorState(objectId, bareStateName);
             return;
         }
 
@@ -119,6 +132,8 @@ public class AnimationManager : BaseAnimationManager , IAnimationManager
             return;
         }
 
+        AnimationEventForwarder.BindAnimator(controller);
+
         if (!PlayerLocomotionAnim.TryResolve(stateOrPrefixWithWeapon, out string stateName, out PlayerLocomotionFamily family))
         {
             Debug.LogWarning(
@@ -147,10 +162,7 @@ public class AnimationManager : BaseAnimationManager , IAnimationManager
 
         // Leave attack playback rate so atkwait does not stay frozen at last swing speed.
         controller.SetAnimatorSpeed(1f);
-        if (PlayerAnimationController.Instance != null)
-        {
-            PlayerAnimationController.Instance.SetPAtkSpeed(1f);
-        }
+        controller.SetPAtkSpeed(1f);
 
         // Always CrossFade — even if animator already in atkwait (stale transition / same pose).
         // Dual jatk often still mid-clip when wall cycle ends — longer blend softens the cut.
@@ -160,7 +172,10 @@ public class AnimationManager : BaseAnimationManager , IAnimationManager
 
     public void PlayAnimationTrigger(int objectId, string animationName)
     {
-        IAnimationController controller = GetPlayerController(objectId);
+        IAnimationController controller = GetRegisteredController(objectId);
+        if (controller == null)
+            return;
+
         string triggerName = GetFinalNameAnim(objectId , animationName);
         Entity entity = GetEntity(objectId);
         DesableLastPlayerAnimationElseTrue(objectId, controller);
@@ -202,10 +217,13 @@ public class AnimationManager : BaseAnimationManager , IAnimationManager
         }
 
         SetRecentName(objectId, stateName);
-        PlayerBasicAttackCrossFade.TryPlay(controller, stateName);
+        if (family == "basicAtk")
+            ApplyLinearMeleePAtkSpeed(objectId, stateName, -1f);
+        float fade = PlayerBasicAttackCrossFade.ResolveDuration(stateName);
+        PlayerBasicAttackCrossFade.TryPlay(controller, stateName, fade);
         Debug.Log(
             $"AnimationManager> start crossfade {family} player {entity.name} " +
-            $"state={stateName} duration={LocomotionCrossFadeSettings.FixedDuration:F3}s");
+            $"state={stateName} duration={fade:F3}s");
         return true;
     }
 
@@ -471,7 +489,10 @@ public class AnimationManager : BaseAnimationManager , IAnimationManager
 
     public void PlayerAnimationTrigger(int objectId , string animationName , bool useFinalName = true)
     {
-        IAnimationController controller = GetPlayerController(objectId);
+        IAnimationController controller = GetRegisteredController(objectId);
+        if (controller == null)
+            return;
+
         if(useFinalName) animationName = GetFinalNameAnim(objectId, animationName);
 
         Entity entity = GetEntity(objectId);
@@ -563,30 +584,34 @@ public class AnimationManager : BaseAnimationManager , IAnimationManager
 
     public void PlayMonsterAnimation(int objectId, string animationName)
     {
+        PlayMonsterAnimation(objectId, animationName, null);
+    }
+
+    public void PlayMonsterAnimation(int objectId, string animationName, float? fixedDuration)
+    {
         IAnimationController controller = GetMonsterController(objectId);
         if (controller == null)
         {
             Debug.LogWarning(
-                $"AnimationManager>PlayMonsterAnimation: no controller objectId={objectId} anim='{animationName}'");
+                $"[ANIM] PlayMonster MISS id={objectId} request='{animationName}' reason=no_controller");
             return;
         }
 
         if (MonsterAnim.TryResolve(animationName, out string stateName, out MonsterAnimState family))
         {
             SetMonsterRecentName(objectId, stateName);
-            MonsterCrossFade.TryPlay(controller, stateName, family);
-            // Debug.Log(
-            //     $"AnimationManager> start crossfade monster objectId={objectId} " +
-            //     $"family={family} state={stateName} duration={LocomotionCrossFadeSettings.FixedDuration:F3}s");
+            float duration = fixedDuration ?? LocomotionCrossFadeSettings.FixedDuration;
+            Debug.Log(
+                $"[ANIM] PlayMonster id={objectId} request='{animationName}' resolved='{stateName}' family={family} duration={duration:F3}s");
+            MonsterCrossFade.TryPlay(controller, stateName, family, duration);
             return;
         }
 
-        // Legacy names still used by state machine (e.g. damageaction) until added to MonsterAnim.
         SetMonsterRecentName(objectId, animationName);
-        MonsterCrossFade.TryPlayRaw(controller, animationName);
-        Debug.LogWarning(
-            $"AnimationManager> monster crossfade unresolved '{animationName}' objectId={objectId} " +
-            $"action=raw_crossfade");
+        float rawDuration = fixedDuration ?? LocomotionCrossFadeSettings.FixedDuration;
+        Debug.Log(
+            $"[ANIM] PlayMonster RAW id={objectId} request='{animationName}' duration={rawDuration:F3}s");
+        MonsterCrossFade.TryPlayRaw(controller, animationName, rawDuration);
     }
    
     public Dictionary<string, float> PlayerGetAllFloat(int objectId)
@@ -609,12 +634,16 @@ public class AnimationManager : BaseAnimationManager , IAnimationManager
 
     public void SetSpTimeAtk(int objectId, int timeAtk)
     {
-       GetPlayerController(objectId)?.SetInt(SP_TIME_ATK , timeAtk);
+        IAnimationController controller = GetRegisteredController(objectId);
+        if (controller == null)
+            return;
+
+        controller.SetInt(SP_TIME_ATK, timeAtk);
     }
 
     public void ResetPlayerAnimatorSpeed(int objectId, float speed = 1f)
     {
-        IAnimationController controller = GetPlayerController(objectId);
+        IAnimationController controller = GetRegisteredController(objectId);
         if (controller == null)
         {
             Debug.LogWarning($"[AnimSpeed] reset skipped objectId={objectId} reason=no_controller");
@@ -625,9 +654,134 @@ public class AnimationManager : BaseAnimationManager , IAnimationManager
         Debug.Log($"[AnimSpeed] reset objectId={objectId} speed={speed:F3}");
     }
 
+    public void SetPAtkSpeed(int objectId, float patkspd)
+    {
+        IAnimationController controller = GetRegisteredController(objectId);
+        if (controller == null)
+            return;
+
+        controller.SetPAtkSpeed(patkspd);
+    }
+
+    public float ApplyLinearMeleePAtkSpeed(int objectId, string animName, float clipLengthSec)
+    {
+        IAnimationController controller = GetRegisteredController(objectId);
+        Entity entity = GetEntity(objectId);
+        if (controller == null)
+            return 1f;
+
+        float clipSec = clipLengthSec;
+        if (clipSec <= 0f)
+            clipSec = ResolveAttackClipLength(controller.GetAnimator(), animName);
+
+        float cycleMs = AttackTimingHelper.ResolveAttackCycleMs(entity, animName);
+        float linear = AttackTimingHelper.ComputeLinearPAtkSpeed(clipSec, cycleMs);
+        controller.SetPAtkSpeed(linear);
+
+        Debug.Log(
+            $"[PATKSPD] ApplyLinear objectId={objectId} entity={entity?.name} anim={animName} " +
+            $"pAtkSpd={AttackTimingHelper.ResolvePAtkSpd(entity):F1} cycleMs={cycleMs:F1} " +
+            $"clipSec={clipSec:F3} patkspd={linear:F3}");
+        return linear;
+    }
+
+    static float ResolveAttackClipLength(Animator animator, string stateName)
+    {
+        if (animator == null)
+            return 1f;
+
+        if (animator.IsInTransition(0))
+        {
+            AnimatorClipInfo[] next = animator.GetNextAnimatorClipInfo(0);
+            if (next != null && next.Length > 0 && next[0].clip != null)
+                return next[0].clip.length;
+        }
+
+        if (TryFindNamedClipLength(animator, stateName, out float namedLength))
+            return namedLength;
+
+        return 1f;
+    }
+
+    static bool TryFindNamedClipLength(Animator animator, string nameContains, out float length)
+    {
+        length = 0f;
+        if (animator == null || string.IsNullOrEmpty(nameContains))
+            return false;
+
+        RuntimeAnimatorController rac = animator.runtimeAnimatorController;
+        if (rac != null)
+        {
+            AnimationClip[] clips = rac.animationClips;
+            for (int i = 0; i < clips.Length; i++)
+            {
+                AnimationClip clip = clips[i];
+                if (clip == null)
+                    continue;
+                if (clip.name == nameContains ||
+                    clip.name.IndexOf(nameContains, StringComparison.OrdinalIgnoreCase) >= 0)
+                {
+                    length = clip.length;
+                    return true;
+                }
+            }
+        }
+
+        float cached = AnimationDataCache.GetOverrideLength(animator, nameContains);
+        if (cached > 0.01f)
+        {
+            length = cached;
+            return true;
+        }
+
+        return false;
+    }
+
+    float GetClipLengthByName(int objectId, string nameContains, float fallback)
+    {
+        IAnimationController controller = GetRegisteredController(objectId);
+        if (controller == null)
+            return fallback;
+
+        if (!TryFindNamedClipLength(controller.GetAnimator(), nameContains, out float length))
+            return fallback;
+        return length;
+    }
+
+    public float PlayExactAnimatorState(int objectId, string stateName, bool snapToEnd = false)
+    {
+        IAnimationController controller = GetRegisteredController(objectId);
+        if (controller == null || string.IsNullOrEmpty(stateName))
+            return 1.6f;
+
+        AnimationEventForwarder.BindAnimator(controller);
+        controller.SetEnabled(true);
+        DesableLastPlayerAnimationElseTrue(objectId, controller);
+        SetRecentName(objectId, stateName);
+        controller.SetAnimatorSpeed(1f);
+        controller.SetPAtkSpeed(1f);
+
+        Animator animator = controller.GetAnimator();
+        if (snapToEnd && animator != null)
+        {
+            animator.Play(stateName, 0, 1f);
+            animator.Update(0f);
+        }
+        else
+        {
+            controller.CrossFadeInFixedTime(stateName, LocomotionCrossFadeSettings.FixedDuration);
+        }
+
+        float duration = GetClipLengthByName(objectId, stateName, 1.6f);
+        return Mathf.Max(0.4f, duration);
+    }
+
     public float[] GetOverrideClipsDurations(int objectId, string[]cycle)
     {
-        IAnimationController controller = GetPlayerController(objectId);
+        IAnimationController controller = GetRegisteredController(objectId);
+        if (controller == null)
+            return new float[cycle != null ? cycle.Length : 0];
+
         float[] durations = new float[cycle.Length];
 
         for(int i=0; i< cycle.Length; i++)
@@ -644,7 +798,9 @@ public class AnimationManager : BaseAnimationManager , IAnimationManager
 
     public float GetOverrideEventTimeByName(int objectId, string[] cycle, string eventName)
     {
-        IAnimationController controller = GetPlayerController(objectId);
+        IAnimationController controller = GetRegisteredController(objectId);
+        if (controller == null)
+            return 0;
 
         for (int i = 0; i < cycle.Length; i++)
         {

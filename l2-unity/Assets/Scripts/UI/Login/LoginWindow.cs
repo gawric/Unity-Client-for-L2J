@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using UnityEngine;
 using UnityEngine.UIElements;
+using VContainer;
 
 public class LoginWindow : L2Window
 {
+    [Inject] LoginRuntime _login;
     private VisualElement _logo;
     private TextField _userInput;
     private TextField _passwordInput;
@@ -117,17 +119,21 @@ public class LoginWindow : L2Window
     }
 
     private void LoginButtonPressed() {
-        if (_userInput.text.Length == 0 && _passwordInput.text.Length == 0) {
-            //_userInput.value = "Shnok";
-            //_passwordInput.value = "1234";
-            
-        } else if(_passwordInput.text.Length == 0) {
+        string account = _userInput.value.ToLower().Trim();
+        string password = _passwordInput.value.Trim();
+
+        LoginClient client = _login != null && _login.LoginClient != null ? _login.LoginClient : IncomingPacketActions.Login;
+        if (string.IsNullOrEmpty(account))
+            account = (client.Account ?? string.Empty).ToLower().Trim();
+        if (string.IsNullOrEmpty(password))
+            password = (client.Password ?? string.Empty).Trim();
+
+        if (string.IsNullOrEmpty(account) || string.IsNullOrEmpty(password))
             return;
-        }
-        //_labelError.text = string.Empty;
-        LoginClient.Instance.Account = _userInput.value.ToLower().Trim();
-        LoginClient.Instance.Password = _passwordInput.value.Trim();
-        LoginClient.Instance.Connect();
+
+        client.Account = account;
+        client.Password = password;
+        client.Connect();
     }
 
     private void ExitButtonPressed() {
@@ -135,16 +141,10 @@ public class LoginWindow : L2Window
     }
 
 
-    public void ShowErrorTextOtherThread(string text)
+    public void ShowErrorText(string text)
     {
         if (_labelError != null)
-        {
-            UnityMainThreadDispatcher.Instance().Enqueue(() =>
-            {
-                _labelError.text = text;
-            });
-            
-        }
+            _labelError.text = text;
     }
 
     public override void HideWindow() {

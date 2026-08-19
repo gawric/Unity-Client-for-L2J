@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 public abstract class AbstractAttackEvents : StateBase
 {
@@ -11,7 +11,7 @@ public abstract class AbstractAttackEvents : StateBase
     public AbstractAttackEvents(int objectId , Animation[] specialsBows, PlayerStateMachine stateMachine = null ) : base(stateMachine)
     {
         _specialsBows = specialsBows;
-        _events = AnimationManager.Instance.GetAnimationEvents(objectId);
+        _events = IncomingPacketActions.Animations.GetAnimationEvents(objectId);
     }
 
     public override void Enter()
@@ -27,7 +27,7 @@ public abstract class AbstractAttackEvents : StateBase
             _events.OnAnimationFinishedHit += CallBackFinishedHit;
             _events.OnAnimationStartLoadArrow += CallBackLoadArrow;
             // Melee Hit/SoulShot: AttackShot anim event (not wall-clock).
-            // Bow Soulshot/stick: HitManager subscribes to ProjectileManager.OnHitMonster (not Attack lifecycle).
+            // Bow Soulshot/stick: HitManager subscribes to ProjectileManager.OnHitMonster (not AttackDto lifecycle).
             _events.OnAnimationAttackShot += CallBackAttackShot;
         }
 
@@ -79,9 +79,9 @@ public abstract class AbstractAttackEvents : StateBase
             return _stateMachine.GetObjectId();
         }
 
-        if (PlayerEntity.Instance != null && PlayerEntity.Instance.IdentityInterlude != null)
+        if (PlayerEntity.Instance != null && PlayerEntity.Instance.Identity != null)
         {
-            return PlayerEntity.Instance.IdentityInterlude.Id;
+            return PlayerEntity.Instance.Identity.Id;
         }
 
         return 0;
@@ -96,8 +96,8 @@ public abstract class AbstractAttackEvents : StateBase
 
         if (_stateMachine != null && _stateMachine.Player != null)
         {
-            int objectId = _stateMachine.Player.IdentityInterlude.Id;
-            AnimationManager.Instance.ResetPlayerAnimatorSpeed(objectId);
+            int objectId = _stateMachine.Player.Identity.Id;
+            IncomingPacketActions.Animations.ResetPlayerAnimatorSpeed(objectId);
         }
 
         // Pose return is owned by combat SMB (SpAtk / Magic / jatk SwitchToIdle).
@@ -164,10 +164,8 @@ public abstract class AbstractAttackEvents : StateBase
             if (monsterEntity.IsDead() || monsterEntity.CalculateRemainingHp() <= 0)
             {
                 monsterEntity.SetDead(true);
-                MonsterStateMachine stateMachine = monsterEntity.GetStateMachine();
-                stateMachine.ChangeState(MonsterState.DEAD);
-                stateMachine.NotifyEvent(Event.FORCE_DEATH);
-                //Debug.Log("Попали и увидели что монстр уже должен быть мертвым hp запускаем анимацию смерти " + monsterEntity.IsDead());
+                if (EntityActionMachine.Instance != null)
+                    EntityActionMachine.Instance.Die(monsterEntity);
             }
 
 
@@ -270,9 +268,9 @@ public abstract class AbstractAttackEvents : StateBase
 
         Entity targetEntity = player.GetTargetEntity();
         Transform target = targetEntity != null ? targetEntity.transform : player.Target;
-        int attackerEntityId = player.IdentityInterlude != null ? player.IdentityInterlude.Id : 0;
-        int targetEntityId = targetEntity != null && targetEntity.IdentityInterlude != null
-            ? targetEntity.IdentityInterlude.Id
+        int attackerEntityId = player.Identity != null ? player.Identity.Id : 0;
+        int targetEntityId = targetEntity != null && targetEntity.Identity != null
+            ? targetEntity.Identity.Id
             : 0;
 
         if (target == null)
@@ -338,8 +336,8 @@ public abstract class AbstractAttackEvents : StateBase
             Transform swordTip = swordBasePoints[1];
             Entity targetEntity = entity.GetTargetEntity();
             Transform target = targetEntity != null ? targetEntity.transform : PlayerEntity.Instance.Target;
-            int attackerEntityId = entity.IdentityInterlude != null ? entity.IdentityInterlude.Id : 0;
-            int targetEntityId = targetEntity != null && targetEntity.IdentityInterlude != null ? targetEntity.IdentityInterlude.Id : 0;
+            int attackerEntityId = entity.Identity != null ? entity.Identity.Id : 0;
+            int targetEntityId = targetEntity != null && targetEntity.Identity != null ? targetEntity.Identity.Id : 0;
             SwordCollisionService.Instance.RegisterSwordByEntityId(attackerEntityId, targetEntityId, swordBase, swordTip, target, 0);
         }
         else
@@ -386,7 +384,7 @@ public abstract class AbstractAttackEvents : StateBase
                 HitManager.Instance.HandleHitCollider(
                     PlayerEntity.Instance,
                     attacker,
-                    monster.GetStateMachine(),
+                    monster,
                     hitPointCollider,
                     hitDirection);
             }

@@ -19,6 +19,9 @@ public interface IAnimationController
     public bool GetBool(string name);
     public int GetInt(string name);
     public void SetAnimatorSpeed(float value);
+    void SetEnabled(bool value);
+    /// <summary>Animator float <c>patkspd</c> — clip rate so the swing fits server timeAtk.</summary>
+    public void SetPAtkSpeed(float newAtkSpd);
   
     event Action<string> OnAnimationFinished;
     event Action<string> OnAnimationStartShoot;

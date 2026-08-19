@@ -29,6 +29,7 @@ public class SkillListWindow : L2PopupWindow
     private const string _passiveName = "Passive";
     private const string _learnName = "Learn Skill";
     private Dictionary<int, SkillInstance> _allSkills;
+    private List<SkillInstance> _pendingSkills;
 
 
     //end fields
@@ -39,6 +40,11 @@ public class SkillListWindow : L2PopupWindow
     public static SkillListWindow Instance
     {
         get { return _instance; }
+    }
+
+    public bool IsReady
+    {
+        get { return _supportActiveSkills != null && _supportActiveSkills.IsReady; }
     }
     private void Awake()
     {
@@ -113,12 +119,23 @@ public class SkillListWindow : L2PopupWindow
         RegisterClickWindowEvent(_windowEle, dragArea);
         OnCenterScreen(_root);
 
+        if (_pendingSkills != null)
+        {
+            SetSkillList(_pendingSkills);
+            _pendingSkills = null;
+        }
     }
 
     public void SetSkillList(List<SkillInstance> list)
     {
         if (list == null) return;
         CopyInDictionry(list);
+
+        if (!_supportActiveSkills.IsReady)
+        {
+            _pendingSkills = list;
+            return;
+        }
 
         var activeSkills = list.Where(s => !s.IsPassive).ToList();
         var passiveSkills = list.Where(s => s.IsPassive).ToList();
@@ -131,9 +148,23 @@ public class SkillListWindow : L2PopupWindow
         if (list == null) return;
         CopyInDictionry(list);
 
+        if (!_supportActiveSkills.IsReady)
+        {
+            _pendingSkills = list;
+            return;
+        }
+
         var activeSkills = list.Where(s => !s.IsPassive).ToList();
         var passiveSkills = list.Where(s => s.IsPassive).ToList();
-        _supportActiveSkills.UpdateSlots(activeSkills);
+        if (_supportActiveSkills.HasSlots)
+        {
+            _supportActiveSkills.UpdateSlots(activeSkills);
+        }
+        else
+        {
+            _supportActiveSkills.CreateSlots(activeSkills, 7);
+        }
+
         _supportPassiveSkills.CreateSlots(passiveSkills, 7);
     }
 

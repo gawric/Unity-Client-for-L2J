@@ -2,7 +2,8 @@ using UnityEngine;
 
 /// <summary>
 /// CrossFade policy for Monster_Basic states.
-/// Locomotion (wait/walk/run/atkwait) skips when already playing; one-shots always restart.
+/// Locomotion (wait/walk/run/atkwait) and death skip when already playing.
+/// Attack one-shots (atk / spatk) always restart.
 /// </summary>
 public static class MonsterCrossFade
 {
@@ -17,14 +18,29 @@ public static class MonsterCrossFade
             return false;
         }
 
-        if (!MonsterAnim.IsOneShot(family) &&
-            PlayerLocomotionCrossFade.IsAlreadyPlaying(controller, stateName))
+        bool alreadyPlaying = PlayerLocomotionCrossFade.IsAlreadyPlaying(controller, stateName);
+        if (alreadyPlaying &&
+            (family == MonsterAnimState.Death || !MonsterAnim.IsOneShot(family)))
         {
-            Debug.Log($"[MONSTER_CROSSFADE] SKIP already playing state={stateName}");
             return false;
         }
 
         float duration = fixedDuration ?? LocomotionCrossFadeSettings.FixedDuration;
+        if (duration <= 0f)
+        {
+            Animator animator = controller.GetAnimator();
+            if (animator == null)
+                return false;
+            int objectId = animator.GetInteger(AnimatorUtils.OBJECT_ID);
+            int hash = Animator.StringToHash(stateName);
+            bool hasState = animator.HasState(0, hash);
+            animator.Play(stateName, 0, 0f);
+            animator.Update(0f);
+            Debug.Log(
+                $"[ANIM_PLAY] id={objectId} snap state={stateName} hasState={hasState}");
+            return true;
+        }
+
         controller.CrossFadeInFixedTime(stateName, duration);
         return true;
     }

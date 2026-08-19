@@ -24,7 +24,7 @@ public abstract class BaseAnimationManager
     {
         _animationControllers[objectId] = new AnimationModel(controller , entity);
         controller.SetInt(AnimatorUtils.OBJECT_ID, objectId);
-
+        AnimationEventForwarder.BindAnimator(controller);
     }
 
     public void UnregisterController(int objectId)
@@ -58,6 +58,15 @@ public abstract class BaseAnimationManager
         return null;
     }
 
+    /// <summary>
+    /// Registered controller for local PlayerEntity or other users (UserEntity / NetworkAnimationController).
+    /// </summary>
+    public IAnimationController GetRegisteredController(int objectId)
+    {
+        AnimationModel model = GetModel(objectId);
+        return model != null ? model.GetController() : null;
+    }
+
     public AnimationEventsBase GetAnimationEvents(int objectId)
     {
         if (_animationControllers.ContainsKey(objectId))
@@ -69,14 +78,14 @@ public abstract class BaseAnimationManager
 
     public AnimationModel GetModel(int objectId)
     {
-        return  _animationControllers[objectId];
+        AnimationModel model;
+        return _animationControllers.TryGetValue(objectId, out model) ? model : null;
     }
-
-
 
     public Entity GetEntity(int objectId)
     {
-        return _animationControllers[objectId].GetEntity();
+        AnimationModel model = GetModel(objectId);
+        return model != null ? model.GetEntity() : null;
     }
 
     public NetworkAnimationController GetMonsterController(int objectId)
@@ -143,9 +152,15 @@ public abstract class BaseAnimationManager
 
     public string GetEquipAnimName(int objectId)
     {
-        AnimationModel model = _animationControllers[objectId];
-        PlayerEntity entity = (PlayerEntity)model.GetEntity();
-        return entity.GetEquippedWeaponName();
+        Entity entity = GetEntity(objectId);
+        if (entity is PlayerEntity player)
+            return player.GetEquippedWeaponName();
+
+        UserEntity user = entity as UserEntity;
+        if (user != null)
+            return user.WeaponAnim;
+
+        return "";
     }
 
 

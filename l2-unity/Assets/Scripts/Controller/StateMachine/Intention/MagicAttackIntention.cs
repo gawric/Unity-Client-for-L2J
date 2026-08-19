@@ -1,4 +1,4 @@
-﻿using System.Threading.Tasks;
+using System.Threading.Tasks;
 using UnityEngine;
 
 public class MagicAttackIntention : IntentionBase
@@ -8,9 +8,9 @@ public class MagicAttackIntention : IntentionBase
 
     public override void Enter(object arg0)
     {
-        if(arg0.GetType() == typeof(MagicSkillUse))
+        if(arg0.GetType() == typeof(MagicSkillUseDto))
         {
-            MagicSkillUse useSkill = (MagicSkillUse)arg0;
+            MagicSkillUseDto useSkill = (MagicSkillUseDto)arg0;
             AnimationCombo anim = SkillgrpTable.Instance.GetAnimComboBySkillId(useSkill.SkillId , useSkill.SkillLvl);
             float distance = VectorUtils.Distance2D(useSkill.AttackerPos, useSkill.TargetPos); 
             //Debug.Log("DISTANCE TO SERVER UNITY  " + distance);
@@ -19,17 +19,17 @@ public class MagicAttackIntention : IntentionBase
 
             if (anim != null)
             {
-                Rotate(PlayerController.Instance, useSkill);
+                Rotate(IncomingPacketActions.Player, useSkill);
                 Task.Run(() => WaitAndStart(useSkill, anim, distance));
             }
         }
     }
 
-    private async void WaitAndStart(MagicSkillUse useSkill , AnimationCombo anim , float distance)
+    private async void WaitAndStart(MagicSkillUseDto useSkill , AnimationCombo anim , float distance)
     {
         var timeout = Task.Delay(500);
 
-        while (PlayerController.Instance.IsTurnsAround())
+        while (IncomingPacketActions.Player.IsTurnsAround())
         {
            // if (await Task.WhenAny(timeout) == timeout) break;
            Debug.LogWarning("Player turns around");
@@ -38,22 +38,22 @@ public class MagicAttackIntention : IntentionBase
         StartUseSkill(useSkill, anim, distance);
     }
 
-    private async void StartUseSkill(MagicSkillUse useSkill , AnimationCombo anim , float distance)
+    private async void StartUseSkill(MagicSkillUseDto useSkill , AnimationCombo anim , float distance)
     {
-        Entity monster =await  World.Instance.GetEntityNoLock(useSkill.TargetId);
-        EventProcessor.Instance.QueueEvent(() =>
+        Entity monster =await  IncomingPacketActions.GameWorld.GetEntityNoLock(useSkill.TargetId);
+        IncomingPacketActions.Queue(() =>
         {
-            SkillsManager.Instance.ExecutePlayerCombo(useSkill.TargetId, anim, useSkill.HitTime, distance, EffectSkillsmanager.Instance, useSkill.SkillId);
-            var footerPosition = PlayerController.Instance.GetPlayerPosition();
+            IncomingPacketActions.SkillCombos.ExecutePlayerCombo(useSkill.TargetId, anim, useSkill.HitTime, distance, IncomingPacketActions.EffectSkills, useSkill.SkillId);
+            var footerPosition = IncomingPacketActions.Player.GetPlayerPosition();
             // var bodyPosition = PlayerController.Instance.GetBodyPosition();
-            var bodyPosition = PlayerController.Instance.GetCollisionSelf(monster.transform);
-            EffectSkillsmanager.Instance.ShowEffect(useSkill.SkillId, footerPosition, bodyPosition, useSkill.HitTime , monster);
+            var bodyPosition = IncomingPacketActions.Player.GetCollisionSelf(monster.transform);
+            IncomingPacketActions.EffectSkills.ShowEffect(useSkill.SkillId, footerPosition, bodyPosition, useSkill.HitTime , monster);
         });
     }
 
-    private async void Rotate(PlayerController controller , MagicSkillUse useSkill)
+    private async void Rotate(PlayerController controller , MagicSkillUseDto useSkill)
     {
-        Entity entity = await World.Instance.GetEntityNoLock(useSkill.TargetId);
+        Entity entity = await IncomingPacketActions.GameWorld.GetEntityNoLock(useSkill.TargetId);
         controller.StartRotateFollow(entity);
     }
 

@@ -1,21 +1,24 @@
 ﻿using UnityEngine;
+using System;
 using System.Threading.Tasks;
-using System.Collections.Generic;
-using System.Collections;
+using VContainer;
 
 public abstract class DefaultClient : MonoBehaviour
 {
-    [SerializeField] protected string _serverIp = SettingServerIp.IpAddressServer;
+    [Inject] protected NetworkRuntime _network;
+    [Header("Connection")]
+    [SerializeField] protected string _serverIp = "127.0.0.1";
     [SerializeField] protected int _serverPort = 11000;
-    [SerializeField] protected AsynchronousClient _client;
-    [SerializeField] protected int _connectionTimeoutMs = 10000;
-    [SerializeField] protected bool _connected = false;
-    [SerializeField] protected bool _logReceivedPackets = true;
-    [SerializeField] protected bool _logSentPackets = true;
-    [SerializeField] protected bool _logCryptography = true;
-    [SerializeField] protected int _sessionKey1;
-    [SerializeField] protected int _sessionKey2;
-    [SerializeField] protected int _ping;
+
+    protected AsynchronousClient _client;
+    protected int _connectionTimeoutMs = 10000;
+    protected bool _connected = false;
+    protected bool _logReceivedPackets = false;
+    protected bool _logSentPackets = false;
+    protected bool _logCryptography = false;
+    protected int _sessionKey1;
+    protected int _sessionKey2;
+    protected int _ping;
 
     private bool _connecting = false;
     public bool LogReceivedPackets { get { return _logReceivedPackets; } }
@@ -31,7 +34,8 @@ public abstract class DefaultClient : MonoBehaviour
 
     private void Start()
     {
-        if (World.Instance != null && World.Instance.OfflineMode)
+        World world = IncomingPacketActions.GameWorld;
+        if (world != null && world.OfflineMode)
         {
             this.enabled = false;
         }
@@ -40,22 +44,54 @@ public abstract class DefaultClient : MonoBehaviour
     public async void Connect()
     {
         _connected = false;
-        if (_connecting) return;
+        if (_connecting)
+        {
+            LobbyFlowLog.Warn(GetType().Name + ".Connect skipped — already connecting");
+            return;
+        }
 
+        LobbyFlowLog.Info(GetType().Name + ".Connect start ip=" + _serverIp + " port=" + _serverPort);
         CreateAsyncClient();
         WhileConnecting();
 
-        bool connected = await Task.Run(_client.Connect);
+        bool connected = false;
+        try
+        {
+            connected = await Task.Run(_client.Connect);
+        }
+        catch (Exception ex)
+        {
+            LobbyFlowLog.Exception(GetType().Name + ".Connect Task.Run", ex);
+        }
 
         _connecting = false;
+        EventProcessor events = Events;
+        LobbyFlowLog.Info(GetType().Name + ".Connect socketResult=" + connected +
+            " events=" + (events != null) + " manager=" + (IncomingPacketActions.Manager != null));
 
         if (connected)
         {
-            EventProcessor.Instance.QueueEvent(() => OnConnectionSuccess());
+            if (events != null)
+            {
+                events.QueueEvent(() =>
+                {
+                    LobbyFlowLog.Info(GetType().Name + ".OnConnectionSuccess (EventProcessor)");
+                    OnConnectionSuccess();
+                });
+            }
+            else
+            {
+                LobbyFlowLog.Warn(GetType().Name + ".Connect no EventProcessor — OnConnectionSuccess inline");
+                OnConnectionSuccess();
+            }
+        }
+        else if (events != null)
+        {
+            events.QueueEvent(() => OnConnectionFailed());
         }
         else
         {
-            EventProcessor.Instance.QueueEvent(() => OnConnectionFailed());
+            OnConnectionFailed();
         }
     }
 
@@ -93,7 +129,28 @@ public abstract class DefaultClient : MonoBehaviour
     {
         _connected = false;
         _client = null;
-        GameManager.Instance.OnDisconnect();
+        IncomingPacketActions.Manager.OnDisconnect();
+    }
+
+    protected NetworkRuntime Network
+    {
+        get
+        {
+            if (_network == null && App.HasContainer)
+                _network = App.Resolve<NetworkRuntime>();
+            return _network;
+        }
+    }
+
+    protected EventProcessor Events
+    {
+        get
+        {
+            NetworkRuntime runtime = Network;
+            if (runtime != null && runtime.Events != null)
+                return runtime.Events;
+            return EventProcessor.Instance;
+        }
     }
 
     void OnApplicationQuit()

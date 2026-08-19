@@ -7,17 +7,17 @@ public class SetupDurationHelper
     public const int ScrollOfEscapeSkillId = 2013;
     public static readonly HashSet<int> PotionSkillIds = new HashSet<int> { 2031  , 2011};
 
-    public static bool IsLongCastSkill(MagicSkillUse useSkill)
+    public static bool IsLongCastSkill(MagicSkillUseDto useSkill)
     {
         return useSkill != null && useSkill.SkillId == ScrollOfEscapeSkillId;
     }
 
-    public static bool IsUsePotion(MagicSkillUse useSkill)
+    public static bool IsUsePotion(MagicSkillUseDto useSkill)
     {
         return useSkill != null && PotionSkillIds.Contains(useSkill.SkillId);
     }
 
-    public static void SetupLongCastDurationIfHitTimeNot0(MagicSkillUse useSkill, int objectId, Entity entity, AnimationCombo selfCombo)
+    public static void SetupLongCastDurationIfHitTimeNot0(MagicSkillUseDto useSkill, int objectId, Entity entity, AnimationCombo selfCombo)
     {
         if (useSkill.HitTime <= 0)
         {
@@ -25,18 +25,18 @@ public class SetupDurationHelper
         }
 
         string[] orderedCycle = BuildOrderedCycleForOverrideTiming(selfCombo.GetAnimCycle());
-        float[] durations = AnimationManager.Instance.GetOverrideClipsDurations(objectId, orderedCycle);
+        float[] durations = IncomingPacketActions.Animations.GetOverrideClipsDurations(objectId, orderedCycle);
         float shotEventTime = ResolveShotEventTime(objectId, orderedCycle);
         entity.SetupLongCastDuration(useSkill.HitTime, durations, shotEventTime, useSkill.TargetId);
     }
 
-    public static void SetupDurationIfHitTimeNot0(MagicSkillUse useSkill, int objectId, Entity entity, AnimationCombo selfCombo)
+    public static void SetupDurationIfHitTimeNot0(MagicSkillUseDto useSkill, int objectId, Entity entity, AnimationCombo selfCombo)
     {
 
         if (useSkill.HitTime > 0)
         {
             string[] orderedSelfCycle = BuildOrderedCycleForOverrideTiming(selfCombo.GetAnimCycle());
-            float[] durations_self = AnimationManager.Instance.GetOverrideClipsDurations(objectId, orderedSelfCycle);
+            float[] durations_self = IncomingPacketActions.Animations.GetOverrideClipsDurations(objectId, orderedSelfCycle);
             float shotEventTime_self = ResolveShotEventTime(objectId, orderedSelfCycle);
             entity.SetupTotalCastDuration(useSkill.HitTime, 0f, durations_self, shotEventTime_self, useSkill.TargetId);
         }
@@ -85,12 +85,12 @@ public class SetupDurationHelper
         // For two-clip execution (CastEnd -> MagicShot), shoot event belongs to the second clip.
         if (orderedCycle.Length == 2)
         {
-            return AnimationManager.Instance.GetOverrideEventTimeByName(
+            return IncomingPacketActions.Animations.GetOverrideEventTimeByName(
                 objectId,
                 new[] { orderedCycle[1] },
                 "OnAnimationShoot");
         }
 
-        return AnimationManager.Instance.GetOverrideEventTimeByName(objectId, orderedCycle, "OnAnimationShoot");
+        return IncomingPacketActions.Animations.GetOverrideEventTimeByName(objectId, orderedCycle, "OnAnimationShoot");
     }
 }

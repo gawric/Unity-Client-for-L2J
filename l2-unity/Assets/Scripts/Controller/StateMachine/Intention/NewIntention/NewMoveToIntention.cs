@@ -1,4 +1,4 @@
-﻿using System.IO;
+using System.IO;
 using System.Security.Cryptography;
 using UnityEngine;
 
@@ -13,7 +13,7 @@ public class NewMoveToIntention : IntentionBase
         //move engine //0.1 default distance
         if (arg0 != null)
         {
-            var moveToLocation = (CharMoveToLocation)arg0;
+            var moveToLocation = (CharMoveToLocationDto)arg0;
             Vector3 newPosition = moveToLocation.NewPosition;
             Vector3 oldPosition = moveToLocation.OldPosition;
 
@@ -25,9 +25,9 @@ public class NewMoveToIntention : IntentionBase
             //PlayerController.Instance.transform.position = oldVector;
             //float distTest2 = VectorUtils.Distance2D(PlayerController.Instance.transform.position, oldVector);
 
-            DebugLineDraw.ShowDrawLineDebug(PlayerEntity.Instance.IdentityInterlude.Id, oldPosition, newPosition, Color.red);
+            DebugLineDraw.ShowDrawLineDebug(PlayerEntity.Instance.Identity.Id, oldPosition, newPosition, Color.red);
 
-            float dist = VectorUtils.Distance2D(PlayerController.Instance.transform.position, newPosition);
+            float dist = VectorUtils.Distance2D(IncomingPacketActions.Player.transform.position, newPosition);
 
             //Debug.Log("NewMoveToIntention> to dict " + distTest + " original " + distTest2);
 
@@ -37,7 +37,7 @@ public class NewMoveToIntention : IntentionBase
 
             
             //PlayerController.Instance.MoveToPoint((Vector3)arg0, 0.1f);
-            PlayerController.Instance.MoveToPoint(new MovementTarget(newPosition, 0.1f , PlayerEntity.Instance.Running));
+            IncomingPacketActions.Player.MoveToPoint(new MovementTarget(newPosition, 0.1f , PlayerEntity.Instance.Running));
             StartAnimMoveTo();
         }
     }

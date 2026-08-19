@@ -3,13 +3,12 @@
 /// <summary>
 /// L2 bow jatk: shoot = OnAnimationShoot notify fraction.
 /// Arrow flight uses ANProjectile accel (dirMul=3000, path (t/T)²).
+/// patkspd is applied on this animator's entity (PlayerEntity and UserEntity / CharInfo).
 /// </summary>
 public class PlayerStateJatkBow : StateMachineBehaviour
 {
     private float _startTime;
     private float _endTime;
-    private float _clipLength;
-    private float _eventTimeInClip;
     private float _linearSpeed;
     private bool _isSwitchIdle;
 
@@ -17,67 +16,62 @@ public class PlayerStateJatkBow : StateMachineBehaviour
     public string motionName;
     public string eventShootName;
 
-    override public void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
+    public override void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
         _isSwitchIdle = false;
         _startTime = Time.time;
 
-        _clipLength = AnimationDataCache.GetOverrideLength(animator, motionName);
-        _eventTimeInClip = AnimationDataCache.GetEventTimeByName(animator, motionName, eventShootName);
+        float clipLength = AnimationDataCache.GetOverrideLength(animator, motionName);
+        float eventTimeInClip = AnimationDataCache.GetEventTimeByName(animator, motionName, eventShootName);
+        if (clipLength <= 0.01f)
+            clipLength = Mathf.Max(stateInfo.length, 0.01f);
+        if (eventTimeInClip <= 0.01f)
+            eventTimeInClip = clipLength * 0.637f;
 
-        float atkSpd = PlayerEntity.Instance.Stats.BasePAtkSpeed;
-        float serverTimeMs = CalcBaseParam.CalculateTimeL2j(atkSpd);
-        _endTime = serverTimeMs / 1000f;
+        int objectId = AnimatorUtils.GetObjectId(animator);
+        _linearSpeed = AnimationManager.Instance.ApplyLinearMeleePAtkSpeed(
+            objectId, parameterName, clipLength);
+        float cycleMs = AttackTimingHelper.ResolveAttackCycleMs(
+            World.Instance != null ? World.Instance.GetEntityNoLockSync(objectId) : null,
+            parameterName);
+        _endTime = Mathf.Max(0.01f, cycleMs / 1000f);
 
-        if (_clipLength <= 0.01f)
-        {
-            _clipLength = Mathf.Max(stateInfo.length, 0.01f);
-        }
-
-        if (_eventTimeInClip <= 0.01f)
-        {
-            _eventTimeInClip = _clipLength * 0.637f;
-        }
-
-        _linearSpeed = _clipLength / _endTime;
-        PlayerAnimationController.Instance.SetPAtkSpeed(_linearSpeed);
-
-        StopAnimationTrigger(animator, parameterName);
+        if (AnimatorUtils.IsLocalPlayerAnimator(animator))
+            StopAnimationTrigger(animator, parameterName);
     }
 
-    override public void OnStateUpdate(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
+    public override void OnStateUpdate(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
-        float timeOut = Time.time - _startTime;
+        int objectId = AnimatorUtils.GetObjectId(animator);
+        if (_startTime >= 0f)
+            AnimationManager.Instance.SetPAtkSpeed(objectId, _linearSpeed);
 
-        if (timeOut >= _endTime)
-        {
-            PlayerAnimationController.Instance.SetPAtkSpeed(1.0f);
-            SwitchToIdle(animator);
+        if (!AnimatorUtils.IsLocalPlayerAnimator(animator))
             return;
-        }
 
-        PlayerAnimationController.Instance.SetPAtkSpeed(_linearSpeed);
+        float timeOut = Time.time - _startTime;
+        if (timeOut >= _endTime)
+            SwitchToIdle();
     }
 
-    private void SwitchToIdle(Animator animator)
+    private void SwitchToIdle()
     {
         if (_isSwitchIdle)
-        {
             return;
-        }
 
         _isSwitchIdle = true;
-        PlayerAnimationController.Instance.SetPAtkSpeed(1.0f);
-        PlayerEntity.Instance.IsAttack = false;
+        if (PlayerEntity.Instance != null)
+            PlayerEntity.Instance.IsAttack = false;
         PlayerStateMachine.Instance.ChangeIntention(Intention.INTENTION_IDLE);
         PlayerStateMachine.Instance.NotifyEvent(Event.WAIT_RETURN, NewIdleState.WaitReturnFromCombatSmb);
     }
 
-    private void StopAnimationTrigger(Animator animator, string parameterName)
+    private void StopAnimationTrigger(Animator animator, string animParameterName)
     {
-        if (animator.GetBool(parameterName) != false)
+        if (animator.GetBool(animParameterName))
         {
-            AnimationManager.Instance.StopCurrentAnimation(animator.GetInteger(AnimatorUtils.OBJECT_ID), parameterName, "player");
+            AnimationManager.Instance.StopCurrentAnimation(
+                AnimatorUtils.GetObjectId(animator), animParameterName, "player");
         }
     }
 }

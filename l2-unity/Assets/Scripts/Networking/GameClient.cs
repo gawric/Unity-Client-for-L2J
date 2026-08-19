@@ -1,16 +1,10 @@
 ﻿using UnityEngine;
-using System.Threading.Tasks;
-using System.Collections.Generic;
-using System.Collections;
-using L2_login;
-
 
 public class GameClient : DefaultClient {
-    [SerializeField] protected PlayerInfoInterlude _playerInfo;
-    [SerializeField] protected int _serverId;
-    [SerializeField] private int _playKey1;
-    [SerializeField] private int _playKey2;
-    private GameCrypt _gameCrypt;
+    protected PlayerInfoInterlude _playerInfo;
+    protected int _serverId;
+    private int _playKey1;
+    private int _playKey2;
     private readonly object syncLock = new object();
     private bool _isLoadComplete { get; set; }
 
@@ -18,14 +12,13 @@ public class GameClient : DefaultClient {
     public string CurrentPlayer { get { return _playerInfo.Identity.Name; } }
     public int ServerId { get { return _serverId; } set { _serverId = value; } }
     public int PlayKey1 { get { return _playKey1; } set { _playKey1 = value; } }
-    public int PlayKey2 { get { return _playKey2; } set { _playKey2 = value; } }
-    public GameCrypt GameCrypt { get { return _gameCrypt; } }   
+    public int PlayKey2 { get { return _playKey2; } set { _playKey2 = value; } } 
 
-    private GameClientInterludePacketHandler clientPacketHandler;
-    private GameServerInterludePacketHandler serverPacketHandler;
+    private GameClientPacketHandler clientPacketHandler;
+    private GameServerPacketHandler serverPacketHandler;
 
-    public GameClientInterludePacketHandler ClientPacketHandler { get { return clientPacketHandler; } }
-    public GameServerInterludePacketHandler ServerPacketHandler { get { return serverPacketHandler; } }
+    public GameClientPacketHandler ClientPacketHandler { get { return clientPacketHandler; } }
+    public GameServerPacketHandler ServerPacketHandler { get { return serverPacketHandler; } }
 
     private static GameClient _instance;
     public static GameClient Instance { get { return _instance; } }
@@ -39,47 +32,78 @@ public class GameClient : DefaultClient {
     }
 
     protected override void CreateAsyncClient() {
-        clientPacketHandler = new GameClientInterludePacketHandler();
-        serverPacketHandler = new GameServerInterludePacketHandler();
+        clientPacketHandler = new GameClientPacketHandler();
+        serverPacketHandler = new GameServerPacketHandler(Network.Protocol, Network.Dispatcher);
 
-        _client = new AsynchronousClient(_serverIp, _serverPort, this, clientPacketHandler, serverPacketHandler, false);
+        _client = new AsynchronousClient(_serverIp, _serverPort, this, clientPacketHandler, serverPacketHandler, false, Network);
     }
 
     public void EnableCrypt(byte[] key) {
-        _gameCrypt = new GameCrypt();
-        _gameCrypt.SetKey(key);
+        if (Network != null && Network.Protocol != null)
+            Network.Protocol.SetGameCryptKey(key);
         _client.CryptEnabled = true;
     }
 
     public bool IsCryptEnabled()
     {
-        return _client.CryptEnabled;
+        return _client != null && _client.CryptEnabled;
     }
 
 
     protected override void WhileConnecting() {
         base.WhileConnecting();
 
-        GameManager.Instance.OnConnectingToGameServer();
+        IncomingPacketActions.Manager.OnConnectingToGameServer();
     }
 
     protected override void OnConnectionSuccess() {
         base.OnConnectionSuccess();
+        LobbyFlowLog.Info("GameClient.OnConnectionSuccess — send ProtocolVersion");
 
-        Debug.Log("Connected to GameServer");
-        //746 interlude protocol
-        SendGameDataQueue.Instance().AddItem(CreatorPacketsGameLobby.CreateProtocolVersion(GameManager.Instance.ProtocolVersion) , false , false);
-        //clientPacketHandler.SendProtocolVersion();
+        GameManager manager = IncomingPacketActions.Manager;
+        if (manager != null)
+            manager.IsSwitchingServer = false;
+        else
+            LobbyFlowLog.Error("GameClient.OnConnectionSuccess Manager is null");
+
+        int protocol = manager != null ? manager.ProtocolVersion : 746;
+        LobbyFlowLog.Info("TX ProtocolVersion=" + protocol + " crypt=" + IsCryptEnabled());
+        SendPlain(new ProtocolVersionCommand(protocol));
+    }
+
+    public void Send(INetworkCommand command)
+    {
+        EnqueueGame(command, IsCryptEnabled());
+    }
+
+    public void SendPlain(INetworkCommand command)
+    {
+        EnqueueGame(command, false);
+    }
+
+    private void EnqueueGame(INetworkCommand command, bool crypt)
+    {
+        if (command == null || Network == null)
+            return;
+
+        Network.SendGame.AddItem(command, crypt);
+    }
+
+    public void EndLoadWorld()
+    {
+        Send(new RequestSkillCoolTimeCommand());
     }
 
     public override void OnConnectionFailed() {
         base.OnConnectionFailed();
+        IncomingPacketActions.Manager.IsSwitchingServer = false;
+        IncomingPacketActions.Manager.OnRelogin();
     }
 
     public override void OnAuthAllowed() {
         //Debug.Log("Authed to GameServer");
 
-        GameManager.Instance.OnAuthAllowed();
+        IncomingPacketActions.Manager.OnAuthAllowed();
     }
 
     public override void OnDisconnect() {

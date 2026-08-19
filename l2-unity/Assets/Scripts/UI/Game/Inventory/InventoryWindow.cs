@@ -327,7 +327,7 @@ public class InventoryWindow : L2PopupWindow
         }
     }
 
-    public void UpdateStats(PlayerInterludeStats stats)
+    public void UpdateStats(PlayerStats stats)
     {
         if(stats != null)
         {

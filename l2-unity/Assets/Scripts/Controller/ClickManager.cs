@@ -1,8 +1,12 @@
 ﻿using UnityEngine;
 using UnityEngine.UIElements;
+using VContainer;
 
 public class ClickManager : MonoBehaviour
 {
+    [Inject] InputManager _input;
+    [Inject] TargetManager _targets;
+    [Inject] GameClient _gameClient;
     [SerializeField] private GameObject _locator;
     [SerializeField] private ObjectData _targetObjectData;
     [SerializeField] private ObjectData _hoverObjectData;
@@ -15,6 +19,21 @@ public class ClickManager : MonoBehaviour
     private UIDocument uiDocument;
     private static ClickManager _instance;
     public static ClickManager Instance => _instance;
+
+    private InputManager GameInput
+    {
+        get { return _input != null ? _input : IncomingPacketActions.Input; }
+    }
+
+    private TargetManager Targets
+    {
+        get { return _targets != null ? _targets : IncomingPacketActions.Targets; }
+    }
+
+    private GameClient Game
+    {
+        get { return _gameClient != null ? _gameClient : IncomingPacketActions.Game; }
+    }
 
     // L2 FindMouseTargetObject far = 10000 UU.
     private const float MousePickDistance = 10000f;
@@ -79,9 +98,9 @@ public class ClickManager : MonoBehaviour
                 _hoverObjectData = new ObjectData(hit.collider.gameObject);
             }
 
-            if (InputManager.Instance != null &&
-                InputManager.Instance.LeftClickDown &&
-                !InputManager.Instance.RightClickHeld)
+            if (GameInput != null &&
+                GameInput.LeftClickDown &&
+                !GameInput.RightClickHeld)
             {
                 _targetObjectData = _hoverObjectData;
 
@@ -108,9 +127,9 @@ public class ClickManager : MonoBehaviour
         StopFollow();
         SendPacketMoveToLocation(_lastClickPosition);
 
-        if (TargetManager.Instance != null)
+        if (Targets != null)
         {
-            TargetManager.Instance.ClearAttackTarget();
+            Targets.ClearAttackTarget();
         }
 
         float angle = Vector3.Angle(hit.normal, Vector3.up);
@@ -137,10 +156,7 @@ public class ClickManager : MonoBehaviour
 
     private void SendPacketMoveToLocation(Vector3 lastClickPosition)
     {
-        MoveBackwardToLocation sendPaket = CreatorPacketsUser.CreateMoveToLocation(
-            PlayerEntity.Instance.transform.position, lastClickPosition);
-        bool enable = GameClient.Instance.IsCryptEnabled();
-        SendGameDataQueue.Instance().AddItem(sendPaket, enable, enable);
+        Game.Send(new MoveToCommand(PlayerEntity.Instance.transform.position, lastClickPosition));
     }
 
     public void OnClickOnEntity()
@@ -152,21 +168,19 @@ public class ClickManager : MonoBehaviour
         }
 
         // Already selected monster → melee attack intent. NPCs = talk, stay Target (blue).
-        if (TargetManager.Instance != null &&
-            TargetManager.Instance.HasTarget() &&
-            TargetManager.Instance.Target.Identity != null &&
-            TargetManager.Instance.Target.Identity.Id == clickTarget.Identity.Id &&
+        if (Targets != null &&
+            Targets.HasTarget() &&
+            Targets.Target.Identity != null &&
+            Targets.Target.Identity.Id == clickTarget.Identity.Id &&
             !clickTarget.IsDead() &&
             clickTarget.GetEntity() is MonsterEntity)
         {
-            TargetManager.Instance.SetAttackTarget();
+            Targets.SetAttackTarget();
         }
 
         var l2jpos = clickTarget.Identity.GetL2jPos();
-        ClickAction sendPaket = CreatorPacketsUser.CreateActiont(
-            clickTarget.Identity.Id, (int)l2jpos.x, (int)l2jpos.y, (int)l2jpos.z, 0);
-        bool enable = GameClient.Instance.IsCryptEnabled();
-        SendGameDataQueue.Instance().AddItem(sendPaket, enable, enable);
+        Game.Send(new ClickActionCommand(
+            clickTarget.Identity.Id, (int)l2jpos.x, (int)l2jpos.y, (int)l2jpos.z, 0));
     }
 
     public void PlaceLocator(Vector3 position)

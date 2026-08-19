@@ -93,6 +93,7 @@ public abstract class AnimationEventsBase : MonoBehaviour
 
     public void OnAnimationLoadArrow(string animationName)
     {
+        animationName = NormalizeAnimationEventName(animationName);
         OnAnimationStartLoadArrow?.Invoke(animationName);
     }
 }

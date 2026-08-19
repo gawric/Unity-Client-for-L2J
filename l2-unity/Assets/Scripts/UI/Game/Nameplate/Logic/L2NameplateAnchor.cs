@@ -72,7 +72,7 @@ public static class L2NameplateAnchor
     }
 
     /// <summary>
-    /// Half-height in Unity meters. npcgrp is already /52.5; UserInfo often raw UU.
+    /// Half-height in Unity meters. npcgrp is already /52.5; UserInfoDto often raw UU.
     /// </summary>
     public static float CollisionHeightToUnityMeters(float collisionHeight)
     {

@@ -1,4 +1,4 @@
-﻿
+
 using UnityEngine;
 
 
@@ -30,7 +30,7 @@ public class NewAttackState : AbstractAttackEvents
                 Entity targetEntity = _stateMachine.Player.GetTargetEntity();
                 if (targetEntity == null || targetEntity.IsDead())
                 {
-                    // Stale Attack after Die/despawn — do not start another jatk.
+                    // Stale AttackDto after DieDto/despawn — do not start another jatk.
                     if (PlayerEntity.Instance != null)
                     {
                         PlayerEntity.Instance.IsAttack = false;
@@ -40,9 +40,10 @@ public class NewAttackState : AbstractAttackEvents
                     break;
                 }
 
-                AttackTimingHelper.RotateFaceToMonster(_stateMachine.Player);
+                // Spine/arm aim-at-target. Disabled: keep attack pose from the clip only.
+                // AttackTimingHelper.RotateFaceToMonster(_stateMachine.Player);
 
-                int targetEntityId = targetEntity.IdentityInterlude != null ? targetEntity.IdentityInterlude.Id : 0;
+                int targetEntityId = targetEntity.Identity != null ? targetEntity.Identity.Id : 0;
                 float attackDurationMs = AttackTimingHelper.ResolveServerLikeAttackDurationMs(_stateMachine.Player);
                 float hitFraction = AttackTimingHelper.ResolveHitFractionByWeapon(_stateMachine.Player);
                 float pAtkSpd = _stateMachine.Player.Stats != null ? _stateMachine.Player.Stats.BasePAtkSpeed : 0f;
@@ -54,7 +55,7 @@ public class NewAttackState : AbstractAttackEvents
                     $"hitFraction={hitFraction:F2} targetId={targetEntityId}");
 
                 SwordCollisionService.Instance.BeginAttack(
-                    _stateMachine.Player.IdentityInterlude.Id,
+                    _stateMachine.Player.Identity.Id,
                     targetEntityId,
                     _stateMachine.Player.transform,
                     targetEntity.transform,
@@ -66,7 +67,7 @@ public class NewAttackState : AbstractAttackEvents
 
                 PlayerEntity.Instance.RefreshRandomPAttack();
                 Animation random = PlayerEntity.Instance.RandomName;
-                AnimationManager.Instance.PlayAnimationTrigger(_stateMachine.GetObjectId() , random.ToString());
+                IncomingPacketActions.Animations.PlayAnimationTrigger(_stateMachine.GetObjectId() , random.ToString());
 
                 break;
             case Event.WAIT_RETURN:

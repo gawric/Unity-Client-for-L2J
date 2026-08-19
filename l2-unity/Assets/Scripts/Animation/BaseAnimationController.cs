@@ -24,11 +24,19 @@ public class BaseAnimationController : AnimationEventsBase, IAnimationController
     private int _lastDuplicateShootFrame = int.MinValue;
     private string _lastDuplicateShootAnim;
 
+    protected bool TryGetAnimator()
+    {
+        if (_animator == null)
+            _animator = GetComponentInChildren<Animator>(true);
+        return _animator != null;
+    }
+
     public virtual void Initialize()
     {
-        _animator = gameObject.GetComponentInChildren<Animator>(true);
         _lastAnimationVariableName = "wait_hand";
-        SkillAnimationDatabase.LoadRaceAnimations(_animator?.runtimeAnimatorController.name);
+        if (!TryGetAnimator() || _animator.runtimeAnimatorController == null)
+            return;
+        SkillAnimationDatabase.LoadRaceAnimations(_animator.runtimeAnimatorController.name);
 
         // Re-entrant: pooled NPC/monster call Initialize again on each spawn.
         _base_motion.Clear();
@@ -61,17 +69,26 @@ public class BaseAnimationController : AnimationEventsBase, IAnimationController
 
     public void SetRunSpeed(float value)
     {
+        if (!TryGetAnimator())
+            return;
         Debug.Log("SetRun speed test " + value);
         _animator.SetFloat("run_speed", value);
     }
 
     public void SetWalkSpeed(float value)
     {
+        if (!TryGetAnimator())
+            return;
         Debug.Log("SetWalk speed test " + value);
         _animator.SetFloat("walk_speed", value);
     }
 
-    public void SetWalkSpeedLobby(float value) => _animator.SetFloat("walk_speed", value);
+    public void SetWalkSpeedLobby(float value)
+    {
+        if (!TryGetAnimator())
+            return;
+        _animator.SetFloat("walk_speed", value);
+    }
 
 
     public void SetPAtkSpd(float value)
@@ -86,6 +103,8 @@ public class BaseAnimationController : AnimationEventsBase, IAnimationController
 
     public void UpdateAnimatorAtkSpdMultiplier(float clipLength)
     {
+        if (!TryGetAnimator())
+            return;
         float newAtkSpd = clipLength * 1000f / _pAtkSpd;
         //Debug.Log("PATACK speed set " + newAtkSpd);
         _animator.SetFloat("patkspd", newAtkSpd);
@@ -93,12 +112,16 @@ public class BaseAnimationController : AnimationEventsBase, IAnimationController
 
     public void UpdateAnimatorAtkSpeedL2j(float timeAtk , float clipLength)
     {
+        if (!TryGetAnimator())
+            return;
         float newAtkSpd = clipLength * 1000f / timeAtk;
         _animator.SetFloat("patkspd", newAtkSpd);
     }
 
     public void SetPAtkSpeed(float newAtkSpd)
     {
+        if (!TryGetAnimator())
+            return;
         //Debug.Log("PATACK speed set 2 " + newAtkSpd);
         _animator.SetFloat("patkspd", newAtkSpd);
     }
@@ -106,6 +129,8 @@ public class BaseAnimationController : AnimationEventsBase, IAnimationController
 
     public void SetMAtkSpd(float value)
     {
+        if (!TryGetAnimator())
+            return;
         //TODO: update for cast animation
         float newMAtkSpd = _spAtk01ClipLength / value;
         _animator.SetFloat("matkspd", newMAtkSpd);
@@ -113,22 +138,30 @@ public class BaseAnimationController : AnimationEventsBase, IAnimationController
 
     public void SetCastSpeed(float value)
     {
+        if (!TryGetAnimator())
+            return;
         _animator.SetFloat("cast_speed", value);
     }
     public float GetNormalizedTimeOffsetSpeed()
     {
+        if (!TryGetAnimator())
+            return 0f;
         float normalized =  GetStateInfo().normalizedTime;
         float speed = _animator.speed;
         return  normalized / speed;
     }
     public void SetShotSpeed(float value)
     {
+        if (!TryGetAnimator())
+            return;
         _animator.SetFloat("shot_speed", value);
     }
 
     // Set all animation variables to false
     public void ClearAnimParams()
     {
+        if (!TryGetAnimator())
+            return;
         for (int i = 0; i < _animator.parameters.Length; i++)
         {
             AnimatorControllerParameter anim = _animator.parameters[i];
@@ -142,36 +175,48 @@ public class BaseAnimationController : AnimationEventsBase, IAnimationController
 
     public void ToggleAnimationTrigger(string name)
     {
+        if (!TryGetAnimator())
+            return;
         _animator.SetTrigger(name);
     }
 
     public void ResetAnimationTrigger(string name)
     {
+        if (!TryGetAnimator())
+            return;
         _animator.ResetTrigger(name);
     }
 
     public void ToggleAnimationCrossFade(string name , float duration)
     {
+        if (!TryGetAnimator())
+            return;
         _animator.CrossFade(name, duration, 0);
     }
 
     public void CrossFadeInFixedTime(string stateName, float fixedDuration, int layer = 0)
     {
-        if (_animator == null || string.IsNullOrEmpty(stateName))
+        if (!TryGetAnimator() || string.IsNullOrEmpty(stateName))
         {
             return;
         }
 
+        int objectId = _animator.GetInteger(AnimatorUtils.OBJECT_ID);
+        int hash = Animator.StringToHash(stateName);
+        bool hasState = _animator.HasState(layer, hash);
         _animator.CrossFadeInFixedTime(stateName, fixedDuration, layer);
         _lastAnimationVariableName = stateName;
         Debug.Log(
-            $"[ANIM_CROSSFADE] launch state={stateName} fixedDuration={fixedDuration:F3}s layer={layer}");
+            $"[ANIM_CROSSFADE] id={objectId} go={name} state={stateName} hasState={hasState} fixedDuration={fixedDuration:F3}s layer={layer}");
     }
 
     public Animator GetAnimator() => _animator;
 
     public void SetBool(string name, bool value , string entityName = "")
     {
+        if (!TryGetAnimator())
+            return;
+
         if (value)
         {
             _lastAnimationVariableName = name;
@@ -182,12 +227,16 @@ public class BaseAnimationController : AnimationEventsBase, IAnimationController
 
     public void SetBoolDisabledOther(string nameAnim  , bool value, string[] disableds)
     {
+        if (!TryGetAnimator())
+            return;
         DisabledOtherAnim(disableds);
         _animator.SetBool(nameAnim, value);
     }
 
     private void DisabledOtherAnim(string[] disableds)
     {
+        if (!TryGetAnimator())
+            return;
         foreach (string name in disableds)
         {
             _animator.SetBool(name, false);
@@ -197,6 +246,8 @@ public class BaseAnimationController : AnimationEventsBase, IAnimationController
 
     public bool GetBool(string name)
     {
+        if (!TryGetAnimator())
+            return false;
         return _animator.GetBool(name);
     }
 
@@ -204,6 +255,8 @@ public class BaseAnimationController : AnimationEventsBase, IAnimationController
 
     public bool IsFinishAnimation(string name)
     {
+        if (!TryGetAnimator())
+            return false;
 
         AnimatorStateInfo stateInfo = _animator.GetCurrentAnimatorStateInfo(0);
         bool isName = stateInfo.IsName(name);
@@ -221,6 +274,8 @@ public class BaseAnimationController : AnimationEventsBase, IAnimationController
 
     public AnimatorStateInfo GetStateInfo()
     {
+        if (!TryGetAnimator())
+            return default;
         return  _animator.GetCurrentAnimatorStateInfo(0);
     }
 
@@ -234,6 +289,8 @@ public class BaseAnimationController : AnimationEventsBase, IAnimationController
     // Update animator variable based on Animation Id
     public void SetAnimationProperty(int animId, float value, bool forceReset)
     {
+        if (!TryGetAnimator())
+            return;
         //Debug.Log("animId " + animId + "/" + _animator.parameters.Length);
         if (animId >= 0 && animId < _animator.parameters.Length)
         {
@@ -265,6 +322,8 @@ public class BaseAnimationController : AnimationEventsBase, IAnimationController
     // Return an animator variable based on its ID
     public float GetAnimationProperty(int animId)
     {
+        if (!TryGetAnimator())
+            return 0f;
         if (animId >= 0 && animId < _animator.parameters.Length)
         {
             AnimatorControllerParameter anim = _animator.parameters[animId];
@@ -285,27 +344,42 @@ public class BaseAnimationController : AnimationEventsBase, IAnimationController
 
     public void SetFloat(string name, float value)
     {
+        if (!TryGetAnimator())
+            return;
         _animator.SetFloat(name, value);
     }
 
     public float GetFloat(string name)
     {
+        if (!TryGetAnimator())
+            return 0f;
         return  _animator.GetFloat(_animator.name);
     }
 
     public void SetInt(string name, int value)
     {
+        if (!TryGetAnimator())
+            return;
         _animator.SetInteger(name, value);
     }
 
     public int GetInt(string name)
     {
+        if (!TryGetAnimator())
+            return 0;
         return _animator.GetInteger(_animator.name);
     }
 
     public void SetAnimatorSpeed(float value)
     {
+        if (!TryGetAnimator())
+            return;
         _animator.speed = value;
+    }
+
+    public void SetEnabled(bool value)
+    {
+        enabled = value;
     }
 
     public string GetAnimatorName()
@@ -342,7 +416,7 @@ public class BaseAnimationController : AnimationEventsBase, IAnimationController
 
     public override void OnAnimationShoot(string animationName)
     {
-        if (_animator == null)
+        if (!TryGetAnimator())
         {
             base.OnAnimationShoot(animationName);
             return;

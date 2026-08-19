@@ -1,9 +1,10 @@
 using System.Collections.Generic;
 using UnityEngine;
+using VContainer;
 
 /// <summary>
 /// Continuous yaw-follow toward a live target during bow draw / magic cast.
-/// Does not move actors — approach stays server <c>MoveToPawn</c> only.
+/// Does not move actors — approach stays server <c>MoveToPawnDto</c> only.
 /// Entries keyed by objectId (list-ready for other players later; today only local player).
 /// Local player pauses while <see cref="PlayerController.RunningToDestination"/>.
 /// </summary>
@@ -20,6 +21,19 @@ public sealed class CombatFacingService : MonoBehaviour
     }
 
     public static CombatFacingService Instance { get; private set; }
+
+    [Inject] WeapongrpTable _weaponGrps;
+
+    private static WeapongrpTable Weapons
+    {
+        get
+        {
+            if (Instance != null && Instance._weaponGrps != null)
+                return Instance._weaponGrps;
+            return WeapongrpTable.Instance;
+        }
+    }
+
 
     [SerializeField] private float _speed = 10f;
     [SerializeField] private float _angleThreshold = 3f;
@@ -38,8 +52,23 @@ public sealed class CombatFacingService : MonoBehaviour
             return Instance;
         }
 
+        if (App.GameContainer != null)
+        {
+            try
+            {
+                CombatFacingService resolved = App.GameContainer.Resolve<CombatFacingService>();
+                if (resolved != null)
+                    return resolved;
+            }
+            catch
+            {
+            }
+        }
+
         GameObject go = new GameObject(nameof(CombatFacingService));
-        return go.AddComponent<CombatFacingService>();
+        CombatFacingService created = go.AddComponent<CombatFacingService>();
+        App.InjectGameObject(go);
+        return created;
     }
 
     private void Awake()
@@ -137,8 +166,8 @@ public sealed class CombatFacingService : MonoBehaviour
         }
 
         int localId = ResolveLocalObjectId();
-        bool localMoving = PlayerController.Instance != null &&
-                           PlayerController.Instance.RunningToDestination;
+        PlayerController player = IncomingPacketActions.Player;
+        bool localMoving = player != null && player.RunningToDestination;
 
         // Snapshot keys — ApplyYaw may write entry back; shoot/Exit may EndFollow mid-frame.
         _iterateIds.Clear();
@@ -222,12 +251,12 @@ public sealed class CombatFacingService : MonoBehaviour
     private static int ResolveLocalObjectId()
     {
         if (PlayerEntity.Instance == null ||
-            PlayerEntity.Instance.IdentityInterlude == null)
+            PlayerEntity.Instance.Identity == null)
         {
             return 0;
         }
 
-        return PlayerEntity.Instance.IdentityInterlude.Id;
+        return PlayerEntity.Instance.Identity.Id;
     }
 
     /// <summary>
@@ -240,7 +269,7 @@ public sealed class CombatFacingService : MonoBehaviour
             return false;
         }
 
-        if (player.Appearance != null && WeapongrpTable.Instance != null)
+        if (player.Appearance != null && Weapons != null)
         {
             if (IsBowItemId(player.Appearance.RHand) || IsBowItemId(player.Appearance.LHand))
             {
@@ -260,7 +289,7 @@ public sealed class CombatFacingService : MonoBehaviour
             return false;
         }
 
-        Weapongrp weapon = WeapongrpTable.Instance.GetWeapon(itemId);
+        Weapongrp weapon = Weapons.GetWeapon(itemId);
         return weapon != null && weapon.WeaponType == WeaponType.bow;
     }
 }

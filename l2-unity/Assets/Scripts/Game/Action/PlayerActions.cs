@@ -1,10 +1,12 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
+using VContainer;
 using static UnityEngine.GraphicsBuffer;
 
 public class PlayerActions : MonoBehaviour
 {
+    [Inject] GameClient _gameClient;
     private Dictionary<ActionType, L2Action> _actions;
     
     private static PlayerActions _instance;
@@ -43,15 +45,15 @@ public class PlayerActions : MonoBehaviour
 
     private void ListenToKeybindedActions()
     {
-        if (InputManager.Instance.Attack)
-        {
-            UseAction(ActionType.Attack);
-        }
+        InputManager input = IncomingPacketActions.Input;
+        if (input == null)
+            return;
 
-        if (InputManager.Instance.NextTarget)
-        {
+        if (input.Attack)
+            UseAction(ActionType.Attack);
+
+        if (input.NextTarget)
             UseAction(ActionType.NextTarget);
-        }
     }
 
     public void UseAction(ActionType actionType)
@@ -68,9 +70,9 @@ public class PlayerActions : MonoBehaviour
 
     public void UseSkill(int skillId)
     {
-        RequestMagicSkillUse sendPaket = CreatorPacketsUser.CreateMagicSkilluse(skillId);
-        bool enable = GameClient.Instance.IsCryptEnabled();
-
-        SendGameDataQueue.Instance().AddItem(sendPaket, enable, enable);
+        GameClient game = _gameClient != null ? _gameClient : IncomingPacketActions.Game;
+        if (game == null)
+            return;
+        game.Send(new RequestMagicSkillUseCommand(skillId, 0, 0));
     }
 }

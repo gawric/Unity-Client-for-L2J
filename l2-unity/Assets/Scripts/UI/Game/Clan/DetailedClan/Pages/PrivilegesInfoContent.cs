@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using UnityEngine.UIElements;
 
 
@@ -25,16 +25,16 @@ public class PrivilegesInfoContent : AbstractClanContent
 
     }
 
-    public void PreShow(ServerPacket serverPacket, VisualElement detailedInfoElement)
+    public void PreShow(object packet, VisualElement detailedInfoElement)
     {
         content = LoadContent(content, detailedInfoElement);
         ClearContent(content);
         _createPanelCheckBox.DestroyTempElements();
 
-        Show(serverPacket, detailedInfoElement);
+        Show(packet, detailedInfoElement);
     }
 
-    private void Show(ServerPacket serverPacket, VisualElement detailedInfoElement)
+    private void Show(object packet, VisualElement detailedInfoElement)
     {
 
 
@@ -51,17 +51,15 @@ public class PrivilegesInfoContent : AbstractClanContent
         var panelClanHall = page.Q<VisualElement>(_panelSystemClanHallName);
         var panelCastle = page.Q<VisualElement>(_panelSystemCastleName);
 
-        if(serverPacket.GetType() == typeof(PledgeReceivePowerInfo))
+        if (packet is PledgeReceivePowerInfoDto privilegesInfo)
         {
             HideElement(applyButton);
-            PledgeReceivePowerInfo privilegesInfo = serverPacket as PledgeReceivePowerInfo;
             PrepareUsePowerGrade(privilegesInfo.PowerGradeByRank, panelPrivilages, panelClanHall, panelCastle);
         }
 
-        if (serverPacket.GetType() == typeof(ManagePledgePower))
+        if (packet is ManagePledgePowerDto managePledgePower)
         {
-            ManagePledgePower managePledgePower = serverPacket as ManagePledgePower;
-            SubscribeApplyButton(applyButton, detailedInfoElement , managePledgePower.Rank);
+            SubscribeApplyButton(applyButton, detailedInfoElement, managePledgePower.Rank);
             ShowElement(applyButton);
 
             UseRank(managePledgePower.PrivilegesByRank, panelPrivilages, panelClanHall, panelCastle);

@@ -445,8 +445,7 @@ public class DealerWindow : L2PopupWindow
             switch (_productType)
             {
                 case ProductType.BUY:
-                    var packetBuy = CreatorPacketsUser.CreateRequestBuyItem(_listId, _listSell);
-                    SendServer(packetBuy);
+                    SendServer(new RequestBuyItemCommand(_listId, _listSell));
                     break;
 
                 case ProductType.WEAR:
@@ -464,21 +463,17 @@ public class DealerWindow : L2PopupWindow
             switch (_productType)
             {
                 case ProductType.SELL:
-                    var packetSell = CreatorPacketsUser.CreateRequestSellItem(_listId, _listSell);
-                    SendServer(packetSell);
+                    SendServer(new RequestSellItemCommand(_listId, _listSell));
                     break;
                 case ProductType.WHDepositList:
-                    var packetWhDp = CreatorPacketsUser.CreateWHDepositList(_listSell);
-                    SendServer(packetWhDp);
+                    SendServer(new SendWarehouseDepositListCommand(_listSell));
                     break;
                 case ProductType.WHWithdrawList:
-                    var packetWhWd = CreatorPacketsUser.CreateWHWithdrawList(_listSell);
-                    SendServer(packetWhWd);
+                    SendServer(new SendWarehouseWithdrawListCommand(_listSell));
                     break;
                 case ProductType.PackageSendableList:
                     int playerObjectId = _listId;
-                    var packetSendable = CreatorPacketsUser.RequestPackageSend(playerObjectId , _listSell);
-                    SendServer(packetSendable);
+                    SendServer(new RequestPackageSendCommand(playerObjectId , _listSell));
                     break;
                 case ProductType.BUY_SEED:
                     Debug.LogWarning("РќРµ СЂРµР°Р»РёР·РѕРІР°РЅ РїР°РєРµС‚ РѕС‚РїСЂР°РІРєР° BUY_SEED ");
@@ -488,15 +483,14 @@ public class DealerWindow : L2PopupWindow
 
     }
 
-    private void SendServer(ClientPacket packet)
+    private void SendServer(INetworkCommand packet)
     {
-        SendGameDataQueue.Instance().AddItem(packet, GameClient.Instance.IsCryptEnabled(), GameClient.Instance.IsCryptEnabled());
+        IncomingPacketActions.Game.Send(packet);
     }
 
     private void OkWear()
     {
-        var packet = CreatorPacketsUser.CreateRequestPreviewList(_listId, _listSell);
-        SendServer(packet);
+        SendServer(new RequestPreviewItemCommand(_listId, _listSell));
         CancelEvent();
     }
 

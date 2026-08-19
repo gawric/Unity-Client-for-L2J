@@ -93,16 +93,7 @@ MonoBehaviour:
   _menuScene: Menu
   _lobbyScene: l2_lobby
   _gameScene: Game
-  _mapList:
-  - name: 17_25
-    enabled: 1
-  - name: 16_25
-    enabled: 0
-  - name: 17_24
-    enabled: 0
-  - name: 16_24
-    enabled: 0
-  _mapsToLoad: []
+  _tilePreloadDistance: 80
 --- !u!114 &3414367172090928233
 MonoBehaviour:
   m_ObjectHideFlags: 0

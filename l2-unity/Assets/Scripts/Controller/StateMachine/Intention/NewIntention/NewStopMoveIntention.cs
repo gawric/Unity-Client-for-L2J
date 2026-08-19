@@ -1,4 +1,4 @@
-﻿public class NewStopMoveIntention : IntentionBase
+public class NewStopMoveIntention : IntentionBase
 {
     public NewStopMoveIntention(PlayerStateMachine stateMachine) : base(stateMachine)
     {
@@ -9,12 +9,12 @@
         
         if (arg0 != null)
         {
-            StopMove stop = (StopMove)arg0;
+            StopMoveDto stop = (StopMoveDto)arg0;
             
             //Debug.Log("StopMove Dist " + VectorUtils.Distance2D(PlayerController.Instance.transform.position, stop.StopPos));
 
             PlayerStateMachine.Instance.IsMoveToPawn = false;
-            PlayerController.Instance.StopMove();
+            IncomingPacketActions.Player.StopMove();
             //Debug.Log("IsMoveToPawn Двигаемся к цели stopmove1");
 
             //когда мы не успеваем добежать до точки и находимся в состоянии бега нам нужно предупредить RunningState о том что мы прибежали на место и нам нужно отключить анимацию бега
@@ -25,7 +25,7 @@
 
                 _stateMachine.NotifyEvent(Event.ARRIVED);
                 _stateMachine.ChangeIntention(Intention.INTENTION_IDLE);
-                PlayerController.Instance.StopMove();
+                IncomingPacketActions.Player.StopMove();
             }
             else
             {

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using UnityEngine;
 
 public class CalcBaseParam
@@ -16,7 +16,7 @@ public class CalcBaseParam
     }
 
     /// <summary>
-    /// Attack split: [0]=draw/shoot window ms, [1]=flight ms (ANProjectile accel 3000).
+    /// AttackDto split: [0]=draw/shoot window ms, [1]=flight ms (ANProjectile accel 3000).
     /// </summary>
     public static float[] CalculateAttackAndFlightTimes(float distance, float baseAttackTimeMs)
     {

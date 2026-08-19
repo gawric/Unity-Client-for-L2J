@@ -83,6 +83,48 @@ public class CharacterArmorDresser : AbstractArmorDresser
         armorPiece.SetActive(true);
     }
 
+    public void EquipDefaultSlot(ItemSlot slot, Armor[] baseArmor, GameObject[] armorPiece)
+    {
+        ItemSlot slotArmor = GetExtendedOrGetCurrentArmorPart(slot, _equippedArmor);
+        if (slotArmor == ItemSlot.fullarmor)
+        {
+            if (baseArmor != null && baseArmor.Length >= 2 &&
+                IsArmorEquipped(baseArmor[0], ItemSlot.chest) &&
+                IsArmorEquipped(baseArmor[1], ItemSlot.legs))
+                return;
+
+            if (armorPiece != null && armorPiece.Length >= 2 &&
+                armorPiece[0] != null && armorPiece[1] != null &&
+                baseArmor != null && baseArmor.Length >= 2 &&
+                baseArmor[0] != null && baseArmor[1] != null)
+            {
+                UnequipFullPlateArmor(slot, slotArmor, baseArmor, armorPiece);
+                return;
+            }
+
+            ResetArmorPiece(ItemSlot.chest);
+            ResetArmorPiece(ItemSlot.legs);
+            ResetArmorPiece(ItemSlot.fullarmor);
+            OnSyncMash?.Invoke(1);
+            return;
+        }
+
+        if (baseArmor != null && baseArmor.Length > 0 && IsArmorEquipped(baseArmor[0], slotArmor))
+            return;
+
+        if (armorPiece != null && armorPiece.Length > 0 && armorPiece[0] != null &&
+            baseArmor != null && baseArmor.Length > 0 && baseArmor[0] != null)
+        {
+            EquipNewArmor(slotArmor, baseArmor[0], armorPiece[0]);
+            OnSyncMash?.Invoke(1);
+            armorPiece[0].SetActive(true);
+            return;
+        }
+
+        ResetArmorPiece(slotArmor);
+        OnSyncMash?.Invoke(1);
+    }
+
     public void UnequipArmorPiece(ItemSlot slot , int unequipId , Armor[] baseArmor, GameObject[] armorPiece)
     {
         ItemSlot slotArmor = GetExtendedOrGetCurrentArmorPart(slot, _equippedArmor);
@@ -227,6 +269,11 @@ public class CharacterArmorDresser : AbstractArmorDresser
             return;
         }
         Debug.Log("EquipNewArmor destroy " + GetGameObject(slot, mainPart));
+        GearFlowLog.Info("ArmorDresser EquipNewArmor slot=" + slot +
+            " part=" + mainPart +
+            " armorId=" + (armor != null ? armor.Id : 0) +
+            " mesh=" + (armorPiece != null ? armorPiece.name : "null") +
+            " container=" + (_containerTransform != null ? _containerTransform.name : "null"));
         if(isDelete) Destroy(GetGameObject(slot, mainPart));
         SetParent(armorPiece);
 
@@ -237,6 +284,11 @@ public class CharacterArmorDresser : AbstractArmorDresser
     private void EquipNewArmorFullPlate(Armor armor, GameObject armorPiece , ItemSlot slotFullPlater, ItemSlot insideFullPlate)
     {
         var mainPart = GetMainArmorPart(insideFullPlate);
+        GearFlowLog.Info("ArmorDresser EquipNewArmorFullPlate slot=" + slotFullPlater +
+            " part=" + mainPart +
+            " armorId=" + (armor != null ? armor.Id : 0) +
+            " mesh=" + (armorPiece != null ? armorPiece.name : "null") +
+            " container=" + (_containerTransform != null ? _containerTransform.name : "null"));
         Destroy(GetGameObject(slotFullPlater, mainPart));
 
         SetParent(armorPiece);

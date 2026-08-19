@@ -8,13 +8,13 @@ public class TargetData
 {
     [SerializeField] private Status _status;
     [SerializeField] private Stats _stats;
-    [SerializeField] private NetworkIdentityInterlude _identity;
+    [SerializeField] private EntityIdentity _identity;
     [SerializeField] private ObjectData _data;
     [SerializeField] private float _distance;
     private string hexColor;
     public Status Status { get { return _status; } }
     public Stats Stats { get { return _stats; } }
-    public NetworkIdentityInterlude Identity { get { return _identity; } }
+    public EntityIdentity Identity { get { return _identity; } }
     public ObjectData Data { get { return _data; } }
     public float Distance { get { return _distance; } set { _distance = value; } }
     public Entity GetEntity() { return _entity; }
@@ -36,7 +36,7 @@ public class TargetData
         if(_data != null)
         {
              _entity  = _data.ObjectTransform.GetComponent<Entity>();
-             _identity = _entity.IdentityInterlude;
+             _identity = _entity.Identity;
              _status = _entity.Status;
              _stats = _entity.Stats;
         }

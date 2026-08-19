@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 public class NewIdleState : StateBase
 {
@@ -71,7 +71,7 @@ public class NewIdleState : StateBase
         bool useAtkWait = (_stateMachine.Player != null && _stateMachine.Player.isAutoAttack) || targetDead;
         var animation = useAtkWait ? AnimationNames.ATK_WAIT : AnimationNames.WAIT;
 
-        // Skip only early external WAIT_RETURN (Die / skill Complete) while swing still plays.
+        // Skip only early external WAIT_RETURN (DieDto / skill Complete) while swing still plays.
         // SMB SwitchToIdle uses wall clock — animNorm often < 0.95 when it fires; must CrossFade.
         if (!fromCombatSmb && TryGetActiveCombatSwing(out _, out _))
         {
@@ -96,7 +96,7 @@ public class NewIdleState : StateBase
 
     private static bool IsCurrentTargetDead()
     {
-        if (PlayerEntity.Instance == null || World.Instance == null)
+        if (PlayerEntity.Instance == null || IncomingPacketActions.GameWorld == null)
         {
             return false;
         }
@@ -107,13 +107,13 @@ public class NewIdleState : StateBase
             return false;
         }
 
-        Entity target = World.Instance.GetEntityNoLockSync(targetId);
+        Entity target = IncomingPacketActions.GameWorld.GetEntityNoLockSync(targetId);
         return target == null || target.IsDead();
     }
 
     /// <summary>
     /// True while jatk/SpAtk (and similar) SMB swing is still playing below exit gate.
-    /// Prevents early WAIT_RETURN / Die from CrossFading atkwait mid-dual.
+    /// Prevents early WAIT_RETURN / DieDto from CrossFading atkwait mid-dual.
     /// </summary>
     private bool TryGetActiveCombatSwing(out string swingState, out float swingNorm)
     {
@@ -121,8 +121,8 @@ public class NewIdleState : StateBase
         swingNorm = 0f;
 
         int objectId = _stateMachine.GetObjectId();
-        string recent = AnimationManager.Instance != null
-            ? AnimationManager.Instance.GetCurrentAnimationName(objectId)
+        string recent = IncomingPacketActions.Animations != null
+            ? IncomingPacketActions.Animations.GetCurrentAnimationName(objectId)
             : null;
         if (!IsCombatSwingStateName(recent))
         {
@@ -130,7 +130,7 @@ public class NewIdleState : StateBase
         }
 
         IAnimationController controller = null;
-        if (AnimationManager.Instance is AnimationManager concrete)
+        if (IncomingPacketActions.Animations is AnimationManager concrete)
         {
             controller = concrete.GetPlayerController(objectId);
         }
@@ -180,28 +180,22 @@ public class NewIdleState : StateBase
 
     private void PlayAnimation(Animation animation)
     {
-        AnimationManager.Instance.PlayAnimation(_stateMachine.GetObjectId() , animation.ToString(), true);
+        IncomingPacketActions.Animations.PlayAnimation(_stateMachine.GetObjectId() , animation.ToString(), true);
     }
 
     private void PlayAnimationDeferred(Animation animation, bool fromCombatSmb = false)
     {
         int objectId = _stateMachine.GetObjectId();
         string animName = animation.ToString();
-        if (EventProcessor.Instance != null)
+        IncomingPacketActions.Queue(() =>
         {
-            EventProcessor.Instance.QueueEvent(() =>
+            // Re-check only for early external WAIT_RETURN; SMB wall-finish must CrossFade.
+            if (!fromCombatSmb && TryGetActiveCombatSwing(out _, out _))
             {
-                // Re-check only for early external WAIT_RETURN; SMB wall-finish must CrossFade.
-                if (!fromCombatSmb && TryGetActiveCombatSwing(out _, out _))
-                {
-                    return;
-                }
+                return;
+            }
 
-                AnimationManager.Instance.PlayAnimation(objectId, animName, true);
-            });
-            return;
-        }
-
-        PlayAnimation(animation);
+            IncomingPacketActions.Animations.PlayAnimation(objectId, animName, true);
+        });
     }
 }

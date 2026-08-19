@@ -1,10 +1,6 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
-using UnityEditor;
 using UnityEngine;
-using static StorageVariable;
-
 
 public class SystemMessageTable {
     private static SystemMessageTable _instance;
@@ -82,60 +78,6 @@ public class SystemMessageTable {
     public SystemMessageDat GetSystemMessage(int id) {
         SystemMessageDat message;
         _systemMessages.TryGetValue(id, out message);
-
-        if (IsReplaceS1(id))
-        {
-            message.Message = GetVariableText(message.OriginalMessage);
-        }
-
         return message;
-    }
-
-
-    private bool IsReplaceS1(int id)
-    {
-        if (id != (int)StorageVariable.MessageID.LEARNED_SKILL_S1)
-        {
-            return false;
-        }
-
-        return true;
-    }
-    private string GetVariableText(string text)
-    {
-        string finalStr = text;
-
-        if (text.IndexOf("$s1") != -1)
-        {
-            string name = "";
-            if (StorageVariable.getInstance().GetVariableByName("$s1") != null)
-            {
-                name = StorageVariable.getInstance().GetVariableByName("$s1").Name;
-            }
-
-            finalStr =  text.Replace("$s1", name).Trim();
-
-        }
-         if(text.IndexOf("$s2") != -1)
-        {
-            string name = "";
-            if (StorageVariable.getInstance().GetVariableByName("$s2") != null)
-            {
-                name = StorageVariable.getInstance().GetVariableByName("$s2").Name;
-            }
-
-            finalStr = finalStr.Replace("$s2", name).Trim();
-        }
-        if (text.IndexOf("$c1") != -1)
-        {
-            string name = "";
-            if (StorageVariable.getInstance().GetVariableByName("$c1") != null)
-            {
-                name = StorageVariable.getInstance().GetVariableByName("$c1").Name;
-            }
-
-            finalStr = finalStr.Replace("$c1", name).Trim();
-        }
-        return finalStr;
     }
 }

@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 /// <summary>
 /// Melee attack anim — linear rate over the FULL L2 attack cycle (timeAtk).
@@ -43,18 +43,22 @@ public class PlayerStateJAtk : StateMachineBehaviour
         _milestoneMask = 0;
         _lastAnimNormalized = 0f;
 
-        _fullCycleMs = GetFullAttackCycleMs(parameterName);
-        _startTime = Time.time;
-        _endTime = TimeUtils.ConvertMsToSec(_fullCycleMs);
-
+        int objectId = animator.GetInteger(AnimatorUtils.OBJECT_ID);
         float timeAnimation = (clipInfos != null && clipInfos.Length > 0 && clipInfos[0].clip != null)
             ? clipInfos[0].clip.length
             : 1f;
         _clipLengthSec = timeAnimation;
+        _fullCycleMs = GetFullAttackCycleMs(objectId, parameterName);
+        _startTime = Time.time;
+        _endTime = TimeUtils.ConvertMsToSec(_fullCycleMs);
 
         // Linear rate: play whole clip over full server attack cycle (not timeAtk/2).
-        _linearPatkSpd = timeAnimation * 1000f / Mathf.Max(1f, _fullCycleMs);
-        PlayerAnimationController.Instance.SetPAtkSpeed(_linearPatkSpd);
+        // AnimationManager applies to this animator's entity (PlayerEntity and UserEntity).
+        _linearPatkSpd = AnimationManager.Instance.ApplyLinearMeleePAtkSpeed(
+            objectId, parameterName, timeAnimation);
+
+        if (!AnimatorUtils.IsLocalPlayerAnimator(animator))
+            return;
 
         TrySubscribeSwordCollider();
 
@@ -132,6 +136,13 @@ public class PlayerStateJAtk : StateMachineBehaviour
 
     public override void OnStateUpdate(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
+        int objectId = animator.GetInteger(AnimatorUtils.OBJECT_ID);
+        if (_startTime >= 0f)
+            AnimationManager.Instance.SetPAtkSpeed(objectId, _linearPatkSpd);
+
+        if (!AnimatorUtils.IsLocalPlayerAnimator(animator))
+            return;
+
         float timeOut = Time.time - _startTime;
         _lastAnimNormalized = stateInfo.normalizedTime % 1f;
         LogAnimMilestones(timeOut);
@@ -147,9 +158,6 @@ public class PlayerStateJAtk : StateMachineBehaviour
         {
             SwordCollisionService.Instance.UpdateAttackProgress(entityId, TimeUtils.ConvertSecToMs(timeOut));
         }
-
-        // Keep constant rate — do not remould mid-swing.
-        PlayerAnimationController.Instance.SetPAtkSpeed(_linearPatkSpd);
     }
 
     private void LogDieTargetLatch(float elapsedSec)
@@ -199,6 +207,9 @@ public class PlayerStateJAtk : StateMachineBehaviour
 
     public override void OnStateExit(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
+        if (!AnimatorUtils.IsLocalPlayerAnimator(animator))
+            return;
+
         TryUnsubscribeSwordCollider();
 
         float elapsedMs = TimeUtils.ConvertSecToMs(Time.time - _startTime);
@@ -237,7 +248,7 @@ public class PlayerStateJAtk : StateMachineBehaviour
             $"swordHit={_isSwordHitLogged} lastDeny='{_lastSwitchDenyReason}' " +
             $"frame={Time.frameCount}");
 
-        // Do not clear IsAttack here — next Attack packet may already own the combo.
+        // Do not clear IsAttack here — next AttackDto packet may already own the combo.
     }
 
     private void SwitchToIdle(AnimatorStateInfo stateInfo)
@@ -291,7 +302,7 @@ public class PlayerStateJAtk : StateMachineBehaviour
             return false;
         }
 
-        // Despawned after Die → null; treat as dead so we still leave jatk.
+        // Despawned after DieDto → null; treat as dead so we still leave jatk.
         Entity entity = World.Instance.GetEntityNoLockSync(targetId);
         return entity == null || entity.IsDead();
     }
@@ -310,9 +321,6 @@ public class PlayerStateJAtk : StateMachineBehaviour
     private static bool IsDual(string animName) =>
         !string.IsNullOrEmpty(animName) &&
         animName.IndexOf("dual", System.StringComparison.OrdinalIgnoreCase) >= 0;
-
-    private bool IsBow(string animName) =>
-        !string.IsNullOrEmpty(animName) && animName.IndexOf("bow", System.StringComparison.OrdinalIgnoreCase) >= 0;
 
     private void TrySubscribeSwordCollider()
     {
@@ -376,33 +384,24 @@ public class PlayerStateJAtk : StateMachineBehaviour
     /// Full attack cycle ms (same as AttackTimingHelper / L2J calculateTimeBetweenAttacks).
     /// Bow: draw portion after subtracting flight time.
     /// </summary>
-    private float GetFullAttackCycleMs(string animName)
+    private float GetFullAttackCycleMs(int objectId, string animName)
     {
-        if (PlayerEntity.Instance == null || PlayerEntity.Instance.Stats == null)
-        {
-            return 1000f;
-        }
+        Entity entity = null;
+        if (World.Instance != null && objectId > 0)
+            entity = World.Instance.GetEntityNoLockSync(objectId);
+        if (entity == null)
+            entity = PlayerEntity.Instance;
 
-        float baseTimeAtkMs = CalcBaseParam.CalculateTimeL2j(PlayerEntity.Instance.Stats.BasePAtkSpeed);
-
-        if (IsBow(animName))
-        {
-            float targetDistance = PlayerEntity.Instance.TargetDistance();
-            float[] timeAndFlye = CalcBaseParam.CalculateAttackAndFlightTimes(targetDistance, baseTimeAtkMs);
-            return timeAndFlye[0];
-        }
-
-        // 1HS / default: full cycle. Melee Hit/SoulShot from AttackShot anim event.
-        return baseTimeAtkMs;
+        return AttackTimingHelper.ResolveAttackCycleMs(entity, animName);
     }
 
     private static int ResolvePlayerEntityId()
     {
-        if (PlayerEntity.Instance == null || PlayerEntity.Instance.IdentityInterlude == null)
+        if (PlayerEntity.Instance == null || PlayerEntity.Instance.Identity == null)
         {
             return 0;
         }
 
-        return PlayerEntity.Instance.IdentityInterlude.Id;
+        return PlayerEntity.Instance.Identity.Id;
     }
 }

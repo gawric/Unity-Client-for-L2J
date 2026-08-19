@@ -5,8 +5,7 @@ using static UnityEngine.EventSystems.EventTrigger;
 [System.Serializable]
 public class Entity : MonoBehaviour {
     [SerializeField] private bool _entityLoaded;
-    [SerializeField] private NetworkIdentity _identity;
-    [SerializeField] private NetworkIdentityInterlude _identityInterlude;
+    [SerializeField] private EntityIdentity _identityInterlude;
     [SerializeField] private Status _status;
     [SerializeField] private Stats _stats;
     [SerializeField] private Status _statusInterlude;
@@ -19,6 +18,13 @@ public class Entity : MonoBehaviour {
     [SerializeField] private EntityBodyType _bodyType = EntityBodyType.Humanoid;
     
     public Animator Animator { get; private set; }
+
+    public bool HasAnimator()
+    {
+        if (Animator == null)
+            Animator = GetComponentInChildren<Animator>(true);
+        return Animator != null && Animator.runtimeAnimatorController != null;
+    }
     [Header("Combat")]
     [SerializeField] private int _targetId;
     [SerializeField] private Transform _target;
@@ -28,7 +34,8 @@ public class Entity : MonoBehaviour {
     [SerializeField] private long _stopAutoAttackTime;
     [SerializeField] private long _startAutoAttackTime;
 
-    private MonsterStateMachine _targetStateMachine;
+    private readonly EntityActionSlot _actionSlot = new EntityActionSlot();
+    public EntityActionSlot ActionSlot { get { return _actionSlot; } }
 
     protected MagicCastData _castData;
     protected NetworkAnimationController _networkAnimationReceive;
@@ -41,9 +48,7 @@ public class Entity : MonoBehaviour {
     public Status Status { get => _status; set => _status = value; }
     public Stats Stats { get => _stats; set => _stats = value; }
     public Appearance Appearance { get => _appearance; set { _appearance = value; } }
-    public NetworkIdentity Identity { get => _identity; set => _identity = value; }
-
-    public NetworkIdentityInterlude IdentityInterlude { get => _identityInterlude; set => _identityInterlude = value; }
+    public EntityIdentity Identity { get => _identityInterlude; set => _identityInterlude = value; }
 
     public bool IsSoulshotCharged {get;set;}
     public int TargetId { get => _targetId; set => _targetId = value; }
@@ -61,6 +66,7 @@ public class Entity : MonoBehaviour {
         }
     }
     public Transform AttackTarget { get { return _attackTarget; } set { _attackTarget = value; } }
+    public bool InCombat { get; set; }
     public long StopAutoAttackTime { get { return _stopAutoAttackTime; } }
     public long StartAutoAttackTime { get { return _startAutoAttackTime; } }
     public CharacterRace Race { get { return _race; } set { _race = value; } }
@@ -160,29 +166,11 @@ public class Entity : MonoBehaviour {
             Debug.LogWarning("Gear script is not attached to entity");
             return;
         }
-        if (_appearance.LHand != 0) {
-            _gear.EquipWeapon(_appearance.LHand, true);
-        }
-        if (_appearance.RHand != 0) {
-            var weapon =  WeapongrpTable.Instance.GetWeapon(_appearance.RHand);
-
-            if(weapon != null)
-            {
-                if(weapon.WeaponType == WeaponType.dual)
-                {
-                    _gear.EquipLeftAndRightWeapon(_appearance.RHand);
-                    return;
-                }
-
-            }
-            _gear.EquipWeapon(_appearance.RHand, false);
-
-        }
+        _gear.SyncEquippedWeapons(_appearance.RHand, _appearance.LHand);
     }
 
     /* Notify server that entity got attacked */
     public void InflictAttack(AttackType attackType) {
-        GameClient.Instance.ClientPacketHandler.InflictAttack(_identity.Id, attackType);
     }
 
     protected virtual void OnDeath() {
@@ -287,9 +275,9 @@ public class Entity : MonoBehaviour {
        // return StatsConverter.Instance.ConvertStat(Stat.SPEED, speed);
     }
    
-    public bool IsDead() {
+    public virtual bool IsDead() {
         if (_dead) return true;
-        return _status.GetHp() <= 0;
+        return _status != null && _status.GetHp() <= 0;
     }
 
 
@@ -301,7 +289,7 @@ public class Entity : MonoBehaviour {
 
     
 
-    public virtual void UpdateWaitType(ChangeWaitTypePacket.WaitType moveType)
+    public virtual void UpdateWaitType(WaitType moveType)
     {
 
     }
@@ -336,7 +324,16 @@ public class Entity : MonoBehaviour {
 
     public void UnequipAndDetermineType(ItemInstance item)
     {
-        if (_gear is not UserGear usergear) return;
+        if (_gear is not UserGear usergear)
+        {
+            GearFlowLog.Warn("Unequip skip gear not UserGear " + GearFlowLog.Entity(this) +
+                " gear=" + (_gear != null ? _gear.GetType().Name : "null"));
+            return;
+        }
+
+        GearFlowLog.Info("UnequipAndDetermineType " + GearFlowLog.Entity(this) +
+            " itemId=" + (item != null ? item.ItemId : 0) +
+            " cat=" + (item != null ? item.Category.ToString() : "null"));
 
         switch (item.Category)
         {
@@ -359,7 +356,17 @@ public class Entity : MonoBehaviour {
 
     public void EquipAndDetermineType(ItemInstance item, int objectId)
     {
-        if (_gear is not UserGear usergear) return;
+        if (_gear is not UserGear usergear)
+        {
+            GearFlowLog.Warn("Equip skip gear not UserGear " + GearFlowLog.Entity(this) +
+                " gear=" + (_gear != null ? _gear.GetType().Name : "null"));
+            return;
+        }
+
+        GearFlowLog.Info("EquipAndDetermineType " + GearFlowLog.Entity(this) +
+            " itemId=" + (item != null ? item.ItemId : 0) +
+            " cat=" + (item != null ? item.Category.ToString() : "null") +
+            " body=" + (item != null ? item.BodyPart.ToString() : "null"));
 
         switch (item.Category)
         {
@@ -372,6 +379,8 @@ public class Entity : MonoBehaviour {
                 break;
 
             default:
+                GearFlowLog.Warn("EquipAndDetermineType unhandled cat=" + item.Category +
+                    " itemId=" + item.ItemId + " " + GearFlowLog.Entity(this));
                 Debug.LogWarning($"Entity->EquipAndDetermineType->Unhandled item category: {item.Category}");
                 break;
         }

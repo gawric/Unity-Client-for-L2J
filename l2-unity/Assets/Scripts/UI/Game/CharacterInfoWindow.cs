@@ -166,10 +166,10 @@ public class CharacterInfoWindow : L2PopupWindow
     {
         yield return new WaitForEndOfFrame();
 
-        var stats = (PlayerInterludeStats)player.Stats;
-        var status = (PlayerStatusInterlude)player.Status;
+        var stats = (PlayerStats)player.Stats;
+        var status = (PlayerStatus)player.Status;
 
-        UpdatePlayerInterlude(player.IdentityInterlude, stats);
+        UpdatePlayerInterlude(player.Identity, stats);
 
         UpdateStatsInterlude(stats);
 
@@ -180,7 +180,7 @@ public class CharacterInfoWindow : L2PopupWindow
         UpdateSocialInterlude(stats.PvpKills, stats.PkKills);
     }
 
-    private void UpdatePlayerInterlude(NetworkIdentityInterlude identity, PlayerInterludeStats stats)
+    private void UpdatePlayerInterlude(EntityIdentity identity, PlayerStats stats)
     {
         _nameLabel.text = identity.Name;
         _classLabel.text = ((CharacterClass)(identity.PlayerClass)).ToString();
@@ -189,7 +189,7 @@ public class CharacterInfoWindow : L2PopupWindow
     }
 
 
-    private void UpdateStatsInterlude(PlayerInterludeStats stats)
+    private void UpdateStatsInterlude(PlayerStats stats)
     {
         _strLabel.text = stats.Str.ToString();
         _intLabel.text = stats.Int.ToString();
@@ -200,7 +200,7 @@ public class CharacterInfoWindow : L2PopupWindow
     }
 
 
-    private void UpdateCombatValuesInterlude(PlayerInterludeStats stats)
+    private void UpdateCombatValuesInterlude(PlayerStats stats)
     {
         _patkLabel.text = stats.PAtk.ToString();
         _pdefLabel.text = stats.PDef.ToString();
@@ -229,7 +229,7 @@ public class CharacterInfoWindow : L2PopupWindow
 
     
 
-    private void UpdateBarsInterlude(PlayerStatusInterlude status, PlayerInterludeStats stats)
+    private void UpdateBarsInterlude(PlayerStatus status, PlayerStats stats)
     {
         _hpLabel.text = $"{status.GetHp()}/{stats.MaxHp}";
         _mpLabel.text = $"{status.GetMp()}/{stats.MaxMp}";

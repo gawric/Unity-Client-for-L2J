@@ -5,20 +5,10 @@ using static ModelTable;
 public class CharacterDefaultEquipment
 {
 
-    public static void EquipStarterGear(UserGear gear, PlayerInterludeAppearance appearance)
+    public static void EquipStarterGear(UserGear gear, PlayerAppearance appearance)
     {
 
-        var armorSlots = new[] {
-        (appearance.Chest, ItemSlot.chest, ItemTable.NAKED_CHEST),
-        (appearance.Legs, ItemSlot.legs, ItemTable.NAKED_LEGS),
-        (appearance.Gloves, ItemSlot.gloves, ItemTable.NAKED_GLOVES),
-        (appearance.Feet, ItemSlot.feet, ItemTable.NAKED_BOOTS)
-    };
-
-        foreach (var (itemId, slot, nakedId) in armorSlots)
-        {
-            gear.EquipArmor(itemId != 0 ? itemId : nakedId, slot);
-        }
+        gear.SyncEquippedArmor(appearance);
 
         if (appearance.LHand != 0) gear.EquipWeapon(appearance.LHand, true);
         if (appearance.RHand != 0) gear.EquipWeapon(appearance.RHand, false);

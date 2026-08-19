@@ -4,9 +4,17 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using VContainer;
 
 public class PlayerShortcuts : MonoBehaviour
 {
+    [Inject] GameClient _gameClient;
+    [Inject] PlayerInventory _inventory;
+
+    private GameClient Game
+    {
+        get { return _gameClient != null ? _gameClient : IncomingPacketActions.Game; }
+    }
     public const int MAXIMUM_SHORTCUTS_PER_BAR = 12;
     public const int MAXIMUM_SKILLBAR_COUNT = 5;
     private int[] _pageMap;
@@ -58,7 +66,7 @@ public class PlayerShortcuts : MonoBehaviour
             {
                 if (_pageMap[i] == shortcut.Page)
                 {
-                    bool shortcutUsed = InputManager.Instance.SkillbarInputs[i, shortcut.Slot];
+                    bool shortcutUsed = IncomingPacketActions.Input.SkillbarInputs[i, shortcut.Slot];
                     if (shortcutUsed)
                     {
                         UseShortcut(shortcut);
@@ -70,7 +78,7 @@ public class PlayerShortcuts : MonoBehaviour
 
     public string GetKeybindForShortcut(int skillbarId, int slot)
     {
-        InputAction action = InputManager.Instance.SkillbarActions[skillbarId, slot];
+        InputAction action = IncomingPacketActions.Input.SkillbarActions[skillbarId, slot];
         return action.GetBindingDisplayString(0).ToUpper();
     }
 
@@ -80,13 +88,15 @@ public class PlayerShortcuts : MonoBehaviour
         switch (shortcut.Type)
         {
             case Shortcut.TYPE_ITEM:
-                PlayerInventory.Instance.UseItem(shortcut.Id , true);
+                PlayerInventory inventory = _inventory != null ? _inventory : IncomingPacketActions.Inventory;
+                if (inventory != null)
+                    inventory.UseItem(shortcut.Id, true);
                 break;
             case Shortcut.TYPE_ACTION:
-                PlayerActions.Instance.UseAction((ActionType)shortcut.Id);
+                IncomingPacketActions.Actions.UseAction((ActionType)shortcut.Id);
                 break;
             case Shortcut.TYPE_SKILL:
-                PlayerActions.Instance.UseSkill(shortcut.Id);
+                IncomingPacketActions.Actions.UseSkill(shortcut.Id);
                 break;
             default:
                 break;
@@ -173,9 +183,9 @@ public class PlayerShortcuts : MonoBehaviour
         }
         
         //GameClient.Instance.ClientPacketHandler.RequestAddShortcut(type, id, slot);
-        var sendPaket = CreatorPacketsUser.CreateRegShortCut(type , slot , id , level);
-        bool enable = GameClient.Instance.IsCryptEnabled();
-        SendGameDataQueue.Instance().AddItem(sendPaket, enable, enable);
+        GameClient game = Game;
+        if (game != null)
+            game.Send(new RequestShortCutRegCommand(type, slot, id, level));
     }
 
     // Shortcut dragged within bar
@@ -194,16 +204,15 @@ public class PlayerShortcuts : MonoBehaviour
 
 
         Debug.Log("Event Reuqets Add ShrtCut 2 ");
-        var sendPaket = CreatorPacketsUser.CreateRegShortCut(oldShortcut.Type, newSlot , oldShortcut.Id, 0);
-        bool enable = GameClient.Instance.IsCryptEnabled();
-        SendGameDataQueue.Instance().AddItem(sendPaket, enable, enable);
+        GameClient game = Game;
+        if (game != null)
+            game.Send(new RequestShortCutRegCommand(oldShortcut.Type, newSlot, oldShortcut.Id, 0));
 
         // Swap slots
         if (newShortcut != null)
         {
-            var sendPaket1 = CreatorPacketsUser.CreateRegShortCut(newShortcut.Type, oldSlot, newShortcut.Id, 0);
-            bool enable1 = GameClient.Instance.IsCryptEnabled();
-            SendGameDataQueue.Instance().AddItem(sendPaket1, enable1, enable1);
+            if (game != null)
+                game.Send(new RequestShortCutRegCommand(newShortcut.Type, oldSlot, newShortcut.Id, 0));
         }
         else
         {
@@ -220,9 +229,9 @@ public class PlayerShortcuts : MonoBehaviour
 
         Debug.Log("Нужно реализовать удаление shortcut");
         //GameClient.Instance.ClientPacketHandler.RequestRemoveShortcut(oldSlot);
-        var sendPaket = CreatorPacketsUser.CreateDestroyShortCut(oldSlot);
-        bool enable = GameClient.Instance.IsCryptEnabled();
-        SendGameDataQueue.Instance().AddItem(sendPaket, enable, enable);
+        GameClient game = Game;
+        if (game != null)
+            game.Send(new RequestShortCutDelCommand(oldSlot));
     }
 
    

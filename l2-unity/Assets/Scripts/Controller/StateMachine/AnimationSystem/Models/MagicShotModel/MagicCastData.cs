@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 public class MagicCastData
 {
@@ -53,7 +53,7 @@ public class MagicCastData
     public float shotEventTime;
     public float serverTimeToShoot;
 
-    /// <summary>Object id цели из пакета MagicSkillUse (приоритетнее PlayerEntity.TargetId для VFX).</summary>
+    /// <summary>Object id цели из пакета MagicSkillUseDto (приоритетнее PlayerEntity.TargetId для VFX).</summary>
     public int TargetObjectId;
 
     /// <summary>Окно от старта каста до момента выстрела: номинал минус penalty или минус фиксированный offset.</summary>

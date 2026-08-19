@@ -1,14 +1,26 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using UnityEngine;
+using VContainer;
 
 public class PositionValidationController : MonoBehaviour
 {
+    [Inject] World _world;
+
+    private World GameWorld
+    {
+        get { return _world != null ? _world : World.Instance; }
+    }
+
+    private PlayerController Player
+    {
+        get { return PlayerController.Instance; }
+    }
     //<197 unit - он передвигается пешком(игнорирует если он двигается)
     //>197 unit он прыгает останавливая движение и возвращая его когда будет перемещен
 
-    private List<ValidateLocation> _validateList;
-    private List<ValidateLocation> _validateRemove;
-    private List<CharMoveToLocation> _validateInitPosition;
+    private List<ValidateLocationDto> _validateList;
+    private List<ValidateLocationDto> _validateRemove;
+    private List<CharMoveToLocationDto> _validateInitPosition;
     private bool validTest = false;
     //197 unit | 3.743f metr
     private float _trigger = 3.743f;
@@ -21,9 +33,9 @@ public class PositionValidationController : MonoBehaviour
         if (_instance == null)
         {
             _instance = this;
-            _validateList = new List<ValidateLocation>();
-            _validateRemove = new List<ValidateLocation>();
-            _validateInitPosition = new List<CharMoveToLocation>();
+            _validateList = new List<ValidateLocationDto>();
+            _validateRemove = new List<ValidateLocationDto>();
+            _validateInitPosition = new List<CharMoveToLocationDto>();
         }
         else
         {
@@ -43,11 +55,14 @@ public class PositionValidationController : MonoBehaviour
 
             for (int i = 0; i < _validateList.Count; i++)
             {
-                ValidateLocation validateLocation = _validateList[i];
+                ValidateLocationDto validateLocation = _validateList[i];
 
                 if (validateLocation != null)
                 {
-                    Entity entity = World.Instance.GetEntityNoLockSync(validateLocation.ObjectId);
+                    World world = GameWorld;
+                    if (world == null)
+                        continue;
+                    Entity entity = world.GetEntityNoLockSync(validateLocation.ObjectId);
 
                     if (entity != null && !entity.IsDead())
                     {
@@ -58,10 +73,26 @@ public class PositionValidationController : MonoBehaviour
 
                         if (distance > 0.15f && distance < _trigger)
                         {
+                            EntityActionCombatLog.LogCiPawn(entity,
+                                "VL StartWalk nick=" + EntityActionCombatLog.NameOf(entity) +
+                                " d=" + distance.ToString("F2") +
+                                " action=" + entity.ActionSlot.Action +
+                                " pos=" + EntityActionCombatLog.Vec(activePosition) +
+                                " vl=" + EntityActionCombatLog.Vec(newPosition) +
+                                " pawn=" + EntityActionCombatLog.Describe(EntityActionCombatLog.PawnOf(entity)));
                             StartWalk(entity, newPosition);
                         }
                         else if (distance > _trigger)
                         {
+                            EntityActionCombatLog.LogCiPawn(entity,
+                                "VL JUMP nick=" + EntityActionCombatLog.NameOf(entity) +
+                                " d=" + distance.ToString("F2") +
+                                " action=" + entity.ActionSlot.Action +
+                                " type=" + entity.GetType().Name +
+                                " pos=" + EntityActionCombatLog.Vec(activePosition) +
+                                " vl=" + EntityActionCombatLog.Vec(newPosition) +
+                                " pawn=" + EntityActionCombatLog.Describe(EntityActionCombatLog.PawnOf(entity)) +
+                                " " + EntityActionCombatLog.ClassifyDest(newPosition, EntityActionCombatLog.PawnOf(entity)));
                             Jump(entity, newPosition);
                         }
 
@@ -72,7 +103,7 @@ public class PositionValidationController : MonoBehaviour
                     {
                         _validateRemove.Add(validateLocation);
                     }
-                    //Debug.Log("Position Validate Controller---> " + entity.IdentityInterlude.Name);
+                    //Debug.Log("Position Validate Controller---> " + entity.Identity.Name);
 
                 }
             }
@@ -98,29 +129,33 @@ public class PositionValidationController : MonoBehaviour
             NewCalcGravityMonster(monsterEntity, newPosition);
             monsterEntity.ShowObject();
             
-            var stateMachine = monsterEntity.GetStateMachine();
-            if (stateMachine != null) ReStartAnimation(monsterEntity.IdentityInterlude.Id , stateMachine);
+            ReplayMoveIfNeeded(monsterEntity);
 
         }else if (entity.GetType() == typeof(PlayerEntity))
         {
-            int objectId = entity.IdentityInterlude.Id;
-            Dictionary<string, float> floatValues  = AnimationManager.Instance.PlayerGetAllFloat(objectId);
+            int objectId = entity.Identity.Id;
+            Dictionary<string, float> floatValues  = IncomingPacketActions.Animations.PlayerGetAllFloat(objectId);
             entity.HideObject();
-            NewCalcGravity(PlayerController.Instance , newPosition);
+            NewCalcGravity(Player, newPosition);
             entity.ShowObject();
 
-            AnimationManager.Instance.PlayerSetAllFloat(objectId , floatValues);
+            IncomingPacketActions.Animations.PlayerSetAllFloat(objectId , floatValues);
             ReStartAnimationPlayer(PlayerStateMachine.Instance);
 
         }else if (entity.GetType() == typeof(NpcEntity))
         {
             NpcEntity npcEntity = (NpcEntity)entity;
             npcEntity.HideObject();
-            //NewCalcGravityMonster(npcEntity, newPosition);
+            NewCalcGravityNpc(npcEntity, newPosition);
             npcEntity.ShowObject();
 
-            var stateMachine = npcEntity.GetStateMachine();
-            if (stateMachine != null) ReStartAnimationNpc(npcEntity.IdentityInterlude.Id, stateMachine);
+            ReplayMoveIfNeeded(npcEntity);
+        }
+        else if (entity is UserEntity)
+        {
+            EntityActionCombatLog.LogCiPawn(entity,
+                "VL JUMP UserEntity NO_HANDLER nick=" + EntityActionCombatLog.NameOf(entity) +
+                " dest=" + EntityActionCombatLog.Vec(newPosition));
         }
     }
 
@@ -141,7 +176,7 @@ public class PositionValidationController : MonoBehaviour
 
     private void ReStartAnimationPlayer(PlayerStateMachine stateMachine)
     {
-        if (PlayerController.Instance.RunningToDestination)
+        if (Player != null && Player.RunningToDestination)
         {
             if (stateMachine.State == PlayerState.WALKING) stateMachine.ChangeState(PlayerState.WALKING);
             if (stateMachine.State == PlayerState.RUNNING) stateMachine.ChangeState(PlayerState.RUNNING);
@@ -149,44 +184,41 @@ public class PositionValidationController : MonoBehaviour
         }
     }
 
-    private void ReStartAnimation(int mObjId , MonsterStateMachine stateMachine)
+    private void ReplayMoveIfNeeded(Entity entity)
     {
-        if (MoveAllCharacters.Instance.IsMoving(mObjId))
-        {
-            if (stateMachine.State == MonsterState.WALKING) stateMachine.ChangeState(MonsterState.WALKING);
-            if (stateMachine.State == MonsterState.RUNNING) stateMachine.ChangeState(MonsterState.RUNNING);
-            stateMachine.NotifyEvent(Event.MOVE_TO);
-        }
-    }
-
-    private void ReStartAnimationNpc(int mObjId, NpcStateMachine stateMachine)
-    {
-        if (MoveAllCharacters.Instance.IsMoving(mObjId))
-        {
-            if (stateMachine.State == NpcState.WALKING) stateMachine.ChangeState(NpcState.WALKING);
-            if (stateMachine.State == NpcState.RUNNING) stateMachine.ChangeState(NpcState.RUNNING);
-            stateMachine.NotifyEvent(Event.MOVE_TO);
-        }
+        if (entity == null || entity.Identity == null || MoveAllCharacters.Instance == null)
+            return;
+        if (!MoveAllCharacters.Instance.IsMoving(entity.Identity.Id))
+            return;
+        EntityActionVisual.StartMove(entity, !entity.Running);
     }
     private void StartWalk(Entity entity , Vector3 newPosition)
     {
         if (entity.GetType() == typeof(MonsterEntity))
         {
             MonsterEntity monsterEntity = (MonsterEntity)entity;
-            var stateMachine = monsterEntity.GetStateMachine();
-            if (stateMachine == null || (stateMachine.State == MonsterState.WALKING || stateMachine.State == MonsterState.RUNNING)) return;
-            stateMachine.ChangeIntention(MonsterIntention.INTENTION_MOVE_TO , newPosition);
+            if (monsterEntity.ActionSlot.Action == EntityActionKind.Move)
+                return;
+            if (EntityActionMachine.Instance != null)
+                EntityActionMachine.Instance.Set(monsterEntity, EntityActionKind.Move, newPosition);
 
         }else if (entity.GetType() == typeof(NpcEntity))
         {
             NpcEntity npcEntity = (NpcEntity)entity;
-            var stateMachine = npcEntity.GetStateMachine();
-            if (stateMachine == null || (stateMachine.State == NpcState.WALKING || stateMachine.State == NpcState.RUNNING)) return;
-            stateMachine.ChangeIntention(NpcIntention.INTENTION_MOVE_TO, newPosition);
+            if (npcEntity.ActionSlot.Action == EntityActionKind.Move)
+                return;
+            if (EntityActionMachine.Instance != null)
+                EntityActionMachine.Instance.Set(npcEntity, EntityActionKind.Move, newPosition);
+        }
+        else if (entity is UserEntity)
+        {
+            EntityActionCombatLog.LogCiPawn(entity,
+                "VL StartWalk UserEntity NO_HANDLER nick=" + EntityActionCombatLog.NameOf(entity) +
+                " dest=" + EntityActionCombatLog.Vec(newPosition));
         }
 
     }
-    public void AddValidateLocation(ValidateLocation validateLocation)
+    public void AddValidateLocation(ValidateLocationDto validateLocation)
     {
         if (!_validateList.Contains(validateLocation))
         {
@@ -194,7 +226,7 @@ public class PositionValidationController : MonoBehaviour
         }
     }
 
-    public void AddInitPosition(CharMoveToLocation location)
+    public void AddInitPosition(CharMoveToLocationDto location)
     {
         _validateInitPosition.Add(location);
     }
@@ -209,8 +241,11 @@ public class PositionValidationController : MonoBehaviour
         {
             for (int i = 0; i < _validateInitPosition.Count; i++)
             {
-                CharMoveToLocation location =  _validateInitPosition[i];
-                Entity entity = World.Instance.GetEntityNoLockSync(location.ObjId);
+                CharMoveToLocationDto location =  _validateInitPosition[i];
+                World world = GameWorld;
+                if (world == null)
+                    continue;
+                Entity entity = world.GetEntityNoLockSync(location.ObjId);
 
                 if(entity != null)
                 {

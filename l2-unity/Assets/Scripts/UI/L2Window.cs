@@ -101,6 +101,7 @@ public abstract class L2Window : MonoBehaviour
             DisableEventOnOver(_windowEle);
             if (_isWindowHidden)
             {
+                _windowEle.style.display = DisplayStyle.None;
                 _mouseOverDetection.Disable();
             }
 

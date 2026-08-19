@@ -18,6 +18,7 @@ public class L2GameUI : L2UI
         if (_instance == null)
         {
             _instance = this;
+            DiBootstrap.EnsureGameScope();
         }
         else
         {
@@ -244,6 +245,13 @@ public class L2GameUI : L2UI
             TradeWindow.Instance.AddWindow(_rootVisualContainer);
             TradeWindow.Instance.HideWindow();
         }
+    }
+
+    public bool AreWindowsReady()
+    {
+        return UILoaded
+            && ClanWindow.Instance != null && ClanWindow.Instance.IsReady
+            && SkillListWindow.Instance != null && SkillListWindow.Instance.IsReady;
     }
 
     public void EnableMouse()

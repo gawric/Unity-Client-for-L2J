@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
+using VContainer;
 
 public class QuestListWindow : L2PopupWindow
 {
@@ -9,6 +10,13 @@ public class QuestListWindow : L2PopupWindow
     private VisualElement _content;
     private ICreatorTables _creatorTableWindows;
     public static QuestListWindow Instance { get { return _instance; } }
+
+    [Inject] QuestNameTable _questNames;
+
+    private QuestNameTable QuestNames
+    {
+        get { return _questNames != null ? _questNames : QuestNameTable.Instance; }
+    }
 
     private void Awake()
     {
@@ -46,7 +54,7 @@ public class QuestListWindow : L2PopupWindow
 
         _creatorTableWindows.InitTable(_content);
         _creatorTableWindows.LoadAsset(LoadAsset);
-        List<QuestName> listQuest = QuestNameTable.Instance.GetQuestsWithLastSubtask();
+        List<QuestName> listQuest = QuestNames.GetQuestsWithLastSubtask();
         ForEachQuest(listQuest, _creatorTableWindows);
 
 

@@ -414,9 +414,6 @@ PrefabInstance:
       addedObject: {fileID: 56833143339352812}
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: ed078e18a5c407147839139075a05559, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 1186886100513359367}
-    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: ed078e18a5c407147839139075a05559, type: 3}
-      insertIndex: -1
       addedObject: {fileID: 3088177361645624235}
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: ed078e18a5c407147839139075a05559, type: 3}
       insertIndex: -1
@@ -556,20 +553,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _entityLoaded: 0
-  _identity:
-    _entityType: 3
-    _id: 0
-    _name: 
-    _title: 
-    _titleColor: 9CE8A9FF
-    _resetTick: 0
-    _npcId: 0
-    _npcClass: 
-    _playerClass: 0
-    _isMage: 0
-    _position: {x: 0, y: 0, z: 0}
-    _heading: 0
-    _owned: 0
   _identityInterlude:
     _entityType: 0
     _id: 0
@@ -605,6 +588,7 @@ MonoBehaviour:
   _dead: 0
   _race: 0
   _raceId: 0
+  _bodyType: 0
   _targetId: 0
   _target: {fileID: 0}
   _attackTarget: {fileID: 0}

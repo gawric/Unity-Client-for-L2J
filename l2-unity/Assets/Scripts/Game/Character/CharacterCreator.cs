@@ -1,17 +1,35 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Drawing;
-using Unity.Mathematics;
+﻿using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.ProBuilder;
-using static ModelTable;
+using VContainer;
 
 public class CharacterCreator : MonoBehaviour
 {
     [SerializeField] private GameObject[] pawns = new GameObject[26];
     [SerializeField] private int currentPawnIndex = -1;
     [SerializeField] private GameObject currentPawn = null;
+
+    [Inject] private ModelTable _models;
+    [Inject] private CharacterBuilder _characterBuilder;
+    [Inject] private LogongrpTable _logonGrps;
+
+    private ModelTable Models
+    {
+        get { return _models != null ? _models : ModelTable.Instance; }
+    }
+
+    private CharacterBuilder Builder
+    {
+        get { return _characterBuilder != null ? _characterBuilder : CharacterBuilder.Instance; }
+    }
+
+    private List<Logongrp> LogonGrps
+    {
+        get
+        {
+            LogongrpTable table = _logonGrps != null ? _logonGrps : LogongrpTable.Instance;
+            return table.LogonGrps;
+        }
+    }
 
     private bool _pawnRotating = false;
     private bool _pawnRotatingRight = true;
@@ -47,7 +65,7 @@ public class CharacterCreator : MonoBehaviour
     }
 
     public void SpawnAllPawns() {
-        List<Logongrp> pawnData = LogongrpTable.Instance.LogonGrps;
+        List<Logongrp> pawnData = LogonGrps;
 
         _pawnContainer = new GameObject("Pawns");
 
@@ -62,7 +80,7 @@ public class CharacterCreator : MonoBehaviour
     {
         _pawnContainer = new GameObject("Pawns");
 
-        List<Logongrp> pawnData = LogongrpTable.Instance.LogonGrps;
+        List<Logongrp> pawnData = LogonGrps;
         for (var i = 8; i < pawnData.Count; i++)
         {
             Logongrp logonGrp = pawnData[i];
@@ -77,7 +95,7 @@ public class CharacterCreator : MonoBehaviour
     }
 
     public GameObject SpawnPawnWithAppearance(CharacterRaceAnimation raceId , int id , PlayerAppearance appearance) {
-        List<Logongrp> pawnData = LogongrpTable.Instance.LogonGrps;
+        List<Logongrp> pawnData = LogonGrps;
 
         GameObject pawnObject = CreatePawn(raceId, appearance);
         PlacePawn(pawnObject, pawnData[id], "Pawn" + id, _pawnContainer);
@@ -87,7 +105,7 @@ public class CharacterCreator : MonoBehaviour
     }
 
     public void SpawnPawnWithId(int id) {
-        Logongrp pawnData = LogongrpTable.Instance.LogonGrps[id];
+        Logongrp pawnData = LogonGrps[id];
         GameObject pawnObject = CreatePawn(pawnData.RaceId, new PlayerAppearance());
         if (pawnObject == null) {
             pawnObject = FallbackPawn();
@@ -97,7 +115,7 @@ public class CharacterCreator : MonoBehaviour
     }
 
     public CharacterRaceAnimation GetRaceAnimator(int id) {
-        return LogongrpTable.Instance.LogonGrps[id].RaceId;
+        return LogonGrps[id].RaceId;
     }
 
     public void SelectPawn(string race, string pawnClass, string gender) {
@@ -145,7 +163,7 @@ public class CharacterCreator : MonoBehaviour
     }
     
     public GameObject CreatePawn(CharacterRaceAnimation raceId, PlayerAppearance appearance) {
-        GameObject pawnObject = CharacterBuilder.Instance.BuildCharacterBase(raceId, appearance, EntityType.Pawn);
+        GameObject pawnObject = Builder.BuildCharacterBase(raceId, appearance, EntityType.Pawn);
         if (pawnObject == null) {
             // m0nster: временная заглушка, пока не реализованы все персонажи
             return null;
@@ -154,30 +172,7 @@ public class CharacterCreator : MonoBehaviour
         UserGear gear = pawnObject.GetComponent<UserGear>();
 
         gear.Initialize(-1, raceId);
-
-        if (appearance.Chest != 0) {
-            gear.EquipArmor(appearance.Chest, ItemSlot.chest);
-        } else {
-            gear.EquipArmor(ItemTable.NAKED_CHEST, ItemSlot.chest);
-        }
-
-        if (appearance.Legs != 0) {
-            gear.EquipArmor(appearance.Legs, ItemSlot.legs);
-        } else {
-            gear.EquipArmor(ItemTable.NAKED_LEGS, ItemSlot.legs);
-        }
-
-        if (appearance.Gloves != 0) {
-            gear.EquipArmor(appearance.Gloves, ItemSlot.gloves);
-        } else {
-            gear.EquipArmor(ItemTable.NAKED_GLOVES, ItemSlot.gloves);
-        }
-
-        if (appearance.Feet != 0) {
-            gear.EquipArmor(appearance.Feet, ItemSlot.feet);
-        } else {
-            gear.EquipArmor(ItemTable.NAKED_BOOTS, ItemSlot.feet);
-        }
+        gear.SyncEquippedArmor(appearance);
 
         if (appearance.LHand != 0) {
             gear.EquipWeapon(appearance.LHand, true);
@@ -189,9 +184,9 @@ public class CharacterCreator : MonoBehaviour
         return pawnObject;
     }
 
-    public GameObject CreatePawnInterlude(CharacterRaceAnimation raceId, PlayerInterludeAppearance appearance)
+    public GameObject CreatePawnInterlude(CharacterRaceAnimation raceId, PlayerAppearance appearance)
     {
-        GameObject pawnObject = CharacterBuilder.Instance.BuildCharacterBaseInterlude(raceId, appearance, EntityType.Pawn);
+        GameObject pawnObject = Builder.BuildCharacterBaseInterlude(raceId, appearance, EntityType.Pawn);
         if (pawnObject == null) {
             // m0nster: временная заглушка, пока не реализованы все персонажи
             return null;
@@ -215,7 +210,7 @@ public class CharacterCreator : MonoBehaviour
         animController.Initialize();
         // Unarmed starter → wait_hand; armed → wait_1HS / wait_bow / …
         string waitState = AnimationNames.WAIT.ToString() + gear.WeaponAnim;
-        AnimationManager.Instance.PlayLobbyLocomotion(animController, waitState);
+        IncomingPacketActions.Animations.PlayLobbyLocomotion(animController, waitState);
     }
 
     public void UpdatePawnPosAndRot(GameObject pawnObject, Logongrp pawnData) {
@@ -240,7 +235,7 @@ public class CharacterCreator : MonoBehaviour
         if (pawnObject != null)
         {
             UserGear gear = pawnObject.GetComponent<UserGear>();
-            GameObject face = Instantiate(ModelTable.Instance.GetFace(raceId, _face));
+            GameObject face = Instantiate(Models.GetFace(raceId, _face));
             gear.EquipFace(face);
         }
     }
@@ -251,8 +246,8 @@ public class CharacterCreator : MonoBehaviour
 
         if (pawnObject != null)
         {
-            var hair1M = ModelTable.Instance.GetHair(raceId, hairStyle, hairColor, false);
-            var hair2M = ModelTable.Instance.GetHair(raceId, hairStyle, hairColor, true);
+            var hair1M = Models.GetHair(raceId, hairStyle, hairColor, false);
+            var hair2M = Models.GetHair(raceId, hairStyle, hairColor, true);
             if(hair1M != null & hair2M != null)
             {
                 GameObject hair1 = Instantiate(hair1M);

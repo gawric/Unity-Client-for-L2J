@@ -557,20 +557,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _entityLoaded: 0
-  _identity:
-    _entityType: 0
-    _id: 0
-    _name: 
-    _title: 
-    _titleColor: 9CE8A9FF
-    _resetTick: 0
-    _npcId: 0
-    _npcClass: 
-    _playerClass: 0
-    _isMage: 0
-    _position: {x: 0, y: 0, z: 0}
-    _heading: 0
-    _owned: 0
   _identityInterlude:
     _entityType: 0
     _id: 0
@@ -624,6 +610,3 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 53a3fe4b315bbb54ba61b44f0eb9b8f8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _enableLogs: 0
-  _currentState: 0
-  _currentIntention: 0

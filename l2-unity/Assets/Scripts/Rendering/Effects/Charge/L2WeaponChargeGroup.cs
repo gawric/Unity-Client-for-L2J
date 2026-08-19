@@ -24,14 +24,9 @@ public class L2WeaponChargeGroup : BaseEffectGroup, IWeaponEffect
 
         if (_weaponTransform != null)
         {
-            // Ищем объект Sword_Tip в дочерних объектах оружия
             _swordTip = weaponTransform.Find("Sword_Tip");
-            float currentLength = Vector3.Distance(_weaponTransform.position, _swordTip.position);
-            
-            
             if (_swordTip == null)
             {
-                // Если не нашли по имени, пробуем найти в глубине (на случай сложной иерархии)
                 foreach (Transform child in weaponTransform.GetComponentsInChildren<Transform>())
                 {
                     if (child.name == "Sword_Tip")
@@ -41,6 +36,11 @@ public class L2WeaponChargeGroup : BaseEffectGroup, IWeaponEffect
                     }
                 }
             }
+
+            if (_swordTip == null)
+                return;
+
+            float currentLength = Vector3.Distance(_weaponTransform.position, _swordTip.position);
 
            float maxMultiplierFor2Meters = 2.0f / ReferenceWeaponLength;
            _timeMultiplier= Mathf.Min(maxMultiplierFor2Meters, currentLength / ReferenceWeaponLength);

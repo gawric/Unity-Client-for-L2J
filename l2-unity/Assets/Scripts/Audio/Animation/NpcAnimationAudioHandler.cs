@@ -16,7 +16,7 @@ public class NpcAnimationAudioHandler : CharacterAnimationAudioHandler
                 _race = CharacterRaceSoundParser.ParseRace(raceName);
             }
 
-            _npcClassName = GetComponent<Entity>().IdentityInterlude.NpcClass;
+            _npcClassName = GetComponent<Entity>().Identity.NpcClass;
             if (!string.IsNullOrEmpty(_npcClassName)) {
                 string[] parts = _npcClassName.Split('.');
                 if (parts.Length > 1) {

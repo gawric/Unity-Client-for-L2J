@@ -1,10 +1,10 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UIElements;
-using static EnchantResult;
+using static EnchantResultDto;
 using static L2Slot;
 
 
@@ -206,9 +206,7 @@ public class EnchantWindow : L2PopupWindow
     {
         //if (_selectItem != null)
         //{
-            var sendPaket = CreatorPacketsUser.CreateEnchantItem(objectId);
-            bool enable = GameClient.Instance.IsCryptEnabled();
-            SendGameDataQueue.Instance().AddItem(sendPaket, enable, enable);
+            IncomingPacketActions.Game.Send(new RequestEnchantItemCommand(objectId));
         //}
     }
 
@@ -437,17 +435,7 @@ public class EnchantWindow : L2PopupWindow
 
     private void SetTextLabelFail()
     {
-        VariableItem itemVariable1 = StorageVariable.getInstance().GetVariableByName("$s1");
-        VariableItem itemVariable2 = StorageVariable.getInstance().GetVariableByName("$s2");
-
-        if (itemVariable1 != null)
-        {
-            _textLabel.text = "Failed! You have obtained " + itemVariable1.Name + " of " + itemVariable2.Name;
-        }
-        else
-        {
-            _textLabel.text = "Failed! You have obtained " + 0 + " of Crystal (C-Grade)";
-        }
+        _textLabel.text = "Failed! You have obtained " + 0 + " of Crystal (C-Grade)";
     }
 
     private async Task<bool> PlayAnim(List<Texture2D> listTextures, VisualElement animElement , float fadeStartTime)

@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -61,7 +61,7 @@ public class SellCropListWindow : L2PopupWindow
     }
 
 
-    public void SetDataTable(ExShowSellCropList showSellCropList)
+    public void SetDataTable(ExShowSellCropListDto showSellCropList)
     {
 
         List<CastleCrop> list = new List<CastleCrop>();

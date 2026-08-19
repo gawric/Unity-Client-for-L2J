@@ -21,14 +21,20 @@ public class AbstractMeshManager : MonoBehaviour
                     int raceId = itemIds[1];
                     Armor armor = ItemTable.Instance.GetArmor(aramorId);
                     ModelTable.L2ArmorPiece goArmor = LoadArmor(armor, CharacterRaceAnimationParser.SafeConvertToRace(raceId));
-                    if (armor != null) ObjectPoolManager.Instance?.AddPrefabToPool(ObjectType.Armor, goArmor.baseArmorModel);
+                    if (goArmor == null)
+                        return null;
+                    if (armor != null && goArmor.baseArmorModel != null)
+                        ObjectPoolManager.Instance?.AddPrefabToPool(ObjectType.Armor, goArmor.baseArmorModel);
                     return goArmor;
                 case EquipmentCategory.FullArmor:
                     int fullArmorId = itemIds[0];
                     int fullArmorRaceId = itemIds[1];
                     Armor armorModel = ItemTable.Instance.GetArmor(fullArmorId);
                     ModelTable.L2ArmorPiece fullGoArmor = LoadArmor(armorModel, CharacterRaceAnimationParser.SafeConvertToRace(fullArmorRaceId));
-                    if (armorModel != null) AddPrefabToList(ObjectType.Armor, fullGoArmor.baseAllModels);
+                    if (fullGoArmor == null)
+                        return null;
+                    if (armorModel != null)
+                        AddPrefabToList(ObjectType.Armor, fullGoArmor.baseAllModels);
                     return fullGoArmor;
                 case EquipmentCategory.EtcItem:
                     int etcId = itemIds[0];
@@ -42,8 +48,10 @@ public class AbstractMeshManager : MonoBehaviour
                     return null;
             }
         } catch (System.Exception ex) {
+            int failedId = itemIds != null && itemIds.Length > 0 ? itemIds[0] : 0;
+            GearFlowLog.Info("LoadMesh failed id=" + failedId + " category=" + category + " " + ex.Message);
             Debug.LogWarning(
-                $"AbstractMeshManager-> LoadMesh не смогли загрузить нужную Mesh !!! ArmorID {itemIds[0]} Type {category} error print: ->\n" +
+                $"AbstractMeshManager-> LoadMesh не смогли загрузить нужную Mesh !!! ArmorID {failedId} Type {category} error print: ->\n" +
                 ex.ToString());
             return null;
         }
@@ -204,10 +212,15 @@ public class AbstractMeshManager : MonoBehaviour
 
     public L2ArmorPiece[] GetMeshBaseArmor(ItemSlot slot, Armor[] defaultArmor, int raceId)
     {
+        if (defaultArmor == null)
+            return System.Array.Empty<L2ArmorPiece>();
+
         L2ArmorPiece[] baseArmorArr = new L2ArmorPiece[defaultArmor.Length];
 
         for (int i = 0; i < defaultArmor.Length; i++)
         {
+            if (defaultArmor[i] == null)
+                continue;
             int baseArmorId = defaultArmor[i].Id;
             baseArmorArr[i] = (L2ArmorPiece)LoadMesh(EquipmentCategory.Armor, baseArmorId, raceId);
         }
@@ -217,10 +230,15 @@ public class AbstractMeshManager : MonoBehaviour
 
     protected GameObject[] CreateCopyOrGetPool(L2ArmorPiece[] armorArrPiece, ItemSlot slot)
     {
+        if (armorArrPiece == null)
+            return System.Array.Empty<GameObject>();
+
         GameObject[] arrGo = new GameObject[armorArrPiece.Length];
         for (int i = 0; i < armorArrPiece.Length; i++)
         {
             var armorPiece = armorArrPiece[i];
+            if (armorPiece == null || armorPiece.baseArmorModel == null || armorPiece.material == null)
+                continue;
             arrGo[i] = CreateArmorMesh(armorPiece.baseArmorModel, armorPiece.material);
         }
         return arrGo;

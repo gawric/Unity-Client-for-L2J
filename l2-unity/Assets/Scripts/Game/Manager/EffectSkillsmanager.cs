@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using VContainer;
 
 //Это не действующий класс нужен был для проверки скилов
 public class EffectSkillsmanager : MonoBehaviour
@@ -11,6 +12,13 @@ public class EffectSkillsmanager : MonoBehaviour
     public float _hitTime = 0;
     public Transform _rootBodyEffect;
     public static EffectSkillsmanager Instance { get { return _instance; } }
+
+    [Inject] World _world;
+
+    private World Worlds
+    {
+        get { return _world != null ? _world : IncomingPacketActions.GameWorld; }
+    }
 
 
     void Start()
@@ -138,7 +146,7 @@ public class EffectSkillsmanager : MonoBehaviour
     {
         _currentTransfromEffect = _skillsEffect.transform.Find(skillId.ToString());
         GameObject go = _currentTransfromEffect.gameObject;
-        Entity targetEntity = await World.Instance.GetEntityNoLock(targetObjId);
+        Entity targetEntity = await Worlds.GetEntityNoLock(targetObjId);
         var _rootBodyEffect = go.transform.Find(S_1177.NAME_BODY_OBJECT);
         //FlyObjectToTarget foToTarget = _rootBodyEffect.gameObject.GetComponent<FlyObjectToTarget>();
         //Debug.Log("StartFlyOrActive: OltTime " + oldTime + " dist " + dist);

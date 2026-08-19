@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -82,7 +82,7 @@ public class MasterClan
         _creatorTableWindows.UpdateTableData(tableColumns);
     }
 
-    public void DeleteMemeberTable(string memberName , PledgeShowMemberListAll packet , ICreatorTables _creatorTableWindows)
+    public void DeleteMemeberTable(string memberName , PledgeShowMemberListAllDto packet , ICreatorTables _creatorTableWindows)
     {
         if(packet != null)
         {
@@ -93,7 +93,7 @@ public class MasterClan
 
     }
 
-    public void AddMemberData(ClanMember clanMember, PledgeShowMemberListAll packet, ICreatorTables _creatorTableWindows)
+    public void AddMemberData(ClanMember clanMember, PledgeShowMemberListAllDto packet, ICreatorTables _creatorTableWindows)
     {
         packet.Members.Add(clanMember);
         _creatorTableWindows.AddRow(new string[4] { clanMember.MemberName , clanMember.Level.ToString() , ROLE_CREATE, GetOnline(clanMember.Online) });
@@ -129,11 +129,14 @@ public class MasterClan
 
     private void SetOfflineMemberColors(List<ClanMember> members, List<TableColumn> columns)
     {
-        UserInfo usrInfo = StorageNpc.getInstance().GetFirstUser();
+        UserInfoDto usrInfo = StorageNpc.getInstance().GetFirstUser();
+        string selfName = usrInfo != null && usrInfo.PlayerInfoInterlude.Identity != null
+            ? usrInfo.PlayerInfoInterlude.Identity.Name
+            : null;
         for (int i=0; i < members.Count; i++)
         {
             ClanMember member = members[i];
-            if(usrInfo.PlayerInfoInterlude.Identity.Name != member.MemberName)
+            if(selfName != null && selfName != member.MemberName)
             {
                  columns[0].SetColor(i + member.MemberName, DEFAULT_OFFLINE_COLOR);
                  columns[1].SetColor(i + member.Level.ToString(), DEFAULT_OFFLINE_COLOR);
@@ -186,7 +189,7 @@ public class MasterClan
     {
         creatorTableWindows.ClearTable();
     }
-    public void UpdateMemberData(ClanMember clanMember, PledgeShowMemberListAll packet , ICreatorTables creatorTableWindows)
+    public void UpdateMemberData(ClanMember clanMember, PledgeShowMemberListAllDto packet , ICreatorTables creatorTableWindows)
     {
         if (packet != null && clanMember != null)
         {

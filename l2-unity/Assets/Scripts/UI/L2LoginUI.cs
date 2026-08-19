@@ -21,6 +21,7 @@ public class L2LoginUI : L2UI
     private void Awake() {
         if (_instance == null) {
             _instance = this;
+            DiBootstrap.EnsureLoginScope();
         } else {
             Destroy(this);
         }
@@ -41,6 +42,7 @@ public class L2LoginUI : L2UI
 
     private void OnDestroy()
     { 
+        IncomingPacketActions.BindLogin(null);
         if (loading)
         {
             //Debug.Log("L2LoginUI Auto : DESTROYYYY");
@@ -51,61 +53,61 @@ public class L2LoginUI : L2UI
     protected override void LoadUI() {
         base.LoadUI();
 
-        LoginWindow.Instance.AddWindow(_rootVisualContainer);
-        CharSelectWindow.Instance.AddWindow(_rootVisualContainer);
-        CharSelectWindow.Instance.HideWindow();
-        CharCreationWindow.Instance.AddWindow(_rootVisualContainer);
-        CharCreationWindow.Instance.HideWindow();
-        LicenseWindow.Instance.AddWindow(_rootVisualContainer);
-        LicenseWindow.Instance.HideWindow();
-        ServerSelectWindow.Instance.AddWindow(_rootVisualContainer);
-        ServerSelectWindow.Instance.HideWindow();
+        IncomingPacketActions.LoginWindow.AddWindow(_rootVisualContainer);
+        IncomingPacketActions.CharSelect.AddWindow(_rootVisualContainer);
+        IncomingPacketActions.CharSelect.HideWindow();
+        IncomingPacketActions.CharCreate.AddWindow(_rootVisualContainer);
+        IncomingPacketActions.CharCreate.HideWindow();
+        IncomingPacketActions.LicenseWindow.AddWindow(_rootVisualContainer);
+        IncomingPacketActions.LicenseWindow.HideWindow();
+        IncomingPacketActions.ServerSelect.AddWindow(_rootVisualContainer);
+        IncomingPacketActions.ServerSelect.HideWindow();
         SkillAnimationDatabase.Initialize();
     }
 
     public void ShowServerSelectWindow() {
-        LoginWindow.Instance.HideWindow();
-        LicenseWindow.Instance.HideWindow();
-        ServerSelectWindow.Instance.ShowWindow();
+        IncomingPacketActions.LoginWindow.HideWindow();
+        IncomingPacketActions.LicenseWindow.HideWindow();
+        IncomingPacketActions.ServerSelect.ShowWindow();
     }
 
     public void ShowLicenseWindow() {
-        LoginWindow.Instance.HideWindow();
-        LicenseWindow.Instance.ShowWindow();
-        ServerSelectWindow.Instance.HideWindow();
+        IncomingPacketActions.LoginWindow.HideWindow();
+        IncomingPacketActions.LicenseWindow.ShowWindow();
+        IncomingPacketActions.ServerSelect.HideWindow();
     }
 
     public void ShowCharSelectWindow() {
-        LoginWindow.Instance.HideWindow();
-        CharCreationWindow.Instance.HideWindow();
-        CharSelectWindow.Instance.ShowWindow();
-        ServerSelectWindow.Instance.HideWindow();
+        IncomingPacketActions.LoginWindow.HideWindow();
+        IncomingPacketActions.CharCreate.HideWindow();
+        IncomingPacketActions.CharSelect.ShowWindow();
+        IncomingPacketActions.ServerSelect.HideWindow();
     }
 
     public void ShowLoginWindow() {
-        CharSelectWindow.Instance.HideWindow();
-        LoginWindow.Instance.ShowWindow();
-        CharCreationWindow.Instance.HideWindow();
-        CharSelectWindow.Instance.HideWindow();
-        LicenseWindow.Instance.HideWindow();
-        ServerSelectWindow.Instance.HideWindow();
+        IncomingPacketActions.CharSelect.HideWindow();
+        IncomingPacketActions.LoginWindow.ShowWindow();
+        IncomingPacketActions.CharCreate.HideWindow();
+        IncomingPacketActions.CharSelect.HideWindow();
+        IncomingPacketActions.LicenseWindow.HideWindow();
+        IncomingPacketActions.ServerSelect.HideWindow();
     }
 
     public void ShowCharCreationWindow() {
-        CharSelectWindow.Instance.HideWindow();
-        CharCreationWindow.Instance.Init();
-        CharCreationWindow.Instance.ShowWindow();
+        IncomingPacketActions.CharSelect.HideWindow();
+        IncomingPacketActions.CharCreate.Init();
+        IncomingPacketActions.CharCreate.ShowWindow();
 
     }
 
     public void SetCharTemplations(List<PlayerTemplates> playerTemplates)
     {
-        CharCreationWindow.Instance.Clear();
-        CharCreationWindow.Instance.SetPlayerTemplates(playerTemplates);
+        IncomingPacketActions.CharCreate.Clear();
+        IncomingPacketActions.CharCreate.SetPlayerTemplates(playerTemplates);
     }
 
     public void ShowCharCreationError(string text)
     {
-        CharCreationWindow.Instance.SetlabelError(text);
+        IncomingPacketActions.CharCreate.SetlabelError(text);
     }
 }

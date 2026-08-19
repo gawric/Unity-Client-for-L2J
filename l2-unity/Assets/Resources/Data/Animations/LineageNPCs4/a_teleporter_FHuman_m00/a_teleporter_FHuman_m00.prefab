@@ -857,20 +857,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _entityLoaded: 0
-  _identity:
-    _entityType: 0
-    _id: 0
-    _name: 
-    _title: 
-    _titleColor: 9CE8A9FF
-    _resetTick: 0
-    _npcId: 0
-    _npcClass: 
-    _playerClass: 0
-    _isMage: 0
-    _position: {x: 0, y: 0, z: 0}
-    _heading: 0
-    _owned: 0
   _identityInterlude:
     _entityType: 0
     _id: 0
@@ -970,9 +956,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e688c28aabf94c249a90aa0f8f1b551a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _enableLogs: 0
-  _currentState: 0
-  _currentIntention: 0
 --- !u!4 &3437153266870657679 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 6352fb5b4037f0e459f10a2fac3fb266, type: 3}

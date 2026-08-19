@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using static UnityEngine.EventSystems.EventTrigger;
@@ -17,9 +17,9 @@ public class NewMagicSkillsState  : AbstractAttackEvents
     }
     public override void HandleEvent(Event evt, object payload = null)
     {
-        MagicSkillUse useSkill = GetPayload(payload);
+        MagicSkillUseDto useSkill = GetPayload(payload);
         PlayerEntity entity = _stateMachine.Player;
-        int objectId = entity.IdentityInterlude.Id;
+        int objectId = entity.Identity.Id;
 
         switch (evt)
         {
@@ -27,7 +27,7 @@ public class NewMagicSkillsState  : AbstractAttackEvents
 
                 AnimationCombo readyCombo = SkillgrpTable.Instance.GetAnimComboBySkillId(useSkill.SkillId, useSkill.SkillLvl);
                 string[] orderedReadyCycle = SetupDurationHelper.BuildOrderedCycleForOverrideTiming(readyCombo.GetAnimCycle());
-                float[] durations = AnimationManager.Instance.GetOverrideClipsDurations(objectId, orderedReadyCycle);
+                float[] durations = IncomingPacketActions.Animations.GetOverrideClipsDurations(objectId, orderedReadyCycle);
                 float shotEventTime = SetupDurationHelper.ResolveShotEventTime(objectId, orderedReadyCycle);
                 float flightTimeMs = ResolveMagicFlightTimeMs(entity, useSkill.SkillId);
                 entity.SetupTotalCastDuration(useSkill.HitTime, flightTimeMs, durations, shotEventTime, useSkill.TargetId);

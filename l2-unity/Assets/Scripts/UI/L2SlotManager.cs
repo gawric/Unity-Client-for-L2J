@@ -228,11 +228,7 @@ public class L2SlotManager : L2PopupWindow
 
     private void OkDestroyRecipe()
     {
-        SendGameDataQueue.Instance().AddItem(
-            CreatorPacketsUser.CreateRequestRecipeBookDestroy(_recipeId),
-            GameClient.Instance.IsCryptEnabled(),
-            GameClient.Instance.IsCryptEnabled()
-        );
+        IncomingPacketActions.Game.Send(new RequestRecipeBookDestroyCommand(_recipeId));
         CleanupMessageWindow();
     }
 

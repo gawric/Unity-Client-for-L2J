@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
 using System.Linq;
+using VContainer;
 
 public class CharSelectWindow : L2Window {
+    [Inject] LoginRuntime _login;
     private VisualTreeAsset _arrowInputTemplate;
     private ArrowInputManipulator _charNameManipulator;
     private List<CharSelectionInfoPackage> _characters;
@@ -82,7 +84,7 @@ public class CharSelectWindow : L2Window {
         VisualElement userNameInputContainer = GetElementById("UserSelectContainer");
         VisualElement userNameInput = _arrowInputTemplate.Instantiate()[0];
         _charNameManipulator = new ArrowInputManipulator(userNameInput, "Name", new string[] { }, -1, (index, value) => {
-            CharacterSelector.Instance.SelectInterludeCharacter(index);
+            IncomingPacketActions.Characters.SelectInterludeCharacter(index);
         });
 
         _levelLabel = (Label)GetElementById("LevelLabel");
@@ -270,23 +272,25 @@ public class CharSelectWindow : L2Window {
     }
     private void StartGamePressed()
     {
-        CharacterSelector.Instance.ConfirmSelection();
+        IncomingPacketActions.Characters.ConfirmSelection();
     }
 
     private void ReLoginPressed() {
-        GameManager.Instance.OnRelogin();
-        GameClient.Instance.Disconnect();
+        GameManager manager = _login != null && _login.Manager != null ? _login.Manager : IncomingPacketActions.Manager;
+        GameClient game = _login != null && _login.Game != null ? _login.Game : IncomingPacketActions.Game;
+        manager.OnRelogin();
+        game.Disconnect();
     }
 
     private void CreatePressed() {
         // GameManager.Instance.OnCreateUser();
-        bool enable = GameClient.Instance.IsCryptEnabled();
-        SendGameDataQueue.Instance().AddItem(CreatorPacketsGameLobby.CreateNewCharacter(), enable, enable);
+        GameClient game = _login != null && _login.Game != null ? _login.Game : IncomingPacketActions.Game;
+        game.Send(new NewCharacterCommand());
     }
 
     private void DeletePressed()
     {
         Debug.Log("DeletePressed");
-        CharacterSelector.Instance.TryToDeleteCharacter();
+        IncomingPacketActions.Characters.TryToDeleteCharacter();
     }
 }
