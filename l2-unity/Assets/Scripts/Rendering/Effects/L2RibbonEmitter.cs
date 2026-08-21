@@ -480,12 +480,17 @@ public sealed class L2RibbonEmitter : EffectPart
             return FollowTarget;
         }
 
-        if (PlayerEntity.Instance != null)
+        return null;
+    }
+
+    static Entity ResolveOwnerEntity(Transform searchRoot)
+    {
+        if (searchRoot == null)
         {
-            return PlayerEntity.Instance.transform;
+            return null;
         }
 
-        return null;
+        return searchRoot.GetComponentInParent<Entity>();
     }
 
     private void ResolveBladeAnchors()
@@ -497,33 +502,31 @@ public sealed class L2RibbonEmitter : EffectPart
 
         Transform searchRoot = ResolveSearchRoot();
         Transform weapon = _weaponRoot;
+        Entity owner = ResolveOwnerEntity(searchRoot);
 
-        if (PlayerEntity.Instance != null)
+        if (weapon == null && owner != null)
         {
-            if (weapon == null)
-            {
-                weapon = PlayerEntity.Instance.GetWeaponTransform();
-            }
+            weapon = owner.GetWeaponTransform();
+        }
 
-            Transform[] points = PlayerEntity.Instance.GetSwordBasePoints();
-            if (points != null)
+        Transform[] points = owner != null ? owner.GetSwordBasePoints() : null;
+        if (points != null)
+        {
+            for (int i = 0; i < points.Length; i++)
             {
-                for (int i = 0; i < points.Length; i++)
+                if (points[i] == null)
                 {
-                    if (points[i] == null)
-                    {
-                        continue;
-                    }
+                    continue;
+                }
 
-                    if (_swordBase == null && points[i].name == _swordBaseName)
-                    {
-                        _swordBase = points[i];
-                    }
+                if (_swordBase == null && points[i].name == _swordBaseName)
+                {
+                    _swordBase = points[i];
+                }
 
-                    if (_swordTip == null && points[i].name == _swordTipName)
-                    {
-                        _swordTip = points[i];
-                    }
+                if (_swordTip == null && points[i].name == _swordTipName)
+                {
+                    _swordTip = points[i];
                 }
             }
         }

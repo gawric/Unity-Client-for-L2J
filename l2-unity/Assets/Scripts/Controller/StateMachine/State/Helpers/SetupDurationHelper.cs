@@ -93,4 +93,31 @@ public class SetupDurationHelper
 
         return IncomingPacketActions.Animations.GetOverrideEventTimeByName(objectId, orderedCycle, "OnAnimationShoot");
     }
+
+    public static float ResolveMagicFlightTimeMs(Entity entity, int skillId, Transform target)
+    {
+        const float fallbackFlightMs = 1000f;
+
+        if (EffectManager.Instance != null && EffectManager.Instance.database != null &&
+            EffectManager.Instance.database.ShouldIgnoreFlightTimeForCast(skillId))
+        {
+            return 0f;
+        }
+
+        if (entity == null || target == null)
+        {
+            return fallbackFlightMs;
+        }
+
+        Vector3 startPos = entity.GetPositionRightHand();
+        Vector3 aimPos = VectorUtils.GetCollision(startPos, target);
+        float distance = Vector3.Distance(startPos, aimPos);
+        if (distance <= 0f)
+        {
+            return fallbackFlightMs;
+        }
+
+        float flightSeconds = ProjectileFlightTimeCalculator.CalculateL2SkillFlightTimeSeconds(distance);
+        return flightSeconds * 1000f;
+    }
 }

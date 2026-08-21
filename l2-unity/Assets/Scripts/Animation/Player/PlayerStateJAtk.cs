@@ -24,6 +24,7 @@ public class PlayerStateJAtk : StateMachineBehaviour
     private bool _dieTargetLatched = false;
     private bool _exitViaSwitchToIdle = false;
     private string _lastSwitchDenyReason = "";
+    private bool _rateFromSwingClip;
 
     public string parameterName;
 
@@ -44,18 +45,33 @@ public class PlayerStateJAtk : StateMachineBehaviour
         _lastAnimNormalized = 0f;
 
         int objectId = animator.GetInteger(AnimatorUtils.OBJECT_ID);
-        float timeAnimation = (clipInfos != null && clipInfos.Length > 0 && clipInfos[0].clip != null)
-            ? clipInfos[0].clip.length
-            : 1f;
+        _rateFromSwingClip = false;
+        float timeAnimation = 1f;
+        if (clipInfos != null && clipInfos.Length > 0 && clipInfos[0].clip != null &&
+            PlayerBasicAttackAnim.IsSwingClipName(clipInfos[0].clip.name))
+        {
+            timeAnimation = clipInfos[0].clip.length;
+            _rateFromSwingClip = true;
+        }
+        else if (PlayerBasicAttackAnim.TryGetSwingClipLength(
+            animator, layerIndex, out float swingLen, out _))
+        {
+            timeAnimation = swingLen;
+            _rateFromSwingClip = true;
+        }
+
         _clipLengthSec = timeAnimation;
         _fullCycleMs = GetFullAttackCycleMs(objectId, parameterName);
         _startTime = Time.time;
         _endTime = TimeUtils.ConvertMsToSec(_fullCycleMs);
 
         // Linear rate: play whole clip over full server attack cycle (not timeAtk/2).
-        // AnimationManager applies to this animator's entity (PlayerEntity and UserEntity).
-        _linearPatkSpd = AnimationManager.Instance.ApplyLinearMeleePAtkSpeed(
-            objectId, parameterName, timeAnimation);
+        // After a chase, current clip is still run_* — do not use that length for patkspd.
+        if (_rateFromSwingClip)
+        {
+            _linearPatkSpd = AnimationManager.Instance.ApplyLinearMeleePAtkSpeed(
+                objectId, parameterName, timeAnimation);
+        }
 
         if (!AnimatorUtils.IsLocalPlayerAnimator(animator))
             return;
@@ -137,7 +153,15 @@ public class PlayerStateJAtk : StateMachineBehaviour
     public override void OnStateUpdate(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
         int objectId = animator.GetInteger(AnimatorUtils.OBJECT_ID);
-        if (_startTime >= 0f)
+        if (!_rateFromSwingClip &&
+            PlayerBasicAttackAnim.TryGetSwingClipLength(animator, layerIndex, out float swingLen, out _))
+        {
+            _clipLengthSec = swingLen;
+            _linearPatkSpd = AnimationManager.Instance.ApplyLinearMeleePAtkSpeed(
+                objectId, parameterName, swingLen);
+            _rateFromSwingClip = true;
+        }
+        if (_startTime >= 0f && _rateFromSwingClip)
             AnimationManager.Instance.SetPAtkSpeed(objectId, _linearPatkSpd);
 
         if (!AnimatorUtils.IsLocalPlayerAnimator(animator))

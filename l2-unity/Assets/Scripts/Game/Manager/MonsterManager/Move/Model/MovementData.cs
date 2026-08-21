@@ -8,25 +8,40 @@ public class MovementData
     private float _verticalVelocity = 0;
     private float _gravity = 28;
     private bool _isMove;
-    private bool _isRotate = false;
     private Vector3 _lastPos;
     private bool _hasLastPos;
-    private bool _keepFollowLogged;
+    private bool _spdTripStarted;
+    private float _spdTripStartTime;
+    private float _spdTripDist2d;
+    private float _spdLastLogTime;
+    private bool _spdLastRunning;
+    private string _spdLastGait;
+    private bool _spdHasGait;
 
+    // Same walk→run as local PlayerController: PeriodicTimer 0.1s, countTrigger <= 3.
+    private PeriodicTimer _gaitTimer;
+    private int _countTrigger;
+    private string _acisAnim;
 
     public MovementData(Entity mEntity , MovementTarget movementTarget)
     {
         _entity = mEntity;
         _movementTarget = movementTarget;
         _isMove = true;
+        if (mEntity is UserEntity)
+        {
+            _gaitTimer = new PeriodicTimer();
+            _gaitTimer.UpdateStartTime(Time.time);
+        }
     }
 
-    public bool ConsumeKeepFollowLog()
+    public void InheritAcisClock(MovementData prev)
     {
-        if (_keepFollowLogged)
-            return false;
-        _keepFollowLogged = true;
-        return true;
+        if (prev == null || _gaitTimer == null || prev._gaitTimer == null)
+            return;
+        _gaitTimer.CopyFrom(prev._gaitTimer);
+        _countTrigger = prev._countTrigger;
+        _acisAnim = prev._acisAnim;
     }
 
     public Entity GetEntity()
@@ -81,7 +96,85 @@ public class MovementData
 
     public float GetSpeed()
     {
-        return (_entity.Running) ? _entity.Stats.UnitySpeedRun : _entity.Stats.UnitySpeedWalking;
+        if (_entity.Stats == null)
+            return 0f;
+        if (!(_entity is UserEntity) || !_entity.Running)
+            return _entity.Running ? _entity.Stats.UnitySpeedRun : _entity.Stats.UnitySpeedWalking;
+        return AcisPlayerMoveSpeed();
+    }
+
+    float AcisPlayerMoveSpeed()
+    {
+        float walk = _entity.Stats.UnitySpeedWalking;
+        float run = _entity.Stats.UnitySpeedRun;
+        return L2PlayerMoveGait.Speed(_countTrigger, true, walk, run);
+    }
+
+    public bool AcisWalkGait()
+    {
+        if (!(_entity is UserEntity) || !_entity.Running)
+            return !_entity.Running;
+        return L2PlayerMoveGait.IsWalkStart(_countTrigger, true);
+    }
+
+    public void SyncUserGait()
+    {
+        if (!(_entity is UserEntity))
+            return;
+        if (_gaitTimer != null)
+            _countTrigger = _gaitTimer.GetTriggerCount(Time.time, _countTrigger);
+        bool walking = AcisWalkGait();
+        string anim = walking ? "walk" : "run";
+        if (_acisAnim == anim)
+            return;
+        _acisAnim = anim;
+        EntityActionVisual.StartMove(_entity, walking);
+    }
+
+    public void SpeedAccum2d(float dist2d)
+    {
+        if (!_spdTripStarted)
+        {
+            _spdTripStarted = true;
+            _spdTripStartTime = Time.time;
+            _spdTripDist2d = 0f;
+        }
+        _spdTripDist2d += dist2d;
+    }
+
+    public bool SpeedShouldLog(float now, float intervalSec)
+    {
+        if (now - _spdLastLogTime < intervalSec)
+            return false;
+        _spdLastLogTime = now;
+        return true;
+    }
+
+    public bool SpeedMarkGait(bool running, string gait)
+    {
+        if (!_spdHasGait)
+        {
+            _spdHasGait = true;
+            _spdLastRunning = running;
+            _spdLastGait = gait;
+            return false;
+        }
+        bool changed = _spdLastRunning != running || _spdLastGait != gait;
+        _spdLastRunning = running;
+        _spdLastGait = gait;
+        return changed;
+    }
+
+    public float SpeedTripSec(float now)
+    {
+        if (!_spdTripStarted)
+            return 0f;
+        return now - _spdTripStartTime;
+    }
+
+    public float SpeedTripDist2d()
+    {
+        return _spdTripDist2d;
     }
 
     public void Move(Vector3 direction , float speed)
@@ -172,6 +265,7 @@ public class MovementData
                 : "-") +
             " " + EntityActionCombatLog.ClassifyDest(dest, pawn) +
             EntityActionCombatLog.ChaseDump(_entity, pawn));
+        CharInfoSpeedLog.LogTripEnd(this, "Move.Finish");
         if (_entity is UserEntity)
             EntitySpawnShared.ApplyGroundedTransform(_entity.gameObject, dest, _entity.transform.rotation);
         else

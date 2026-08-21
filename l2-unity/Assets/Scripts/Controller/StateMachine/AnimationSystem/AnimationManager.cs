@@ -168,6 +168,7 @@ public class AnimationManager : BaseAnimationManager , IAnimationManager
         // Dual jatk often still mid-clip when wall cycle ends — longer blend softens the cut.
         float duration = LocomotionCrossFadeSettings.ResolveExitDuration(controller);
         controller.CrossFadeInFixedTime(atkWaitStateName, duration);
+        WaitReturnLog.Play(objectId, atkWaitStateName);
     }
 
     public void PlayAnimationTrigger(int objectId, string animationName)
@@ -217,9 +218,7 @@ public class AnimationManager : BaseAnimationManager , IAnimationManager
         }
 
         SetRecentName(objectId, stateName);
-        if (family == "basicAtk")
-            ApplyLinearMeleePAtkSpeed(objectId, stateName, -1f);
-        float fade = PlayerBasicAttackCrossFade.ResolveDuration(stateName);
+        float fade = LocomotionCrossFadeSettings.FixedDuration;
         PlayerBasicAttackCrossFade.TryPlay(controller, stateName, fade);
         Debug.Log(
             $"AnimationManager> start crossfade {family} player {entity.name} " +

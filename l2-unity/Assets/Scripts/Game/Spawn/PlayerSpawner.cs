@@ -30,8 +30,14 @@ public sealed class PlayerSpawner
         identity.EntityType = EntityType.Player;
 
         CharacterRace race = (CharacterRace)appearance.Race;
-        CharacterRaceAnimation raceId = CharacterRaceAnimationParser.ParseRaceInterlude(
-            race, appearance.Sex, appearance.BaseClass);
+        int playerClass = identity != null ? identity.PlayerClass : 0;
+        CharacterRaceAnimation raceId = CharacterRaceAnimationParser.ResolveRaceAnimation(
+            race, appearance, playerClass);
+        Debug.Log("PlayerSpawner body race=" + race +
+            " sex=" + (appearance != null ? appearance.Sex : -1) +
+            " playerClass=" + playerClass +
+            " baseClass=" + (appearance != null ? appearance.BaseClass : -1) +
+            " raceId=" + raceId);
 
         GameObject go = _characterBuilder.BuildCharacterBaseInterlude(raceId, appearance, identity.EntityType);
         if (go == null)

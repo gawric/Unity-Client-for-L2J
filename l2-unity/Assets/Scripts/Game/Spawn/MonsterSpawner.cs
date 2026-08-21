@@ -35,6 +35,7 @@ public sealed class MonsterSpawner
         EntitySpawnShared.ReapplyGroundAfterActivate(npcGo, identity);
 
         InitMonster(npc, npcGo, world);
+        CharInfoSpeedLog.LogNpcPacket(npc, "OnNpcInfo spawn");
         world.RegisterNpc(npc);
         return npc;
     }
@@ -49,6 +50,7 @@ public sealed class MonsterSpawner
         monster.UpdateNpcRunningSpd(npcInfo.Stats.RunRealSpeed);
         monster.UpdateNpcWalkSpd(npcInfo.Stats.WalkRealSpeed);
         monster.Running = npcInfo.Identity.IsRunning;
+        CharInfoSpeedLog.LogNpcPacket(monster, "OnNpcInfo update");
     }
 
     private static void InitMonster(Entity npc, GameObject npcGo, IWorldSpawnContext world)

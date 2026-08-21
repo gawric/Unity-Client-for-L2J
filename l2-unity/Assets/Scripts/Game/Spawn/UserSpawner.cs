@@ -25,7 +25,9 @@ public sealed class UserSpawner
         identity.EntityType = EntityType.User;
 
         CharacterRace race = (CharacterRace)appearance.Race;
-        CharacterRaceAnimation raceId = ResolveRaceAnimation(race, appearance, identity);
+        int playerClass = identity != null ? identity.PlayerClass : 0;
+        CharacterRaceAnimation raceId = CharacterRaceAnimationParser.ResolveRaceAnimation(
+            race, appearance, playerClass);
 
         CharacterBuilder builder = _characterBuilder != null ? _characterBuilder : CharacterBuilder.Instance;
         if (builder == null)
@@ -101,6 +103,7 @@ public sealed class UserSpawner
             " WalkReal=" + info.Stats.WalkRealSpeed +
             " BaseRun=" + info.Stats.BaseRunSpeed +
             " BaseWalk=" + info.Stats.BaseWalkingSpeed);
+        CharInfoSpeedLog.LogPacket(user, "OnCharInfo spawn");
 
         world.RegisterUser(user);
         if (info.AlikeDead || user.IsDead())
@@ -143,11 +146,27 @@ public sealed class UserSpawner
         user.UpdateMAtkSpeed((int)info.Stats.MAtkSpd);
         user.LogSpeed("update CharInfo RunReal=" + info.Stats.RunRealSpeed +
             " WalkReal=" + info.Stats.WalkRealSpeed);
+        CharInfoSpeedLog.LogPacket(user, "OnCharInfo update");
+        CharInfoSpeedLog.LogSnap(user, identity.Position, "CharInfo UpdateInfo");
+        CharInfoMoveBudgetLog.Compare(user, "CHARINFO", EntityActionCombatLog.PawnOf(user), identity.Position, true);
         GearFlowLog.Info("UserSpawner.RefreshVisuals nick=" + user.Nick);
         user.RefreshVisuals();
 
-        EntitySpawnShared.ApplyGroundedTransform(user.gameObject, identity.Position, identity.Heading);
-        EntitySpawnShared.ReapplyGroundAfterActivate(user.gameObject, user.Identity);
+        float snap2d = VectorUtils.Distance2D(user.transform.position, identity.Position);
+        float skipM = VectorUtils.ConvertL2UuToMeters(L2PawnRange.AdjustSkipUu);
+        if (snap2d > skipM)
+        {
+            EntitySpawnShared.ApplyGroundedTransform(user.gameObject, identity.Position, identity.Heading);
+            EntitySpawnShared.ReapplyGroundAfterActivate(user.gameObject, user.Identity);
+        }
+        else
+        {
+            user.transform.rotation = identity.Heading;
+            Debug.Log("[CI_MOVE] CHARINFO SKIP_SNAP nick=" + user.Nick +
+                " snap2d=" + snap2d.ToString("F3") +
+                " skipM=" + skipM.ToString("F2") +
+                " (AdjustPawnLocation <= 200 UU)");
+        }
 
         if (info.AlikeDead)
         {
@@ -164,20 +183,5 @@ public sealed class UserSpawner
         }
         else if (wasCorpse && EntityActionMachine.Instance != null)
             EntityActionMachine.Instance.Revive(user);
-    }
-
-    static CharacterRaceAnimation ResolveRaceAnimation(
-        CharacterRace race,
-        PlayerAppearance appearance,
-        EntityIdentity identity)
-    {
-        int baseClass = appearance.BaseClass;
-        if (baseClass != (int)BaseClass.Fighter && baseClass != (int)BaseClass.MMagic)
-        {
-            bool isMage = CharacterClassParser.IsMage((CharacterClass)identity.PlayerClass);
-            baseClass = isMage ? (int)BaseClass.MMagic : (int)BaseClass.Fighter;
-        }
-
-        return CharacterRaceAnimationParser.ParseRaceInterlude(race, appearance.Sex, baseClass);
     }
 }

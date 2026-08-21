@@ -132,8 +132,6 @@ public class PlayerController : MonoBehaviour
                 _countTrigger = _timer.GetTriggerCount(_elapsedTime, _countTrigger);
                 SwitchWalkToRun(ref _switchWalkToRun, _countTrigger);
 
-                
-
                 float finalAngle = GetFinalAngle(targetPosition, characterPosition);
 
                 float maxAngle = VectorUtils.GetMaxAngle(VectorUtils.To2D(_movementTarget.GetTarget()), transform);

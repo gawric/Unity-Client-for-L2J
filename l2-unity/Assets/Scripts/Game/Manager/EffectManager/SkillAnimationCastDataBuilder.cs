@@ -24,18 +24,15 @@ public static class SkillAnimationCastDataBuilder
             return castData;
         }
 
-        // Entity.Animator is often unset; SpAtk SMB runs on PlayerAnimationController's animator.
         Animator animator = null;
-        if (IncomingPacketActions.Animations is BaseAnimationManager animMgr)
+        if (IncomingPacketActions.Animations is BaseAnimationManager animMgr && entity.Identity != null)
         {
-            PlayerAnimationController pac = animMgr.GetPlayerController(entity.Identity.Id);
-            if (pac != null)
-            {
-                animator = pac.GetAnimator();
-            }
+            IAnimationController registered = animMgr.GetRegisteredController(entity.Identity.Id);
+            if (registered != null)
+                animator = registered.GetAnimator();
         }
 
-        if (animator == null && PlayerAnimationController.Instance != null)
+        if (animator == null && entity is PlayerEntity && PlayerAnimationController.Instance != null)
         {
             animator = PlayerAnimationController.Instance.GetAnimator();
         }
@@ -58,10 +55,15 @@ public static class SkillAnimationCastDataBuilder
         string[] cycle = animCombo != null ? animCombo.GetAnimCycle() : null;
         string cycleName = cycle != null && cycle.Length > 0 ? cycle[0] : null;
         string spatkName = cycleName;
-        if (!string.IsNullOrEmpty(cycleName) && entity is PlayerEntity playerEntity)
+        if (!string.IsNullOrEmpty(cycleName))
         {
-            // Same as AnimationManager.GetFinalNameAnim: cycle + equipped weapon suffix (e.g. SpAtk01_1HS).
-            spatkName = cycleName + playerEntity.GetEquippedWeaponName();
+            string suffix = null;
+            if (entity is PlayerEntity playerEntity)
+                suffix = playerEntity.GetEquippedWeaponName();
+            else if (entity is UserEntity userEntity)
+                suffix = userEntity.WeaponAnim;
+            if (!string.IsNullOrEmpty(suffix))
+                spatkName = cycleName + suffix;
         }
 
         if (PlayerStateSpAtk.TryEstimateWallDuration(

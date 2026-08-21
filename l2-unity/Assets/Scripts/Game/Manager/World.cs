@@ -338,7 +338,7 @@ public class World : MonoBehaviour, IWorldSpawnContext {
             if (entity.IsDead())
             {
                 if (_deadManager != null)
-                    _deadManager.AddDeadAndRemove(objectId , new DeadData(true, entity));
+                    _deadManager.AddDeadAndRemove(objectId, new DeadData(entity));
                 Debug.Log($"[DeleteObject] HANDLER id={objectId} Monster DEAD → DeadManager");
             }
             else
@@ -349,8 +349,16 @@ public class World : MonoBehaviour, IWorldSpawnContext {
         }
         else if (entity is NpcEntity)
         {
-            RemoveObject(objectId);
-            Debug.Log($"[DeleteObject] HANDLER id={objectId} NpcEntity → RemoveObject done");
+            if (_deadManager != null)
+            {
+                _deadManager.AddDeadAndRemove(objectId, new DeadData(entity));
+                Debug.Log($"[DeleteObject] HANDLER id={objectId} NpcEntity → DeadManager");
+            }
+            else
+            {
+                RemoveObject(objectId);
+                Debug.Log($"[DeleteObject] HANDLER id={objectId} NpcEntity → RemoveObject done");
+            }
         }
         else
         {

@@ -28,6 +28,14 @@ public class PeriodicTimer
         return _moveTimeStamp;
     }
 
+    public void CopyFrom(PeriodicTimer other)
+    {
+        if (other == null)
+            return;
+        _startTime = other._startTime;
+        _interval = other._interval;
+    }
+
 
 
     

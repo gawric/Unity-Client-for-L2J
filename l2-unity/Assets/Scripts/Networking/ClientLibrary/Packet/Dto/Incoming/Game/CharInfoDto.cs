@@ -171,6 +171,19 @@ public class CharInfoDto : IWireDto
             " " + GearFlowLog.Paperdoll(Appearance) +
             " rHand1=" + rHand1 + " rHand2=" + rHand2 + " backOrHair=" + paperBackOrHair);
 
+        Debug.Log("[SPD] PKT OnCharInfo parse nick=" + Identity.Name +
+            " id=" + Identity.Id +
+            " runBase=" + Stats.BaseRunSpeed +
+            " walkBase=" + Stats.BaseWalkingSpeed +
+            " moveMul=" + moveMultiplier.ToString("F5") +
+            " runReal=" + Stats.RunRealSpeed.ToString("F3") +
+            " walkReal=" + Stats.WalkRealSpeed.ToString("F3") +
+            " groundFromMul=" + (Stats.BaseRunSpeed * moveMultiplier).ToString("F3") +
+            " unityRun=" + NumberUtils.ScaleToUnity(Stats.RunRealSpeed).ToString("F4") +
+            " l2RunMs=" + (Stats.RunRealSpeed / 52.5f).ToString("F4") +
+            " running=" + (running ? 1 : 0) +
+            " locL2=(" + x + "," + y + "," + z + ")");
+
         if (Appearance.BaseClass != (int)BaseClass.Fighter && Appearance.BaseClass != (int)BaseClass.MMagic)
         {
             Appearance.BaseClass = CharacterClassParser.IsMage((CharacterClass)Identity.PlayerClass)

@@ -73,6 +73,7 @@ public class NewAttackState : AbstractAttackEvents
             case Event.WAIT_RETURN:
                 // WhoDied while still ATTACKING: clear latch only. Pose returns at swing end
                 // (PlayerStateJAtk.SwitchToIdle). Forcing atkwait here cuts the finishing blow.
+                WaitReturnLog.Dump("NewAttackState.WAIT_RETURN latch-only");
                 if (PlayerEntity.Instance != null)
                 {
                     PlayerEntity.Instance.IsAttack = false;

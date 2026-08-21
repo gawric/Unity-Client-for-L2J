@@ -48,11 +48,7 @@ public class EffectManager : MonoBehaviour
             return;
         }
 
-        Transform weapon = null;
-        if (entity is PlayerEntity player)
-        {
-            weapon = player.GetWeaponTransform();
-        }
+        Transform weapon = entity.GetWeaponTransform();
 
         Transform attach = weapon != null ? weapon : entity.transform;
         MagicCastData castData = SkillAnimationCastDataBuilder.Build(entity, hitTimeMs, animCombo);

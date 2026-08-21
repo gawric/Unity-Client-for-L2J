@@ -184,13 +184,13 @@ public class SkillAnimationRunner
 
     private static async Task HoldInCastEndPoseBeforeShot(int objectId)
     {
-        PlayerEntity player = PlayerEntity.Instance;
-        if (player == null)
+        Entity caster = EntityActionSkill.ResolveEntity(objectId);
+        if (caster == null)
         {
             return;
         }
 
-        MagicCastData castData = player.GetMagicCastData();
+        MagicCastData castData = caster.GetMagicCastData();
         if (castData == null || castData.TwoClipCastEndHoldSeconds <= 0f)
         {
             return;

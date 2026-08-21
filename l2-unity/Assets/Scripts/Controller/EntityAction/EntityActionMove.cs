@@ -51,6 +51,9 @@ public sealed class EntityActionMove : IEntityActionProcess
                 : "-") +
             " " + EntityActionCombatLog.ClassifyDest(destination, pawn) +
             (distance <= 0.12f ? " SKIP_ARRIVED" : " START"));
+        CharInfoSpeedLog.LogMoveStart(entity, "Point", distance,
+            pawn != null ? VectorUtils.Distance2D(entity.transform.position, pawn.transform.position) : -1f, 0.1f);
+        CharInfoMoveBudgetLog.StartPoint(entity as UserEntity, destination);
         if (distance <= 0.12f)
         {
             entity.ActionSlot.PawnDist = 0f;
@@ -64,9 +67,13 @@ public sealed class EntityActionMove : IEntityActionProcess
         L2PawnRange.ClearIgnoredPawn(entity);
 
         entity.ActionSlot.Destination = destination;
-        EntityActionVisual.StartMove(entity, !entity.Running);
         MovementTarget target = new MovementTarget(destination, 0.1f, entity.Running);
-        MoveAllCharacters.Instance.AddMoveData(entity.Identity.Id, new MovementData(entity, target));
+        MovementData data = new MovementData(entity, target);
+        MoveAllCharacters.Instance.AddMoveData(entity.Identity.Id, data);
+        if (entity is UserEntity)
+            data.SyncUserGait();
+        else
+            EntityActionVisual.StartMove(entity, !entity.Running);
     }
 
     void StartMoveToPawn(Entity entity, MoveToPawnDto dto)
@@ -75,11 +82,18 @@ public sealed class EntityActionMove : IEntityActionProcess
             ? IncomingPacketActions.GameWorld.GetEntityNoLockSync(dto.TarObjid)
             : null;
         if (pawn == null || pawn.IsDead())
+        {
+            EntityActionCombatLog.LogGap(entity, "Move.Pawn ABORT", pawn,
+                " tarId=" + dto.TarObjid +
+                " pawnNull=" + (pawn == null) +
+                " pawnDead=" + (pawn != null && pawn.IsDead()));
             return;
+        }
 
         entity.Running = true;
         entity.AttackTarget = pawn.transform;
         entity.ActionSlot.Target = pawn;
+        L2PawnRange.TrySnapUserToPacket(entity, dto.ObjPos, "MoveToPawn origin");
 
         float stopDistance = dto.Distance > 0.01f ? dto.Distance : 0.1f;
         entity.ActionSlot.PawnDist = stopDistance;
@@ -95,12 +109,15 @@ public sealed class EntityActionMove : IEntityActionProcess
                 " stopDist=" + stopDistance.ToString("F2") +
                 " toPawn=" + toPawn.ToString("F2") +
                 " pawnMoving=" + EntityActionCombatLog.IsPawnMoving(pawn));
+            EntityActionCombatLog.LogGap(entity, "Move.Pawn SKIP_IN_RANGE", pawn,
+                " stopDist=" + stopDistance.ToString("F2") +
+                " pktOrigin=" + EntityActionCombatLog.Vec(dto.ObjPos) +
+                " originToPawn=" + VectorUtils.Distance2D(dto.ObjPos, pawn.transform.position).ToString("F2"));
             if (EntityActionMachine.Instance != null)
                 EntityActionMachine.Instance.NotifyArrived(entity);
             return;
         }
 
-        EntityActionVisual.StartMove(entity, false);
         entity.ActionSlot.Destination = _pawnRange.StopPointOnDistRing(
             entity.transform.position, pawn.transform.position, stopDistance);
         EntityActionCombatLog.MarkChaseStart(entity, pawn, entity.ActionSlot.Destination);
@@ -114,7 +131,11 @@ public sealed class EntityActionMove : IEntityActionProcess
                 entity.ActionSlot.Destination, pawn.transform.position).ToString("F2") +
             " pawnMoving=" + EntityActionCombatLog.IsPawnMoving(pawn) +
             " pawnPos=" + EntityActionCombatLog.Vec(pawn.transform.position));
+        CharInfoSpeedLog.LogMoveStart(entity, "Pawn", toPawn, toPawn, stopDistance);
+        CharInfoMoveBudgetLog.StartPawn(entity as UserEntity, pawn, dto, stopDistance);
         MovementTarget target = new MovementTarget(pawn, stopDistance);
-        MoveAllCharacters.Instance.AddMoveData(entity.Identity.Id, new MovementData(entity, target));
+        MovementData data = new MovementData(entity, target);
+        MoveAllCharacters.Instance.AddMoveData(entity.Identity.Id, data);
+        data.SyncUserGait();
     }
 }

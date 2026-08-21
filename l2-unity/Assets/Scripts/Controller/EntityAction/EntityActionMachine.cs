@@ -19,7 +19,8 @@ public sealed class EntityActionMachine : ITickable
             { EntityActionKind.Idle, new EntityActionIdle() },
             { EntityActionKind.Move, new EntityActionMove(pawnRange) },
             { EntityActionKind.Stop, new EntityActionStop(pawnRange) },
-            { EntityActionKind.Attack, new EntityActionAttack() }
+            { EntityActionKind.Attack, new EntityActionAttack() },
+            { EntityActionKind.Skill, new EntityActionSkill() }
         };
     }
 
@@ -96,6 +97,9 @@ public sealed class EntityActionMachine : ITickable
             "ReleaseDeadTarget keepSwing=" + IsFinishingSwing(entity) +
             " " + EntityActionCombatLog.Describe(entity) +
             " fromAction=" + action);
+        EntityActionCombatLog.LogGap(entity, "ReleaseDeadTarget", null,
+            " fromAction=" + action +
+            " keepSwing=" + IsFinishingSwing(entity));
 
         if (IsFinishingSwing(entity) || action == EntityActionKind.Idle)
             return;
@@ -109,7 +113,7 @@ public sealed class EntityActionMachine : ITickable
             return;
 
         EntityActionKind action = entity.ActionSlot.Action;
-        if (action == EntityActionKind.Attack || entity.InCombat && action != EntityActionKind.Move)
+        if (IsSkillOrAttack(action) || entity.InCombat && action != EntityActionKind.Move)
         {
             EntityActionCombatLog.LogIfWatch(entity,
                 "StopMove ignore name=" + EntityActionCombatLog.NameOf(entity) +
@@ -233,7 +237,7 @@ public sealed class EntityActionMachine : ITickable
     {
         EntityActionKind action = entity.ActionSlot.Action;
         bool busy = action == EntityActionKind.Move ||
-            action == EntityActionKind.Attack ||
+            IsSkillOrAttack(action) ||
             IsFinishingSwing(entity);
         if (busy)
         {
@@ -284,7 +288,7 @@ public sealed class EntityActionMachine : ITickable
     {
         if (!IsAllowed(entity) || entity.IsDead())
             return;
-        if (entity.ActionSlot.Action == EntityActionKind.Attack || ShouldHoldCombatIdle(entity))
+        if (IsSkillOrAttack(entity.ActionSlot.Action) || ShouldHoldCombatIdle(entity))
         {
             EntityActionCombatLog.LogIfWatch(entity,
                 "NotifyArrived ignore name=" + EntityActionCombatLog.NameOf(entity) +
@@ -301,37 +305,20 @@ public sealed class EntityActionMachine : ITickable
         if (entity is UserEntity && pawn != null && entity.ActionSlot.PawnDist > 0.01f)
         {
             EntityActionVisual.CancelMove(entity);
-            float toHint = VectorUtils.Distance2D(
-                entity.transform.position, entity.ActionSlot.Destination);
-            bool chasedMoving = toHint > 0.5f;
-            bool combatPawn = entity.InCombat || pawn is MonsterEntity || pawn is UserEntity;
-            string pose;
-            if (chasedMoving)
-            {
-                EntityActionVisual.FreezeUserMove(entity);
-                pose = "Arrived FREEZE";
-            }
-            else if (combatPawn)
-            {
-                EntityActionVisual.PlayCombatWait(entity, 0f);
-                pose = "Arrived SNAP_ATKWAIT";
-            }
-            else
-            {
-                EntityActionVisual.PlayStandWait(entity);
-                pose = "Arrived STAND";
-            }
+            string pose = "Arrived KEEP_RUN";
             EntityActionCombatLog.MarkArrivedPose(pose);
             EntityActionCombatLog.LogCiPawn(entity,
                 pose +
                 " nick=" + EntityActionCombatLog.NameOf(entity) +
                 " nowToPawn=" + VectorUtils.Distance2D(entity.transform.position, pawn.transform.position).ToString("F2") +
                 " pawnDist=" + entity.ActionSlot.PawnDist.ToString("F2") +
-                " toHint=" + toHint.ToString("F2") +
-                " chasedMoving=" + chasedMoving +
                 " inCombat=" + entity.InCombat +
                 " pawn=" + EntityActionCombatLog.Describe(pawn) +
                 EntityActionCombatLog.ChaseDump(entity, pawn));
+            float arrivedToPawn = VectorUtils.Distance2D(entity.transform.position, pawn.transform.position);
+            if (arrivedToPawn >= 2f)
+                EntityActionCombatLog.LogGap(entity, "Arrived KEEP_RUN_FAR", pawn);
+            CharInfoSpeedLog.LogArrive(entity, pose);
             return;
         }
 
@@ -382,6 +369,11 @@ public sealed class EntityActionMachine : ITickable
     {
         UserEntity user = entity as UserEntity;
         return user != null && user.IsAttackVisualPlaying();
+    }
+
+    public static bool IsSkillOrAttack(EntityActionKind action)
+    {
+        return action == EntityActionKind.Attack || action == EntityActionKind.Skill;
     }
 
     void Track(Entity entity, EntityActionKind action)
@@ -574,6 +566,29 @@ public static class EntityActionCombatLog
         if (!IsCharInfo(entity))
             return;
         Debug.Log("[CI_PAWN] " + message);
+    }
+
+    public static void LogGap(Entity entity, string reason, Entity pawn, string extra = "")
+    {
+        if (!IsCharInfo(entity))
+            return;
+        float nowToPawn = pawn != null
+            ? VectorUtils.Distance2D(entity.transform.position, pawn.transform.position)
+            : -1f;
+        bool moving = entity.Identity != null && MoveAllCharacters.Instance != null &&
+            MoveAllCharacters.Instance.IsMoving(entity.Identity.Id);
+        Debug.Log("[CI_GAP] " + reason +
+            " nick=" + NameOf(entity) +
+            " action=" + entity.ActionSlot.Action +
+            " inCombat=" + entity.InCombat +
+            " moving=" + moving +
+            " nowToPawn=" + nowToPawn.ToString("F2") +
+            " pawnDist=" + entity.ActionSlot.PawnDist.ToString("F2") +
+            " dest=" + Vec(entity.ActionSlot.Destination) +
+            " now=" + Vec(entity.transform.position) +
+            " pawn=" + Describe(pawn) +
+            (pawn != null ? " pawnPos=" + Vec(pawn.transform.position) : "") +
+            extra);
     }
 
     public static bool IsPawnMoving(Entity pawn)

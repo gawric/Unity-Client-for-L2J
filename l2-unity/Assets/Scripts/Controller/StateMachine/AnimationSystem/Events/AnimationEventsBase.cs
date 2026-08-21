@@ -72,10 +72,6 @@ public abstract class AnimationEventsBase : MonoBehaviour
     public void AttackShot(string animationName)
     {
         animationName = NormalizeAnimationEventName(animationName);
-        int listeners = OnAnimationAttackShot != null ? OnAnimationAttackShot.GetInvocationList().Length : 0;
-        Debug.Log(
-            $"[HIT_FX] 1.AnimEvent AttackShot frame={Time.frameCount} t={Time.time:F3} " +
-            $"anim={animationName} listeners={listeners}");
         OnAnimationAttackShot?.Invoke(animationName);
     }
 

@@ -42,7 +42,11 @@ public sealed class NpcWorldApply : EntityWorldApply
 
     public override void OnMagicSkillUse(Entity entity, MagicSkillUseDto dto)
     {
-        _actions.Set(entity, EntityActionKind.Attack, dto);
+        if (entity == null || entity.IsDead())
+            return;
+        if (EntityActionSkill.TryApplyWeaponCharge(entity, dto))
+            return;
+        _actions.Set(entity, EntityActionKind.Skill, dto);
     }
 
     public override void OnAutoAttackStart(Entity entity, AutoAttackStartDto dto)
@@ -64,6 +68,8 @@ public sealed class NpcWorldApply : EntityWorldApply
     {
         if (entity != null && entity.IsDead())
             return;
+        if (entity != null && entity.Identity != null)
+            CombatFacingService.Instance?.EndFollow(entity.Identity.Id, "skill-canceled");
         _actions.Set(entity, EntityActionKind.Idle, null);
     }
 

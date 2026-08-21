@@ -14,6 +14,13 @@ public sealed class NetworkDispatcher : INetworkDispatcher
         if (model == null)
             return;
 
-        _applyQueue.QueueApply(() => _handlers.Handle(model));
+        EventProcessor events = EventProcessor.Instance;
+        int mainPending = events != null ? events.PendingCount : 0;
+        PacketLatencyLog.OnQueued(model, mainPending);
+        _applyQueue.QueueApply(() =>
+        {
+            PacketLatencyLog.OnApply(model);
+            _handlers.Handle(model);
+        });
     }
 }

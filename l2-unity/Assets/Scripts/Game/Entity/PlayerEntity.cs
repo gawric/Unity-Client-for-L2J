@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using UnityEngine;
 
 
@@ -10,12 +9,6 @@ public class PlayerEntity : Entity
     private CharacterAnimationAudioHandler _characterAnimationAudioHandler;
 
     private float _lastServerRunSpeed = 0;
-
-    private const string SWORD_BASE = "Sword_Base";
-
-    private const string SWORD_TIP = "Sword_Tip";
-
-    private readonly string[] BASE_SWORD_POINT_NAME = { SWORD_BASE, SWORD_TIP };
 
     private static PlayerEntity _instance;
     public Animation RandomName { get; set; }
@@ -227,25 +220,11 @@ public class PlayerEntity : Entity
         return _gear.WeaponAnim;
     }
 
-    public Transform GetWeaponTransform()
-    {
-        return _gear.GetAllTransformByRightHand(new string[1] { "weapon_" }).FirstOrDefault();
-    }
-    public Vector3 GetPositionRightHand()
-    {
-        return _gear.GetPositionRightHand();
-    }
-
     public GameObject GetGoEtcItem()
     {
         return _gear.GetGoEtcItem();
     }
 
-
-    public Transform[] GetSwordBasePoints()
-    {
-        return _gear.GetAllTransformByRightHand(BASE_SWORD_POINT_NAME);
-    }
     public float TargetDistance()
     {
         Vector3 startPos = GetPositionRightHand();

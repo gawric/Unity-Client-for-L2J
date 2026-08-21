@@ -124,7 +124,7 @@ public static class EntityActionVisual
         if (user != null && user.IsAttackVisualPlaying())
             return;
         if (entity.InCombat)
-            PlayCombatWait(entity);
+            PlayCombatWait(entity, 0.2f);
         else
             StopMove(entity);
     }
@@ -269,6 +269,21 @@ public static class EntityActionVisual
         if (user == null || user.Identity == null)
             return;
 
+        NetworkAnimationController nacCheck = user.GetAnimatorController();
+        Animator animator = nacCheck != null ? nacCheck.GetAnimator() : null;
+        bool visLock = user.IsAttackVisualPlaying() && user.AttackVisualLeftSec() > 0.35f;
+        bool clipLock = PlayerBasicAttackAnim.IsSwingPlaying(animator, 0.85f);
+        if (visLock || clipLock)
+        {
+            EntityActionCombatLog.LogCiPawn(user,
+                "Melee SKIP_RETRIGGER nick=" + EntityActionCombatLog.NameOf(user) +
+                " visLock=" + visLock +
+                " clipLock=" + clipLock +
+                " visLeft=" + user.AttackVisualLeftSec().ToString("F3") +
+                " " + EntityActionCombatLog.AnimDump(user));
+            return;
+        }
+
         string prefix = UserMeleeVariants[UnityEngine.Random.Range(0, UserMeleeVariants.Length)];
         string state = prefix + user.WeaponAnim;
         float cycleMs = AttackTimingHelper.ResolveAttackCycleMs(user, state);
@@ -288,7 +303,6 @@ public static class EntityActionVisual
         if (nac == null)
             return;
 
-        AnimationManager.Instance.ApplyLinearMeleePAtkSpeed(user.Identity.Id, state, -1f);
         PlayerBasicAttackCrossFade.TryPlay(nac, state);
         Debug.Log(user.LogTag + " Visual.MeleeAttack fallback state=" + state + " cycleMs=" + cycleMs);
     }
@@ -298,11 +312,28 @@ public static class EntityActionVisual
         if (user == null || user.Identity == null)
             return;
 
+        string trigger = ResolveUserPhysicalSkillTrigger(magic);
+        bool basicJatk = !string.IsNullOrEmpty(trigger) &&
+            trigger.StartsWith("jatk", System.StringComparison.OrdinalIgnoreCase);
+        NetworkAnimationController nac = user.GetAnimatorController();
+        Animator animator = nac != null ? nac.GetAnimator() : null;
+        if (basicJatk &&
+            (user.IsAttackVisualPlaying() || PlayerBasicAttackAnim.IsSwingPlaying(animator, 0.85f)))
+        {
+            EntityActionCombatLog.LogCiPawn(user,
+                "Skill SKIP_JATK nick=" + EntityActionCombatLog.NameOf(user) +
+                " skill=" + (magic != null ? magic.SkillId.ToString() : "-") +
+                " lvl=" + (magic != null ? magic.SkillLvl.ToString() : "-") +
+                " trigger=" + trigger +
+                " visLeft=" + user.AttackVisualLeftSec().ToString("F3") +
+                " " + EntityActionCombatLog.AnimDump(user));
+            return;
+        }
+
         int objectId = user.Identity.Id;
         if (IncomingPacketActions.Animations != null && magic != null && magic.HitTime > 0)
             IncomingPacketActions.Animations.SetSpTimeAtk(objectId, magic.HitTime);
 
-        string trigger = ResolveUserPhysicalSkillTrigger(magic);
         string state = trigger + user.WeaponAnim;
 
         float cycleMs = magic != null && magic.HitTime > 0

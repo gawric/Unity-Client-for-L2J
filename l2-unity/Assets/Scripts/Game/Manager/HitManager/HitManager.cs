@@ -23,9 +23,9 @@ public class HitManager : MonoBehaviour
         public bool Soulshot;
         public bool Fired;
         public float FireAt;
+        public bool WaitForShot;
         public AnimationEventsBase Events;
         public Action<string> OnShot;
-        public Action<string> OnHit;
     }
 
     private void Awake()
@@ -218,10 +218,39 @@ public class HitManager : MonoBehaviour
 
     /// <summary>
     /// Remote melee (Monster / CharInfo). Local PlayerEntity stays on AttackShot + sword collision.
-    /// Both wait for clip AttackShot / OnAnimationHit; timer is only a late fallback.
-    /// Bow: ignore AttackShot / HitShoot — the arrow has not left yet. Impact is ArrowStick Hit Time.
+    /// Impact waits for clip AttackShot; timer is only a late fallback.
+    /// Bow: ignore AttackShot — the arrow has not left yet. Impact is ArrowStick Hit Time.
     /// </summary>
     public void ArmRemoteMeleeHit(Entity attacker, Entity target, AttackDto dto)
+    {
+        Hit hit = dto != null ? dto.FirstHit : null;
+        ArmRemoteMeleeHit(
+            attacker,
+            target,
+            miss: hit != null && hit.isMiss(),
+            soulshot: hit != null && hit.hasSoulshot(),
+            hitTimeMs: 0);
+    }
+
+    public void ArmRemoteSkillHit(Entity attacker, Entity target, MagicSkillUseDto magic)
+    {
+        if (target == null || target == attacker)
+            return;
+
+        ArmRemoteMeleeHit(
+            attacker,
+            target,
+            miss: false,
+            soulshot: attacker != null && attacker.IsSoulshotCharged,
+            hitTimeMs: magic != null ? magic.HitTime : 0);
+    }
+
+    void ArmRemoteMeleeHit(
+        Entity attacker,
+        Entity target,
+        bool miss,
+        bool soulshot,
+        int hitTimeMs)
     {
         if (attacker == null || target == null || attacker is PlayerEntity)
             return;
@@ -230,55 +259,48 @@ public class HitManager : MonoBehaviour
         if (attacker.Identity == null)
             return;
 
-        Hit hit = dto != null ? dto.FirstHit : null;
-        if (hit != null && hit.isMiss())
-        {
-            Debug.Log(
-                $"[HIT_FX] ArmRemoteMelee SKIP miss attacker={attacker.name} target={target.name}");
+        if (miss)
             return;
-        }
 
         if (IsBowWeapon(attacker))
         {
             DropRemoteMeleeHit(attacker.Identity.Id);
-            if (hit != null && hit.hasSoulshot())
+            if (soulshot)
                 attacker.IsSoulshotCharged = true;
-            Debug.Log(
-                $"[HIT_FX] ArmRemoteMelee SKIP bow attacker={attacker.name} " +
-                "impact waits ArrowStick Hit Time");
             return;
         }
 
         FlushRemoteMeleeHit(attacker);
 
-        float delay = ResolveRemoteHitDelay(attacker);
+        AnimationEventsBase events = attacker.GetAnimatorController();
+        if (events == null)
+            events = attacker.GetComponentInChildren<AnimationEventsBase>(true);
+
+        bool waitForShot = events != null;
+        float delay = waitForShot
+            ? 4f
+            : hitTimeMs > 0
+                ? Mathf.Clamp(hitTimeMs / 1000f * 0.75f, 0.12f, 2.5f)
+                : ResolveRemoteHitDelay(attacker);
         int attackerId = attacker.Identity.Id;
         RemoteMeleeHit pending = new RemoteMeleeHit
         {
             AttackerId = attackerId,
             Attacker = attacker,
             Target = target,
-            Soulshot = hit != null && hit.hasSoulshot(),
+            Soulshot = soulshot,
+            WaitForShot = waitForShot,
             FireAt = Time.time + delay
         };
 
-        AnimationEventsBase events = attacker.GetAnimatorController();
-        if (events == null)
-            events = attacker.GetComponentInChildren<AnimationEventsBase>(true);
-        if (events != null)
+        if (waitForShot)
         {
             pending.Events = events;
             pending.OnShot = _ => TryFireRemoteMeleeHit(attackerId);
-            pending.OnHit = _ => TryFireRemoteMeleeHit(attackerId);
             events.OnAnimationAttackShot += pending.OnShot;
-            events.OnAnimationStartHit += pending.OnHit;
         }
 
         _remoteHits[attackerId] = pending;
-        Debug.Log(
-            $"[HIT_FX] ArmRemoteMelee attacker={attacker.name} id={attackerId} " +
-            $"target={target.name} ss={pending.Soulshot} delay={delay:F3} " +
-            $"hasEvents={(events != null)}");
     }
 
     public void FlushRemoteMeleeHit(Entity attacker)
@@ -325,6 +347,12 @@ public class HitManager : MonoBehaviour
                 continue;
             }
 
+            if (pending.WaitForShot)
+            {
+                DropRemoteMeleeHit(id);
+                continue;
+            }
+
             TryFireRemoteMeleeHit(id);
         }
     }
@@ -346,9 +374,6 @@ public class HitManager : MonoBehaviour
 
         attacker.IsSoulshotCharged = pending.Soulshot;
         Vector3 hitPoint = ResolveTargetImpactCenter(target);
-        Debug.Log(
-            $"[HIT_FX] FireRemoteMelee attacker={attacker.name} id={attackerId} " +
-            $"target={target.name} ss={pending.Soulshot} point={hitPoint}");
         HandleHitCollider(attacker, attacker.transform, target, hitPoint, Vector3.zero);
     }
 
@@ -377,11 +402,8 @@ public class HitManager : MonoBehaviour
             return;
         if (pending.OnShot != null)
             pending.Events.OnAnimationAttackShot -= pending.OnShot;
-        if (pending.OnHit != null)
-            pending.Events.OnAnimationStartHit -= pending.OnHit;
         pending.Events = null;
         pending.OnShot = null;
-        pending.OnHit = null;
     }
 
     static bool IsBowWeapon(Entity attacker)

@@ -34,6 +34,7 @@ public class GameServerPacketHandler : ServerPacketHandler
         }
 
         LobbyFlowLog.Info("Game RX OK " + model.GetType().Name + " len=" + len + " crypt=" + item.CryptEnabled + " → Apply");
+        PacketLatencyLog.OnParsed(model, item.RecvTick, item.QueueAhead);
         _dispatcher.Dispatch(model);
     }
 }

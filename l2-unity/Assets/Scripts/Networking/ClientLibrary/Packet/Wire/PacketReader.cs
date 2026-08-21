@@ -14,8 +14,20 @@ public sealed class PacketReader
             ReadB();
     }
 
+    public int Remaining
+    {
+        get { return _data == null ? 0 : _data.Length - _iterator; }
+    }
+
+    public bool HasRemaining(int count)
+    {
+        return count <= 0 || Remaining >= count;
+    }
+
     public byte ReadB()
     {
+        if (_data == null || _iterator >= _data.Length)
+            return 0;
         return _data[_iterator++];
     }
 

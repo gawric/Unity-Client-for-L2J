@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Concurrent;
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -39,13 +40,23 @@ public class IncomingGameQueue : IDisposable
         try
         {
             EnsureWorker();
-            queue.Add(new IncomingRawPacket(data, init, cryptEnabled), token);
+            int ahead = 0;
+            try
+            {
+                ahead = queue.Count;
+            }
+            catch
+            {
+            }
+            queue.Add(
+                new IncomingRawPacket(data, init, cryptEnabled, Stopwatch.GetTimestamp(), ahead),
+                token);
         }
         catch (OperationCanceledException){}
         catch (InvalidOperationException){}
         catch (Exception ex)
         {
-            Debug.LogError("IncomingGameQueue->AddItem " + ex);
+            UnityEngine.Debug.LogError("IncomingGameQueue->AddItem " + ex);
         }
     }
 
@@ -135,10 +146,19 @@ public class IncomingGameQueue : IDisposable
                 }
 
                 try{
+                    int remain = 0;
+                    try
+                    {
+                        remain = queue.Count;
+                    }
+                    catch
+                    {
+                    }
+                    PacketLatencyLog.SetIncomingRemain(remain);
                     handler.Handle(item);
                 }
                 catch (Exception ex){
-                    Debug.LogError("IncomingGameQueue->Handle " + ex);
+                    UnityEngine.Debug.LogError("IncomingGameQueue->Handle " + ex);
                 }
             }
         }

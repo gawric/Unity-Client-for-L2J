@@ -252,6 +252,7 @@ public class UserInfoDto : IWireDto
         int mountNpcId = reader.ReadI();
         int inventoryLimit = reader.ReadSh();
         int class_id = reader.ReadI();
+        _info.Identity.PlayerClass = class_id;
         int unknow = reader.ReadI();//// special effects? circles around player...
         _info.Stats.MaxCp = reader.ReadI();
         int cp = reader.ReadI();

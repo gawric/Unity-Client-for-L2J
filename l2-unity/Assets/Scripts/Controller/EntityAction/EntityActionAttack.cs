@@ -33,6 +33,8 @@ public sealed class EntityActionAttack : IEntityActionProcess
             entity.InCombat = true;
             entity.AttackTarget = target.transform;
             entity.ActionSlot.Target = target;
+            CharInfoMoveBudgetLog.Compare(entity, "ATK", target, attack.AttackerPos, true);
+            L2PawnRange.TrySnapUserToPacket(entity, attack.AttackerPos, "Attack pos");
             EntityActionVisual.FaceTowards(entity, target.transform.position);
             if (entity is MonsterEntity && IncomingPacketActions.Moves != null)
                 IncomingPacketActions.Moves.AddRotate(entity.Identity.Id, new RotateData(target, entity));
@@ -50,31 +52,17 @@ public sealed class EntityActionAttack : IEntityActionProcess
             EntityActionCombatLog.LogIfWatch(entity, target,
                 "Attack.Enter PLAY atk01 attacker=" + EntityActionCombatLog.Describe(entity) +
                 " target=" + EntityActionCombatLog.Describe(target));
+            CharInfoSpeedLog.LogAttack(entity, target);
+            float atkDist = VectorUtils.Distance2D(entity.transform.position, target.transform.position);
+            if (atkDist >= 2f)
+                EntityActionCombatLog.LogGap(entity, "Attack FAR", target,
+                    " dist2d=" + atkDist.ToString("F2") +
+                    " pktAtk=" + EntityActionCombatLog.Vec(attack.AttackerPos) +
+                    " pktAtkToPawn=" + VectorUtils.Distance2D(attack.AttackerPos, target.transform.position).ToString("F2") +
+                    " pktAtkToNow=" + VectorUtils.Distance2D(attack.AttackerPos, entity.transform.position).ToString("F2"));
             EntityActionVisual.PlayMeleeAttack(entity);
             if (HitManager.Instance != null)
                 HitManager.Instance.ArmRemoteMeleeHit(entity, target, attack);
-            return;
-        }
-
-        if (payload is MagicSkillUseDto magic)
-        {
-            entity.InCombat = true;
-            Entity target = IncomingPacketActions.GameWorld != null
-                ? IncomingPacketActions.GameWorld.GetEntityNoLockSync(magic.TargetId)
-                : null;
-            if (target != null)
-            {
-                entity.AttackTarget = target.transform;
-                entity.ActionSlot.Target = target;
-                EntityActionVisual.FaceTowards(entity, target.transform.position);
-            }
-
-            if (magic.SkillGrp != null && magic.SkillGrp.IsMagic != 1)
-                EntityActionVisual.PlayPhysicalSkill(entity, magic);
-
-            EffectManager effects = IncomingPacketActions.Effects;
-            if (effects != null)
-                effects.PlayEffect(magic.SkillId, entity.transform, entity.GetMagicCastData());
         }
     }
 
@@ -86,6 +74,13 @@ public sealed class EntityActionAttack : IEntityActionProcess
         UserEntity user = entity as UserEntity;
         if (user != null && user.IsAttackVisualPlaying())
             return;
+        if (user != null)
+        {
+            NetworkAnimationController nac = user.GetAnimatorController();
+            Animator animator = nac != null ? nac.GetAnimator() : null;
+            if (PlayerBasicAttackAnim.IsSwingPlaying(animator, 0.90f))
+                return;
+        }
 
         Entity target = entity.ActionSlot.Target;
         if (target == null && entity.AttackTarget != null)

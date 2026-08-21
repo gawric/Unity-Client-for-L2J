@@ -40,11 +40,35 @@ public sealed class MonsterWorldApply : EntityWorldApply
         _actions.Die(entity);
 
         PlayerEntity player = PlayerEntity.Instance;
-        if (player != null && dto != null && player.TargetId == dto.ObjectId)
+        bool targetMatch = player != null && dto != null && player.TargetId == dto.ObjectId;
+        if (targetMatch)
             player.IsAttack = false;
 
-        if (PlayerStateMachine.Instance != null)
+        bool localInCombat = LocalPlayerInCombatWith(player, targetMatch);
+        WaitReturnLog.Dump(
+            "MonsterWorldApply.OnDie targetMatch=" + targetMatch +
+            " localInCombat=" + localInCombat +
+            " skipWaitReturn=" + !localInCombat,
+            entity,
+            dto);
+        if (localInCombat && PlayerStateMachine.Instance != null)
             PlayerStateMachine.Instance.OnWaitReturn();
+    }
+
+    static bool LocalPlayerInCombatWith(PlayerEntity player, bool targetMatch)
+    {
+        if (player == null || !targetMatch)
+            return false;
+        if (player.isAutoAttack || player.IsAttack)
+            return true;
+        PlayerStateMachine sm = PlayerStateMachine.Instance;
+        if (sm == null)
+            return false;
+        PlayerState state = sm.State;
+        return state == PlayerState.ATTACKING ||
+            state == PlayerState.PHYSICAL_SKILLS ||
+            state == PlayerState.MAGIC_SKILLS ||
+            state == PlayerState.ANIMATION_LOCKED;
     }
 
     public override void OnAttack(Entity attacker, Entity target, AttackDto dto)
@@ -60,6 +84,15 @@ public sealed class MonsterWorldApply : EntityWorldApply
         }
 
         _actions.Set(attacker, EntityActionKind.Attack, dto);
+    }
+
+    public override void OnMagicSkillUse(Entity entity, MagicSkillUseDto dto)
+    {
+        if (entity == null || entity.IsDead())
+            return;
+        if (EntityActionSkill.TryApplyWeaponCharge(entity, dto))
+            return;
+        _actions.Set(entity, EntityActionKind.Skill, dto);
     }
 
     public override void OnAutoAttackStart(Entity entity, AutoAttackStartDto dto)
@@ -81,6 +114,8 @@ public sealed class MonsterWorldApply : EntityWorldApply
     {
         if (entity != null && entity.IsDead())
             return;
+        if (entity != null && entity.Identity != null)
+            CombatFacingService.Instance?.EndFollow(entity.Identity.Id, "skill-canceled");
         _actions.Set(entity, EntityActionKind.Idle, null);
     }
 }

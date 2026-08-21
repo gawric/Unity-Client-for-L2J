@@ -11,6 +11,7 @@ public class PlayerOverriddenLongAtk : StateMachineBehaviour
     private const float PhaseDoneNormalizedTime = 0.95f;
 
     private MagicCastData _castData;
+    private int _objectId;
     private bool _isSwitchIdle;
     private bool _phaseFinished;
     private float _stateEnterTime;
@@ -41,7 +42,8 @@ public class PlayerOverriddenLongAtk : StateMachineBehaviour
         _stateEnterTime = Time.time;
         _lastExitDiagLogTime = -1f;
 
-        _castData = PlayerEntity.Instance != null ? PlayerEntity.Instance.GetMagicCastData() : null;
+        _objectId = animator.GetInteger(AnimatorUtils.OBJECT_ID);
+        _castData = EntityActionSkill.ResolveCastData(_objectId);
         animator.speed = 1f;
 
         AnimationClip clip = AnimationDataCache.GetActiveClip(animator, layerIndex);
@@ -195,6 +197,12 @@ public class PlayerOverriddenLongAtk : StateMachineBehaviour
         Debug.Log(
             $"{LongExitLogTag} SwitchToIdle FIRE state={parameterName} local={localElapsed:F3}s " +
             $"→ INTENTION_IDLE + WAIT_RETURN");
+
+        if (!EntityActionSkill.IsLocalPlayer(_objectId))
+        {
+            EntityActionSkill.FinishRemoteCast(_objectId);
+            return;
+        }
 
         if (PlayerEntity.Instance != null)
         {

@@ -43,7 +43,41 @@ public class Entity : MonoBehaviour {
     protected Gear _gear;
     public Gear Gear => _gear;
     public bool Running { get { return _running; } set { _running = value; } }
-    
+
+    public Transform GetWeaponTransform()
+    {
+        if (_gear == null)
+            return null;
+
+        Transform[] found = _gear.GetAllTransformByRightHand(new[] { "weapon_" });
+        if (found != null)
+        {
+            for (int i = 0; i < found.Length; i++)
+            {
+                if (found[i] != null)
+                    return found[i];
+            }
+        }
+
+        return _gear.GetTransformRightHandBone();
+    }
+
+    static readonly string[] SwordBladePointNames = { "Sword_Base", "Sword_Tip" };
+
+    public Transform[] GetSwordBasePoints()
+    {
+        if (_gear == null)
+            return null;
+        return _gear.GetAllTransformByRightHand(SwordBladePointNames);
+    }
+
+    public Vector3 GetPositionRightHand()
+    {
+        if (_gear == null)
+            return transform.position;
+        return _gear.GetPositionRightHand();
+    }
+
     public float GetWeaponRage() { return _gear.GetWeaponRange(); }
     public Status Status { get => _status; set => _status = value; }
     public Stats Stats { get => _stats; set => _stats = value; }

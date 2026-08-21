@@ -23,6 +23,7 @@ public sealed class GameLifetimeScope : LifetimeScope
         RegisterIfFound<SkillExecutor>(builder);
         RegisterIfFound<CombatFacingService>(builder);
         RegisterIfFound<EventBus>(builder);
+        builder.Register<L2ActorFade>(Lifetime.Singleton);
         RegisterIfFound<DeadManager>(builder);
         RegisterIfFound<MoveAllCharacters>(builder);
         RegisterIfFound<GravityNpc>(builder);

@@ -87,6 +87,28 @@ public sealed class L2PawnRange
         mover.ActionSlot.CollisionPawn = null;
     }
 
+    public static bool TrySnapUserToPacket(Entity entity, Vector3 packetPos, string reason)
+    {
+        UserEntity user = entity as UserEntity;
+        if (user == null)
+            return false;
+
+        float d = VectorUtils.Distance2D(user.transform.position, packetPos);
+        if (d <= VectorUtils.ConvertL2UuToMeters(AdjustSkipUu))
+            return false;
+
+        Vector3 from = user.transform.position;
+        Vector3 grounded = GroundSnapHelper.SnapToGroundOrKeep(packetPos);
+        if (user.Identity != null)
+            user.Identity.Position = grounded;
+        EntitySpawnShared.ApplyGroundedTransform(user.gameObject, grounded, user.transform.rotation);
+        EntityActionCombatLog.LogGap(user, "SNAP " + reason, EntityActionCombatLog.PawnOf(user),
+            " snapD=" + d.ToString("F2") +
+            " from=" + EntityActionCombatLog.Vec(from) +
+            " to=" + EntityActionCombatLog.Vec(grounded));
+        return true;
+    }
+
     static void IgnoreBetween(Entity a, Entity b, bool ignore)
     {
         CharacterController ca = a != null ? a.GetComponent<CharacterController>() : null;

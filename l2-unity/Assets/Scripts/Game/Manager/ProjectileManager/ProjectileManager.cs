@@ -129,7 +129,7 @@ public class ProjectileManager : AbstractProjectile, IProjectileManager
 
     private void AttachCastTimingSnapshot(ProjectileData projectile)
     {
-        MagicCastData castData = PlayerEntity.Instance != null ? PlayerEntity.Instance.GetMagicCastData() : null;
+        MagicCastData castData = ResolveLaunchCastData(projectile);
         if (castData == null)
         {
             projectile.castStartTimeSnapshot = -1f;
@@ -152,6 +152,22 @@ public class ProjectileManager : AbstractProjectile, IProjectileManager
             $"deltaLaunchToShoot={projectile.projectileLaunchGlobalFromCast - projectile.castServerShootSnapshot:F3}s " +
             $"configuredFly={projectile.flytime:F3}s distance={projectile.distance:F3}m.");
 #endif
+    }
+
+    static MagicCastData ResolveLaunchCastData(ProjectileData projectile)
+    {
+        if (projectile != null && projectile.attackerEntityId != 0)
+        {
+            Entity caster = EntityActionSkill.ResolveEntity(projectile.attackerEntityId);
+            if (caster != null)
+            {
+                MagicCastData fromCaster = caster.GetMagicCastData();
+                if (fromCaster != null)
+                    return fromCaster;
+            }
+        }
+
+        return PlayerEntity.Instance != null ? PlayerEntity.Instance.GetMagicCastData() : null;
     }
 
 

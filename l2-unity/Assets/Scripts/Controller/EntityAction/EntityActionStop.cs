@@ -42,7 +42,13 @@ public sealed class EntityActionStop : IEntityActionProcess
                 : "-") +
             (skipSnap ? " SKIP_SNAP" : " SNAP"));
         if (skipSnap)
+        {
+            if (pawn != null && VectorUtils.Distance2D(entity.transform.position, pawn.transform.position) >= 2f)
+                EntityActionCombatLog.LogGap(entity, "Stop SKIP_SNAP_FAR", pawn,
+                    " snapD=" + snapD.ToString("F2") +
+                    " stop=" + EntityActionCombatLog.Vec(stop));
             return;
+        }
 
         entity.Identity.Position = stop;
         EntitySpawnShared.ApplyGroundedTransform(entity.gameObject, stop, entity.transform.rotation);

@@ -49,15 +49,14 @@ public class NewIdleState : StateBase
 
     private void HandleArrival()
     {
-        bool targetDead = IsCurrentTargetDead();
-        bool useAtkWait = _stateMachine.Player.isAutoAttack || targetDead;
+        bool useAtkWait = _stateMachine.Player != null && _stateMachine.Player.isAutoAttack;
         var animation = useAtkWait ? AnimationNames.ATK_WAIT : AnimationNames.WAIT;
         PlayAnimation(animation);
     }
 
     private void HandleWaitReturn(object payload = null)
     {
-        // Combat swing finished (or target died). Always leave attack latch and show wait pose.
+        // Combat swing finished. Always leave attack latch and show wait pose.
         if (PlayerEntity.Instance != null)
         {
             PlayerEntity.Instance.IsAttack = false;
@@ -66,17 +65,24 @@ public class NewIdleState : StateBase
 
         bool fromCombatSmb = IsWaitReturnFromCombatSmb(payload);
         bool targetDead = IsCurrentTargetDead();
-        // Dead target still uses atkwait_ (combat idle). AutoAttackStop may already
-        // have cleared isAutoAttack — targetDead keeps the correct pose.
-        bool useAtkWait = (_stateMachine.Player != null && _stateMachine.Player.isAutoAttack) || targetDead;
+        bool useAtkWait = _stateMachine.Player != null && _stateMachine.Player.isAutoAttack;
         var animation = useAtkWait ? AnimationNames.ATK_WAIT : AnimationNames.WAIT;
 
         // Skip only early external WAIT_RETURN (DieDto / skill Complete) while swing still plays.
         // SMB SwitchToIdle uses wall clock — animNorm often < 0.95 when it fires; must CrossFade.
-        if (!fromCombatSmb && TryGetActiveCombatSwing(out _, out _))
-        {
+        string swingState = null;
+        float swingNorm = 0f;
+        bool skipSwing = !fromCombatSmb && TryGetActiveCombatSwing(out swingState, out swingNorm);
+        WaitReturnLog.Handle(
+            "NewIdleState.HandleWaitReturn",
+            fromCombatSmb,
+            targetDead,
+            useAtkWait,
+            animation.ToString(),
+            skipSwing,
+            skipSwing ? swingState + " n=" + swingNorm.ToString("F2") : "-");
+        if (skipSwing)
             return;
-        }
 
         // Defer one frame: CrossFade from inside JAtk OnStateUpdate is unreliable, and a
         // same-frame second CrossFade (Complete → CallBack) can leave the Animator stuck.
@@ -195,6 +201,7 @@ public class NewIdleState : StateBase
                 return;
             }
 
+            WaitReturnLog.Play(objectId, animName);
             IncomingPacketActions.Animations.PlayAnimation(objectId, animName, true);
         });
     }

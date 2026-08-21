@@ -24,6 +24,7 @@ public class PlayerOverriddenMagicAtk : StateMachineBehaviour
     private const float PhaseDoneNormalizedTime = 0.95f;
 
     private MagicCastData _castData;
+    private int _objectId;
     private bool _isSwitchIdle;
     private bool _phaseFinished;
     private float _stateEnterTime;
@@ -45,7 +46,8 @@ public class PlayerOverriddenMagicAtk : StateMachineBehaviour
         _stateEnterTime = Time.time;
         _lastExitDiagLogTime = -1f;
 
-        _castData = PlayerEntity.Instance.GetMagicCastData();
+        _objectId = animator.GetInteger(AnimatorUtils.OBJECT_ID);
+        _castData = EntityActionSkill.ResolveCastData(_objectId);
         float targetSpeed = 1.0f;
         if (_castData != null)
         {
@@ -297,6 +299,12 @@ public class PlayerOverriddenMagicAtk : StateMachineBehaviour
         Debug.Log(
             $"{MagicExitLogTag} SwitchToIdle FIRE state={parameterName} local={localElapsed:F3}s " +
             $"→ INTENTION_IDLE + WAIT_RETURN");
+
+        if (!EntityActionSkill.IsLocalPlayer(_objectId))
+        {
+            EntityActionSkill.FinishRemoteCast(_objectId);
+            return;
+        }
 
         if (PlayerEntity.Instance != null)
         {

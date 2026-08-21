@@ -130,7 +130,7 @@ public class PlayerStateMachine : MonoBehaviour
 
     public void OnWaitReturn()
     {
-        if (_enableLogs) Debug.Log("[StateMachine] wait return attack");
+        WaitReturnLog.Dump("PlayerStateMachine.OnWaitReturn");
         NotifyEvent(Event.WAIT_RETURN);
     }
 }

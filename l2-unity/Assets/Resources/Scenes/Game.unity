@@ -458,11 +458,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5966979649214767529, guid: 50559bb8d22c3c04a8a788ca6ec38fec, type: 3}
       propertyPath: _camDistance
-      value: 2
+      value: 1.721875
       objectReference: {fileID: 0}
     - target: {fileID: 5966979649214767529, guid: 50559bb8d22c3c04a8a788ca6ec38fec, type: 3}
       propertyPath: _minDistance
-      value: 0.5
+      value: 0.53125
+      objectReference: {fileID: 0}
+    - target: {fileID: 5966979649214767529, guid: 50559bb8d22c3c04a8a788ca6ec38fec, type: 3}
+      propertyPath: _maxDistance
+      value: 8
       objectReference: {fileID: 0}
     - target: {fileID: 5966979649214767529, guid: 50559bb8d22c3c04a8a788ca6ec38fec, type: 3}
       propertyPath: _smoothCamera
@@ -470,7 +474,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5966979649214767529, guid: 50559bb8d22c3c04a8a788ca6ec38fec, type: 3}
       propertyPath: _disableCollisionZoom
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6289952722580539430, guid: 50559bb8d22c3c04a8a788ca6ec38fec, type: 3}
       propertyPath: m_LocalPosition.x

@@ -29,7 +29,18 @@ public sealed class ServerListDto : IWireDto
             ServersData.Add(serverData);
         }
 
+        // Interlude ServerList ends here. Later logins append chars-on-server.
+        // Decrypted login packets still contain padding + checksum — do not treat that as payload.
+        if (reader.Remaining <= 8)
+            return;
+
+        if (!reader.HasRemaining(3))
+            return;
+
         reader.ReadSh();
+        if (!reader.HasRemaining(1))
+            return;
+
         int charsOnServerCount = reader.ReadB();
         if (charsOnServerCount > 7)
             return;
@@ -38,9 +49,13 @@ public sealed class ServerListDto : IWireDto
 
         for (int i = 0; i < charsOnServerCount; i++)
         {
+            if (!reader.HasRemaining(2))
+                break;
+
             byte serverId = reader.ReadB();
             byte charCount = reader.ReadB();
-            reader.ReadB();
+            if (reader.HasRemaining(1))
+                reader.ReadB();
             CharsOnServers[serverId] = charCount;
         }
     }

@@ -172,16 +172,22 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _x: 0
-  _y: 0
+  _y: 14.831543
   _target: {fileID: 0}
+  _unityPlayerHeight: 0.85
+  _l2PlayerHeight: 1.6
+  _applyL2Fov: 1
   _smoothCamera: 1
-  _camOffset: {x: 0, y: 0.8, z: 0}
+  _camOffset: {x: 0, y: 0, z: 0}
+  _lookHeightAdjust: -0.3
   _smoothness: 8
   _camSpeed: 3
-  _minDistance: 0.5
-  _maxDistance: 10
+  _pitchAngle: 14.831543
+  _disableCollisionZoom: 0
+  _minDistance: 0.53125
+  _maxDistance: 8
   _zoomSpeed: 5
-  _camDistance: 2
+  _camDistance: 1.721875
   _currentDistance: 0
   _stickToBone: 0
   _rootBone: {fileID: 0}
