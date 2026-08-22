@@ -1,12 +1,8 @@
 [IncomingGamePacket(GameServerPacketType.TradeOtherAdd)]
-public sealed class TradeOtherAddIncoming : IncomingPacket<TradeOtherAddIncomingDto>
+public sealed class TradeOtherAddIncoming : IncomingWirePacket<TradeOtherAddDto>
 {
-    public override TradeOtherAddIncomingDto Read(PacketReader reader)
+    public override void Apply(TradeOtherAddDto dto)
     {
-        return new TradeOtherAddIncomingDto();
-    }
-
-    public override void Apply(TradeOtherAddIncomingDto dto)
-    {
+        IncomingPacketActions.Queue(() => IncomingPacketActions.Trade.OtherAddItem(dto));
     }
 }

@@ -71,23 +71,26 @@ public class PlayerStats : Stats
     public int PvpKills { get { return _pvpKills; } set { _pvpKills = value; } }
     public int PkKills { get { return _pkKills; } set { _pkKills = value; } }
 
+    /// <summary>
+    /// Progress (0-100) from <paramref name="level"/> towards <paramref name="level"/>+1. Exp is the
+    /// character's total accumulated experience (from level 1), and LevelServer.GetExp(level) is the
+    /// cumulative threshold to REACH that level - since a character already at that level has always
+    /// passed its own threshold, dividing raw Exp by it (the old implementation) could only ever
+    /// return >=100%. The bar needs the character's progress WITHIN the level's own span instead.
+    /// </summary>
     public double ExpPercent(int level)
     {
-        if (Exp == 0)
+        long expForLevel = LevelServer.GetExp(level);
+        long expForNextLevel = LevelServer.GetExp(level + 1);
+        long range = expForNextLevel - expForLevel;
+        if (range <= 0)
         {
-            return 0;
+            // Invalid/max level (GetExp returns -1 past MAX_LEVEL) - nothing left to fill.
+            return Exp > 0 ? 100 : 0;
         }
 
-        long MaxExp = LevelServer.GetExp(level);
-        if (MaxExp == 0 & Exp > 0) return 100;
-        if (MaxExp != 0)
-        {
-            double persent = (double)100 / MaxExp;
-            double currentPerxent = persent * Exp;
-            return Math.Round(currentPerxent, 2);
-        }
-
-        return 0;
+        double percent = (double)(Exp - expForLevel) / range * 100.0;
+        return Math.Clamp(Math.Round(percent, 2), 0, 100);
     }
 
     public double WeightPercent()

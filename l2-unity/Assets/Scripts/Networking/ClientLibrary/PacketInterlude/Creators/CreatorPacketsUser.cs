@@ -28,12 +28,6 @@ public class CreatorPacketsUser
         return new RequestDestroyItem(_objectId, _count);
     }
 
-    public static RequestDropItem CreateRequestDropItem(int objectId, int count, Vector3 position)
-    {
-        return new RequestDropItem(objectId, count, position);
-    }
-
-
     public static TradeDone CreateTradeDone(int result)
     {
         return new TradeDone(result);
@@ -52,16 +46,6 @@ public class CreatorPacketsUser
     public static AnswerTradeRequest CreateAnswerTradeRequest(int answer)
     {
         return new AnswerTradeRequest(answer);
-    }
-
-    public static RequestAnswerJoinParty CreateRequestAnswerJoinParty(int answer)
-    {
-        return new RequestAnswerJoinParty(answer);
-    }
-
-    public static RequestJoinParty CreateRequestJoinParty(string targetName, int partyDistributionTypeId)
-    {
-        return new RequestJoinParty(targetName, partyDistributionTypeId);
     }
 
     public static RequestOustPledgeMember CreateRequestOustPledgeMember(string memberName)

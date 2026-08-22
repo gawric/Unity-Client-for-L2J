@@ -1,7 +1,5 @@
 public sealed class TradeDoneIncomingDto : INetworkModel { }
 
-public sealed class TradeOtherAddIncomingDto : INetworkModel { }
-
 public sealed class TradePressOwnOkIncomingDto : INetworkModel { }
 
 public sealed class TradePressOtherOkIncomingDto : INetworkModel { }

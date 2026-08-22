@@ -59,15 +59,24 @@ public class UserGear : Gear
             return;
         }
 
-        ItemSlot slotArmor = ResolveArmorSlot(armor, slot);
-        GearFlowLog.Info("EquipArmor id=" + itemId +
-            " askedSlot=" + slot +
-            " resolved=" + slotArmor +
-            " body=" + (armor.Armorgrp != null ? armor.Armorgrp.BodyPart.ToString() : "null"));
-        if (ItemSlot.fullarmor != slotArmor) {
-            EquipSingleArmor(armor, slotArmor, itemId);
-        } else {
-            EquipFullArmor(armor, slotArmor, itemId);
+        // SyncEquippedArmor calls this once per slot (chest/legs/gloves/feet) in a row - an
+        // exception equipping ONE slot must not stop the remaining slots from ever being attempted.
+        try
+        {
+            ItemSlot slotArmor = ResolveArmorSlot(armor, slot);
+            GearFlowLog.Info("EquipArmor id=" + itemId +
+                " askedSlot=" + slot +
+                " resolved=" + slotArmor +
+                " body=" + (armor.Armorgrp != null ? armor.Armorgrp.BodyPart.ToString() : "null"));
+            if (ItemSlot.fullarmor != slotArmor) {
+                EquipSingleArmor(armor, slotArmor, itemId);
+            } else {
+                EquipFullArmor(armor, slotArmor, itemId);
+            }
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogError($"UserGear-> EquipArmor error id={itemId} slot={slot}: {e}");
         }
     }
 

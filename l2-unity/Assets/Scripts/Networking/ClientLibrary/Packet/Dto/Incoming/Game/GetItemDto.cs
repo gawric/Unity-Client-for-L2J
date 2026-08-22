@@ -1,20 +1,23 @@
+using UnityEngine;
 
+/// <summary>Another player/creature picked an item up off the ground.</summary>
 public class GetItemDto : IWireDto
 {
-    private int _playerId;
-    public int PlayerId { get => _playerId; }
-    private ItemInstance _item;
-    public ItemInstance Item { get => _item; }
+    /// <summary>Object id of whoever picked the item up.</summary>
+    public int PlayerId { get; private set; }
 
+    /// <summary>World id of the dropped item that was picked up.</summary>
+    public int ObjectId { get; private set; }
 
-    
+    public Vector3 Position { get; private set; }
 
     public void ReadFrom(PacketReader reader)
     {
-        _playerId = reader.ReadI();
-        var objectId = reader.ReadI();
-        var x = reader.ReadI();
-        var y = reader.ReadI();
-        var z = reader.ReadI();
+        PlayerId = reader.ReadI();
+        ObjectId = reader.ReadI();
+        int x = reader.ReadI();
+        int y = reader.ReadI();
+        int z = reader.ReadI();
+        Position = VectorUtils.ConvertPosToUnity(new Vector3(x, y, z));
     }
 }

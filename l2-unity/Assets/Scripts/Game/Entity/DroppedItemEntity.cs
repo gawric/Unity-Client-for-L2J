@@ -136,8 +136,7 @@ public class DroppedItemEntity : MonoBehaviour
     private void SendPickupRequest()
     {
         Vector3 l2jPos = VectorUtils.ConvertPosUnityToL2j(transform.position);
-        ClickAction packet = CreatorPacketsUser.CreateActiont(_itemObjectId, (int)l2jPos.x, (int)l2jPos.y, (int)l2jPos.z, 0);
-        bool enable = GameClient.Instance.IsCryptEnabled();
-        SendGameDataQueue.Instance().AddItem(packet, enable, enable);
+        IncomingPacketActions.Game.Send(new ClickActionCommand(
+            _itemObjectId, (int)l2jPos.x, (int)l2jPos.y, (int)l2jPos.z, 0));
     }
 }

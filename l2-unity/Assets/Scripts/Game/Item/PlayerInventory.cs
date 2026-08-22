@@ -581,9 +581,7 @@ public class PlayerInventory : MonoBehaviour
             return;
         }
 
-        var sendPaket = CreatorPacketsUser.CreateRequestDropItem(objectId, quantity, PlayerEntity.Instance.transform.position);
-        bool enable = GameClient.Instance.IsCryptEnabled();
-        SendGameDataQueue.Instance().AddItem(sendPaket, enable, enable);
+        IncomingPacketActions.Game.Send(new RequestDropItemCommand(objectId, quantity, PlayerEntity.Instance.transform.position));
     }
 
     public bool IsContaineInventory(int objectId)

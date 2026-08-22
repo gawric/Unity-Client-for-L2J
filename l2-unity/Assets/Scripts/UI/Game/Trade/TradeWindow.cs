@@ -76,18 +76,23 @@ public class TradeWindow : L2PopupWindow
         }
     }
 
-    public void OtherAddItem(TradeOtherAdd item)
+    public void OtherAddItem(TradeOtherAddDto item)
     {
         try
         {
-            ItemInstance i = new(item.Item.ObjectId, item.BaseItem.Id, ItemLocation.Trade, 0, (int)item.Item.Count, (ItemCategory)item.Item.Type1, false, (ItemSlot)item.Item.BodyPart, item.Item.Enchant, 0);
-            var itm = item.BaseItem;
-            i.SetSlot(1);
-            _inventorySlotsOtherPlayersOffer.FirstOrDefault(x => x.IsEmpty).AssignItem(i);
-        }
-        catch(Exception e)
-        {
+            AbstractItem baseItem = ItemTable.Instance.GetItem(item.ItemId);
+            if (baseItem == null)
+            {
+                return;
+            }
 
+            ItemInstance i = new(item.ObjectId, baseItem.Id, ItemLocation.Trade, 0, item.Count,
+                (ItemCategory)item.Type1, false, (ItemSlot)item.BodyPart, item.EnchantLevel, 0);
+            i.SetSlot(1);
+            _inventorySlotsOtherPlayersOffer.FirstOrDefault(x => x.IsEmpty)?.AssignItem(i);
+        }
+        catch (Exception)
+        {
         }
     }
 

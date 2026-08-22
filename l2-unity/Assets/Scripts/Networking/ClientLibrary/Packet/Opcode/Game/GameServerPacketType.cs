@@ -1,4 +1,4 @@
-﻿public enum GameServerPacketType : byte
+public enum GameServerPacketType : byte
 {
     InterludeKeyPacket = 0x00,
     CharMoveToLocation = 0x01,
@@ -8,6 +8,7 @@
     Attack = 0x05,
     Die = 0x06,
     Revive = 0x07,
+    SpawnItem = 0x0B,
     DropItem = 0x0C,
     GetItem = 0x0D,
     StatusUpdate = 0x0E,
@@ -46,6 +47,11 @@
     MagicSkillUse = 0x48,
     MagicSkillCanceled = 0x49,
     CreatureSay = 0x4A,
+    PartySmallWindowAll = 0x4E,
+    PartySmallWindowAdd = 0x4F,
+    PartySmallWindowDeleteAll = 0x50,
+    PartySmallWindowDelete = 0x51,
+    PartySmallWindowUpdate = 0x52,
     PledgeShowMemberListAll = 0x53,
     PledgeShowMemberListUpdate = 0x54,
     PledgeShowMemberListAdd = 0x55,
@@ -61,25 +67,14 @@
     TradeUpdate = 0x74,
     TradePressOwnOk = 0x75,
     TradePressOtherOk = 0x76,
-
-    AskJoinParty = 0x39,
-    JoinParty = 0x3a,
-    PartySmallWindowAll = 0x4E,
-    PartySmallWindowAdd = 0x4F,
-    PartySmallWindowDeleteAll = 0x50,
-    PartySmallWindowDelete = 0x51,
-    PartySmallWindowUpdate = 0x52,
-    PartySpelled = 0xEE,
-
-
-    CharInfo = 0x03,
-    SpawnItem = 0x0b,
-    DropItem = 0x0c,
-    GetItem = 0x0d,
-
-    ShowBoard = 0x6e,
+    // MagicSkillLaunched shares this same raw value in every table seen this session (pre-merge
+    // GSInterludeCombatPacketType.MagicSkillLaunched was also 0x76) - harmless for the enum itself
+    // (C# allows duplicate values under different names), but the two now share ONE dictionary in
+    // IncomingPacketAutoRegistry, so whichever [IncomingGamePacket] attribute registers second will
+    // be rejected with "Duplicate incoming packet opcode 0x76" at startup. Needs the real opcode
+    // for one of them from server source to resolve properly - not guessed here.
     MagicSkillLaunched = 0x76,
-    TradePressOtherOk = 0x7C,
+
     AbnormalStatusUpdate = 0x7F,
     QuestList = 0x80,
     EnchantResult = 0x81,
@@ -99,6 +94,7 @@
     HennaInfo = 0xE4,
     MacroList = 0xE7,
     BuyListSeed = 0xE8,
+    PartySpelled = 0xEE,
     ShopPreviewList = 0xEF,
     ShopPreviewInfo = 0xF0,
     EtcStatusUpdate = 0xF3,

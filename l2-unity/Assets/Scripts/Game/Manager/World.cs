@@ -145,184 +145,99 @@ public class World : MonoBehaviour, IWorldSpawnContext {
             return;
         }
 
-        Entity transform;
-        if (_objects.TryGetValue(id, out transform)) {
-            _players.Remove(id);
-            _npcs.Remove(id);
-            _objects.Remove(id);
-
-            Destroy(transform.gameObject);
-
-        }
-    }
-
-    public void SpawnPlayerInterlude(NetworkIdentityInterlude identity, PlayerStatusInterlude status, PlayerInterludeStats stats, PlayerInterludeAppearance appearance)
-    {
-        
-        identity.SetPosY(GetGroundHeight(identity.Position));
- 
-        identity.EntityType = EntityType.Player;
- 
-
-        CharacterRace race = (CharacterRace)appearance.Race;
-   
-        CharacterRaceAnimation raceId = CharacterRaceAnimationParser.ParseRaceInterlude(race, appearance.Sex, appearance.BaseClass);
-   
-
-        GameObject go = CharacterBuilder.Instance.BuildCharacterBaseInterlude(raceId, appearance, identity.EntityType);
-     
-        go.transform.SetParent(_usersContainer.transform);
-      
-        //go.transform.eulerAngles = new Vector3(transform.eulerAngles.x, identity.Heading, transform.eulerAngles.z);
-
-        go.transform.position = identity.Position;
-       
-        go.transform.rotation = identity.Heading;
-     
-
-        // go.transform.name = "_Player";
-        go.transform.name = identity.Name;
-   
-        PlayerEntity player = go.GetComponent<PlayerEntity>();
- 
-
-        player.Status = status;
-        player.IdentityInterlude = identity;
-        player.Stats = stats;
-        player.Appearance = appearance;
-        player.Race = race;
-        player.RaceId = raceId;
-        player.Running = appearance.Running;
-  
-        player.SetDead(false);
- 
-        go.GetComponent<NetworkTransformShare>().enabled = true;
-   
-        go.GetComponent<PlayerController>().enabled = true;
-   
-        go.GetComponent<PlayerController>().Initialize();
-   
-
-        go.SetActive(true);
-      
-
-        go.GetComponentInChildren<PlayerAnimationController>().Initialize();
-     
-        PlayerAnimationController controller = go.GetComponentInChildren<PlayerAnimationController>();
-
-       
-        AnimationManager.Instance.RegisterController(identity.Id, controller , player);
-   
-        go.GetComponent<Gear>().Initialize(player.IdentityInterlude.Id, player.RaceId);
-     
-        var statsIntr = (PlayerInterludeStats)player.Stats;
-       
-        player.Initialize();
-
-
-
-        player.UpdateRunSpeed(statsIntr.RunRealSpeed);
-      
-        player.UpdateWalkSpeed(statsIntr.WalkRealSpeed);
-      
-
-        //416 - пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
-        //554 - пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
-        player.UpdatePAtkSpeedPlayer((int)statsIntr.BasePAtkSpeed);
-      
-        player.UpdateMAtkSpeed((int)statsIntr.MAtkSpd);
-     
-        //go.transform.SetParent(_usersContainer.transform);
-
-        CameraController.Instance.enabled = true;
-      
-        CameraController.Instance.SetTarget(go);
-      
-        CameraController.Instance.SetHeading(identity.OrigHeading);
-    
-
-        CharacterInfoWindow.Instance.UpdateValues();
-    
-        PlayerStateMachine.Instance.Player = player;
-    
-        _players.Add(identity.Id, player);
-
-        _objects.Add(identity.Id, player);
-    }
-
-    /// <summary>
-    /// Spawns another player entering our visibility range (CharInfo). Unlike
-    /// SpawnPlayerInterlude (our own avatar - camera, input, PlayerStateMachine), this is purely
-    /// network-driven, same shape as an NPC: no local control, movement/animation come from
-    /// packets via NetworkAnimationController/NetworkCharacterControllerReceive.
-    /// </summary>
-    public void SpawnUserInterlude(NetworkIdentityInterlude identity, PlayerStatusInterlude status, PlayerInterludeStats stats, PlayerInterludeAppearance appearance)
-    {
-        if (_objects.TryGetValue(identity.Id, out Entity existingEntity))
+        Entity entity;
+        if (!_objects.TryGetValue(id, out entity))
         {
-            // Same packet is re-sent when this player's visible equipment changes - not just on
-            // first entering view range - so an already-spawned user gets a gear refresh instead
-            // of being silently ignored.
-            if (existingEntity is UserEntity existingUser)
-            {
-                existingUser.RefreshEquipment(appearance);
-            }
-
+            Debug.LogWarning($"[DeleteObject] RemoveObject MISS dict id={id} (already gone or never spawned)");
             return;
         }
 
-        identity.SetPosY(GetGroundHeight(identity.Position));
-        identity.EntityType = EntityType.User;
+        string goName = entity != null ? entity.name : "null";
+        string typeName = entity != null ? entity.GetType().Name : "null";
+        GameObject go = entity != null ? entity.gameObject : null;
+        bool wasActive = go != null && go.activeSelf;
+        string parentBefore = go != null && go.transform.parent != null
+            ? go.transform.parent.name
+            : "null";
 
-        CharacterRace race = (CharacterRace)appearance.Race;
-        CharacterRaceAnimation raceId = CharacterRaceAnimationParser.ParseRaceInterlude(race, appearance.Sex, appearance.BaseClass);
+        Debug.Log(
+            $"[DeleteObject] RemoveObject START id={id} type={typeName} name={goName} " +
+            $"activeSelf={wasActive} parent={parentBefore}");
 
-        GameObject go = CharacterBuilder.Instance.BuildCharacterBaseInterlude(raceId, appearance, identity.EntityType);
+        _players.Remove(id);
+        _npcs.Remove(id);
+        _objects.Remove(id);
+        if (EntityActionMachine.Instance != null)
+            EntityActionMachine.Instance.Remove(entity);
+
+        if (_gravityNpc != null)
+        {
+            _gravityNpc.DeleteGravity(id);
+        }
+
+        if (Animations != null)
+            Animations.UnregisterController(id);
+
         if (go == null)
         {
-            Debug.LogWarning($"SpawnUserInterlude - could not build character model for {identity.Name} ({identity.Id})");
+            Debug.LogWarning($"[DeleteObject] RemoveObject id={id} entity.gameObject is null");
             return;
         }
 
-        go.transform.SetParent(_usersContainer.transform);
-        go.transform.position = identity.Position;
-        go.transform.rotation = identity.Heading;
-        go.transform.name = identity.Name;
+        // City NPC + field monsters → pool. If pool fails or leaves object visible → Destroy.
+        if (_objectPool != null &&
+            (entity is NpcEntity || entity is MonsterEntity))
+        {
+            ObjectType poolType = entity is MonsterEntity ? ObjectType.Monster : ObjectType.Npc;
+            bool returned = _objectPool.ReturnToPool(poolType, go);
+            bool stillVisible = go != null && go.activeInHierarchy;
+            Debug.Log(
+                $"[DeleteObject] RemoveObject {poolType} id={id} returned={returned} " +
+                $"activeSelf={(go != null && go.activeSelf)} " +
+                $"activeInHierarchy={stillVisible} " +
+                $"parent={(go != null && go.transform.parent != null ? go.transform.parent.name : "null")}");
 
-        UserEntity user = go.GetComponent<UserEntity>();
-        user.Status = status;
-        user.IdentityInterlude = identity;
-        user.Stats = stats;
-        user.Appearance = appearance;
-        user.Race = race;
-        user.RaceId = raceId;
+            if (returned && !stillVisible)
+            {
+                return;
+            }
 
-        user.SetDead(false);
+            Debug.LogWarning(
+                $"[DeleteObject] RemoveObject {poolType} id={id} pool did not hide → Destroy " +
+                $"(returned={returned} stillVisible={stillVisible})");
+        }
 
-        go.SetActive(true);
-
-        var animationController = user.GetComponent<NetworkAnimationController>();
-        animationController.Initialize();
-
-        go.GetComponent<Gear>().Initialize(user.IdentityInterlude.Id, user.RaceId);
-        user.Initialize();
-
-        AnimationManager.Instance.RegisterController(identity.Id, animationController, user);
-        user.UpdateNpcPAtkSpd((int)stats.PAtkSpd);
-        user.UpdateRunSpeed(stats.RunRealSpeed);
-        user.UpdateWalkSpeed(stats.WalkRealSpeed);
-        user.Running = identity.IsRunning;
-
-        // The local player gets kicked into "wait_<weapon>" on ENTER_WORLD (NewIdleState), which is
-        // what puts its Animator into the state the UserState* StateMachineBehaviours are attached
-        // to (Wait, then auto-switching to Run via IsMoving()). Nothing does that for other
-        // players, so without this their Animator never leaves its default entry state.
-        AnimationManager.Instance.PlayMonsterAnimation(identity.Id, AnimationNames.WAIT.ToString() + user.Gear.WeaponAnim);
-
-        _players.Add(identity.Id, user);
-        _objects.Add(identity.Id, user);
+        Destroy(go);
+        Debug.Log($"[DeleteObject] RemoveObject DESTROY id={id} name={goName}");
     }
 
+    public bool ContainsNpc(int id)
+    {
+        return _npcs.ContainsKey(id);
+    }
+
+    public void RegisterPlayer(PlayerEntity player)
+    {
+        if (player == null || player.Identity == null)
+            return;
+
+        int id = player.Identity.Id;
+        _players[id] = player;
+        _objects[id] = player;
+    }
+
+    public void RegisterUser(Entity user)
+    {
+        if (user == null || user.Identity == null)
+            return;
+
+        int id = user.Identity.Id;
+        if (_objects.ContainsKey(id))
+            return;
+
+        _players[id] = user;
+        _objects[id] = user;
+    }
 
     bool isSinglSpawn = false;
 
@@ -427,111 +342,6 @@ public class World : MonoBehaviour, IWorldSpawnContext {
         }
 
         return true;
-    }
-
-    public void SpawnNpcInterlude(NetworkIdentityInterlude identity, NpcStatusInterlude status, Stats stats)
-    {
-
-
-
-        if (_npcs.ContainsKey(identity.Id)) return;
-
-        MonsterStateMachine msm = null;
-        Npcgrp npcgrp = NpcgrpTable.Instance.GetNpcgrp(identity.NpcId);
-        NpcName npcName = NpcNameTable.Instance.GetNpcName(identity.NpcId);
-
-
-        if (npcName == null || npcgrp == null)
-        {
-            Debug.LogWarning($"[DeleteObject] RemoveObject MISS dict id={id} (already gone or never spawned)");
-            return;
-        }
-
-        string goName = entity != null ? entity.name : "null";
-        string typeName = entity != null ? entity.GetType().Name : "null";
-        GameObject go = entity != null ? entity.gameObject : null;
-        bool wasActive = go != null && go.activeSelf;
-        string parentBefore = go != null && go.transform.parent != null
-            ? go.transform.parent.name
-            : "null";
-
-        Debug.Log(
-            $"[DeleteObject] RemoveObject START id={id} type={typeName} name={goName} " +
-            $"activeSelf={wasActive} parent={parentBefore}");
-
-        _players.Remove(id);
-        _npcs.Remove(id);
-        _objects.Remove(id);
-        if (EntityActionMachine.Instance != null)
-            EntityActionMachine.Instance.Remove(entity);
-
-        if (_gravityNpc != null)
-        {
-            _gravityNpc.DeleteGravity(id);
-        }
-
-        if (Animations != null)
-            Animations.UnregisterController(id);
-
-        if (go == null)
-        {
-            Debug.LogWarning($"[DeleteObject] RemoveObject id={id} entity.gameObject is null");
-            return;
-        }
-
-        // City NPC + field monsters → pool. If pool fails or leaves object visible → Destroy.
-        if (_objectPool != null &&
-            (entity is NpcEntity || entity is MonsterEntity))
-        {
-            ObjectType poolType = entity is MonsterEntity ? ObjectType.Monster : ObjectType.Npc;
-            bool returned = _objectPool.ReturnToPool(poolType, go);
-            bool stillVisible = go != null && go.activeInHierarchy;
-            Debug.Log(
-                $"[DeleteObject] RemoveObject {poolType} id={id} returned={returned} " +
-                $"activeSelf={(go != null && go.activeSelf)} " +
-                $"activeInHierarchy={stillVisible} " +
-                $"parent={(go != null && go.transform.parent != null ? go.transform.parent.name : "null")}");
-
-            if (returned && !stillVisible)
-            {
-                return;
-            }
-
-            Debug.LogWarning(
-                $"[DeleteObject] RemoveObject {poolType} id={id} pool did not hide → Destroy " +
-                $"(returned={returned} stillVisible={stillVisible})");
-        }
-
-        Destroy(go);
-        Debug.Log($"[DeleteObject] RemoveObject DESTROY id={id} name={goName}");
-    }
-
-    public bool ContainsNpc(int id)
-    {
-        return _npcs.ContainsKey(id);
-    }
-
-    public void RegisterPlayer(PlayerEntity player)
-    {
-        if (player == null || player.Identity == null)
-            return;
-
-        int id = player.Identity.Id;
-        _players[id] = player;
-        _objects[id] = player;
-    }
-
-    public void RegisterUser(Entity user)
-    {
-        if (user == null || user.Identity == null)
-            return;
-
-        int id = user.Identity.Id;
-        if (_objects.ContainsKey(id))
-            return;
-
-        _players[id] = user;
-        _objects[id] = user;
     }
 
     public void SpawnUser(CharInfoDto info)
@@ -683,6 +493,32 @@ public class World : MonoBehaviour, IWorldSpawnContext {
 
     public float GetGroundHeight(Vector3 pos) {
         return GroundSnapHelper.SnapToGroundOrKeep(pos, _groundMask).y;
+    }
+
+    private static readonly RaycastHit[] _groundProbeHits = new RaycastHit[16];
+
+    /// <summary>
+    /// Ground-item specific probe - lowest raycast hit under the drop point, so items land on the
+    /// actual nearest surface (steps, rooftops) instead of GetGroundHeight's more general snap.
+    /// </summary>
+    public float GetDroppedItemGroundHeight(Vector3 pos)
+    {
+        int hitCount = Physics.RaycastNonAlloc(pos + Vector3.up * 1.5f, Vector3.down, _groundProbeHits, 5f, _groundMask);
+        if (hitCount == 0)
+        {
+            return GetGroundHeight(pos);
+        }
+
+        float lowestY = float.MaxValue;
+        for (int i = 0; i < hitCount; i++)
+        {
+            if (_groundProbeHits[i].point.y < lowestY)
+            {
+                lowestY = _groundProbeHits[i].point.y;
+            }
+        }
+
+        return lowestY;
     }
 
     public string GetEntityName(int id)

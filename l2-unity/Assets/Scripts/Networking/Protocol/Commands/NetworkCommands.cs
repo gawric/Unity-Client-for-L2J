@@ -409,6 +409,32 @@ public sealed class RequestAnswerJoinPartyCommand : INetworkCommand
     }
 }
 
+public sealed class RequestJoinPartyCommand : INetworkCommand
+{
+    public string TargetName;
+    public int PartyDistributionTypeId;
+
+    public RequestJoinPartyCommand(string targetName, int partyDistributionTypeId)
+    {
+        TargetName = targetName;
+        PartyDistributionTypeId = partyDistributionTypeId;
+    }
+}
+
+public sealed class RequestDropItemCommand : INetworkCommand
+{
+    public int ObjectId;
+    public int Count;
+    public Vector3 Position;
+
+    public RequestDropItemCommand(int objectId, int count, Vector3 position)
+    {
+        ObjectId = objectId;
+        Count = count;
+        Position = position;
+    }
+}
+
 public sealed class AnswerTradeRequestCommand : INetworkCommand
 {
     public int Response;

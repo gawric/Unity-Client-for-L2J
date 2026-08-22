@@ -259,8 +259,7 @@ public class CharSelectWindow : L2Window {
         if (_ExpBarBG != null && _ExpBar != null)
         {
             float bgWidth = _ExpBarBG.resolvedStyle.width;
-            //  float procent = (float)_charactersInterlude[slot].ExpProcent;
-            float expRatio = (float)_charactersInterlude[slot].Exp / (float)_charactersInterlude[slot].MaxExp();
+            float expRatio = (float)_charactersInterlude[slot].ExpProcent / 100f;
             float barWidth = bgWidth * expRatio;
             _ExpBar.style.width = barWidth;
         }

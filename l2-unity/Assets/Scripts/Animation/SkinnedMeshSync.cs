@@ -20,22 +20,49 @@ public class SkinnedMeshSync : MonoBehaviour {
         _destSkinnedRenderer = new SkinnedMeshRenderer[8];
         byte childIndex = 0;
 
+        // _rootSkinnedRenderer is resolved once and cached, never re-scanned below - a weapon
+        // equipped later gets parented onto one of the body's own hand bones (a descendant of
+        // `transform`), so re-running transform.GetComponentInChildren<SkinnedMeshRenderer>() after
+        // that could find the WEAPON's renderer instead of the body's (whichever comes first in
+        // hierarchy order) and silently rebind every armor piece to the weapon's bones instead of
+        // the character's - exactly the "body invisible only once a weapon is held" bug.
+        if (_rootSkinnedRenderer == null)
+        {
+            _rootSkinnedRenderer = transform.GetComponentInChildren<SkinnedMeshRenderer>();
+        }
 
         for (byte i = 0; i < transform.parent.childCount; i++) {
             Transform child = transform.parent.GetChild(i);
             if (child != transform) {
+                if (childIndex >= _destSkinnedRenderer.Length)
+                {
+                    Debug.LogWarning("[MeshSync] " + gameObject.name +
+                        " more than " + _destSkinnedRenderer.Length + " sibling pieces under " +
+                        transform.parent.name + " - skipping '" + child.name + "' (increase the array size).");
+                    continue;
+                }
                 _destSkinnedRenderer[childIndex++] = child.GetComponentInChildren<SkinnedMeshRenderer>();
-            } else {
-                _rootSkinnedRenderer = transform.GetComponentInChildren<SkinnedMeshRenderer>();
             }
         }
 
+        if (_rootSkinnedRenderer == null)
+        {
+            Debug.LogWarning("[MeshSync] " + gameObject.name + " under " +
+                (transform.parent != null ? transform.parent.name : "null") +
+                " - no root SkinnedMeshRenderer found on self, cannot rebind sibling armor bones.");
+            return;
+        }
+
+        int rebound = 0;
         foreach (var renderer in _destSkinnedRenderer) {
             if (renderer != null) {
                 renderer.bones = _rootSkinnedRenderer.bones;
+                rebound++;
             }
             //renderer.rootBone = _rootSkinnedRenderer.rootBone;
         }
+        Debug.Log("[MeshSync] " + gameObject.name + " under " + transform.parent.name +
+            " rebound=" + rebound + " root=" + _rootSkinnedRenderer.name);
     }
 
 

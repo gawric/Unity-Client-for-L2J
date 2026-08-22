@@ -72,7 +72,7 @@ public class CharSelectInfoPackage
 
 
     public bool Selected { get => _selected; set => _selected = value; }
-    public double ExpProcent { get => _stats.ExpPercent(_lvl + 1); }
+    public double ExpProcent { get => _stats.ExpPercent(_lvl); }
     public PaperDollSelection PaperDoll { get => _paperDool; }
 
     public CharacterRaceAnimation CharacterRaceAnimation { get => _characterRaceAnimation; set => _characterRaceAnimation = value; }

@@ -279,6 +279,32 @@ public sealed class WorldPacketApply
         apply.OnNpcHtml(npc, dto);
     }
 
+    public void DropItem(DropItemDto dto)
+    {
+        if (_world == null || dto == null)
+            return;
+
+        _world.DropItemOnTheGround(dto.ObjectId, dto.ItemObjectId, dto.ItemId, dto.Position, dto.Count, dto.Stackable);
+    }
+
+    public void GetItem(GetItemDto dto)
+    {
+        if (_world == null || dto == null)
+            return;
+
+        _world.PickupItemFromTheGround(dto.ObjectId, dto.PlayerId, dto.Position);
+    }
+
+    public void SpawnItem(SpawnItemDto dto)
+    {
+        if (_world == null || dto == null)
+            return;
+
+        // Not "dropped" by anyone in view - it was already lying there before we arrived, so there's
+        // no dropper object id to report (0, matching how DropItemOnTheGround treats an unknown one).
+        _world.DropItemOnTheGround(0, dto.ItemObjectId, dto.ItemId, dto.Position, dto.Count, dto.Stackable);
+    }
+
     public void SendArrivedPosition()
     {
         PlayerController player = PlayerController.Instance;

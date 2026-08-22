@@ -38,8 +38,6 @@ public class PickupAction : L2Action
 
     private void SendMoveToItem(Vector3 playerPosition, Vector3 itemPosition)
     {
-        MoveBackwardToLocation movePacket = CreatorPacketsUser.CreateMoveToLocation(playerPosition, itemPosition);
-        bool enable = GameClient.Instance.IsCryptEnabled();
-        SendGameDataQueue.Instance().AddItem(movePacket, enable, enable);
+        IncomingPacketActions.Game.Send(new MoveToCommand(playerPosition, itemPosition));
     }
 }

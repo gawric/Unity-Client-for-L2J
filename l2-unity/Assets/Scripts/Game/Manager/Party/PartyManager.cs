@@ -22,7 +22,7 @@ public class PartyManager : UnityEngine.MonoBehaviour
     public IReadOnlyCollection<PartyMemberData> Members => _members.Values;
 
     public bool IsLeader => IsInParty && PlayerEntity.Instance != null
-        && _leaderObjectId == PlayerEntity.Instance.IdentityInterlude.Id;
+        && _leaderObjectId == PlayerEntity.Instance.Identity.Id;
 
     /// <summary>Roster changed shape (member added/removed, or full reset) - rebuild the member list UI.</summary>
     public event Action OnPartyChanged;
@@ -54,7 +54,7 @@ public class PartyManager : UnityEngine.MonoBehaviour
         return _members.TryGetValue(objectId, out PartyMemberData member) ? member : null;
     }
 
-    public void ApplyAll(PartySmallWindowAll packet)
+    public void ApplyAll(PartySmallWindowAllDto packet)
     {
         _leaderObjectId = packet.LeaderObjectId;
         _distributionType = packet.DistributionType;
@@ -71,7 +71,7 @@ public class PartyManager : UnityEngine.MonoBehaviour
         OnPartyChanged?.Invoke();
     }
 
-    public void ApplyAdd(PartySmallWindowAdd packet)
+    public void ApplyAdd(PartySmallWindowAddDto packet)
     {
         _leaderObjectId = packet.LeaderObjectId;
         _distributionType = packet.DistributionType;
@@ -84,7 +84,7 @@ public class PartyManager : UnityEngine.MonoBehaviour
         OnPartyChanged?.Invoke();
     }
 
-    public void ApplyUpdate(PartySmallWindowUpdate packet)
+    public void ApplyUpdate(PartySmallWindowUpdateDto packet)
     {
         if (!_members.TryGetValue(packet.Member.ObjectId, out PartyMemberData member))
         {
@@ -98,7 +98,7 @@ public class PartyManager : UnityEngine.MonoBehaviour
         OnMemberUpdated?.Invoke(member.ObjectId);
     }
 
-    public void ApplyDelete(PartySmallWindowDelete packet)
+    public void ApplyDelete(PartySmallWindowDeleteDto packet)
     {
         if (_members.Remove(packet.ObjectId))
         {
@@ -113,7 +113,7 @@ public class PartyManager : UnityEngine.MonoBehaviour
         OnPartyChanged?.Invoke();
     }
 
-    public void ApplySpelled(PartySpelled packet)
+    public void ApplySpelled(PartySpelledDto packet)
     {
         // Only player members have a roster row today - pets/servitors (CreatureType 1/2) aren't
         // tracked here yet.

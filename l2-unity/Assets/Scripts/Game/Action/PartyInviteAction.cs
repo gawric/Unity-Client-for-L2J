@@ -33,8 +33,6 @@ public class PartyInviteAction : L2Action
             ? PartyManager.Instance.DistributionType.GetId()
             : PartyDistributionType.FindersKeepers.GetId();
 
-        var sendPacket = CreatorPacketsUser.CreateRequestJoinParty(targetName, distributionTypeId);
-        bool enable = GameClient.Instance.IsCryptEnabled();
-        SendGameDataQueue.Instance().AddItem(sendPacket, enable, enable);
+        IncomingPacketActions.Game.Send(new RequestJoinPartyCommand(targetName, distributionTypeId));
     }
 }

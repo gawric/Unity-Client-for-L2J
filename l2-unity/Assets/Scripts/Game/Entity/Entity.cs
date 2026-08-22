@@ -200,7 +200,18 @@ public class Entity : MonoBehaviour {
             Debug.LogWarning("Gear script is not attached to entity");
             return;
         }
-        _gear.SyncEquippedWeapons(_appearance.RHand, _appearance.LHand);
+
+        // An exception here must not stop the caller (Initialize()/RefreshVisuals()) - it would
+        // silently skip everything after it (armor equip, world registration, event subscriptions)
+        // for the whole entity just because one weapon failed to load. Log and move on instead.
+        try
+        {
+            _gear.SyncEquippedWeapons(_appearance.RHand, _appearance.LHand);
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogError("Entity.EquipAllWeapons error " + GearFlowLog.Entity(this) + " : " + e);
+        }
     }
 
     /* Notify server that entity got attacked */

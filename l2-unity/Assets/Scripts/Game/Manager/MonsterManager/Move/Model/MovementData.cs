@@ -92,54 +92,6 @@ public class MovementData
     public void SetIsMove(bool isMove)
     {
         _isMove = isMove;
-        if (!isMove)
-        {
-            ResumeSync();
-        }
-    }
-
-    private void PauseSync()
-    {
-        if (_syncPaused) return;
-        _syncPaused = true;
-        _networkTransformReceive?.PausePositionSync();
-        _networkCharacterControllerReceive?.SetExternalMoveActive(true);
-        PlayUserAnimation(AnimationNames.RUN);
-    }
-
-    private void ResumeSync()
-    {
-        if (!_syncPaused) return;
-        _syncPaused = false;
-
-        // _serverPosition/_lastPos are still frozen at wherever they were the last time
-        // SetNewPosition ran (nothing else ever calls it) - resuming without refreshing them means
-        // the safety net immediately sees the whole distance just traveled as "desync" and yanks
-        // the entity straight back to that stale point. Telling it "here is valid" first prevents
-        // that snap and keeps it from comparing against stale data on the next move too.
-        if (_networkTransformReceive != null)
-        {
-            _networkTransformReceive.SetNewPosition(_entity.transform.position);
-            _networkTransformReceive.ResumePositionSync();
-        }
-
-        _networkCharacterControllerReceive?.SetExternalMoveActive(false);
-        PlayUserAnimation(AnimationNames.WAIT);
-    }
-
-    /// <summary>
-    /// The local player and NPCs both switch run/wait explicitly (NewRunningState/NewIdleState via
-    /// AnimationManager.PlayAnimation, NpcEntity.OnStartL2jMoving/OnStopL2jMoving) rather than by
-    /// polling for movement - UserStateWait's own IsMoving() polling turned out not to actually
-    /// trigger the Wait->Run switch in practice, so other players get the same explicit treatment
-    /// here instead of relying on it.
-    /// </summary>
-    private void PlayUserAnimation(Animation animation)
-    {
-        if (_entity is UserEntity user)
-        {
-            AnimationManager.Instance.PlayMonsterAnimation(user.IdentityInterlude.Id, animation.ToString() + user.Gear.WeaponAnim);
-        }
     }
 
     public float GetSpeed()

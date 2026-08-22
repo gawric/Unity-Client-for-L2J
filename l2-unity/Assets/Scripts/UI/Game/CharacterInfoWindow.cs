@@ -238,7 +238,7 @@ public class CharacterInfoWindow : L2PopupWindow
 
         if (stats.MaxExp > 0)
         {
-             float procent = (float)stats.ExpPercent(stats.Level + 1);
+             float procent = (float)stats.ExpPercent(stats.Level);
             _expLabel.text =  procent + "%";
         }
         else
@@ -300,7 +300,7 @@ public class CharacterInfoWindow : L2PopupWindow
         {
             float bgWidth = 315;
             //float bgWidth = _expBarBg.resolvedStyle.width;
-            double expRatio = stats.Exp / stats.MaxExp;
+            double expRatio = stats.ExpPercent(stats.Level) / 100.0;
             double barWidth = bgWidth * expRatio;
             if (stats.MaxExp == 0)
             {
