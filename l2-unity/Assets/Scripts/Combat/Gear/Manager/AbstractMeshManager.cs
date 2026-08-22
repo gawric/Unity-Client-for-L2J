@@ -66,9 +66,59 @@ public class AbstractMeshManager : MonoBehaviour
             _go.SetActive(false);
             _go.transform.name = name;
 
+            if (type == ObjectType.Weapon)
+                NeutralizeSkinnedWeaponMesh(_go);
+
             return _go;
         }
         return null;
+    }
+
+    /// <summary>
+    /// Some weapon models come out of the FBX import with a SkinnedMeshRenderer attached (a stray
+    /// artifact of the import, not something the weapon actually needs - it's a rigid prop parented
+    /// wholesale to a hand bone, never deformed by the character's skeleton). Left as-is, it breaks
+    /// SkinnedMeshSync: once the weapon is a descendant of the body's own transform, the sync's
+    /// GetComponentInChildren&lt;SkinnedMeshRenderer&gt;() search can find the WEAPON's renderer instead
+    /// of the body's, and every armor piece gets rebound to the weapon's (wrong/absent) bones -
+    /// exactly the "body invisible only while holding certain weapons" bug. Converting it to a plain
+    /// MeshRenderer here, at creation time, keeps it out of that search entirely regardless of which
+    /// weapon it is or what order things get equipped in.
+    /// </summary>
+    private void NeutralizeSkinnedWeaponMesh(GameObject go)
+    {
+        if (go == null)
+            return;
+
+        SkinnedMeshRenderer[] skinnedRenderers = go.GetComponentsInChildren<SkinnedMeshRenderer>(true);
+        foreach (SkinnedMeshRenderer skinned in skinnedRenderers)
+        {
+            GameObject holder = skinned.gameObject;
+            Mesh mesh = skinned.sharedMesh;
+            Material[] materials = skinned.sharedMaterials;
+            UnityEngine.Rendering.ShadowCastingMode shadowMode = skinned.shadowCastingMode;
+            bool receiveShadows = skinned.receiveShadows;
+
+            // Needs to be gone immediately, not deferred - EquipAllWeapons() and EquipAllArmors()
+            // run back-to-back in the same frame, and SyncMesh() (triggered by the armor equip that
+            // follows) must not still find this component when it searches moments later.
+            UnityEngine.Object.DestroyImmediate(skinned);
+
+            MeshFilter filter = holder.GetComponent<MeshFilter>();
+            if (filter == null)
+                filter = holder.AddComponent<MeshFilter>();
+            filter.sharedMesh = mesh;
+
+            MeshRenderer renderer = holder.GetComponent<MeshRenderer>();
+            if (renderer == null)
+                renderer = holder.AddComponent<MeshRenderer>();
+            renderer.sharedMaterials = materials;
+            renderer.shadowCastingMode = shadowMode;
+            renderer.receiveShadows = receiveShadows;
+
+            GearFlowLog.Info("NeutralizeSkinnedWeaponMesh converted " + holder.name +
+                " from SkinnedMeshRenderer to MeshRenderer");
+        }
     }
 
     private void AddPrefabToList(ObjectType type , GameObject[] allModels)

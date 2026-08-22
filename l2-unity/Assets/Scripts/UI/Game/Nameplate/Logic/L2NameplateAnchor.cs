@@ -23,18 +23,14 @@ public static class L2NameplateAnchor
             return Vector3.zero;
         }
 
-        if (cc != null)
-        {
-            Vector3 localTop = cc.center + Vector3.up * (cc.height * 0.5f);
-            return target.TransformPoint(localTop) + Vector3.up * headHeightOffset;
-        }
-
-        if (capsule != null)
-        {
-            Vector3 localTop = capsule.center + Vector3.up * (capsule.height * 0.5f);
-            return target.TransformPoint(localTop) + Vector3.up * headHeightOffset;
-        }
-
+        // Deliberately NOT using cc/capsule dimensions anymore, even when present: the User_<Race>
+        // prefabs (other players) and Player_<Race> prefabs (local player) ship with differently
+        // tuned CharacterController sizes for the very same race (e.g. MFighter: Player_ capsule
+        // top ~0.925m, User_ ~0.725m) - fine for movement/collision, but it made nameplates sit at
+        // very different heights for identical races depending on whether the entity happened to be
+        // the local player or someone else. CollisionHeight comes from the server (same field, same
+        // per-race value for everyone), so anchoring on it instead keeps nameplate height consistent
+        // no matter which prefab variant a given entity uses.
         // Feet GO + 2×CH: UE Location is capsule center (= feet+CH), name = Loc+CH.
         return target.position + Vector3.up * HeightFromFeet(collisionHeight, headHeightOffset);
     }
