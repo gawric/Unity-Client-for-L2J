@@ -9,9 +9,12 @@ public class LoginClientReceiving
     private readonly AsynchronousClient _asyncClient;
     private const int HeaderSize = 2;
 
-    public LoginClientReceiving(AsynchronousClient asyncClient)
+    private readonly IncomingLoginDataQueue _incoming;
+
+    public LoginClientReceiving(AsynchronousClient asyncClient, IncomingLoginDataQueue incoming)
     {
         _asyncClient = asyncClient;
+        _incoming = incoming;
     }
 
     public Task StartReceiving(Socket socket, System.Threading.CancellationToken token)
@@ -44,7 +47,7 @@ public class LoginClientReceiving
                     byte[] data = new byte[dataLen];
                     GameClientReceiving.ReadWholeArray(stream, data);
 
-                    IncomingLoginDataQueue.Instance().AddItem(data, _asyncClient.InitPacket, _asyncClient.CryptEnabled);
+                    _incoming.AddItem(data, _asyncClient.InitPacket, _asyncClient.CryptEnabled);
                 }
             }
         }

@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -11,7 +11,7 @@ public class DescriptionSkillWindow : L2PopupWindow
     private Label _spLabel;
     private Button _backButton;
     private Button _okButton;
-    private AcquireSkillInfo _packet;
+    private AcquireSkillInfoDto _packet;
     private void Awake()
     {
         if (_instance == null)
@@ -53,7 +53,7 @@ public class DescriptionSkillWindow : L2PopupWindow
 
     }
 
-    public void AddData(AcquireSkillInfo packet)
+    public void AddData(AcquireSkillInfoDto packet)
     {
         _packet = packet;
         _dataProvider.AddDescriptionSkill(packet.GetId(), packet.GetSpCoast(), packet.GetLevel(), _content);
@@ -62,7 +62,7 @@ public class DescriptionSkillWindow : L2PopupWindow
 
     public void ShowWindow()
     {
-        UserInfo user = StorageNpc.getInstance().GetFirstUser();
+        UserInfoDto user = StorageNpc.getInstance().GetFirstUser();
         _spLabel.text = user.PlayerInfoInterlude.Stats.Sp.ToString();
         base.ShowWindow();
     }
@@ -80,8 +80,7 @@ public class DescriptionSkillWindow : L2PopupWindow
         // 2 - Pledge skills
         if (_packet != null)
         {
-            RequestAcquireSkill sendPaket = CreatorPacketsUser.CreateRequestAcquireSkill(_packet.GetId(), _packet.GetLevel(), 0);
-            SendGameDataQueue.Instance().AddItem(sendPaket, GameClient.Instance.IsCryptEnabled(), GameClient.Instance.IsCryptEnabled());
+            IncomingPacketActions.Game.Send(new RequestAcquireSkillCommand(_packet.GetId(), _packet.GetLevel(), 0));
         }
         base.HideWindow();
     }

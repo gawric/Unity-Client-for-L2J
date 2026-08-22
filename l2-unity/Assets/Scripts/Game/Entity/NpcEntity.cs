@@ -2,7 +2,6 @@
 
 [RequireComponent(typeof(NetworkAnimationController)),
     RequireComponent(typeof(NetworkTransformReceive)),
-    RequireComponent(typeof(NetworkCharacterControllerReceive)),
     RequireComponent(typeof(CharacterAnimationAudioHandler))]
 public class NpcEntity : NetworkEntity
 {
@@ -13,7 +12,6 @@ public class NpcEntity : NetworkEntity
     private static readonly string _wait = "wait";
     private string[] allAnim = new string[] { _walk , _run , _wait, };
     private CharacterController _characterController;
-    private NpcStateMachine _stateMachine;
     [SerializeField] private NpcData _npcData;
 
     public NpcData NpcData { get { return _npcData; } set { _npcData = value; } }
@@ -22,7 +20,6 @@ public class NpcEntity : NetworkEntity
     {
         base.Initialize();
         _npcAnimationAudioHandler = GetComponent<CharacterAnimationAudioHandler>();
-        _stateMachine = GetComponent<NpcStateMachine>();
         _characterController = GetComponent<CharacterController>();
 
         EntityLoaded = true;
@@ -132,11 +129,6 @@ public class NpcEntity : NetworkEntity
     {
         base.OnStartMoving(walking);
         _networkAnimationReceive.SetAnimationProperty(walking ? (int)NpcAnimationEvent.Walk : (int)NpcAnimationEvent.Run, 1f);
-    }
-
-    public NpcStateMachine GetStateMachine()
-    {
-        return _stateMachine;
     }
 
     public CharacterController GetCharacterController()

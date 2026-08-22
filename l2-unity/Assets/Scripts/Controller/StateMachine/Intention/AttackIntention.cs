@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using static AttackingState;
 
 public class AttackIntention : IntentionBase
@@ -7,9 +7,9 @@ public class AttackIntention : IntentionBase
 
     public override void Enter(object arg0)
     {
-        Transform target = TargetManager.Instance.Target.Data.ObjectTransform;
+        Transform target = IncomingPacketActions.Targets.Target.Data.ObjectTransform;
 
-        //Attack attackpacket = (Attack)arg0;
+        //AttackDto attackpacket = (AttackDto)arg0;
 
         //Debug.Log("AttackIntention++++ HP " + TargetManager.Instance.Target.Status.Hp);\\
         //TimeUtils.PrintFullTime("Attack Packet Time Intention " + _stateMachine.State);
@@ -21,7 +21,7 @@ public class AttackIntention : IntentionBase
         }
         PlayerEntity.Instance.isAccesNewAtk = true;
         //default combo 2 attack
-        //Attack packet send time 1200ms and UpdatePacket 600ms;
+        //AttackDto packet send time 1200ms and UpdatePacket 600ms;
         if (PlayerEntity.Instance.CountAtk >= 2)
         {
             PlayerEntity.Instance.isStop = true;
@@ -42,7 +42,7 @@ public class AttackIntention : IntentionBase
 
         if (type != AttackIntentionType.TargetReached)
         {
-            TargetManager.Instance.SetAttackTarget();
+            IncomingPacketActions.Targets.SetAttackTarget();
         }
         //Debug.Log("Attack Intention!!!!! comment code");
         if (type == AttackIntentionType.WaitReturn)

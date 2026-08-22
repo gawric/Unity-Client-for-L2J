@@ -1486,9 +1486,6 @@ PrefabInstance:
       addedObject: {fileID: 3064228160147892943}
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: b0633ea5287063849a1827d459101d11, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 7633784946178420607}
-    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: b0633ea5287063849a1827d459101d11, type: 3}
-      insertIndex: -1
       addedObject: {fileID: 2999981383657213868}
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: b0633ea5287063849a1827d459101d11, type: 3}
       insertIndex: -1
@@ -1537,20 +1534,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _entityLoaded: 0
-  _identity:
-    _entityType: 2
-    _id: 0
-    _name: 
-    _title: 
-    _titleColor: 9CE8A9FF
-    _resetTick: 0
-    _npcId: 0
-    _npcClass: 
-    _playerClass: 0
-    _isMage: 0
-    _position: {x: 0, y: 0, z: 0}
-    _heading: 0
-    _owned: 0
   _identityInterlude:
     _entityType: 0
     _id: 0
@@ -1672,22 +1655,6 @@ CharacterController:
   m_SkinWidth: 0.08
   m_MinMoveDistance: 0.001
   m_Center: {x: 0, y: 0.38, z: 0}
---- !u!114 &7633784946178420607
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6189121370827720120}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c0d95d876eae19f4099fa56602b7d22d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _direction: {x: 0, y: 0, z: 0}
-  _speed: 0
-  _destination: {x: 0, y: 0, z: 0}
-  _gravity: 28
 --- !u!114 &2999981383657213868
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1753,9 +1720,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e688c28aabf94c249a90aa0f8f1b551a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _enableLogs: 0
-  _currentState: 0
-  _currentIntention: 0
 --- !u!4 &6822950914073517826 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: b0633ea5287063849a1827d459101d11, type: 3}

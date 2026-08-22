@@ -1,13 +1,32 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
+using VContainer;
 
 public class HitManager : MonoBehaviour
 {
+    [Inject] World _world;
     public static HitManager Instance { get; private set; }
     private const string ETC_NAME = "etc_";
     private const string IMPACT_DEBUG_TAG = "[HIT_DEBUG]";
     private const int SoulshotImpactEffectId = 99998;
     private const int NormalImpactEffectId = 99997;
+    private bool _projectileHitSubscribed;
+    private readonly Dictionary<int, RemoteMeleeHit> _remoteHits = new Dictionary<int, RemoteMeleeHit>();
+    private readonly List<int> _remoteHitScratch = new List<int>();
+
+    sealed class RemoteMeleeHit
+    {
+        public int AttackerId;
+        public Entity Attacker;
+        public Entity Target;
+        public bool Soulshot;
+        public bool Fired;
+        public float FireAt;
+        public bool WaitForShot;
+        public AnimationEventsBase Events;
+        public Action<string> OnShot;
+    }
 
     private void Awake()
     {
@@ -19,6 +38,121 @@ public class HitManager : MonoBehaviour
         else
         {
             Destroy(gameObject);
+        }
+    }
+
+    private void OnEnable()
+    {
+        TrySubscribeProjectileHits();
+    }
+
+    private void Start()
+    {
+        TrySubscribeProjectileHits();
+    }
+
+    private void OnDisable()
+    {
+        UnsubscribeProjectileHits();
+        ClearRemoteMeleeHits();
+    }
+
+    private void Update()
+    {
+        TickRemoteMeleeHits();
+    }
+
+    /// <summary>
+    /// Called from ProjectileManager.Awake when Instance becomes available (order-safe).
+    /// Subscribe once for HitManager lifetime; unsubscribe only on HitManager disable/destroy.
+    /// </summary>
+    public void BindProjectileHits()
+    {
+        TrySubscribeProjectileHits();
+    }
+
+    private void TrySubscribeProjectileHits()
+    {
+        if (_projectileHitSubscribed || ProjectileManager.Instance == null)
+        {
+            return;
+        }
+
+        ProjectileManager.Instance.OnHitMonster += OnProjectileHitMonster;
+        _projectileHitSubscribed = true;
+    }
+
+    private void UnsubscribeProjectileHits()
+    {
+        if (!_projectileHitSubscribed)
+        {
+            return;
+        }
+
+        if (ProjectileManager.Instance != null)
+        {
+            ProjectileManager.Instance.OnHitMonster -= OnProjectileHitMonster;
+        }
+
+        _projectileHitSubscribed = false;
+    }
+
+    /// <summary>
+    /// Bow ArrowStick Hit Time — lives on HitManager so AttackDto→Idle cannot drop the subscription.
+    /// </summary>
+    private void OnProjectileHitMonster(
+        GameObject prefab,
+        Transform target,
+        Vector3 hitPointCollider,
+        Vector3 hitDirection,
+        int attackerEntityId)
+    {
+        if (prefab != null && target != null)
+        {
+            HandleHitBody(prefab, target, hitPointCollider, hitDirection);
+        }
+
+        Entity attacker = ResolveEntityFromWorld(attackerEntityId);
+        if (attacker == null)
+            attacker = PlayerEntity.Instance;
+        Entity targetEntity = target != null
+            ? target.GetComponentInParent<Entity>()
+            : null;
+        if (targetEntity == null && attacker != null)
+            targetEntity = attacker.GetTargetEntity();
+
+        MonsterEntity monster = targetEntity as MonsterEntity;
+        if (monster == null)
+        {
+            Debug.Log(
+                $"[HIT_FX] OnProjectileHitMonster SKIP not MonsterEntity " +
+                $"type={(targetEntity != null ? targetEntity.GetType().Name : "null")}");
+            return;
+        }
+
+        if (attacker != null && attacker.HitIsMissed())
+        {
+            Debug.Log(
+                $"[HIT_FX] OnProjectileHitMonster SKIP HitIsMissed=true monster={monster.name}");
+            return;
+        }
+
+        Transform attackerTf = prefab != null ? prefab.transform : null;
+        Debug.Log(
+            $"[HIT_FX] OnProjectileHitMonster → HandleHitCollider monster={monster.name} " +
+            $"soulshot={(attacker != null && attacker.IsSoulshotCharged)}");
+        HandleHitCollider(
+            attacker,
+            attackerTf,
+            monster,
+            hitPointCollider,
+            hitDirection);
+
+        if (monster.IsDead() || monster.CalculateRemainingHp() <= 0)
+        {
+            monster.SetDead(true);
+            if (EntityActionMachine.Instance != null)
+                EntityActionMachine.Instance.Die(monster);
         }
     }
 
@@ -40,34 +174,267 @@ public class HitManager : MonoBehaviour
     public void HandleHitCollider(
         Entity attaker,
         Transform attacker,
-        MonsterStateMachine targetStateMachine,
+        Entity targetEntity,
         Vector3 hitCollider,
         Vector3 hitColliderDirection)
     {
-        if (targetStateMachine == null)
+        string attackerName = attacker != null ? attacker.name : "null";
+        Debug.Log(
+            $"[HIT_FX] 6.HitManager.HandleHitCollider ENTER frame={Time.frameCount} t={Time.time:F3} " +
+            $"attacker={attackerName} target={(targetEntity != null ? targetEntity.name : "null")} " +
+            $"soulshot={(attaker != null && attaker.IsSoulshotCharged)} point={hitCollider}");
+
+        if (targetEntity == null)
         {
+            Debug.LogWarning("[HIT_FX] 6.HitManager SKIP targetEntity=null");
             return;
         }
-
-        if (targetStateMachine.State == MonsterState.IDLE)
-        {
-            targetStateMachine.NotifyEvent(Event.HIT_REACTION);
-        }
-
-        Entity targetEntity = ResolveTargetEntity(targetStateMachine);
         Vector3 impactDir = ResolveSoulshotImpactDirection(attaker, targetEntity, hitCollider);
         Vector3 spawnPoint = ResolveSoulshotSpawnPoint(targetEntity, impactDir, hitCollider);
+
+        if (EffectManager.Instance == null)
+        {
+            Debug.LogWarning("[HIT_FX] 6.HitManager SKIP EffectManager.Instance=null");
+            return;
+        }
 
         if (attaker != null && attaker.IsSoulshotCharged)
         {
             LogSoulshotImpactOrientation(attaker, targetEntity, hitCollider, spawnPoint, impactDir);
+            Debug.Log(
+                $"[HIT_FX] 6.HitManager → EffectManager.PlayerImpactEffect " +
+                $"id={SoulshotImpactEffectId} (soulshot) spawn={spawnPoint} dir={impactDir}");
             EffectManager.Instance.PlayerImpactEffect(SoulshotImpactEffectId, spawnPoint, impactDir);
             attaker.IsSoulshotCharged = false;
         }
         else
         {
+            Debug.Log(
+                $"[HIT_FX] 6.HitManager → EffectManager.PlayerImpactEffect " +
+                $"id={NormalImpactEffectId} (normal) spawn={spawnPoint} dir={impactDir}");
             EffectManager.Instance.PlayerImpactEffect(NormalImpactEffectId, spawnPoint, impactDir);
         }
+    }
+
+    /// <summary>
+    /// Remote melee (Monster / CharInfo). Local PlayerEntity stays on AttackShot + sword collision.
+    /// Impact waits for clip AttackShot; timer is only a late fallback.
+    /// Bow: ignore AttackShot — the arrow has not left yet. Impact is ArrowStick Hit Time.
+    /// </summary>
+    public void ArmRemoteMeleeHit(Entity attacker, Entity target, AttackDto dto)
+    {
+        Hit hit = dto != null ? dto.FirstHit : null;
+        ArmRemoteMeleeHit(
+            attacker,
+            target,
+            miss: hit != null && hit.isMiss(),
+            soulshot: hit != null && hit.hasSoulshot(),
+            hitTimeMs: 0);
+    }
+
+    public void ArmRemoteSkillHit(Entity attacker, Entity target, MagicSkillUseDto magic)
+    {
+        if (target == null || target == attacker)
+            return;
+
+        ArmRemoteMeleeHit(
+            attacker,
+            target,
+            miss: false,
+            soulshot: attacker != null && attacker.IsSoulshotCharged,
+            hitTimeMs: magic != null ? magic.HitTime : 0);
+    }
+
+    void ArmRemoteMeleeHit(
+        Entity attacker,
+        Entity target,
+        bool miss,
+        bool soulshot,
+        int hitTimeMs)
+    {
+        if (attacker == null || target == null || attacker is PlayerEntity)
+            return;
+        if (!(attacker is MonsterEntity) && !(attacker is UserEntity))
+            return;
+        if (attacker.Identity == null)
+            return;
+
+        if (miss)
+            return;
+
+        if (IsBowWeapon(attacker))
+        {
+            DropRemoteMeleeHit(attacker.Identity.Id);
+            if (soulshot)
+                attacker.IsSoulshotCharged = true;
+            return;
+        }
+
+        FlushRemoteMeleeHit(attacker);
+
+        AnimationEventsBase events = attacker.GetAnimatorController();
+        if (events == null)
+            events = attacker.GetComponentInChildren<AnimationEventsBase>(true);
+
+        bool waitForShot = events != null;
+        float delay = waitForShot
+            ? 4f
+            : hitTimeMs > 0
+                ? Mathf.Clamp(hitTimeMs / 1000f * 0.75f, 0.12f, 2.5f)
+                : ResolveRemoteHitDelay(attacker);
+        int attackerId = attacker.Identity.Id;
+        RemoteMeleeHit pending = new RemoteMeleeHit
+        {
+            AttackerId = attackerId,
+            Attacker = attacker,
+            Target = target,
+            Soulshot = soulshot,
+            WaitForShot = waitForShot,
+            FireAt = Time.time + delay
+        };
+
+        if (waitForShot)
+        {
+            pending.Events = events;
+            pending.OnShot = _ => TryFireRemoteMeleeHit(attackerId);
+            events.OnAnimationAttackShot += pending.OnShot;
+        }
+
+        _remoteHits[attackerId] = pending;
+    }
+
+    public void FlushRemoteMeleeHit(Entity attacker)
+    {
+        if (attacker == null || attacker.Identity == null)
+            return;
+        TryFireRemoteMeleeHit(attacker.Identity.Id);
+    }
+
+    void TickRemoteMeleeHits()
+    {
+        if (_remoteHits.Count == 0)
+            return;
+
+        _remoteHitScratch.Clear();
+        foreach (KeyValuePair<int, RemoteMeleeHit> kv in _remoteHits)
+        {
+            RemoteMeleeHit pending = kv.Value;
+            if (pending == null || pending.Fired)
+            {
+                _remoteHitScratch.Add(kv.Key);
+                continue;
+            }
+
+            if (pending.Attacker == null || pending.Attacker.IsDead())
+            {
+                _remoteHitScratch.Add(kv.Key);
+                continue;
+            }
+
+            if (Time.time >= pending.FireAt)
+                _remoteHitScratch.Add(kv.Key);
+        }
+
+        for (int i = 0; i < _remoteHitScratch.Count; i++)
+        {
+            int id = _remoteHitScratch[i];
+            RemoteMeleeHit pending;
+            if (!_remoteHits.TryGetValue(id, out pending) || pending == null)
+                continue;
+            if (pending.Fired || pending.Attacker == null || pending.Attacker.IsDead())
+            {
+                DropRemoteMeleeHit(id);
+                continue;
+            }
+
+            if (pending.WaitForShot)
+            {
+                DropRemoteMeleeHit(id);
+                continue;
+            }
+
+            TryFireRemoteMeleeHit(id);
+        }
+    }
+
+    void TryFireRemoteMeleeHit(int attackerId)
+    {
+        RemoteMeleeHit pending;
+        if (!_remoteHits.TryGetValue(attackerId, out pending) || pending == null || pending.Fired)
+            return;
+
+        pending.Fired = true;
+        UnbindRemoteMeleeHit(pending);
+        _remoteHits.Remove(attackerId);
+
+        Entity attacker = pending.Attacker;
+        Entity target = pending.Target;
+        if (attacker == null || target == null)
+            return;
+
+        attacker.IsSoulshotCharged = pending.Soulshot;
+        Vector3 hitPoint = ResolveTargetImpactCenter(target);
+        HandleHitCollider(attacker, attacker.transform, target, hitPoint, Vector3.zero);
+    }
+
+    void DropRemoteMeleeHit(int attackerId)
+    {
+        RemoteMeleeHit pending;
+        if (!_remoteHits.TryGetValue(attackerId, out pending))
+            return;
+        UnbindRemoteMeleeHit(pending);
+        _remoteHits.Remove(attackerId);
+    }
+
+    void ClearRemoteMeleeHits()
+    {
+        _remoteHitScratch.Clear();
+        foreach (KeyValuePair<int, RemoteMeleeHit> kv in _remoteHits)
+            _remoteHitScratch.Add(kv.Key);
+        for (int i = 0; i < _remoteHitScratch.Count; i++)
+            DropRemoteMeleeHit(_remoteHitScratch[i]);
+        _remoteHitScratch.Clear();
+    }
+
+    static void UnbindRemoteMeleeHit(RemoteMeleeHit pending)
+    {
+        if (pending == null || pending.Events == null)
+            return;
+        if (pending.OnShot != null)
+            pending.Events.OnAnimationAttackShot -= pending.OnShot;
+        pending.Events = null;
+        pending.OnShot = null;
+    }
+
+    static bool IsBowWeapon(Entity attacker)
+    {
+        if (attacker == null)
+            return false;
+
+        UserEntity user = attacker as UserEntity;
+        if (user != null)
+            return string.Equals(user.WeaponAnim, "bow", StringComparison.OrdinalIgnoreCase);
+
+        return attacker.Gear != null &&
+               !string.IsNullOrEmpty(attacker.Gear.WeaponAnim) &&
+               string.Equals(attacker.Gear.WeaponAnim, "bow", StringComparison.OrdinalIgnoreCase);
+    }
+
+    static float ResolveRemoteHitDelay(Entity attacker)
+    {
+        float pAtk = 333f;
+        if (attacker != null && attacker.Stats != null)
+        {
+            if (attacker.Stats.PAtkRealSpeed > 1f)
+                pAtk = attacker.Stats.PAtkRealSpeed;
+            else if (attacker.Stats.PAtkSpd > 1)
+                pAtk = attacker.Stats.PAtkSpd;
+            else if (attacker.Stats.BasePAtkSpeed > 1f)
+                pAtk = attacker.Stats.BasePAtkSpeed;
+        }
+
+        float cycleSec = TimeUtils.ConvertMsToSec(CalcBaseParam.CalculateTimeL2j(pAtk));
+        return Mathf.Clamp(cycleSec * 0.75f, 0.12f, 1.5f);
     }
 
     public bool TryPrepareProjectileEffectHit(
@@ -324,19 +691,9 @@ public class HitManager : MonoBehaviour
         return PlayerEntity.Instance != null ? PlayerEntity.Instance.transform : null;
     }
 
-    private static Entity ResolveTargetEntity(MonsterStateMachine targetStateMachine)
+    private static Entity ResolveTargetEntity(Entity targetEntity)
     {
-        if (targetStateMachine == null)
-        {
-            return null;
-        }
-
-        if (targetStateMachine.Entity != null)
-        {
-            return targetStateMachine.Entity;
-        }
-
-        return targetStateMachine.GetComponentInParent<Entity>();
+        return targetEntity;
     }
 
     private static void LogSoulshotImpactOrientation(
@@ -365,8 +722,8 @@ public class HitManager : MonoBehaviour
         float angResolvedVsTargetFwd = AngleDeg(resolved, targetFwd);
 
         string source = attackerTf != null && targetTf != null ? "PLAYER_TO_TARGET_ENTITY" : "PLAYER_TO_HIT_FALLBACK";
-        int attackerId = attacker != null && attacker.IdentityInterlude != null ? attacker.IdentityInterlude.Id : 0;
-        int targetId = target != null && target.IdentityInterlude != null ? target.IdentityInterlude.Id : 0;
+        int attackerId = attacker != null && attacker.Identity != null ? attacker.Identity.Id : 0;
+        int targetId = target != null && target.Identity != null ? target.Identity.Id : 0;
 
         Debug.Log(
             $"{IMPACT_DEBUG_TAG} soulshotOrient source={source} " +
@@ -397,12 +754,11 @@ public class HitManager : MonoBehaviour
 
     private Entity ResolveEntityFromWorld(int entityId)
     {
-        if (entityId <= 0 || World.Instance == null)
-        {
+        World world = _world != null ? _world : World.Instance;
+        if (entityId <= 0 || world == null)
             return null;
-        }
 
-        return World.Instance.GetEntityNoLockSync(entityId);
+        return world.GetEntityNoLockSync(entityId);
     }
 
     private void HandleArrowHit(GameObject arrow, Transform target, Vector3 hitPointCollider, Vector3 hitDirection)

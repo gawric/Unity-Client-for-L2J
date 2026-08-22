@@ -75,4 +75,24 @@ public abstract class L2UI : MonoBehaviour
             _loadingElement.style.display = DisplayStyle.None;
         }
     }
+
+    public void SetHudVisible(bool visible)
+    {
+        if (_rootElement == null)
+        {
+            UIDocument document = GetComponent<UIDocument>();
+            if (document != null)
+            {
+                _rootElement = document.rootVisualElement;
+            }
+        }
+
+        if (_rootElement == null)
+        {
+            return;
+        }
+
+        _rootElement.style.visibility = visible ? Visibility.Visible : Visibility.Hidden;
+        _rootElement.pickingMode = visible ? PickingMode.Position : PickingMode.Ignore;
+    }
 }

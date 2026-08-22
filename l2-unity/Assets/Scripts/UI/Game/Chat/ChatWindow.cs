@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -202,8 +202,7 @@ public class ChatWindow : L2Window
                         String prefix = "admin_";
                         string gmCommand = text.Substring(2);
                         string command = prefix + gmCommand;
-                        bool enable = GameClient.Instance.IsCryptEnabled();
-                        SendGameDataQueue.Instance().AddItem(CreatorPacketsUser.CreateByPassPacket(command), enable, enable);
+                        IncomingPacketActions.Game.Send(new RequestBypassToServerCommand(command));
                         Debug.Log("ChatWindow: requested admin command :" + command);
                     }
                     else
@@ -211,8 +210,7 @@ public class ChatWindow : L2Window
                         var commands = PlayerCommands.FindByText(text);
                         if (commands != null)
                         {
-                            bool enable = GameClient.Instance.IsCryptEnabled();
-                            SendGameDataQueue.Instance().AddItem(CreatorPacketsUser.CreateRequestUserCommand(commands.Id), enable, enable);
+                            IncomingPacketActions.Game.Send(new RequestUserCommandCommand(commands.Id));
                             Debug.Log("ChatWindow: requested player command :" + commands  + " id: " + commands.Id);
                         }
                         else
@@ -281,7 +279,6 @@ public class ChatWindow : L2Window
         ChatTypeData data = ChatTypes.GetById(tab.TabId);
         if (data != null)
         {
-            bool enable = GameClient.Instance.IsCryptEnabled();
             bool whisper = text[0] == '"';
 
             if (whisper)
@@ -295,12 +292,12 @@ public class ChatWindow : L2Window
                 string targetName = text.Substring(0, spaceIndex);
                 string message = text.Substring(spaceIndex + 1);
 
-                SendGameDataQueue.Instance().AddItem(CreatorPacketsUser.CreateSendWhisperMessage(ChatTypes.GetById(2), message, targetName), enable, enable);
+                IncomingPacketActions.Game.Send(new RequestSay2Command(ChatTypes.GetById(2), message, targetName));
                 Debug.Log("whisper chat: sending to :" + targetName + " message: " + message);
             }
             else
             {
-                SendGameDataQueue.Instance().AddItem(CreatorPacketsUser.CreateSendMessage(data, text), enable, enable);
+                IncomingPacketActions.Game.Send(new RequestSay2Command(data, text, ""));
             }
         }
         else

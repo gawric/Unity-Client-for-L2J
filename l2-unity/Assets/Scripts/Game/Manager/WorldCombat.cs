@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Xml;
 using UnityEngine;
-using static StatusUpdatePacket;
+using static StatusUpdate;
 using static UnityEngine.EventSystems.EventTrigger;
 
 public class WorldCombat : MonoBehaviour {
@@ -59,10 +59,10 @@ public class WorldCombat : MonoBehaviour {
     }
 
 
-    public void StatusUpdate(Entity entity,  PlayerInterludeStats pis , PlayerStatusInterlude psi , int id)
+    public void StatusUpdate(Entity entity,  PlayerStats pis , PlayerStatus psi , int id)
     {
-        PlayerStatusInterlude status = (PlayerStatusInterlude)entity.Status;
-        PlayerInterludeStats stats = (PlayerInterludeStats) entity.Stats;
+        PlayerStatus status = (PlayerStatus)entity.Status;
+        PlayerStats stats = (PlayerStats) entity.Stats;
 
         stats.Exp = pis.Exp;
         stats.Str = pis.Str;
@@ -86,46 +86,50 @@ public class WorldCombat : MonoBehaviour {
         //Debug.Log(" StatusUpdate " + pis.PAtkSpd);
         stats.PAtkSpd = pis.PAtkSpd;
     }
-    public void StatusUpdate(Entity entity, List<StatusUpdatePacket.Attribute> attributes , int id) {
+    public void StatusUpdate(Entity entity, List<StatusUpdate.Attribute> attributes , int id) {
        // Debug.Log("Word combat: Status update");
         Status status = entity.Status;
         Stats stats = entity.Stats;
 
-        foreach (StatusUpdatePacket.Attribute attribute in attributes) {
+        foreach (StatusUpdate.Attribute attribute in attributes) {
             //Debug.Log("World Combat Update Status UPDATE +++++++ Iteration ID " + attribute.id + " VALUE " + attribute.value + " NPC " + id);
             switch((AttributeType) attribute.id) {
                 case AttributeType.LEVEL:
                     stats.Level = attribute.value;
                     break;
                 case AttributeType.EXP:
-                    ((PlayerInterludeStats) stats).Exp = attribute.value;
+                    ((PlayerStats) stats).Exp = attribute.value;
                     break;
                 case AttributeType.STR:
-                    ((PlayerInterludeStats) stats).Str = (byte)attribute.value;
+                    ((PlayerStats) stats).Str = (byte)attribute.value;
                     break;
                 case AttributeType.DEX:
-                    ((PlayerInterludeStats) stats).Dex = (byte)attribute.value;
+                    ((PlayerStats) stats).Dex = (byte)attribute.value;
                     break;
                 case AttributeType.CON:
-                    ((PlayerInterludeStats) stats).Con = (byte)attribute.value;
+                    ((PlayerStats) stats).Con = (byte)attribute.value;
                     break;
                 case AttributeType.INT:
-                    ((PlayerInterludeStats) stats).Int = (byte)attribute.value;
+                    ((PlayerStats) stats).Int = (byte)attribute.value;
                     break;
                 case AttributeType.WIT:
-                    ((PlayerInterludeStats) stats).Wit = (byte)attribute.value;
+                    ((PlayerStats) stats).Wit = (byte)attribute.value;
                     break;
                 case AttributeType.MEN:
-                    ((PlayerInterludeStats) stats).Men = (byte)attribute.value;
+                    ((PlayerStats) stats).Men = (byte)attribute.value;
                     break;
                 case AttributeType.CUR_HP:
-                    //Debug.Log("World Combat select CUR_HP ID " + attribute.id + " VALUE " + attribute.value + " NPC " + id);
-
                     status.SetHp(attribute.value);
+                    UserEntity hpUser = entity as UserEntity;
+                    if (hpUser != null)
+                        Debug.Log(hpUser.LogTag + " StatusUpdate CUR_HP=" + attribute.value +
+                            " isDead=" + hpUser.IsDead());
                     break;
                 case AttributeType.MAX_HP:
-                    //Debug.Log("World Combat select MAX_HP ID " + attribute.id + " VALUE " + attribute.value + " NPC " + id);
                     stats.MaxHp = attribute.value;
+                    UserEntity maxHpUser = entity as UserEntity;
+                    if (maxHpUser != null)
+                        Debug.Log(maxHpUser.LogTag + " StatusUpdate MAX_HP=" + attribute.value);
                     break;
                 case AttributeType.CUR_MP:
                     status.SetMp(attribute.value);
@@ -134,56 +138,56 @@ public class WorldCombat : MonoBehaviour {
                     stats.MaxMp = attribute.value;
                     break;
                 case AttributeType.SP:
-                    ((PlayerInterludeStats) stats).Sp = attribute.value;
+                    ((PlayerStats) stats).Sp = attribute.value;
                     break;
                 case AttributeType.CUR_LOAD:
-                    ((PlayerInterludeStats) stats).CurrWeight = attribute.value;
+                    ((PlayerStats) stats).CurrWeight = attribute.value;
                     break;
                 case AttributeType.MAX_LOAD:
-                    ((PlayerInterludeStats) stats).MaxWeight = attribute.value;
+                    ((PlayerStats) stats).MaxWeight = attribute.value;
                     break;
                 case AttributeType.P_ATK:
-                    ((PlayerInterludeStats) stats).PAtk = attribute.value;
+                    ((PlayerStats) stats).PAtk = attribute.value;
                     break;
                 case AttributeType.ATK_SPD:
                     stats.PAtkSpd = attribute.value;
                     break;
                 case AttributeType.P_DEF:
-                    ((PlayerInterludeStats) stats).PDef = attribute.value;
+                    ((PlayerStats) stats).PDef = attribute.value;
                     break;
                 case AttributeType.P_EVASION:
-                    ((PlayerInterludeStats)stats).PEvasion = attribute.value;
+                    ((PlayerStats)stats).PEvasion = attribute.value;
                     break;
                 case AttributeType.P_ACCURACY:
-                    ((PlayerInterludeStats)stats).PAccuracy = attribute.value;
+                    ((PlayerStats)stats).PAccuracy = attribute.value;
                     break;
                 case AttributeType.P_CRITICAL:
-                    ((PlayerInterludeStats)stats).PCritical = attribute.value;
+                    ((PlayerStats)stats).PCritical = attribute.value;
                     break;
                 case AttributeType.M_EVASION:
-                    ((PlayerInterludeStats)stats).MEvasion = attribute.value;
+                    ((PlayerStats)stats).MEvasion = attribute.value;
                     break;
                 case AttributeType.M_ACCURACY:
-                    ((PlayerInterludeStats)stats).MAccuracy = attribute.value;
+                    ((PlayerStats)stats).MAccuracy = attribute.value;
                     break;
                 case AttributeType.M_CRITICAL:
-                    ((PlayerInterludeStats)stats).MCritical = attribute.value;
+                    ((PlayerStats)stats).MCritical = attribute.value;
                     break;
                 case AttributeType.M_ATK:
-                    ((PlayerInterludeStats) stats).MAtk = attribute.value;
+                    ((PlayerStats) stats).MAtk = attribute.value;
                     break;
                 case AttributeType.CAST_SPD:
                     stats.MAtkSpd = attribute.value;
                     break;
                 case AttributeType.M_DEF:
-                    ((PlayerInterludeStats) stats).MDef = attribute.value;
+                    ((PlayerStats) stats).MDef = attribute.value;
                     break;
                 case AttributeType.PVP_FLAG:
                     break;
                 case AttributeType.KARMA:
                     break;
                 case AttributeType.CUR_CP:
-                    PlayerStatusInterlude test = (PlayerStatusInterlude)status;
+                    PlayerStatus test = (PlayerStatus)status;
                     test.Cp = attribute.value;
                     break;
                 case AttributeType.MAX_CP:

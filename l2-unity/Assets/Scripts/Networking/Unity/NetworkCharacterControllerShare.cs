@@ -28,7 +28,7 @@ public class NetworkCharacterControllerShare : MonoBehaviour {
 
     void Start() {
         _characterController = GetComponent<CharacterController>();
-        if(_characterController == null || World.Instance.OfflineMode) {
+        if(_characterController == null || (IncomingPacketActions.GameWorld != null && IncomingPacketActions.GameWorld.OfflineMode)) {
             this.enabled = false;
             return;
         }
@@ -39,7 +39,7 @@ public class NetworkCharacterControllerShare : MonoBehaviour {
     }
 
     private void FixedUpdate() {
-        Vector3 newDirection = PlayerController.Instance.MoveDirection.normalized;
+        Vector3 newDirection = IncomingPacketActions.Player.MoveDirection.normalized;
         long now = DateTimeOffset.Now.ToUnixTimeMilliseconds();
         if (ShouldShareMoveDirection(newDirection, now)) {
             _lastSharingTimestamp = now;
@@ -77,10 +77,9 @@ public class NetworkCharacterControllerShare : MonoBehaviour {
 
     public void ShareMoveDirection(Vector3 moveDirection) {
         _lastDirection = moveDirection;
-        GameClient.Instance.ClientPacketHandler.UpdateMoveDirection(moveDirection); 
     }
 
     public void ForceShareMoveDirection() {
-        ShareMoveDirection(PlayerController.Instance.MoveDirection.normalized);
+        ShareMoveDirection(IncomingPacketActions.Player.MoveDirection.normalized);
     }
 }

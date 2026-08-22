@@ -1,12 +1,12 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-
-using static StorageVariable;
+using VContainer;
 
 public class PlayerInventory : MonoBehaviour
 {
+    [Inject] GameClient _gameClient;
     public enum InventoryChange
     {
         UNCHANGED = 0, ADDED = 1, REMOVED = 3, MODIFIED = 2
@@ -134,7 +134,7 @@ public class PlayerInventory : MonoBehaviour
     {
         _instance = null;
     }
-    private UserInfo _currentUser;
+    private UserInfoDto _currentUser;
     public void SetInventory(Dictionary<int, ItemInstance> items, Dictionary<int, ItemInstance> equipItems , bool openInventory , int adenaCount , int usedSlot)
     {
         _playerInventory = items;
@@ -505,12 +505,10 @@ public class PlayerInventory : MonoBehaviour
 
     private void SendUseItemPacket(int objectId)
     {
-        bool isCryptEnabled = GameClient.Instance.IsCryptEnabled();
-        SendGameDataQueue.Instance().AddItem(
-            CreatorPacketsUser.CreateUseItem(objectId, 0),
-            isCryptEnabled,
-            isCryptEnabled
-        );
+        GameClient game = _gameClient != null ? _gameClient : IncomingPacketActions.Game;
+        if (game == null)
+            return;
+        game.Send(new UseItemCommand(objectId, 0));
     }
 
     private void SetupMessageWindow()
@@ -564,9 +562,10 @@ public class PlayerInventory : MonoBehaviour
             ItemInstance item = _playerInventory[objectId];
             //getInstance().AddS1Items(new VariableItem(item.ItemData.ItemName.Name, objectId));
             //AudioManager.Instance.PlayEquipSound("trash_basket");
-            var sendPaket = CreatorPacketsUser.CreateDestroyItem(objectId, quantity);
-            bool enable = GameClient.Instance.IsCryptEnabled();
-            SendGameDataQueue.Instance().AddItem(sendPaket, enable, enable);
+            GameClient game = _gameClient != null ? _gameClient : IncomingPacketActions.Game;
+            if (game == null)
+                return;
+            game.Send(new RequestDestroyItemCommand(objectId, quantity));
         }
         else
         {

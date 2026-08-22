@@ -1,10 +1,12 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using VContainer;
 using static UnityEngine.GraphicsBuffer;
 
 public class TargetManager : MonoBehaviour
 {
+    [Inject] GameClient _gameClient;
     private TargetData _target = null;
     private TargetData _attackTarget = null;
     private Transform _playerTransform;
@@ -175,7 +177,7 @@ public class TargetManager : MonoBehaviour
             {
                 var _entity = entity.transform.parent.GetComponent<Entity>();
 
-                if(_entity != null & _entity.IdentityInterlude.Id == id)
+                if(_entity != null & _entity.Identity.Id == id)
                 {
                     var _targetData = new ObjectData(entity.transform.parent.gameObject);
                     SetTarget(_targetData , hexColor);
@@ -192,6 +194,24 @@ public class TargetManager : MonoBehaviour
         {
             ClearTarget();
             return;
+        }
+
+        // New select is Target (blue) until AttackDto/AutoAttackStart marks attack target again.
+        int newId = -1;
+        Entity newEntity = target.Entity;
+        if (newEntity == null && target.ObjectTransform != null)
+        {
+            newEntity = target.ObjectTransform.GetComponent<Entity>();
+        }
+
+        if (newEntity != null && newEntity.Identity != null)
+        {
+            newId = newEntity.Identity.Id;
+        }
+
+        if (_target != null && _target.Identity != null && _target.Identity.Id != newId)
+        {
+            ClearAttackTarget();
         }
 
         _target = new TargetData(target);
@@ -213,7 +233,17 @@ public class TargetManager : MonoBehaviour
 
     public bool IsAttackTargetSet()
     {
-        return _target != null && _attackTarget != null && _target == _attackTarget;
+        if (_target == null || _attackTarget == null)
+        {
+            return false;
+        }
+
+        if (_target.Identity == null || _attackTarget.Identity == null)
+        {
+            return _target == _attackTarget;
+        }
+
+        return _target.Identity.Id == _attackTarget.Identity.Id;
     }
 
     public bool HasTarget()
@@ -237,8 +267,9 @@ public class TargetManager : MonoBehaviour
         {
             if (PlayerEntity.Instance.TargetId != -1)
             {
-                bool enable = GameClient.Instance.IsCryptEnabled();
-                SendGameDataQueue.Instance().AddItem(CreatorPacketsUser.CreateRequestTargetCanceld(), enable, enable);
+                GameClient game = _gameClient != null ? _gameClient : IncomingPacketActions.Game;
+                if (game != null)
+                    game.Send(new RequestTargetCanceldCommand());
                 PlayerEntity.Instance.TargetId = -1;
                 PlayerEntity.Instance.Target = null;
             }
@@ -257,8 +288,11 @@ public class TargetManager : MonoBehaviour
 
         if (HasTarget())
         {
+            PlayerController player = PlayerController.Instance;
+            if (player == null)
+                return;
             _target.Distance = Vector3.Distance(
-                PlayerController.Instance.transform.position,
+                player.transform.position,
                 _target.Data.ObjectTransform.position);
         }
         else

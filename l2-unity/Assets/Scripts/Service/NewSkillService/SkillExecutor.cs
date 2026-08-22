@@ -3,9 +3,12 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Rendering;
+using VContainer;
 
 public class SkillExecutor : MonoBehaviour
 {
+    [Inject] IAnimationManager _animations;
+    [Inject] EffectManager _effects;
     private SkillAnimationRunner _animRunner;
 
     public event Action OnSkillSequenceFinished;
@@ -33,30 +36,34 @@ public class SkillExecutor : MonoBehaviour
     public async Task ExecuteSkill(Entity entity , AnimationCombo animationCombo , AnimationEventsBase actions)
     {
         if (entity == null || animationCombo == null) return;
-        int objectId = entity.IdentityInterlude.Id;
+        int objectId = entity.Identity.Id;
 
 
         // _emitter.SetupActions(actions);
 
         string[] cycle = animationCombo.GetAnimCycle();
-        _animRunner.StartRun(cycle, objectId , AnimationManager.Instance  , () => OnAllAnimationFinish(actions));
+        IAnimationManager animations = _animations != null ? _animations : IncomingPacketActions.Animations;
+        _animRunner.StartRun(cycle, objectId , animations  , () => OnAllAnimationFinish(actions));
     }
 
     public async Task ExecuteSkillOverride(Skillgrp skill, Entity entity, AnimationCombo animationCombo, AnimationEventsBase actions, bool isLong = false)
     {
         if (entity == null || animationCombo == null) return;
-        int objectId = entity.IdentityInterlude.Id;
+        int objectId = entity.Identity.Id;
 
-        EffectManager.Instance.PlayEffect(skill.Id, entity.transform, entity.GetMagicCastData());
+        EffectManager effects = _effects != null ? _effects : IncomingPacketActions.Effects;
+        if (effects != null)
+            effects.PlayEffect(skill.Id, entity.transform, entity.GetMagicCastData());
 
         string[] cycle = animationCombo.GetAnimCycle();
+        IAnimationManager animations = _animations != null ? _animations : IncomingPacketActions.Animations;
         if (isLong)
         {
-            _animRunner.StartRunLongOverride(cycle, objectId, AnimationManager.Instance, () => OnAllAnimationFinish(actions));
+            _animRunner.StartRunLongOverride(cycle, objectId, animations, () => OnAllAnimationFinish(actions));
         }
         else
         {
-            _animRunner.StartRunOverride(cycle, objectId, AnimationManager.Instance, () => OnAllAnimationFinish(actions));
+            _animRunner.StartRunOverride(cycle, objectId, animations, () => OnAllAnimationFinish(actions));
         }
     }
 

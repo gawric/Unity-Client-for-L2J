@@ -9,13 +9,10 @@ public class AbstractProjectile : MonoBehaviour
 
 
     public event Action<Transform, Transform, Vector3, Vector3> OnHitCollider;
-    protected float GetSpeed(float distance)
+
+    protected void InvokeOnHitCollider(Transform attacker, Transform target, Vector3 hitPoint, Vector3 hitDirection)
     {
-        return ProjectileFlightTimeCalculator.GetSpeed(distance);
-    }
-    protected float CalculateFlightTime(float distance , float speed)
-    {
-        return ProjectileFlightTimeCalculator.CalculateFlightTime(distance, speed, HIT_OFFSET);
+        OnHitCollider?.Invoke(attacker, target, hitPoint, hitDirection);
     }
 
     public ProjectileData CreateData(int projectileId , float distance, GameObject readyProjectile , Vector3 startPos , Transform target , Vector3 adjustedTarget , float requiredSpeed , ProjectileData settings, ProjectileData defaultSettings)
@@ -115,18 +112,14 @@ public class AbstractProjectile : MonoBehaviour
 
         if (targetEntity == null || entity == null) return;
 
-        if (entity.IdentityInterlude.Id == targetEntity.IdentityInterlude.Id)
+        if (entity.Identity.Id == targetEntity.Identity.Id)
         {
 
             projectile.hitPointCollider = hit.point;
             projectile.hitNormalCollider = hit.normal;
             projectile.hitDirection = VectorUtils.CalcHitDirection(hit.point, projectile.startPosition);
 
-            // Effect-only projectile hit is time-based at end-of-flight, not collider-based.
-            if (projectile.impactType != ProjectileImpactType.EffectOnly)
-            {
-                OnHitCollider?.Invoke(projectile.prefab.transform, projectile.targetTransform, projectile.hitPointCollider, projectile.hitDirection);
-            }
+            // Impact FX is time-based at end-of-flight (ArrowStick / EffectOnly). Collider path unused.
         }
     }
 

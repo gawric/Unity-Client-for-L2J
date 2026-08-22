@@ -1,7 +1,8 @@
-﻿using System;
+using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.UIElements;
+using VContainer;
 
 public class TradeRequestWindow : L2PopupWindow
 {
@@ -16,6 +17,13 @@ public class TradeRequestWindow : L2PopupWindow
     private float _timeoutSeconds;
     private int _senderId;
     private Coroutine _countdownCoroutine;
+
+    [Inject] World _world;
+
+    private World Worlds
+    {
+        get { return _world != null ? _world : World.Instance; }
+    }
 
     public static TradeRequestWindow Instance
     {
@@ -36,11 +44,11 @@ public class TradeRequestWindow : L2PopupWindow
         }
     }
 
-    public void AddData(SendTradeRequest request)
+    public void AddData(SendTradeRequestDto request)
     {
         _senderId = request.SenderId;
 
-        var target = World.Instance.getEntityName(_senderId);
+        var target = Worlds.GetEntityName(_senderId);
 
         _requesterName = target;
     }
@@ -146,9 +154,7 @@ public class TradeRequestWindow : L2PopupWindow
     private void SendAcceptResponse()
     {
         // Отправляем пакет подтверждения торговли
-        var sendPacket = CreatorPacketsUser.CreateAnswerTradeRequest(1);
-        bool enable = GameClient.Instance.IsCryptEnabled();
-        SendGameDataQueue.Instance().AddItem(sendPacket, enable, enable);
+        IncomingPacketActions.Game.Send(new AnswerTradeRequestCommand(1));
 
         OnTradeResponse?.Invoke(true);
     }
@@ -156,9 +162,7 @@ public class TradeRequestWindow : L2PopupWindow
     private void SendDeclineResponse()
     {
         // Отправляем пакет отклонения торговли
-        var sendPacket = CreatorPacketsUser.CreateAnswerTradeRequest(0);
-        bool enable = GameClient.Instance.IsCryptEnabled();
-        SendGameDataQueue.Instance().AddItem(sendPacket, enable, enable);
+        IncomingPacketActions.Game.Send(new AnswerTradeRequestCommand(0));
 
         OnTradeResponse?.Invoke(false);
     }

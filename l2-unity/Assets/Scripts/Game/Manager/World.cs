@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Security.Principal;
 using System.Text;
@@ -7,11 +7,11 @@ using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.InputSystem.XR;
 using UnityEngine.UIElements.Experimental;
-using static UnityEditor.Progress;
+using VContainer;
 
 
 
-public class World : MonoBehaviour {
+public class World : MonoBehaviour, IWorldSpawnContext {
     [SerializeField] private GameObject _player;
     [SerializeField] private GameObject _playerPlaceholder;
     [SerializeField] private GameObject _userPlaceholder;
@@ -23,7 +23,49 @@ public class World : MonoBehaviour {
     [SerializeField] private GameObject _usersContainer;
     [SerializeField] private GameObject _droppedItemsContainer;
 
-    private EventProcessor _eventProcessor;
+    [Inject] private EventProcessor _eventProcessor;
+    [Inject] private Geodata _geodata;
+    [Inject] private WorldCombat _worldCombat;
+    [Inject] private ObjectPoolManager _objectPool;
+    [Inject] private GravityNpc _gravityNpc;
+    [Inject] private DeadManager _deadManager;
+    [Inject] private ClickManager _clicks;
+    [Inject] private CameraController _camera;
+    [Inject] private IAnimationManager _animations;
+    [Inject] private GameClient _gameClient;
+    [Inject] private PlayerSpawner _playerSpawner;
+    [Inject] private UserSpawner _userSpawner;
+    [Inject] private NpcSpawner _npcSpawner;
+    [Inject] private MonsterSpawner _monsterSpawner;
+    [Inject] private NpcgrpTable _npcGrps;
+    [Inject] private NpcNameTable _npcNames;
+    [Inject] private ModelTable _models;
+    [Inject] private CharacterInfoWindow _characterInfo;
+
+    private CharacterInfoWindow CharacterInfo
+    {
+        get { return _characterInfo != null ? _characterInfo : CharacterInfoWindow.Instance; }
+    }
+
+    public IAnimationManager Animations
+    {
+        get { return IncomingPacketActions.Animations != null ? IncomingPacketActions.Animations : _animations; }
+    }
+
+    public Transform UsersContainer
+    {
+        get { return _usersContainer != null ? _usersContainer.transform : null; }
+    }
+
+    public Transform NpcsContainer
+    {
+        get { return _npcsContainer != null ? _npcsContainer.transform : null; }
+    }
+
+    public Transform MonstersContainer
+    {
+        get { return _monstersContainer != null ? _monstersContainer.transform : null; }
+    }
 
     private Dictionary<int, Entity> _players = new Dictionary<int, Entity>();
     private Dictionary<int, Entity> _npcs = new Dictionary<int, Entity>();
@@ -53,9 +95,12 @@ public class World : MonoBehaviour {
             _instance = this;
         } else if (_instance != this) {
             Destroy(this);
+            return;
         }
 
-        _eventProcessor = EventProcessor.Instance;
+        DiBootstrap.EnsureGameScope();
+        if (_eventProcessor == null)
+            _eventProcessor = EventProcessor.Instance;
         _playerPlaceholder = Resources.Load<GameObject>("Prefab/Player_FDarkElf");
         _userPlaceholder = Resources.Load<GameObject>("Prefab/User_FDarkElf");
         _npcPlaceHolder = Resources.Load<GameObject>("Prefab/Npc");
@@ -67,18 +112,25 @@ public class World : MonoBehaviour {
     }
 
     void OnDestroy() {
+        if (_deadManager != null)
+            _deadManager.OnReadyToRemove -= RemoveObject;
         _instance = null;
     }
 
     void Start() {
+        if (_deadManager != null)
+            _deadManager.OnReadyToRemove += RemoveObject;
         UpdateMasks();
     }
 
     public void UpdateMasks() {
         NameplatesManager.Instance.SetMask(_entityMask);
-        Geodata.Instance.ObstacleMask = _obstacleMask;
-        ClickManager.Instance.SetMasks(_entityClickAreaMask, _clickThroughMask);
-        CameraController.Instance.SetMask(_obstacleMask);
+        if (_geodata != null)
+            _geodata.ObstacleMask = _obstacleMask;
+        if (_clicks != null)
+            _clicks.SetMasks(_entityClickAreaMask, _clickThroughMask);
+        if (_camera != null)
+            _camera.SetMask(_obstacleMask);
     }
 
     public void ClearEntities() {
@@ -391,227 +443,184 @@ public class World : MonoBehaviour {
 
         if (npcName == null || npcgrp == null)
         {
-            Debug.LogError($"Npc {identity.NpcId} could not be loaded correctly.");
+            Debug.LogWarning($"[DeleteObject] RemoveObject MISS dict id={id} (already gone or never spawned)");
             return;
         }
 
+        string goName = entity != null ? entity.name : "null";
+        string typeName = entity != null ? entity.GetType().Name : "null";
+        GameObject go = entity != null ? entity.gameObject : null;
+        bool wasActive = go != null && go.activeSelf;
+        string parentBefore = go != null && go.transform.parent != null
+            ? go.transform.parent.name
+            : "null";
+
+        Debug.Log(
+            $"[DeleteObject] RemoveObject START id={id} type={typeName} name={goName} " +
+            $"activeSelf={wasActive} parent={parentBefore}");
+
+        _players.Remove(id);
+        _npcs.Remove(id);
+        _objects.Remove(id);
+        if (EntityActionMachine.Instance != null)
+            EntityActionMachine.Instance.Remove(entity);
+
+        if (_gravityNpc != null)
+        {
+            _gravityNpc.DeleteGravity(id);
+        }
+
+        if (Animations != null)
+            Animations.UnregisterController(id);
+
+        if (go == null)
+        {
+            Debug.LogWarning($"[DeleteObject] RemoveObject id={id} entity.gameObject is null");
+            return;
+        }
+
+        // City NPC + field monsters → pool. If pool fails or leaves object visible → Destroy.
+        if (_objectPool != null &&
+            (entity is NpcEntity || entity is MonsterEntity))
+        {
+            ObjectType poolType = entity is MonsterEntity ? ObjectType.Monster : ObjectType.Npc;
+            bool returned = _objectPool.ReturnToPool(poolType, go);
+            bool stillVisible = go != null && go.activeInHierarchy;
+            Debug.Log(
+                $"[DeleteObject] RemoveObject {poolType} id={id} returned={returned} " +
+                $"activeSelf={(go != null && go.activeSelf)} " +
+                $"activeInHierarchy={stillVisible} " +
+                $"parent={(go != null && go.transform.parent != null ? go.transform.parent.name : "null")}");
+
+            if (returned && !stillVisible)
+            {
+                return;
+            }
+
+            Debug.LogWarning(
+                $"[DeleteObject] RemoveObject {poolType} id={id} pool did not hide → Destroy " +
+                $"(returned={returned} stillVisible={stillVisible})");
+        }
+
+        Destroy(go);
+        Debug.Log($"[DeleteObject] RemoveObject DESTROY id={id} name={goName}");
+    }
+
+    public bool ContainsNpc(int id)
+    {
+        return _npcs.ContainsKey(id);
+    }
+
+    public void RegisterPlayer(PlayerEntity player)
+    {
+        if (player == null || player.Identity == null)
+            return;
+
+        int id = player.Identity.Id;
+        _players[id] = player;
+        _objects[id] = player;
+    }
+
+    public void RegisterUser(Entity user)
+    {
+        if (user == null || user.Identity == null)
+            return;
+
+        int id = user.Identity.Id;
+        if (_objects.ContainsKey(id))
+            return;
+
+        _players[id] = user;
+        _objects[id] = user;
+    }
+
+    public void SpawnUser(CharInfoDto info)
+    {
+        if (info == null || info.Identity == null || _userSpawner == null)
+        {
+            GearFlowLog.Warn("SpawnUser abort info/spawner null");
+            return;
+        }
+
+        int id = info.Identity.Id;
+        if (_objects.ContainsKey(id))
+        {
+            GearFlowLog.Info("SpawnUser SKIP already in world id=" + id +
+                " type=" + _objects[id].GetType().Name);
+            return;
+        }
+
+        PlayerEntity local = PlayerEntity.Instance;
+        if (local != null && local.Identity != null && local.Identity.Id == id)
+        {
+            GearFlowLog.Info("SpawnUser SKIP local PlayerEntity id=" + id);
+            return;
+        }
+
+        GearFlowLog.Info("SpawnUser CREATE UserEntity id=" + id +
+            " nick=" + info.Identity.Name + " " + GearFlowLog.Paperdoll(info.Appearance));
+        _userSpawner.Spawn(info, this);
+    }
+
+    public void UpdateUser(Entity entity, CharInfoDto info)
+    {
+        if (_userSpawner != null)
+            _userSpawner.UpdateInfo(entity, info);
+    }
+
+    public void RegisterNpc(Entity npc)
+    {
+        if (npc == null || npc.Identity == null)
+            return;
+
+        int id = npc.Identity.Id;
+        _npcs.Add(id, npc);
+        _objects.Add(id, npc);
+    }
+
+    public void SpawnPlayer(EntityIdentity identity, PlayerStatus status, PlayerStats stats, PlayerAppearance appearance)
+    {
+        if (_playerSpawner != null)
+            _playerSpawner.Spawn(identity, status, stats, appearance, this);
+    }
+
+    public void SpawnNpc(EntityIdentity identity, NpcStatusInterlude status, Stats stats)
+    {
+        if (identity == null || ContainsNpc(identity.Id))
+            return;
+
         if (identity.NpcId == 20481)
-        {
             Debug.Log(" object NpcInfo 5 " + identity.Id);
-        }
 
-        GameObject go = ModelTable.Instance.GetNpc(npcgrp.Mesh);
+        NpcSpawnRequest request;
+        if (!EntitySpawnShared.TryResolveNpc(identity, _npcGrps, _npcNames, _models, out request))
+            return;
 
+        request.Status = status;
+        request.Stats = stats;
+        Debug.Log("Name NPC " + request.NpcName.Name);
 
-        if (go != null)
+        if (identity.EntityType == EntityType.NPC)
         {
-
-            Debug.Log("Name NPC " + npcName.Name);
-            //Debug пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ 1 пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅ !!!!
-           //if (isSinglSpawn | !npcName.Name.Equals("Elder Keltir")) return;
-
-           // if (!isSinglSpawn)
-            //{
-              //  isSinglSpawn = true;
-                
-               // if (identity.EntityType == EntityType.NPC)
-               // {
-                //    return;
-               //}
-            //}
-            
-            identity.SetPosY(GetGroundHeight(identity.Position));
-
-            //GameObject npcGo = Instantiate(go, identity.Position, identity.Heading);
-            GameObject npcGo = Instantiate(go, identity.Position, identity.Heading);
-
-
-            NpcData npcData = new NpcData(npcName, npcgrp);
-
-           
-
-            identity.EntityType = EntityTypeParser.ParseEntityType(npcgrp.ClassName);
-            Entity npc;
-
-
-            ChangeEntityType(identity);
-
-            if (identity.EntityType == EntityType.NPC)
-            {
-                npcGo.transform.SetParent(_npcsContainer.transform);
-                npc = npcGo.GetComponent<NpcEntity>();
-                ((NpcEntity)npc).NpcData = npcData;
-
-            }
-            else
-            {
-                npcGo.transform.SetParent(_monstersContainer.transform);
-                npc = npcGo.GetComponent<MonsterEntity>();
-                npc.Running = npc.IdentityInterlude.IsRunning;
-                ((MonsterEntity)npc).NpcData = npcData;
-            }
-
-
-
-            Appearance appearance = new Appearance();
-            appearance.RHand = npcgrp.Rhand;
-            appearance.LHand = npcgrp.Lhand;
-            appearance.CollisionRadius = npcgrp.CollisionRadius;
-            appearance.CollisionHeight = npcgrp.CollisionHeight;
-
-            
-
-            npc.Status = status;
-
-            npc.Stats = stats;
-
-            npc.IdentityInterlude = identity;
-            npc.IdentityInterlude.NpcClass = npcgrp.ClassName;
-            npc.IdentityInterlude.Name = npcName.Name;
-            npc.IdentityInterlude.Title = npcName.Title;
-
-            if (npc.IdentityInterlude.Title == null || npc.IdentityInterlude.Title.Length == 0)
-            {
-                if (identity.EntityType == EntityType.Monster)
-                {
-                    npc.IdentityInterlude.Title = " Lvl: " + npc.Stats.Level;
-                }
-            }
-            npc.IdentityInterlude.TitleColor = npcName.TitleColor;
-
-            npc.Appearance = appearance;
-
-           
-
-            npcGo.transform.name = identity.Name;
-            npcGo.SetActive(true);
-
-
-            if (npc.GetType() == typeof(MonsterEntity))
-            {
-                msm = InitMonster(npc, npcGo);
-            }
-            else
-            {
-                InitNpc(npc, npcGo);
-            }
-
-
-
-            RespawnPositionElseLoadingGame(identity, npcGo);
-
-
-            if (msm != null) _msObjects.Add(npc.IdentityInterlude.Id, msm);
-            _npcs.Add(identity.Id, npc);
-            _objects.Add(identity.Id, npc);
-            Debug.Log("NPC NEW SPAWN !!!!!!!!!! " + identity.Id);
+            if (_npcSpawner != null)
+                _npcSpawner.Spawn(request, this);
         }
-        else
+        else if (_monsterSpawner != null)
         {
-            Debug.LogWarning("NPC Not Found Nps!!!!! Need add server ID " + identity.Id  + " Npc Id " + identity.NpcId);
+            _monsterSpawner.Spawn(request, this);
         }
     }
 
-    private void ChangeEntityType(NetworkIdentityInterlude identity)
+    public void UpdateNpc(Entity entity , NpcInfoDto npcInfo)
     {
-        //Cat Npc
-        if (identity.NpcId == 31760)
-        {
-            Debug.Log("SpawnNpcInterlude>>> Spawn 31760 p5");
-            identity.EntityType = EntityType.NPC;
-        }
-    }
-    //The only npcs that move in the game
-    //Leandro
-    //Remy
-    private void RespawnPositionElseLoadingGame(NetworkIdentityInterlude identity , GameObject npcGo)
-    {
-        if (identity.Name.Equals("Leandro") | identity.Name.Equals("Remy"))
-        {
-            CharMoveToLocation lastLocation = InitPacketsLoadWord.getInstance().GetMoveToLocation(identity.Id);
-
-            if(lastLocation != null)
-            {
-                PositionValidationController.Instance.AddInitPosition(lastLocation);
-            }
-            
-        }
+        if (_monsterSpawner != null)
+            _monsterSpawner.UpdateInfo(entity, npcInfo);
     }
 
-
-    public void UpdateNpcInfo(Entity entity , NpcInfo npcInfo)
+    public void UpdateUserInfo(Entity entity, UserInfoDto userInfo)
     {
-        if(entity.GetType() == typeof(MonsterEntity))
-        {
-            MonsterEntity m_entity = (MonsterEntity) entity;
-            m_entity.UpdateNpcPAtkSpd((int)npcInfo.Stats.PAtkRealSpeed);
-            m_entity.UpdateNpcRunningSpd(npcInfo.Stats.RunRealSpeed);
-            m_entity.UpdateNpcWalkSpd(npcInfo.Stats.WalkRealSpeed);
-            m_entity.Running = npcInfo.Identity.IsRunning;
-        }
-
-
-    }
-
-
-    public void UpdateUserInfo(Entity entity, UserInfo userInfo)
-    {
-        if (entity.GetType() == typeof(PlayerEntity))
-        {
-            PlayerEntity p_entity = (PlayerEntity)entity;
-
-            var statsIntr = userInfo.PlayerInfoInterlude.Stats;
-
-            p_entity.UpdateRunSpeed(statsIntr.RunRealSpeed);
-            p_entity.UpdateWalkSpeed(statsIntr.WalkRealSpeed);
-
-
-            p_entity.UpdatePAtkSpeedPlayer((int)statsIntr.BasePAtkSpeed);
-            p_entity.UpdateMAtkSpeed((int)statsIntr.MAtkSpd);
-        }
-    }
-
-
-    private MonsterStateMachine InitMonster(Entity npc , GameObject npcGo)
-    {
-        var animationController = npc.GetComponent<NetworkAnimationController>();
-        animationController.Initialize();
-        npcGo.GetComponent<Gear>().Initialize(npc.IdentityInterlude.Id, npc.RaceId);
-        npc.Initialize();
-        var msm = npcGo.GetComponent<MonsterStateMachine>();
-
-        if (msm != null)
-        {
-            AnimationManager.Instance.RegisterController(npc.IdentityInterlude.Id, animationController, npc);
-            npc.UpdateNpcPAtkSpd((int)npc.Stats.PAtkRealSpeed);
-            npc.UpdateNpcRunningSpd(npc.Stats.RunRealSpeed);
-            npc.UpdateNpcWalkSpd(npc.Stats.WalkRealSpeed);
-            npc.Running = npc.IdentityInterlude.IsRunning;
-            msm.Initialize(npc.IdentityInterlude.Id, npc.IdentityInterlude.NpcId, npcGo, npc);
-        }
-
-        return msm;
-    }
-
-    private void InitNpc(Entity npc, GameObject npcGo)
-    {
-        var animationController = npc.GetComponent<NetworkAnimationController>();
-        animationController.Initialize();
-        MoveNpc moveNpc = npcGo.GetComponent<MoveNpc>();
-
-
-        npcGo.GetComponent<Gear>().Initialize(npc.IdentityInterlude.Id, npc.RaceId);
-        npc.Initialize();
-        var nsm = npcGo.GetComponent<NpcStateMachine>();
-        if (nsm != null)
-        {
-            AnimationManager.Instance.RegisterController(npc.IdentityInterlude.Id, animationController, npc);
-            npc.UpdateNpcPAtkSpd((int)npc.Stats.PAtkSpd);
-            npc.UpdateNpcRunningSpd(npc.Stats.RunRealSpeed);
-            npc.UpdateNpcWalkSpd(npc.Stats.WalkRealSpeed);
-            npc.Running = npc.IdentityInterlude.IsRunning;
-            nsm.Initialize(npc.IdentityInterlude.Id, npc.IdentityInterlude.NpcId, npcGo, moveNpc, npc);
-        }
+        if (_playerSpawner != null)
+            _playerSpawner.UpdateInfo(entity, userInfo);
     }
 
     public async Task DeleteObject(int objectId)
@@ -625,68 +634,58 @@ public class World : MonoBehaviour {
         Entity entity = await GetEntityNoLock(objectId);
         if (entity == null)
         {
+            Debug.LogWarning(
+                $"[DeleteObject] HANDLER id={objectId} → entity NOT in World._objects " +
+                "(packet arrived but client has no entity — GO may be orphaned in Hierarchy)");
             return;
         }
 
-        if(entity.GetType() == typeof(MonsterEntity))
+        string typeName = entity.GetType().Name;
+        Debug.Log(
+            $"[DeleteObject] HANDLER id={objectId} found type={typeName} name={entity.name} " +
+            $"activeInHierarchy={entity.gameObject.activeInHierarchy}");
+
+        if (entity.GetType() == typeof(MonsterEntity))
         {
             if (entity.IsDead())
             {
-                DeadManager.Instance.AddDeadAndRemove(objectId , new DeadData(true, entity));
+                if (_deadManager != null)
+                    _deadManager.AddDeadAndRemove(objectId, new DeadData(entity));
+                Debug.Log($"[DeleteObject] HANDLER id={objectId} Monster DEAD → DeadManager");
             }
             else
             {
                 RemoveObject(objectId);
-                Debug.Log("REMOVEEEEE OBJECT Name " + entity.name + " ID " + entity.Identity.Id);
+                Debug.Log($"[DeleteObject] HANDLER id={objectId} Monster → RemoveObject");
             }
-
+        }
+        else if (entity is NpcEntity)
+        {
+            if (_deadManager != null)
+            {
+                _deadManager.AddDeadAndRemove(objectId, new DeadData(entity));
+                Debug.Log($"[DeleteObject] HANDLER id={objectId} NpcEntity → DeadManager");
+            }
+            else
+            {
+                RemoveObject(objectId);
+                Debug.Log($"[DeleteObject] HANDLER id={objectId} NpcEntity → RemoveObject done");
+            }
         }
         else
         {
-            // NPCs and other players leaving visibility range - no death/corpse handling needed.
+            // Same as historical catch-all: anything else still must leave the world.
+            Debug.LogWarning(
+                $"[DeleteObject] HANDLER id={objectId} unexpected type={typeName} → RemoveObject");
             RemoveObject(objectId);
         }
     }
 
     public float GetGroundHeight(Vector3 pos) {
-        RaycastHit hit;
-        if (Physics.Raycast(pos + Vector3.up * 1.0f, Vector3.down, out hit, 2.5f, _groundMask)) {
-            return hit.point.y;
-        }
-
-        return pos.y;
+        return GroundSnapHelper.SnapToGroundOrKeep(pos, _groundMask).y;
     }
 
-    private static readonly RaycastHit[] _groundProbeHits = new RaycastHit[16];
-
-    /// <summary>
-    /// _groundMask includes StaticMesh/Brush (needed for entities to stand on bridges, rocks, etc),
-    /// so a plain single-hit raycast lands a drop on the first thing above it - a tree's canopy or
-    /// root collider, if the drop happens to be underneath one. A drop has no reason to rest
-    /// anywhere but the actual lowest surface below it, so every collider along the ray is
-    /// considered and the deepest hit wins, ducking under any overhanging prop geometry.
-    /// </summary>
-    public float GetDroppedItemGroundHeight(Vector3 pos)
-    {
-        int hitCount = Physics.RaycastNonAlloc(pos + Vector3.up * 1.5f, Vector3.down, _groundProbeHits, 5f, _groundMask);
-        if (hitCount == 0)
-        {
-            return GetGroundHeight(pos);
-        }
-
-        float lowestY = float.MaxValue;
-        for (int i = 0; i < hitCount; i++)
-        {
-            if (_groundProbeHits[i].point.y < lowestY)
-            {
-                lowestY = _groundProbeHits[i].point.y;
-            }
-        }
-
-        return lowestY;
-    }
-
-    public string getEntityName(int id)
+    public string GetEntityName(int id)
     {
         if (_npcs.ContainsKey(id))
         {
@@ -726,17 +725,29 @@ public class World : MonoBehaviour {
         return ExecuteWithEntityAsync(id, entity => {
             if (entity.GetType() == typeof(PlayerEntity))
             {
-                entity.GetComponent<PlayerTeleport>().TeleportTo(position);
-                SendValidatePosition(position);
+                PlayerTeleport teleport = entity.GetComponent<PlayerTeleport>();
+                teleport.TeleportTo(position);
+                Vector3 grounded = teleport.LastTeleportPosition;
+                // Match original client after TeleportToLocationDto / L2_Teleport:
+                // ValidatePosition then Appearing → server onTeleported() + UserInfoDto / knownlist.
+                SendValidatePosition(grounded);
+                SendAppearing();
             }
         });
     }
 
     private void SendValidatePosition(Vector3 position)
     {
-        ValidatePosition sendPaket = CreatorPacketsUser.CreateValidatePosition(position.x, position.y, position.z);
-        bool enable = GameClient.Instance.IsCryptEnabled();
-        SendGameDataQueue.Instance().AddItem(sendPaket, enable, enable);
+        GameClient game = _gameClient != null ? _gameClient : IncomingPacketActions.Game;
+        if (game != null)
+            game.Send(new ValidatePositionCommand(position.x, position.y, position.z));
+    }
+
+    private void SendAppearing()
+    {
+        GameClient game = _gameClient != null ? _gameClient : IncomingPacketActions.Game;
+        if (game != null)
+            game.Send(new AppearingCommand());
     }
 
 
@@ -753,8 +764,12 @@ public class World : MonoBehaviour {
                 e.UpdateSpeed(speed);
             }
 
-            e.GetComponent<NetworkCharacterControllerReceive>().SetDestination(position);
-            e.GetComponent<NetworkTransformReceive>().LookAt(position);
+            NetworkTransformReceive ntr = e.GetComponent<NetworkTransformReceive>();
+            if (ntr != null)
+            {
+                ntr.LookAt(position);
+            }
+
             e.OnStartMoving(walking);
         });
     }
@@ -770,7 +785,8 @@ public class World : MonoBehaviour {
             if (senderEntity != null) {
                 //WorldCombat.Instance.InflictAttack(senderEntity.transform, targetEntity.transform, damage, criticalHit);
             } else {
-                WorldCombat.Instance.InflictAttack(targetEntity.transform, damage, criticalHit);
+                if (_worldCombat != null)
+                    _worldCombat.InflictAttack(targetEntity.transform, damage, criticalHit);
             }
         });
     }
@@ -780,8 +796,7 @@ public class World : MonoBehaviour {
             if (speed != e.Stats.Speed) {
                 e.UpdateSpeed(speed);
             }
-
-            e.GetComponent<NetworkCharacterControllerReceive>().UpdateMoveDirection(direction);
+            // Movement direction applied via MoveAllCharacters / CharMoveToLocationDto.
         });
     }
 
@@ -793,32 +808,31 @@ public class World : MonoBehaviour {
     }
 
 
-    public Task StatusUpdate(int id, List<StatusUpdatePacket.Attribute> attributes) {
+    public Task StatusUpdate(int id, List<StatusUpdate.Attribute> attributes) {
         return ExecuteWithEntityAsync(id, e => {
-            if(WorldCombat.Instance != null)
+            if(_worldCombat != null)
             {
-                WorldCombat.Instance.StatusUpdate(e, attributes, id);
+                _worldCombat.StatusUpdate(e, attributes, id);
                 if (e.GetType() == typeof(PlayerEntity))
                 {
-                    if(CharacterInfoWindow.Instance != null)
-                    {
-                        CharacterInfoWindow.Instance.UpdateValues();
-                    }
-                   
+                    if (CharacterInfo != null)
+                        CharacterInfo.UpdateValues();
                 }
             }
 
         });
     }
 
-    public Task UserInfoUpdateCharacter(UserInfo user)
+    public Task UserInfoUpdateCharacter(UserInfoDto user)
     {
         return ExecuteWithEntityAsync(user.PlayerInfoInterlude.Identity.Id, e => {
-            WorldCombat.Instance.StatusUpdate(e, user.PlayerInfoInterlude.Stats, user.PlayerInfoInterlude.Status , user.PlayerInfoInterlude.Identity.Id);
+            if (_worldCombat != null)
+                _worldCombat.StatusUpdate(e, user.PlayerInfoInterlude.Stats, user.PlayerInfoInterlude.Status , user.PlayerInfoInterlude.Identity.Id);
             if (e == PlayerEntity.Instance)
             {
                 PlayerEntity.Instance.Running = user.PlayerInfoInterlude.Appearance.Running;
-                CharacterInfoWindow.Instance.UpdateValues();
+                if (CharacterInfo != null)
+                    CharacterInfo.UpdateValues();
             }
         });
     }
@@ -861,6 +875,18 @@ public class World : MonoBehaviour {
             return _objects[id];
         }
         return null;
+    }
+
+    public void ForEachEntity(Action<Entity> action)
+    {
+        if (action == null)
+            return;
+
+        foreach (KeyValuePair<int, Entity> pair in _objects)
+        {
+            if (pair.Value != null)
+                action(pair.Value);
+        }
     }
 
 

@@ -6,7 +6,12 @@ using UnityEngine;
 public class UserStateAction : UserStateBase
 {
     public bool IsMoving() {
-        return _networkCharacterControllerReceive.IsMoving();
+        if (_entity == null || _entity.Identity == null || MoveAllCharacters.Instance == null)
+        {
+            return false;
+        }
+
+        return MoveAllCharacters.Instance.IsMoving(_entity.Identity.Id);
     }
 
     public bool IsAttacking() {

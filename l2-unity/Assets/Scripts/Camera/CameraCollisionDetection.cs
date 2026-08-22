@@ -14,13 +14,59 @@ public class CameraCollisionDetection {
     public float AdjustedDistance { get { return _adjustedDistance; } }
 
     public CameraCollisionDetection(Camera camera, Transform target, Vector3 cameraOffset, LayerMask collisionmask) {
-        this._camera = camera;
-        this._target = target;
+        _camera = camera;
+        _target = target;
         _offset = cameraOffset;
         _collisionLayer = collisionmask;
+        _adjustedDistance = 0f;
     }
 
-    /* Calculate our near clip points */
+    public void SetMask(LayerMask collisionMask)
+    {
+        _collisionLayer = collisionMask;
+    }
+
+    public void DetectSphereCollision(
+        Vector3 lookAt,
+        Quaternion rotation,
+        float desiredDistance,
+        float radius,
+        float extraLength)
+    {
+        _adjustedDistance = desiredDistance;
+        if (desiredDistance <= 0.001f)
+        {
+            return;
+        }
+
+        Vector3 desiredPos = lookAt + rotation * (Vector3.forward * -desiredDistance);
+        Vector3 delta = desiredPos - lookAt;
+        float dist = delta.magnitude;
+        if (dist <= 0.001f)
+        {
+            return;
+        }
+
+        Vector3 dir = delta / dist;
+        RaycastHit hit;
+        if (Physics.SphereCast(
+            lookAt,
+            Mathf.Max(0.01f, radius),
+            dir,
+            out hit,
+            dist + extraLength,
+            _collisionLayer,
+            QueryTriggerInteraction.Ignore))
+        {
+            _adjustedDistance = Mathf.Clamp(hit.distance, 0.05f, desiredDistance);
+            _collisionObject = hit.transform;
+        }
+        else
+        {
+            _collisionObject = null;
+        }
+    }
+
     public Vector3[] GetCameraClipPoints(float distance) {
         Vector3[] cameraClipPoints = new Vector3[5];
         Quaternion camRot = _camera.transform.rotation;
@@ -30,23 +76,20 @@ public class CameraCollisionDetection {
         float x = Mathf.Tan(_camera.fieldOfView / _clipPlaneOffset.x) * z;
         float y = x / _camera.aspect / _clipPlaneOffset.y;
 
-        //top left
         cameraClipPoints[0] = (camRot * new Vector3(-x, y, z)) + desiredPos;
-        //top right
         cameraClipPoints[1] = (camRot * new Vector3(x, y, z)) + desiredPos;
-        //bottom left
         cameraClipPoints[2] = (camRot * new Vector3(-x, -y, z)) + desiredPos;
-        //bottom right
         cameraClipPoints[3] = (camRot * new Vector3(x, -y, z)) + desiredPos;
-        //camera position
         cameraClipPoints[4] = desiredPos - (_camera.transform.forward * 0.25f);
 
         return cameraClipPoints;
     }
 
     public Vector3[] GetCameraViewPortPoints() {
-
-        if (_camera == null) return new Vector3[0];
+        if (_camera == null)
+        {
+            return new Vector3[0];
+        }
 
         Vector3[] cameraClipPoints = new Vector3[5];
         Quaternion camRot = _camera.transform.rotation;
@@ -56,51 +99,12 @@ public class CameraCollisionDetection {
         float x = Mathf.Tan(_camera.fieldOfView) * z;
         float y = x / _camera.aspect / _clipPlaneOffset.y;
 
-        //top left
         cameraClipPoints[0] = (camRot * new Vector3(-x, y, z)) + camPos;
-        //top right
         cameraClipPoints[1] = (camRot * new Vector3(x, y, z)) + camPos;
-        //bottom left
         cameraClipPoints[2] = (camRot * new Vector3(-x, -y, z)) + camPos;
-        //bottom right
         cameraClipPoints[3] = (camRot * new Vector3(x, -y, z)) + camPos;
-        //camera position
         cameraClipPoints[4] = camPos - (_camera.transform.forward * 0.25f);
 
         return cameraClipPoints;
-    }
-
-    /* Cast a ray from the target to each clip points */
-    public void DetectCollision(float desiredDistance) {
-        if(_camera == null) {
-            return;
-        }
-
-        Vector3[] clipPoints = GetCameraClipPoints(desiredDistance);
-        Vector3[] viewPoints = GetCameraViewPortPoints();
-
-
-        if (viewPoints.Length == 0) return;
-
-        _adjustedDistance = desiredDistance;
-        float distance = -1f;
-
-        Transform hitObject = null;
-        RaycastHit hit;
-        for(int i = 0; i < clipPoints.Length; i++) {
-            if(Physics.Linecast(_target.position + _offset, clipPoints[i], out hit, _collisionLayer)) {
-                if(distance == -1f || hit.distance < distance) {
-                    distance = hit.distance;
-                }
-                hitObject = hit.transform;
-            }
-
-        }
-
-        if(distance != -1f) {
-            _adjustedDistance = distance;
-        }
-
-        _collisionObject = hitObject;
     }
 }

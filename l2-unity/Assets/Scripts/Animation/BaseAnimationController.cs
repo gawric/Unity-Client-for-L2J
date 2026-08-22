@@ -1,10 +1,6 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Security.Cryptography.X509Certificates;
 using UnityEngine;
-using static UnityEngine.Rendering.DebugUI;
 
 public class BaseAnimationController : AnimationEventsBase, IAnimationController
 {
@@ -28,16 +24,25 @@ public class BaseAnimationController : AnimationEventsBase, IAnimationController
     private int _lastDuplicateShootFrame = int.MinValue;
     private string _lastDuplicateShootAnim;
 
+    protected bool TryGetAnimator()
+    {
+        if (_animator == null)
+            _animator = GetComponentInChildren<Animator>(true);
+        return _animator != null;
+    }
+
     public virtual void Initialize()
     {
-        _animator = gameObject.GetComponentInChildren<Animator>(true);
         _lastAnimationVariableName = "wait_hand";
-        InitializePriority();
-        SkillAnimationDatabase.LoadRaceAnimations(_animator?.runtimeAnimatorController.name);
+        if (!TryGetAnimator() || _animator.runtimeAnimatorController == null)
+            return;
+        SkillAnimationDatabase.LoadRaceAnimations(_animator.runtimeAnimatorController.name);
 
-        _base_motion.Add("CastMid" , BASE_MOTION_CAST_MID);
-        _base_motion.Add("CastEnd", BASE_MOTION_END);
-        _base_motion.Add("MagicShoot", BASE_MOTION_MAGIC_SHOOT);
+        // Re-entrant: pooled NPC/monster call Initialize again on each spawn.
+        _base_motion.Clear();
+        _base_motion["CastMid"] = BASE_MOTION_CAST_MID;
+        _base_motion["CastEnd"] = BASE_MOTION_END;
+        _base_motion["MagicShoot"] = BASE_MOTION_MAGIC_SHOOT;
 
         // Создаем экземпляр оверрайда на основе текущего контроллера
         if (_animator.runtimeAnimatorController is not AnimatorOverrideController)
@@ -50,29 +55,40 @@ public class BaseAnimationController : AnimationEventsBase, IAnimationController
             _overrideController = (AnimatorOverrideController)_animator.runtimeAnimatorController;
         }
 
+        // Leave death/corpse pose behind when reusing from ObjectPool.
+        if (_animator != null)
+        {
+            _animator.Rebind();
+            _animator.Update(0f);
+        }
     }
 
   
 
-    protected override void HandleQueueAnimation(string animationName)
-    {
-        Debug.Log($"AnimationManager> start name убираем из ожидания и запускаем {animationName}");
-        SetBool(animationName, true, "player");
-    }
+  
 
     public void SetRunSpeed(float value)
     {
+        if (!TryGetAnimator())
+            return;
         Debug.Log("SetRun speed test " + value);
         _animator.SetFloat("run_speed", value);
     }
 
     public void SetWalkSpeed(float value)
     {
+        if (!TryGetAnimator())
+            return;
         Debug.Log("SetWalk speed test " + value);
         _animator.SetFloat("walk_speed", value);
     }
 
-    public void SetWalkSpeedLobby(float value) => _animator.SetFloat("walk_speed", value);
+    public void SetWalkSpeedLobby(float value)
+    {
+        if (!TryGetAnimator())
+            return;
+        _animator.SetFloat("walk_speed", value);
+    }
 
 
     public void SetPAtkSpd(float value)
@@ -87,6 +103,8 @@ public class BaseAnimationController : AnimationEventsBase, IAnimationController
 
     public void UpdateAnimatorAtkSpdMultiplier(float clipLength)
     {
+        if (!TryGetAnimator())
+            return;
         float newAtkSpd = clipLength * 1000f / _pAtkSpd;
         //Debug.Log("PATACK speed set " + newAtkSpd);
         _animator.SetFloat("patkspd", newAtkSpd);
@@ -94,12 +112,16 @@ public class BaseAnimationController : AnimationEventsBase, IAnimationController
 
     public void UpdateAnimatorAtkSpeedL2j(float timeAtk , float clipLength)
     {
+        if (!TryGetAnimator())
+            return;
         float newAtkSpd = clipLength * 1000f / timeAtk;
         _animator.SetFloat("patkspd", newAtkSpd);
     }
 
     public void SetPAtkSpeed(float newAtkSpd)
     {
+        if (!TryGetAnimator())
+            return;
         //Debug.Log("PATACK speed set 2 " + newAtkSpd);
         _animator.SetFloat("patkspd", newAtkSpd);
     }
@@ -107,6 +129,8 @@ public class BaseAnimationController : AnimationEventsBase, IAnimationController
 
     public void SetMAtkSpd(float value)
     {
+        if (!TryGetAnimator())
+            return;
         //TODO: update for cast animation
         float newMAtkSpd = _spAtk01ClipLength / value;
         _animator.SetFloat("matkspd", newMAtkSpd);
@@ -114,22 +138,30 @@ public class BaseAnimationController : AnimationEventsBase, IAnimationController
 
     public void SetCastSpeed(float value)
     {
+        if (!TryGetAnimator())
+            return;
         _animator.SetFloat("cast_speed", value);
     }
     public float GetNormalizedTimeOffsetSpeed()
     {
+        if (!TryGetAnimator())
+            return 0f;
         float normalized =  GetStateInfo().normalizedTime;
         float speed = _animator.speed;
         return  normalized / speed;
     }
     public void SetShotSpeed(float value)
     {
+        if (!TryGetAnimator())
+            return;
         _animator.SetFloat("shot_speed", value);
     }
 
     // Set all animation variables to false
     public void ClearAnimParams()
     {
+        if (!TryGetAnimator())
+            return;
         for (int i = 0; i < _animator.parameters.Length; i++)
         {
             AnimatorControllerParameter anim = _animator.parameters[i];
@@ -143,191 +175,68 @@ public class BaseAnimationController : AnimationEventsBase, IAnimationController
 
     public void ToggleAnimationTrigger(string name)
     {
-        IfSpecialAnimationsCreateProcessQueue(name, ref _isProcessingQueue, _priorityAnimations, true);
+        if (!TryGetAnimator())
+            return;
         _animator.SetTrigger(name);
     }
 
     public void ResetAnimationTrigger(string name)
     {
+        if (!TryGetAnimator())
+            return;
         _animator.ResetTrigger(name);
     }
 
     public void ToggleAnimationCrossFade(string name , float duration)
     {
-        IfSpecialAnimationsCreateProcessQueue(name, ref _isProcessingQueue, _priorityAnimations, true);
+        if (!TryGetAnimator())
+            return;
         _animator.CrossFade(name, duration, 0);
     }
 
+    public void CrossFadeInFixedTime(string stateName, float fixedDuration, int layer = 0)
+    {
+        if (!TryGetAnimator() || string.IsNullOrEmpty(stateName))
+        {
+            return;
+        }
+
+        int objectId = _animator.GetInteger(AnimatorUtils.OBJECT_ID);
+        int hash = Animator.StringToHash(stateName);
+        bool hasState = _animator.HasState(layer, hash);
+        _animator.CrossFadeInFixedTime(stateName, fixedDuration, layer);
+        _lastAnimationVariableName = stateName;
+        Debug.Log(
+            $"[ANIM_CROSSFADE] id={objectId} go={name} state={stateName} hasState={hasState} fixedDuration={fixedDuration:F3}s layer={layer}");
+    }
+
+    public Animator GetAnimator() => _animator;
+
     public void SetBool(string name, bool value , string entityName = "")
     {
-        const string ANIM_Q_LOG = "[ANIM_PRIORITY_Q]";
+        if (!TryGetAnimator())
+            return;
 
-        // Walk/run/wait must never stay blocked behind an interrupted jatk that never got OnAnimationComplete.
-        if (value && IsLocomotionOrWaitAnim(name) && (_isProcessingQueue || HasAnyActivePriorityFlag()))
-        {
-            ForceReleasePriorityQueue($"locomotion_bypass:{name}");
-        }
-
-        if(_isProcessingQueue && value == true)
-        {
-            IfAnimationNeedsWait( _priorityAnimations, name);
-
-            Debug.Log(
-                $"{ANIM_Q_LOG} SetBool BLOCKED name={name} value={value} " +
-                $"isProcessingQueue={_isProcessingQueue} queueCount={_animationQueue.Count} " +
-                $"activePriority={DumpActivePriorityFlags()} " +
-                $"dict={DumpPriorityDict()} " +
-                $"(OnAnimationComplete must clear flag or locomotion stays on wait)");
-
-            if (value) return;
-            Debug.Log($"AnimationManager> start name player  добавление в список ожидания {name} статус {value} продолжение return ");
-        }
-
-
-        IfSpecialAnimationsCreateProcessQueue(name , ref _isProcessingQueue, _priorityAnimations, value);
-
-        // Save the last animation name
-        if (value == true)
+        if (value)
         {
             _lastAnimationVariableName = name;
         }
-        
+
         _animator.SetBool(name, value);
-
-        if (!string.IsNullOrEmpty(entityName) || value)
-        {
-            Debug.Log(
-                $"{ANIM_Q_LOG} SetBool APPLY name={name} value={value} " +
-                $"isProcessingQueue={_isProcessingQueue} lastAnim={_lastAnimationVariableName} " +
-                $"activePriority={DumpActivePriorityFlags()}");
-        }
-
     }
-
-    private void IfSpecialAnimationsCreateProcessQueue(string animName , ref bool isProcessingQueue , Dictionary<string, bool> priorityAnimations , bool value)
-    {
-        if (!priorityAnimations.ContainsKey(animName) || value != true)
-        {
-            return;
-        }
-
-        if (priorityAnimations[animName])
-        {
-            // Same clip re-fired while still locked (jatk03→jatk03). Keep lock;
-            // suppress the old clip's OnAnimationComplete so it cannot IDLE the new swing.
-            MarkSameNamePriorityRelock(animName);
-            isProcessingQueue = true;
-            return;
-        }
-
-        // New priority swing — drop stale flags from previous jatk that never completed.
-        ClearOtherPriorityFlags(animName);
-        _animationQueue.Clear();
-
-        priorityAnimations[animName] = true;
-        isProcessingQueue = true;
-        Debug.Log(
-            $"[ANIM_PRIORITY_Q] LOCK queue anim={animName} isProcessingQueue=True " +
-            $"activePriority={DumpActivePriorityFlags()} dict={DumpPriorityDict()}");
-    }
-
-    private void IfAnimationNeedsWait(Dictionary<string, bool> priorityAnimations , string animName)
-    {
-        if (!priorityAnimations.ContainsKey(animName))
-        {
-            _animationQueue.Enqueue(animName);
-            Debug.Log(
-                $"[ANIM_PRIORITY_Q] ENQUEUE wait anim={animName} queueCount={_animationQueue.Count} " +
-                $"queue=[{string.Join(",", _animationQueue)}] " +
-                $"(not a priority key — waits until OnAnimationComplete)");
-        }
-        else
-        {
-            Debug.Log(
-                $"[ANIM_PRIORITY_Q] SKIP enqueue anim={animName} — already a priority key " +
-                $"flag={priorityAnimations[animName]} isProcessingQueue={_isProcessingQueue}");
-        }
-    }
-
-    private static bool IsLocomotionOrWaitAnim(string name)
-    {
-        if (string.IsNullOrEmpty(name)) return false;
-        return name.StartsWith("walk", StringComparison.OrdinalIgnoreCase)
-            || name.StartsWith("run", StringComparison.OrdinalIgnoreCase)
-            || name.StartsWith("wait", StringComparison.OrdinalIgnoreCase)
-            || name.StartsWith("atkwait", StringComparison.OrdinalIgnoreCase);
-    }
-
-    private bool HasAnyActivePriorityFlag()
-    {
-        if (_priorityAnimations == null) return false;
-        foreach (var kv in _priorityAnimations)
-        {
-            if (kv.Value) return true;
-        }
-        return false;
-    }
-
-    private void ClearOtherPriorityFlags(string exceptAnim)
-    {
-        if (_priorityAnimations == null) return;
-        // ToList — avoid modifying during enumeration
-        var keys = _priorityAnimations.Keys.ToList();
-        foreach (string key in keys)
-        {
-            if (key == exceptAnim) continue;
-            if (!_priorityAnimations[key]) continue;
-            _priorityAnimations[key] = false;
-            Debug.Log($"[ANIM_PRIORITY_Q] STALE clear flag={key} (new lock={exceptAnim})");
-        }
-    }
-
-    private void ForceReleasePriorityQueue(string reason)
-    {
-        bool hadLock = _isProcessingQueue || HasAnyActivePriorityFlag() || _animationQueue.Count > 0;
-        if (!hadLock) return;
-
-        string before = DumpActivePriorityFlags();
-        var keys = _priorityAnimations.Keys.ToList();
-        foreach (string key in keys)
-        {
-            _priorityAnimations[key] = false;
-        }
-        _isProcessingQueue = false;
-        _animationQueue.Clear();
-        Debug.Log(
-            $"[ANIM_PRIORITY_Q] FORCE unlock reason={reason} wasActive={before} " +
-            $"isProcessingQueue=False queueCleared");
-    }
-
-    private string DumpActivePriorityFlags()
-    {
-        if (_priorityAnimations == null || _priorityAnimations.Count == 0) return "(empty)";
-        var active = _priorityAnimations.Where(kv => kv.Value).Select(kv => kv.Key).ToArray();
-        return active.Length == 0 ? "(none true)" : string.Join(",", active);
-    }
-
-    private string DumpPriorityDict()
-    {
-        if (_priorityAnimations == null || _priorityAnimations.Count == 0) return "{}";
-        // Only dump true flags + a few known combat keys to keep log short.
-        var parts = _priorityAnimations
-            .Where(kv => kv.Value || kv.Key.StartsWith("jatk") || kv.Key.StartsWith("SpAtk") || kv.Key.StartsWith("Magic") || kv.Key.StartsWith("Cast"))
-            .Select(kv => $"{kv.Key}={kv.Value}");
-        return "{" + string.Join(", ", parts) + "}";
-    }
-
-
-
 
     public void SetBoolDisabledOther(string nameAnim  , bool value, string[] disableds)
     {
+        if (!TryGetAnimator())
+            return;
         DisabledOtherAnim(disableds);
         _animator.SetBool(nameAnim, value);
     }
 
     private void DisabledOtherAnim(string[] disableds)
     {
+        if (!TryGetAnimator())
+            return;
         foreach (string name in disableds)
         {
             _animator.SetBool(name, false);
@@ -337,6 +246,8 @@ public class BaseAnimationController : AnimationEventsBase, IAnimationController
 
     public bool GetBool(string name)
     {
+        if (!TryGetAnimator())
+            return false;
         return _animator.GetBool(name);
     }
 
@@ -344,6 +255,8 @@ public class BaseAnimationController : AnimationEventsBase, IAnimationController
 
     public bool IsFinishAnimation(string name)
     {
+        if (!TryGetAnimator())
+            return false;
 
         AnimatorStateInfo stateInfo = _animator.GetCurrentAnimatorStateInfo(0);
         bool isName = stateInfo.IsName(name);
@@ -361,6 +274,8 @@ public class BaseAnimationController : AnimationEventsBase, IAnimationController
 
     public AnimatorStateInfo GetStateInfo()
     {
+        if (!TryGetAnimator())
+            return default;
         return  _animator.GetCurrentAnimatorStateInfo(0);
     }
 
@@ -374,6 +289,8 @@ public class BaseAnimationController : AnimationEventsBase, IAnimationController
     // Update animator variable based on Animation Id
     public void SetAnimationProperty(int animId, float value, bool forceReset)
     {
+        if (!TryGetAnimator())
+            return;
         //Debug.Log("animId " + animId + "/" + _animator.parameters.Length);
         if (animId >= 0 && animId < _animator.parameters.Length)
         {
@@ -405,6 +322,8 @@ public class BaseAnimationController : AnimationEventsBase, IAnimationController
     // Return an animator variable based on its ID
     public float GetAnimationProperty(int animId)
     {
+        if (!TryGetAnimator())
+            return 0f;
         if (animId >= 0 && animId < _animator.parameters.Length)
         {
             AnimatorControllerParameter anim = _animator.parameters[animId];
@@ -425,27 +344,42 @@ public class BaseAnimationController : AnimationEventsBase, IAnimationController
 
     public void SetFloat(string name, float value)
     {
+        if (!TryGetAnimator())
+            return;
         _animator.SetFloat(name, value);
     }
 
     public float GetFloat(string name)
     {
+        if (!TryGetAnimator())
+            return 0f;
         return  _animator.GetFloat(_animator.name);
     }
 
     public void SetInt(string name, int value)
     {
+        if (!TryGetAnimator())
+            return;
         _animator.SetInteger(name, value);
     }
 
     public int GetInt(string name)
     {
+        if (!TryGetAnimator())
+            return 0;
         return _animator.GetInteger(_animator.name);
     }
 
     public void SetAnimatorSpeed(float value)
     {
+        if (!TryGetAnimator())
+            return;
         _animator.speed = value;
+    }
+
+    public void SetEnabled(bool value)
+    {
+        enabled = value;
     }
 
     public string GetAnimatorName()
@@ -482,7 +416,7 @@ public class BaseAnimationController : AnimationEventsBase, IAnimationController
 
     public override void OnAnimationShoot(string animationName)
     {
-        if (_animator == null)
+        if (!TryGetAnimator())
         {
             base.OnAnimationShoot(animationName);
             return;

@@ -55,7 +55,26 @@ public abstract class AbstractGetCache
         }
 
   
-        string model = armor.Armorgrp.FirstModel[(byte)raceId];
+        if (armor.Armorgrp == null || armor.Armorgrp.FirstModel == null)
+        {
+            Debug.LogWarning($"Can't find armorgrp model list for armor {armor.Id}");
+            return null;
+        }
+
+        byte raceIndex = (byte)raceId;
+        if (raceIndex >= armor.Armorgrp.FirstModel.Length)
+        {
+            Debug.LogWarning($"Can't find armor model for {raceId} in armor {armor.Id}");
+            return null;
+        }
+
+        string model = armor.Armorgrp.FirstModel[raceIndex];
+        if (string.IsNullOrEmpty(model))
+        {
+            Debug.LogWarning($"Empty armor model for {raceId} in armor {armor.Id}");
+            return null;
+        }
+
         if (!_armors.TryGetValue(model, out var l2Armor))
         {
             Debug.LogWarning($"Can't find armor model {model} in ModelTable");
@@ -100,13 +119,18 @@ public abstract class AbstractGetCache
         allMaterials = null;
 
         if (l2Armor.materials == null)
-        {
-            Debug.LogWarning($"Can't find armor materials for texture {textureName} in ModelTable");
-            return false;
-        }
+            l2Armor.materials = new Dictionary<string, Material>();
 
         l2Armor.materials.TryGetValue(textureName, out firstMaterial);
-        l2Armor.allMaterials.TryGetValue(textureName, out allMaterials);
+        if (firstMaterial == null)
+        {
+            firstMaterial = LoadArmorMaterial(textureName);
+            if (firstMaterial != null)
+                l2Armor.materials[textureName] = firstMaterial;
+        }
+
+        if (l2Armor.allMaterials != null)
+            l2Armor.allMaterials.TryGetValue(textureName, out allMaterials);
 
         if (firstMaterial == null)
         {
@@ -115,6 +139,38 @@ public abstract class AbstractGetCache
         }
 
         return true;
+    }
+
+    protected Material LoadArmorMaterial(string texture)
+    {
+        if (string.IsNullOrEmpty(texture))
+            return null;
+
+        string[] parts = texture.Split('.');
+        if (parts.Length < 2)
+            return null;
+
+        string folder = parts[0];
+        string file = parts[1];
+        string[] candidates =
+        {
+            $"Data/SysTextures/{folder}/Materials/{file}",
+            $"Data/SysTextures/{folder}/Materials/{folder}.{file}",
+            $"Data/SysTextures/{folder}/Materials/{texture}"
+        };
+
+        for (int i = 0; i < candidates.Length; i++)
+        {
+            Material material = Resources.Load<Material>(candidates[i]);
+            if (material != null)
+            {
+                Debug.Log($"Successfully loaded armor material at {candidates[i]}");
+                return material;
+            }
+        }
+
+        Debug.LogWarning($"Can't find armor material at {candidates[0]} (also tried {folder}.{file})");
+        return null;
     }
 
 

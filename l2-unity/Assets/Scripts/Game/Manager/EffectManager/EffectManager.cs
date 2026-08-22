@@ -18,9 +18,9 @@ public class EffectManager : MonoBehaviour
     {
         var data = database.effects.Find(e => e.id == id);
 
-        if (data == null || data.prefab == null || _activeEffectsContainer == null)
+        if (data == null || data.prefab == null || _activeEffectsContainer == null || target == null)
         {
-            Debug.LogWarning($"EffectManager: PlayEffect data == null || data.prefab == null || _activeEffectsContainer == null");
+            Debug.LogWarning($"EffectManager: PlayEffect data == null || data.prefab == null || _activeEffectsContainer == null || target == null");
             return;
         }
 
@@ -29,6 +29,30 @@ public class EffectManager : MonoBehaviour
         instance.gameObject.SetActive(true);
         instance.Setup(data.settings, castData, target);
         instance.Play();
+    }
+
+    /// <summary>
+    /// Melee skill FX attached to weapon (fallback: entity). Builds cast data with
+    /// <see cref="MagicCastData.SkillAnimationDuration"/> from SpAtk wall-time so composites
+    /// with Match Lifetime To Skill Animation end with the swing.
+    /// </summary>
+    public void PlayEffectSyncedToSkillAnimation(
+        int effectId,
+        Entity entity,
+        int hitTimeMs,
+        AnimationCombo animCombo)
+    {
+        if (entity == null)
+        {
+            Debug.LogWarning($"[SKILL_ANIM_FX] PlayEffectSyncedToSkillAnimation entity is null effectId={effectId}");
+            return;
+        }
+
+        Transform weapon = entity.GetWeaponTransform();
+
+        Transform attach = weapon != null ? weapon : entity.transform;
+        MagicCastData castData = SkillAnimationCastDataBuilder.Build(entity, hitTimeMs, animCombo);
+        PlayEffect(effectId, attach, castData);
     }
 
     // L2 Action_Attack: FVector::Rotation(targetLoc - attackerLoc) on XZ.
@@ -43,11 +67,18 @@ public class EffectManager : MonoBehaviour
 
     public void PlayerImpactEffect(int id, Vector3 point, Vector3 impactDirection, MagicCastData castData = null)
     {
-        var data = database.effects.Find(e => e.id == id);
+        Debug.Log(
+            $"[HIT_FX] 7.EffectManager.PlayerImpactEffect ENTER frame={Time.frameCount} t={Time.time:F3} " +
+            $"effectId={id} point={point} dir={impactDirection}");
+
+        var data = database != null ? database.effects.Find(e => e.id == id) : null;
 
         if (data == null || data.prefab == null || _activeEffectsContainer == null)
         {
-            Debug.LogWarning($"EffectManager: PlayEffect data == null || data.prefab == null || _activeEffectsContainer == null");
+            Debug.LogWarning(
+                $"[HIT_FX] 7.EffectManager SKIP Play failed effectId={id} " +
+                $"dataNull={data == null} prefabNull={data == null || data.prefab == null} " +
+                $"containerNull={_activeEffectsContainer == null}");
             return;
         }
 
@@ -109,6 +140,9 @@ public class EffectManager : MonoBehaviour
         }
 
         instance.Play();
+        Debug.Log(
+            $"[HIT_FX] 7.EffectManager PLAY OK spawn#{_impactSpawnCounter} effectId={id} " +
+            $"prefab={data.prefab.name} point={point}");
     }
 
     private static Vector3 hitPointFlat(Vector3 v)

@@ -28,15 +28,30 @@ public class GravityMonster : MonoBehaviour
 
     private void FixedUpdate()
     {
-        if (!_isSync) return;
-
-        if (!_entity.IsDead())
+        if (!_isSync)
         {
-            Vector3 ajustedDirection = _direction * _speed * _moveSpeedMultiplier + Vector3.down * _gravity;
-            _characterController.Move(ajustedDirection * Time.deltaTime);
-            //Debug.Log("Position IsDead SetMoveDirectionToDestination");
+            return;
         }
 
+        if (_characterController == null ||
+            !_characterController.enabled ||
+            !_characterController.gameObject.activeInHierarchy ||
+            _characterController.radius <= 0.001f ||
+            _characterController.height <= 0.001f)
+        {
+            return;
+        }
+
+        if (_entity != null && !_entity.EntityLoaded)
+        {
+            return;
+        }
+
+        if (_entity != null && !_entity.IsDead())
+        {
+            Vector3 adjustedDirection = _direction * _speed * _moveSpeedMultiplier + Vector3.down * _gravity;
+            _characterController.Move(adjustedDirection * Time.deltaTime);
+        }
     }
 
     public void Sync()

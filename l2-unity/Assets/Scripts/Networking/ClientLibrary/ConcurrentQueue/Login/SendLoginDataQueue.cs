@@ -1,80 +1,180 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
 
 public class SendLoginDataQueue : IDisposable
 {
+    private readonly object _sync = new object();
+    private readonly IProtocol _protocol;
     private BlockingCollection<ItemSendLogin> _queue;
-    private static SendLoginDataQueue _instance;
-    protected ClientPacketHandler _clientPacketHandler;
-    private static CancellationTokenSource _cancelTokenSource;
-    private static CancellationToken _token;
-    public static SendLoginDataQueue Instance()
-    {
-        if (_instance == null)
-        {
-            _cancelTokenSource = new CancellationTokenSource();
-            _token = _cancelTokenSource.Token;
-            _instance = new SendLoginDataQueue();
-        }
+    private ClientPacketHandler _clientPacketHandler;
+    private CancellationTokenSource _cancelTokenSource;
+    private Task _worker;
+    private int _running;
 
-        return _instance;
+    public SendLoginDataQueue(IProtocol protocol)
+    {
+        _protocol = protocol;
+        _queue = new BlockingCollection<ItemSendLogin>();
+        _cancelTokenSource = new CancellationTokenSource();
     }
 
     public void SetPacketHandler(ClientPacketHandler clientPacketHandler)
     {
-        this._clientPacketHandler = clientPacketHandler;
-    }
-    public SendLoginDataQueue()
-    {
-        if (_queue == null) _queue = new();
-        WaitSendData();
-    }
-    public void AddItem(ClientPacket packet , bool encrypt, bool blowfish)
-    {
-        if (_queue == null) _queue = new();
-        _queue.Add(new ItemSendLogin(packet , encrypt, blowfish));
+        lock (_sync)
+            _clientPacketHandler = clientPacketHandler;
+        EnsureWorker();
     }
 
-    public void WaitSendData()
+    public void AddItem(INetworkCommand command)
     {
-        Task.Run(() =>
+        if (command == null)
+            return;
+
+        BlockingCollection<ItemSendLogin> queue;
+        CancellationToken token;
+        lock (_sync)
         {
-            while (true)
+            queue = _queue;
+            token = _cancelTokenSource.Token;
+        }
+
+        try
+        {
+            EnsureWorker();
+            queue.Add(new ItemSendLogin(command), token);
+        }
+        catch (OperationCanceledException)
+        {
+        }
+        catch (InvalidOperationException)
+        {
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError("SendLoginDataQueue->AddItem " + ex);
+        }
+    }
+
+    public void Stop()
+    {
+        Task worker;
+        CancellationTokenSource oldCts;
+        lock (_sync)
+        {
+            oldCts = _cancelTokenSource;
+            try
             {
-                if (_token.IsCancellationRequested)
+                if (oldCts != null && !oldCts.IsCancellationRequested)
+                    oldCts.Cancel();
+            }
+            catch
+            {
+            }
+
+            try
+            {
+                _queue?.CompleteAdding();
+            }
+            catch
+            {
+            }
+
+            worker = _worker;
+            _worker = null;
+        }
+
+        try
+        {
+            worker?.Wait(500);
+        }
+        catch
+        {
+        }
+
+        lock (_sync)
+        {
+            try
+            {
+                oldCts?.Dispose();
+            }
+            catch
+            {
+            }
+
+            _queue = new BlockingCollection<ItemSendLogin>();
+            _cancelTokenSource = new CancellationTokenSource();
+            Volatile.Write(ref _running, 0);
+        }
+    }
+
+    public void Dispose()
+    {
+        Stop();
+    }
+
+    private void EnsureWorker()
+    {
+        ClientPacketHandler handler;
+        BlockingCollection<ItemSendLogin> queue;
+        CancellationToken token;
+
+        lock (_sync)
+        {
+            if (_clientPacketHandler == null)
+                return;
+            if (Interlocked.CompareExchange(ref _running, 1, 0) != 0)
+                return;
+
+            handler = _clientPacketHandler;
+            queue = _queue;
+            token = _cancelTokenSource.Token;
+            _worker = Task.Run(() => Run(handler, queue, token));
+        }
+    }
+
+    private void Run(
+        ClientPacketHandler handler,
+        BlockingCollection<ItemSendLogin> queue,
+        CancellationToken token)
+    {
+        try
+        {
+            while (!token.IsCancellationRequested)
+            {
+                ItemSendLogin item;
+                try
+                {
+                    item = queue.Take(token);
+                }
+                catch (OperationCanceledException)
+                {
+                    break;
+                }
+                catch (InvalidOperationException)
                 {
                     break;
                 }
 
-                if (_queue.Count > 0)
+                try
                 {
-                    ItemSendLogin item = _queue.Take();
-                    if (item != null)
-                    {
-                        var sender = (LoginClientInterludePacketHandler)_clientPacketHandler;
-                        sender.SendPacket(item.GetPacket());
-                    }
-                    
+                    IOutgoingPacket packet = _protocol.EncodeLogin(item.Command);
+                    if (packet == null)
+                        continue;
+
+                    ((LoginClientPacketHandler)handler).SendPacket(packet);
                 }
-                Thread.Sleep(100);
+                catch (Exception ex)
+                {
+                    Debug.LogError("SendLoginDataQueue->Send " + ex);
+                }
             }
-        });
-    }
-
-
-
-    public void Dispose()
-    {
-        if (!_cancelTokenSource.IsCancellationRequested)
+        }
+        finally
         {
-            _cancelTokenSource.Cancel();
-            _queue = null;
-            _instance = null;
+            Interlocked.Exchange(ref _running, 0);
         }
     }
 }

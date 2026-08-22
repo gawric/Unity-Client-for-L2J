@@ -2,68 +2,64 @@
 
 public class DeadData
 {
-    private bool _useAntiGravity;
-    private float _currentPos;
-    private float _zeroPos;
-    private bool _isRefresh;
-    private Entity _entity;
+    private readonly Entity _entity;
+    private float _elapsed;
+    private Material[][] _instances;
+    private bool _begun;
 
-    public DeadData(bool useAntiGravity  , Entity entity)
+    public DeadData(Entity entity)
     {
-        _useAntiGravity = useAntiGravity;
         _entity = entity;
-    }
-
-    public int GetIdEntity()
-    {
-        return _entity.IdentityInterlude.Id;
-    }
-    public void SetRefresh(bool refresh)
-    {
-        _isRefresh = refresh;
-    }
-
-    public void SetAntiGravity(bool useAntiGravity)
-    {
-        _useAntiGravity = useAntiGravity;
     }
 
     public Entity GetEntity()
     {
         return _entity;
     }
-    public void SetZeroPos(float zeroPos)
+
+    public int GetIdEntity()
     {
-        _zeroPos = zeroPos;
+        return _entity != null && _entity.Identity != null ? _entity.Identity.Id : 0;
     }
 
-    public void SetCurrentPos(float currentPos)
+    public bool IsValid()
     {
-        _currentPos = currentPos;
+        return _entity != null && _entity.gameObject != null;
     }
 
-    public float GetZeroPos()
+    public float Elapsed
     {
-        return _zeroPos;
+        get { return _elapsed; }
     }
 
-    public float GetCurrentPos()
+    public void AddElapsed(float dt)
     {
-        return _currentPos;
+        _elapsed += dt;
     }
 
-    public bool IsAntiGravity()
+    public bool TryBeginFade(L2ActorFade fade)
     {
-        return _useAntiGravity;
+        if (_begun)
+        {
+            return true;
+        }
+
+        if (!IsValid() || fade == null)
+        {
+            return false;
+        }
+
+        _begun = fade.TryBegin(_entity, out Renderer[] _, out _instances);
+        return _begun;
     }
 
-    public bool IsRefresh()
+    public void SetAlphaByte(L2ActorFade fade, byte alphaByte)
     {
-        return _isRefresh;
-    }
+        if (fade == null)
+        {
+            return;
+        }
 
-    public Renderer[]  GetRender()
-    {
-        return _entity.gameObject.GetComponentsInChildren<Renderer>();
+        fade.SetAlphaByte(_instances, alphaByte);
     }
 }

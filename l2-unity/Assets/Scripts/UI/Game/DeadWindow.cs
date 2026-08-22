@@ -57,9 +57,7 @@ public class DeadWindow : L2Window
     {
         toVillage.RegisterCallback<MouseUpEvent>(evt => {
 
-            RequestRestartPoint sendPaket = CreatorPacketsUser.CreateRestartPoint();
-            bool enable = GameClient.Instance.IsCryptEnabled();
-            SendGameDataQueue.Instance().AddItem(sendPaket, enable, enable);
+            IncomingPacketActions.Game.Send(new RequestRestartPointCommand());
 
             HideWindow();
         }, TrickleDown.TrickleDown);

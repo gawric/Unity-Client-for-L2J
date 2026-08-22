@@ -1,4 +1,4 @@
-﻿
+
 using System.Collections;
 using System.Collections.Generic;
 
@@ -71,8 +71,7 @@ public class SkillLearnWindow : L2PopupWindow
        if(model != null)
        {
             //base.OnlyHideWindow();
-            RequestAcquireSkillInfo sendPaket = CreatorPacketsUser.CreateRequestAcquireSkillInfo(model.GetId(), model.GetValue1(), model.GetAcqType());
-            SendGameDataQueue.Instance().AddItem(sendPaket, GameClient.Instance.IsCryptEnabled(), GameClient.Instance.IsCryptEnabled());
+            IncomingPacketActions.Game.Send(new RequestAcquireSkillInfoCommand(model.GetId(), model.GetValue1(), model.GetAcqType()));
         }
 
     }
@@ -91,7 +90,7 @@ public class SkillLearnWindow : L2PopupWindow
     }
     public void ShowWindow()
     {
-        UserInfo user = StorageNpc.getInstance().GetFirstUser();
+        UserInfoDto user = StorageNpc.getInstance().GetFirstUser();
         _spLabel.text = user.PlayerInfoInterlude.Stats.Sp.ToString();
         base.ShowWindow();
     }

@@ -22,7 +22,6 @@ public class MoveNpc : MonoBehaviour
     private float _gravity = 28;
     private CharacterController _controller;
     private NpcEntity _entity;
-    private NpcStateMachine _stateMachine;
 
     private Vector3 _flatTransformPos;
     private Vector3 _lastPos;
@@ -35,7 +34,6 @@ public class MoveNpc : MonoBehaviour
     {
         _controller = GetComponent<CharacterController>();
         _entity = GetComponent<NpcEntity>();
-        _stateMachine = GetComponent<NpcStateMachine>();
         //var _debugObject = GameObject.FindWithTag("DebugMove");
         //_debugLine = _debugObject.GetComponent<DrawLine>();
     }
@@ -139,17 +137,19 @@ public class MoveNpc : MonoBehaviour
             {
 
                 Vector3 point = gravityOffTarget - gravityOffTransform;
-                Vector3 direction = point.normalized;
-                direction = ApplyGravity(direction);
+                Vector3 lookDir = point.normalized;
+                Vector3 direction = ApplyGravity(lookDir);
 
                 if (_isTeleport == false)
                 {
                     _detectedIsMove = true;
                     _controller.Move(direction * monsterSpeed * Time.deltaTime);
 
-                    // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ NPC пїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅ
-                    Quaternion lookRotation = Quaternion.LookRotation(direction);
-                    transform.rotation = Quaternion.Slerp(transform.rotation, lookRotation, Time.deltaTime * 5.0f); // пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
+                    if (lookDir.sqrMagnitude > 0.0001f)
+                    {
+                        Quaternion lookRotation = Quaternion.LookRotation(lookDir);
+                        transform.rotation = Quaternion.Slerp(transform.rotation, lookRotation, Time.deltaTime * 5.0f);
+                    }
                 }
 
                 if (_lastPos == transform.position)
@@ -171,10 +171,11 @@ public class MoveNpc : MonoBehaviour
         // Debug.Log("MoveMonster: пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅ!!!! " + this.name);
         _isMove = false;
 
-        var teset = new Vector3(target.x, 0, target.z);
-        transform.position = teset;
+        Vector3 dest = new Vector3(target.x, transform.position.y, target.z);
+        transform.position = GroundSnapHelper.SnapToGroundOrKeep(dest);
         _detectedIsMove = false;
-        _stateMachine.NotifyEvent(Event.ARRIVED);
+        if (EntityActionMachine.Instance != null)
+            EntityActionMachine.Instance.NotifyArrived(_entity);
     }
 
     public bool IsMoving()

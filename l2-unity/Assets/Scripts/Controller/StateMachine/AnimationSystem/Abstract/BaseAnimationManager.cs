@@ -24,7 +24,15 @@ public abstract class BaseAnimationManager
     {
         _animationControllers[objectId] = new AnimationModel(controller , entity);
         controller.SetInt(AnimatorUtils.OBJECT_ID, objectId);
+        AnimationEventForwarder.BindAnimator(controller);
+    }
 
+    public void UnregisterController(int objectId)
+    {
+        _animationControllers.Remove(objectId);
+        _recentAnimationNames.Remove(objectId);
+        _recentMonsterAnimationNames.Remove(objectId);
+        _tcsMap.Remove(objectId);
     }
 
 
@@ -50,6 +58,15 @@ public abstract class BaseAnimationManager
         return null;
     }
 
+    /// <summary>
+    /// Registered controller for local PlayerEntity or other users (UserEntity / NetworkAnimationController).
+    /// </summary>
+    public IAnimationController GetRegisteredController(int objectId)
+    {
+        AnimationModel model = GetModel(objectId);
+        return model != null ? model.GetController() : null;
+    }
+
     public AnimationEventsBase GetAnimationEvents(int objectId)
     {
         if (_animationControllers.ContainsKey(objectId))
@@ -61,14 +78,14 @@ public abstract class BaseAnimationManager
 
     public AnimationModel GetModel(int objectId)
     {
-        return  _animationControllers[objectId];
+        AnimationModel model;
+        return _animationControllers.TryGetValue(objectId, out model) ? model : null;
     }
-
-
 
     public Entity GetEntity(int objectId)
     {
-        return _animationControllers[objectId].GetEntity();
+        AnimationModel model = GetModel(objectId);
+        return model != null ? model.GetEntity() : null;
     }
 
     public NetworkAnimationController GetMonsterController(int objectId)
@@ -101,7 +118,25 @@ public abstract class BaseAnimationManager
 
     public void PlayOriginalAnimation(int objectId , string animationName)
     {
-        IAnimationController controllerAnimator = GetPlayerController(objectId);
+        IAnimationController controller = GetPlayerController(objectId);
+        if (controller == null)
+        {
+            return;
+        }
+
+        // death / rebirth (no weapon suffix) → CrossFade, not SetBool.
+        if (PlayerDeathAnim.TryResolve(animationName, out string bareState))
+        {
+            DesableLastPlayerAnimationElseTrue(objectId, controller);
+            SetRecentName(objectId, bareState);
+            controller.SetAnimatorSpeed(1f);
+            controller.CrossFadeInFixedTime(bareState, LocomotionCrossFadeSettings.FixedDuration);
+            Debug.Log(
+                $"AnimationManager> start crossfade {bareState} player objectId={objectId} " +
+                $"duration={LocomotionCrossFadeSettings.FixedDuration:F3}s");
+            return;
+        }
+
         PlayerAnimationController.Instance.SetBool(animationName, true);
     }
 
@@ -117,9 +152,15 @@ public abstract class BaseAnimationManager
 
     public string GetEquipAnimName(int objectId)
     {
-        AnimationModel model = _animationControllers[objectId];
-        PlayerEntity entity = (PlayerEntity)model.GetEntity();
-        return entity.GetEquippedWeaponName();
+        Entity entity = GetEntity(objectId);
+        if (entity is PlayerEntity player)
+            return player.GetEquippedWeaponName();
+
+        UserEntity user = entity as UserEntity;
+        if (user != null)
+            return user.WeaponAnim;
+
+        return "";
     }
 
 
@@ -181,6 +222,17 @@ public abstract class BaseAnimationManager
             }
 
         }
+    }
+
+    /// <summary>
+    /// Code-driven locomotion entry via <see cref="PlayerLocomotionCrossFade"/>.
+    /// </summary>
+    protected bool PlayLocomotionCrossFade(
+        IAnimationController controller,
+        string stateName,
+        float? fixedDuration = null)
+    {
+        return PlayerLocomotionCrossFade.TryPlay(controller, stateName, fixedDuration);
     }
 
 

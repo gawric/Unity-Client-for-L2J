@@ -1,10 +1,11 @@
-﻿using NUnit.Framework;
+using NUnit.Framework;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.UIElements;
+using VContainer;
 using static UnityEngine.Rendering.DebugUI;
 
 public class BufferPanel : L2Window
@@ -22,6 +23,13 @@ public class BufferPanel : L2Window
     public BLink _bLink;
     public VisualElement _content;
     private FilterData _filterData;
+
+    [Inject] SkillgrpTable _skillGrps;
+
+    private SkillgrpTable SkillGrps
+    {
+        get { return _skillGrps != null ? _skillGrps : SkillgrpTable.Instance; }
+    }
 
     private void Awake()
     {
@@ -63,7 +71,7 @@ public class BufferPanel : L2Window
         MovePanelToChatPosition(_defaultLeftOffset);
     }
 
-    public void RefreshPenalty(EtcStatusUpdate etcStatusUpdatePacket)
+    public void RefreshPenalty(EtcStatusUpdateDto etcStatusUpdatePacket)
     {
         _deathPenalty = etcStatusUpdatePacket.DeathPenalty;
         _weightPenalty = etcStatusUpdatePacket.WeightPenalty;
@@ -92,7 +100,7 @@ public class BufferPanel : L2Window
     public void AddDataCellToTime(int skillId, int skillLevel, int time)
     {
 
-        Skillgrp skill = SkillgrpTable.Instance.GetSkill(skillId, skillLevel);
+        Skillgrp skill = SkillGrps.GetSkill(skillId, skillLevel);
 
         if (skill != null)
         {

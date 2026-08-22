@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -6,8 +6,9 @@ using UnityEngine;
 public class StorageNpc
 {
     private static StorageNpc instance;
-    public static Dictionary<int , NpcInfo> npcs;
-    public static Dictionary<int, UserInfo> users;
+    public static Dictionary<int , NpcInfoDto> npcs;
+    public static Dictionary<int, UserInfoDto> users;
+    public static Dictionary<int, CharInfoDto> chars;
     private object _sync = new object();
     private StorageNpc()
     { }
@@ -17,14 +18,15 @@ public class StorageNpc
         if (instance == null)
         {
             instance = new StorageNpc();
-            npcs = new Dictionary<int, NpcInfo>();
-            users = new Dictionary<int, UserInfo>();
+            npcs = new Dictionary<int, NpcInfoDto>();
+            users = new Dictionary<int, UserInfoDto>();
+            chars = new Dictionary<int, CharInfoDto>();
         }
             
         return instance;
     }
 
-    public void AddNpcInfo(NpcInfo npc)
+    public void AddNpcInfo(NpcInfoDto npc)
     {
         lock (_sync)
         {
@@ -41,7 +43,43 @@ public class StorageNpc
         }
     }
 
-    public void AddUserInfo(UserInfo user)
+    public void AddCharInfo(CharInfoDto info)
+    {
+        if (info == null || info.Identity == null)
+            return;
+        lock (_sync)
+        {
+            if (chars == null)
+                chars = new Dictionary<int, CharInfoDto>();
+            chars[info.Identity.Id] = info;
+        }
+    }
+
+    public NpcInfoDto[] CopyNpcs()
+    {
+        lock (_sync)
+        {
+            if (npcs == null || npcs.Count == 0)
+                return new NpcInfoDto[0];
+            NpcInfoDto[] copy = new NpcInfoDto[npcs.Count];
+            npcs.Values.CopyTo(copy, 0);
+            return copy;
+        }
+    }
+
+    public CharInfoDto[] CopyChars()
+    {
+        lock (_sync)
+        {
+            if (chars == null || chars.Count == 0)
+                return new CharInfoDto[0];
+            CharInfoDto[] copy = new CharInfoDto[chars.Count];
+            chars.Values.CopyTo(copy, 0);
+            return copy;
+        }
+    }
+
+    public void AddUserInfo(UserInfoDto user)
     {
         lock (_sync)
         {
@@ -57,7 +95,7 @@ public class StorageNpc
 
         }
     }
-    public UserInfo GetFirstUser()
+    public UserInfoDto GetFirstUser()
     {
         if(users.Count > 0)
         {
@@ -65,7 +103,7 @@ public class StorageNpc
         }
         return null;
     }
-    public NpcInfo GetNpcInfo(int objId)
+    public NpcInfoDto GetNpcInfo(int objId)
     {
         //lock (_sync)
         //{
@@ -73,7 +111,7 @@ public class StorageNpc
         //}
     }
 
-    public UserInfo GetUserInfo(int objId)
+    public UserInfoDto GetUserInfo(int objId)
     {
         //lock (_sync)
         //{

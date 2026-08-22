@@ -11,7 +11,7 @@
         switch (evt)
         {
             case Event.REBIRTH:
-                AnimationManager.Instance.PlayOriginalAnimation(_stateMachine.GetObjectId() , AnimationNames.REBIRTH.ToString());
+                IncomingPacketActions.Animations.PlayOriginalAnimation(_stateMachine.GetObjectId() , AnimationNames.REBIRTH.ToString());
                 _stateMachine.ChangeIntention(Intention.INTENTION_IDLE);
                 break;
 

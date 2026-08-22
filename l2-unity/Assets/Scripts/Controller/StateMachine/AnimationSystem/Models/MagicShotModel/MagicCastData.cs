@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 public class MagicCastData
 {
@@ -37,6 +37,12 @@ public class MagicCastData
     public float HitTime;
     public float FlightTime;
 
+    /// <summary>
+    /// Wall-clock skill animation duration (e.g. SpAtk until SwitchToIdle).
+    /// When &gt; 0 and composite has Match Lifetime To Skill Animation, FX lifetime uses this instead of HitTime.
+    /// </summary>
+    public float SkillAnimationDuration;
+
     /// <summary>Неучтённые в таймлинке переходы/оверлапы (масштаб от server HitTime), только если penalty включён.</summary>
     public float AnimatorWallPenaltySeconds { get; private set; }
 
@@ -47,7 +53,7 @@ public class MagicCastData
     public float shotEventTime;
     public float serverTimeToShoot;
 
-    /// <summary>Object id цели из пакета MagicSkillUse (приоритетнее PlayerEntity.TargetId для VFX).</summary>
+    /// <summary>Object id цели из пакета MagicSkillUseDto (приоритетнее PlayerEntity.TargetId для VFX).</summary>
     public int TargetObjectId;
 
     /// <summary>Окно от старта каста до момента выстрела: номинал минус penalty или минус фиксированный offset.</summary>

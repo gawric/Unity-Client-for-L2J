@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -55,7 +55,7 @@ public class TradeWindow : L2PopupWindow
         }
     }
 
-    public void AddData(TradeStart data)
+    public void AddData(TradeStartDto data)
     {
         try
         {
@@ -248,9 +248,7 @@ public class TradeWindow : L2PopupWindow
             _exchangeItems.Add(item);
 
             // Отправляем пакет добавления предмета в обмен
-            var sendPacket = CreatorPacketsUser.CreateAddTradeItem(0, item.ObjectId, item.Count);
-            bool enable = GameClient.Instance.IsCryptEnabled();
-            SendGameDataQueue.Instance().AddItem(sendPacket, enable, enable);
+            IncomingPacketActions.Game.Send(new AddTradeItemCommand(0, item.ObjectId, item.Count));
         }
         else
         {
@@ -265,11 +263,6 @@ public class TradeWindow : L2PopupWindow
         {
             slot.AssignEmpty();
             _exchangeItems.RemoveAll(item => item.ObjectId == objectId);
-
-            // Отправляем пакет удаления предмета из обмена
-            //var sendPacket = CreatorPacketsUser.CreateRemoveTradeItem(objectId);
-            //bool enable = GameClient.Instance.IsCryptEnabled();
-            //SendGameDataQueue.Instance().AddItem(sendPacket, enable, enable);
         }
     }
 
@@ -292,9 +285,7 @@ public class TradeWindow : L2PopupWindow
     private void SendOkResponse()
     {
         // Отправляем пакет подтверждения обмена
-        var sendPacket = CreatorPacketsUser.CreateTradeDone(1);
-        bool enable = GameClient.Instance.IsCryptEnabled();
-        SendGameDataQueue.Instance().AddItem(sendPacket, enable, enable);
+        IncomingPacketActions.Game.Send(new TradeDoneCommand(1));
 
         OnExchangeResponse?.Invoke(true);
     }
@@ -302,9 +293,7 @@ public class TradeWindow : L2PopupWindow
     private void SendCancelResponse()
     {
         // Отправляем пакет отмены обмена
-        var sendPacket = CreatorPacketsUser.CreateTradeDone(0);
-        bool enable = GameClient.Instance.IsCryptEnabled();
-        SendGameDataQueue.Instance().AddItem(sendPacket, enable, enable);
+        IncomingPacketActions.Game.Send(new TradeDoneCommand(0));
 
         OnExchangeResponse?.Invoke(false);
     }

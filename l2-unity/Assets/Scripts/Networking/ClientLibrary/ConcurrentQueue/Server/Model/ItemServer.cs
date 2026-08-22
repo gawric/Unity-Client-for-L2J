@@ -1,67 +1,33 @@
-﻿using L2_login;
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using System;
 
-
-public class ItemServer :  IData
+public class ItemServer
 {
-    private byte[] _data;
-    private GameInterludeServerPacketType packetType;
-    private byte _byteType;
+    private readonly byte[] _data;
+    private readonly byte _byteType;
+    private readonly GameServerPacketType packetType;
     private int _exByteType;
- 
-    public ItemServer(byte[] data, bool init, bool cryptEnbled)
+
+    public ItemServer(byte[] data)
     {
-
-        Decrypt(data, cryptEnbled, init);
-        packetType = (GameInterludeServerPacketType)data[0];
-        _byteType = data[0];
         _data = data;
-
-        if (PartyDebugRawLog.Enabled)
-        {
-            UnityEngine.Debug.Log($"[PartyDebug] RAW packet id=0x{data[0]:X2} len={data.Length}");
-        }
+        _byteType = data[0];
+        packetType = (GameServerPacketType)data[0];
     }
 
     public byte[] DecodeData() { return _data; }
-    //remove 3 bytes = 1 byte: id ExPacket & 2 byte id packet(type short)
-    public byte[] DecodeExData() {
+
+    public byte[] DecodeExData()
+    {
         return Delete2And3Byte(_data);
     }
+
     public byte ByteType() { return _byteType; }
-    public GameInterludeServerPacketType PaketType() { return packetType; }
+    public GameServerPacketType PaketType() { return packetType; }
 
-    public int ExPacketType() {
-
+    public int ExPacketType()
+    {
         _exByteType = ReadSh(_data);
         return _exByteType;
-    }
-
-    private void Decrypt(byte[] data, bool cryptEnbled, bool init)
-    {
-        if (cryptEnbled)
-        {
-            GameClient.Instance.GameCrypt.GameServerDecrypt(data, 0, data.Length);
-        }
-
-    }
-
-  
-
-    public ClientPacket GetPacket()
-    {
-        throw new System.NotImplementedException();
-    }
-
-    public string ToString()
-    {
-        return "ItemServer{" +
-            ", packetType=" + packetType +
-            ", byteType=" + _byteType +
-        '}';
     }
 
     protected int ReadSh(byte[] packetData)
@@ -72,7 +38,7 @@ public class ItemServer :  IData
         short value = ByteUtils.fromByteArrayShort(data);
         return value;
     }
-    //l2j Server Ex  use Short type
+
     private byte[] Delete2And3Byte(byte[] data)
     {
         byte[] newData = new byte[data.Length - 2];
@@ -80,7 +46,6 @@ public class ItemServer :  IData
         Array.Copy(data, 0, newData, pos, 1);
         pos += 1;
         Array.Copy(_data, 3, newData, pos, data.Length - 3);
-
         return newData;
     }
 }

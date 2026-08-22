@@ -27,6 +27,7 @@ public class Geodata : MonoBehaviour {
     public LayerMask ObstacleMask { get { return _obstacleMask; } set { _obstacleMask = value; } }
 
     public float NodeSize { get { return _nodeSize; } }
+    public float MapSize { get { return _mapSize; } }
     public bool Loaded { get { return _loaded; } }
 
     private static Geodata _instance;
@@ -46,9 +47,24 @@ public class Geodata : MonoBehaviour {
     }
 
     void Start() {
-        _geodata = new Dictionary<string, Node[,,]>();
+        if (_geodata == null) {
+            _geodata = new Dictionary<string, Node[,,]>();
+        }
+    }
 
-        foreach(var mapId in _mapsToLoad) {
+    public void LoadMaps(IList<string> mapIds) {
+        if (_geodata == null) {
+            _geodata = new Dictionary<string, Node[,,]>();
+        }
+
+        _mapsToLoad = mapIds != null ? new List<string>(mapIds) : new List<string>();
+        _loaded = _mapsToLoad.Count == 0;
+
+        for (int i = 0; i < _mapsToLoad.Count; i++) {
+            string mapId = _mapsToLoad[i];
+            if (_mapsOrigin.ContainsKey(mapId)) {
+                continue;
+            }
 
             Vector3 origin;
             try {
@@ -64,7 +80,7 @@ public class Geodata : MonoBehaviour {
                     _geodata[mapId] = callback;
                 }
 
-                if(_geodata.Keys.Count == _mapsToLoad.Count) {
+                if(_geodata.Keys.Count >= _mapsToLoad.Count) {
                     _loaded = true;
                 }
             });

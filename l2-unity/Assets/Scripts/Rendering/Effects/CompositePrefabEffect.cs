@@ -112,6 +112,12 @@ public class CompositePrefabEffect : TimedCompositeEffectBase
     [SerializeField] private CompositePrefabPart[] _parts;
     [SerializeField] private float _serverHitLifetimeTailSeconds = 0f;
 
+    [Header("Lifetime")]
+    [Tooltip(
+        "If enabled: root/part cast-timed lifetime uses MagicCastData.SkillAnimationDuration " +
+        "(wall-clock SpAtk until idle) instead of HitTime. For melee skill FX that must end with the swing.")]
+    [SerializeField] private bool _matchLifetimeToSkillAnimation;
+
     [Tooltip("Если включено: не вызывать DestoryEffect по lifetime корня — дочерние префабы (например wh_heal_ca) не уничтожаются вместе с композитом. Только для отладки шейдеров/Hold.")]
     [SerializeField] private bool _skipDestroyCompositeByLifetime;
 
@@ -147,6 +153,18 @@ public class CompositePrefabEffect : TimedCompositeEffectBase
     private bool _lightSpawned;
     protected override string DebugPrefix => "[CompositePrefabEffect]";
     protected override float RuntimeLifeTimeTailSeconds => _serverHitLifetimeTailSeconds;
+
+    protected override float ResolveCastTimedLifetimeSeconds()
+    {
+        if (_matchLifetimeToSkillAnimation &&
+            _castData != null &&
+            _castData.SkillAnimationDuration > 0f)
+        {
+            return _castData.SkillAnimationDuration;
+        }
+
+        return base.ResolveCastTimedLifetimeSeconds();
+    }
 
     public override void Setup(EffectSettings settings, MagicCastData castData, Transform owner)
     {
@@ -307,13 +325,13 @@ public class CompositePrefabEffect : TimedCompositeEffectBase
             return;
         }
 
-        if (_context?.CasterEntity?.IdentityInterlude == null || AnimationManager.Instance == null)
+        if (_context?.CasterEntity?.Identity == null || IncomingPacketActions.Animations == null)
         {
             return;
         }
 
-        int casterId = _context.CasterEntity.IdentityInterlude.Id;
-        _animationEvents = AnimationManager.Instance.GetAnimationEvents(casterId);
+        int casterId = _context.CasterEntity.Identity.Id;
+        _animationEvents = IncomingPacketActions.Animations.GetAnimationEvents(casterId);
         TrySubscribeShootSource(_animationEvents, "AnimationManager");
 
         if (!_isSubscribedToAnyShoot)

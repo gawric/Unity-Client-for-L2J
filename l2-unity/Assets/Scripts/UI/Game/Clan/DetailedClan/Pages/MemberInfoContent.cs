@@ -1,4 +1,4 @@
-﻿
+
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -61,7 +61,7 @@ public class MemberInfoContent : AbstractClanContent
         _tamplateChangeTitle = loaderFunc(_templateNameElementChangeTitle);
     }
 
-    public void PreShow(PledgeReceiveMemberInfo memberInfo, VisualElement detailedInfoElement, PledgeShowMemberListAll packetAll)
+    public void PreShow(PledgeReceiveMemberInfoDto memberInfo, VisualElement detailedInfoElement, PledgeShowMemberListAllDto packetAll)
     {
         content = LoadContent(content, detailedInfoElement);
         ClearContent(content);
@@ -70,7 +70,7 @@ public class MemberInfoContent : AbstractClanContent
 
         Show(memberInfo, detailedInfoElement, packetAll);
     }
-    public void Show(PledgeReceiveMemberInfo memberInfo, VisualElement detailedInfoElement, PledgeShowMemberListAll packetAll)
+    public void Show(PledgeReceiveMemberInfoDto memberInfo, VisualElement detailedInfoElement, PledgeShowMemberListAllDto packetAll)
     {
         VisualElement page = ToolTipsUtils.CloneOne(template);
 
@@ -112,7 +112,7 @@ public class MemberInfoContent : AbstractClanContent
     }
 
 
-    private void SetLeader(PledgeReceiveMemberInfo memberInfo, PledgeShowMemberListAll packetAll)
+    private void SetLeader(PledgeReceiveMemberInfoDto memberInfo, PledgeShowMemberListAllDto packetAll)
     {
         _isLeader = StorageNpc.getInstance().GetFirstUser().PlayerInfoInterlude.Identity.Name == packetAll.SubPledgeLeaderName;
     }

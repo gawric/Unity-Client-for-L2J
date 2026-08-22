@@ -9,9 +9,12 @@ public class GameClientReceiving
     private readonly AsynchronousClient _asyncClient;
     private const int HeaderSize = 2;
 
-    public GameClientReceiving(AsynchronousClient asyncClient)
+    private readonly IncomingGameQueue _incoming;
+
+    public GameClientReceiving(AsynchronousClient asyncClient, IncomingGameQueue incoming)
     {
         _asyncClient = asyncClient;
+        _incoming = incoming;
     }
 
     public Task StartReceiving(Socket socket, System.Threading.CancellationToken token)
@@ -39,26 +42,25 @@ public class GameClientReceiving
                     if (!_asyncClient.IsConnected)
                         break;
 
-                    ItemServer item = IncomingGameDataQueue.Instance().CreateItem(data, _asyncClient.InitPacket, _asyncClient.CryptEnabled);
-
-                    IncomingGameCombatQueue.Instance().AddItem(item);
-                    IncomingGameDataQueue.Instance().AddItem(item);
-                    IncomingGameMessageQueue.Instance().AddItem(item);
+                    _incoming.AddItem(data, _asyncClient.InitPacket, _asyncClient.CryptEnabled);
                 }
             }
         }
         catch (ObjectDisposedException)
         {
+            LobbyFlowLog.Warn("Game RX stopped — socket disposed");
         }
-        catch (IOException)
+        catch (IOException ex)
         {
+            LobbyFlowLog.Warn("Game RX IOException: " + ex.Message);
         }
-        catch (SocketException)
+        catch (SocketException ex)
         {
+            LobbyFlowLog.Warn("Game RX SocketException: " + ex.Message);
         }
         catch (Exception e)
         {
-            Debug.LogException(e);
+            LobbyFlowLog.Exception("Game RX", e);
         }
     }
 

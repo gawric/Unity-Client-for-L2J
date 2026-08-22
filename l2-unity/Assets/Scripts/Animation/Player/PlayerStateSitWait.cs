@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PlayerStateSitWait : PlayerStateAction {
+public class PlayerStateSitWait : PlayerStateBase {
     override public void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex) {
         LoadComponents(animator);
         if (!_enabled) {
@@ -13,10 +13,6 @@ public class PlayerStateSitWait : PlayerStateAction {
 
     override public void OnStateUpdate(Animator animator, AnimatorStateInfo stateInfo, int layerIndex) {
         if (!_enabled) {
-            return;
-        }
-
-        if (ShouldDie()) {
             return;
         }
 

@@ -99,7 +99,7 @@ MonoBehaviour:
     settings: {fileID: 11400000, guid: dd6f482471331114da04e05ef1d9dddb, type: 2}
     ignoreFlightTimeForCast: 1
   - id: 2031
-    prefab: {fileID: 2595007125146735222, guid: 3f05ace42cf604c4aae86789a698f5c3, type: 3}
+    prefab: {fileID: 5808942669273333594, guid: a1c7d3a47cad6db40bea1a5ea2ad1a9e, type: 3}
     comment: it-healing-potion-effect
     settings: {fileID: 11400000, guid: 304118563f04a3c46812acac35e7ba2e, type: 2}
     ignoreFlightTimeForCast: 1
@@ -112,4 +112,9 @@ MonoBehaviour:
     prefab: {fileID: 720686262775047825, guid: a6591ce429474df46874126c3dc0c6a4, type: 3}
     comment: simple_atk_effect
     settings: {fileID: 11400000, guid: 39ad4dfd5fe718841a26f54f9f4b3702, type: 2}
+    ignoreFlightTimeForCast: 1
+  - id: 3
+    prefab: {fileID: 5808942669273333594, guid: a1c7d3a47cad6db40bea1a5ea2ad1a9e, type: 3}
+    comment: power_strike
+    settings: {fileID: 11400000, guid: 539430148bf8dfa41bf71e9aa073a74a, type: 2}
     ignoreFlightTimeForCast: 1

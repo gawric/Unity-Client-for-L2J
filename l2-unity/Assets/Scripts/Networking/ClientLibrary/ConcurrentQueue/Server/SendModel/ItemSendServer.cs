@@ -1,44 +1,11 @@
-﻿using L2_login;
-
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-
-public class ItemSendServer : IData
+﻿public sealed class ItemSendServer
 {
-    private ClientPacket packet;
-    private bool encrypt;
-    public ItemSendServer(ClientPacket packet, bool encrypt, bool blowfish)
-    {
-        this.packet = packet;
-        this.encrypt = encrypt;
-        //Encrypt(packet, encrypt);
-        Blowfish(packet.GetData(), blowfish);
-    }
-    public byte[] DecodeData()
-    {
-        throw new System.NotImplementedException();
-    }
+    public readonly INetworkCommand Command;
+    public readonly bool Encrypt;
 
-    //new version encrypt
-    private void Blowfish(byte[] data, bool blowfish)
+    public ItemSendServer(INetworkCommand command, bool encrypt)
     {
-        if (blowfish)
-        {
-            //Debug.Log($"GameServer Data no encrypt : {StringUtils.ByteArrayToString(data)}");
-            GameClient.Instance.GameCrypt.GameServerEncrypt(data , 0 , data.Length);
-
-        }
-
-    }
-
-    public ClientPacket GetPacket()
-    {
-        return packet;
-    }
-
-    public byte[] DecodeExData()
-    {
-        throw new System.NotImplementedException();
+        Command = command;
+        Encrypt = encrypt;
     }
 }

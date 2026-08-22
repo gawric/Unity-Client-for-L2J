@@ -1,4 +1,4 @@
-﻿using Org.BouncyCastle.Bcpg;
+using Org.BouncyCastle.Bcpg;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -7,7 +7,7 @@ public class DataProviderClanInfo : AbstractDataFunction
 {
     private const string IMG_ONLINE = "Data/UI/Clan/PConline_up";
     private const string IMG_OFFLINE= "Data/UI/Clan/PConline_down";
-    public void SetMasterClanInfo(VisualElement container, PledgeShowMemberListAll packet)
+    public void SetMasterClanInfo(VisualElement container, PledgeShowMemberListAllDto packet)
     {
         if (container != null)
         {
@@ -49,13 +49,13 @@ public class DataProviderClanInfo : AbstractDataFunction
         }
     }
 
-    public void UpdateClanInfo(VisualElement container, PledgeInfo packet)
+    public void UpdateClanInfo(VisualElement container, PledgeInfoDto packet)
     {
         Label titleLabel = container.Q<Label>("labelClanName");
         AddElementIfNotEmpty(titleLabel, titleLabel, packet.ClanName);
     }
 
-    public void SetMemberInfo(VisualElement container, PledgeReceiveMemberInfo packet ,  PledgeShowMemberListAll packetAll)
+    public void SetMemberInfo(VisualElement container, PledgeReceiveMemberInfoDto packet ,  PledgeShowMemberListAllDto packetAll)
     {
         Label titleName = container.Q<Label>("titleLabel");
         AddElementIfNotEmpty(titleName, titleName, packet.Name);
@@ -74,7 +74,7 @@ public class DataProviderClanInfo : AbstractDataFunction
         AddElementIfNotEmpty(statuslabel, statuslabel, "Main Clan - " + packet.SubPledgeName);
     }
 
-    public void SetSubjectClanInfo(VisualElement container , PledgeShowMemberListAll packetAll)
+    public void SetSubjectClanInfo(VisualElement container , PledgeShowMemberListAllDto packetAll)
     {
         Label titleName = container.Q<Label>("titleLabel");
         AddElementIfNotEmpty(titleName, titleName, packetAll.PledgeName);

@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public class PlayerStateStand : PlayerStateAction
+public class PlayerStateStand : PlayerStateBase
 {
     //private float _lastNormalizedTime = 0;
 

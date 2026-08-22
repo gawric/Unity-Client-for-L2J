@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
 using UnityEngine.ProBuilder.MeshOperations;
@@ -25,14 +25,14 @@ public class ClanInfoContent : AbstractClanContent
         return _listDemoSkills;
     }
 
-    public void PreShow(PledgeClanInfo clanInfo, VisualElement detailedInfoElement, PledgeShowMemberListAll packetAll)
+    public void PreShow(PledgeClanInfoDto clanInfo, VisualElement detailedInfoElement, PledgeShowMemberListAllDto packetAll)
     {
         content = LoadContent(content, detailedInfoElement);
         ClearContent(content);
 
         Show(clanInfo, detailedInfoElement, packetAll);
     }
-    public void Show(PledgeClanInfo clanInfo, VisualElement detailedInfoElement, PledgeShowMemberListAll packetAll)
+    public void Show(PledgeClanInfoDto clanInfo, VisualElement detailedInfoElement, PledgeShowMemberListAllDto packetAll)
     {
         VisualElement page = ToolTipsUtils.CloneOne(template);
         //_dataProvider.SetMemberInfo(page, memberInfo, packetAll);

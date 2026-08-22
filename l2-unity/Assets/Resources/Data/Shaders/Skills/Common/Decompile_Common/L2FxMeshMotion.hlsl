@@ -23,6 +23,19 @@
 //
 // VelocityLoss: same UParticleEmitter proportional drag as L2FxSpriteMotion
 // (live BlueDust / UpdateParticles). Per-axis VelocityLossRange units are 1/s.
+//
+// MaxAbsVelocity (UParticleEmitter::UpdateParticles decompile):
+//   Per-axis clamp of particle Velocity to [-MaxAbs, +MaxAbs].
+//   MaxAbs==0 → that axis is NOT clamped.
+//   Tick order in the same function: integrate Location from Velocity, then
+//   MaxAbsVelocity clamp on Velocity, then VelocityLoss.
+//
+//   *** NOT LIVE-VERIFIED ***
+//   Taken from IDA/decompile of Lineage2 UParticleEmitter::UpdateParticles only.
+//   No ParticleSnapshot / hook compare vs original client logs yet.
+//   Do not treat closed-form EvaluatePosition* as including MaxAbs — those
+//   helpers stay ballistic/drag only; call ClampVelocityMaxAbsUe on discrete
+//   velocity when an effect needs UC MaxAbsVelocity parity.
 
 float3 L2Fx_MeshMotion_EvaluatePositionUe(
     float3 startLocationOffsetUe,
@@ -85,6 +98,30 @@ float3 L2Fx_MeshMotion_EvaluatePositionUeWithDrag(
         accelerationUe,
         velocityLossPerSecUe,
         ageSeconds);
+}
+
+// ---------------------------------------------------------------------------
+// MaxAbsVelocity — DECOMPILE ONLY (not verified vs Lineage2 live logs)
+// Source: UParticleEmitter::UpdateParticles
+//   if (MaxAbs != 0) Velocity = clamp(Velocity, -MaxAbs, +MaxAbs)  // per axis
+// Emitter MaxAbs floats: this+240/241/242 (X/Y/Z). Particle vel: +24/+28/+32.
+// ---------------------------------------------------------------------------
+float L2Fx_MeshMotion_ClampAxisMaxAbsUe(float velocityUe, float maxAbsUe)
+{
+    // Decompile: MaxAbs == 0 skips the clamp for that axis.
+    if (maxAbsUe == 0.0)
+        return velocityUe;
+    return clamp(velocityUe, -maxAbsUe, maxAbsUe);
+}
+
+float3 L2Fx_MeshMotion_ClampVelocityMaxAbsUe(
+    float3 velocityUe,
+    float3 maxAbsVelocityUe)
+{
+    return float3(
+        L2Fx_MeshMotion_ClampAxisMaxAbsUe(velocityUe.x, maxAbsVelocityUe.x),
+        L2Fx_MeshMotion_ClampAxisMaxAbsUe(velocityUe.y, maxAbsVelocityUe.y),
+        L2Fx_MeshMotion_ClampAxisMaxAbsUe(velocityUe.z, maxAbsVelocityUe.z));
 }
 
 #endif // L2_FX_MESH_MOTION_INCLUDED

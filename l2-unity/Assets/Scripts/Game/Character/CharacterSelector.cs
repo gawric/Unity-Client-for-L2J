@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Drawing;
+﻿using System.Collections.Generic;
 using UnityEngine;
+using VContainer;
 
 public class CharacterSelector : MonoBehaviour
 {
@@ -18,8 +16,22 @@ public class CharacterSelector : MonoBehaviour
     private List<Logongrp> _pawnData;
     private List<GameObject> _characterGameObjects;
 
+    [Inject] private LogongrpTable _logonGrps;
+
+    private List<Logongrp> LogonGrps
+    {
+        get
+        {
+            LogongrpTable table = _logonGrps != null ? _logonGrps : LogongrpTable.Instance;
+            return table.LogonGrps;
+        }
+    }
+
     public Camera Camera { get { return _charSelectCamera; } set { _charSelectCamera = value; } }
     public int SelectedSlot { get { return _selectedCharacterSlot; } }
+
+    /// <summary>Spawned lobby pawns (Interlude / legacy select row).</summary>
+    public IReadOnlyList<GameObject> CharacterPawns => _characterGameObjects;
 
 
     private static CharacterSelector _instance;
@@ -29,6 +41,7 @@ public class CharacterSelector : MonoBehaviour
         if (_instance == null) {
             _instance = this;
             dict = new Dictionary<int, float>();
+            App.InjectGameObject(gameObject);
         } else if (_instance != this) {
             Destroy(this);
         }
@@ -46,7 +59,7 @@ public class CharacterSelector : MonoBehaviour
         }
 
         _characters = characters;
-        _pawnData = LogongrpTable.Instance.LogonGrps;
+        _pawnData = LogonGrps;
         _characterGameObjects = new List<GameObject>();
         _selectedCharacterSlot = -1;
 
@@ -70,7 +83,7 @@ public class CharacterSelector : MonoBehaviour
         }
 
         _charactersInterlude = characters;
-        _pawnData = LogongrpTable.Instance.LogonGrps;
+        _pawnData = LogonGrps;
         _characterGameObjects = new List<GameObject>();
         _selectedCharacterSlot = -1;
 
@@ -84,12 +97,22 @@ public class CharacterSelector : MonoBehaviour
 
     public void SpawnInterludeCharacterSlot(int id)
     {
-        GameObject pawnObject = CharacterCreator.Instance.CreatePawnInterlude(_charactersInterlude[id].CharacterRaceAnimation, _charactersInterlude[id].Appreance);
-        pawnObject.GetComponent<SelectableCharacterEntity>().CharacterInfoInterlude = _charactersInterlude[id];
+        CharSelectInfoPackage info = _charactersInterlude[id];
+        GameObject pawnObject = CharacterCreator.Instance.CreatePawnInterlude(info.CharacterRaceAnimation, info.Appreance);
+        if (pawnObject == null)
+        {
+            LobbyFlowLog.Error(
+                "lobby pawn null slot=" + id + " name=" + info.Name +
+                " raceAnim=" + info.CharacterRaceAnimation + " — skip (would NRE and freeze char select)");
+            return;
+        }
+
+        pawnObject.GetComponent<SelectableCharacterEntity>().CharacterInfoInterlude = info;
         pawnObject.GetComponent<SelectableCharacterEntity>().WeaponAnim = pawnObject.GetComponent<UserGear>().WeaponAnim;
-        string name = _charactersInterlude[id].Name;
+        string name = info.Name;
         CharacterCreator.Instance.PlacePawn(pawnObject, _pawnData[id], name, _container);
         _characterGameObjects.Add(pawnObject);
+        LobbyFlowLog.Info("lobby pawn spawned slot=" + id + " name=" + name);
     }
 
     Bounds GetMaxBounds(GameObject parent)
@@ -158,8 +181,7 @@ public class CharacterSelector : MonoBehaviour
             Debug.LogWarning("Please select a character");
             return;
         }
-        bool enable = GameClient.Instance.IsCryptEnabled();
-        SendGameDataQueue.Instance().AddItem(CreatorPacketsGameLobby.CharacterSelect(SelectedSlot), enable, enable);
+        IncomingPacketActions.Game.Send(new CharacterSelectCommand(SelectedSlot));
        // GameClient.Instance.ClientPacketHandler.SendRequestSelectCharacter(SelectedSlot);
     }
 
@@ -170,10 +192,7 @@ public class CharacterSelector : MonoBehaviour
                 Debug.LogWarning("Please select a character");
                 return;
             }
-
-
-            bool enable = GameClient.Instance.IsCryptEnabled();
-            SendGameDataQueue.Instance().AddItem(CreatorPacketsGameLobby.RequestCharacterDelete(SelectedSlot), enable, enable);
+            IncomingPacketActions.Game.Send(new CharacterDeleteCommand(SelectedSlot));
             Debug.LogWarning("Requesting delete character , slot: " + SelectedSlot);
     }
 

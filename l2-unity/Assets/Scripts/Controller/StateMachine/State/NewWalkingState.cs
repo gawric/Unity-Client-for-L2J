@@ -17,10 +17,10 @@
             {
                 case Event.ARRIVED:
                     ArrivedToDestination();
-                    DebugLineDraw.RemoveDrawLineDebug(PlayerEntity.Instance.IdentityInterlude.Id);
+                    DebugLineDraw.RemoveDrawLineDebug(PlayerEntity.Instance.Identity.Id);
                     break;
                 case Event.MOVE_TO:
-                    AnimationManager.Instance.PlayAnimation(_stateMachine.GetObjectId() , AnimationNames.WALK.ToString(), true);
+                    IncomingPacketActions.Animations.PlayAnimation(_stateMachine.GetObjectId() , AnimationNames.WALK.ToString(), true);
                 break;
             }
     }

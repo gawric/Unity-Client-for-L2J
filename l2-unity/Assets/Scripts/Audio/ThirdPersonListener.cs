@@ -18,17 +18,38 @@ public class ThirdPersonListener : MonoBehaviour
     private void Awake() {
         if (_instance == null) {
             _instance = this;
-        } else {
-            Destroy(this);
         }
 
-        if(_cam == null) {
+        if (_cam == null && Camera.main != null) {
             _cam = Camera.main.gameObject;
         }
     }
 
+    private void OnEnable() {
+        _instance = this;
+    }
+
+    private void OnDisable() {
+        if (_instance == this) {
+            _instance = FindActiveListener();
+        }
+    }
+
     void OnDestroy() {
-        _instance = null;
+        if (_instance == this) {
+            _instance = null;
+        }
+    }
+
+    private ThirdPersonListener FindActiveListener() {
+        ThirdPersonListener[] listeners = FindObjectsByType<ThirdPersonListener>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
+        for (int i = 0; i < listeners.Length; i++) {
+            if (listeners[i] != null && listeners[i] != this && listeners[i].isActiveAndEnabled) {
+                return listeners[i];
+            }
+        }
+
+        return null;
     }
 
     void Update() {

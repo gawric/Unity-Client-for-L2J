@@ -88,17 +88,27 @@ public class LoginCameraManager : MonoBehaviour
 
             if (camera == "CharSelect")
             {
-                LobbyNameplatesManager.Instance.Camera = obj;
-                CharacterSelector.Instance.Camera = obj;
+                if (LobbyNameplatesManager.Instance != null)
+                {
+                    LobbyNameplatesManager.Instance.Camera = obj;
+                }
+
+                if (CharacterSelector.Instance != null)
+                {
+                    CharacterSelector.Instance.Camera = obj;
+                }
             }
             else
-             {
-                if(LobbyNameplatesManager.Instance != null)
+            {
+                if (LobbyNameplatesManager.Instance != null)
                 {
                     LobbyNameplatesManager.Instance.Camera = null;
-                   
                 }
-                CharacterSelector.Instance.Camera = null;
+
+                if (CharacterSelector.Instance != null)
+                {
+                    CharacterSelector.Instance.Camera = null;
+                }
             }
 
             UpdateListenerPosition();
@@ -121,6 +131,10 @@ public class LoginCameraManager : MonoBehaviour
     }
 
     private void UpdateListenerPosition() {
+        if (ThirdPersonListener.Instance == null || _activeCamera == null) {
+            return;
+        }
+
         ThirdPersonListener.Instance.transform.position = _activeCamera.transform.position;
         ThirdPersonListener.Instance.Cam = _activeCamera.gameObject;
     }

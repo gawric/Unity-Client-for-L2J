@@ -155,7 +155,7 @@ public class StatusWindow : L2Window
 
     private void SendSelfTargetAction(PlayerEntity player)
     {
-        if (player.IdentityInterlude == null || GameClient.Instance == null)
+        if (player.Identity == null || IncomingPacketActions.Game == null)
         {
             return;
         }
@@ -163,15 +163,12 @@ public class StatusWindow : L2Window
         var position = player.transform.position;
         var l2jpos = VectorUtils.ConvertPosUnityToL2j(position);
 
-        ClickAction sendPacket = CreatorPacketsUser.CreateActiont(
-            player.IdentityInterlude.Id,
+        IncomingPacketActions.Game.Send(new ClickActionCommand(
+            player.Identity.Id,
             (int)l2jpos.x,
             (int)l2jpos.y,
             (int)l2jpos.z,
-            0);
-
-        bool enable = GameClient.Instance.IsCryptEnabled();
-        SendGameDataQueue.Instance().AddItem(sendPacket, enable, enable);
+            0));
     }
 
     void FixedUpdate()
@@ -180,20 +177,20 @@ public class StatusWindow : L2Window
             return; 
         }
 
-        if(!(PlayerEntity.Instance.Status is PlayerStatusInterlude)) {
+        if(!(PlayerEntity.Instance.Status is PlayerStatus)) {
             Debug.LogWarning("Player status is not of type playerstatus");
             return;
         }
 
-        PlayerStatusInterlude status = (PlayerStatusInterlude)PlayerEntity.Instance.Status;
-        PlayerInterludeStats stats = (PlayerInterludeStats)PlayerEntity.Instance.Stats;
+        PlayerStatus status = (PlayerStatus)PlayerEntity.Instance.Status;
+        PlayerStats stats = (PlayerStats)PlayerEntity.Instance.Stats;
 
         if (_levelLabel != null) {
             _levelLabel.text = stats.Level.ToString();
         }
 
         if(_nameLabel != null) {
-            _nameLabel.text = PlayerEntity.Instance.IdentityInterlude.Name;
+            _nameLabel.text = PlayerEntity.Instance.Identity.Name;
         }
 
         if(_CPTextLabel != null) {

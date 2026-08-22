@@ -22,8 +22,11 @@ public class PlayerTeleport : MonoBehaviour
 
     public void TeleportTo(Vector3 teleportPosition)
     {
-        this._teleportPosition = teleportPosition;
+        // Snap to terrain before reveal — server Z often floats above mesh.
+        _teleportPosition = GroundSnapHelper.SnapToGroundOrKeep(teleportPosition);
         _isTeleporting = true;
-        
     }
+
+    /// <summary>World position after ground snap (set when <see cref="TeleportTo"/> runs).</summary>
+    public Vector3 LastTeleportPosition => _teleportPosition;
 }

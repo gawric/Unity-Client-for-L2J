@@ -1,32 +1,34 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using UnityEditor;
 using UnityEngine;
-using UnityEngine.TextCore.Text;
 
 public class ModelTable : AbstractCache
 {
     private static ModelTable _instance;
-    public static ModelTable Instance { 
-        get { 
-            if (_instance == null) {
-                _instance = new ModelTable();
-            }
 
-            return _instance; 
-        } 
+    public static ModelTable Instance
+    {
+        get
+        {
+            if (_instance == null)
+                _instance = new ModelTable();
+            return _instance;
+        }
     }
 
-
-    public class L2ArmorPiece {
+    public class L2ArmorPiece
+    {
         public GameObject baseArmorModel;
         public Material material;
         public GameObject[] baseAllModels;
         public Material[] allMaterials;
-        public L2ArmorPiece(GameObject baseArmorModel, Material material , GameObject[] baseAllModels, Material[] allMaterials) {
+
+        public L2ArmorPiece(
+            GameObject baseArmorModel,
+            Material material,
+            GameObject[] baseAllModels,
+            Material[] allMaterials)
+        {
             this.baseArmorModel = baseArmorModel;
             this.material = material;
             this.baseAllModels = baseAllModels;
@@ -36,243 +38,194 @@ public class ModelTable : AbstractCache
 
     public void Initialize()
     {
-        CachePlayerContainers();
+        CacheRaceContainers();
         CacheFaces();
         CacheHair();
         CacheWeapons();
-        CacheArmors();
         CacheEtcItems();
+        CacheArmors();
         CacheNpcs();
     }
 
-    private void OnDestroy() {
-        _faces = null;
-        _hair = null;
-        _instance = null;
-        _playerContainers = null;
-        _userContainers = null;
-        _weapons.Clear();
-        _armors.Clear();
-        _instance = null;
+    private static string RaceFolder(CharacterRaceAnimation raceId)
+    {
+        CharacterRace race = CharacterRaceParser.ParseRace(raceId);
+        return "Data/Animations/" + race + "/" + raceId;
     }
 
-    // -------
-    // CACHE
-    // -------
-    private void CachePlayerContainers() {
+    private void CacheRaceContainers()
+    {
         _playerContainers = new GameObject[RACE_COUNT];
         _userContainers = new GameObject[RACE_COUNT];
         _pawnContainers = new GameObject[RACE_COUNT];
 
-        // Player Containers
-        for (int r = 0; r < RACE_COUNT; r++) {
+        for (int r = 0; r < RACE_COUNT; r++)
+        {
             CharacterRaceAnimation raceId = (CharacterRaceAnimation)r;
-            CharacterRace race = CharacterRaceParser.ParseRace(raceId);
-
-            string path = $"Data/Animations/{race}/{raceId}/Player_{raceId}";
-            _playerContainers[r] = Resources.Load<GameObject>(path);
-         //   Debug.Log($"Loading player container {r} [{path}]");
-        }
-
-        // User Containers
-        for (int r = 0; r < RACE_COUNT; r++) {
-            CharacterRaceAnimation raceId = (CharacterRaceAnimation)r;
-            CharacterRace race = CharacterRaceParser.ParseRace(raceId);
-
-            string path = $"Data/Animations/{race}/{raceId}/User_{raceId}";
-            _userContainers[r] = Resources.Load<GameObject>(path);
-            //Debug.Log($"Loading user container {r} [{path}]");
-        }
-
-        // Pawn Containers
-        for (int r = 0; r < RACE_COUNT; r++) {
-            CharacterRaceAnimation raceId = (CharacterRaceAnimation)r;
-            CharacterRace race = CharacterRaceParser.ParseRace(raceId);
-
-            string path = $"Data/Animations/{race}/{raceId}/Pawn_{raceId}";
-            _pawnContainers[r] = Resources.Load<GameObject>(path);
-            //  Debug.Log($"Loading user container {r} [{path}]");
+            string folder = RaceFolder(raceId);
+            _playerContainers[r] = Resources.Load<GameObject>(folder + "/Player_" + raceId);
+            _userContainers[r] = Resources.Load<GameObject>(folder + "/User_" + raceId);
+            _pawnContainers[r] = Resources.Load<GameObject>(folder + "/Pawn_" + raceId);
         }
     }
 
-    private void CacheFaces() {   
-        _faces = new GameObject[RACE_COUNT, FACE_COUNT]; // there is 14 races, each race has 6 faces
+    private void CacheFaces()
+    {
+        _faces = new GameObject[RACE_COUNT, FACE_COUNT];
 
-        // Faces
-        for (int r = 0; r < RACE_COUNT; r++) {
+        for (int r = 0; r < RACE_COUNT; r++)
+        {
             CharacterRaceAnimation raceId = (CharacterRaceAnimation)r;
-            CharacterRace race = CharacterRaceParser.ParseRace(raceId);
-            for (int f = 0; f < FACE_COUNT; f++) {
-                string path = $"Data/Animations/{race}/{raceId}/Faces/{raceId}_f_{f}";
-                _faces[r, f] = Resources.Load<GameObject>(path);
-               // Debug.Log($"Loading face {f} for race {raceId} [{path}]");
-            }
+            string folder = RaceFolder(raceId);
+            for (int f = 0; f < FACE_COUNT; f++)
+                _faces[r, f] = Resources.Load<GameObject>(folder + "/Faces/" + raceId + "_f_" + f);
         }
     }
 
-    private void CacheHair() {
-        _hair = new GameObject[RACE_COUNT, HAIR_STYLE_COUNT * HAIR_COLOR_COUNT * 2]; // there is 14 races, each race has 6 hairstyle (2 models each) of 4 colors
+    private void CacheHair()
+    {
+        _hair = new GameObject[RACE_COUNT, HAIR_STYLE_COUNT * HAIR_COLOR_COUNT * 2];
 
-        // Hair
-        for (int r = 0; r < RACE_COUNT; r++) {
+        for (int r = 0; r < RACE_COUNT; r++)
+        {
             CharacterRaceAnimation raceId = (CharacterRaceAnimation)r;
-            CharacterRace race = CharacterRaceParser.ParseRace(raceId);
-
-            for (int hs = 0; hs < HAIR_STYLE_COUNT; hs++) {
-                for (int hc = 0; hc < HAIR_COLOR_COUNT; hc++) {
-                    int index = hs * HAIR_STYLE_COUNT + (hc * 2);
-                    string path = $"Data/Animations/{race}/{raceId}/Hair/{raceId}_h_{hs}_{hc}_ah";
-                    _hair[r, index] = Resources.Load<GameObject>(path);
-                    //Debug.Log($"Loading hair {hs} color {hc} at {index} for race {raceId} [{path}]");
-
-                    path = $"Data/Animations/{race}/{raceId}/Hair/{raceId}_h_{hs}_{hc}_bh";
-                    _hair[r, index + 1] = Resources.Load<GameObject>(path);
-                    //Debug.Log($"Loading hair {hs} color {hc} at {index + 1} for race {raceId} [{path}]");
+            string folder = RaceFolder(raceId);
+            for (int style = 0; style < HAIR_STYLE_COUNT; style++)
+            {
+                for (int color = 0; color < HAIR_COLOR_COUNT; color++)
+                {
+                    int index = style * HAIR_STYLE_COUNT + color * 2;
+                    string hairPrefix = folder + "/Hair/" + raceId + "_h_" + style + "_" + color;
+                    _hair[r, index] = Resources.Load<GameObject>(hairPrefix + "_ah");
+                    _hair[r, index + 1] = Resources.Load<GameObject>(hairPrefix + "_bh");
                 }
             }
         }
     }
 
-    private void CacheWeapons() {
-        _weapons = new Dictionary<string, GameObject>();
-        int success = 0;
-        foreach (KeyValuePair<int, Weapon> kvp in ItemTable.Instance.Weapons) {
-
-            if(_weapons.ContainsKey(kvp.Value.Weapongrp.Model)) {
-                continue;
-            }
-
-            GameObject weapon = LoadWeaponModel(kvp.Value.Weapongrp.Model);
-            if (weapon != null) {
-                success++;
-                _weapons[kvp.Value.Weapongrp.Model] = weapon;
-            }
-        }
-
-        Debug.Log($"Successfully loaded {success}/{ItemTable.Instance.Weapons.Count} weapon model(s).");
+    private void CacheWeapons()
+    {
+        _weapons = LoadItemModels(
+            ItemTable.Instance.Weapons,
+            weapon => weapon.Weapongrp != null ? weapon.Weapongrp.Model : null,
+            "weapon");
     }
 
     private void CacheEtcItems()
     {
-          _etcItems = new Dictionary<string, GameObject>();
-          int success = 0;
-          foreach (KeyValuePair<int, EtcItem> kvp in ItemTable.Instance.EtcItems)
-          {
-
-            if (kvp.Value.EtcItemgrp == null || kvp.Value.EtcItemgrp.Model == null ||
-             _etcItems.ContainsKey(kvp.Value.EtcItemgrp.Model))
-            {
-                continue;
-            }
-
-
-            GameObject etcItem = LoadWeaponModel(kvp.Value.EtcItemgrp.Model);
-                if (etcItem != null)
-                {
-                    success++;
-                    _etcItems[kvp.Value.EtcItemgrp.Model] = etcItem;
-                }
-          }
-
-          Debug.Log($"Successfully loaded {success}/{ItemTable.Instance.EtcItems.Count} EtcItemgrp model(s).");
+        _etcItems = LoadItemModels(
+            ItemTable.Instance.EtcItems,
+            etc => etc.EtcItemgrp != null ? etc.EtcItemgrp.Model : null,
+            "EtcItemgrp");
     }
 
+    private Dictionary<string, GameObject> LoadItemModels<T>(
+        Dictionary<int, T> items,
+        Func<T, string> modelOf,
+        string label)
+    {
+        Dictionary<string, GameObject> cache = new Dictionary<string, GameObject>();
+        int success = 0;
 
+        foreach (KeyValuePair<int, T> pair in items)
+        {
+            string model = modelOf(pair.Value);
+            if (string.IsNullOrEmpty(model) || cache.ContainsKey(model))
+                continue;
+
+            GameObject go = LoadWeaponModel(model);
+            if (go == null)
+                continue;
+
+            cache[model] = go;
+            success++;
+        }
+
+        Debug.Log("Successfully loaded " + success + "/" + items.Count + " " + label + " model(s).");
+        return cache;
+    }
 
     private void CacheArmors()
     {
         _armors = new Dictionary<string, L2Armor>();
-        int armorMaterials = 0;
+        int materialCount = 0;
 
-        foreach (var kvp in ItemTable.Instance.Armors)
+        foreach (KeyValuePair<int, Armor> pair in ItemTable.Instance.Armors)
         {
-            for (int i = 0; i < RACE_COUNT; i++)
+            Armorgrp grp = pair.Value.Armorgrp;
+            if (grp.BodyPart == ItemSlot.alldress)
+                continue;
+
+            for (int race = 0; race < RACE_COUNT; race++)
             {
-                var armor = kvp.Value;
-                var armorgrp = armor.Armorgrp;
-
-                // Early exit for invalid slot
-                if (armorgrp.BodyPart == ItemSlot.alldress) return;
-
-                // Get model data
-                string model = armorgrp.FirstModel[i];
+                string model = grp.FirstModel[race];
                 if (string.IsNullOrEmpty(model))
                 {
-                    Debug.LogWarning($"Model string is null for race {(CharacterRaceAnimation)i} in armor {kvp.Key}");
+                    Debug.LogWarning("Model string is null for race " + (CharacterRaceAnimation)race + " in armor " + pair.Key);
                     continue;
                 }
 
-                // Get or create L2Armor
-                L2Armor l2Model = _armors.TryGetValue(model, out var existing)
-                    ? existing
-                    : CreateNewArmorModel(model, armorgrp.AllModels[i]);
+                L2Armor l2Armor = GetOrCreateArmor(model, grp.AllModels[race]);
+                if (l2Armor == null || l2Armor.baseModel == null)
+                    continue;
 
-                if (l2Model == null || l2Model.baseModel == null) continue;
-
-                // Process materials
-                ProcessArmorMaterials(armorgrp, i, l2Model, ref armorMaterials);
+                AddArmorMaterials(grp, race, l2Armor, ref materialCount);
             }
         }
 
-        LogCacheResults(_armors.Count, armorMaterials);
+        Debug.Log("Successfully loaded " + _armors.Count + " armor model(s).");
+        Debug.Log("Successfully loaded " + materialCount + " armor material(s).");
     }
 
-    private L2Armor CreateNewArmorModel(string model, List<string> models)
+    private L2Armor GetOrCreateArmor(string model, List<string> extraModels)
     {
-        var l2Model = new L2Armor
+        L2Armor existing;
+        if (_armors.TryGetValue(model, out existing))
+            return existing;
+
+        L2Armor created = new L2Armor
         {
             baseModel = LoadArmorModel(model),
-            allModels = LoadAllArmorModels(models)
+            allModels = LoadAllArmorModels(extraModels)
         };
 
-        if (l2Model.baseModel != null)
-        {
-            l2Model.materials = new Dictionary<string, Material>();
-            l2Model.allMaterials = new Dictionary<string, Material[]>();
-            _armors[model] = l2Model;
-        }
+        if (created.baseModel == null)
+            return created;
 
-        return l2Model;
+        created.materials = new Dictionary<string, Material>();
+        created.allMaterials = new Dictionary<string, Material[]>();
+        _armors[model] = created;
+        return created;
     }
 
-    private void ProcessArmorMaterials(Armorgrp armorgrp, int raceIndex, L2Armor l2Model, ref int armorMaterials)
+    private void AddArmorMaterials(Armorgrp grp, int raceIndex, L2Armor l2Armor, ref int materialCount)
     {
-        string texture = armorgrp.FirstTexture[raceIndex];
-        List<string> textures = armorgrp.AllTextures[raceIndex];
+        string texture = grp.FirstTexture[raceIndex];
+        if (l2Armor.materials.ContainsKey(texture))
+            return;
 
-        if (l2Model.materials.ContainsKey(texture)) return;
-
-        Material[] allArmorMaterials = LoadAllArmorMaterials(textures);
-        Material armorMaterial = LoadArmorMaterial(texture);
-
-        // Update models if needed
-        if (ShouldUpdateModels(l2Model, armorgrp.AllModels[raceIndex], armorgrp.BodyPart))
+        if (NeedsExtraArmorModels(l2Armor, grp.AllModels[raceIndex], grp.BodyPart))
         {
-            l2Model.allModels = LoadAllArmorModels(armorgrp.AllModels[raceIndex]);
-            Debug.Log($"Reloading all models for {l2Model.baseModel.name}, loading {l2Model.allModels.Length} models");
+            l2Armor.allModels = LoadAllArmorModels(grp.AllModels[raceIndex]);
+            Debug.Log("Reloading all models for " + l2Armor.baseModel.name + ", loading " + l2Armor.allModels.Length + " models");
         }
 
-        if (armorMaterial == null) return;
+        Material material = LoadArmorMaterial(texture);
+        if (material == null)
+            return;
 
-        if (allArmorMaterials.Length > 0 && armorgrp.BodyPart == ItemSlot.fullarmor)
-        {
-            l2Model.allMaterials[texture] = allArmorMaterials;
-        }
+        Material[] fullSet = LoadAllArmorMaterials(grp.AllTextures[raceIndex]);
+        if (fullSet.Length > 0 && grp.BodyPart == ItemSlot.fullarmor)
+            l2Armor.allMaterials[texture] = fullSet;
 
-        l2Model.materials[texture] = armorMaterial;
-        armorMaterials++;
+        l2Armor.materials[texture] = material;
+        materialCount++;
     }
 
-    private bool ShouldUpdateModels(L2Armor l2Model, List<string> models, ItemSlot slot)
+    private static bool NeedsExtraArmorModels(L2Armor l2Armor, List<string> models, ItemSlot slot)
     {
-        return l2Model.allModels[0] == null ||
-               (l2Model.allModels.Length < models.Count && slot == ItemSlot.fullarmor);
-    }
-
-    private void LogCacheResults(int modelCount, int materialCount)
-    {
-        Debug.Log($"Successfully loaded {modelCount} armor model(s).");
-        Debug.Log($"Successfully loaded {materialCount} armor material(s).");
+        return l2Armor.allModels[0] == null ||
+               (l2Armor.allModels.Length < models.Count && slot == ItemSlot.fullarmor);
     }
 
     private void CacheNpcs()
@@ -280,30 +233,22 @@ public class ModelTable : AbstractCache
         _npcs = new Dictionary<string, L2Npc>();
         int success = 0;
 
-        foreach (var kvp in NpcgrpTable.Instance.Npcgrps)
+        foreach (KeyValuePair<int, Npcgrp> pair in NpcgrpTable.Instance.Npcgrps)
         {
-            if (_npcs.ContainsKey(kvp.Value.Mesh)) continue;
+            string mesh = pair.Value.Mesh;
+            if (_npcs.ContainsKey(mesh))
+                continue;
 
-            var npc = LoadNpc(kvp.Value.Mesh);
-            if (npc == null) continue;
+            GameObject npc = LoadNpc(mesh);
+            if (npc == null)
+                continue;
 
-            var materials = new Dictionary<string, Material[]>
-            {
-                [kvp.Value.Mesh] = LoadAllMaterials(kvp.Value.Materials.ToList())
-            };
-
-            _npcs[kvp.Value.Mesh] = new L2Npc(npc, materials);
+            Dictionary<string, Material[]> materials = new Dictionary<string, Material[]>();
+            materials[mesh] = LoadAllMaterials(new List<string>(pair.Value.Materials));
+            _npcs[mesh] = new L2Npc(npc, materials);
             success++;
         }
 
-        Debug.Log($"Loaded {success} npc model(s).");
+        Debug.Log("Loaded " + success + " npc model(s).");
     }
-
-
-
-
-
-
-
-
 }

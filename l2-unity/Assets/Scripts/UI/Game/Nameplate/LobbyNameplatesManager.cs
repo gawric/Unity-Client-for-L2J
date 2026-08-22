@@ -1,184 +1,275 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UIElements;
+using UnityEngine.Rendering;
 
-public class LobbyNameplatesManager : MonoBehaviour {
-    private VisualElement _rootElement;
-    private VisualTreeAsset _nameplateTemplate;
-    private readonly Dictionary<int, Nameplate> _nameplates = new Dictionary<int, Nameplate>();
+/// <summary>
+/// Lobby names — same L2 canvas path as <see cref="NameplatesManager"/>:
+/// Project → screen-pixel glyphs → <see cref="L2NameplateScreenBatch"/> (one draw).
+/// </summary>
+public class LobbyNameplatesManager : MonoBehaviour
+{
+    private const int MaxSlots = 8;
 
     [SerializeField] private Camera _camera;
-    [SerializeField] private float _nameplateViewDistance = 50f;
-    [SerializeField] private LayerMask _entityMask;
-    [SerializeField] public RaycastHit[] _entitiesInRange;
+    [SerializeField] private float _nameplateViewDistance = 80f;
+    [SerializeField] private Color _defaultNameColor = Color.white;
+    [Tooltip("Glyph pixel scale. Tune later to match L2; 1 = native atlas pixels.")]
+    [SerializeField] private float _pixelScale = 1f;
+    [Tooltip("Meters after L2 capsule top (Location + CollisionHeight). Negative lowers names. Shared with world.")]
+    [SerializeField] private float _headHeightOffset = -0.12f;
+    [Tooltip("L2 canvas: lock plate to whole screen pixels (hysteresis).")]
+    [SerializeField] private bool _snapAnchorToPixels = true;
+    [SerializeField] private float _snapHysteresisPx = 0.75f;
+    [SerializeField] private bool _snapDiscardSubpixelFrac = true;
+    [SerializeField] private string _atlasResourcePath = "Data/UI/Font/L2Lobby/l2_lobby_font_atlas";
+    [SerializeField] private string _csvResourcePath = "Data/UI/Font/L2Lobby/ul2font_ascii";
 
-    public Camera Camera { get { return _camera; }  set { _camera = value; } }
+    private readonly List<PaintItem> _paintList = new List<PaintItem>(MaxSlots);
+    private readonly NameplatePixelSnap _pixelSnap = new NameplatePixelSnap(MaxSlots);
+    private readonly L2NameplateScreenBatch _batch = new L2NameplateScreenBatch();
+
+    private L2BitmapFont _font;
+    private bool _loggedReady;
+    private bool _subscribed;
 
     private static LobbyNameplatesManager _instance;
-    public static LobbyNameplatesManager Instance { get { return _instance; } }
+    public static LobbyNameplatesManager Instance => _instance;
 
-    private void Awake() {
-        if (_instance == null) {
-            _instance = this;
-        } else {
-            Destroy(this);
-        }
+    public Camera Camera
+    {
+        get => _camera;
+        set => _camera = value;
     }
 
-    private void OnDestroy() {
-        _nameplates.Clear();
-        _instance = null;
+    private struct PaintItem
+    {
+        public int Slot;
+        public Vector3 World;
+        public string Name;
+        public Color Color;
     }
 
-    void Start() {
-        if (_nameplateTemplate == null) {
-            _nameplateTemplate = Resources.Load<VisualTreeAsset>("Data/UI/_Elements/Game/Nameplate");
-        }
-        if (_nameplateTemplate == null) {
-            Debug.LogError("Could not load chat window template.");
-        }
-    }
-
-    public void SetMask(LayerMask mask) {
-        _entityMask = mask;
-    }
-
-    private const int kUpdatesPerSecond = 200;
-    private const float kUpdateInterval = 1.0f / kUpdatesPerSecond; // how many seconds pass before an update should happen
-    private float _accumulation = 0.0f; // stores time elapsed
-    private void Update() {
-        // add to the accumulator
-        _accumulation += Time.deltaTime;
-
-        // while enough time has passed for an update, call our code we want executed 200 times per second.
-        while (_accumulation >= kUpdateInterval) {
-            UpdateNameplates();
-            _accumulation -= kUpdateInterval;
-        }
-    }
-
-
-    private void FixedUpdate() {
-        if (_camera == null) {
-            ClearNameplates();
-            return;
-        }
-
-        if (!L2LoginUI.Instance.UILoaded) {
-            return;
-        }
-
-        if (_rootElement == null) {
-            _rootElement = L2LoginUI.Instance.RootElement.Q<VisualElement>("NameplatesContainer");
-            return;
-        }
-
-        _entitiesInRange = Physics.SphereCastAll(_camera.transform.position, _nameplateViewDistance, transform.forward, 0, _entityMask);
-        CreateNameplateForEntities();
-        CheckNameplateVisibility();
-    }
-
-    private void CreateNameplateForEntities() {
-        foreach (RaycastHit hit in _entitiesInRange) {
-            SelectableCharacterEntity objectEntity = hit.transform.GetComponent<SelectableCharacterEntity>();
-            if (objectEntity != null) {
-                int objectId = objectEntity.CharacterInfo.Id;
-
-                if (!_nameplates.ContainsKey(objectId)) {
-                    CreateNameplate(objectEntity);
-                }
-            }
-        }
-    }
-
-    private void CreateNameplate(SelectableCharacterEntity entity) {
-        if (!IsNameplateVisible(entity.transform)) {
-            return;
-        }
-        var height = CharacterHeight.GetHeight(entity.CharacterInfoInterlude.CharacterRaceAnimation);
-        VisualElement visualElement = _nameplateTemplate.Instantiate()[0];
-
-        Nameplate nameplate = new Nameplate(
-            visualElement,
-            visualElement.Q<Label>("EntityName"),
-            visualElement.Q<Label>("EntityTitle"),
-            entity.transform,
-            "",
-            "9CE8A9FF",
-            // 0.92f, //height
-            height, 
-            entity.CharacterInfoInterlude.Name,
-            entity.CharacterInfoInterlude.ObjId,
-            true
-            );
-        if (!_nameplates.ContainsKey(entity.CharacterInfoInterlude.ObjId))
+    private void Awake()
+    {
+        if (_instance == null)
         {
-            _nameplates.Add(entity.CharacterInfoInterlude.ObjId, nameplate);
-            _rootElement.Add(visualElement);
+            _instance = this;
         }
-  
+        else
+        {
+            Destroy(this);
+            return;
+        }
+
+        EnsureResources();
     }
 
-  
+    private void OnEnable()
+    {
+        if (!_subscribed)
+        {
+            RenderPipelineManager.beginCameraRendering += OnBeginCameraRendering;
+            _subscribed = true;
+        }
+    }
 
-    private void CheckNameplateVisibility() {
-        foreach (var nameplateId in _nameplates.Keys) {
-            var nameplate = _nameplates[nameplateId];
-            if (!IsNameplateVisible(nameplate.Target)) {
-                nameplate.Visible = false;
-            } else {
-                nameplate.Visible = true;
+    private void OnDisable()
+    {
+        if (_subscribed)
+        {
+            RenderPipelineManager.beginCameraRendering -= OnBeginCameraRendering;
+            _subscribed = false;
+        }
+    }
+
+    private void OnDestroy()
+    {
+        OnDisable();
+        _pixelSnap.ClearAll();
+        _batch.Dispose();
+
+        if (_instance == this)
+        {
+            _instance = null;
+        }
+    }
+
+    private void EnsureResources()
+    {
+        if (_font == null)
+        {
+            _font = L2BitmapFont.LoadFromResources(_atlasResourcePath, _csvResourcePath);
+            if (_font != null && !_loggedReady)
+            {
+                _loggedReady = true;
+                Debug.Log($"[LobbyNameplates] Font ready atlas={_font.AtlasWidth}x{_font.AtlasHeight} (screen-space batch)");
             }
         }
+
+        if (_font != null)
+        {
+            _batch.EnsureMaterial(_font.Atlas);
+        }
     }
 
-    private void UpdateNameplates() {
-        var keysToRemove = new List<int>();
-        foreach (var nameplateId in _nameplates.Keys) {
-            var nameplate = _nameplates[nameplateId];
-            if (!nameplate.Visible) {
-                keysToRemove.Add(nameplateId);
-            } else {
-                UpdateNameplatePosition(nameplate);
+    private Camera ResolveCamera()
+    {
+        if (_camera != null)
+        {
+            return _camera;
+        }
+
+        if (CharacterSelector.Instance != null && CharacterSelector.Instance.Camera != null)
+        {
+            return CharacterSelector.Instance.Camera;
+        }
+
+        return null;
+    }
+
+    private void OnBeginCameraRendering(ScriptableRenderContext context, Camera cam)
+    {
+        Camera targetCam = ResolveCamera();
+        if (cam == null || targetCam == null || cam != targetCam || !cam.isActiveAndEnabled)
+        {
+            return;
+        }
+
+        EnsureResources();
+        if (_font == null || !_batch.IsReady)
+        {
+            return;
+        }
+
+        BuildPaintList(cam);
+        if (_paintList.Count == 0)
+        {
+            return;
+        }
+
+        if (!RebuildAndDraw(cam))
+        {
+            return;
+        }
+    }
+
+    private bool RebuildAndDraw(Camera cam)
+    {
+        _batch.BeginFrame();
+
+        float scale = _pixelScale > 0f ? _pixelScale : 1f;
+        float screenH = cam.pixelHeight;
+        float lineH = _font.MeasureHeight(scale);
+        bool discardFrac = _snapAnchorToPixels && _snapDiscardSubpixelFrac;
+
+        for (int i = 0; i < _paintList.Count; i++)
+        {
+            PaintItem item = _paintList[i];
+            Vector3 screen = cam.WorldToScreenPoint(item.World);
+            if (screen.z <= 0f)
+            {
+                continue;
             }
+
+            float ax = screen.x;
+            float ay = screen.y;
+            if (_snapAnchorToPixels)
+            {
+                _pixelSnap.HysteresisPx = _snapHysteresisPx;
+                ax = _pixelSnap.Snap(item.Slot, screen.x, true, screen.z);
+                ay = _pixelSnap.Snap(item.Slot, screen.y, false, screen.z);
+            }
+
+            float textW = _font.MeasureWidth(item.Name, scale);
+            float x = ax - textW * 0.5f;
+            // GUI/L2 Y-down top of string; projected point = bottom of text.
+            float yTop = screenH - ay - lineH;
+
+            _batch.AppendLine(
+                _font, item.Name, x, yTop, scale, item.Color, screen.z, screenH, discardFrac);
         }
-        foreach (var key in keysToRemove) {
-            _rootElement.Remove(_nameplates[key].NameplateEle);
-            _nameplates.Remove(key);
+
+        return _batch.UploadAndDraw(cam);
+    }
+
+    private void BuildPaintList(Camera cam)
+    {
+        _paintList.Clear();
+
+        if (CharacterSelector.Instance == null)
+        {
+            return;
+        }
+
+        IReadOnlyList<GameObject> pawns = CharacterSelector.Instance.CharacterPawns;
+        if (pawns == null)
+        {
+            return;
+        }
+
+        int count = Mathf.Min(pawns.Count, MaxSlots);
+        for (int i = 0; i < count; i++)
+        {
+            GameObject pawn = pawns[i];
+            if (pawn == null)
+            {
+                continue;
+            }
+
+            SelectableCharacterEntity entity = pawn.GetComponent<SelectableCharacterEntity>();
+            if (entity == null || entity.CharacterInfoInterlude == null)
+            {
+                continue;
+            }
+
+            Transform t = entity.transform;
+            if (!IsNameplateVisible(cam, t))
+            {
+                continue;
+            }
+
+            CharSelectInfoPackage info = entity.CharacterInfoInterlude;
+            if (string.IsNullOrEmpty(info.Name))
+            {
+                continue;
+            }
+
+            _paintList.Add(new PaintItem
+            {
+                Slot = i,
+                World = GetHeadWorldPos(t, info),
+                Name = info.Name,
+                Color = ResolveNameColor(info.Karma)
+            });
         }
     }
 
-
-    private void UpdateNameplatePosition(Nameplate nameplate) {
-        try {
-            Vector2 nameplatePos = _camera.WorldToScreenPoint(nameplate.Target.position + Vector3.up * nameplate.NameplateOffsetHeight);
-            nameplate.NameplateEle.style.left = nameplatePos.x - nameplate.NameplateEle.resolvedStyle.width / 2f;
-            nameplate.NameplateEle.style.top = Screen.height - nameplatePos.y - nameplate.NameplateEle.resolvedStyle.height;
-        } 
-        catch (NullReferenceException) { } 
-        catch  (MissingReferenceException) { }  
+    private Vector3 GetHeadWorldPos(Transform target, CharSelectInfoPackage info)
+    {
+        // Char-select has no CollisionHeight on Appearance yet — same default as world.
+        _ = info;
+        return L2NameplateAnchor.GetHeadWorldPos(
+            target, L2NameplateAnchor.DefaultCollisionHeightMeters, _headHeightOffset);
     }
 
-    private bool IsNameplateVisible(Transform target) {
-        if (target == null) {
+    private Color ResolveNameColor(int karma)
+    {
+        if (karma <= 0)
+        {
+            return _defaultNameColor;
+        }
+
+        float t = Mathf.Clamp01(karma / 1000f);
+        return Color.Lerp(Color.white, new Color(1f, 0.25f, 0.25f, 1f), t);
+    }
+
+    private bool IsNameplateVisible(Camera cam, Transform target)
+    {
+        if (target == null || cam == null)
+        {
             return false;
         }
 
-        bool isTooFar = Vector3.Distance(_camera.transform.position, target.position) > _nameplateViewDistance;
-        if (isTooFar) {
-            return false;
-        }
-
-        return true;
-    }
-
-    private void ClearNameplates() {
-        foreach (var nameplate in _nameplates.Values) {
-            nameplate.NameplateEle.RemoveFromHierarchy();
-        }
-
-        _nameplates.Clear();
+        return Vector3.Distance(cam.transform.position, target.position) <= _nameplateViewDistance;
     }
 }

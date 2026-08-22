@@ -105,6 +105,13 @@ public class TerrainConverter : MonoBehaviour {
         if (convertDecoLayer) {
             List<L2DecoLayer> decoLayers = terrainInfo.decoLayers;
             GameObject decoLayer = DecoToMesh.ConvertDecoLayers(decoLayers, terrainToConvert);
+            string decoInstancesPath = Path.Combine(saveFolder, mapToConvert + "_DecoInstances.asset").Replace("\\", "/");
+            L2InstancedPropBaker.ReplaceHierarchyWithInstances(
+                decoLayer,
+                decoInstancesPath,
+                castShadows: false,
+                maxDrawDistance: 30f,
+                layer: LayerMask.NameToLayer("Deco"));
 
             if (saveAssets) {
                 string decoLayerPrefabPath = Path.Combine(saveFolder, mapToConvert + "_DecoLayer.prefab");

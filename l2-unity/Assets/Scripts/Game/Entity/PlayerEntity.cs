@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using UnityEngine;
 
 
@@ -10,12 +9,6 @@ public class PlayerEntity : Entity
     private CharacterAnimationAudioHandler _characterAnimationAudioHandler;
 
     private float _lastServerRunSpeed = 0;
-
-    private const string SWORD_BASE = "Sword_Base";
-
-    private const string SWORD_TIP = "Sword_Tip";
-
-    private readonly string[] BASE_SWORD_POINT_NAME = { SWORD_BASE, SWORD_TIP };
 
     private static PlayerEntity _instance;
     public Animation RandomName { get; set; }
@@ -70,6 +63,15 @@ public class PlayerEntity : Entity
         EntityLoaded = true;
     }
 
+    public void RefreshVisuals()
+    {
+        GearFlowLog.Info("PlayerEntity.RefreshVisuals " + GearFlowLog.Entity(this) +
+            " " + GearFlowLog.Paperdoll(this) +
+            " gear=" + (_gear != null ? _gear.GetType().Name : "null"));
+        EquipAllWeapons();
+        EquipAllArmors();
+    }
+
     void OnDestroy()
     {
         _instance = null;
@@ -77,42 +79,18 @@ public class PlayerEntity : Entity
 
     private void EquipAllArmors()
     {
-        PlayerInterludeAppearance appearance = (PlayerInterludeAppearance)_appearance;
-        if (appearance.Chest != 0)
+        PlayerAppearance appearance = _appearance as PlayerAppearance;
+        UserGear gear = _gear as UserGear;
+        if (appearance == null || gear == null)
         {
-            ((PlayerGear)_gear).EquipArmor(appearance.Chest, ItemSlot.chest);
-        }
-        else
-        {
-            ((PlayerGear)_gear).EquipArmor(ItemTable.NAKED_CHEST, ItemSlot.chest);
-        }
-
-        if (appearance.Legs != 0)
-        {
-            ((PlayerGear)_gear).EquipArmor(appearance.Legs, ItemSlot.legs);
-        }
-        else
-        {
-            ((PlayerGear)_gear).EquipArmor(ItemTable.NAKED_LEGS, ItemSlot.legs);
+            GearFlowLog.Warn("PlayerEntity.EquipAllArmors abort " + GearFlowLog.Entity(this) +
+                " appearance=" + (appearance != null) + " gear=" + (_gear != null ? _gear.GetType().Name : "null"));
+            return;
         }
 
-        if (appearance.Gloves != 0)
-        {
-            ((PlayerGear)_gear).EquipArmor(appearance.Gloves, ItemSlot.gloves);
-        }
-        else
-        {
-            ((PlayerGear)_gear).EquipArmor(ItemTable.NAKED_GLOVES, ItemSlot.gloves);
-        }
-
-        if (appearance.Feet != 0)
-        {
-            ((PlayerGear)_gear).EquipArmor(appearance.Feet, ItemSlot.feet);
-        }
-        else
-        {
-            ((PlayerGear)_gear).EquipArmor(ItemTable.NAKED_BOOTS, ItemSlot.feet);
-        }
+        GearFlowLog.Info("PlayerEntity.EquipAllArmors " + GearFlowLog.Entity(this) +
+            " " + GearFlowLog.Paperdoll(appearance));
+        gear.SyncEquippedArmor(appearance);
     }
 
     public string GetEquippedWeaponName()
@@ -174,7 +152,7 @@ public class PlayerEntity : Entity
     public override float UpdateRunSpeed(float serverValue)
     {
         float converted = base.UpdateRunSpeed(serverValue);
-        PlayerInterludeAppearance playerApperance = (PlayerInterludeAppearance)_appearance;
+        PlayerAppearance playerApperance = (PlayerAppearance)_appearance;
 
         float anim_converted = CharTemplateRegistry.GetRunSpeed(playerApperance.BaseClass,
             playerApperance.Sex, 
@@ -182,14 +160,14 @@ public class PlayerEntity : Entity
             _gear.IsTwoHandedEquipped());
 
         PlayerAnimationController.Instance.SetRunSpeed(anim_converted);
-        PlayerController.Instance.UpdateRunSpeed(converted);
+        IncomingPacketActions.Player.UpdateRunSpeed(converted);
         _lastServerRunSpeed = serverValue;
         return converted;
     }
 
     public void RefreshRunSpeed()
     {
-        PlayerInterludeAppearance playerApperance = (PlayerInterludeAppearance)_appearance;
+        PlayerAppearance playerApperance = (PlayerAppearance)_appearance;
         float anim_converted = CharTemplateRegistry.GetRunSpeed(playerApperance.BaseClass, playerApperance.Sex, _lastServerRunSpeed, _gear.IsTwoHandedEquipped());
         PlayerAnimationController.Instance.SetRunSpeed(anim_converted);
     }
@@ -197,11 +175,11 @@ public class PlayerEntity : Entity
     public override float UpdateWalkSpeed(float serverValue)
     {
         float converted = base.UpdateWalkSpeed(serverValue);
-        PlayerInterludeAppearance playerApperance = (PlayerInterludeAppearance)_appearance;
+        PlayerAppearance playerApperance = (PlayerAppearance)_appearance;
         float anim_converted = CharTemplateRegistry.GetWalkSpeed(playerApperance.BaseClass, playerApperance.Sex, serverValue, _gear.IsTwoHandedEquipped());
         PlayerAnimationController.Instance.SetWalkSpeed(anim_converted);
         //PlayerAnimationController.Instance.SetWalkSpeed(0.45f);
-        PlayerController.Instance.UpdateWalkSpeed(converted);
+        IncomingPacketActions.Player.UpdateWalkSpeed(converted);
 
         return converted;
     }
@@ -210,7 +188,7 @@ public class PlayerEntity : Entity
 
 
 
-    public override void UpdateWaitType(ChangeWaitTypePacket.WaitType moveType)
+    public override void UpdateWaitType(WaitType moveType)
     {
         base.UpdateWaitType(moveType);
     }
@@ -219,9 +197,9 @@ public class PlayerEntity : Entity
     {
         base.UpdateMoveType(running);
 
-        if (PlayerController.Instance != null)
+        if (IncomingPacketActions.Player != null)
         {
-            PlayerController.Instance.Running = running;
+            IncomingPacketActions.Player.Running = running;
         }
 
         if (PlayerStateMachine.Instance != null)
@@ -242,25 +220,11 @@ public class PlayerEntity : Entity
         return _gear.WeaponAnim;
     }
 
-    public Transform GetWeaponTransform()
-    {
-        return _gear.GetAllTransformByRightHand(new string[1] { "weapon_" }).FirstOrDefault();
-    }
-    public Vector3 GetPositionRightHand()
-    {
-        return _gear.GetPositionRightHand();
-    }
-
     public GameObject GetGoEtcItem()
     {
         return _gear.GetGoEtcItem();
     }
 
-
-    public Transform[] GetSwordBasePoints()
-    {
-        return _gear.GetAllTransformByRightHand(BASE_SWORD_POINT_NAME);
-    }
     public float TargetDistance()
     {
         Vector3 startPos = GetPositionRightHand();

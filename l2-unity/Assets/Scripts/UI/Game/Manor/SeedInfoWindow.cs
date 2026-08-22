@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
+using VContainer;
 using static UnityEngine.InputSystem.LowLevel.InputStateHistory;
 
 
@@ -33,6 +34,13 @@ public class SeedInfoWindow : L2PopupWindow
     private Button _buttonHarvst;
     private Button _buttonAll1;
     private Button _buttonAll2;
+
+    [Inject] ItemNameTable _itemNames;
+
+    private ItemNameTable ItemNames
+    {
+        get { return _itemNames != null ? _itemNames : ItemNameTable.Instance; }
+    }
 
     protected override void LoadAssets()
     {
@@ -266,12 +274,12 @@ public class SeedInfoWindow : L2PopupWindow
 
         foreach (var seed in listSeed)
         {
-            ItemName name = ItemNameTable.Instance.GetItemName(seed.CropId);
+            ItemName name = ItemNames.GetItemName(seed.CropId);
 
             if(name != null)
             {
-                ItemName reward1name = ItemNameTable.Instance.GetItemName(seed.Reward1ItemId);
-                ItemName reward2name = ItemNameTable.Instance.GetItemName(seed.Reward2ItemId);
+                ItemName reward1name = ItemNames.GetItemName(seed.Reward1ItemId);
+                ItemName reward2name = ItemNames.GetItemName(seed.Reward2ItemId);
                 harvest.Add("" + name.Name);
                 auth.Add("" + seed.SeedLevel);
                 buy.Add("" + seed.SeedReferencePrice);

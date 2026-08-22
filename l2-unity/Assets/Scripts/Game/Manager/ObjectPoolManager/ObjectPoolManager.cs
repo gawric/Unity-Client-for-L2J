@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 
 public class ObjectPoolManager : AbstractPoolManager, IPoolManager
@@ -7,18 +6,16 @@ public class ObjectPoolManager : AbstractPoolManager, IPoolManager
     [System.Serializable]
     public class Pool
     {
-        public ObjectType tag;  
-        public GameObject prefab; 
-        public int size; 
-        public GameObject usePrefab; 
+        public ObjectType tag;
+        public GameObject prefab;
+        public int size;
+        public GameObject usePrefab;
     }
 
     public List<Pool> pools;
     // Минимальный размер пула >= 3
     private int _maxSizePool = 3;
-    [SerializeField] private Transform poolParent; // Родительский объект для пулов
-
-
+    [SerializeField] private Transform poolParent;
 
     #region Singleton
     public static IPoolManager Instance;
@@ -36,18 +33,19 @@ public class ObjectPoolManager : AbstractPoolManager, IPoolManager
         createdInstancesTracker = new Dictionary<GameObject, int>();
         objectTypePoolLimits = new Dictionary<ObjectType, int>();
 
-
         foreach (ObjectType type in System.Enum.GetValues(typeof(ObjectType)))
         {
             objectTypePoolLimits[type] = _maxSizePool;
         }
 
-        SetPoolLimit(ObjectType.Arrow , 25);
+        SetPoolLimit(ObjectType.Arrow, 25);
+        // Shared meshes (e.g. many a_guard_*) need headroom — limit=2 destroyed returns on leave-city.
+        SetPoolLimit(ObjectType.Npc, 32);
+        // Same headroom as Npc/guards; can tune later.
+        SetPoolLimit(ObjectType.Monster, 32);
         SetupPoolHierarchy(pools, poolParent);
         Debug.Log($"Создание пула объектов успешно. Размер: {poolDictionary.Count}");
     }
-
-  
 
     public void AddPrefabToPool(ObjectType tag, GameObject prefab, int count = 2)
     {
@@ -73,7 +71,7 @@ public class ObjectPoolManager : AbstractPoolManager, IPoolManager
             return;
         }
 
-        Transform parentTag = GetParent(tag, pools);
+        Transform parentTag = EnsurePoolSlot(tag, pools, poolParent);
         Queue<GameObject> prefabPool = poolDictionary[tag][prefab];
 
         int availableSpace = currentLimit - prefabPool.Count;
@@ -81,21 +79,28 @@ public class ObjectPoolManager : AbstractPoolManager, IPoolManager
 
         if (objectsToAdd <= 0)
         {
-            Debug.Log($"Пул для {prefab.name} достиг максимального размера ({currentLimit}). Невозможно добавить {count} объектов.");
+            Debug.Log(
+                $"Пул для {prefab.name} достиг максимального размера ({currentLimit}). " +
+                $"Невозможно добавить {count} объектов.");
             return;
         }
 
         for (int i = 0; i < objectsToAdd; i++)
         {
-            if (GetCreateCount(prefab) >= currentLimit) break;
+            if (GetCreateCount(prefab) >= currentLimit)
+            {
+                break;
+            }
 
-            GameObject obj = CopyObject(prefab, parentTag, poolParent);
+            GameObject obj = CopyObject(tag, prefab, parentTag, poolParent);
             obj.SetActive(false);
             prefabPool.Enqueue(obj);
             Plus1Create(prefab);
         }
 
-        Debug.Log($"ObjectPoolManager->Добавлено {objectsToAdd} объектов в пул для {prefab.name}. Общее количество: {prefabPool.Count}/{currentLimit} Общий размер: {poolDictionary[ObjectType.Armor].Count}");
+        Debug.Log(
+            $"[ObjectPool] Add {objectsToAdd} → {tag}/{prefab.name} " +
+            $"queue={prefabPool.Count}/{currentLimit} created={GetCreateCount(prefab)}");
     }
 
     public GameObject SpawnFromPool(ObjectType tag, GameObject specificPrefab = null)
@@ -116,39 +121,59 @@ public class ObjectPoolManager : AbstractPoolManager, IPoolManager
         }
 
         Queue<GameObject> objectPool = prefabPools[prefab];
+        int queueBefore = objectPool.Count;
 
-        if (objectPool.Count == 0)
+        if (queueBefore == 0)
         {
-            // Pool ran dry - hand the caller a freshly instantiated object directly. It must NOT
-            // also be enqueued here: this object is about to be parented/activated by the caller
-            // (still in active use), so leaving it in the queue too meant a later SpawnFromPool
-            // call for this prefab could dequeue and re-parent the SAME instance out from under
-            // whoever is currently using it (e.g. an equipped armor piece silently disappearing
-            // from one character and reappearing on another).
-            GameObject newObj = Instantiate(prefab, poolParent);
+            // Grow by one and hand out — do NOT enqueue (old bug: same GO in queue + in use).
+            Transform parentTag = EnsurePoolSlot(tag, pools, poolParent);
+            GameObject newObj = CopyObject(tag, prefab, parentTag, poolParent);
             newObj.SetActive(false);
             Plus1Create(prefab);
+            Debug.Log(
+                $"[ObjectPool] Spawn GREW {tag}/{prefab.name} " +
+                $"queue=0/{objectTypePoolLimits[tag]} created={GetCreateCount(prefab)}");
             return newObj;
         }
 
         GameObject objectToSpawn = objectPool.Dequeue();
+        EnsurePooledMeta(objectToSpawn, tag, prefab);
+        Debug.Log(
+            $"[ObjectPool] Spawn REUSED {tag}/{prefab.name} " +
+            $"queue={objectPool.Count}/{objectTypePoolLimits[tag]}");
         return objectToSpawn;
     }
 
     public bool ReturnToPool(ObjectType tag, GameObject objectToReturn)
     {
-        if (!ValidatePool(tag) || !FindMatchingPrefab(tag, objectToReturn, out GameObject prefab))
+        if (objectToReturn == null)
         {
+            Debug.LogWarning($"[ObjectPool] Return REJECT tag={tag} go=null");
+            return false;
+        }
+
+        if (!ValidatePool(tag))
+        {
+            Debug.LogWarning($"[ObjectPool] Return REJECT id-go={objectToReturn.name} no pool tag={tag}");
+            return false;
+        }
+
+        if (!FindMatchingPrefab(tag, objectToReturn, out GameObject prefab))
+        {
+            Debug.LogWarning(
+                $"[ObjectPool] Return REJECT FindMatchingPrefab FAIL go={objectToReturn.name} tag={tag}");
             return false;
         }
 
         if (_maxSizePool <= 0)
         {
+            Debug.LogWarning($"[ObjectPool] Return REJECT maxSizePool<=0 go={objectToReturn.name}");
             return false;
         }
 
         if (!PrepareObjectForReturn(objectToReturn, tag))
         {
+            Debug.LogWarning($"[ObjectPool] Return REJECT Prepare FAIL go={objectToReturn.name}");
             return false;
         }
 
@@ -157,7 +182,7 @@ public class ObjectPoolManager : AbstractPoolManager, IPoolManager
 
     private bool PrepareObjectForReturn(GameObject objectToReturn, ObjectType tag)
     {
-        var parent = GetParent(tag, pools);
+        Transform parent = EnsurePoolSlot(tag, pools, poolParent);
         if (parent == null)
         {
             return false;
@@ -165,6 +190,15 @@ public class ObjectPoolManager : AbstractPoolManager, IPoolManager
 
         objectToReturn.transform.SetParent(parent);
         ResetPosition(objectToReturn);
+
+        PooledInstance pooled = objectToReturn.GetComponent<PooledInstance>();
+        if (pooled != null &&
+            (tag == ObjectType.Npc || tag == ObjectType.Monster))
+        {
+            // DeadManager fades via material instances — restore shared mats for next spawn.
+            pooled.RestoreSharedMaterials();
+        }
+
         objectToReturn.SetActive(false);
         return true;
     }
@@ -176,12 +210,18 @@ public class ObjectPoolManager : AbstractPoolManager, IPoolManager
 
         if (objectPool.Count >= currentLimit)
         {
-            Debug.LogError($"ObjectPoolManager->HandlePoolReturn: Объект уничтожен через Destroy Unity!");
+            Debug.LogWarning(
+                $"[ObjectPool] Return DROP(destroy) {tag}/{objectToReturn.name} " +
+                $"queueFull={objectPool.Count}/{currentLimit}");
+            Minus1Create(prefab);
             Destroy(objectToReturn);
         }
         else
         {
             objectPool.Enqueue(objectToReturn);
+            Debug.Log(
+                $"[ObjectPool] Return OK {tag}/{prefab.name} " +
+                $"queue={objectPool.Count}/{currentLimit}");
         }
 
         return true;
@@ -190,8 +230,12 @@ public class ObjectPoolManager : AbstractPoolManager, IPoolManager
 
 public enum ObjectType
 {
-    Weapon,    // Оружие
-    Armor,     // Броня
-    Face,      // Лицо
-    Arrow      // Стрела
+    Weapon,
+    Armor,
+    Face,
+    Arrow,
+    /// <summary>Whole city NPC prefab.</summary>
+    Npc,
+    /// <summary>Whole monster prefab (leave-range + post-death corpse cleanup).</summary>
+    Monster
 }

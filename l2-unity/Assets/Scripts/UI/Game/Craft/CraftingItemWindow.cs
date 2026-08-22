@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -8,7 +8,7 @@ public class CraftingItemWindow : L2PopupWindow
 {
     private ICreatorSimpleTrade _creatorSimpleTrade;
     private static CraftingItemWindow _instance;
-    private RecipeItemMakeInfo _packet;
+    private RecipeItemMakeInfoDto _packet;
     private DataProviderCraftItem _dataProvider;
     private VisualElement _progressBar;
     private VisualElement _progressBarBg;
@@ -79,10 +79,7 @@ public class CraftingItemWindow : L2PopupWindow
     {
         if (_packet != null)
         {
-            SendGameDataQueue.Instance().AddItem(
-                CreatorPacketsUser.CreateRequestRecipeItemMakeSelf(_packet.RecipeId),
-                GameClient.Instance.IsCryptEnabled(),
-                GameClient.Instance.IsCryptEnabled());
+            IncomingPacketActions.Game.Send(new RequestRecipeItemMakeSelfCommand(_packet.RecipeId));
         }
     }
 
@@ -91,16 +88,13 @@ public class CraftingItemWindow : L2PopupWindow
 
         if (_packet != null)
         {
-            SendGameDataQueue.Instance().AddItem(
-                CreatorPacketsUser.CreateRequestRecipeBookOpen(_packet.IsDwarvenRecipe),
-                GameClient.Instance.IsCryptEnabled(),
-                GameClient.Instance.IsCryptEnabled());
+            IncomingPacketActions.Game.Send(new RequestRecipeBookOpenCommand(_packet.IsDwarvenRecipe));
         }
 
         HideWindow();
     }
 
-    public void AddData(RecipeItemMakeInfo packet)
+    public void AddData(RecipeItemMakeInfoDto packet)
     {
         if(packet != null)
         {

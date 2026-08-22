@@ -85,15 +85,10 @@ public class MoveAllCharacters : MonoBehaviour, IMoveAllCharacters
     }
     public void AddMoveData(int id, MovementData data)
     {
-        if (!_moveDict.ContainsKey(id))
-        {
-
-            _moveDict.Add(id, data);
-        }
-        else
-        {
-            _moveDict[id] = data;
-        }
+        MovementData prev;
+        if (_moveDict.TryGetValue(id, out prev) && prev != null && prev.IsMove())
+            data.InheritAcisClock(prev);
+        _moveDict[id] = data;
     }
 
 
@@ -156,6 +151,7 @@ public class MoveAllCharacters : MonoBehaviour, IMoveAllCharacters
         if (target != null)
         {
             float stopDistance = data.GetDistance();
+            data.SyncUserGait();
             float speed = data.GetSpeed();
             bool isMove = data.IsMove();
 
@@ -165,49 +161,58 @@ public class MoveAllCharacters : MonoBehaviour, IMoveAllCharacters
             }
 
             Transform transform = data.GetTransform();
+            Vector3 before = transform.position;
+            if (!isMove)
+            {
+                _removeListMove.Add(key);
+                data.SetLastPosition(before);
+                return;
+            }
 
-            float distance = VectorUtils.Distance2D(transform.position, target);
+            float distance = VectorUtils.Distance2D(before, target);
+            bool translated = false;
 
             if (distance >= stopDistance)
             {
-
                 var gravityOffTransform = new Vector3(transform.position.x, 0, transform.position.z);
                 var gravityOffTarget = new Vector3(target.x, 0, target.z);
 
                 Vector3 point = gravityOffTarget - gravityOffTransform;
                 Vector3 direction = point.normalized;
 
-                if (isMove)
+                if (isMove && point.sqrMagnitude > 0.0001f)
                 {
                     data.Move(direction, speed);
+                    translated = true;
 
-                    if (data.GetLastPosition() == transform.position)
+                    if (speed > 0.001f && data.HasLastPosition() && data.GetLastPosition() == transform.position)
                     {
                         data.OnFinish(target);
                         _removeListMove.Add(key);
-                        //Debug.Log("MoveAllCharacters Stop Run3");
                     }
                 }
-                else
+                else if (!isMove)
                 {
                     _removeListMove.Add(key);
-
                 }
             }
             else
             {
                 data.OnFinish(target);
                 _removeListMove.Add(key);
-
             }
 
+ 
             data.SetLastPosition(transform.position);
         }
     }
 
     private void TurnTowardsAttacker(Vector3 attackerPosition, Transform mTranform)
     {
-        Vector3 directionToAttacker = (attackerPosition - mTranform.position).normalized;
+        Vector3 directionToAttacker = attackerPosition - mTranform.position;
+        directionToAttacker.y = 0f;
+        if (directionToAttacker.sqrMagnitude < 0.0001f)
+            return;
         Quaternion lookRotation = Quaternion.LookRotation(directionToAttacker);
         //default 25
         mTranform.rotation = Quaternion.Slerp(mTranform.rotation, lookRotation, Time.deltaTime * 15f);

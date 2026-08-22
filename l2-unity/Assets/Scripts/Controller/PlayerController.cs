@@ -1,6 +1,4 @@
-﻿using UnityEngine;
-
-
+using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
@@ -118,8 +116,8 @@ public class PlayerController : MonoBehaviour
  
     public void FixedUpdate()
     {
-        //Если мы не двигаемся но мы в состоянии MoveToPawn == true тогда мы следим за обьектом двинется он или нет если двинется мы подбегаем к нему
-        //Если мы получим MoveToPawn == false мы останавливаем слежение
+        //Если мы не двигаемся но мы в состоянии MoveToPawnDto == true тогда мы следим за обьектом двинется он или нет если двинется мы подбегаем к нему
+        //Если мы получим MoveToPawnDto == false мы останавливаем слежение
         RestartMoveElseMoveToPawnTrue(ref _isMove);
 
         if (_isMove)
@@ -133,8 +131,6 @@ public class PlayerController : MonoBehaviour
                 _elapsedTime = Time.time;
                 _countTrigger = _timer.GetTriggerCount(_elapsedTime, _countTrigger);
                 SwitchWalkToRun(ref _switchWalkToRun, _countTrigger);
-
-                
 
                 float finalAngle = GetFinalAngle(targetPosition, characterPosition);
 
@@ -345,12 +341,15 @@ public class PlayerController : MonoBehaviour
         PlayerStateMachine.Instance.ChangeIntention(Intention.INTENTION_MOVE_TO_PAWN, model);
     }
 
-    public void InitMoveToPawn(MoveToPawn moveToPawnPacket)
+    public void InitMoveToPawn(MoveToPawnDto moveToPawnPacket)
     {
         
         if (PlayerEntity.Instance.TargetId == moveToPawnPacket.TarObjid)
         {
-            Entity tarPos = World.Instance.GetEntityNoLockSync(moveToPawnPacket.TarObjid);
+            World world = World.Instance;
+            if (world == null)
+                return;
+            Entity tarPos = world.GetEntityNoLockSync(moveToPawnPacket.TarObjid);
             //DebugLineDraw.ShowDrawLineDebug(moveToPawnPacket.ObjId, moveToPawnPacket.ObjPos, tarPos.transform.position, Color.green);
             if (PlayerEntity.Instance.Target != null) ThinkMoveToPawn(new ModelMovePawn(PlayerEntity.Instance, tarPos,  moveToPawnPacket.Distance));
         }

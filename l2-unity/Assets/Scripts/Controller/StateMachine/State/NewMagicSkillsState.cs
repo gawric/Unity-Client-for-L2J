@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
 using UnityEngine;
-using static UnityEngine.EventSystems.EventTrigger;
 
 public class NewMagicSkillsState  : AbstractAttackEvents
 {
@@ -17,9 +14,9 @@ public class NewMagicSkillsState  : AbstractAttackEvents
     }
     public override void HandleEvent(Event evt, object payload = null)
     {
-        MagicSkillUse useSkill = GetPayload(payload);
+        MagicSkillUseDto useSkill = GetPayload(payload);
         PlayerEntity entity = _stateMachine.Player;
-        int objectId = entity.IdentityInterlude.Id;
+        int objectId = entity.Identity.Id;
 
         switch (evt)
         {
@@ -27,9 +24,10 @@ public class NewMagicSkillsState  : AbstractAttackEvents
 
                 AnimationCombo readyCombo = SkillgrpTable.Instance.GetAnimComboBySkillId(useSkill.SkillId, useSkill.SkillLvl);
                 string[] orderedReadyCycle = SetupDurationHelper.BuildOrderedCycleForOverrideTiming(readyCombo.GetAnimCycle());
-                float[] durations = AnimationManager.Instance.GetOverrideClipsDurations(objectId, orderedReadyCycle);
+                float[] durations = IncomingPacketActions.Animations.GetOverrideClipsDurations(objectId, orderedReadyCycle);
                 float shotEventTime = SetupDurationHelper.ResolveShotEventTime(objectId, orderedReadyCycle);
-                float flightTimeMs = ResolveMagicFlightTimeMs(entity, useSkill.SkillId);
+                float flightTimeMs = SetupDurationHelper.ResolveMagicFlightTimeMs(
+                    entity, useSkill.SkillId, entity != null ? entity.Target : null);
                 entity.SetupTotalCastDuration(useSkill.HitTime, flightTimeMs, durations, shotEventTime, useSkill.TargetId);
 
                 SkillExecutor.Instance.ExecuteSkillOverride(useSkill.SkillGrp, entity, readyCombo, _events);
@@ -45,41 +43,5 @@ public class NewMagicSkillsState  : AbstractAttackEvents
                 break;
 
         }
-    }
-
-
-
-
-
-
-
-    private static float ResolveMagicFlightTimeMs(PlayerEntity entity, int skillId)
-    {
-        const float fallbackFlightMs = 1000f;
-        const float projectileHitOffsetSeconds = 0.3f;
-        const float minFlightMs = 350f;
-
-        if (EffectManager.Instance != null && EffectManager.Instance.database != null &&
-            EffectManager.Instance.database.ShouldIgnoreFlightTimeForCast(skillId))
-        {
-            return 0f;
-        }
-
-        if (entity == null || entity.Target == null)
-        {
-            return fallbackFlightMs;
-        }
-
-        float distance = entity.TargetDistance();
-        if (distance <= 0f)
-        {
-            return fallbackFlightMs;
-        }
-
-        float speed = ProjectileFlightTimeCalculator.GetSpeed(distance);
-        float flightSeconds = ProjectileFlightTimeCalculator.CalculateFlightTime(distance, speed, projectileHitOffsetSeconds);
-        float resolvedFlightMs = Mathf.Max(minFlightMs, flightSeconds * 1000f);
-
-        return resolvedFlightMs;
     }
 }

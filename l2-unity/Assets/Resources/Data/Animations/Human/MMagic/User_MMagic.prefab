@@ -121,7 +121,6 @@ GameObject:
   - component: {fileID: 8320559729586774763}
   - component: {fileID: 8234728174252591980}
   - component: {fileID: 5733643542121449354}
-  - component: {fileID: 3478450228567174879}
   - component: {fileID: 4463289532557031153}
   - component: {fileID: 3808788841989169926}
   m_Layer: 6
@@ -166,13 +165,13 @@ CharacterController:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Height: 0.65
-  m_Radius: 0.1
+  m_Height: 0.83
+  m_Radius: 0.13
   m_SlopeLimit: 45
   m_StepOffset: 0.3
   m_SkinWidth: 0.08
   m_MinMoveDistance: 0.001
-  m_Center: {x: 0, y: 0.4, z: 0}
+  m_Center: {x: 0, y: 0.45, z: 0}
 --- !u!114 &8234728174252591980
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -210,13 +209,9 @@ MonoBehaviour:
     _npcId: 0
     _npcClass: 
     _playerClass: 0
-    _isMage: 0
     _position: {x: 4724, y: -68, z: -1731}
-    _heading: 0
+    _heading: {x: 0, y: 0, z: 0, w: 0}
     _owned: 0
-  _status:
-    _hp: 0
-    _mp: 0
   _stats:
     _level: 0
     _speed: 0
@@ -227,27 +222,24 @@ MonoBehaviour:
     _maxHp: 0
     _maxMp: 0
     _maxCp: 0
-    _walkingSpeed: 0
-    _runSpeed: 0
     _scaledRunSpeed: 0
     _scaledWalkSpeed: 0
-  _statusInterlude:
-    _hp: 0
-    _mp: 0
+    _basePAtkSpeed: 0
   _appearance:
-    _collisonHeight: 0
-    _collisionRadius: 0
-    _lhand: 0
-    _rhand: 0
+    CollisionHeight: 0
+    CollisionRadius: 0
+    LHand: 0
+    RHand: 0
   _running: 0
+  _dead: 0
   _race: 0
   _raceId: 12
+  _bodyType: 0
   _targetId: 0
   _target: {fileID: 0}
   _attackTarget: {fileID: 0}
   _stopAutoAttackTime: 0
   _startAutoAttackTime: 0
-  _sitting: 0
 --- !u!114 &5733643542121449354
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -267,22 +259,6 @@ MonoBehaviour:
   _positionDelta: 0
   _lastDesyncTime: 0
   _lastDesyncDuration: 0
---- !u!114 &3478450228567174879
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2252958834938601816}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c0d95d876eae19f4099fa56602b7d22d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _direction: {x: 0, y: 0, z: 0}
-  _speed: 0
-  _destination: {x: 0, y: 0, z: 0}
-  _gravity: 28
 --- !u!114 &4463289532557031153
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -310,86 +286,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8c9bdd7f05411824eb481988706385f3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _rightHandWeapon:
-    _id: 0
-    _icon: 
-    _itemName:
-      _id: 0
-      _name: 
-      _description: 
-      _defaultAction: 
-      _tradeable: 0
-      _destructible: 0
-      _droppable: 0
-      _sellable: 0
-    _itemStatData:
-      _objectId: 0
-      _pDef: 0
-      _mDef: 0
-      _pAtk: 0
-      _mAtk: 0
-      _pAtkSpd: 0
-      _pHit: 0
-      _mHit: 0
-      _pCrit: 0
-      _mCrit: 0
-      _speed: 0
-      _shieldDef: 0
-      _shieldDefRate: 0
-      _pAvoid: 0
-      _mAvoid: 0
-    _itemgrp:
-      _objectId: 0
-      _dropModel: 
-      _dropTexture: 
-      _icon: 
-      _weight: 0
-      _material: 0
-      _dropSound: 
-      _grade: 0
-      _equipSound: 
-      _inventoryType: 
-      _crystallizable: 0
-  _leftHandWeapon:
-    _id: 0
-    _icon: 
-    _itemName:
-      _id: 0
-      _name: 
-      _description: 
-      _defaultAction: 
-      _tradeable: 0
-      _destructible: 0
-      _droppable: 0
-      _sellable: 0
-    _itemStatData:
-      _objectId: 0
-      _pDef: 0
-      _mDef: 0
-      _pAtk: 0
-      _mAtk: 0
-      _pAtkSpd: 0
-      _pHit: 0
-      _mHit: 0
-      _pCrit: 0
-      _mCrit: 0
-      _speed: 0
-      _shieldDef: 0
-      _shieldDefRate: 0
-      _pAvoid: 0
-      _mAvoid: 0
-    _itemgrp:
-      _objectId: 0
-      _dropModel: 
-      _dropTexture: 
-      _icon: 
-      _weight: 0
-      _material: 0
-      _dropSound: 
-      _grade: 0
-      _equipSound: 
-      _inventoryType: 
-      _crystallizable: 0
+  allBone:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
   _rightHandType: 0
   _rightHandBone: {fileID: 0}
   _rightHand: {fileID: 0}
@@ -398,292 +299,7 @@ MonoBehaviour:
   _shieldBone: {fileID: 0}
   _leftHand: {fileID: 0}
   _weaponAnim: 
-  _torsoMeta:
-    _id: 0
-    _icon: 
-    _itemName:
-      _id: 0
-      _name: 
-      _description: 
-      _defaultAction: 
-      _tradeable: 0
-      _destructible: 0
-      _droppable: 0
-      _sellable: 0
-    _itemStatData:
-      _objectId: 0
-      _pDef: 0
-      _mDef: 0
-      _pAtk: 0
-      _mAtk: 0
-      _pAtkSpd: 0
-      _pHit: 0
-      _mHit: 0
-      _pCrit: 0
-      _mCrit: 0
-      _speed: 0
-      _shieldDef: 0
-      _shieldDefRate: 0
-      _pAvoid: 0
-      _mAvoid: 0
-    _itemgrp:
-      _objectId: 0
-      _dropModel: 
-      _dropTexture: 
-      _icon: 
-      _weight: 0
-      _material: 0
-      _dropSound: 
-      _grade: 0
-      _equipSound: 
-      _inventoryType: 
-      _crystallizable: 0
-    _armorgrp:
-      _objectId: 0
-      _dropModel: 
-      _dropTexture: 
-      _icon: 
-      _weight: 0
-      _material: 0
-      _dropSound: 
-      _grade: 0
-      _equipSound: 
-      _inventoryType: 
-      _crystallizable: 0
-      _mpBonus: 0
-      _bodypart: 0
-      _model: []
-      _texture: []
-  _fullarmorMeta:
-    _id: 0
-    _icon: 
-    _itemName:
-      _id: 0
-      _name: 
-      _description: 
-      _defaultAction: 
-      _tradeable: 0
-      _destructible: 0
-      _droppable: 0
-      _sellable: 0
-    _itemStatData:
-      _objectId: 0
-      _pDef: 0
-      _mDef: 0
-      _pAtk: 0
-      _mAtk: 0
-      _pAtkSpd: 0
-      _pHit: 0
-      _mHit: 0
-      _pCrit: 0
-      _mCrit: 0
-      _speed: 0
-      _shieldDef: 0
-      _shieldDefRate: 0
-      _pAvoid: 0
-      _mAvoid: 0
-    _itemgrp:
-      _objectId: 0
-      _dropModel: 
-      _dropTexture: 
-      _icon: 
-      _weight: 0
-      _material: 0
-      _dropSound: 
-      _grade: 0
-      _equipSound: 
-      _inventoryType: 
-      _crystallizable: 0
-    _armorgrp:
-      _objectId: 0
-      _dropModel: 
-      _dropTexture: 
-      _icon: 
-      _weight: 0
-      _material: 0
-      _dropSound: 
-      _grade: 0
-      _equipSound: 
-      _inventoryType: 
-      _crystallizable: 0
-      _mpBonus: 0
-      _bodypart: 0
-      _model: []
-      _texture: []
-  _legsMeta:
-    _id: 0
-    _icon: 
-    _itemName:
-      _id: 0
-      _name: 
-      _description: 
-      _defaultAction: 
-      _tradeable: 0
-      _destructible: 0
-      _droppable: 0
-      _sellable: 0
-    _itemStatData:
-      _objectId: 0
-      _pDef: 0
-      _mDef: 0
-      _pAtk: 0
-      _mAtk: 0
-      _pAtkSpd: 0
-      _pHit: 0
-      _mHit: 0
-      _pCrit: 0
-      _mCrit: 0
-      _speed: 0
-      _shieldDef: 0
-      _shieldDefRate: 0
-      _pAvoid: 0
-      _mAvoid: 0
-    _itemgrp:
-      _objectId: 0
-      _dropModel: 
-      _dropTexture: 
-      _icon: 
-      _weight: 0
-      _material: 0
-      _dropSound: 
-      _grade: 0
-      _equipSound: 
-      _inventoryType: 
-      _crystallizable: 0
-    _armorgrp:
-      _objectId: 0
-      _dropModel: 
-      _dropTexture: 
-      _icon: 
-      _weight: 0
-      _material: 0
-      _dropSound: 
-      _grade: 0
-      _equipSound: 
-      _inventoryType: 
-      _crystallizable: 0
-      _mpBonus: 0
-      _bodypart: 0
-      _model: []
-      _texture: []
-  _glovesMeta:
-    _id: 0
-    _icon: 
-    _itemName:
-      _id: 0
-      _name: 
-      _description: 
-      _defaultAction: 
-      _tradeable: 0
-      _destructible: 0
-      _droppable: 0
-      _sellable: 0
-    _itemStatData:
-      _objectId: 0
-      _pDef: 0
-      _mDef: 0
-      _pAtk: 0
-      _mAtk: 0
-      _pAtkSpd: 0
-      _pHit: 0
-      _mHit: 0
-      _pCrit: 0
-      _mCrit: 0
-      _speed: 0
-      _shieldDef: 0
-      _shieldDefRate: 0
-      _pAvoid: 0
-      _mAvoid: 0
-    _itemgrp:
-      _objectId: 0
-      _dropModel: 
-      _dropTexture: 
-      _icon: 
-      _weight: 0
-      _material: 0
-      _dropSound: 
-      _grade: 0
-      _equipSound: 
-      _inventoryType: 
-      _crystallizable: 0
-    _armorgrp:
-      _objectId: 0
-      _dropModel: 
-      _dropTexture: 
-      _icon: 
-      _weight: 0
-      _material: 0
-      _dropSound: 
-      _grade: 0
-      _equipSound: 
-      _inventoryType: 
-      _crystallizable: 0
-      _mpBonus: 0
-      _bodypart: 0
-      _model: []
-      _texture: []
-  _bootsMeta:
-    _id: 0
-    _icon: 
-    _itemName:
-      _id: 0
-      _name: 
-      _description: 
-      _defaultAction: 
-      _tradeable: 0
-      _destructible: 0
-      _droppable: 0
-      _sellable: 0
-    _itemStatData:
-      _objectId: 0
-      _pDef: 0
-      _mDef: 0
-      _pAtk: 0
-      _mAtk: 0
-      _pAtkSpd: 0
-      _pHit: 0
-      _mHit: 0
-      _pCrit: 0
-      _mCrit: 0
-      _speed: 0
-      _shieldDef: 0
-      _shieldDefRate: 0
-      _pAvoid: 0
-      _mAvoid: 0
-    _itemgrp:
-      _objectId: 0
-      _dropModel: 
-      _dropTexture: 
-      _icon: 
-      _weight: 0
-      _material: 0
-      _dropSound: 
-      _grade: 0
-      _equipSound: 
-      _inventoryType: 
-      _crystallizable: 0
-    _armorgrp:
-      _objectId: 0
-      _dropModel: 
-      _dropTexture: 
-      _icon: 
-      _weight: 0
-      _material: 0
-      _dropSound: 
-      _grade: 0
-      _equipSound: 
-      _inventoryType: 
-      _crystallizable: 0
-      _mpBonus: 0
-      _bodypart: 0
-      _model: []
-      _texture: []
   _container: {fileID: 0}
-  _torso: {fileID: 0}
-  _fullarmor: {fileID: 0}
-  _legs: {fileID: 0}
-  _gloves: {fileID: 0}
-  _boots: {fileID: 0}
 --- !u!1 &6411853543172213777
 GameObject:
   m_ObjectHideFlags: 0
@@ -713,10 +329,10 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 7266862029197428}
+  - {fileID: 3153091440902167102}
   m_Father: {fileID: 198945824199396250}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1001 &9118551808217596015
+--- !u!1001 &7829699720217905059
 PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
@@ -724,57 +340,61 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 4887996185110440913}
     m_Modifications:
-    - target: {fileID: 5811865579490092099, guid: 8d4e3f5fbdf8b454e8f874fde4a426f0, type: 3}
+    - target: {fileID: 2014278124050676118, guid: 22b27c0422c032a40933d38d7fc9775e, type: 3}
       propertyPath: m_Name
-      value: MFighter_anim_user
+      value: MMagic_anim_user
       objectReference: {fileID: 0}
-    - target: {fileID: 9120435357139046427, guid: 8d4e3f5fbdf8b454e8f874fde4a426f0, type: 3}
+    - target: {fileID: 5146112015308955037, guid: 22b27c0422c032a40933d38d7fc9775e, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 9120435357139046427, guid: 8d4e3f5fbdf8b454e8f874fde4a426f0, type: 3}
+    - target: {fileID: 5146112015308955037, guid: 22b27c0422c032a40933d38d7fc9775e, type: 3}
       propertyPath: m_LocalPosition.y
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 9120435357139046427, guid: 8d4e3f5fbdf8b454e8f874fde4a426f0, type: 3}
+    - target: {fileID: 5146112015308955037, guid: 22b27c0422c032a40933d38d7fc9775e, type: 3}
       propertyPath: m_LocalPosition.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 9120435357139046427, guid: 8d4e3f5fbdf8b454e8f874fde4a426f0, type: 3}
+    - target: {fileID: 5146112015308955037, guid: 22b27c0422c032a40933d38d7fc9775e, type: 3}
       propertyPath: m_LocalRotation.w
       value: 1
       objectReference: {fileID: 0}
-    - target: {fileID: 9120435357139046427, guid: 8d4e3f5fbdf8b454e8f874fde4a426f0, type: 3}
+    - target: {fileID: 5146112015308955037, guid: 22b27c0422c032a40933d38d7fc9775e, type: 3}
       propertyPath: m_LocalRotation.x
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 9120435357139046427, guid: 8d4e3f5fbdf8b454e8f874fde4a426f0, type: 3}
+    - target: {fileID: 5146112015308955037, guid: 22b27c0422c032a40933d38d7fc9775e, type: 3}
       propertyPath: m_LocalRotation.y
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 9120435357139046427, guid: 8d4e3f5fbdf8b454e8f874fde4a426f0, type: 3}
+    - target: {fileID: 5146112015308955037, guid: 22b27c0422c032a40933d38d7fc9775e, type: 3}
       propertyPath: m_LocalRotation.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 9120435357139046427, guid: 8d4e3f5fbdf8b454e8f874fde4a426f0, type: 3}
+    - target: {fileID: 5146112015308955037, guid: 22b27c0422c032a40933d38d7fc9775e, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 9120435357139046427, guid: 8d4e3f5fbdf8b454e8f874fde4a426f0, type: 3}
+    - target: {fileID: 5146112015308955037, guid: 22b27c0422c032a40933d38d7fc9775e, type: 3}
       propertyPath: m_LocalEulerAnglesHint.y
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 9120435357139046427, guid: 8d4e3f5fbdf8b454e8f874fde4a426f0, type: 3}
+    - target: {fileID: 5146112015308955037, guid: 22b27c0422c032a40933d38d7fc9775e, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6049167834668828008, guid: 22b27c0422c032a40933d38d7fc9775e, type: 3}
+      propertyPath: m_Mesh
+      value: 
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: 8d4e3f5fbdf8b454e8f874fde4a426f0, type: 3}
---- !u!4 &7266862029197428 stripped
+  m_SourcePrefab: {fileID: 100100000, guid: 22b27c0422c032a40933d38d7fc9775e, type: 3}
+--- !u!4 &3153091440902167102 stripped
 Transform:
-  m_CorrespondingSourceObject: {fileID: 9120435357139046427, guid: 8d4e3f5fbdf8b454e8f874fde4a426f0, type: 3}
-  m_PrefabInstance: {fileID: 9118551808217596015}
+  m_CorrespondingSourceObject: {fileID: 5146112015308955037, guid: 22b27c0422c032a40933d38d7fc9775e, type: 3}
+  m_PrefabInstance: {fileID: 7829699720217905059}
   m_PrefabAsset: {fileID: 0}

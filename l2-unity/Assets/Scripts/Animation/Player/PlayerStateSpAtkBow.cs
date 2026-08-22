@@ -1,108 +1,85 @@
 ﻿using UnityEngine;
 
+/// <summary>
+/// L2 bow skill (SpAtk01_bow): same model as <see cref="PlayerStateJatkBow"/>.
+/// Shoot = OnAnimationShoot notify; arrow Accel via AbstractAttackEvents.CallBackStartShoot.
+/// Requires Animator state Speed Parameter = patkspd.
+/// Stretch uses skill HitTime (sptimeatk) when set, else CharInfo / UserInfo PAtkSpd.
+/// </summary>
 public class PlayerStateSpAtkBow : StateMachineBehaviour
 {
     private float _startTime;
     private float _endTime;
-    private float _clipLength;
-    private float _eventTimeInClip; // Время ивента в самом файле (3.22с)
-    private float _targetShootTime; // Когда ивент ДОЛЖЕН сработать в реале (2.3с)
+    private float _linearSpeed;
     private bool _isSwitchIdle;
 
     public string parameterName;
     public string motionName;
     public string eventShootName;
-    private AnimationCurve _animationCurve;
 
-
-
-    override public void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
+    public override void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
         _isSwitchIdle = false;
         _startTime = Time.time;
-        _animationCurve = CreateNormalizedCurve();
 
-        // 1. Получаем данные клипа и ивента из кэша
-        _clipLength = AnimationDataCache.GetOverrideLength(animator, motionName);
-        _eventTimeInClip = AnimationDataCache.GetEventTimeByName(animator, motionName, eventShootName);
+        float clipLength = AnimationDataCache.GetOverrideLength(animator, motionName);
+        float eventTimeInClip = AnimationDataCache.GetEventTimeByName(animator, motionName, eventShootName);
+        if (clipLength <= 0.01f)
+            clipLength = Mathf.Max(stateInfo.length, 0.01f);
+        if (eventTimeInClip <= 0.01f)
+            eventTimeInClip = clipLength * 0.637f;
 
-        // 2. Получаем серверное время (3.3с)
+        int objectId = AnimatorUtils.GetObjectId(animator);
         int serverTimeMs = animator.GetInteger("sptimeatk");
-        _endTime = serverTimeMs / 1000f;
-
-        // 3. Рассчитываем время полета и когда ДОЛЖЕН быть выстрел
-        float dist = PlayerEntity.Instance.TargetDistance();
-        float[] times = CalcBaseParam.CalculateAttackAndFlightTimes(dist, serverTimeMs);
-        float flightTime = times[1] / 1000f;
-
-        // Точка выстрела в реальном времени (например: 3.3 - 1.0 = 2.3с)
-        _targetShootTime = _endTime - flightTime;
-
-        // Предохранитель, чтобы не было деления на ноль
-        if (_targetShootTime <= 0) _targetShootTime = _endTime * 0.5f;
-
-        Debug.Log($"[Sync] Клип: {_clipLength}с | Ивент в клипе: {_eventTimeInClip}с | Цель выстрела: {_targetShootTime}с | Цель итог: {_endTime}с");
+        Entity entity = World.Instance != null ? World.Instance.GetEntityNoLockSync(objectId) : null;
+        float cycleMs = serverTimeMs > 0
+            ? serverTimeMs
+            : AttackTimingHelper.ResolveAttackCycleMs(entity, parameterName);
+        _endTime = Mathf.Max(0.01f, cycleMs / 1000f);
+        _linearSpeed = AttackTimingHelper.ComputeLinearPAtkSpeed(clipLength, cycleMs);
+        AnimationManager.Instance.SetPAtkSpeed(objectId, _linearSpeed);
+        Debug.Log(
+            $"[PATKSPD] SpAtkBow objectId={objectId} anim={parameterName} " +
+            $"sptimeatk={serverTimeMs} cycleMs={cycleMs:F1} clipSec={clipLength:F3} patkspd={_linearSpeed:F3}");
     }
 
-    override public void OnStateUpdate(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
+    public override void OnStateUpdate(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
-        float timeOut = Time.time - _startTime;
+        int objectId = AnimatorUtils.GetObjectId(animator);
+        AnimationManager.Instance.SetPAtkSpeed(objectId, _linearSpeed);
 
-        if (timeOut >= _endTime)
-        {
-            PlayerAnimationController.Instance.SetPAtkSpeed(1.0f);
-            SwitchToIdle(animator);
+        if (!AnimatorUtils.IsLocalPlayerAnimator(animator))
             return;
-        }
 
-        float progress = Mathf.Clamp01(timeOut / _endTime);
-
-        // Расчет базовой скорости для синхронизации
-        float baseSpeed;
-
-        if (timeOut < _targetShootTime)
-        {
-            // ФАЗА 1: До выстрела. Должны пройти путь _eventTimeInClip за время _targetShootTime
-            baseSpeed = _eventTimeInClip / _targetShootTime;
-        }
-        else
-        {
-            // ФАЗА 2: После выстрела. Должны пройти остаток клипа за остаток времени
-            float remainingClip = _clipLength - _eventTimeInClip;
-            float remainingTime = _endTime - _targetShootTime;
-            baseSpeed = (remainingTime > 0) ? (remainingClip / remainingTime) : 1.0f;
-        }
-
-        // Модификатор кривой (slope)
-        float delta = 0.01f;
-        float v1 = _animationCurve.Evaluate(progress);
-        float v2 = _animationCurve.Evaluate(Mathf.Min(progress + delta, 1.0f));
-        float slope = (v2 - v1) / delta;
-
-        float targetSpeed = baseSpeed * slope;
-
-        PlayerAnimationController.Instance.SetPAtkSpeed(targetSpeed);
-
-        // Дебаг прогресса выстрела
-        if (timeOut < _targetShootTime)
-            Debug.Log($"[Sync] До выстрела: {(timeOut / _targetShootTime) * 100:F0}% | Скорость: {targetSpeed:F2}");
+        float timeOut = Time.time - _startTime;
+        if (timeOut >= _endTime)
+            SwitchToIdle(animator);
     }
 
-    private AnimationCurve CreateNormalizedCurve()
+    public override void OnStateExit(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
-        AnimationCurve curve = new AnimationCurve();
-        curve.AddKey(new Keyframe(0f, 0f));
-        curve.AddKey(new Keyframe(1f, 1f)); // Для двухфазной скорости лучше использовать линейную или мягкую кривую
-        for (int i = 0; i < curve.length; i++) curve.SmoothTangents(i, 0);
-        return curve;
+        AnimationManager.Instance.SetPAtkSpeed(AnimatorUtils.GetObjectId(animator), 1f);
     }
 
     private void SwitchToIdle(Animator animator)
     {
-        if (_isSwitchIdle) return;
+        if (_isSwitchIdle)
+            return;
+
         _isSwitchIdle = true;
-        PlayerEntity.Instance.IsAttack = false;
+        if (PlayerEntity.Instance != null)
+            PlayerEntity.Instance.IsAttack = false;
+
+        int objectId = AnimatorUtils.GetObjectId(animator);
+        string phaseName = AnimationManager.Instance != null
+            ? AnimationManager.Instance.GetCurrentAnimationName(objectId)
+            : null;
+        if (string.IsNullOrEmpty(phaseName))
+            phaseName = !string.IsNullOrEmpty(parameterName) ? parameterName : motionName;
+
+        AnimationManager.Instance?.NotifyMagicPhaseFinished(objectId, phaseName);
+
         PlayerStateMachine.Instance.ChangeIntention(Intention.INTENTION_IDLE);
-        PlayerStateMachine.Instance.NotifyEvent(Event.WAIT_RETURN);
+        PlayerStateMachine.Instance.NotifyEvent(Event.WAIT_RETURN, NewIdleState.WaitReturnFromCombatSmb);
     }
 }

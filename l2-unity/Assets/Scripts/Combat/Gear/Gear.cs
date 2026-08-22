@@ -62,12 +62,16 @@ public class Gear : AbstractMeshManager
         Weapon weapon = ItemTable.Instance.GetWeapon(weaponId);
         ErrorPrint(weapon, weaponId);
 
-        if (weaponId == 0 | IsShieldEquipped(weaponId) | IsWeaponEquipped(weaponId , true) | weapon == null)
+        if (weaponId == 0 | IsShieldEquipped(weaponId) | weapon == null)
         {
             return;
         }
 
+        ClearLeftHandForShield();
+
         GameObject weaponPrefab = (GameObject)LoadMesh(EquipmentCategory.Weapon, weaponId);
+        if (weaponPrefab == null)
+            return;
         _origShieldPrefabName = weaponPrefab.name;
         WeaponType type = WeaponType.none;
         RefreshDataShield(weapon , WeaponType.shield);
@@ -103,13 +107,30 @@ public class Gear : AbstractMeshManager
 
         ErrorPrint(weapon, weaponId);
 
-        if (weaponId == 0 | IsWeaponEquipped(weaponId, leftSlot) | weapon == null)
-        {
+        if (weaponId == 0 | weapon == null) {
+            GearFlowLog.Warn("EquipWeapon abort id=" + weaponId +
+                " owner=" + _ownerId + " nullWeapon=" + (weapon == null));
             return;
         }
 
+        if (IsWeaponEquipped(weaponId, leftSlot)) {
+            GearFlowLog.Info("EquipWeapon SKIP already equipped id=" + weaponId +
+                " left=" + leftSlot + " owner=" + _ownerId);
+            return;
+        }
+
+        GearFlowLog.Info("EquipWeapon APPLY id=" + weaponId +
+            " left=" + leftSlot + " owner=" + _ownerId +
+            " type=" + (weapon.Weapongrp != null ? weapon.Weapongrp.WeaponType.ToString() : "null"));
+
+        ClearHandsForNewWeapon(leftSlot, false);
+
         GameObject weaponPrefab = (GameObject)LoadMesh(EquipmentCategory.Weapon, weaponId);
-        if (weaponPrefab == null) return;
+        if (weaponPrefab == null)
+        {
+            GearFlowLog.Warn("EquipWeapon mesh null id=" + weaponId + " owner=" + _ownerId);
+            return;
+        }
 
         var weaponNameAndId = weaponName + weaponId;
         WeaponType type = weapon.Weapongrp.WeaponType;
@@ -168,10 +189,17 @@ public class Gear : AbstractMeshManager
 
         ErrorPrint(weapon, weaponId);
 
-        if (weaponId == 0 | IsWeaponEquippedInBothHands(weaponId) | weapon == null)
+        if (weaponId == 0 | weapon == null)
         {
             return;
         }
+
+        if (IsWeaponEquippedInBothHands(weaponId))
+        {
+            return;
+        }
+
+        ClearHandsForNewWeapon(false, true);
 
         GameObject weaponPrefab = (GameObject)LoadMesh(EquipmentCategory.Weapon, weaponId);
         //GameObject weaponPrefabRight = (GameObject)LoadMesh(EquipmentCategory.Weapon, weaponId);
@@ -293,12 +321,203 @@ public class Gear : AbstractMeshManager
         return _shieldBone;
     }
 
-
-    
-    
-
     public float GetWeaponRange() {
-        return VectorUtils.ConvertL2jDistance(_weaponRange);
+        return VectorUtils.ConvertL2UuToMeters(_weaponRange);
+    }
+
+    public void SyncEquippedWeapons(int rHandId, int lHandId)
+    {
+        Weapon rWeapon = rHandId != 0 ? ItemTable.Instance.GetWeapon(rHandId) : null;
+        Weapon lItem = lHandId != 0 ? ItemTable.Instance.GetWeapon(lHandId) : null;
+        WeaponType rType = rWeapon != null && rWeapon.Weapongrp != null
+            ? rWeapon.Weapongrp.WeaponType : WeaponType.none;
+        WeaponType lType = lItem != null && lItem.Weapongrp != null
+            ? lItem.Weapongrp.WeaponType : WeaponType.none;
+
+        bool dual = rType == WeaponType.dual;
+        bool bow = rType == WeaponType.bow;
+        bool lShield = lType == WeaponType.shield || lType == WeaponType.none && lHandId != 0 && lItem != null;
+
+        int wantRight = 0;
+        int wantLeft = 0;
+        int wantShield = 0;
+        if (dual)
+        {
+            wantRight = rHandId;
+            wantLeft = rHandId;
+        }
+        else if (bow)
+        {
+            wantLeft = rHandId;
+        }
+        else
+        {
+            wantRight = rHandId;
+            if (lShield)
+                wantShield = lHandId;
+            else
+                wantLeft = lHandId;
+        }
+
+        int haveRight = _rightHandWeapon != null ? _rightHandWeapon.Id : 0;
+        int haveShield = _leftHandShield != null ? _leftHandShield.Id : 0;
+        int haveLeft = 0;
+        if (_leftHandWeapon != null && _leftHandShield == null)
+            haveLeft = _leftHandWeapon.Id;
+
+        if (haveRight == wantRight && haveLeft == wantLeft && haveShield == wantShield &&
+            !HasOrphanHandMeshes(wantRight, wantLeft, wantShield))
+        {
+            if (this is UserGear || rHandId != 0 || lHandId != 0)
+            {
+                GearFlowLog.Info("SyncWeapons SKIP same owner=" + _ownerId +
+                    " have R=" + haveRight + " L=" + haveLeft + " S=" + haveShield +
+                    " packet R=" + rHandId + " L=" + lHandId);
+            }
+            return;
+        }
+
+        GearFlowLog.Info("SyncWeapons APPLY owner=" + _ownerId +
+            " have R=" + haveRight + " L=" + haveLeft + " S=" + haveShield +
+            " want R=" + wantRight + " L=" + wantLeft + " S=" + wantShield +
+            " packet R=" + rHandId + " L=" + lHandId +
+            " dual=" + dual + " bow=" + bow + " lShield=" + lShield);
+
+        ClearAllHandEquipment();
+
+        if (dual)
+            EquipLeftAndRightWeapon(rHandId);
+        else if (bow)
+            EquipWeapon(rHandId, false);
+        else
+        {
+            if (wantRight != 0)
+                EquipWeapon(wantRight, false);
+            if (wantShield != 0)
+                EquipShield(wantShield);
+            else if (wantLeft != 0)
+                EquipWeapon(wantLeft, true);
+        }
+    }
+
+    void ClearHandsForNewWeapon(bool leftSlot, bool dual)
+    {
+        if (dual)
+        {
+            ClearAllHandEquipment();
+            return;
+        }
+
+        if (leftSlot)
+            ClearLeftHandForShield();
+        else
+        {
+            if (IsDualEquipped())
+                UnequipWeapon(false, _rightHandWeapon.Id, true);
+            else if (_rightHandWeapon != null)
+                UnequipWeapon(false, _rightHandWeapon.Id, false);
+            ClearWeaponMeshesOnBone(GetRightHandBone());
+            RefreshData(false, null);
+        }
+    }
+
+    void ClearLeftHandForShield()
+    {
+        if (_leftHandShield != null)
+            UnequipShield(_leftHandShield.Id);
+        else if (_leftHandWeapon != null)
+            UnequipWeapon(true, _leftHandWeapon.Id, false);
+        ClearWeaponMeshesOnBone(GetLeftHandBone());
+        ClearShieldMeshesOnBone(GetShieldBone());
+        RefreshData(true, null);
+        RefreshDataShield(null);
+    }
+
+    void ClearAllHandEquipment()
+    {
+        if (IsDualEquipped())
+            UnequipWeapon(false, _rightHandWeapon.Id, true);
+        else
+        {
+            if (_leftHandShield != null)
+                UnequipShield(_leftHandShield.Id);
+            else if (_leftHandWeapon != null)
+                UnequipWeapon(true, _leftHandWeapon.Id, false);
+            if (_rightHandWeapon != null)
+                UnequipWeapon(false, _rightHandWeapon.Id, false);
+        }
+
+        ClearWeaponMeshesOnBone(GetLeftHandBone());
+        ClearWeaponMeshesOnBone(GetRightHandBone());
+        ClearShieldMeshesOnBone(GetShieldBone());
+        RefreshData(true, null);
+        RefreshData(false, null);
+        RefreshDataShield(null);
+    }
+
+    bool IsDualEquipped()
+    {
+        return _rightHandWeapon != null && _leftHandWeapon != null &&
+            _leftHandShield == null &&
+            _rightHandWeapon.Id == _leftHandWeapon.Id;
+    }
+
+    bool HasOrphanHandMeshes(int wantRight, int wantLeft, int wantShield)
+    {
+        return BoneHasUnexpectedItem(GetRightHandBone(), weaponName, wantRight) ||
+            BoneHasUnexpectedItem(GetLeftHandBone(), weaponName, wantLeft) ||
+            BoneHasUnexpectedItem(GetShieldBone(), shieldName, wantShield);
+    }
+
+    bool BoneHasUnexpectedItem(Transform bone, string prefix, int allowedId)
+    {
+        if (bone == null)
+            return false;
+
+        int matching = 0;
+        for (int i = 0; i < bone.childCount; i++)
+        {
+            Transform child = bone.GetChild(i);
+            if (child == null || !child.name.StartsWith(prefix, StringComparison.Ordinal))
+                continue;
+
+            int itemId = 0;
+            int.TryParse(child.name.Substring(prefix.Length), out itemId);
+            if (allowedId == 0 || itemId != allowedId)
+                return true;
+            matching++;
+            if (matching > 1)
+                return true;
+        }
+        return false;
+    }
+
+    void ClearWeaponMeshesOnBone(Transform bone)
+    {
+        ClearPrefixedMeshesOnBone(bone, weaponName);
+    }
+
+    void ClearShieldMeshesOnBone(Transform bone)
+    {
+        ClearPrefixedMeshesOnBone(bone, shieldName);
+    }
+
+    void ClearPrefixedMeshesOnBone(Transform bone, string prefix)
+    {
+        if (bone == null)
+            return;
+
+        for (int i = bone.childCount - 1; i >= 0; i--)
+        {
+            Transform child = bone.GetChild(i);
+            if (child == null || !child.name.StartsWith(prefix, StringComparison.Ordinal))
+                continue;
+
+            int itemId = 0;
+            string suffix = child.name.Substring(prefix.Length);
+            int.TryParse(suffix, out itemId);
+            DestroyObject(child.gameObject, GetWeaponModelName(itemId));
+        }
     }
 
     public  void UnequipWeapon(bool leftSlot , int weaponId, bool lrDestroy = false)

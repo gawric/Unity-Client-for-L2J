@@ -1,20 +1,42 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UIElements;
-using static UnityEngine.EventSystems.EventTrigger;
+using UnityEngine.Rendering;
 
+/// <summary>
+/// World nameplates orchestrator — L2 canvas path: Project → screen-pixel glyphs →
+/// <see cref="L2NameplateScreenBatch"/>. Titles + DrawTargetName hover/target/attack bubbles.
+/// </summary>
 public class NameplatesManager : MonoBehaviour
 {
-    private VisualElement _rootElement;
-    private VisualTreeAsset _nameplateTemplate;
-    private readonly Dictionary<int, Nameplate> _nameplates = new Dictionary<int, Nameplate>();
-    private Transform _playerTransform;
-
+    [SerializeField] private Camera _camera;
     [SerializeField] private float _nameplateViewDistance = 50f;
     [SerializeField] private LayerMask _entityMask;
+    [SerializeField] private Color _defaultNameColor = Color.white;
+    [SerializeField] private float _pixelScale = 1f;
+    [Tooltip("Meters after L2 capsule top (Location + CollisionHeight). Negative lowers names.")]
+    [SerializeField] private float _headHeightOffset = -0.12f;
+    [Tooltip("L2 canvas: lock plate to whole screen pixels (hysteresis).")]
+    [SerializeField] private bool _snapAnchorToPixels = true;
+    [SerializeField] private float _snapHysteresisPx = 0.75f;
+    [SerializeField] private bool _snapDiscardSubpixelFrac = true;
+    [SerializeField] private bool _drawTitles = true;
+    [SerializeField] private float _titleGapPixels = 2f;
+    [SerializeField] private bool _drawBubbles = true;
+    [SerializeField] private string _atlasResourcePath = "Data/UI/Font/L2Lobby/l2_lobby_font_atlas";
+    [SerializeField] private string _csvResourcePath = "Data/UI/Font/L2Lobby/ul2font_ascii";
+
     [SerializeField] public RaycastHit[] _entitiesInRange;
+
+    private readonly List<NameplatePaintItem> _paintList = new List<NameplatePaintItem>(64);
+
+    private NameplateBubbleResolver _bubbleResolver;
+    private NameplateEntryStore _entryStore;
+    private NameplatePixelSnap _pixelSnap;
+    private NameplateTextDrawer _textDrawer;
+    private NameplateBubbleDrawer _bubbleDrawer;
+
+    private Transform _playerTransform;
+    private bool _subscribed;
 
     private static NameplatesManager _instance;
     //private bool _isRemoveNamePlate = false;
@@ -215,55 +237,108 @@ public class NameplatesManager : MonoBehaviour
         return entity.Appearance.CollisionHeight * 2.1f;
     }
 
-    private void CheckNameplateVisibility() {
-        foreach(var nameplateId in _nameplates.Keys) {
-            var nameplate = _nameplates[nameplateId];
-            if(!IsNameplateVisible(nameplate.Target)) {
-                nameplate.Visible = false;
-            } else {
-                nameplate.Visible = true;
-            }
+    private void OnEnable()
+    {
+        if (!_subscribed)
+        {
+            RenderPipelineManager.beginCameraRendering += OnBeginCameraRendering;
+            _subscribed = true;
         }
     }
 
-    private void UpdateNameplates() {
-        var keysToRemove = new List<int>();
-        foreach(var nameplateId in _nameplates.Keys) {
-            var nameplate = _nameplates[nameplateId];
+    private void OnDisable()
+    {
+        if (_subscribed)
+        {
+            RenderPipelineManager.beginCameraRendering -= OnBeginCameraRendering;
+            _subscribed = false;
+        }
+    }
 
-            if(!nameplate.Visible) {
-                keysToRemove.Add(nameplateId);
-            } else {
-                UpdateNameplatePosition(nameplate);
-                UpdateNameplateStyle(nameplate);
-            }
+    private void OnDestroy()
+    {
+        OnDisable();
+        _entryStore?.Clear();
+        _pixelSnap?.ClearAll();
+        _textDrawer?.Dispose();
+        _bubbleDrawer?.Dispose();
+
+        if (_instance == this)
+        {
+            _instance = null;
         }
-        foreach(var key in keysToRemove) {
-            _rootElement.Remove(_nameplates[key].NameplateEle);
-            _nameplates.Remove(key);
-        }
+    }
+
+    public void SetMask(LayerMask mask)
+    {
+        _entityMask = mask;
     }
 
     public void Remove(int id)
     {
-        if (_nameplates.ContainsKey(id))
-        {
-           // _isRemoveNamePlate = true;
-            Nameplate nameplate = _nameplates[id];
-            nameplate.Visible = false;
-            _removeObjId = id;
-            _rootElement.Remove(_nameplates[id].NameplateEle);
-            _nameplates.Remove(id);
-        }  
+        _entryStore?.Remove(id, _pixelSnap);
     }
-    private void UpdateNameplateStyle(Nameplate nameplate) {
-        if(TargetManager.Instance.HasTarget() && TargetManager.Instance.Target.Data.ObjectTransform == nameplate.Target) {
-            if (TargetManager.Instance.AttackTarget == TargetManager.Instance.Target) {
-                nameplate.SetStyle("target-bubble-attack");
-            } else {
-                nameplate.SetStyle("target-bubble-target");
-                nameplate.RemoveStyle("target-bubble-attack");
+
+    private void ApplySettingsToSubsystems()
+    {
+        _pixelSnap.HysteresisPx = _snapHysteresisPx;
+        _textDrawer.ConfigurePaths(_atlasResourcePath, _csvResourcePath);
+        _textDrawer.PixelScale = _pixelScale;
+        _textDrawer.TitleGapPixels = _titleGapPixels;
+        _textDrawer.SnapAnchorToPixels = _snapAnchorToPixels;
+        _textDrawer.SnapDiscardSubpixelFrac = _snapDiscardSubpixelFrac;
+        _bubbleDrawer.Enabled = _drawBubbles;
+    }
+
+    private void EnsureResources()
+    {
+        ApplySettingsToSubsystems();
+        _textDrawer.EnsureResources();
+        _bubbleDrawer.EnsureResources();
+    }
+
+    private Camera ResolveCamera()
+    {
+        return _camera != null ? _camera : Camera.main;
+    }
+
+    private void FixedUpdate()
+    {
+        if (_playerTransform == null)
+        {
+            if (PlayerEntity.Instance != null && PlayerEntity.Instance.transform != null)
+            {
+                _playerTransform = PlayerEntity.Instance.transform;
             }
+            else
+            {
+                return;
+            }
+        }
+
+        _entitiesInRange = Physics.SphereCastAll(
+            _playerTransform.position,
+            _nameplateViewDistance,
+            transform.forward,
+            0f,
+            _entityMask);
+
+        _entryStore.Discover(_entitiesInRange, _defaultNameColor);
+        _entryStore.EnsureHoverAndTarget(_entityMask, _defaultNameColor);
+
+        if (PlayerEntity.Instance != null)
+        {
+            _entryStore.UpsertEntry(PlayerEntity.Instance, _defaultNameColor);
+        }
+
+        _entryStore.RefreshVisibility(_playerTransform, _nameplateViewDistance, _pixelSnap);
+    }
+
+    private void OnBeginCameraRendering(ScriptableRenderContext context, Camera cam)
+    {
+        Camera targetCam = ResolveCamera();
+        if (cam == null || targetCam == null || cam != targetCam)
+        {
             return;
         } else {
             nameplate.RemoveStyle("target-bubble-attack");
@@ -297,9 +372,10 @@ public class NameplatesManager : MonoBehaviour
             return false;
         }
 
-        bool isHover = ClickManager.Instance.HoverObjectData != null && ClickManager.Instance.HoverObjectData.ObjectTransform == target;
-        if(isHover) {
-            return true;
+        EnsureResources();
+        if (!_textDrawer.IsReady)
+        {
+            return;
         }
 
         bool isTarget = TargetManager.Instance.HasTarget() && TargetManager.Instance.Target.Data.ObjectTransform == target;

@@ -36,9 +36,7 @@ public class HtmlWindow : L2PopupWindow
         if (Input.GetKeyDown(KeyCode.B) && CanSend(1100))
         {
             Debug.Log("Requesting : ShowBoard");
-            RequestShowBoard packet = CreatorPacketsUser.CreateRequestShowBoard();
-            bool crypt = GameClient.Instance.IsCryptEnabled();
-            SendGameDataQueue.Instance().AddItem(packet, crypt, crypt);
+            IncomingPacketActions.Game.Send(new RequestShowBoardCommand());
         }
     }
 
@@ -290,9 +288,7 @@ public class HtmlWindow : L2PopupWindow
         if (string.IsNullOrEmpty(action))
             return;
 
-        RequestBypassToServer packet = CreatorPacketsUser.CreateByPassPacket(action);
-        bool crypt = GameClient.Instance.IsCryptEnabled();
-        SendGameDataQueue.Instance().AddItem(packet, crypt, crypt);
+        IncomingPacketActions.Game.Send(new RequestBypassToServerCommand(action));
     }
 
     public void UseActionCommand(string command)

@@ -1,4 +1,4 @@
-﻿public class NewDeadIntention : IntentionBase
+public class NewDeadIntention : IntentionBase
 {
     public NewDeadIntention(PlayerStateMachine stateMachine) : base(stateMachine)
     {
@@ -6,11 +6,11 @@
 
     public override void Enter(object arg0)
     {
-        if (arg0.GetType() == typeof(Die))
+        if (arg0.GetType() == typeof(DieDto))
         {
-            Die myModel = (Die)arg0;
-            BufferPanel.Instance.RemoveAllEffects();
-            DeadWindow.Instance.ShowWindow();
+            DieDto myModel = (DieDto)arg0;
+            IncomingPacketActions.Buffer.RemoveAllEffects();
+            IncomingPacketActions.Dead.ShowWindow();
 
             _stateMachine.ChangeState(PlayerState.DEAD);
             _stateMachine.NotifyEvent(Event.DEAD);

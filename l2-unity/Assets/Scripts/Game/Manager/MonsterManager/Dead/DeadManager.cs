@@ -1,14 +1,19 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
+using VContainer;
 
 public class DeadManager : MonoBehaviour, IDead
 {
+    public event Action<int> OnReadyToRemove;
+
     private static IDead _instance;
     public static IDead Instance { get { return _instance; } }
 
+    [Inject] private L2ActorFade _actorFade;
+
     private Dictionary<int, DeadData> _dict;
-    public float speed = 0.000001f; // Скорость движения вверх
-    List<int> _remove = new List<int>();
+    private List<int> _remove = new List<int>();
 
     private void Awake()
     {
@@ -23,122 +28,75 @@ public class DeadManager : MonoBehaviour, IDead
             Destroy(this);
         }
     }
-    
+
     void Update()
     {
-        if (_dict.Count == 0) return;
-
-        
+        if (_dict.Count == 0)
+        {
+            return;
+        }
 
         foreach (KeyValuePair<int, DeadData> kvp in _dict)
         {
             DeadData data = kvp.Value;
-
-           
-
-            if (data.IsAntiGravity())
+            if (data == null || !data.IsValid())
             {
-                float newY3 = transform.position.y;
-                float newY4 = newY3 * 2;
-                float zeroPosition = newY3 - newY4;
-                data.SetCurrentPos(zeroPosition - zeroPosition * 2);
-                data.SetZeroPos(data.GetCurrentPos());
-                data.SetCurrentPos(data.GetCurrentPos() + 0.5f);
-
-                data.SetRefresh(true);
-                data.SetAntiGravity(false);
-    
-                NameplatesManager.Instance.Remove(data.GetIdEntity());
+                _remove.Add(kvp.Key);
+                continue;
             }
-            else
+
+            data.AddElapsed(Time.deltaTime);
+            if (data.Elapsed > L2ActorFade.DurationSeconds)
             {
-                if (data.IsRefresh())
-                {
-                    if (transform.position.y <= 3)
-                    {
-                        var originalColor = GetOriginalColor(data.GetRender());
-                        if (originalColor.a > 0.1)
-                        {
-                            float lerp = Mathf.Lerp(transform.position.y, data.GetCurrentPos(), speed * Time.deltaTime);
-                            float alpha = Mathf.Lerp(originalColor.a, 0f, 1f * Time.deltaTime);
-                            transform.position = new Vector3(transform.position.x, lerp, transform.position.z);
-                            SetOpacity(data.GetRender(), alpha);
-                            //_remove.Add(kvp.Key);
-                        }
-                        else
-                        {
-                            World.Instance.RemoveObject(data.GetIdEntity());
-                            data.SetRefresh(false);
-                            _remove.Add(kvp.Key);
-                        }
-
-                    }
-
-                }
-
+                Finish(data);
+                _remove.Add(kvp.Key);
+                continue;
             }
+
+            data.SetAlphaByte(_actorFade, _actorFade.AlphaByte(data.Elapsed));
         }
-        //Debug.Log("DeadManager size 1 " + _dict.Count);
+
         Remove(_remove);
-        //Debug.Log("DeadManager size 2 " + _dict.Count);
     }
 
-
-    public void AddDeadAndRemove(int id , DeadData data)
+    public void AddDeadAndRemove(int id, DeadData data)
     {
-        if (!_dict.ContainsKey(id))
+        if (data == null || _dict.ContainsKey(id))
         {
-            _dict.Add(id, data);
+            return;
+        }
+
+        if (!data.TryBeginFade(_actorFade))
+        {
+            OnReadyToRemove?.Invoke(id);
+            return;
+        }
+
+        if (NameplatesManager.Instance != null)
+        {
+            NameplatesManager.Instance.Remove(data.GetIdEntity());
+        }
+
+        data.SetAlphaByte(_actorFade, 255);
+        _dict.Add(id, data);
+    }
+
+    private void Finish(DeadData data)
+    {
+        int id = data.GetIdEntity();
+        if (id != 0)
+        {
+            OnReadyToRemove?.Invoke(id);
         }
     }
+
     private void Remove(List<int> remove)
     {
-        foreach(int id in remove)
+        for (int i = 0; i < remove.Count; i++)
         {
-            if (_dict.ContainsKey(id))
-            {
-                _dict.Remove(id);
-            }
+            _dict.Remove(remove[i]);
         }
 
         remove.Clear();
-    }
-
-    public Color GetOriginalColor(Renderer[] monsterRenderer)
-    {
-        if (monsterRenderer[0] != null)
-        {
-            Material material = monsterRenderer[0].material;
-
-            if (material.HasProperty("_Surface"))
-            {
-                material.SetFloat("_Surface", 1); // 1 для Transparent, 0 для Opaque
-            }
-
-            if (material != null)
-            {
-                return material.color;
-            }
-        }
-        return new Color();
-    }
-
-    private void SetOpacity(Renderer[] monsterRenderer, float opacity)
-    {
-        if (monsterRenderer[0] != null)
-        {
-            Material material = monsterRenderer[0].material;
-            if (material != null)
-            {
-
-                material.SetFloat("_Surface", 1); 
-                material.SetOverrideTag("RenderType", "Transparent");
-                material.renderQueue = (int)UnityEngine.Rendering.RenderQueue.Transparent;
-                Color color = material.color;
-                color.a = opacity;
-                material.color = color;
-            }
-        }
-
     }
 }

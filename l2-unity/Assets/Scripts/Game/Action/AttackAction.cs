@@ -29,20 +29,24 @@ public class AttackAction : L2Action
     {
         Debug.Log("Use attack action.");
 
-        if (TargetManager.Instance.HasTarget())
+        if (IncomingPacketActions.Targets.HasTarget())
         {
             if (!PlayerEntity.Instance.IsAttack && PlayerStateMachine.Instance.State != PlayerState.DEAD)
             {
-                TargetData target = TargetManager.Instance.Target;
+                TargetData target = IncomingPacketActions.Targets.Target;
 
                 if (target != null && !target.IsDead())
                 {
-                    Debug.Log("Trying To Attack");
+                    Entity entity = target.GetEntity();
+                    if (entity is MonsterEntity)
+                    {
+                        Debug.Log("Trying To Attack");
+                        // Melee attack intent (hotkey) — red while closing distance.
+                        IncomingPacketActions.Targets.SetAttackTarget();
+                    }
 
                     var l2jpos = target.Identity.GetL2jPos();
-                    ClickAction sendPaket = CreatorPacketsUser.CreateActiont(target.Identity.Id, (int)l2jpos.x, (int)l2jpos.y, (int)l2jpos.z, 0);
-                    bool enable = GameClient.Instance.IsCryptEnabled();
-                    SendGameDataQueue.Instance().AddItem(sendPaket, enable, enable);
+                    IncomingPacketActions.Game.Send(new ClickActionCommand(target.Identity.Id, (int)l2jpos.x, (int)l2jpos.y, (int)l2jpos.z, 0));
                 }
             }
         }

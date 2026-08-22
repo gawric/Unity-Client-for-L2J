@@ -390,9 +390,6 @@ PrefabInstance:
       addedObject: {fileID: -7871514648059682121}
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 0804fc196ecaf9d4f85bb9d94dcdf03e, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 8061403572513567561}
-    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 0804fc196ecaf9d4f85bb9d94dcdf03e, type: 3}
-      insertIndex: -1
       addedObject: {fileID: -1571688244852663738}
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 0804fc196ecaf9d4f85bb9d94dcdf03e, type: 3}
       insertIndex: -1
@@ -469,13 +466,13 @@ CharacterController:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Height: 0.7
-  m_Radius: 0.29
+  m_Height: 0.3
+  m_Radius: 0.25
   m_SlopeLimit: 45
   m_StepOffset: 0.3
   m_SkinWidth: 0.08
   m_MinMoveDistance: 0.001
-  m_Center: {x: 0, y: 0.35, z: 0}
+  m_Center: {x: 0, y: 0.27, z: 0}
 --- !u!114 &-7871514648059682121
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -495,22 +492,6 @@ MonoBehaviour:
   _positionDelta: 0
   _lastDesyncTime: 0
   _lastDesyncDuration: 0
---- !u!114 &8061403572513567561
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5476352264530995488}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c0d95d876eae19f4099fa56602b7d22d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _direction: {x: 0, y: 0, z: 0}
-  _speed: 0
-  _destination: {x: 0, y: 0, z: 0}
-  _gravity: 28
 --- !u!114 &-1571688244852663738
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -576,20 +557,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _entityLoaded: 0
-  _identity:
-    _entityType: 0
-    _id: 0
-    _name: 
-    _title: 
-    _titleColor: 9CE8A9FF
-    _resetTick: 0
-    _npcId: 0
-    _npcClass: 
-    _playerClass: 0
-    _isMage: 0
-    _position: {x: 0, y: 0, z: 0}
-    _heading: 0
-    _owned: 0
   _identityInterlude:
     _entityType: 0
     _id: 0
@@ -643,6 +610,3 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 53a3fe4b315bbb54ba61b44f0eb9b8f8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _enableLogs: 0
-  _currentState: 0
-  _currentIntention: 0

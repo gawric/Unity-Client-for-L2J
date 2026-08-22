@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 public abstract class AbstractAttackEvents : StateBase
 {
@@ -11,7 +11,7 @@ public abstract class AbstractAttackEvents : StateBase
     public AbstractAttackEvents(int objectId , Animation[] specialsBows, PlayerStateMachine stateMachine = null ) : base(stateMachine)
     {
         _specialsBows = specialsBows;
-        _events = AnimationManager.Instance.GetAnimationEvents(objectId);
+        _events = IncomingPacketActions.Animations.GetAnimationEvents(objectId);
     }
 
     public override void Enter()
@@ -26,33 +26,27 @@ public abstract class AbstractAttackEvents : StateBase
             _events.OnAnimationStartShoot += CallBackStartShoot;
             _events.OnAnimationFinishedHit += CallBackFinishedHit;
             _events.OnAnimationStartLoadArrow += CallBackLoadArrow;
-            // Melee Hit/SoulShot: AttackShot anim event (not wall-clock). Bow stays on StartShoot.
+            // Melee Hit/SoulShot: AttackShot anim event (not wall-clock).
+            // Bow Soulshot/stick: HitManager subscribes to ProjectileManager.OnHitMonster (not AttackDto lifecycle).
             _events.OnAnimationAttackShot += CallBackAttackShot;
         }
 
         if (ProjectileManager.Instance != null)
         {
             SkillExecutor.Instance.OnAllAnimationFinished += OnAllAnimationFinishedFromExecutor;
-        }
-
-
-        if (ProjectileManager.Instance != null)
-        {
-            ProjectileManager.Instance.OnHitMonster += OnHitBodyMonster;
-            ProjectileManager.Instance.OnHitCollider += OnHitColliderMonster;
+            // EffectOnly magic chain only — bow ArrowStick is HitManager ← OnHitMonster (persistent).
             ProjectileManager.Instance.OnHitEffectProjectile += OnHitEffectProjectile;
         }
         if (SwordCollisionService.Instance != null)
         {
             SwordCollisionService.Instance.OnHitCollider += OnHitColliderMonster;
         }
-
-
     }
 
     public override void Exit()
     {
         base.Exit();
+        CombatFacingService.Instance?.EndFollow(ResolveFacingObjectId(), "state-exit");
         if (!_isSubscribed) return;
         _isSubscribed = false;
 
@@ -69,19 +63,29 @@ public abstract class AbstractAttackEvents : StateBase
 
         if (ProjectileManager.Instance != null)
         {
-            ProjectileManager.Instance.OnHitMonster -= OnHitBodyMonster;
-            ProjectileManager.Instance.OnHitCollider -= OnHitColliderMonster;
             ProjectileManager.Instance.OnHitEffectProjectile -= OnHitEffectProjectile;
         }
         if (SwordCollisionService.Instance != null)
         {
             SwordCollisionService.Instance.OnHitCollider -= OnHitColliderMonster;
         }
-
-
-    
     }
 
+
+    private int ResolveFacingObjectId()
+    {
+        if (_stateMachine != null)
+        {
+            return _stateMachine.GetObjectId();
+        }
+
+        if (PlayerEntity.Instance != null && PlayerEntity.Instance.Identity != null)
+        {
+            return PlayerEntity.Instance.Identity.Id;
+        }
+
+        return 0;
+    }
 
     private void OnAllAnimationFinishedFromExecutor(AnimationEventsBase actions)
     {
@@ -92,12 +96,12 @@ public abstract class AbstractAttackEvents : StateBase
 
         if (_stateMachine != null && _stateMachine.Player != null)
         {
-            int objectId = _stateMachine.Player.IdentityInterlude.Id;
-            AnimationManager.Instance.ResetPlayerAnimatorSpeed(objectId);
+            int objectId = _stateMachine.Player.Identity.Id;
+            IncomingPacketActions.Animations.ResetPlayerAnimatorSpeed(objectId);
         }
 
-        PlayerStateMachine.Instance.ChangeIntention(Intention.INTENTION_IDLE);
-        PlayerStateMachine.Instance.NotifyEvent(Event.WAIT_RETURN);
+        // Pose return is owned by combat SMB (SpAtk / Magic / jatk SwitchToIdle).
+        // Early clip-Complete used to call WAIT_RETURN here and CrossFade atkwait mid-dual.
     }
 
 
@@ -105,24 +109,35 @@ public abstract class AbstractAttackEvents : StateBase
     {
         foreach (Animation special in _specialsBows)
         {
-            
-            if (animName == special.ToString())
+            if (animName != special.ToString())
             {
-                if(special.Type == TypesAnimation.MagicAttack && special.Phase != MagicPhase.End)
-                {
-                    return;
-                }
-
-                PlayerStateMachine.Instance.ChangeIntention(Intention.INTENTION_IDLE);
-                PlayerStateMachine.Instance.NotifyEvent(Event.WAIT_RETURN);
-                break;
+                continue;
             }
+
+            if (special.Type == TypesAnimation.MagicAttack && special.Phase != MagicPhase.End)
+            {
+                return;
+            }
+
+            // Melee / SpAtk / Magic return is owned by SMB SwitchToIdle (not Complete).
+            // A second WAIT_RETURN CrossFades mid-transition and can freeze the Animator.
+            if (special.Type == TypesAnimation.MeleeAttack ||
+                special.Type == TypesAnimation.MagicAttack ||
+                (!string.IsNullOrEmpty(animName) &&
+                 animName.StartsWith("SpAtk", System.StringComparison.Ordinal)))
+            {
+                return;
+            }
+
+            PlayerStateMachine.Instance.ChangeIntention(Intention.INTENTION_IDLE);
+            PlayerStateMachine.Instance.NotifyEvent(Event.WAIT_RETURN);
+            break;
         }
     }
 
     private void CallBackFinishedHit(string animName)
     {
-        if (!IsMeleeJatkAnim(animName))
+        if (!IsMeleeAttackShotAnim(animName))
         {
             return;
         }
@@ -149,10 +164,8 @@ public abstract class AbstractAttackEvents : StateBase
             if (monsterEntity.IsDead() || monsterEntity.CalculateRemainingHp() <= 0)
             {
                 monsterEntity.SetDead(true);
-                MonsterStateMachine stateMachine = monsterEntity.GetStateMachine();
-                stateMachine.ChangeState(MonsterState.DEAD);
-                stateMachine.NotifyEvent(Event.FORCE_DEATH);
-                //Debug.Log("Попали и увидели что монстр уже должен быть мертвым hp запускаем анимацию смерти " + monsterEntity.IsDead());
+                if (EntityActionMachine.Instance != null)
+                    EntityActionMachine.Instance.Die(monsterEntity);
             }
 
 
@@ -161,6 +174,9 @@ public abstract class AbstractAttackEvents : StateBase
 
     private void CallBackStartShoot(string animName)
     {
+        // Bow / magic: release aim-follow at projectile launch (not during flight).
+        CombatFacingService.Instance?.EndFollow(ResolveFacingObjectId(), "shoot");
+
         foreach (Animation special in _specialsBows)
         {
             if (animName == special.ToString())
@@ -168,6 +184,13 @@ public abstract class AbstractAttackEvents : StateBase
 
                 if (special.Type == TypesAnimation.BowAttack)
                 {
+                    // SpAtk01_bow / jatk*_bow: same ArrowStick path. Ensure wooden arrow exists
+                    // if LoadArrow notify was skipped (state exited early before equip).
+                    if (PlayerEntity.Instance.GetGoEtcItem() == null)
+                    {
+                        PlayerEntity.Instance.EquipArrow(WOODEN_ARROW);
+                    }
+
                     GameObject go = PlayerEntity.Instance.GetGoEtcItem();
                     Transform target = PlayerEntity.Instance.Target;
 
@@ -175,19 +198,30 @@ public abstract class AbstractAttackEvents : StateBase
                         go == null ||
                         target == null)
                     {
-                        Debug.LogError("NewAttackState->CallBackStartShoot: Критическая ошибка не все компоненты загрузились что-бы отправить стрелу в полет");
+                        Debug.LogError(
+                            $"NewAttackState->CallBackStartShoot: missing arrow/target anim={animName} " +
+                            $"go={(go != null)} target={(target != null)}");
                         return;
                     }
 
                     Vector3 startPos = PlayerEntity.Instance.GetPositionRightHand();
-
-                    float baseAttackTime = CalcBaseParam.CalculateTimeL2j(PlayerEntity.Instance.Stats.BasePAtkSpeed);
-                    float targetDistance = PlayerEntity.Instance.TargetDistance();
-                    float[] timeAndFlye = CalcBaseParam.CalculateAttackAndFlightTimes(targetDistance, baseAttackTime);
-                    var timeAtk = TimeUtils.ConvertMsToSec(timeAndFlye[1]);
+                    Vector3 aimPos = VectorUtils.GetCollision(startPos, target);
+                    float dist3d = Vector3.Distance(startPos, aimPos);
+                    // ANProjectile NArrow / s_u003_d: dirMul=3000, fly=sqrt(2·Dist/3000), path (t/T)².
+                    float flyAccel = ProjectileFlightTimeCalculator.CalculateL2ArrowFlightTimeSeconds(dist3d);
+                    float avgSpeed = dist3d / Mathf.Max(flyAccel, 0.05f);
 
                     ProjectileData settings = new ProjectileData(go, target, startPos, target);
-                    settings.lifetime = timeAtk;
+                    settings.impactType = ProjectileImpactType.ArrowStick;
+                    settings.speed = avgSpeed;
+                    settings.flytime = flyAccel;
+                    settings.lifetime = flyAccel;
+
+                    bool isSpAtkBow = animName.IndexOf("SpAtk", System.StringComparison.OrdinalIgnoreCase) >= 0;
+                    Debug.Log(
+                        $"[BOW_ARROW] SHOOT anim={animName} spAtkBow={isSpAtkBow} " +
+                        $"dist3d={dist3d:F3} flyAccel={flyAccel:F3}s avgSpeed={avgSpeed:F3} " +
+                        $"uuAccel=3000 path=(t/T)^2 (compare vs decompile ANSkillProjectileTick.log)");
 
                     ProjectileManager.Instance.LaunchProjectile(go, startPos, target, settings);
                     break;
@@ -204,38 +238,53 @@ public abstract class AbstractAttackEvents : StateBase
 
     /// <summary>
     /// L2-like AttackShot: fire melee Hit/SoulShot when clip notify fires.
-    /// Accepts jatk*_1HS / _2HS / _dual / _pole. Bow uses <see cref="CallBackStartShoot"/>.
+    /// Accepts jatk* and SpAtk* melee (_1HS / _2HS / _dual / _pole).
+    /// Bow: StartShoot + ArrowStickTimeHit (end of flytime / Hit Time), not this path.
     /// </summary>
     private void CallBackAttackShot(string animName)
     {
-        if (!IsMeleeJatkAnim(animName))
+        if (!IsMeleeAttackShotAnim(animName))
         {
+            Debug.Log(
+                $"[HIT_FX] 2.CallBackAttackShot SKIP not-melee-attack-shot frame={Time.frameCount} anim={animName}");
             return;
         }
 
         PlayerEntity player = _stateMachine != null ? _stateMachine.Player : null;
         if (player == null || SwordCollisionService.Instance == null)
         {
+            Debug.LogWarning(
+                $"[HIT_FX] 2.CallBackAttackShot SKIP playerNull={player == null} " +
+                $"swordSvcNull={SwordCollisionService.Instance == null} anim={animName}");
             return;
         }
 
         Transform[] swordBasePoints = player.GetSwordBasePoints();
         if (swordBasePoints == null || swordBasePoints.Length <= 1)
         {
-            Debug.LogWarning($"[ATK_HIT_CHAIN] AttackShot SKIP — no sword points anim={animName}");
+            Debug.LogWarning($"[HIT_FX] 2.CallBackAttackShot SKIP no sword points anim={animName}");
             return;
         }
 
         Entity targetEntity = player.GetTargetEntity();
         Transform target = targetEntity != null ? targetEntity.transform : player.Target;
-        int attackerEntityId = player.IdentityInterlude != null ? player.IdentityInterlude.Id : 0;
-        int targetEntityId = targetEntity != null && targetEntity.IdentityInterlude != null
-            ? targetEntity.IdentityInterlude.Id
+        int attackerEntityId = player.Identity != null ? player.Identity.Id : 0;
+        int targetEntityId = targetEntity != null && targetEntity.Identity != null
+            ? targetEntity.Identity.Id
             : 0;
 
+        if (target == null)
+        {
+            Debug.LogWarning(
+                $"[HIT_FX] 2.CallBackAttackShot SKIP target=null anim={animName} " +
+                $"attackerId={attackerEntityId} targetEntityId={targetEntityId}");
+            return;
+        }
+
         Debug.Log(
-            $"[ATK_HIT_CHAIN] 2.AnimEvent_AttackShot frame={Time.frameCount} t={Time.time:F3} " +
-            $"anim={animName} attackerId={attackerEntityId} → EmitHitNow");
+            $"[HIT_FX] 2.CallBackAttackShot OK frame={Time.frameCount} t={Time.time:F3} " +
+            $"anim={animName} attackerId={attackerEntityId} targetId={targetEntityId} " +
+            $"target={target.name} → EmitHitFromAttackShot");
 
         if (SwordCollisionService.Instance != null &&
             attackerEntityId > 0 &&
@@ -257,15 +306,10 @@ public abstract class AbstractAttackEvents : StateBase
             target);
     }
 
-    /// <summary>jatk01_1HS / jatk02_pole / … — not bow.</summary>
-    private static bool IsMeleeJatkAnim(string animName)
+    /// <summary>jatk01_1HS / SpAtk01_1HS / … — melee AttackShot path, not bow.</summary>
+    private static bool IsMeleeAttackShotAnim(string animName)
     {
         if (string.IsNullOrEmpty(animName))
-        {
-            return false;
-        }
-
-        if (animName.IndexOf("jatk", System.StringComparison.OrdinalIgnoreCase) < 0)
         {
             return false;
         }
@@ -275,7 +319,9 @@ public abstract class AbstractAttackEvents : StateBase
             return false;
         }
 
-        return true;
+        bool isJatk = animName.IndexOf("jatk", System.StringComparison.OrdinalIgnoreCase) >= 0;
+        bool isSpAtk = animName.IndexOf("SpAtk", System.StringComparison.OrdinalIgnoreCase) >= 0;
+        return isJatk || isSpAtk;
     }
 
     protected void RegisterSwordCollision(PlayerEntity entity)
@@ -290,8 +336,8 @@ public abstract class AbstractAttackEvents : StateBase
             Transform swordTip = swordBasePoints[1];
             Entity targetEntity = entity.GetTargetEntity();
             Transform target = targetEntity != null ? targetEntity.transform : PlayerEntity.Instance.Target;
-            int attackerEntityId = entity.IdentityInterlude != null ? entity.IdentityInterlude.Id : 0;
-            int targetEntityId = targetEntity != null && targetEntity.IdentityInterlude != null ? targetEntity.IdentityInterlude.Id : 0;
+            int attackerEntityId = entity.Identity != null ? entity.Identity.Id : 0;
+            int targetEntityId = targetEntity != null && targetEntity.Identity != null ? targetEntity.Identity.Id : 0;
             SwordCollisionService.Instance.RegisterSwordByEntityId(attackerEntityId, targetEntityId, swordBase, swordTip, target, 0);
         }
         else
@@ -300,28 +346,57 @@ public abstract class AbstractAttackEvents : StateBase
         }
     }
 
-    private void OnHitBodyMonster(GameObject prefab, Transform target, Vector3 hitPointCollider, Vector3 hitDirection)
-    {
-        HitManager.Instance.HandleHitBody(prefab, target, hitPointCollider, hitDirection);
-    }
-
     private void OnHitColliderMonster(Transform attacker, Transform target, Vector3 hitPointCollider, Vector3 hitDirection)
     {
-        Entity entity = PlayerEntity.Instance.GetTargetEntity();
-       
+        // Melee only (SwordCollisionService). Bow uses HitManager ← OnHitMonster.
+        string attackerName = attacker != null ? attacker.name : "null";
+        string targetName = target != null ? target.name : "null";
+        Entity entity = PlayerEntity.Instance != null ? PlayerEntity.Instance.GetTargetEntity() : null;
+
+        Debug.Log(
+            $"[HIT_FX] 5.OnHitColliderMonster frame={Time.frameCount} t={Time.time:F3} " +
+            $"attacker={attackerName} target={targetName} " +
+            $"playerTarget={(entity != null ? entity.name : "null")} " +
+            $"isMonster={entity is MonsterEntity} point={hitPointCollider}");
+
         if (entity is MonsterEntity)
         {
             MonsterEntity monster = (MonsterEntity)entity;
-         
-            if (!_stateMachine.Player.HitIsMissed())
+            bool missed = _stateMachine != null &&
+                          _stateMachine.Player != null &&
+                          _stateMachine.Player.HitIsMissed();
+
+            if (missed)
             {
-                
-                HitManager.Instance.HandleHitCollider(PlayerEntity.Instance , attacker, monster.GetStateMachine(), hitPointCollider, hitDirection);
+                Debug.Log(
+                    $"[HIT_FX] 5.OnHitColliderMonster SKIP HitIsMissed=true " +
+                    $"monster={monster.name} — EffectManager NOT called");
+            }
+            else if (HitManager.Instance == null)
+            {
+                Debug.LogWarning("[HIT_FX] 5.OnHitColliderMonster SKIP HitManager.Instance=null");
+            }
+            else
+            {
+                Debug.Log(
+                    $"[HIT_FX] 5.OnHitColliderMonster → HitManager.HandleHitCollider " +
+                    $"monster={monster.name}");
+                HitManager.Instance.HandleHitCollider(
+                    PlayerEntity.Instance,
+                    attacker,
+                    monster,
+                    hitPointCollider,
+                    hitDirection);
             }
 
             IfMonsterDead(PlayerEntity.Instance.GetTargetEntity());
         }
-
+        else
+        {
+            Debug.Log(
+                $"[HIT_FX] 5.OnHitColliderMonster SKIP not MonsterEntity " +
+                $"type={(entity != null ? entity.GetType().Name : "null")}");
+        }
     }
 
     private void OnHitEffectProjectile(GameObject prefab, Transform target, Vector3 hitPointCollider, Vector3 hitDirection, int attackerEntityId)

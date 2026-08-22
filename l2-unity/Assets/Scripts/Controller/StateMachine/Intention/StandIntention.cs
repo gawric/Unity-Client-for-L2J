@@ -17,7 +17,7 @@ public class StandIntention : IntentionBase
         //}
         //else
         //{
-            PlayerController.Instance.StopMove();
+            IncomingPacketActions.Player.StopMove();
         //}
     }
 

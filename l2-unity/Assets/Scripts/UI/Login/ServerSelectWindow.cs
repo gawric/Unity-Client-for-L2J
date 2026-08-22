@@ -2,10 +2,11 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
-using static ServerListPacket;
+using VContainer;
 
 public class ServerSelectWindow : L2Window
 {
+    [Inject] LoginRuntime _login;
     private VisualTreeAsset _serverElementTemplate;
     private VisualElement _listContentContainer;
     private List<VisualElement> _serverElements;
@@ -119,8 +120,9 @@ public class ServerSelectWindow : L2Window
 
         //Debug.Log("Server selected: " + _selectedServerId);
 
-        GameClient.Instance.ServerIp = StringUtils.ByteArrayToIpAddress(_serverData[rowId].ip);
-        GameClient.Instance.ServerPort = _serverData[rowId].port;
+        GameClient game = _login != null && _login.Game != null ? _login.Game : IncomingPacketActions.Game;
+        game.ServerIp = StringUtils.ByteArrayToIpAddress(_serverData[rowId].ip);
+        game.ServerPort = _serverData[rowId].port;
     }
 
     private string ParseServerName(int serverId) {
@@ -227,21 +229,25 @@ public class ServerSelectWindow : L2Window
 
     private void SetServerId(int id) {
         _selectedServerId = id;
-        GameClient.Instance.ServerId = id;
+        GameClient game = _login != null && _login.Game != null ? _login.Game : IncomingPacketActions.Game;
+        game.ServerId = id;
     }
 
     private void ConfirmButtonPressed() {
         if(_selectServerData != null & _selectServerData.status != 0){
-            LoginClient.Instance.OnServerSelected(_selectedServerId);
+            LoginClient client = _login != null && _login.LoginClient != null ? _login.LoginClient : IncomingPacketActions.Login;
+            client.OnServerSelected(_selectedServerId);
         }
         else
         {
-            LoginWindow.Instance.ShowErrorTextOtherThread("Your login attempt failed due to high server load. Please try again later");
-            LoginClient.Instance.Disconnect();
+            LoginClient client = _login != null && _login.LoginClient != null ? _login.LoginClient : IncomingPacketActions.Login;
+            IncomingPacketActions.LoginWindow.ShowErrorText("Your login attempt failed due to high server load. Please try again later");
+            client.Disconnect();
         }
     }
 
     private void CancelButtonPressed() {
-        LoginClient.Instance.Disconnect();
+        LoginClient client = _login != null && _login.LoginClient != null ? _login.LoginClient : IncomingPacketActions.Login;
+        client.Disconnect();
     }
 }

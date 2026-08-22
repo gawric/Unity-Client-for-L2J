@@ -11,6 +11,27 @@ public class VectorUtils : MonoBehaviour {
         return new Vector3(convert.z, convert.y, convert.x);
     }
 
+    public const float SwTileSizeUu = 32768f;
+
+    public static void GetSwMapTile(Vector3 l2Pos, out int tileX, out int tileY)
+    {
+        tileX = Mathf.FloorToInt(l2Pos.x / SwTileSizeUu) + 20;
+        tileY = Mathf.FloorToInt(l2Pos.y / SwTileSizeUu) + 18;
+    }
+
+    public static string FormatSwMapName(int tileX, int tileY)
+    {
+        return tileX.ToString("00") + "_" + tileY.ToString("00");
+    }
+
+    public static string GetSwMapName(Vector3 l2Pos)
+    {
+        int tileX;
+        int tileY;
+        GetSwMapTile(l2Pos, out tileX, out tileY);
+        return FormatSwMapName(tileX, tileY);
+    }
+
     public static Vector3 ConvertRotToUnity(Vector3 ueRot) {
         return new Vector3(
                             -360.00f * ueRot.x / 65536,
@@ -158,8 +179,19 @@ public class VectorUtils : MonoBehaviour {
         return new Vector3(ueVector.y, ueVector.z, ueVector.x);
     }
 
+    public const float L2UuToUnity = 1f / 52.5f;
+
     public static Vector3 ScaleToUnity(Vector3 ueVector) {
-        return ueVector * (1f / 52.5f);
+        return ueVector * L2UuToUnity;
+    }
+
+    /// <summary>
+    /// L2 world units → Unity meters. Same scale as <see cref="ConvertPosToUnity"/>.
+    /// MoveToPawn Dist and CollisionRadius live in UU; do not use the guessed 0.0165 factor.
+    /// </summary>
+    public static float ConvertL2UuToMeters(float uu)
+    {
+        return uu * L2UuToUnity;
     }
 
     public static Vector2 RotateVector2(Vector2 vector, float angle) {

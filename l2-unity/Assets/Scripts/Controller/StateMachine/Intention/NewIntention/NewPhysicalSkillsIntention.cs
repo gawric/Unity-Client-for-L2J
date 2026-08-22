@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using UnityEngine;
 
 public class NewPhysicalSkillsIntention : IntentionBase
@@ -11,9 +11,9 @@ public class NewPhysicalSkillsIntention : IntentionBase
 
     public override void Enter(object arg0)
     {
-        if (arg0.GetType() == typeof(MagicSkillUse))
+        if (arg0.GetType() == typeof(MagicSkillUseDto))
         {
-            MagicSkillUse useSkill = (MagicSkillUse)arg0;
+            MagicSkillUseDto useSkill = (MagicSkillUseDto)arg0;
 
             if (IsSpecialSkill(useSkill.SkillId))
             {
@@ -24,35 +24,50 @@ public class NewPhysicalSkillsIntention : IntentionBase
                 Debug.Log(
                     $"{SS_SM_LOG} Intention backup charge skillId={useSkill.SkillId} " +
                     $"keepState={prevState} intentionNow={_stateMachine.Intention} " +
-                    $"(prefer GsInterludeCombatHandler.ApplyWeaponChargeShot)");
+                    $"(prefer GameServerPacketHandler.ApplyWeaponChargeShot)");
                 return;
             }
 
 
             Debug.Log("NewPhysicalSkillsIntention > use " + useSkill.SkillId);
-            int objectId = _stateMachine.Player.IdentityInterlude.Id;
-            AnimationManager.Instance.SetSpTimeAtk(objectId , useSkill.HitTime);
-            Entity targetEntity = World.Instance.GetEntityNoLockSync(useSkill.TargetId);
-            PlayerController.Instance.RotateToAttacker(targetEntity.transform.position);
+            int objectId = _stateMachine.Player.Identity.Id;
+            IncomingPacketActions.Animations.SetSpTimeAtk(objectId , useSkill.HitTime);
+            Entity targetEntity = IncomingPacketActions.GameWorld.GetEntityNoLockSync(useSkill.TargetId);
+            // Bow SpAtk: live follow until shoot. Other phys skills: one-shot snapshot.
+            if (objectId != useSkill.TargetId &&
+                targetEntity != null &&
+                CombatFacingService.IsPlayerUsingBow(PlayerEntity.Instance))
+            {
+                CombatFacingService.Ensure().BeginFollow(
+                    objectId,
+                    IncomingPacketActions.Player.transform,
+                    targetEntity.transform);
+            }
+            else if (targetEntity != null)
+            {
+                CombatFacingService.Instance?.EndFollow(objectId, "non-bow-phys");
+                IncomingPacketActions.Player.RotateToAttacker(targetEntity.transform.position);
+            }
+
             IfUseSelf(objectId, useSkill);
 
         }
     }
 
-    private void ApplySoulshotCharge(MagicSkillUse useSkill)
+    private void ApplySoulshotCharge(MagicSkillUseDto useSkill)
     {
         if (_stateMachine.Player == null) return;
 
         _stateMachine.Player.IsSoulshotCharged = true;
         Transform weapon = _stateMachine.Player.GetWeaponTransform();
-        EffectManager.Instance.PlayEffect(useSkill.SkillId, weapon);
+        IncomingPacketActions.Effects.PlayEffect(useSkill.SkillId, weapon);
 
         Debug.Log(
             $"{SS_SM_LOG} ApplySoulshotCharge skillId={useSkill.SkillId} " +
             $"state={_stateMachine.State} IsSoulshotCharged=True");
     }
 
-    private void IfUseSelf(int objectId , MagicSkillUse useSkill)
+    private void IfUseSelf(int objectId , MagicSkillUseDto useSkill)
     {
         if (objectId != useSkill.TargetId)
         {

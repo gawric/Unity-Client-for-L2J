@@ -205,15 +205,12 @@ public class SkillgrpTable
 
     public AnimationCombo GetAnimComboBySkillId(int skillId , int level)
     {
-        if (_skills.ContainsKey(skillId))
-        {
-            Dictionary<int, Skillgrp> skills = _skills[skillId];
-            Skillgrp grp = skills[level];
-            if (_animationsCombo.ContainsKey(grp.Animation))
-            {
-                return _animationsCombo[grp.Animation];
-            }
-        }
+        if (!_skills.TryGetValue(skillId, out Dictionary<int, Skillgrp> skills))
+            return null;
+        if (!skills.TryGetValue(level, out Skillgrp grp) || grp == null || string.IsNullOrEmpty(grp.Animation))
+            return null;
+        if (_animationsCombo.TryGetValue(grp.Animation, out AnimationCombo combo))
+            return combo;
         return null;
     }
 

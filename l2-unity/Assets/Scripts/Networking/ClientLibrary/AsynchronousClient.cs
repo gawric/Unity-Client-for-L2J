@@ -11,6 +11,7 @@ public class AsynchronousClient
     private System.Threading.CancellationTokenSource _cts;
 
     private int _state;
+    private string _ip;
     private int _port;
 
     private Socket _socket;
@@ -39,8 +40,11 @@ public class AsynchronousClient
         }
     }
 
-    public AsynchronousClient(string ip, int port, DefaultClient client, ClientPacketHandler clientPacketHandler, ServerPacketHandler serverPacketHandler, bool enableInitPacket)
+    private NetworkRuntime _network;
+
+    public AsynchronousClient(string ip, int port, DefaultClient client, ClientPacketHandler clientPacketHandler, ServerPacketHandler serverPacketHandler, bool enableInitPacket, NetworkRuntime network)
     {
+        _ip = ip;
         _port = port;
         _client = client;
 
@@ -52,6 +56,7 @@ public class AsynchronousClient
 
         _initPacketEnabled = enableInitPacket;
         _initPacket = enableInitPacket;
+        _network = network;
 
         var isLogin = IsLoginClient(client);
         SetQueue(isLogin);
@@ -68,14 +73,16 @@ public class AsynchronousClient
 
         try
         {
-            string ipStr = SettingServerIp.IpAddressServer;
+            string ipStr = !string.IsNullOrWhiteSpace(_client.ServerIp) ? _client.ServerIp : _ip;
+            int port = _client.ServerPort != 0 ? _client.ServerPort : _port;
             var ip = IPAddress.Parse(ipStr);
             _socket = new Socket(ip.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
 
             if (_initPacketEnabled)
                 _initPacket = true;
 
-            await _socket.ConnectAsync(ip, _port);
+            Debug.Log("Connecting to " + (isLogin ? "LoginServer" : "GameServer") + " " + ipStr + ":" + port);
+            await _socket.ConnectAsync(ip, port);
 
             _stream = new NetworkStream(_socket, ownsSocket: false);
 
@@ -94,7 +101,8 @@ public class AsynchronousClient
         {
             Debug.LogWarning("Connection failed for: " + (isLogin ? " LoginClient." : " GameClient."));
             Disconnect();
-            EventProcessor.Instance.QueueEvent(() => _client.OnConnectionFailed());
+            EventProcessor events = _network != null ? _network.Events : EventProcessor.Instance;
+            events.QueueEvent(() => _client.OnConnectionFailed());
             return false;
         }
     }
@@ -112,7 +120,8 @@ public class AsynchronousClient
 
         DisposeQueue();
 
-        EventProcessor.Instance.QueueEvent(() => _client.OnDisconnect());
+        EventProcessor events = _network != null ? _network.Events : EventProcessor.Instance;
+        events.QueueEvent(() => _client.OnDisconnect());
 
         Interlocked.Exchange(ref _state, 0);
 
@@ -124,19 +133,17 @@ public class AsynchronousClient
     {
         if (IsLoginClient(_client))
         {
-            IncomingLoginDataQueue.Instance().Dispose();
-            SendLoginDataQueue.Instance().Dispose();
+            _network.IncomingLogin.Stop();
+            _network.SendLogin.Stop();
         }
         else
         {
-            SendGameDataQueue.Instance().Dispose();
-            IncomingGameDataQueue.Instance().Dispose();
-            IncomingGameMessageQueue.Instance().Dispose();
-            IncomingGameCombatQueue.Instance().Dispose();
+            _network.SendGame.Stop();
+            _network.IncomingGame.Stop();
         }
     }
 
-    public void SendPacket(ClientPacket packet)
+    public void SendPacket(IOutgoingPacket packet)
     {
         try
         {
@@ -164,24 +171,22 @@ public class AsynchronousClient
     private void SetReceiving(bool isLoginClient)
     {
         if (isLoginClient)
-            _loginReceiving = new LoginClientReceiving(this);
+            _loginReceiving = new LoginClientReceiving(this, _network.IncomingLogin);
         else
-            _gameReceiving = new GameClientReceiving(this);
+            _gameReceiving = new GameClientReceiving(this, _network.IncomingGame);
     }
 
     private void SetQueue(bool isLoginClient)
     {
         if (isLoginClient)
         {
-            SendLoginDataQueue.Instance().SetPacketHandler(_clientPacketHandler);
-            IncomingLoginDataQueue.Instance().SetPacketHandler(_serverPacketHandler);
+            _network.SendLogin.SetPacketHandler(_clientPacketHandler);
+            _network.IncomingLogin.SetPacketHandler(_serverPacketHandler);
         }
         else
         {
-            SendGameDataQueue.Instance().SetPacketHandler(_clientPacketHandler);
-            IncomingGameDataQueue.Instance().SetPacketHandler(_serverPacketHandler);
-            IncomingGameCombatQueue.Instance().SetPacketHandler(new GsInterludeCombatHandler());
-            IncomingGameMessageQueue.Instance().SetPacketHandler(new GSInterludeMessageHandler());
+            _network.SendGame.SetPacketHandler(_clientPacketHandler);
+            _network.IncomingGame.SetPacketHandler(_serverPacketHandler);
         }
     }
 

@@ -5,8 +5,10 @@ using System.Collections.Generic;
 using UnityEngine;
 
 using UnityEngine.UIElements;
+using VContainer;
 
 public class CharCreationWindow : L2Window {
+    [Inject] LoginRuntime _login;
     private VisualTreeAsset _arrowInputTemplate;
     private ArrowInputManipulator hairstyleManipulator;
     private ArrowInputManipulator hairColorManipulator;
@@ -82,19 +84,19 @@ public class CharCreationWindow : L2Window {
         pawnZoominButton.AddManipulator(new ButtonClickSoundManipulator(pawnZoominButton));
 
         pawnRotateLeftButton.RegisterCallback<PointerDownEvent>((evt) => {
-            CharacterCreator.Instance.RotatePawn(true);
+            IncomingPacketActions.Creator.RotatePawn(true);
         }, TrickleDown.TrickleDown);
 
         pawnRotateRightButton.RegisterCallback<PointerDownEvent>((evt) => {
-            CharacterCreator.Instance.RotatePawn(false);
+            IncomingPacketActions.Creator.RotatePawn(false);
         }, TrickleDown.TrickleDown);
 
         pawnRotateLeftButton.RegisterCallback<PointerUpEvent>((evt) => {
-            CharacterCreator.Instance.StopRotatingPawn();
+            IncomingPacketActions.Creator.StopRotatingPawn();
         });
 
         pawnRotateRightButton.RegisterCallback<PointerUpEvent>((evt) => {
-            CharacterCreator.Instance.StopRotatingPawn();
+            IncomingPacketActions.Creator.StopRotatingPawn();
         });
 
         pawnZoominButton.RegisterCallback<ClickEvent>((evt) => {
@@ -111,32 +113,32 @@ public class CharCreationWindow : L2Window {
 
 
         hairstyleManipulator = new ArrowInputManipulator(hairstyleInput, "Hairstyle", new string[] { "Type A", "Type B", "Type C", "Type D", "Type E" }, -1, (index, value) => {
-            if (CharacterCreator.Instance.PawnIndex == -1) {
+            if (IncomingPacketActions.Creator.PawnIndex == -1) {
                 hairstyleManipulator.ClearInput();
                 return;
             }
-            CharacterRaceAnimation race = CharacterCreator.Instance.GetRaceAnimator(CharacterCreator.Instance.PawnIndex);
+            CharacterRaceAnimation race = IncomingPacketActions.Creator.GetRaceAnimator(IncomingPacketActions.Creator.PawnIndex);
             RefreshHair(race, hairColorManipulator.Value, hairstyleManipulator.Value);
             //RefreshFace(CharacterRaceAnimation.FFighter, faceManipulator.Value, hairColorManipulator.Value, hairstyleManipulator.Value);
         });
         hairstyleInput.AddManipulator(hairstyleManipulator);
 
         hairColorManipulator = new ArrowInputManipulator(hairColorInput, "Hair Color", new string[] { "Type A", "Type B", "Type C", "Type D" }, -1, (index, value) => {
-            if (CharacterCreator.Instance.PawnIndex == -1) {
+            if (IncomingPacketActions.Creator.PawnIndex == -1) {
                 hairColorManipulator.ClearInput();
                 return;
             }
-            CharacterRaceAnimation race = CharacterCreator.Instance.GetRaceAnimator(CharacterCreator.Instance.PawnIndex);
+            CharacterRaceAnimation race = IncomingPacketActions.Creator.GetRaceAnimator(IncomingPacketActions.Creator.PawnIndex);
             RefreshHair(race, hairColorManipulator.Value, hairstyleManipulator.Value);
         });
         hairColorInput.AddManipulator(hairColorManipulator);
 
         faceManipulator = new ArrowInputManipulator(faceInput, "Face", new string[] { "Type A", "Type B", "Type C" }, -1, (index, value) => {
-            if(CharacterCreator.Instance.PawnIndex == -1) {
+            if(IncomingPacketActions.Creator.PawnIndex == -1) {
                 faceManipulator.ClearInput();
                 return;
             }
-            CharacterRaceAnimation race = CharacterCreator.Instance.GetRaceAnimator(CharacterCreator.Instance.PawnIndex);
+            CharacterRaceAnimation race = IncomingPacketActions.Creator.GetRaceAnimator(IncomingPacketActions.Creator.PawnIndex);
             RefreshFace(race, faceManipulator.Value);
             //Debug.Log("Face Change");
         });
@@ -148,9 +150,9 @@ public class CharCreationWindow : L2Window {
                 return;
             }
 
-            Camera cam = LoginCameraManager.Instance.SelectGenderCamera(raceManipulator.Value, classManipulator.Value, value);
+            Camera cam = IncomingPacketActions.LoginCamera.SelectGenderCamera(raceManipulator.Value, classManipulator.Value, value);
             if (cam != null) {
-                LoginCameraManager.Instance.SwitchCamera(cam);
+                IncomingPacketActions.LoginCamera.SwitchCamera(cam);
             }
 
             hairstyleManipulator.ResetInput();
@@ -158,8 +160,8 @@ public class CharCreationWindow : L2Window {
             faceManipulator.ResetInput();
 
             ShowRotatePawnWindow();
-            CharacterCreator.Instance.ResetPawnSelection();
-            CharacterCreator.Instance.SelectPawn(raceManipulator.Value, classManipulator.Value, value);
+            IncomingPacketActions.Creator.ResetPawnSelection();
+            IncomingPacketActions.Creator.SelectPawn(raceManipulator.Value, classManipulator.Value, value);
             
         });
         genderInput.AddManipulator(genderManipulator);
@@ -175,9 +177,9 @@ public class CharCreationWindow : L2Window {
                 return;
             }
 
-            Camera cam = LoginCameraManager.Instance.SelectClassCamera(raceManipulator.Value, value);
+            Camera cam = IncomingPacketActions.LoginCamera.SelectClassCamera(raceManipulator.Value, value);
             if (cam != null) {
-                LoginCameraManager.Instance.SwitchCamera(cam);
+                IncomingPacketActions.LoginCamera.SwitchCamera(cam);
             }
 
             genderManipulator.ClearInput();
@@ -186,13 +188,13 @@ public class CharCreationWindow : L2Window {
             faceManipulator.ClearInput();
 
             HideRotatePawnWindow();
-            CharacterCreator.Instance.ResetPawnSelection();
-            //CharacterCreator.Instance.SpawnPawnWithId(currentPawnIndex);
+            IncomingPacketActions.Creator.ResetPawnSelection();
+            //IncomingPacketActions.Creator.SpawnPawnWithId(currentPawnIndex);
         });
         classInput.AddManipulator(classManipulator);
 
         raceManipulator = new ArrowInputManipulator(raceInput, "Race", new string[] { "Human", "Elf", "Dark Elf", "Orc", "Dwarf" }, -1, (index, value) => {
-            LoginCameraManager.Instance.SwitchCamera(value);
+            IncomingPacketActions.LoginCamera.SwitchCamera(value);
             classManipulator.ClearInput();
             genderManipulator.ClearInput();
             hairstyleManipulator.ClearInput();
@@ -200,7 +202,7 @@ public class CharCreationWindow : L2Window {
             faceManipulator.ClearInput();
 
             HideRotatePawnWindow();
-            CharacterCreator.Instance.ResetPawnSelection();
+            IncomingPacketActions.Creator.ResetPawnSelection();
  
         });
         raceInput.AddManipulator(raceManipulator);
@@ -220,7 +222,7 @@ public class CharCreationWindow : L2Window {
         byte iFace = ConvertType.ConvertTypeToByte(face);
    
 
-        CharacterCreator.Instance.ReBuildFace(raceId, iFace);
+        IncomingPacketActions.Creator.ReBuildFace(raceId, iFace);
     }
 
     private void RefreshHair(CharacterRaceAnimation raceId,  string hairColor, string hairStyle)
@@ -229,7 +231,7 @@ public class CharCreationWindow : L2Window {
         byte typeHairColor = ConvertType.ConvertTypeToByte(hairColor);
         byte typeHairStyle = ConvertType.ConvertTypeToByte(hairStyle);
 
-        CharacterCreator.Instance.ReBuildHair(raceId,  typeHairColor , typeHairStyle);
+        IncomingPacketActions.Creator.ReBuildHair(raceId,  typeHairColor , typeHairStyle);
     }
 
     public void Init()
@@ -237,7 +239,7 @@ public class CharCreationWindow : L2Window {
         if (!isInit)
         {
             isInit = true;
-            CharacterCreator.Instance.SpawnAllCharCreatePawns();
+            IncomingPacketActions.Creator.SpawnAllCharCreatePawns();
         }
     }
 
@@ -258,9 +260,9 @@ public class CharCreationWindow : L2Window {
         string race = raceManipulator.Value;
         string name = userInputField.value;
 
-        var sendPaket = CreatorPacketsGameLobby.CreateCharacter(_playerTemplates , class1, sex , hairColor , hairStyle , face , race , name);
-        bool enable = GameClient.Instance.IsCryptEnabled();
-        SendGameDataQueue.Instance().AddItem(sendPaket, enable, enable);
+        var sendPaket = new CharacterCreateCommand(_playerTemplates , class1, sex , hairColor , hairStyle , face , race , name);
+        GameClient game = _login != null && _login.Game != null ? _login.Game : IncomingPacketActions.Game;
+        game.Send(sendPaket);
         //Debug.Log("Button click ButtonPressed");
         //Debug.Log("");
     }
@@ -286,7 +288,8 @@ public class CharCreationWindow : L2Window {
         raceManipulator.ClearInput();
         userInputField.value = "";
         SetlabelError("");
-        GameManager.Instance.OnAuthAllowed();
+        GameManager manager = _login != null && _login.Manager != null ? _login.Manager : IncomingPacketActions.Manager;
+        manager.OnAuthAllowed();
     }
 
     private void ShowRotatePawnWindow() {
@@ -303,12 +306,12 @@ public class CharCreationWindow : L2Window {
 
     private void ToggleZoomin(bool removeOnly) {
         if(pawnZoominButton.ClassListContains("toggle")) {
-            LoginCameraManager.Instance.ZoomOut();
+            IncomingPacketActions.LoginCamera.ZoomOut();
 
             pawnZoominButton.RemoveFromClassList("toggle");
         } else {
 
-            LoginCameraManager.Instance.ZoomIn();
+            IncomingPacketActions.LoginCamera.ZoomIn();
 
             pawnZoominButton.AddToClassList("toggle");
         }

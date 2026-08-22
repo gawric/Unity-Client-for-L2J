@@ -30,7 +30,8 @@ public class NetworkTransformShare : MonoBehaviour
 
     void Start()
     {
-        if (World.Instance.OfflineMode)
+        World world = IncomingPacketActions.GameWorld;
+        if (world != null && world.OfflineMode)
         {
             enabled = false;
             return;
@@ -69,24 +70,17 @@ public class NetworkTransformShare : MonoBehaviour
 
     public void SharePosition()
     {
-        GameClient.Instance.ClientPacketHandler.UpdatePosition(transform.position);
         _lastSharedPosTime = Time.time;
         _lastPos = transform.position;
-
-        //ClientPacketHandler.Instance.UpdateRotation(transform.eulerAngles.y);
     }
 
     public void ShareRotation()
     {
         if (Vector3.Angle(_lastRot, transform.forward) >= 10.0f)
-        {
             _lastRot = transform.forward;
-            GameClient.Instance.ClientPacketHandler.UpdateRotation(transform.eulerAngles.y);
-        }
     }
 
     public void ShareAnimation(byte id, float value)
     {
-        GameClient.Instance.ClientPacketHandler.UpdateAnimation(id, value);
     }
 }

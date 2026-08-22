@@ -28,9 +28,7 @@ public class GearSlot : InventorySlot
             {
                 AddCacheName(item, ObjectId);
 
-                var sendPaket = CreatorPacketsUser.CreateUseItem(ObjectId, 0);
-                bool enable = GameClient.Instance.IsCryptEnabled();
-                SendGameDataQueue.Instance().AddItem(sendPaket, enable, enable);
+                IncomingPacketActions.Game.Send(new UseItemCommand(ObjectId, 0));
             }
             else
             {

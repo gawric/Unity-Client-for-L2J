@@ -1,4 +1,4 @@
-﻿
+
 using UnityEngine;
 
 
@@ -27,10 +27,23 @@ public class NewAttackState : AbstractAttackEvents
         {
             case Event.READY_TO_ACT:
                 Debug.Log("Attack Sate to Intention> начало новой atk пришел запрос от сервера");
-                AttackTimingHelper.RotateFaceToMonster(_stateMachine.Player);
                 Entity targetEntity = _stateMachine.Player.GetTargetEntity();
+                if (targetEntity == null || targetEntity.IsDead())
+                {
+                    // Stale AttackDto after DieDto/despawn — do not start another jatk.
+                    if (PlayerEntity.Instance != null)
+                    {
+                        PlayerEntity.Instance.IsAttack = false;
+                    }
+                    PlayerStateMachine.Instance.ChangeIntention(Intention.INTENTION_IDLE);
+                    PlayerStateMachine.Instance.NotifyEvent(Event.WAIT_RETURN);
+                    break;
+                }
 
-                int targetEntityId = targetEntity != null && targetEntity.IdentityInterlude != null ? targetEntity.IdentityInterlude.Id : 0;
+                // Spine/arm aim-at-target. Disabled: keep attack pose from the clip only.
+                // AttackTimingHelper.RotateFaceToMonster(_stateMachine.Player);
+
+                int targetEntityId = targetEntity.Identity != null ? targetEntity.Identity.Id : 0;
                 float attackDurationMs = AttackTimingHelper.ResolveServerLikeAttackDurationMs(_stateMachine.Player);
                 float hitFraction = AttackTimingHelper.ResolveHitFractionByWeapon(_stateMachine.Player);
                 float pAtkSpd = _stateMachine.Player.Stats != null ? _stateMachine.Player.Stats.BasePAtkSpeed : 0f;
@@ -42,10 +55,10 @@ public class NewAttackState : AbstractAttackEvents
                     $"hitFraction={hitFraction:F2} targetId={targetEntityId}");
 
                 SwordCollisionService.Instance.BeginAttack(
-                    _stateMachine.Player.IdentityInterlude.Id,
+                    _stateMachine.Player.Identity.Id,
                     targetEntityId,
                     _stateMachine.Player.transform,
-                    targetEntity != null ? targetEntity.transform : _stateMachine.Player.Target,
+                    targetEntity.transform,
                     attackDurationMs,
                     hitFraction);
 
@@ -54,8 +67,18 @@ public class NewAttackState : AbstractAttackEvents
 
                 PlayerEntity.Instance.RefreshRandomPAttack();
                 Animation random = PlayerEntity.Instance.RandomName;
-                AnimationManager.Instance.PlayAnimationTrigger(_stateMachine.GetObjectId() , random.ToString());
+                IncomingPacketActions.Animations.PlayAnimationTrigger(_stateMachine.GetObjectId() , random.ToString());
 
+                break;
+            case Event.WAIT_RETURN:
+                // WhoDied while still ATTACKING: clear latch only. Pose returns at swing end
+                // (PlayerStateJAtk.SwitchToIdle). Forcing atkwait here cuts the finishing blow.
+                WaitReturnLog.Dump("NewAttackState.WAIT_RETURN latch-only");
+                if (PlayerEntity.Instance != null)
+                {
+                    PlayerEntity.Instance.IsAttack = false;
+                    PlayerEntity.Instance.LastAtkAnimation = null;
+                }
                 break;
             case Event.CANCEL:
                 Debug.Log("Attack Sate to Intention> Отмена скорее всего запрос пришел из ActionFaild");

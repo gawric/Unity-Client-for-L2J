@@ -272,9 +272,7 @@ public class QuestWindow : L2TwoPanels
     {
         if(_selectQuest != null)
         {
-            var sendPaket = CreatorPacketsUser.CreateRequestQuestAbort(_selectQuest.QuestID);
-            bool enable = GameClient.Instance.IsCryptEnabled();
-            SendGameDataQueue.Instance().AddItem(sendPaket, enable, enable);
+            IncomingPacketActions.Game.Send(new RequestQuestAbortCommand(_selectQuest.QuestID));
             CancelEvent();
         }
 
