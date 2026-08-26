@@ -20,7 +20,7 @@
 12. Доработана система ParticlesGroup: теперь частицы из единого материала рисуются на GPU в едином DrawCall.
 13. Доработаны MFighter и MMagic как основы для других: бафаются, стреляют магией, используют soulshots, стреляют из луков, используют SpSkills, видят и дропают вещи.  
 
-<img src="https://i.ibb.co/zW8hVgnH/farm-1-2.png" alt="Preview0" style="max-width: 75%; height: auto;">   
+<img src="https://i.ibb.co/zW8hVgnH/farm-1-2.png" alt="Preview0" style="max-width: 45%; height: auto;">   
 
 
 Это отдельная ветка созданная на основе исходной https://gitlab.com/shnok (последняя синхронизация была 25.09.2024 года)
