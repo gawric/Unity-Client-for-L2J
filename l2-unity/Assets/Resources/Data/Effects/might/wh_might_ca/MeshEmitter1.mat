@@ -22,7 +22,7 @@ Material:
   - _USED3D9BRIGHTENFS_ON
   - _USESIZESCALE_ON
   m_LightmapFlags: 4
-  m_EnableInstancingVariants: 0
+  m_EnableInstancingVariants: 1
   m_DoubleSidedGI: 0
   m_CustomRenderQueue: -1
   stringTagMap: {}
@@ -97,10 +97,15 @@ Material:
     - _SrcBlend: 1
     - _StartTime: 0
     - _TailLift: 2
+    - _UcAccelerationScale: 1
+    - _UcStartLocationOffsetScale: 1
+    - _UcStartSizeScale: 1
+    - _UcVelocityScale: 1
     - _UniformSize: 0
     - _UseD3d9BrightenFs: 1
     - _UseRegularSizeScale: 0
     - _UseSizeScale: 1
+    - _UseStartSpin3Axis: 0
     - _bAlphaBlend: 0
     m_Colors:
     - _Acceleration: {r: 0, g: 0, b: 0, a: 0}
@@ -114,6 +119,9 @@ Material:
     - _StartLocationOffset: {r: 0, g: 0, b: 2, a: 0}
     - _StartSize: {r: 0.4, g: 0.4, b: 0.2, a: 0}
     - _StartSpinRange: {r: 0, g: 1, b: 0, a: 0}
+    - _StartSpinRangeX: {r: 0, g: 1, b: 0, a: 0}
+    - _StartSpinRangeY: {r: 0, g: 0, b: 0, a: 0}
+    - _StartSpinRangeZ: {r: 0, g: 0, b: 0, a: 0}
     - _StartVelocityRangeZ: {r: 0, g: 0, b: 0, a: 0}
   m_BuildTextureStacks: []
   m_AllowLocking: 1

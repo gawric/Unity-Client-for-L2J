@@ -52,6 +52,7 @@ public sealed class L2EffectGeneratorWindow : EditorWindow
         EditorGUILayout.LabelField("L2 Effect Generator", EditorStyles.boldLabel);
         EditorGUILayout.HelpBox(
             "Creates subfolders, child prefabs, and {EffectName}_composite under Effect Root.\n" +
+            "Emitter materials use the unified SpriteEmitter/MeshEmitter shaders and UC values.\n" +
             "UC _ta File (optional) -> {EffectName}_ta/{EffectName}_ta.prefab\n" +
             "UC _ca File (optional) -> {EffectName}_ca/{EffectName}_ca.prefab\n" +
             "At least one UC file is required. Composite includes only the parts that were generated.",

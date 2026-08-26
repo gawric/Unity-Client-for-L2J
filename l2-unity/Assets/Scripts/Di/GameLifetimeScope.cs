@@ -12,6 +12,7 @@ public sealed class GameLifetimeScope : LifetimeScope
         RegisterIfFound<TargetManager>(builder);
         RegisterIfFound<HitManager>(builder);
         RegisterIfFound<ClickManager>(builder);
+        RegisterIfFound<NpcCursorManager>(builder);
         RegisterIfFound<PlayerInventory>(builder);
         RegisterIfFound<PlayerShortcuts>(builder);
         RegisterIfFound<EffectManager>(builder);
@@ -24,6 +25,7 @@ public sealed class GameLifetimeScope : LifetimeScope
         RegisterIfFound<CombatFacingService>(builder);
         RegisterIfFound<EventBus>(builder);
         builder.Register<L2ActorFade>(Lifetime.Singleton);
+        builder.RegisterEntryPoint<AppearFadeService>().AsSelf();
         RegisterIfFound<DeadManager>(builder);
         RegisterIfFound<MoveAllCharacters>(builder);
         RegisterIfFound<GravityNpc>(builder);
@@ -78,6 +80,16 @@ public sealed class GameLifetimeScope : LifetimeScope
         builder.Register<UserSpawner>(Lifetime.Singleton);
         builder.Register<NpcSpawner>(Lifetime.Singleton);
         builder.Register<MonsterSpawner>(Lifetime.Singleton);
+        builder.Register<ItemSpawner>(Lifetime.Singleton);
+        builder.Register<ItemDropLayerService>(Lifetime.Singleton);
+        builder.Register<ItemDropClickAreaService>(Lifetime.Singleton);
+        builder.Register<ItemDropPicker>(Lifetime.Singleton);
+        builder.Register<ItemDropGrpCatalog>(Lifetime.Singleton);
+        builder.Register<ItemDropPrefabLoader>(Lifetime.Singleton);
+        builder.Register<ItemDropMaterialService>(Lifetime.Singleton);
+        builder.Register<ItemDropWeaponAligner>(Lifetime.Singleton);
+        builder.Register<ItemDropVisualService>(Lifetime.Singleton);
+        builder.Register<ItemDropPresentationService>(Lifetime.Singleton);
         builder.Register<PlayerPositionSender>(Lifetime.Singleton);
         builder.Register<L2PawnRange>(Lifetime.Singleton);
         builder.RegisterEntryPoint<EntityActionMachine>().AsSelf();

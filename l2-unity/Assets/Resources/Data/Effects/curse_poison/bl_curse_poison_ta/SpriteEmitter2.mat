@@ -11,7 +11,8 @@ Material:
   m_Shader: {fileID: 4800000, guid: c7e8f9a0b1d24365a4b3c2d1e0f9a8b7, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
-  m_ValidKeywords:
+  m_ValidKeywords: []
+  m_InvalidKeywords:
   - _ALPHAFROMLUMA_ON
   - _BALPHABLEND_ON
   - _BLENDBETWEENSUBDIVISIONS_ON
@@ -20,9 +21,8 @@ Material:
   - _IGNOREMAINTEXALPHA_ON
   - _SPINPARTICLES_ON
   - _UNIFORMSIZE_ON
-  m_InvalidKeywords: []
   m_LightmapFlags: 4
-  m_EnableInstancingVariants: 0
+  m_EnableInstancingVariants: 1
   m_DoubleSidedGI: 0
   m_CustomRenderQueue: 3000
   stringTagMap: {}
@@ -54,8 +54,8 @@ Material:
     - _LumaAlphaFloor: 0.02
     - _Opacity: 1
     - _Seed: 0
-    - _SpinParticles: 1
     - _SpawnUnitScale: 0.01
+    - _SpinParticles: 1
     - _StartTime: 0
     - _SubdivisionEnd: 16
     - _SubdivisionStart: 14

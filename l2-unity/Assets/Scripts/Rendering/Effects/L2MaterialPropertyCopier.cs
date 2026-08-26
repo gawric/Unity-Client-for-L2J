@@ -66,6 +66,8 @@ public static class L2MaterialPropertyCopier
     public static readonly int L2FxTargetWorldPosId = Shader.PropertyToID(L2FxTargetWorldPosProperty);
     public static readonly int StartSpinRandStateBitsId = Shader.PropertyToID("_StartSpinRandStateBits");
     public static readonly int MeshSpawnRandStateBitsId = Shader.PropertyToID("_MeshSpawnRandStateBits");
+    public static readonly int SpawnModeId = Shader.PropertyToID("_SpawnMode");
+    public static readonly int SpinParticlesId = Shader.PropertyToID("_SpinParticles");
     public static readonly int StartSpinYawRangeUcId = Shader.PropertyToID("_StartSpinYawRangeUc");
     public static readonly int StartSpinPitchRangeUcId = Shader.PropertyToID("_StartSpinPitchRangeUc");
     public static readonly int StartSpinRollRangeUcId = Shader.PropertyToID("_StartSpinRollRangeUc");
@@ -79,6 +81,7 @@ public static class L2MaterialPropertyCopier
     public static readonly int SpriteSpinSpsRangeUcId = Shader.PropertyToID("_SpriteSpinSpsRangeUc");
     public static readonly int SpriteSpinCcwOrCwId = Shader.PropertyToID("_SpriteSpinCcwOrCw");
     public static readonly int SpriteMotionRandStateBitsId = Shader.PropertyToID("_SpriteMotionRandStateBits");
+    public static readonly int SpriteSpinModeId = Shader.PropertyToID("_SpinMode");
     public static readonly int StartVelocityRangeXUcId = Shader.PropertyToID("_StartVelocityRangeXUc");
     public static readonly int StartVelocityRangeYUcId = Shader.PropertyToID("_StartVelocityRangeYUc");
     public static readonly int StartVelocityRangeZUcId = Shader.PropertyToID("_StartVelocityRangeZUc");
@@ -119,7 +122,36 @@ public static class L2MaterialPropertyCopier
     /// </summary>
     public static bool IsMeshSpawnParticleMaterial(Material mat)
     {
-        return mat != null && mat.HasProperty(MeshSpawnRandStateBitsId);
+        if (mat == null || !mat.HasProperty(MeshSpawnRandStateBitsId))
+            return false;
+
+        // Unified MeshEmitter exposes the full property superset. The mode,
+        // rather than property existence, opts a material into SpawnParticle.
+        return !mat.HasProperty(SpawnModeId) || mat.GetFloat(SpawnModeId) > 0.5f;
+    }
+
+    public static bool IsMeshStartSpinMaterial(Material mat)
+    {
+        if (mat == null || !mat.HasProperty(StartSpinRandStateBitsId))
+            return false;
+
+        return !mat.HasProperty(SpinParticlesId) || mat.GetFloat(SpinParticlesId) > 0.5f;
+    }
+
+    public static bool IsSpriteSpawnMaterial(Material mat)
+    {
+        if (mat == null || !mat.HasProperty(SpriteMotionRandStateBitsId))
+            return false;
+
+        return !mat.HasProperty(SpawnModeId) || mat.GetFloat(SpawnModeId) > 0.5f;
+    }
+
+    public static bool IsSpriteSpinMaterial(Material mat)
+    {
+        if (mat == null || !mat.HasProperty(SpriteSpinRandStateBitsId))
+            return false;
+
+        return !mat.HasProperty(SpriteSpinModeId) || mat.GetFloat(SpriteSpinModeId) > 0.5f;
     }
 
     /// <summary>
@@ -128,10 +160,8 @@ public static class L2MaterialPropertyCopier
     public static bool IsShotNAtkMeshEmitter225SpiritMaterial(Material mat)
     {
         if (mat == null ||
-            !mat.HasProperty(MeshSpawnRandStateBitsId) ||
-            !mat.HasProperty(StartSizeRangeXUcId) ||
-            !mat.HasProperty(StartLocationOffsetUeId) ||
-            mat.HasProperty(StartSizeXYId))
+            !IsMeshSpawnParticleMaterial(mat) ||
+            !mat.HasProperty(StartLocationOffsetUeId))
         {
             return false;
         }
@@ -147,9 +177,8 @@ public static class L2MaterialPropertyCopier
     public static bool IsShotNAtkMeshEmitter226ShockWaveMaterial(Material mat)
     {
         if (mat == null ||
-            !mat.HasProperty(MeshSpawnRandStateBitsId) ||
-            !mat.HasProperty(StartSizeRangeXUcId) ||
-            mat.HasProperty(StartSizeXYId))
+            !IsMeshSpawnParticleMaterial(mat) ||
+            !mat.HasProperty(StartLocationOffsetUeId))
         {
             return false;
         }
@@ -483,13 +512,17 @@ public static class L2MaterialPropertyCopier
         uint baseState,
         int slotIndex)
     {
-        if (runtimeMat == null || sharedMat == null ||
-            !sharedMat.HasProperty(StartSpinRandStateBitsId))
+        if (runtimeMat == null || sharedMat == null)
         {
             return;
         }
 
-        if (IsMeshSpawnParticleMaterial(sharedMat))
+        bool hasMeshSpawn = IsMeshSpawnParticleMaterial(sharedMat);
+        bool hasStartSpin = IsMeshStartSpinMaterial(sharedMat);
+        if (!hasMeshSpawn && !hasStartSpin)
+            return;
+
+        if (hasMeshSpawn)
         {
             // Mesh spawn base is before StartVelocity; MeshEmitter3 base is before StartSpin.
             CopyMeshSpawnAppRandFromBaseState(runtimeMat, sharedMat, baseState, slotIndex);
@@ -507,13 +540,7 @@ public static class L2MaterialPropertyCopier
 
     public static uint ComputeMeshEmitter3StartSpinState(uint sharedBaseState, int slotIndex)
     {
-        uint slotState = sharedBaseState;
-        for (int i = 0; i < slotIndex; i++)
-        {
-            slotState = AdvanceAppRandState(slotState, MeshEmitter3SlotToSlotDrawCount);
-        }
-
-        return slotState;
+        return AdvanceAppRandState(sharedBaseState, slotIndex * MeshEmitter3SlotToSlotDrawCount);
     }
 
     /// <summary>
@@ -624,6 +651,33 @@ public static class L2MaterialPropertyCopier
         return 0u;
     }
 
+    public static float UIntBitsToFloat(uint state)
+    {
+        return BitConverter.Int32BitsToSingle(unchecked((int)state));
+    }
+
+    public static void ResolveGpuInstanceRandBits(
+        Material sharedMat,
+        uint meshEmitter3AppRandBaseState,
+        uint spriteEmitterAppRandBaseState,
+        int slotIndex,
+        out float meshSpawnRandBits,
+        out float startSpinRandBits,
+        out float spriteMotionRandBits,
+        out float spriteSpinRandBits)
+    {
+        L2AppRand.ResolveGpuInstanceRandBits(
+            IsMeshSpawnParticleMaterial(sharedMat),
+            IsMeshStartSpinMaterial(sharedMat),
+            meshEmitter3AppRandBaseState,
+            spriteEmitterAppRandBaseState,
+            slotIndex,
+            out meshSpawnRandBits,
+            out startSpinRandBits,
+            out spriteMotionRandBits,
+            out spriteSpinRandBits);
+    }
+
     /// <summary>
     /// Produces a finite bit-pattern that survives Material.SetFloat/asuint.
     /// It is a state seed, not a float numeric value.
@@ -638,12 +692,7 @@ public static class L2MaterialPropertyCopier
 
     public static uint AdvanceAppRandState(uint state, int drawCount)
     {
-        for (int i = 0; i < drawCount; i++)
-        {
-            state = unchecked(state * AppRandMultiplier + AppRandIncrement);
-        }
-
-        return state;
+        return L2AppRand.Advance(state, drawCount);
     }
 
     public static float ReadLifetimeMax(Material[] sharedMaterials, float fallback)

@@ -17,6 +17,7 @@ public class L2Particle : BaseEffect, IRegisteredBillboard
     private EffectSettings _settings;
     private MagicCastData _castData;
     private float _playStartedAt = -1f;
+    private string _firstPlayStack;
     public PooledEffect PooledEffect { get { return _pooledEffect; } }
     public Vector3 SurfaceNormal { get { return _surfaceNormal; } set { _surfaceNormal = value; } }
 
@@ -106,6 +107,11 @@ public class L2Particle : BaseEffect, IRegisteredBillboard
 
     public override void Play()
     {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        if (_playStartedAt > 0f && Time.time - _playStartedAt < 8f)
+            EffectDoublePlayLog.Repeat("L2Particle.Play", this, _playStartedAt, _firstPlayStack);
+        _firstPlayStack = EffectDoublePlayLog.CaptureStack();
+#endif
         _playStartedAt = Time.time;
         ResetTimer();
         if (!_skipScheduledDestroyForDebug && !IsDestroyDeferredUntilHomeArrival)
@@ -134,6 +140,10 @@ public class L2Particle : BaseEffect, IRegisteredBillboard
 
     public void ResetTimer()
     {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        if (_playStartedAt > 0f && Time.time - _playStartedAt > 0.02f && Time.time - _playStartedAt < 8f)
+            EffectDoublePlayLog.Repeat("L2Particle.ResetTimer", this, _playStartedAt, _firstPlayStack);
+#endif
         RefreshParticleGroups();
 
         for (int i = 0; i < _particleGroups.Length; i++)
@@ -200,10 +210,17 @@ public class L2Particle : BaseEffect, IRegisteredBillboard
     protected override void OnDestroy()
     {
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
+        float now = Time.time;
+        float elapsed = _playStartedAt > 0f ? now - _playStartedAt : -1f;
+        DropAdenaDestroyLog.Event(
+            "L2PARTICLE_ON_DESTROY",
+            this,
+            $"wallLived={elapsed:F3}s configuredLife={(_settings != null ? _settings.defaultLifeTime : -1f):F3}s " +
+            $"castHit={(_castData != null ? _castData.HitTime : -1f):F3}s " +
+            $"settings='{(_settings != null ? _settings.name : "null")}'",
+            includeStack: true);
         if (ShouldTraceLifetime())
         {
-            float now = Time.time;
-            float elapsed = _playStartedAt > 0f ? now - _playStartedAt : -1f;
             Debug.Log(
                 $"[L2Particle] FX_DESTROY effect='{name}' now={now:F3}s " +
                 $"wallLived={elapsed:F3}s configuredLife={(_settings != null ? _settings.defaultLifeTime : -1f):F3}s " +

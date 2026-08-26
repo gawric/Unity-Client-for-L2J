@@ -573,6 +573,35 @@ public class PlayerInventory : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Sends RequestDropItem. Prefer worldPos from inventory drag release (mouse→ground).
+    /// Distance is validated by the server (CANNOT_DISCARD_DISTANCE_TOO_FAR).
+    /// </summary>
+    public void DropItem(int objectId, int quantity, Vector3? dropWorldPos = null)
+    {
+        if (!_playerInventory.ContainsKey(objectId))
+        {
+            Debug.Log("Drop item not found " + objectId);
+            return;
+        }
+
+        GameClient game = _gameClient != null ? _gameClient : IncomingPacketActions.Game;
+        if (game == null || PlayerEntity.Instance == null)
+            return;
+
+        Transform player = PlayerEntity.Instance.transform;
+        Vector3 dropPos = dropWorldPos ?? player.position + player.forward * 0.6f;
+
+        Vector3 l2 = VectorUtils.ConvertPosUnityToL2j(dropPos);
+        Debug.Log($"DropItem obj={objectId} qty={quantity} world={dropPos} l2=({(int)l2.x},{(int)l2.y},{(int)l2.z})");
+        game.Send(new RequestDropItemCommand(
+            objectId,
+            quantity,
+            (int)l2.x,
+            (int)l2.y,
+            (int)l2.z));
+    }
+
     public bool IsContaineInventory(int objectId)
     {
         return _playerInventory.ContainsKey(objectId);

@@ -7,6 +7,7 @@ public class ClickManager : MonoBehaviour
     [Inject] InputManager _input;
     [Inject] TargetManager _targets;
     [Inject] GameClient _gameClient;
+    [Inject] ItemDropPicker _dropPicker;
     [SerializeField] private GameObject _locator;
     [SerializeField] private ObjectData _targetObjectData;
     [SerializeField] private ObjectData _hoverObjectData;
@@ -70,12 +71,6 @@ public class ClickManager : MonoBehaviour
 
     void Update()
     {
-        if (L2GameUI.Instance != null && L2GameUI.Instance.MouseOverUI)
-        {
-            _hoverObjectData = null;
-            return;
-        }
-
         if (Camera.main == null)
         {
             _hoverObjectData = null;
@@ -84,13 +79,42 @@ public class ClickManager : MonoBehaviour
 
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         RaycastHit hit;
+        ItemEntity stickyDrop = null;
+        if (_hoverObjectData != null && _hoverObjectData.ObjectTransform != null)
+            stickyDrop = _hoverObjectData.ObjectTransform.GetComponent<ItemEntity>();
+
+        if (_dropPicker != null &&
+            _dropPicker.TryPick(ray, MousePickDistance, stickyDrop, out ItemEntity dropItem, out _))
+        {
+            Transform root = dropItem.transform;
+            _hoverObjectData = new ObjectData(root.gameObject);
+
+            if (GameInput != null &&
+                GameInput.LeftClickDown &&
+                !GameInput.RightClickHeld)
+            {
+                _targetObjectData = _hoverObjectData;
+                OnClickOnEntity();
+            }
+
+            return;
+        }
+
+        if (L2GameUI.Instance != null && L2GameUI.Instance.MouseOverUI)
+        {
+            _hoverObjectData = null;
+            return;
+        }
 
         if (Physics.Raycast(ray, out hit, MousePickDistance, ~_clickThroughMask))
         {
             int hitLayer = hit.collider.gameObject.layer;
             if (_entityMask == (_entityMask | (1 << hitLayer)))
             {
-                Transform root = hit.transform.parent != null ? hit.transform.parent : hit.transform;
+                Entity entity = hit.collider.GetComponentInParent<Entity>();
+                Transform root = entity != null
+                    ? entity.transform
+                    : (hit.transform.parent != null ? hit.transform.parent : hit.transform);
                 _hoverObjectData = new ObjectData(root.gameObject);
             }
             else

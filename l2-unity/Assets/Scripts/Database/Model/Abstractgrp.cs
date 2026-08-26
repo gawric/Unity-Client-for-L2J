@@ -15,6 +15,10 @@ public class Abstractgrp
     [SerializeField] protected string _equipSound;
     [SerializeField] protected string _inventoryType;
     [SerializeField] private bool _crystallizable;
+    [SerializeField] protected int _dropType;
+    [SerializeField] protected int _dropAnimType;
+    [SerializeField] protected int _dropRadius;
+    [SerializeField] protected int _dropHeight;
     private string[] _otherIcon;
 
     public ItemMaterial Material { get { return _material; } set { _material = value; } }
@@ -28,6 +32,12 @@ public class Abstractgrp
     public string InventoryType { get { return _inventoryType; } set { _inventoryType = value; } }
     public bool Crystallizable { get { return _crystallizable; } set { _crystallizable = value; } }
     public ItemGrade Grade { get { return _grade; } set { _grade = value; } }
+    /// <summary>weapongrp drop_type: 1/2 sword-like stick, 3/4 club/staff, 0 flat.</summary>
+    public int DropType { get { return _dropType; } set { _dropType = value; } }
+    /// <summary>drop_anim_type: 1/2 throw+spin, 3 throw no spin, 5 adena FX, 0 none.</summary>
+    public int DropAnimType { get { return _dropAnimType; } set { _dropAnimType = value; } }
+    public int DropRadius { get { return _dropRadius; } set { _dropRadius = value; } }
+    public int DropHeight { get { return _dropHeight; } set { _dropHeight = value; } }
 
     public string[] OtherIcon { get { return _otherIcon; } }
     public void SetOtherIcon(string[] allIcon)

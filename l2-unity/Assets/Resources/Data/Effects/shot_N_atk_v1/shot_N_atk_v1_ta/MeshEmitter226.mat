@@ -21,7 +21,7 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: MeshEmitter226
-  m_Shader: {fileID: 4800000, guid: a7c4e2b91d8f3a6e0b5c9d2e4f183756, type: 3}
+  m_Shader: {fileID: 4800000, guid: 699f590baf9747f39ab2925f3970aa59, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
@@ -31,7 +31,7 @@ Material:
   - _SPINPARTICLES_ON
   - _USESIZESCALE_ON
   m_LightmapFlags: 4
-  m_EnableInstancingVariants: 0
+  m_EnableInstancingVariants: 1
   m_DoubleSidedGI: 0
   m_CustomRenderQueue: -1
   stringTagMap:
@@ -66,6 +66,21 @@ Material:
     - _StartTime: 0
     - _UseManualAge: 0
     - _UseSizeScale: 1
+    - _SpawnMode: 2
+    - _MotionMode: 1
+    - _TransformMode: 0
+    - _SizeMode: 2
+    - _OffsetSource: 1
+    - _SpinSpsMode: 1
+    - _SrcBlend: 1
+    - _DstBlend: 1
+    - _ZWrite: 0
+    - _Cull: 0
+    - _AlphaClipThreshold: -1
+    - _SizeKeyCount: 5
+    - _ColorKey3Time: 1
+    - _ColorKey4Time: 1
+    - _ColorKey5Time: 1
     m_Colors:
     - _ColorKey0: {r: 1, g: 1, b: 1, a: 1}
     - _ColorKey1: {r: 1, g: 1, b: 1, a: 1}
@@ -95,5 +110,8 @@ Material:
     - _StartVelocityRangeXUc: {r: 4, g: 4, b: 0, a: 0}
     - _StartVelocityRangeYUc: {r: 0, g: 0, b: 0, a: 0}
     - _StartVelocityRangeZUc: {r: 0, g: 0, b: 0, a: 0}
+    - _ColorKey3: {r: 1, g: 1, b: 1, a: 1}
+    - _ColorKey4: {r: 1, g: 1, b: 1, a: 1}
+    - _ColorKey5: {r: 1, g: 1, b: 1, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1

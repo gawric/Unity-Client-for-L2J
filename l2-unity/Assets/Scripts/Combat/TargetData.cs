@@ -33,18 +33,25 @@ public class TargetData
     {
         _data = target;
 
-        if(_data != null)
+        if (_data != null)
         {
-             _entity  = _data.ObjectTransform.GetComponent<Entity>();
-             _identity = _entity.Identity;
-             _status = _entity.Status;
-             _stats = _entity.Stats;
+            _entity = _data.ObjectTransform != null
+                ? _data.ObjectTransform.GetComponent<Entity>()
+                : null;
+            if (_entity == null && _data.ObjectTransform != null)
+                _entity = _data.ObjectTransform.GetComponentInParent<Entity>();
+            if (_entity != null)
+            {
+                _identity = _entity.Identity;
+                _status = _entity.Status;
+                _stats = _entity.Stats;
+            }
         }
     }
 
     public bool IsDead()
     {
-       return _entity.IsDead();
+        return _entity != null && _entity.IsDead();
     }
 
     public void SetColor(string hexColor)

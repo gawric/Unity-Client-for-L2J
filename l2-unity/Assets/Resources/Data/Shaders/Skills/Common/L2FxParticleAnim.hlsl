@@ -3,8 +3,21 @@
 
 // Shared L2-style particle timing: lifetime, fade in/out, size curve, seeded random, spin.
 // Include after Core.hlsl. Call with your UnityPerMaterial uniforms (no globals inside this file).
+// Object scale is the exception: GPU instancing remaps UNITY_MATRIX_M, not unity_ObjectToWorld.
 
 static const float L2Fx_TwoPi = 6.28318530718;
+
+// Column lengths of the instancing-safe object matrix. Sprite billboards that
+// rebuild the quad in world space must multiply StartSize by this, not by
+// unity_ObjectToWorld (that stays identity under RenderMeshInstanced).
+float3 L2Fx_ObjectWorldScale()
+{
+    float4x4 m = UNITY_MATRIX_M;
+    return float3(
+        length(float3(m._m00, m._m10, m._m20)),
+        length(float3(m._m01, m._m11, m._m21)),
+        length(float3(m._m02, m._m12, m._m22)));
+}
 
 float L2Fx_Hash11(float n)
 {

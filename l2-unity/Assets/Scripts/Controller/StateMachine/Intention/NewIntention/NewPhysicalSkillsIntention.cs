@@ -30,6 +30,12 @@ public class NewPhysicalSkillsIntention : IntentionBase
 
 
             Debug.Log("NewPhysicalSkillsIntention > use " + useSkill.SkillId);
+            if (SetupDurationHelper.IsUsePotion(useSkill))
+            {
+                SetupDurationHelper.FinishPotionUse(_stateMachine, _stateMachine.Player, useSkill);
+                return;
+            }
+
             int objectId = _stateMachine.Player.Identity.Id;
             IncomingPacketActions.Animations.SetSpTimeAtk(objectId , useSkill.HitTime);
             Entity targetEntity = IncomingPacketActions.GameWorld.GetEntityNoLockSync(useSkill.TargetId);

@@ -21,7 +21,7 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: MeshEmitter2
-  m_Shader: {fileID: 4800000, guid: c9d2e3f4a5b66778899aabbccddeeff0, type: 3}
+  m_Shader: {fileID: 4800000, guid: 699f590baf9747f39ab2925f3970aa59, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
@@ -31,7 +31,7 @@ Material:
   - _SPINPARTICLES_ON
   - _USESIZESCALE_ON
   m_LightmapFlags: 4
-  m_EnableInstancingVariants: 0
+  m_EnableInstancingVariants: 1
   m_DoubleSidedGI: 0
   m_CustomRenderQueue: -1
   stringTagMap:
@@ -65,6 +65,21 @@ Material:
     - _StartTime: 0
     - _UseManualAge: 0
     - _UseSizeScale: 1
+    - _SpawnMode: 0
+    - _MotionMode: 0
+    - _TransformMode: 0
+    - _SizeMode: 1
+    - _OffsetSource: 0
+    - _SpinSpsMode: 0
+    - _SrcBlend: 1
+    - _DstBlend: 1
+    - _ZWrite: 0
+    - _Cull: 0
+    - _AlphaClipThreshold: -1
+    - _SizeKeyCount: 2
+    - _ColorKey3Time: 1
+    - _ColorKey4Time: 1
+    - _ColorKey5Time: 1
     m_Colors:
     - _ColorKey0: {r: 1, g: 1, b: 1, a: 1}
     - _ColorKey1: {r: 0.654902, g: 0.654902, b: 0.654902, a: 1}
@@ -80,5 +95,10 @@ Material:
     - _StartSpinPitchRangeUc: {r: 0, g: 0, b: 0, a: 0}
     - _StartSpinRollRangeUc: {r: 0, g: 0, b: 0, a: 0}
     - _StartSpinYawRangeUc: {r: 0, g: 0, b: 0, a: 0}
+    - _StartLocationOffsetUc: {r: 0, g: 0, b: -6, a: 0}
+    - _StartSizeZRange: {r: 0.6, g: 0.6, b: 0, a: 0}
+    - _ColorKey3: {r: 1, g: 1, b: 1, a: 1}
+    - _ColorKey4: {r: 1, g: 1, b: 1, a: 1}
+    - _ColorKey5: {r: 1, g: 1, b: 1, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1

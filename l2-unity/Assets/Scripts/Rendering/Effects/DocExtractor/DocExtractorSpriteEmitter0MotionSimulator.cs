@@ -479,8 +479,9 @@ public static class DocExtractorSpriteEmitter0MotionSimulator
 
     public static Vector3 UcPositionToUnityMeters(Vector3 uePositionUu, float worldCalibK)
     {
-        float k = worldCalibK > 0f ? worldCalibK : 1.8f;
-        return new Vector3(uePositionUu.x, uePositionUu.z, uePositionUu.y) * UuToMeters * k;
+        // Match L2Fx_UcPositionToUnityMeters: world UU/52.5, size K does not scale motion.
+        _ = worldCalibK;
+        return new Vector3(uePositionUu.x, uePositionUu.z, uePositionUu.y) * UuToMeters;
     }
 
     private static Vector3 UcPositionToUnityMetersInternal(Vector3 uePositionUu, float worldCalibK)

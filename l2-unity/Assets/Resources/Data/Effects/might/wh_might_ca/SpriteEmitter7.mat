@@ -27,7 +27,7 @@ Material:
   - _USESOFTLUMAALPHA_ON
   - _USEVELOCITYTOWARDFOCAL_ON
   m_LightmapFlags: 4
-  m_EnableInstancingVariants: 0
+  m_EnableInstancingVariants: 1
   m_DoubleSidedGI: 0
   m_CustomRenderQueue: -1
   stringTagMap: {}
@@ -71,6 +71,7 @@ Material:
     - _FunnelArcScale: 0.06
     - _FunnelEasePower: 2.5
     - _HasLifetime: 1
+    - _HorizontalOutwardWeight: 0
     - _IgnoreMainTexAlpha: 1
     - _L2FxEffectScale: 1
     - _L2FxSpriteScale: 1.4
@@ -103,6 +104,7 @@ Material:
     - _TextureVSubdivisions: 4
     - _UcAccelerationScale: 0.32
     - _UcPolarRadiusScale: 0.32142857
+    - _UcSphereRadiusScale: 1
     - _UcStartLocationOffsetScale: 0.24
     - _UcStartLocationRangeScale: 0.16
     - _UcVelocityScale: 0.33333334
@@ -112,10 +114,13 @@ Material:
     - _UseOwnerFromShaderTarget: 1
     - _UseRandomSubdivision: 1
     - _UseRegularSizeScale: 0
-    - _UseSpawnUnitScale: 0
     - _UseSizeScale: 1
     - _UseSoftLumaAlpha: 1
+    - _UseSpawnUnitScale: 0
+    - _UseSphereRadius: 0
+    - _UseVelocityMagnitude3D: 0
     - _UseVelocityTowardFocal: 1
+    - _VelocityDirectionSign: 1
     - _bAlphaBlend: 1
     m_Colors:
     - _Acceleration: {r: 0, g: 0, b: 100, a: 0}
@@ -133,6 +138,7 @@ Material:
     - _PolarPitchDeg: {r: 75, g: 105, b: 0, a: 0}
     - _PolarRadius: {r: 14, g: 14, b: 0, a: 0}
     - _SizeRange: {r: 4, g: 8, b: 0, a: 0}
+    - _SphereRadiusUU: {r: 0, g: 0, b: 0, a: 0}
     - _SpinsPerSecondRange: {r: 0, g: 0, b: 0, a: 0}
     - _StartLocationOffset: {r: 0, g: 0, b: 10, a: 0}
     - _StartLocationRangeX: {r: -10, g: 10, b: 0, a: 0}
@@ -141,5 +147,6 @@ Material:
     - _StartSpinRange: {r: 0, g: 1, b: 0, a: 0}
     - _VelocityRangeX: {r: 30, g: 30, b: 0, a: 0}
     - _VelocityRangeY: {r: 30, g: 30, b: 0, a: 0}
+    - _VelocityRangeZ: {r: 0, g: 0, b: 0, a: 0}
   m_BuildTextureStacks: []
   m_AllowLocking: 1

@@ -1,20 +1,22 @@
+using UnityEngine;
 
-public class GetItemDto : IWireDto
+/// <summary>aCis GetItem 0x0D: playerId, objectId, x,y,z.</summary>
+public sealed class GetItemDto : IWireDto
 {
-    private int _playerId;
-    public int PlayerId { get => _playerId; }
-    private ItemInstance _item;
-    public ItemInstance Item { get => _item; }
-
-
-    
+    public int PlayerId { get; private set; }
+    public int ObjectId { get; private set; }
+    public int X { get; private set; }
+    public int Y { get; private set; }
+    public int Z { get; private set; }
+    public Vector3 UnityPos { get; private set; }
 
     public void ReadFrom(PacketReader reader)
     {
-        _playerId = reader.ReadI();
-        var objectId = reader.ReadI();
-        var x = reader.ReadI();
-        var y = reader.ReadI();
-        var z = reader.ReadI();
+        PlayerId = reader.ReadI();
+        ObjectId = reader.ReadI();
+        X = reader.ReadI();
+        Y = reader.ReadI();
+        Z = reader.ReadI();
+        UnityPos = VectorUtils.ConvertPosToUnity(new Vector3(X, Y, Z));
     }
 }

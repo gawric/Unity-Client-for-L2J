@@ -39,7 +39,6 @@ public class Entity : MonoBehaviour {
 
     protected MagicCastData _castData;
     protected NetworkAnimationController _networkAnimationReceive;
-    protected NetworkTransformReceive _networkTransformReceive;
     protected Gear _gear;
     public Gear Gear => _gear;
     public bool Running { get { return _running; } set { _running = value; } }
@@ -120,10 +119,6 @@ public class Entity : MonoBehaviour {
         }
     }
 
-    public void FixedUpdate() {
-        LookAtTarget();
-    }
-
     public void HideObject()
     {
         gameObject.SetActive(false);
@@ -146,15 +141,8 @@ public class Entity : MonoBehaviour {
         //}
     }
 
-    protected virtual void LookAtTarget() {
-        if (AttackTarget != null && Status.GetHp() > 0) {
-            _networkTransformReceive.LookAt(_attackTarget);
-        }
-    }
-
     public virtual void Initialize() {
         TryGetComponent(out _networkAnimationReceive);
-        TryGetComponent(out _networkTransformReceive);
         TryGetComponent(out _gear);
        
         UpdatePAtkSpeed((int)_stats.PAtkSpd);
@@ -210,9 +198,6 @@ public class Entity : MonoBehaviour {
     protected virtual void OnDeath() {
         if(_networkAnimationReceive != null) {
             _networkAnimationReceive.enabled = false;
-        }
-        if (_networkTransformReceive != null) {
-            _networkTransformReceive.enabled = false;
         }
     }
 

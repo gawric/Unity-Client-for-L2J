@@ -76,7 +76,7 @@ public static class GroundSnapHelper
     {
         LayerMask mask = ResolveGroundMask(groundMask);
         mask |= LayerMask.GetMask("Default", "Terrain", "StaticMesh", "Brush", "AllowWalk", "Deco", "Obstacle");
-        mask &= ~LayerMask.GetMask("Entity", "EntityClick", "Player", "UI", "Ignore Raycast", "SkillEffect");
+        mask &= ~LayerMask.GetMask("Entity", "EntityClick", "DropItem", "Player", "UI", "Ignore Raycast", "SkillEffect");
         return mask;
     }
 

@@ -5,13 +5,16 @@ public sealed class UserSpawner
 {
     private readonly CharacterBuilder _characterBuilder;
     private readonly Func<UserEntity, UserBowArrowEvents> _createBowArrowEvents;
+    private readonly AppearFadeService _appearFade;
 
     public UserSpawner(
         CharacterBuilder characterBuilder,
-        Func<UserEntity, UserBowArrowEvents> createBowArrowEvents)
+        Func<UserEntity, UserBowArrowEvents> createBowArrowEvents,
+        AppearFadeService appearFade)
     {
         _characterBuilder = characterBuilder;
         _createBowArrowEvents = createBowArrowEvents;
+        _appearFade = appearFade;
     }
 
     public UserEntity Spawn(CharInfoDto info, IWorldSpawnContext world)
@@ -70,11 +73,8 @@ public sealed class UserSpawner
         if (share != null)
             share.enabled = false;
 
-        NetworkTransformReceive receive = go.GetComponent<NetworkTransformReceive>();
-        if (receive != null)
-            receive.enabled = false;
-
         EntitySpawnShared.SanitizeCharacterControllerStepOffset(go);
+        EntitySpawnShared.DisableLegacyPositionSync(go);
         App.InjectGameObject(go);
         go.SetActive(true);
         EntitySpawnShared.ReapplyGroundAfterActivate(go, identity);
@@ -108,6 +108,8 @@ public sealed class UserSpawner
         world.RegisterUser(user);
         if (info.AlikeDead || user.IsDead())
             EntityActionVisual.PlayDeath(user, true);
+        else if (_appearFade != null)
+            _appearFade.Begin(user);
         return user;
     }
 
@@ -150,7 +152,13 @@ public sealed class UserSpawner
         CharInfoSpeedLog.LogSnap(user, identity.Position, "CharInfo UpdateInfo");
         CharInfoMoveBudgetLog.Compare(user, "CHARINFO", EntityActionCombatLog.PawnOf(user), identity.Position, true);
         GearFlowLog.Info("UserSpawner.RefreshVisuals nick=" + user.Nick);
-        user.RefreshVisuals();
+        if (_appearFade != null && info.AlikeDead && user.Identity != null)
+            _appearFade.Cancel(user.Identity.Id);
+
+        if (_appearFade != null && !info.AlikeDead)
+            _appearFade.AroundVisualRefresh(user, user.RefreshVisuals);
+        else
+            user.RefreshVisuals();
 
         float snap2d = VectorUtils.Distance2D(user.transform.position, identity.Position);
         float skipM = VectorUtils.ConvertL2UuToMeters(L2PawnRange.AdjustSkipUu);

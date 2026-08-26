@@ -151,6 +151,9 @@ public class CompositePrefabEffect : TimedCompositeEffectBase
     private bool _isSubscribedToAnyShoot;
     private bool _isSubscribedToProjectileEffectHit;
     private bool _lightSpawned;
+    private string _lastShootChannel;
+    private float _lastShootAt = -1f;
+    private string _lastShootStack;
     protected override string DebugPrefix => "[CompositePrefabEffect]";
     protected override float RuntimeLifeTimeTailSeconds => _serverHitLifetimeTailSeconds;
 
@@ -191,6 +194,9 @@ public class CompositePrefabEffect : TimedCompositeEffectBase
         }
 
         _lightSpawned = false;
+        _lastShootChannel = null;
+        _lastShootAt = -1f;
+        _lastShootStack = null;
         _playStartedAt = Time.time;
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
         Debug.Log(
@@ -246,6 +252,14 @@ public class CompositePrefabEffect : TimedCompositeEffectBase
         {
             return;
         }
+
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        if (_spawnedPartInstances.ContainsKey(part))
+            EffectDoublePlayLog.Note(
+                "Composite.SpawnPart",
+                this,
+                $"part='{part.name}' already spawned instance='{_spawnedPartInstances[part]}'");
+#endif
 
         RefreshResolveContext();
 
@@ -362,9 +376,19 @@ public class CompositePrefabEffect : TimedCompositeEffectBase
         ProcessShootEvent("direct");
     }
 
-
     private void ProcessShootEvent(string channel)
     {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        if (_lastShootAt > 0f && _pendingAnimationShootParts.Count > 0)
+            EffectDoublePlayLog.Repeat(
+                $"Composite.ShootEvent first={_lastShootChannel} this={channel}",
+                this,
+                _lastShootAt,
+                _lastShootStack);
+        _lastShootChannel = channel;
+        _lastShootAt = Time.time;
+        _lastShootStack = EffectDoublePlayLog.CaptureStack();
+#endif
         SpawnPendingAnimationShootParts();
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
@@ -859,9 +883,27 @@ public class CompositePrefabEffect : TimedCompositeEffectBase
         _pendingParts.Clear();
         _pendingHitColliderParts.Clear();
         _pendingAnimationShootParts.Clear();
+        DestroyOwnedSpawnedParts();
         _spawnedPartInstances.Clear();
         _launchedProjectileParts.Clear();
         _launchedHomeProjectileParts.Clear();
+    }
+
+    /// <summary>
+    /// Parts spawn unparented when followResolvedTransform is off. Destroying the
+    /// composite root would otherwise leave Kira / sprites playing in the world.
+    /// </summary>
+    void DestroyOwnedSpawnedParts()
+    {
+        foreach (KeyValuePair<CompositePrefabPart, BaseEffect> pair in _spawnedPartInstances)
+        {
+            if (pair.Value == null)
+                continue;
+            if (_launchedProjectileParts.Contains(pair.Key) ||
+                _launchedHomeProjectileParts.Contains(pair.Key))
+                continue;
+            Destroy(pair.Value.gameObject);
+        }
     }
 
     private void UnsubscribeShootEvent()

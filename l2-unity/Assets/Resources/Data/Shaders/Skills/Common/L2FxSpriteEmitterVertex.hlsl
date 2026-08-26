@@ -11,14 +11,6 @@ float L2Fx_SpriteMaterialSeed(float globalSeed)
     return globalSeed;
 }
 
-float3 L2Fx_ObjectWorldScale()
-{
-    return float3(
-        length(float3(UNITY_MATRIX_M[0][0], UNITY_MATRIX_M[1][0], UNITY_MATRIX_M[2][0])),
-        length(float3(UNITY_MATRIX_M[0][1], UNITY_MATRIX_M[1][1], UNITY_MATRIX_M[2][1])),
-        length(float3(UNITY_MATRIX_M[0][2], UNITY_MATRIX_M[1][2], UNITY_MATRIX_M[2][2])));
-}
-
 float L2Fx_MotionCompensationForManualBillboardScale(float manualBillboardScale)
 {
     if (manualBillboardScale <= 0.0)
@@ -100,7 +92,7 @@ float3 L2Fx_ResolveParticleNormalWS(float3 surfaceNormalMaterial)
     }
 
     float3 localNormal = float3(0.0, 1.0, 0.0);
-    float3 normalWS = mul((float3x3)unity_ObjectToWorld, localNormal);
+    float3 normalWS = mul((float3x3)UNITY_MATRIX_M, localNormal);
     return dot(normalWS, normalWS) > 1e-6 ? normalize(normalWS) : float3(0.0, 1.0, 0.0);
 }
 

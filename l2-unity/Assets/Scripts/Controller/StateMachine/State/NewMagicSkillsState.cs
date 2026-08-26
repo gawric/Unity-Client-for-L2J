@@ -37,6 +37,12 @@ public class NewMagicSkillsState  : AbstractAttackEvents
                 break;
             case Event.APPLY_SELF_SKILL:
 
+                if (SetupDurationHelper.IsUsePotion(useSkill))
+                {
+                    SetupDurationHelper.FinishPotionUse(_stateMachine, entity, useSkill);
+                    break;
+                }
+
                 AnimationCombo selfCombo = SkillgrpTable.Instance.GetAnimComboBySkillId(useSkill.SkillId, useSkill.SkillLvl);
                 SetupDurationHelper.SetupDurationIfHitTimeNot0(useSkill, objectId, entity, selfCombo);
                 SkillExecutor.Instance.ExecuteSkillOverride(useSkill.SkillGrp, entity, selfCombo, _events);

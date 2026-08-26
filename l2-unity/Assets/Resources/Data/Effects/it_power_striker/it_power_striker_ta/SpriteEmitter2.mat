@@ -8,7 +8,7 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: SpriteEmitter2
-  m_Shader: {fileID: 4800000, guid: c4e8a91b2f3d4015a6b7c8d9e0f10102, type: 3}
+  m_Shader: {fileID: 4800000, guid: 748e51cf1e6d475fbb467f790cbb8a74, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
@@ -39,7 +39,7 @@ Material:
     - _FadeInEndTime: 0.2132
     - _Fadeout: 1
     - _FadeoutStartTime: 0.588
-    - _L2FxWorldCalibration: 1.8
+    - _L2FxWorldCalibration: 1.1
     - _L2SpriteColorGammaToLinear: 0
     - _ManualAge: 0
     - _Opacity: 0.8
@@ -54,6 +54,22 @@ Material:
     - _TextureVSubdivisions: 1
     - _UseManualAge: 0
     - _UseSizeScale: 1
+    - _SpawnMode: 0
+    - _FullTlsShape: 0
+    - _MotionMode: 0
+    - _OrientationMode: 0
+    - _PtvdMode: 0
+    - _SizeMode: 0
+    - _SpinMode: 1
+    - _FlipbookMode: 0
+    - _SrcBlend: 1
+    - _DstBlend: 1
+    - _ZWrite: 0
+    - _Cull: 0
+    - _ColorFadeAlphaBlend: 0
+    - _AlphaClipThreshold: -1
+    - _StaticSubdivision: 0
+    - _SizeScaleCount: 4
     m_Colors:
     - _ColorKey0: {r: 1, g: 1, b: 1, a: 1}
     - _ColorKey1: {r: 1, g: 1, b: 1, a: 1}

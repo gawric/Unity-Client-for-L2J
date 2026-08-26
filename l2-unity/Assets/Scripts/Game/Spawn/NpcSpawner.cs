@@ -3,10 +3,12 @@ using UnityEngine;
 public sealed class NpcSpawner
 {
     private readonly ObjectPoolManager _pool;
+    private readonly AppearFadeService _appearFade;
 
-    public NpcSpawner(ObjectPoolManager pool)
+    public NpcSpawner(ObjectPoolManager pool, AppearFadeService appearFade)
     {
         _pool = pool;
+        _appearFade = appearFade;
     }
 
     public Entity Spawn(NpcSpawnRequest request, IWorldSpawnContext world)
@@ -22,7 +24,16 @@ public sealed class NpcSpawner
             return null;
 
         npcGo.transform.SetParent(world.NpcsContainer);
-        NpcEntity npc = npcGo.GetComponent<NpcEntity>();
+        NpcEntity npc = EntitySpawnShared.FindOnPrefab<NpcEntity>(npcGo);
+        if (npc == null)
+        {
+            Debug.LogError(
+                "NpcSpawner: NpcEntity missing on " + npcGo.name +
+                " prefab=" + (request.Prefab != null ? request.Prefab.name : "null") +
+                " npcId=" + identity.NpcId);
+            UnityEngine.Object.Destroy(npcGo);
+            return null;
+        }
         npc.NpcData = new NpcData(request.NpcName, request.Npcgrp);
         EntitySpawnShared.ApplyNpcIdentity(npc, request);
 
@@ -30,17 +41,26 @@ public sealed class NpcSpawner
             ? request.Prefab.name + "_" + identity.Name
             : identity.Name;
         EntitySpawnShared.SanitizeCharacterControllerStepOffset(npcGo);
+        EntitySpawnShared.DisableLegacyPositionSync(npcGo);
         npcGo.SetActive(true);
         EntitySpawnShared.ReapplyGroundAfterActivate(npcGo, identity);
 
         InitNpc(npc, npcGo, world);
         world.RegisterNpc(npc);
+        if (_appearFade != null && !npc.IsDead())
+            _appearFade.Begin(npc);
         return npc;
     }
 
     private static void InitNpc(Entity npc, GameObject npcGo, IWorldSpawnContext world)
     {
-        NetworkAnimationController animationController = npc.GetComponent<NetworkAnimationController>();
+        NetworkAnimationController animationController =
+            EntitySpawnShared.FindOnPrefab<NetworkAnimationController>(npcGo);
+        if (animationController == null)
+        {
+            Debug.LogError("NpcSpawner: NetworkAnimationController missing on " + npcGo.name);
+            return;
+        }
         animationController.Initialize();
         EntitySpawnShared.BindGearAndAnimation(npc, npcGo, animationController);
         EntitySpawnShared.RegisterAnimation(world, npc.Identity.Id, animationController, npc);

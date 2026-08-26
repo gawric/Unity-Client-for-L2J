@@ -80,6 +80,7 @@ Shader "L2/Effects/VampiricFury01"
             "RenderPipeline" = "UniversalPipeline"
             "Queue" = "Transparent"
             "RenderType" = "Transparent"
+                    "L2FxGpuInstancing" = "On"
         }
 
         // Dark ink must darken the target, so use regular alpha blending instead of additive.
@@ -96,6 +97,7 @@ Shader "L2/Effects/VampiricFury01"
             HLSLPROGRAM
             #pragma vertex vert
             #pragma fragment frag
+            #pragma multi_compile_instancing
             #pragma target 3.0
 
             #include "../../Common/L2FxMeshEmitterUrp.hlsl"
@@ -169,6 +171,8 @@ Shader "L2/Effects/VampiricFury01"
                 float4 _UvFitOffset;
             CBUFFER_END
 
+            #include "../../Common/L2FxInstancing.hlsl"
+
             float3 L2Fx_VampiricRotateEulerDegrees(float3 p, float3 degrees)
             {
                 float3 r = radians(degrees);
@@ -195,10 +199,7 @@ Shader "L2/Effects/VampiricFury01"
 
                 float3 rightWS = normalize(cross(upRef, toCamera));
                 float3 upWS = normalize(cross(toCamera, rightWS));
-                float3 objectScale = float3(
-                    length(float3(unity_ObjectToWorld._m00, unity_ObjectToWorld._m10, unity_ObjectToWorld._m20)),
-                    length(float3(unity_ObjectToWorld._m01, unity_ObjectToWorld._m11, unity_ObjectToWorld._m21)),
-                    length(float3(unity_ObjectToWorld._m02, unity_ObjectToWorld._m12, unity_ObjectToWorld._m22)));
+                float3 objectScale = L2Fx_ObjectWorldScale();
 
                 float3 billboardOS = L2Fx_VampiricRotateEulerDegrees(posOS, _BillboardEulerOffset.xyz);
                 return centerWS
@@ -213,6 +214,7 @@ Shader "L2/Effects/VampiricFury01"
                 float3 normalOS : NORMAL;
                 float2 uv : TEXCOORD0;
                 float4 color : COLOR;
+                UNITY_VERTEX_INPUT_INSTANCE_ID
             };
 
             struct Varyings
@@ -224,6 +226,7 @@ Shader "L2/Effects/VampiricFury01"
 
             Varyings vert(Attributes IN)
             {
+                UNITY_SETUP_INSTANCE_ID(IN);
                 Varyings OUT;
 
                 float delay, lifetime, age, ageNorm;

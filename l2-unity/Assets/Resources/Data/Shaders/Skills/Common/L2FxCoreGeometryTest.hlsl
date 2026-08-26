@@ -4,55 +4,35 @@
 // UE2.5 macro-world: 1 Unity meter = 52.5 Unreal Units
 static const float L2_UU_TO_METERS = 1.0 / 52.5;
 
-// Local quad vertex scale (object space) 
-// Final quad diameter before Transform scaling = (sizeUU / 52.5) * K * quadSpan.
+// UE SpriteEmitter Particle.Size is a half-extent: FillVertexBuffer emits
+// corners at Location +/- Size. Unity's unit quad spans [-0.5,+0.5], so its
+// local diameter must be 2 * Size after UU-to-meters world calibration.
+// DrawScale is intentionally not part of this conversion.
 float L2Fx_GetFinalVertexSizeMeters(float sizeUU, float worldCalibK)
 {
     float k = worldCalibK > 0.0 ? worldCalibK : 1.0;
     float sizeInMeters = sizeUU * L2_UU_TO_METERS;
-    return (sizeInMeters * k);
+    return sizeInMeters * k * 2.0;
 }
 
 // UE2.5 positional quantities from .uc (StartLocationOffset, ranges, polar
-// radius, velocity, acceleration) are in UU. Healing-potion validation:
-// StartLocationOffset=(Z=8) visually aligns with the original after:
-//   UE(X,Y,Z) -> Unity(X,Z,Y), meters = UU / 52.5 * K.
-// With verified K=1.8, Z=8 maps to Unity Y ~= 0.274 m.
+// radius, velocity, acceleration) are in the same UU as pawns/terrain:
+//   UE(X,Y,Z) -> Unity(X,Z,Y), meters = UU / 52.5.
+// Mesh/sprite size K (_L2FxWorldCalibration 1.8 / 1.1) is NOT applied here.
+// Size K only scales mesh/quad vertices (GetFinalMeshScale / GetFinalVertexSizeMeters).
+// Passing worldCalibK keeps the call signature; it must not change trajectories.
 float3 L2Fx_UcPositionToUnityMeters(float3 uePositionUU, float worldCalibK)
 {
-    float k = worldCalibK > 0.0 ? worldCalibK : 1.8;
-    return float3(uePositionUU.x, uePositionUU.z, uePositionUU.y) * L2_UU_TO_METERS * k;
+    worldCalibK = 1.0;
+    return float3(uePositionUU.x, uePositionUU.z, uePositionUU.y)
+        * L2_UU_TO_METERS * worldCalibK;
 }
 
-
-//example
-
-//v2f vert(Attributes input)
-//    v2f o;
-    // ... ˜˜˜˜˜˜˜˜ ˜˜˜˜˜˜ ˜˜˜˜˜˜˜ p ...
-    
-   // float meshScale = L2Fx_GetFinalMeshScale(p.startSize, p.relativeSize, 1.4f);
-    
-    // ˜˜˜˜˜˜˜˜˜˜˜˜ ˜˜˜˜˜˜˜ FBX-˜˜˜˜˜˜
-   // float3 scaledVertex = input.vertex.xyz * meshScale;
-    
-    // ˜˜˜˜˜˜˜˜ ˜ ˜˜˜˜˜˜˜ ˜˜˜˜˜˜˜ (˜˜˜˜˜˜˜ ˜˜˜ ˜ ˜˜˜˜˜˜, ˜˜˜˜˜˜˜˜, -0.28)
-   // float3 worldPosition = p.position + scaledVertex;
-    
-   // o.pos = mul(UNITY_MATRIX_VP, float4(worldPosition, 1.0));
-   // return o;
-//}
-// ˜˜ ˜˜˜˜˜˜ ˜˜˜˜˜ ˜˜˜˜˜˜, ˜˜ ˜˜˜˜˜˜ ˜˜˜ MeshEmitter
 // Final mesh local scale = sizeUU * sizeScale * K.
 float L2Fx_GetFinalMeshScale(float sizeUU, float sizeScale, float worldCalibK)
 {
     float k = worldCalibK > 0.0 ? worldCalibK : 1.8;
-    
-    // ˜˜˜ ˜˜˜˜ StartSizeRange ˜ ˜˜˜˜˜˜ SizeScale ˜ ˜˜˜ ˜˜˜˜˜˜ Scale-˜˜˜˜˜˜˜˜˜.
-    // ˜˜˜˜˜˜˜˜˜ 52.5 ˜˜ ˜˜˜˜˜˜˜˜˜˜˜˜.
-    float finalScale = sizeUU * sizeScale * k;
-    
-    return finalScale;
+    return sizeUU * sizeScale * k;
 }
 
 #endif

@@ -114,6 +114,18 @@ public class DatUtils {
             case "inventory_type":
                 abstractgrp.InventoryType = value;
                 break;
+            case "drop_type":
+                abstractgrp.DropType = int.Parse(value);
+                break;
+            case "drop_anim_type":
+                abstractgrp.DropAnimType = int.Parse(value);
+                break;
+            case "drop_radius":
+                abstractgrp.DropRadius = int.Parse(value);
+                break;
+            case "drop_height":
+                abstractgrp.DropHeight = int.Parse(value);
+                break;
             default:
                 return false;
         }

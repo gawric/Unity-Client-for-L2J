@@ -11,9 +11,6 @@ public static class L2EffectGeneratorPrefabBuilder
     private const string LineageEffectsStaticMeshesFolder =
         "Assets/Resources/Data/StaticMeshes/LineageEffectsStaticmeshes";
 
-    private const string SpriteEmitterFallbackShaderName = "Universal Render Pipeline/Unlit";
-    private const string MeshEmitterFallbackShaderName = "Universal Render Pipeline/Lit";
-
     public static string GetPrefabAssetPath(L2EffectGeneratorFolderBuilder.PlannedFolder planned)
     {
         return planned.AssetPath + "/" + planned.FolderName + ".prefab";
@@ -265,16 +262,16 @@ public static class L2EffectGeneratorPrefabBuilder
                 }
 
                 EffectPart effectPart = ConfigureEmitterPart(owner, emitterObject, emitter);
-                Material emitterMaterial = EnsureEmitterMaterial(
+                Mesh slotMesh = ResolveSlotMesh(emitter);
+                Material[] emitterMaterials = EnsureEmitterMaterials(
                     planned.AssetPath,
                     emitter,
-                    out bool materialCreated);
-                if (materialCreated)
-                {
-                    createdMaterialCount++;
-                }
+                    slotMesh,
+                    out int materialsCreated,
+                    out string materialConfiguration);
+                createdMaterialCount += materialsCreated;
 
-                int slotCount = EnsureParticleSlots(emitterObject.transform, emitter, emitterMaterial);
+                int slotCount = EnsureParticleSlots(emitterObject.transform, emitter, emitterMaterials);
                 AssignParticleRenderers(effectPart, emitterObject.transform);
                 if (effectPart != null)
                 {
@@ -282,15 +279,16 @@ public static class L2EffectGeneratorPrefabBuilder
                 }
 
                 string action = wasCreated ? "emitter created" : "emitter updated";
-                string materialAction = materialCreated
-                    ? ", material created"
-                    : emitterMaterial != null
-                        ? ", material reused"
+                string materialAction = materialsCreated > 0
+                    ? ", materials created=" + materialsCreated
+                    : emitterMaterials != null && emitterMaterials.Length > 0
+                        ? ", materials reused"
                         : ", material missing";
                 logLines.Add(
                     planned.Label + ": " + action + " -> " + emitter.EmitterName +
                     " (" + emitter.ClassName + ", " + DescribeEmitterPart(emitter.MaxParticles) +
                     ", slots=" + slotCount + ", slotName=" + emitter.ParticleSlotName + materialAction +
+                    ", " + materialConfiguration +
                     ", delay=" + FormatUcDelay(emitter) +
                     ", cps=" + FormatUcCountPerSecond(emitter) +
                     ", duration=" + FormatUcDuration(emitter) + ")");
@@ -403,6 +401,32 @@ public static class L2EffectGeneratorPrefabBuilder
             maxCountProperty.intValue = Math.Max(1, emitter.MaxParticles);
         }
 
+        if (emitterPart is ParticleGroup && emitter.MaxParticles > 1)
+        {
+            SerializedProperty cloneProperty = serializedPart.FindProperty("_cloneParticlesToMaxCount");
+            if (cloneProperty != null)
+            {
+                cloneProperty.boolValue = true;
+            }
+
+            SerializedProperty gpuProperty = serializedPart.FindProperty("_useGpuInstancing");
+            if (gpuProperty != null)
+            {
+                gpuProperty.boolValue = true;
+            }
+
+            if (string.Equals(emitter.ClassName, "MeshEmitter", StringComparison.OrdinalIgnoreCase) &&
+                emitter.HasInitialParticlesPerSecond &&
+                emitter.InitialParticlesPerSecond >= 100)
+            {
+                SerializedProperty burstProperty = serializedPart.FindProperty("_isBurstSpawning");
+                if (burstProperty != null)
+                {
+                    burstProperty.boolValue = true;
+                }
+            }
+        }
+
         if (emitter.HasInitialDelayRange)
         {
             SetFloatIfPresent(serializedPart, "_startDelay", emitter.InitialDelayMax);
@@ -429,7 +453,9 @@ public static class L2EffectGeneratorPrefabBuilder
 
     private static float ResolveUcDuration(L2EffectUcEmitterParser.UcEmitterDefinition emitter)
     {
-        return Math.Max(emitter.LifetimeMin, emitter.LifetimeMax);
+        float life = Math.Max(emitter.LifetimeMin, emitter.LifetimeMax);
+        float delay = emitter.HasInitialDelayRange ? Math.Max(emitter.InitialDelayMin, emitter.InitialDelayMax) : 0f;
+        return life + delay;
     }
 
     private static void SetFloatIfPresent(SerializedObject serializedObject, string propertyName, float value)
@@ -497,23 +523,19 @@ public static class L2EffectGeneratorPrefabBuilder
         serializedOwner.ApplyModifiedPropertiesWithoutUndo();
     }
 
-    private static Material EnsureEmitterMaterial(
+    private static Material[] EnsureEmitterMaterials(
         string effectAssetPath,
         L2EffectUcEmitterParser.UcEmitterDefinition emitter,
-        out bool wasCreated)
+        Mesh slotMesh,
+        out int createdCount,
+        out string configuration)
     {
-        wasCreated = false;
+        createdCount = 0;
+        configuration = "material configuration skipped";
         if (string.IsNullOrWhiteSpace(effectAssetPath) || emitter == null ||
             string.IsNullOrWhiteSpace(emitter.EmitterName))
         {
             return null;
-        }
-
-        string materialPath = effectAssetPath + "/" + emitter.EmitterName + ".mat";
-        Material existingMaterial = AssetDatabase.LoadAssetAtPath<Material>(materialPath);
-        if (existingMaterial != null)
-        {
-            return existingMaterial;
         }
 
         Shader shader = ResolveEmitterShader(emitter.ClassName);
@@ -525,34 +547,51 @@ public static class L2EffectGeneratorPrefabBuilder
             return null;
         }
 
-        Material material = new Material(shader)
+        List<Texture2D> textures = L2EffectGeneratorMaterialConfigurator.ResolveTextures(
+            emitter.TextureReference, slotMesh);
+        bool isMesh = string.Equals(
+            emitter.ClassName, "MeshEmitter", StringComparison.OrdinalIgnoreCase);
+        int materialCount = isMesh && slotMesh != null
+            ? Math.Max(1, slotMesh.subMeshCount)
+            : 1;
+        var materials = new Material[materialCount];
+        var status = new List<string>();
+        for (int i = 0; i < materialCount; i++)
         {
-            name = emitter.EmitterName
-        };
-        AssetDatabase.CreateAsset(material, materialPath);
-        wasCreated = true;
-        return material;
+            string suffix = i == 0 ? string.Empty : "_sub" + i;
+            string materialPath = effectAssetPath + "/" + emitter.EmitterName + suffix + ".mat";
+            Material material = AssetDatabase.LoadAssetAtPath<Material>(materialPath);
+            if (material == null)
+            {
+                material = new Material(shader)
+                {
+                    name = emitter.EmitterName + suffix
+                };
+                AssetDatabase.CreateAsset(material, materialPath);
+                createdCount++;
+            }
+
+            Texture2D texture = textures.Count > 0
+                ? textures[Math.Min(i, textures.Count - 1)]
+                : null;
+            status.Add(L2EffectGeneratorMaterialConfigurator.Configure(
+                material, emitter, slotMesh, texture));
+            materials[i] = material;
+        }
+
+        configuration = string.Join("; ", status);
+        return materials;
     }
 
     private static Shader ResolveEmitterShader(string className)
     {
-        string shaderName = string.Equals(className, "MeshEmitter", StringComparison.OrdinalIgnoreCase)
-            ? MeshEmitterFallbackShaderName
-            : SpriteEmitterFallbackShaderName;
-
-        Shader shader = Shader.Find(shaderName);
-        if (shader != null)
-        {
-            return shader;
-        }
-
-        return Shader.Find(SpriteEmitterFallbackShaderName);
+        return L2EffectGeneratorMaterialConfigurator.ResolveShader(className);
     }
 
     private static int EnsureParticleSlots(
         Transform emitterTransform,
         L2EffectUcEmitterParser.UcEmitterDefinition emitter,
-        Material emitterMaterial)
+        Material[] emitterMaterials)
     {
         if (emitterTransform == null || emitter == null)
         {
@@ -577,7 +616,7 @@ public static class L2EffectGeneratorPrefabBuilder
             slotObject.transform.SetParent(emitterTransform, false);
             slotObject.transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
             slotObject.transform.localScale = Vector3.one;
-            EnsureSlotRenderComponents(slotObject, emitter, emitterMaterial);
+            EnsureSlotRenderComponents(slotObject, emitter, emitterMaterials);
             createdSlots++;
         }
 
@@ -586,7 +625,7 @@ public static class L2EffectGeneratorPrefabBuilder
             Transform slotTransform = emitterTransform.GetChild(slotIndex);
             slotTransform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
             slotTransform.localScale = Vector3.one;
-            EnsureSlotRenderComponents(slotTransform.gameObject, emitter, emitterMaterial);
+            EnsureSlotRenderComponents(slotTransform.gameObject, emitter, emitterMaterials);
         }
 
         return emitterTransform.childCount;
@@ -595,7 +634,7 @@ public static class L2EffectGeneratorPrefabBuilder
     private static void EnsureSlotRenderComponents(
         GameObject slotObject,
         L2EffectUcEmitterParser.UcEmitterDefinition emitter,
-        Material emitterMaterial)
+        Material[] emitterMaterials)
     {
         if (slotObject == null)
         {
@@ -620,9 +659,15 @@ public static class L2EffectGeneratorPrefabBuilder
             meshFilter.sharedMesh = slotMesh;
         }
 
-        if (emitterMaterial != null)
+        if (emitterMaterials != null && emitterMaterials.Length > 0)
         {
-            meshRenderer.sharedMaterial = emitterMaterial;
+            int materialCount = slotMesh != null ? Math.Max(1, slotMesh.subMeshCount) : 1;
+            var materials = new Material[materialCount];
+            for (int i = 0; i < materials.Length; i++)
+            {
+                materials[i] = emitterMaterials[Math.Min(i, emitterMaterials.Length - 1)];
+            }
+            meshRenderer.sharedMaterials = materials;
         }
     }
 

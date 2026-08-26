@@ -163,6 +163,15 @@ public abstract class BaseEffect : MonoBehaviour
         {
             Destroy(transform.parent.gameObject, settings.defaultLifeTime);
         }
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        DropAdenaDestroyLog.Event(
+            "SCHEDULE_DESTROY",
+            this,
+            $"lifeTime={settings.defaultLifeTime:F3}s hideTime={settings.hideTime:F3}s " +
+            $"fadeStartIn={fadeOutTime:F3}s destroyAt={_scheduledDestroyAt:F3}s " +
+            $"alsoDestroyHitPointProxy={(transform.parent != null && transform.parent.name == "HitPointProxy")}",
+            includeStack: true);
+#endif
     }
 
     private string BuildLifetimeShaderSnapshot()
@@ -244,6 +253,12 @@ public abstract class BaseEffect : MonoBehaviour
     protected virtual void OnDestroy()
     {
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
+        DropAdenaDestroyLog.Event(
+            "ON_DESTROY",
+            this,
+            $"scheduledAt={_scheduledDestroyAt:F3}s scheduledLife={_scheduledLifeTime:F3}s " +
+            $"castHit={_castHitTimeSnapshot:F3}s owner='{(_owner != null ? _owner.name : "null")}'",
+            includeStack: true);
         if (_scheduledDestroyAt <= 0f)
         {
             return;
@@ -273,6 +288,13 @@ public abstract class BaseEffect : MonoBehaviour
 
         foreach (var part in parts)
         {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            DropAdenaDestroyLog.Event(
+                "BEGIN_FADEOUT_STOPPART",
+                part,
+                $"fromEffect='{name}'",
+                includeStack: false);
+#endif
             part.StopPart();
         }
     }

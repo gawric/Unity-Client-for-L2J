@@ -14,7 +14,8 @@ public static class ParticleSingleLifetimeDebug
         "it_teleport",
         "wind_strike",
         "el_wind_strike",
-        "it_healing_potion"
+        "it_healing_potion",
+        "e_u056_a"
     };
 
     public static bool ShouldTrace(string groupName, L2Particle owner, Transform transform)

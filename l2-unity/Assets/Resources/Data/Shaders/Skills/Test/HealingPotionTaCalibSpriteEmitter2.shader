@@ -7,7 +7,7 @@ Shader "L2/Effects/Calib/HealingPotionTaSpriteEmitter2"
     {
         _MainTex ("Texture", 2D) = "white" {}
 
-        _L2FxWorldCalibration ("World Calibration K", Float) = 1.4
+        _L2FxWorldCalibration ("World Calibration K", Float) = 1.1
         _SizeRange ("Start Size UU Min Max", Vector) = (5.5, 5.5, 0, 0)
         _StartLocationOffsetUU ("StartLocationOffset UE X Y Z", Vector) = (0, 0, 8, 0)
 
@@ -62,6 +62,7 @@ Shader "L2/Effects/Calib/HealingPotionTaSpriteEmitter2"
             "RenderPipeline" = "UniversalPipeline"
             "Queue" = "Transparent"
             "RenderType" = "Transparent"
+                    "L2FxGpuInstancing" = "On"
         }
 
         Blend One One
@@ -77,6 +78,7 @@ Shader "L2/Effects/Calib/HealingPotionTaSpriteEmitter2"
             HLSLPROGRAM
             #pragma vertex vert
             #pragma fragment frag
+            #pragma multi_compile_instancing
             #pragma target 4.5
 
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
@@ -129,6 +131,8 @@ Shader "L2/Effects/Calib/HealingPotionTaSpriteEmitter2"
                 float _LumaAlphaFloor;
             CBUFFER_END
 
+            #include "../Common/L2FxInstancing.hlsl"
+
             float ResolveStartSizeUU()
             {
                 float minUU = _SizeRange.x;
@@ -172,6 +176,7 @@ Shader "L2/Effects/Calib/HealingPotionTaSpriteEmitter2"
             {
                 float4 positionOS : POSITION;
                 float2 uv : TEXCOORD0;
+                UNITY_VERTEX_INPUT_INSTANCE_ID
             };
 
             struct Varyings
@@ -184,6 +189,7 @@ Shader "L2/Effects/Calib/HealingPotionTaSpriteEmitter2"
 
             Varyings vert(Attributes IN)
             {
+                UNITY_SETUP_INSTANCE_ID(IN);
                 Varyings OUT;
 
                 float ageNorm = ResolveParticleAgeNorm();

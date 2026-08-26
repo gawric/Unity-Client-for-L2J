@@ -97,6 +97,7 @@ Shader "L2/Effects/ShieldTaMesh"
             "RenderPipeline" = "UniversalPipeline"
             "Queue" = "Transparent"
             "RenderType" = "Transparent"
+                    "L2FxGpuInstancing" = "On"
         }
 
         Blend SrcAlpha One
@@ -112,6 +113,7 @@ Shader "L2/Effects/ShieldTaMesh"
             HLSLPROGRAM
             #pragma vertex vert
             #pragma fragment frag
+            #pragma multi_compile_instancing
             #pragma target 3.0
 
             #include "../Common/L2FxMeshEmitterUrp.hlsl"
@@ -199,11 +201,14 @@ Shader "L2/Effects/ShieldTaMesh"
                 float4 _DebugAtlasBackground;
             CBUFFER_END
 
+            #include "../Common/L2FxInstancing.hlsl"
+
             struct Attributes
             {
                 float4 positionOS : POSITION;
                 float3 normalOS : NORMAL;
                 float2 uv : TEXCOORD0;
+                UNITY_VERTEX_INPUT_INSTANCE_ID
             };
 
             struct Varyings
@@ -216,6 +221,7 @@ Shader "L2/Effects/ShieldTaMesh"
 
             Varyings vert(Attributes IN)
             {
+                UNITY_SETUP_INSTANCE_ID(IN);
                 Varyings OUT;
 
                 float delay, lifetime, age, ageNorm;

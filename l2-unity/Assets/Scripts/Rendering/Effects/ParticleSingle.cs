@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Rendering;
 
 public class ParticleSingle : EffectPart
 {
@@ -49,6 +50,7 @@ public class ParticleSingle : EffectPart
     private bool _loggedHalfSecondCheckpoint;
     private uint _spriteSpinAppRandBaseState;
     private uint _spriteMotionAppRandBaseState;
+    private uint _meshAppRandBaseState;
 
     private void Update()
     {
@@ -94,6 +96,12 @@ public class ParticleSingle : EffectPart
             ParticleSingleLifetimeDebug.LogSlotOff(BuildDebugSnapshot(now), now);
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
             DocExtractorParticleSnapshotLogger.OnSlotOff(this);
+            DropAdenaDestroyLog.Event(
+                "SLOT_EXPIRED",
+                this,
+                $"spawnedAt={_lifetime.SpawnedAt:F3}s duration={_lifetime.Duration:F3}s " +
+                $"age={(now - _lifetime.SpawnedAt):F3}s maxCount={_maxCount} spawned={_lifetime.SpawnedCount}",
+                includeStack: true);
 #endif
             SetActive(false, "slot_expired");
             _lifetime.Active = false;
@@ -176,8 +184,13 @@ public class ParticleSingle : EffectPart
             _particles = GetComponentsInChildren<Renderer>(true);
         }
 
-        _spriteSpinAppRandBaseState = L2MaterialPropertyCopier.CreateFiniteAppRandState();
+        ExpandVertexMotionBounds();
+
         _spriteMotionAppRandBaseState = L2MaterialPropertyCopier.CreateFiniteAppRandState();
+        _spriteSpinAppRandBaseState = L2MaterialPropertyCopier.AdvanceAppRandState(
+            _spriteMotionAppRandBaseState,
+            L2AppRand.SpriteSpinDraws);
+        _meshAppRandBaseState = L2MaterialPropertyCopier.CreateFiniteAppRandState();
 
         if (_testSpawnOnlyNoTeardown)
         {
@@ -199,22 +212,35 @@ public class ParticleSingle : EffectPart
         _holdController.ResetReleaseLogs();
         _holdController.ResetCastEndFade();
 
+        Renderer slotRenderer = ResolveRenderer();
         float materialLifetime = _lifetime.ReadLifetimeFromSharedMaterials(
-            ResolveRenderer(),
+            slotRenderer,
             name,
             _owner,
             transform,
             _duration);
+        float slotDuration = materialLifetime + ReadMaxInitialDelay(slotRenderer) + 0.03f;
+        if (slotDuration > _lifetime.Duration)
+            _lifetime.Duration = slotDuration;
         _lifetime.PrepareForPlay(
             materialLifetime,
             _hasFixedDuration,
             _holdController.HasRuntimeLoopOverride,
             _holdController.RuntimeLoopOverrideValue);
+        if (slotDuration > _lifetime.Duration)
+            _lifetime.Duration = slotDuration;
         _duration = _lifetime.Duration;
 
         SetActive(false, "playpart_reset");
         ParticleSingleLifetimeDebug.LogPlay(BuildDebugSnapshot(now));
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
+        DropAdenaDestroyLog.Event(
+            "PLAY_PART",
+            this,
+            $"duration={_duration:F3}s materialLife={materialLifetime:F3}s " +
+            $"slotDuration={slotDuration:F3}s delay={ReadMaxInitialDelay(slotRenderer):F3}s " +
+            $"fixed={_hasFixedDuration} maxCount={_maxCount}",
+            includeStack: false);
         DocExtractorParticleSnapshotLogger.OnPlayPart(this);
 #endif
     }
@@ -250,6 +276,13 @@ public class ParticleSingle : EffectPart
             ? stopRenderer.materials[0]
             : null;
         ParticleSingleLifetimeDebug.LogStopPart(BuildDebugSnapshot(now), now, stopRenderer, stopMat);
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        DropAdenaDestroyLog.Event(
+            "STOP_PART",
+            this,
+            $"duration={_duration:F3}s spawnedAt={_lifetime.SpawnedAt:F3}s active={_lifetime.Active}",
+            includeStack: true);
+#endif
 
         _lifetime.RuntimeContinuousLoop = false;
         _lifetime.SpawnedCount = _maxCount;
@@ -304,6 +337,18 @@ public class ParticleSingle : EffectPart
         transform.localScale = new Vector3(targetWidth * 4f, 1f, targetWidth * 4f);
     }
 
+    void OnDestroy()
+    {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        DropAdenaDestroyLog.Event(
+            "PARTICLE_SINGLE_ON_DESTROY",
+            this,
+            $"duration={_duration:F3}s spawnedAt={_lifetime.SpawnedAt:F3}s " +
+            $"active={_lifetime.Active} stopped={_lifetime.Stopped} spawnedCount={_lifetime.SpawnedCount}",
+            includeStack: true);
+#endif
+    }
+
     private void Spawn(float now)
     {
         Renderer renderer = ResolveRenderer();
@@ -319,8 +364,8 @@ public class ParticleSingle : EffectPart
 
         float shaderStartTime = now - _relativeWarmupTime;
         float seed = Random.Range(-100f, 100f);
-        // State immediately before SpriteEmitter2's StartSpin FRangeVector
-        // draw. The shader consumes the verified L2 appRand sequence itself.
+        // Sprite spin shares the same verified TLS chain as motion:
+        // state before StartSpin = state before StartVelocity + 22 draws.
         L2ShaderHoldController.Settings holdSettings = BuildHoldSettings();
         float holdValue = _holdController.EvaluateHold(holdSettings, BuildCastTimeline(now));
 
@@ -342,6 +387,16 @@ public class ParticleSingle : EffectPart
             }
 
             L2MaterialPropertyCopier.CopyLifetimeFadeAndFxFromShared(runtimeMat, sharedMat);
+            L2MaterialPropertyCopier.CopyMeshAppRandStartSpinFromBaseState(
+                runtimeMat,
+                sharedMat,
+                _meshAppRandBaseState,
+                0);
+            // MeshRenderer path never binds _L2FxParticleSlots. The instanced
+            // shader variant would read StartTime from that unbound buffer.
+            runtimeMat.enableInstancing = false;
+            if (sharedMat != null)
+                sharedMat.enableInstancing = false;
             runtimeMat.SetFloat(L2MaterialPropertyCopier.StartTimeId, shaderStartTime);
             runtimeMat.SetFloat(L2MaterialPropertyCopier.SeedId, seed);
             L2MaterialPropertyCopier.SetSpriteSpinRandState(runtimeMat, _spriteSpinAppRandBaseState);
@@ -411,6 +466,16 @@ public class ParticleSingle : EffectPart
         bool wasActive = renderer.gameObject.activeSelf;
         renderer.gameObject.SetActive(value);
         ParticleSingleLifetimeDebug.LogSetActive(BuildDebugSnapshot(Now()), value, reason, renderer, wasActive);
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        if (!value)
+        {
+            DropAdenaDestroyLog.Event(
+                "SET_ACTIVE_FALSE",
+                this,
+                $"reason={reason} slot='{renderer.name}' wasActive={wasActive}",
+                includeStack: true);
+        }
+#endif
     }
 
     private void ApplyCompositeShaderHoldToAllRuntimeMaterials(float now)
@@ -530,5 +595,64 @@ public class ParticleSingle : EffectPart
         }
 
         material.SetVector(L2MaterialPropertyCopier.OwnerWorldPosProperty, ResolveOwnerWorldPosForShader(material));
+    }
+
+    static bool RequiresExpandedBounds(Material material)
+    {
+        const string expandBoundsProperty = "_ExpandShaderBounds";
+        return material != null &&
+               material.HasProperty(expandBoundsProperty) &&
+               material.GetFloat(expandBoundsProperty) > 0.5f;
+    }
+
+    bool RequiresExpandedBounds(Renderer renderer)
+    {
+        if (renderer == null)
+            return false;
+
+        Material[] materials = renderer.sharedMaterials;
+        if (materials == null)
+            return false;
+
+        for (int i = 0; i < materials.Length; i++)
+        {
+            if (RequiresExpandedBounds(materials[i]))
+                return true;
+        }
+
+        return false;
+    }
+
+    void ExpandVertexMotionBounds()
+    {
+        Renderer renderer = ResolveRenderer();
+        if (!RequiresExpandedBounds(renderer))
+            return;
+
+        // Culling sees imported CPU bounds before the vertex shader applies
+        // StartSize, UC offset, velocity and acceleration. coin00 is only
+        // ~6 mm wide in the FBX but its shader path moves it about one metre.
+        renderer.allowOcclusionWhenDynamic = false;
+        renderer.localBounds = new Bounds(
+            new Vector3(0f, 0.5f, 0f),
+            new Vector3(8f, 8f, 8f));
+    }
+
+    static float ReadMaxInitialDelay(Renderer renderer)
+    {
+        float maxDelay = 0f;
+        if (renderer == null || renderer.sharedMaterials == null)
+            return maxDelay;
+
+        Material[] materials = renderer.sharedMaterials;
+        for (int i = 0; i < materials.Length; i++)
+        {
+            Material material = materials[i];
+            if (material == null || !material.HasProperty("_InitialDelayRange"))
+                continue;
+            maxDelay = Mathf.Max(maxDelay, material.GetVector("_InitialDelayRange").y);
+        }
+
+        return maxDelay;
     }
 }

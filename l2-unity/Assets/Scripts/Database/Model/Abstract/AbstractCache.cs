@@ -45,7 +45,6 @@ public abstract class AbstractCache : AbstractGetCache
 
     protected GameObject LoadArmorModel(string model)
     {
-
         string[] folderFile = model.Split(".");
 
         if (folderFile.Length < 2) return null;
@@ -75,19 +74,52 @@ public abstract class AbstractCache : AbstractGetCache
             return null;
         }
 
-        string path = $"Data/Animations/{folderFile[0]}/{folderFile[1]}/{folderFile[1]}";
+        string folder = $"Data/Animations/{folderFile[0]}/{folderFile[1]}";
+        string assetName = folderFile[1];
+        GameObject[] loaded = Resources.LoadAll<GameObject>(folder);
+        GameObject best = null;
+        int bestScore = -1;
+        for (int i = 0; i < loaded.Length; i++)
+        {
+            GameObject go = loaded[i];
+            if (go == null || go.name != assetName)
+                continue;
+            int score = ScoreNpcPrefab(go);
+            if (score > bestScore)
+            {
+                bestScore = score;
+                best = go;
+            }
+        }
 
-        return Resources.Load<GameObject>(path);
+        if (best != null)
+            return best;
+
+        return Resources.Load<GameObject>(folder + "/" + assetName);
+    }
+
+    static int ScoreNpcPrefab(GameObject go)
+    {
+        int score = 0;
+        if (go.GetComponent<MonsterEntity>() != null || go.GetComponentInChildren<MonsterEntity>(true) != null)
+            score += 100;
+        if (go.GetComponent<NpcEntity>() != null || go.GetComponentInChildren<NpcEntity>(true) != null)
+            score += 100;
+        if (go.GetComponent<CharacterController>() != null ||
+            go.GetComponentInChildren<CharacterController>(true) != null)
+            score += 20;
+        if (go.transform.Find("click_area") != null)
+            score += 10;
+        score += go.GetComponents<MonoBehaviour>().Length;
+        return score;
     }
 
     protected GameObject LoadWeaponModel(string model)
     {
-        var parts = model.Split('.');
-        if (parts.Length < 2) return null;
-
-        var weapon = Resources.Load<GameObject>($"Data/Animations/{parts[0]}/{parts[1]}");
-        Debug.Log(weapon != null ? $"Successfully loaded weapon {model} model." : $"Can't find weapon model at Data/Animations/{parts[0]}/{parts[1]}");
-
+        GameObject weapon = LoadUkxPrefab(model);
+        Debug.Log(weapon != null
+            ? $"Successfully loaded weapon {model} model."
+            : $"Can't find weapon model {model}");
         return weapon;
     }
 

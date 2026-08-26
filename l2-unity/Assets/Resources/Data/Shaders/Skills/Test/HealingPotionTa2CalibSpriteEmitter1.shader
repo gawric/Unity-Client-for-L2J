@@ -5,7 +5,7 @@ Shader "L2/Effects/Calib/HealingPotionTa2SpriteEmitter1"
     {
         _MainTex ("Texture", 2D) = "white" {}
 
-        _L2FxWorldCalibration ("World Calibration K", Float) = 1.4
+        _L2FxWorldCalibration ("World Calibration K", Float) = 1.1
         _SizeRange ("Start Size UU Min Max", Vector) = (20, 20, 0, 0)
 
         _TestSizeScaleAge ("SizeScale Age 0-1", Range(0, 1)) = 0.5
@@ -33,6 +33,7 @@ Shader "L2/Effects/Calib/HealingPotionTa2SpriteEmitter1"
             "RenderPipeline" = "UniversalPipeline"
             "Queue" = "Transparent"
             "RenderType" = "Transparent"
+                    "L2FxGpuInstancing" = "On"
         }
 
         Blend One One
@@ -48,6 +49,7 @@ Shader "L2/Effects/Calib/HealingPotionTa2SpriteEmitter1"
             HLSLPROGRAM
             #pragma vertex vert
             #pragma fragment frag
+            #pragma multi_compile_instancing
             #pragma target 3.0
 
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
@@ -76,6 +78,8 @@ Shader "L2/Effects/Calib/HealingPotionTa2SpriteEmitter1"
                 float _RgbBoost;
                 float _LumaAlphaFloor;
             CBUFFER_END
+
+            #include "../Common/L2FxInstancing.hlsl"
 
             float EvaluateDynamicSizeScale(float progress)
             {
@@ -125,6 +129,7 @@ Shader "L2/Effects/Calib/HealingPotionTa2SpriteEmitter1"
             {
                 float4 positionOS : POSITION;
                 float2 uv : TEXCOORD0;
+                UNITY_VERTEX_INPUT_INSTANCE_ID
             };
 
             struct Varyings
@@ -137,6 +142,7 @@ Shader "L2/Effects/Calib/HealingPotionTa2SpriteEmitter1"
 
             Varyings vert(Attributes IN)
             {
+                UNITY_SETUP_INSTANCE_ID(IN);
                 Varyings OUT;
 
                 float sizeUU = ResolveStartSizeUU() * EvaluateDynamicSizeScale(_TestSizeScaleAge);

@@ -99,12 +99,12 @@ MonoBehaviour:
     settings: {fileID: 11400000, guid: dd6f482471331114da04e05ef1d9dddb, type: 2}
     ignoreFlightTimeForCast: 1
   - id: 2031
-    prefab: {fileID: 5808942669273333594, guid: a1c7d3a47cad6db40bea1a5ea2ad1a9e, type: 3}
+    prefab: {fileID: 2595007125146735222, guid: 3f05ace42cf604c4aae86789a698f5c3, type: 3}
     comment: it-healing-potion-effect
     settings: {fileID: 11400000, guid: 304118563f04a3c46812acac35e7ba2e, type: 2}
     ignoreFlightTimeForCast: 1
   - id: 2011
-    prefab: {fileID: 8950294488946584971, guid: 673a363b6152ee94695a2b7d0958da24, type: 3}
+    prefab: {fileID: 2595007125146735222, guid: 3f05ace42cf604c4aae86789a698f5c3, type: 3}
     comment: it-haste-potion-effect
     settings: {fileID: 11400000, guid: cf003ce1643c62640a960af58930287b, type: 2}
     ignoreFlightTimeForCast: 1
@@ -117,4 +117,74 @@ MonoBehaviour:
     prefab: {fileID: 5808942669273333594, guid: a1c7d3a47cad6db40bea1a5ea2ad1a9e, type: 3}
     comment: power_strike
     settings: {fileID: 11400000, guid: 539430148bf8dfa41bf71e9aa073a74a, type: 2}
+    ignoreFlightTimeForCast: 1
+  - id: 56001
+    prefab: {fileID: 1907917464583194202, guid: 1c316dd6db6d87047aeff4b29429a145, type: 3}
+    comment: e_u056_a drop land / coins
+    settings: {fileID: 11400000, guid: 56001e056a0000000000000000000001, type: 2}
+    ignoreFlightTimeForCast: 1
+  - id: 56002
+    prefab: {fileID: 2128254535069956145, guid: f1f7330b6829b664fa1a4a57ca01088b, type: 3}
+    comment: e_u056_b drop ground glow
+    settings: {fileID: 11400000, guid: 56002e056b0000000000000000000001, type: 2}
+    ignoreFlightTimeForCast: 1
+  - id: 2278
+    prefab: {fileID: 2595007125146735222, guid: 3f05ace42cf604c4aae86789a698f5c3, type: 3}
+    comment: herb-of-life→it-healing-potion-effect
+    settings: {fileID: 11400000, guid: 304118563f04a3c46812acac35e7ba2e, type: 2}
+    ignoreFlightTimeForCast: 1
+  - id: 2279
+    prefab: {fileID: 2595007125146735222, guid: 3f05ace42cf604c4aae86789a698f5c3, type: 3}
+    comment: herb-of-mana→it-healing-potion-effect
+    settings: {fileID: 11400000, guid: 304118563f04a3c46812acac35e7ba2e, type: 2}
+    ignoreFlightTimeForCast: 1
+  - id: 2280
+    prefab: {fileID: 2595007125146735222, guid: 3f05ace42cf604c4aae86789a698f5c3, type: 3}
+    comment: herb-of-power→it-healing-potion-effect
+    settings: {fileID: 11400000, guid: 304118563f04a3c46812acac35e7ba2e, type: 2}
+    ignoreFlightTimeForCast: 1
+  - id: 2281
+    prefab: {fileID: 2595007125146735222, guid: 3f05ace42cf604c4aae86789a698f5c3, type: 3}
+    comment: herb-of-magic→it-healing-potion-effect
+    settings: {fileID: 11400000, guid: 304118563f04a3c46812acac35e7ba2e, type: 2}
+    ignoreFlightTimeForCast: 1
+  - id: 2282
+    prefab: {fileID: 2595007125146735222, guid: 3f05ace42cf604c4aae86789a698f5c3, type: 3}
+    comment: herb-of-atk-spd→it-haste-potion-effect
+    settings: {fileID: 11400000, guid: cf003ce1643c62640a960af58930287b, type: 2}
+    ignoreFlightTimeForCast: 1
+  - id: 2283
+    prefab: {fileID: 2595007125146735222, guid: 3f05ace42cf604c4aae86789a698f5c3, type: 3}
+    comment: herb-of-casting-spd→it-haste-potion-effect
+    settings: {fileID: 11400000, guid: cf003ce1643c62640a960af58930287b, type: 2}
+    ignoreFlightTimeForCast: 1
+  - id: 2284
+    prefab: {fileID: 2595007125146735222, guid: 3f05ace42cf604c4aae86789a698f5c3, type: 3}
+    comment: herb-of-critical→it-healing-potion-effect
+    settings: {fileID: 11400000, guid: 304118563f04a3c46812acac35e7ba2e, type: 2}
+    ignoreFlightTimeForCast: 1
+  - id: 2285
+    prefab: {fileID: 2595007125146735222, guid: 3f05ace42cf604c4aae86789a698f5c3, type: 3}
+    comment: herb-of-speed→it-haste-potion-effect
+    settings: {fileID: 11400000, guid: cf003ce1643c62640a960af58930287b, type: 2}
+    ignoreFlightTimeForCast: 1
+  - id: 2244
+    prefab: {fileID: 2595007125146735222, guid: 3f05ace42cf604c4aae86789a698f5c3, type: 3}
+    comment: herb-of-life-c4→it-healing-potion-effect
+    settings: {fileID: 11400000, guid: 304118563f04a3c46812acac35e7ba2e, type: 2}
+    ignoreFlightTimeForCast: 1
+  - id: 2245
+    prefab: {fileID: 2595007125146735222, guid: 3f05ace42cf604c4aae86789a698f5c3, type: 3}
+    comment: herb-of-mana-c4→it-healing-potion-effect
+    settings: {fileID: 11400000, guid: 304118563f04a3c46812acac35e7ba2e, type: 2}
+    ignoreFlightTimeForCast: 1
+  - id: 2246
+    prefab: {fileID: 2595007125146735222, guid: 3f05ace42cf604c4aae86789a698f5c3, type: 3}
+    comment: herb-of-power-c4→it-healing-potion-effect
+    settings: {fileID: 11400000, guid: 304118563f04a3c46812acac35e7ba2e, type: 2}
+    ignoreFlightTimeForCast: 1
+  - id: 2247
+    prefab: {fileID: 2595007125146735222, guid: 3f05ace42cf604c4aae86789a698f5c3, type: 3}
+    comment: herb-of-magic-c4→it-healing-potion-effect
+    settings: {fileID: 11400000, guid: 304118563f04a3c46812acac35e7ba2e, type: 2}
     ignoreFlightTimeForCast: 1

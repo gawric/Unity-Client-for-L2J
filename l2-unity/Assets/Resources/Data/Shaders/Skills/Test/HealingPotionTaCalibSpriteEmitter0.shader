@@ -5,7 +5,7 @@ Shader "L2/Effects/Calib/HealingPotionTaSpriteEmitter0"
     {
         _MainTex ("Texture", 2D) = "white" {}
 
-        _L2FxWorldCalibration ("World Calibration K", Float) = 1.4
+        _L2FxWorldCalibration ("World Calibration K", Float) = 1.1
         _SizeRange ("Start Size UU Min Max", Vector) = (3, 6, 0, 0)
         _StartLocationOffsetUU ("StartLocationOffset UE X Y Z", Vector) = (0, 0, 7, 0)
         _PolarThetaRangeUc ("Polar Theta Min Max", Vector) = (0, 360, 0, 0)
@@ -70,6 +70,7 @@ Shader "L2/Effects/Calib/HealingPotionTaSpriteEmitter0"
             "RenderPipeline" = "UniversalPipeline"
             "Queue" = "Transparent"
             "RenderType" = "Transparent"
+                    "L2FxGpuInstancing" = "On"
         }
 
         Blend One OneMinusSrcColor
@@ -85,6 +86,7 @@ Shader "L2/Effects/Calib/HealingPotionTaSpriteEmitter0"
             HLSLPROGRAM
             #pragma vertex vert
             #pragma fragment frag
+            #pragma multi_compile_instancing
             #pragma target 4.5
 
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
@@ -160,6 +162,8 @@ Shader "L2/Effects/Calib/HealingPotionTaSpriteEmitter0"
                 float _LumaAlphaPower;
             CBUFFER_END
 
+            #include "../Common/L2FxInstancing.hlsl"
+
             float EvaluateDynamicSizeScale(float progress)
             {
                 float phase = frac(progress * _SizeScaleRepeats);
@@ -208,6 +212,7 @@ Shader "L2/Effects/Calib/HealingPotionTaSpriteEmitter0"
             {
                 float4 positionOS : POSITION;
                 float2 uv : TEXCOORD0;
+                UNITY_VERTEX_INPUT_INSTANCE_ID
             };
 
             struct Varyings
@@ -218,6 +223,7 @@ Shader "L2/Effects/Calib/HealingPotionTaSpriteEmitter0"
 
             Varyings vert(Attributes IN)
             {
+                UNITY_SETUP_INSTANCE_ID(IN);
                 Varyings OUT;
 
                 uint spawnState = asuint(_SpriteMotionRandStateBits);

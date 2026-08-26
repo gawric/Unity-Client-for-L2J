@@ -57,8 +57,7 @@ public class NewPhysicalSkillsState : AbstractAttackEvents
                 } //2031 potion heal , 2011 haste potion
                 else if (SetupDurationHelper.IsUsePotion(useSkill))
                 {
-                    Entity entity = _stateMachine.Player;
-                    EffectManager.Instance.PlayEffect(useSkill.SkillId, entity.transform, entity.GetMagicCastData());
+                    SetupDurationHelper.FinishPotionUse(_stateMachine, _stateMachine.Player, useSkill);
                 }
                 else
                 {

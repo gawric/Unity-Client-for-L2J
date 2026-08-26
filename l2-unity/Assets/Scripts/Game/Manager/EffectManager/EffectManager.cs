@@ -28,6 +28,9 @@ public class EffectManager : MonoBehaviour
 
         instance.gameObject.SetActive(true);
         instance.Setup(data.settings, castData, target);
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        EffectDoublePlayLog.TrackManagerPlay(id, data.prefab != null ? data.prefab.name : "null");
+#endif
         instance.Play();
     }
 
@@ -139,6 +142,9 @@ public class EffectManager : MonoBehaviour
             composite.SetImpactHit(point, dir);
         }
 
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        EffectDoublePlayLog.TrackManagerPlay(id, data.prefab != null ? data.prefab.name : "null");
+#endif
         instance.Play();
         Debug.Log(
             $"[HIT_FX] 7.EffectManager PLAY OK spawn#{_impactSpawnCounter} effectId={id} " +

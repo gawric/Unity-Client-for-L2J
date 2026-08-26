@@ -22,7 +22,16 @@ public sealed class MonsterSpawner
             return null;
 
         npcGo.transform.SetParent(world.MonstersContainer);
-        MonsterEntity npc = npcGo.GetComponent<MonsterEntity>();
+        MonsterEntity npc = EntitySpawnShared.FindOnPrefab<MonsterEntity>(npcGo);
+        if (npc == null)
+        {
+            Debug.LogError(
+                "MonsterSpawner: MonsterEntity missing on " + npcGo.name +
+                " prefab=" + (request.Prefab != null ? request.Prefab.name : "null") +
+                " npcId=" + identity.NpcId);
+            UnityEngine.Object.Destroy(npcGo);
+            return null;
+        }
         npc.Running = npc.Identity != null && npc.Identity.IsRunning;
         npc.NpcData = new NpcData(request.NpcName, request.Npcgrp);
         EntitySpawnShared.ApplyNpcIdentity(npc, request);
@@ -31,6 +40,7 @@ public sealed class MonsterSpawner
             ? request.Prefab.name + "_" + identity.Name
             : identity.Name;
         EntitySpawnShared.SanitizeCharacterControllerStepOffset(npcGo);
+        EntitySpawnShared.DisableLegacyPositionSync(npcGo);
         npcGo.SetActive(true);
         EntitySpawnShared.ReapplyGroundAfterActivate(npcGo, identity);
 
@@ -55,7 +65,13 @@ public sealed class MonsterSpawner
 
     private static void InitMonster(Entity npc, GameObject npcGo, IWorldSpawnContext world)
     {
-        NetworkAnimationController animationController = npc.GetComponent<NetworkAnimationController>();
+        NetworkAnimationController animationController =
+            EntitySpawnShared.FindOnPrefab<NetworkAnimationController>(npcGo);
+        if (animationController == null)
+        {
+            Debug.LogError("MonsterSpawner: NetworkAnimationController missing on " + npcGo.name);
+            return;
+        }
         animationController.Initialize();
         EntitySpawnShared.BindGearAndAnimation(npc, npcGo, animationController);
         EntitySpawnShared.RegisterAnimation(world, npc.Identity.Id, animationController, npc);

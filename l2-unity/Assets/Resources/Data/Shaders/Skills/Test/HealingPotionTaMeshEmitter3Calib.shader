@@ -43,7 +43,7 @@ Shader "L2/Effects/HealingPotionTaMeshEmitter3"
 
     SubShader
     {
-        Tags { "RenderPipeline" = "UniversalPipeline" "Queue" = "Transparent" "RenderType" = "Transparent" }
+        Tags { "RenderPipeline" = "UniversalPipeline" "Queue" = "Transparent" "RenderType" = "Transparent" "L2FxGpuInstancing" = "On" }
         Blend One One
         Cull Off
         ZWrite Off
@@ -56,6 +56,7 @@ Shader "L2/Effects/HealingPotionTaMeshEmitter3"
             HLSLPROGRAM
             #pragma vertex vert
             #pragma fragment frag
+            #pragma multi_compile_instancing
             // Exact appRand needs 32-bit uint wraparound and bit shifts.
             #pragma target 4.5
 
@@ -101,10 +102,13 @@ Shader "L2/Effects/HealingPotionTaMeshEmitter3"
                 float _FadeOutStartTime;
             CBUFFER_END
 
+            #include "../Common/L2FxInstancing.hlsl"
+
             struct Attributes
             {
                 float4 positionOS : POSITION;
                 float2 uv : TEXCOORD0;
+                UNITY_VERTEX_INPUT_INSTANCE_ID
             };
 
             struct Varyings
@@ -184,6 +188,7 @@ Shader "L2/Effects/HealingPotionTaMeshEmitter3"
 
             Varyings vert(Attributes IN)
             {
+                UNITY_SETUP_INSTANCE_ID(IN);
                 Varyings OUT;
                 float lifetime;
                 float ageSeconds = ResolveAgeSeconds(lifetime);

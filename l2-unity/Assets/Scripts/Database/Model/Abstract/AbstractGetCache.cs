@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using VContainer;
 using static ModelTable;
 
 public abstract class AbstractGetCache
@@ -13,6 +14,7 @@ public abstract class AbstractGetCache
 
     protected Dictionary<string, GameObject> _weapons;
     protected Dictionary<string, GameObject> _etcItems;
+    protected Dictionary<string, GameObject> _loadedModels;
     protected Dictionary<string, L2Npc> _npcs;
     protected Dictionary<string, L2Armor> _armors;
 
@@ -173,6 +175,33 @@ public abstract class AbstractGetCache
         return null;
     }
 
+    protected GameObject LoadUkxPrefab(string model)
+    {
+        if (string.IsNullOrEmpty(model))
+            return null;
+
+        string[] parts = model.Split('.');
+        if (parts.Length < 2)
+            return null;
+
+        string pkg = parts[0];
+        string asset = parts[1];
+
+        GameObject go = Resources.Load<GameObject>($"Data/Animations/{pkg}/{asset}");
+        if (go != null)
+            return go;
+
+        go = Resources.Load<GameObject>($"Data/Animations/{pkg}/{asset}/{asset}");
+        if (go != null)
+            return go;
+
+        go = Resources.Load<GameObject>($"Data/StaticMeshes/{pkg}/{asset}");
+        if (go != null)
+            return go;
+
+        return Resources.Load<GameObject>($"Data/StaticMeshes/{pkg}/{asset}/{asset}");
+    }
+
 
     public GameObject GetWeaponById(int itemId)
     {
@@ -230,6 +259,76 @@ public abstract class AbstractGetCache
         }
 
         return go;
+    }
+
+    public GameObject TryGetCachedItemModel(string model)
+    {
+        if (string.IsNullOrEmpty(model))
+            return null;
+        if (_weapons != null && _weapons.TryGetValue(model, out GameObject weapon) && weapon != null)
+            return weapon;
+        if (_etcItems != null && _etcItems.TryGetValue(model, out GameObject etc) && etc != null)
+            return etc;
+        if (_loadedModels != null && _loadedModels.TryGetValue(model, out GameObject extra) && extra != null)
+            return extra;
+        return null;
+    }
+
+    /// <summary>
+    /// Cached weapon/etc prefab, or a lazily loaded Animations/StaticMeshes UKX.
+    /// </summary>
+    public GameObject GetOrLoadModel(string model)
+    {
+        if (string.IsNullOrEmpty(model) ||
+            model.Equals("None", StringComparison.OrdinalIgnoreCase))
+            return null;
+
+        GameObject cached = TryGetCachedItemModel(model);
+        if (cached != null)
+            return cached;
+
+        GameObject loaded = LoadUkxPrefab(model);
+        if (loaded == null)
+            return null;
+
+        if (_loadedModels == null)
+            _loadedModels = new Dictionary<string, GameObject>();
+        _loadedModels[model] = loaded;
+        return loaded;
+    }
+
+    public GameObject GetDropPrefab(int itemId)
+    {
+        if (App.GameContainer != null)
+            return App.GameContainer.Resolve<ItemDropPrefabLoader>().Resolve(itemId);
+
+        Abstractgrp grp = ResolveDropGrp(itemId);
+        if (grp != null && !string.IsNullOrEmpty(grp.DropModel))
+        {
+            GameObject drop = GetOrLoadModel(grp.DropModel);
+            if (drop != null)
+                return drop;
+        }
+
+        string equip = grp is Weapongrp weapon ? weapon.Model
+            : grp is EtcItemgrp etc ? etc.Model
+            : null;
+        return GetOrLoadModel(equip);
+    }
+
+    static Abstractgrp ResolveDropGrp(int itemId)
+    {
+        ItemTable items = ItemTable.Instance;
+        if (items == null)
+            return null;
+        Weapon weapon = items.GetWeapon(itemId);
+        if (weapon != null && weapon.Weapongrp != null)
+            return weapon.Weapongrp;
+        Armor armor = items.GetArmor(itemId);
+        if (armor != null && armor.Armorgrp != null)
+            return armor.Armorgrp;
+        EtcItem etc = items.GetEtcItem(itemId);
+        return etc != null ? etc.EtcItemgrp : null;
     }
 
     public GameObject GetContainer(CharacterRaceAnimation raceId, EntityType entityType)

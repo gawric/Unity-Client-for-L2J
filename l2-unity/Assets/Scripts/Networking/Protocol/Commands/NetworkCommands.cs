@@ -229,6 +229,24 @@ public sealed class RequestDestroyItemCommand : INetworkCommand
     }
 }
 
+public sealed class RequestDropItemCommand : INetworkCommand
+{
+    public int ObjectId;
+    public int Count;
+    public int X;
+    public int Y;
+    public int Z;
+
+    public RequestDropItemCommand(int objectId, int count, int x, int y, int z)
+    {
+        ObjectId = objectId;
+        Count = count;
+        X = x;
+        Y = y;
+        Z = z;
+    }
+}
+
 public sealed class RequestEnchantItemCommand : INetworkCommand
 {
     public int ObjectId;

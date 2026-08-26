@@ -99,8 +99,6 @@ public class PlayerEntity : Entity
         return gear.GetNameWeapon();
     }
 
-    protected override void LookAtTarget() { }
-
     protected override void OnDeath()
     {
         base.OnDeath();

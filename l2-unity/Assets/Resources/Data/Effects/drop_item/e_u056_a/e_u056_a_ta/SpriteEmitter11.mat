@@ -1,0 +1,111 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!21 &2100000
+Material:
+  serializedVersion: 8
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: SpriteEmitter11
+  m_Shader: {fileID: 4800000, guid: 748e51cf1e6d475fbb467f790cbb8a74, type: 3}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
+  m_ValidKeywords: []
+  m_InvalidKeywords:
+  - _FADEOUT_ON
+  - _USESIZESCALE_ON
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 1
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: -1
+  stringTagMap:
+    RenderType: Transparent
+  disabledShaderPasses: []
+  m_LockedProperties: 
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - _MainTex:
+        m_Texture: {fileID: 2800000, guid: fc20868edcd7b2a408a5408d2519ade4, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Ints: []
+    m_Floats:
+    - _ColorKey1Time: 1
+    - _ColorKey2Time: 1
+    - _ColorScaleCount: 2
+    - _ColorScaleParam: 0
+    - _FadeIn: 0
+    - _FadeInEndTime: 0
+    - _Fadeout: 1
+    - _FadeoutStartTime: 0.24
+    - _L2FxWorldCalibration: 1.1
+    - _L2SpriteColorGammaToLinear: 0
+    - _Opacity: 1
+    - _RgbBoost: 1
+    - _SizeScaleCount: 4
+    - _SizeScaleRepeats: 0
+    - _SpriteMotionRandStateBits: 0
+    - _SpriteSpinRandStateBits: 0
+    - _StartTime: 0
+    - _SubdivisionEnd: 2
+    - _SubdivisionStart: 0
+    - _TextureUSubdivisions: 2
+    - _TextureVSubdivisions: 2
+    - _UseSizeScale: 1
+    - _SpawnMode: 1
+    - _FullTlsShape: 0
+    - _MotionMode: 1
+    - _OrientationMode: 0
+    - _PtvdMode: 0
+    - _SizeMode: 0
+    - _SpinMode: 1
+    - _FlipbookMode: 3
+    - _SrcBlend: 1
+    - _DstBlend: 1
+    - _ZWrite: 0
+    - _Cull: 0
+    - _ColorFadeAlphaBlend: 1
+    - _AlphaClipThreshold: -1
+    - _StaticSubdivision: 0
+    - _ColorKey3Time: 1
+    m_Colors:
+    - _AccelerationUc: {r: 0, g: 0, b: 0, a: 0}
+    - _ColorKey0: {r: 1, g: 1, b: 1, a: 1}
+    - _ColorKey1: {r: 1, g: 1, b: 1, a: 1}
+    - _ColorKey2: {r: 1, g: 1, b: 1, a: 1}
+    - _ColorMulMax: {r: 1, g: 1, b: 1, a: 0}
+    - _ColorMulMin: {r: 1, g: 1, b: 1, a: 0}
+    - _LifetimeRange: {r: 0.3, g: 0.3, b: 0, a: 0}
+    - _SizeKey0: {r: 0.07, g: 2.5, b: 0, a: 0}
+    - _SizeKey1: {r: 0.31, g: 1.5, b: 0, a: 0}
+    - _SizeKey2: {r: 1, g: 0.01, b: 0, a: 0}
+    - _SizeKey3: {r: 1, g: 0.01, b: 0, a: 0}
+    - _SizeRange: {r: 0.3, g: 1.2, b: 0, a: 0}
+    - _SpriteSpinCcwOrCw: {r: 0, g: 0, b: 0, a: 0}
+    - _SpriteSpinSpsRangeUc: {r: 0, g: 0, b: 0, a: 0}
+    - _SpriteSpinStartRangeUc: {r: 0.03, g: 0.03, b: 0, a: 0}
+    - _StartLocationOffsetUc: {r: 0, g: 0, b: 27.1, a: 0}
+    - _StartLocationRangeXUc: {r: -4, g: 4, b: 0, a: 0}
+    - _StartLocationRangeYUc: {r: -4, g: 4, b: 0, a: 0}
+    - _StartLocationRangeZUc: {r: -10, g: 10, b: 0, a: 0}
+    - _StartVelocityRangeXUc: {r: 0, g: 0, b: 0, a: 0}
+    - _StartVelocityRangeYUc: {r: 0, g: 0, b: 0, a: 0}
+    - _StartVelocityRangeZUc: {r: 0, g: 0, b: 0, a: 0}
+    - _ColorKey3: {r: 1, g: 1, b: 1, a: 1}
+  m_BuildTextureStacks: []
+  m_AllowLocking: 1
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 11
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d0353a89b1f911e48b9e16bdc9f2e058, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  version: 10

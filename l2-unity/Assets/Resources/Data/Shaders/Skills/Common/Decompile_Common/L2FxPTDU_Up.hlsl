@@ -160,6 +160,7 @@ float3 L2FxPTDU_Up_FillVbCorner(
 // Same-space path: Loc/Cam/Size already share one space after CS resolution
 // (typically owner-local when CS==1 and the Unity GO is the effect owner).
 // Unity built-in quad: OS.xy in [-0.5,+0.5]; OS.y -> streak (AxisX), OS.x -> width (AxisY).
+// sizeX/sizeY here retain the original UE half-extent convention.
 float3 L2FxPTDU_Up_PositionSameSpaceFromQuadOs(
     float3 locationSame,
     float3 oldLocationSame,
@@ -196,13 +197,15 @@ float3 L2FxPTDU_Up_PositionUnityFromQuadOs(
     float sizeYMeters,
     float2 quadOsXy)
 {
+    // sizeXMeters/sizeYMeters are full diameters returned by
+    // L2Fx_GetFinalVertexSizeMeters, so the unit quad needs no second *2.
     float3 dir = L2FxPTDU_Up_DirUnity(locationUnity, oldLocationUnity);
     float3 perp = L2FxPTDU_Up_Perp(locationUnity, cameraUnityOs, dir);
     float3 axisX;
     float3 axisY;
     L2FxPTDU_Up_Axes(dir, perp, sizeXMeters, sizeYMeters, axisX, axisY);
-    float sx = quadOsXy.y * 2.0;
-    float sy = quadOsXy.x * 2.0;
+    float sx = quadOsXy.y;
+    float sy = quadOsXy.x;
     return L2FxPTDU_Up_Corner(locationUnity, axisX, axisY, sx, sy);
 }
 

@@ -19,6 +19,12 @@ public sealed class EntityActionSkill : IEntityActionProcess
         if (TryApplyWeaponCharge(entity, magic))
             return;
 
+        if (SetupDurationHelper.IsUsePotion(magic))
+        {
+            PlaySkillEffect(entity, magic);
+            return;
+        }
+
         EntityActionVisual.CancelMove(entity);
 
         Entity target = IncomingPacketActions.GameWorld != null

@@ -75,6 +75,13 @@ public sealed class PlayerWorldApply : EntityWorldApply
             return;
         }
 
+        // Herb/potion: FX only. Stay in current SM state so pickup can CrossFade wait.
+        if (SetupDurationHelper.IsUsePotion(dto))
+        {
+            SetupDurationHelper.PlayPotionEffect(entity, dto);
+            return;
+        }
+
         if (PlayerStateMachine.Instance == null)
             return;
 

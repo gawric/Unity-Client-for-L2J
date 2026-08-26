@@ -20,6 +20,7 @@ public class World : MonoBehaviour, IWorldSpawnContext {
     [SerializeField] private GameObject _monstersContainer;
     [SerializeField] private GameObject _npcsContainer;
     [SerializeField] private GameObject _usersContainer;
+    [SerializeField] private GameObject _itemsContainer;
 
     [Inject] private EventProcessor _eventProcessor;
     [Inject] private Geodata _geodata;
@@ -27,6 +28,7 @@ public class World : MonoBehaviour, IWorldSpawnContext {
     [Inject] private ObjectPoolManager _objectPool;
     [Inject] private GravityNpc _gravityNpc;
     [Inject] private DeadManager _deadManager;
+    [Inject] private AppearFadeService _appearFade;
     [Inject] private ClickManager _clicks;
     [Inject] private CameraController _camera;
     [Inject] private IAnimationManager _animations;
@@ -35,6 +37,9 @@ public class World : MonoBehaviour, IWorldSpawnContext {
     [Inject] private UserSpawner _userSpawner;
     [Inject] private NpcSpawner _npcSpawner;
     [Inject] private MonsterSpawner _monsterSpawner;
+    [Inject] private ItemSpawner _itemSpawner;
+    [Inject] private ItemDropPresentationService _itemDropPresentation;
+    [Inject] private ItemDropLayerService _dropLayers;
     [Inject] private NpcgrpTable _npcGrps;
     [Inject] private NpcNameTable _npcNames;
     [Inject] private ModelTable _models;
@@ -63,6 +68,11 @@ public class World : MonoBehaviour, IWorldSpawnContext {
     public Transform MonstersContainer
     {
         get { return _monstersContainer != null ? _monstersContainer.transform : null; }
+    }
+
+    public Transform ItemsContainer
+    {
+        get { return _itemsContainer != null ? _itemsContainer.transform : null; }
     }
 
     private Dictionary<int, Entity> _players = new Dictionary<int, Entity>();
@@ -99,10 +109,28 @@ public class World : MonoBehaviour, IWorldSpawnContext {
         _playerPlaceholder = Resources.Load<GameObject>("Prefab/Player_FDarkElf");
         _userPlaceholder = Resources.Load<GameObject>("Prefab/User_FDarkElf");
         _npcPlaceHolder = Resources.Load<GameObject>("Prefab/Npc");
-        _monsterPlaceholder = Resources.Load<GameObject>("Data/Animations/LineageMonsters/gremlin/gremlin_prefab");
+        _monsterPlaceholder = Resources.Load<GameObject>("Data/Animations/LineageMonsters/gremlin_m00/gremlin_m00");
         _npcsContainer = GameObject.Find("Npcs");
         _monstersContainer = GameObject.Find("Monsters");
         _usersContainer = GameObject.Find("Users");
+        _itemsContainer = GameObject.Find("Items");
+        if (_itemsContainer == null)
+        {
+            _itemsContainer = new GameObject("Items");
+            _itemsContainer.transform.SetParent(transform, false);
+        }
+
+        BindItemDropPresentationRunner();
+    }
+
+    [Inject]
+    void BindItemDropPresentationRunner()
+    {
+        ItemDropPresentationRunner runner = GetComponent<ItemDropPresentationRunner>();
+        if (runner == null)
+            runner = gameObject.AddComponent<ItemDropPresentationRunner>();
+        if (_itemDropPresentation != null)
+            runner.Bind(_itemDropPresentation);
     }
 
     void OnDestroy() {
@@ -122,7 +150,10 @@ public class World : MonoBehaviour, IWorldSpawnContext {
         if (_geodata != null)
             _geodata.ObstacleMask = _obstacleMask;
         if (_clicks != null)
-            _clicks.SetMasks(_entityClickAreaMask, _clickThroughMask);
+        {
+            LayerMask dropMask = _dropLayers != null ? _dropLayers.Mask : 0;
+            _clicks.SetMasks(_entityClickAreaMask | dropMask, _clickThroughMask);
+        }
         if (_camera != null)
             _camera.SetMask(_obstacleMask);
     }
@@ -153,19 +184,9 @@ public class World : MonoBehaviour, IWorldSpawnContext {
             $"[DeleteObject] RemoveObject START id={id} type={typeName} name={goName} " +
             $"activeSelf={wasActive} parent={parentBefore}");
 
-        _players.Remove(id);
-        _npcs.Remove(id);
-        _objects.Remove(id);
-        if (EntityActionMachine.Instance != null)
-            EntityActionMachine.Instance.Remove(entity);
-
-        if (_gravityNpc != null)
-        {
-            _gravityNpc.DeleteGravity(id);
-        }
-
-        if (Animations != null)
-            Animations.UnregisterController(id);
+        UnregisterObject(id, entity);
+        if (_appearFade != null)
+            _appearFade.Cancel(id);
 
         if (go == null)
         {
@@ -175,7 +196,8 @@ public class World : MonoBehaviour, IWorldSpawnContext {
 
         // City NPC + field monsters → pool. If pool fails or leaves object visible → Destroy.
         if (_objectPool != null &&
-            (entity is NpcEntity || entity is MonsterEntity))
+            (entity is NpcEntity || entity is MonsterEntity) &&
+            !(entity is ItemEntity))
         {
             ObjectType poolType = entity is MonsterEntity ? ObjectType.Monster : ObjectType.Npc;
             bool returned = _objectPool.ReturnToPool(poolType, go);
@@ -198,6 +220,74 @@ public class World : MonoBehaviour, IWorldSpawnContext {
 
         Destroy(go);
         Debug.Log($"[DeleteObject] RemoveObject DESTROY id={id} name={goName}");
+    }
+
+    void UnregisterObject(int id, Entity entity)
+    {
+        _players.Remove(id);
+        _npcs.Remove(id);
+        _objects.Remove(id);
+        if (EntityActionMachine.Instance != null)
+            EntityActionMachine.Instance.Remove(entity);
+
+        if (_gravityNpc != null)
+            _gravityNpc.DeleteGravity(id);
+
+        if (Animations != null)
+            Animations.UnregisterController(id);
+    }
+
+    void BeginActorDisappear(int id, Entity entity, Action<GameObject> onFinished)
+    {
+        GameObject go = entity != null ? entity.gameObject : null;
+        UnregisterObject(id, entity);
+        if (NameplatesManager.Instance != null)
+            NameplatesManager.Instance.Remove(id);
+        SetEntityInteraction(go, false);
+
+        if (_appearFade == null || go == null)
+        {
+            if (onFinished != null)
+                onFinished(go);
+            return;
+        }
+
+        _appearFade.BeginDisappear(entity, onFinished);
+    }
+
+    void DestroyDisappearedUser(GameObject go)
+    {
+        if (go != null)
+            Destroy(go);
+    }
+
+    void FinishDisappearedNpc(GameObject go)
+    {
+        if (go == null)
+            return;
+
+        SetEntityInteraction(go, true);
+        if (_objectPool != null && _objectPool.ReturnToPool(ObjectType.Npc, go))
+            return;
+
+        Destroy(go);
+    }
+
+    static void SetEntityInteraction(GameObject go, bool enabled)
+    {
+        if (go == null)
+            return;
+
+        CharacterController controller = go.GetComponent<CharacterController>();
+        if (controller != null)
+            controller.enabled = enabled;
+
+        Collider[] colliders = go.GetComponentsInChildren<Collider>(true);
+        for (int i = 0; i < colliders.Length; i++)
+        {
+            if (colliders[i] != null)
+                colliders[i].enabled = enabled;
+        }
     }
 
     public bool ContainsNpc(int id)
@@ -270,6 +360,56 @@ public class World : MonoBehaviour, IWorldSpawnContext {
         int id = npc.Identity.Id;
         _npcs.Add(id, npc);
         _objects.Add(id, npc);
+    }
+
+    public void RegisterItem(ItemEntity item)
+    {
+        if (item == null || item.Identity == null)
+            return;
+
+        _objects[item.Identity.Id] = item;
+    }
+
+    public void SpawnOrUpdateGroundItem(
+        int objectId,
+        int itemId,
+        int count,
+        bool stackable,
+        Vector3 unityPos,
+        int charObjId)
+    {
+        if (!IncomingPacketActions.IsWorldSpawnReady())
+            return;
+
+        Entity existing = GetEntityNoLockSync(objectId);
+        if (existing is ItemEntity item)
+        {
+            float groundY = GetGroundHeight(unityPos);
+            unityPos.y = groundY;
+            item.UpdateGround(unityPos, count, stackable);
+            return;
+        }
+
+        if (existing != null)
+            RemoveObject(objectId);
+
+        if (_itemSpawner == null)
+        {
+            Debug.LogWarning("[World] ItemSpawner missing — cannot spawn ground item " + objectId);
+            return;
+        }
+
+        _itemSpawner.Spawn(objectId, itemId, count, stackable, unityPos, charObjId, this);
+    }
+
+    public void PickupGroundItem(int itemObjectId, int pickerCharObjId, Vector3 unityPos)
+    {
+        if (_itemDropPresentation != null)
+            _itemDropPresentation.PlayPickup(itemObjectId, pickerCharObjId, unityPos);
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        DropMeshLifetimeLog.NotifyRemove(itemObjectId, "GetItem_pickup");
+#endif
+        RemoveObject(itemObjectId);
     }
 
     public void SpawnPlayer(EntityIdentity identity, PlayerStatus status, PlayerStats stats, PlayerAppearance appearance)
@@ -347,18 +487,33 @@ public class World : MonoBehaviour, IWorldSpawnContext {
                 Debug.Log($"[DeleteObject] HANDLER id={objectId} Monster → RemoveObject");
             }
         }
+        else if (entity is ItemEntity)
+        {
+            if (_itemDropPresentation != null)
+                _itemDropPresentation.StopItemPresentation(objectId);
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            DropMeshLifetimeLog.NotifyRemove(objectId, "DeleteObject_packet");
+#endif
+            RemoveObject(objectId);
+            Debug.Log($"[DeleteObject] HANDLER id={objectId} ItemEntity → RemoveObject");
+        }
         else if (entity is NpcEntity)
         {
-            if (_deadManager != null)
+            if (entity.IsDead() && _deadManager != null)
             {
                 _deadManager.AddDeadAndRemove(objectId, new DeadData(entity));
-                Debug.Log($"[DeleteObject] HANDLER id={objectId} NpcEntity → DeadManager");
+                Debug.Log($"[DeleteObject] HANDLER id={objectId} NpcEntity DEAD → DeadManager");
             }
             else
             {
-                RemoveObject(objectId);
-                Debug.Log($"[DeleteObject] HANDLER id={objectId} NpcEntity → RemoveObject done");
+                BeginActorDisappear(objectId, entity, FinishDisappearedNpc);
+                Debug.Log($"[DeleteObject] HANDLER id={objectId} NpcEntity → disappear fade");
             }
+        }
+        else if (entity is UserEntity)
+        {
+            BeginActorDisappear(objectId, entity, DestroyDisappearedUser);
+            Debug.Log($"[DeleteObject] HANDLER id={objectId} UserEntity → disappear fade");
         }
         else
         {
@@ -441,21 +596,13 @@ public class World : MonoBehaviour, IWorldSpawnContext {
 
 
     public Task UpdateObjectRotation(int id, float angle) {
-        return ExecuteWithEntityAsync(id, e => {
-            e.GetComponent<NetworkTransformReceive>().SetFinalRotation(angle);
-        });
+        return ExecuteWithEntityAsync(id, e => { });
     }
 
     public Task UpdateObjectDestination(int id, Vector3 position, int speed, bool walking) {
         return ExecuteWithEntityAsync(id, e => {
             if (speed != e.Stats.Speed) {
                 e.UpdateSpeed(speed);
-            }
-
-            NetworkTransformReceive ntr = e.GetComponent<NetworkTransformReceive>();
-            if (ntr != null)
-            {
-                ntr.LookAt(position);
             }
 
             e.OnStartMoving(walking);

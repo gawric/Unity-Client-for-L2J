@@ -1,0 +1,79 @@
+class e_u056_b extends Emitter;
+
+defaultproperties
+{
+     Begin Object Class=SpriteEmitter Name=SpriteEmitter2
+          Acceleration=(X=0.000000,Y=0.000000,Z=15.000000)
+          ColorScale(0)=(RelativeTime=0.000000,Color=(B=255,G=255,R=255,A=255))
+          ColorScale(1)=(RelativeTime=1.000000,Color=(B=255,G=255,R=255,A=255))
+          ColorMultiplierRange=(X=(Min=0.700000,Max=1.000000),Y=(Min=0.700000,Max=1.000000),Z=(Min=0.700000,Max=1.000000))
+          FadeOutStartTime=0.882000
+          FadeOut=True
+          MaxParticles=30
+          RespawnDeadParticles=False
+          Name="Kira"
+          StartLocationOffset=(X=0.000000,Y=0.000000,Z=5.000000)
+          StartLocationRange=(X=(Min=-6.000000,Max=6.000000),Y=(Min=-6.000000,Max=6.000000),Z=(Min=-10.000000,Max=10.000000))
+          StartLocationShape=PTLS_Polar
+          StartLocationPolarRange=(X=(Min=0.000000,Max=360.000000),Y=(Min=90.000000,Max=90.000000),Z=(Min=5.000000,Max=5.000000))
+          SpinParticles=True
+          StartSpinRange=(X=(Min=0.025000,Max=0.025000),Y=(Min=0.000000,Max=0.000000),Z=(Min=0.000000,Max=0.000000))
+          UseSizeScale=True
+          UseRegularSizeScale=False
+          UniformSize=True
+          SizeScale(0)=(RelativeTime=0.070000,RelativeSize=2.500000)
+          SizeScale(1)=(RelativeTime=0.310000,RelativeSize=1.500000)
+          SizeScale(2)=(RelativeTime=0.600000,RelativeSize=0.800000)
+          SizeScale(3)=(RelativeTime=1.000000,RelativeSize=0.800000)
+          SizeScaleRepeats=10.000000
+          StartSizeRange=(X=(Min=1.200000,Max=1.600000),Y=(Min=1.200000,Max=1.600000),Z=(Min=1.200000,Max=1.600000))
+          InitialParticlesPerSecond=2.000000
+          AutomaticInitialSpawning=False
+          Texture=Texture'LineageEffectsTextures.Particles.fx_m_t0085'
+          TextureUSubdivisions=2
+          TextureVSubdivisions=2
+          BlendBetweenSubdivisions=True
+          SubdivisionEnd=2
+          LifetimeRange=(Min=1.000000,Max=1.800000)
+          StartVelocityRange=(X=(Min=-5.000000,Max=5.000000),Y=(Min=-5.000000,Max=5.000000),Z=(Min=-5.000000,Max=10.000000))
+     End Object
+     Emitters(0)=SpriteEmitter'SpriteEmitter2'
+     Begin Object Class=SpriteEmitter Name=SpriteEmitter6
+          ColorScale(0)=(RelativeTime=0.000000,Color=(B=255,G=255,R=255,A=255))
+          ColorScale(1)=(RelativeTime=1.000000,Color=(B=255,G=255,R=255,A=255))
+          FadeOutStartTime=1.500000
+          CoordinateSystem=PTCS_Independent
+          MaxParticles=30
+          RespawnDeadParticles=False
+          Name="Kira01"
+          StartLocationOffset=(X=0.000000,Y=0.000000,Z=7.000000)
+          StartLocationRange=(X=(Min=-5.000000,Max=5.000000),Y=(Min=-5.000000,Max=5.000000),Z=(Min=-5.000000,Max=5.000000))
+          SpinParticles=True
+          StartSpinRange=(X=(Min=0.030000,Max=0.030000),Y=(Min=0.000000,Max=0.000000),Z=(Min=0.000000,Max=0.000000))
+          UseSizeScale=True
+          UseRegularSizeScale=False
+          UniformSize=True
+          SizeScale(0)=(RelativeTime=0.060000,RelativeSize=2.500000)
+          SizeScale(1)=(RelativeTime=0.180000,RelativeSize=1.500000)
+          SizeScale(2)=(RelativeTime=0.410000,RelativeSize=0.001000)
+          SizeScale(3)=(RelativeTime=1.000000,RelativeSize=0.001000)
+          SizeScaleRepeats=2.000000
+          StartSizeRange=(X=(Min=1.200000,Max=1.800000),Y=(Min=1.200000,Max=1.800000),Z=(Min=1.200000,Max=1.800000))
+          InitialParticlesPerSecond=2.000000
+          AutomaticInitialSpawning=False
+          Texture=Texture'LineageEffectsTextures.Particles.fx_m_t0085'
+          TextureUSubdivisions=2
+          TextureVSubdivisions=2
+          BlendBetweenSubdivisions=True
+          SubdivisionEnd=2
+          LifetimeRange=(Min=0.800000,Max=1.600000)
+          InitialDelayRange=(Min=0.500000,Max=0.500000)
+          StartVelocityRange=(X=(Min=-2.000000,Max=2.000000),Y=(Min=-2.000000,Max=2.000000),Z=(Min=-2.000000,Max=2.000000))
+     End Object
+     Emitters(1)=SpriteEmitter'SpriteEmitter6'
+     bRotEmitter=True
+     RotPerSecond=(Pitch=0,Yaw=25000,Roll=0)
+     bNoDelete=False
+     bUnlit=False
+     Tag="Emitter"
+}

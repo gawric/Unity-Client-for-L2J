@@ -95,7 +95,7 @@ public abstract class EffectPart : MonoBehaviour
         return ResolveOwnerWorldPosDefault();
     }
 
-    protected Vector3 ResolveOwnerWorldPosForShader(Material material)
+    protected internal Vector3 ResolveOwnerWorldPosForShader(Material material)
     {
         if (material != null &&
             material.HasProperty(L2MaterialPropertyCopier.UseOwnerFromShaderTargetId) &&
@@ -123,7 +123,7 @@ public abstract class EffectPart : MonoBehaviour
         }
     }
 
-    protected bool TryResolveShaderTargetWorldPos(out Vector3 worldPosition)
+    protected internal bool TryResolveShaderTargetWorldPos(out Vector3 worldPosition)
     {
         if (_shaderTargetWorldPosOverrideActive)
         {

@@ -6,12 +6,14 @@
 
 float L2Fx_SpriteYawRadiansFromObjectMatrix()
 {
-    return atan2(unity_ObjectToWorld._m02, unity_ObjectToWorld._m00);
+    float4x4 m = UNITY_MATRIX_M;
+    return atan2(m._m02, m._m00);
 }
 
 float3 L2Fx_SpriteEffectOriginWS()
 {
-    return float3(unity_ObjectToWorld._m03, unity_ObjectToWorld._m13, unity_ObjectToWorld._m23);
+    float4x4 m = UNITY_MATRIX_M;
+    return float3(m._m03, m._m13, m._m23);
 }
 
 float3 L2Fx_SpriteCameraForwardXZ(float3 centerWS)

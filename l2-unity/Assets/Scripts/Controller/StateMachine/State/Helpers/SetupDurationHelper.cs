@@ -5,7 +5,12 @@ using UnityEngine;
 public class SetupDurationHelper
 {
     public const int ScrollOfEscapeSkillId = 2013;
-    public static readonly HashSet<int> PotionSkillIds = new HashSet<int> { 2031  , 2011};
+    public static readonly HashSet<int> PotionSkillIds = new HashSet<int>
+    {
+        2031, 2011,
+        2244, 2245, 2246, 2247,
+        2278, 2279, 2280, 2281, 2282, 2283, 2284, 2285
+    };
 
     public static bool IsLongCastSkill(MagicSkillUseDto useSkill)
     {
@@ -15,6 +20,47 @@ public class SetupDurationHelper
     public static bool IsUsePotion(MagicSkillUseDto useSkill)
     {
         return useSkill != null && PotionSkillIds.Contains(useSkill.SkillId);
+    }
+
+    public static bool IsPickupAnimationPlaying(int objectId)
+    {
+        if (IncomingPacketActions.Animations == null)
+            return false;
+
+        string current = IncomingPacketActions.Animations.GetCurrentAnimationName(objectId);
+        return !string.IsNullOrEmpty(current)
+            && current.IndexOf("pickup", StringComparison.OrdinalIgnoreCase) >= 0;
+    }
+
+    public static void PlayPotionEffect(Entity entity, MagicSkillUseDto useSkill)
+    {
+        if (entity == null || useSkill == null || EffectManager.Instance == null)
+            return;
+
+        EffectManager.Instance.PlayEffect(useSkill.SkillId, entity.transform, entity.GetMagicCastData());
+    }
+
+    /// <summary>
+    /// Instant potion/herb: keep current stance. Do not enter MAGIC_SKILLS / PHYSICAL_SKILLS
+    /// or pickup cannot WAIT_RETURN (graph has no exit from pickup).
+    /// If we already entered a skill state, leave it without cutting pickup.
+    /// </summary>
+    public static void FinishPotionUse(PlayerStateMachine stateMachine, Entity entity, MagicSkillUseDto useSkill)
+    {
+        PlayPotionEffect(entity, useSkill);
+        if (stateMachine == null)
+            return;
+
+        bool inSkillState = stateMachine.State == PlayerState.MAGIC_SKILLS
+            || stateMachine.State == PlayerState.PHYSICAL_SKILLS;
+        if (!inSkillState)
+            return;
+
+        stateMachine.ChangeIntention(Intention.INTENTION_IDLE);
+        if (IsPickupAnimationPlaying(stateMachine.GetObjectId()))
+            return;
+
+        stateMachine.NotifyEvent(Event.WAIT_RETURN);
     }
 
     public static void SetupLongCastDurationIfHitTimeNot0(MagicSkillUseDto useSkill, int objectId, Entity entity, AnimationCombo selfCombo)

@@ -8,6 +8,7 @@
     Attack = 0x05,
     Die = 0x06,
     Revive = 0x07,
+    SpawnItem = 0x0B,
     DropItem = 0x0C,
     GetItem = 0x0D,
     StatusUpdate = 0x0E,

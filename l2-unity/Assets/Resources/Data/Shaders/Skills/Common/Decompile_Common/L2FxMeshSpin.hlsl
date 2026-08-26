@@ -15,7 +15,7 @@
 // - LineageEffect.m_u008_b_2 / MeshEmitter6:
 //   StartSpinRange.X=0.255 -> Yaw=16711.4238 (=0.255*65535);
 //   SpinsPerSecondRange.X=0.1 -> Yaw speed magnitude 0.1*65535.
-//   UC X maps to runtime slot c0 / Yaw. SpinCCWorCW sign: see pending notes.
+//   UC X maps to runtime slot c0 / Yaw.
 //
 // Exact StartSpin RNG path (verified 2026-07-13):
 // - UParticleEmitter::SpawnParticle calls FRangeVector::GetRand;
@@ -24,8 +24,13 @@
 // - FRangeVector draws Roll(Z), Pitch(Y), Yaw(X), then stores Yaw/Pitch/Roll;
 // - FRange::GetRand is Max + appFrand() * (Min - Max).
 //
+// SpinCCWorCW (verified 2026-08-24, e_u056_a Coin / MeshEmitter7, 16 slots):
+//   After StartSpin + SPS FRangeVector draws, SpawnParticle consumes 3 appFrand
+//   calls and multiplies each SPS axis by -1 when frand < SpinCCWorCW.axis.
+//   UE2 default is (0.5, 0.5, 0.5). UC omit keeps 0.5 on every axis; a partial
+//   write such as (X=1) is (1, 0.5, 0.5). Explicit (0,0,0) never flips.
+//
 // Still pending before declaring every mesh setting universal:
-// - SpinCCWorCW per-slot ± when UC omits the property (Wave live shows both);
 // - Non-uniform StartSize (thin Z) + Unity-remapped mesh: Wave looks flat with
 //   S only, but tips with R — fix inside this library / basis conjugation, do
 //   not bypass with yaw-only helpers in effect shaders.
@@ -73,14 +78,70 @@ float3 L2Fx_MeshSpin_StartYawPitchRollUruFromAppRandState(
     return startSpinUc * L2FX_MESH_SPIN_UC_TO_URU;
 }
 
-// Inputs are already in runtime order (Yaw, Pitch, Roll). directionSign must
-// be derived from SpinCCWorCW: L2Fx_ApplySpinCCWorCW_Scalar uses
-// (ccw==0 ? -1 : +1). Wave live spinRate is often -19660.5 when UC omits CCW.
-float3 L2Fx_MeshSpin_VelocityYawPitchRollUruPerSecond(
-    float3 spinsPerSecond,
-    float3 directionSign)
+// UC-order spinsPerSecond (Yaw, Pitch, Roll) before URU conversion.
+void L2Fx_MeshSpin_ApplySpinCCWorCW_Uc(
+    inout float3 spinsPerSecondUc,
+    float3 spinCcwOrCw,
+    inout uint appRandState)
 {
-    return spinsPerSecond * directionSign * L2FX_MESH_SPIN_UC_TO_URU;
+    if (L2Fx_AppFrand(appRandState) < spinCcwOrCw.x)
+        spinsPerSecondUc.x *= -1.0;
+    if (L2Fx_AppFrand(appRandState) < spinCcwOrCw.y)
+        spinsPerSecondUc.y *= -1.0;
+    if (L2Fx_AppFrand(appRandState) < spinCcwOrCw.z)
+        spinsPerSecondUc.z *= -1.0;
+}
+
+float3 L2Fx_MeshSpin_VelocityYawPitchRollUruPerSecond(float3 spinsPerSecondUc)
+{
+    return spinsPerSecondUc * L2FX_MESH_SPIN_UC_TO_URU;
+}
+
+// Preview-only when CPU did not supply an appRand TLS state. Same comparison as
+// ApplySpinCCWorCW_Uc, but the three draws come from the hashed spawn helper.
+float3 L2Fx_MeshSpin_ApplySpinCCWorCW_Hashed(
+    float3 spinsPerSecondUc,
+    float3 spinCcwOrCw,
+    float seed,
+    float startTime)
+{
+    if (L2Fx_RandomRange(float2(0.0, 1.0), seed, startTime, 53.0) < spinCcwOrCw.x)
+        spinsPerSecondUc.x *= -1.0;
+    if (L2Fx_RandomRange(float2(0.0, 1.0), seed, startTime, 59.0) < spinCcwOrCw.y)
+        spinsPerSecondUc.y *= -1.0;
+    if (L2Fx_RandomRange(float2(0.0, 1.0), seed, startTime, 61.0) < spinCcwOrCw.z)
+        spinsPerSecondUc.z *= -1.0;
+    return spinsPerSecondUc;
+}
+
+// Exact UE2.5 SpawnParticle spin path: StartSpin, SPS, then 3x SpinCCWorCW.
+void L2Fx_MeshSpin_SpawnYawPitchRollUruFromAppRandState(
+    float2 yawRangeUc,
+    float2 pitchRangeUc,
+    float2 rollRangeUc,
+    float2 spsYawRangeUc,
+    float2 spsPitchRangeUc,
+    float2 spsRollRangeUc,
+    float3 spinCcwOrCw,
+    uint startSpinRandState,
+    out float3 startYawPitchRollUru,
+    out float3 spinRateYawPitchRollUruPerSecond)
+{
+    uint state = startSpinRandState;
+    float3 startSpinUc = L2Fx_FRangeVector_GetRandYawPitchRoll(
+        yawRangeUc,
+        pitchRangeUc,
+        rollRangeUc,
+        state);
+    float3 spinsPerSecondUc = L2Fx_FRangeVector_GetRandYawPitchRoll(
+        spsYawRangeUc,
+        spsPitchRangeUc,
+        spsRollRangeUc,
+        state);
+    L2Fx_MeshSpin_ApplySpinCCWorCW_Uc(spinsPerSecondUc, spinCcwOrCw, state);
+    startYawPitchRollUru = startSpinUc * L2FX_MESH_SPIN_UC_TO_URU;
+    spinRateYawPitchRollUruPerSecond =
+        L2Fx_MeshSpin_VelocityYawPitchRollUruPerSecond(spinsPerSecondUc);
 }
 
 // Matches the int cast in UMeshEmitter::RenderParticles. The return order is

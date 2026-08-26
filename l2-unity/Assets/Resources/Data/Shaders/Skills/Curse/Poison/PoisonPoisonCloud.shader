@@ -84,6 +84,7 @@ Shader "L2/Effects/PoisonPoisonCloud"
             "RenderPipeline" = "UniversalPipeline"
             "Queue" = "Transparent"
             "RenderType" = "Transparent"
+                    "L2FxGpuInstancing" = "On"
         }
 
         Blend SrcAlpha OneMinusSrcAlpha, One OneMinusSrcAlpha
@@ -99,6 +100,7 @@ Shader "L2/Effects/PoisonPoisonCloud"
             HLSLPROGRAM
             #pragma vertex vert
             #pragma fragment frag
+            #pragma multi_compile_instancing
             #pragma target 3.0
 
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
@@ -177,11 +179,14 @@ Shader "L2/Effects/PoisonPoisonCloud"
                 float _BlendBetweenSubdivisions;
             CBUFFER_END
 
+            #include "../../Common/L2FxInstancing.hlsl"
+
             struct Attributes
             {
                 float4 positionOS : POSITION;
                 float3 normalOS : NORMAL;
                 float2 uv : TEXCOORD0;
+                UNITY_VERTEX_INPUT_INSTANCE_ID
             };
 
             struct Varyings
@@ -207,6 +212,7 @@ Shader "L2/Effects/PoisonPoisonCloud"
 
             Varyings vert(Attributes IN)
             {
+                UNITY_SETUP_INSTANCE_ID(IN);
                 Varyings OUT;
                 float pSeed = L2Fx_SpriteMaterialSeed(_Seed);
                 float delay = L2Fx_RandomInitialDelay(_InitialDelayRange.xy, pSeed, _StartTime, 3.0);

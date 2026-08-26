@@ -1,0 +1,110 @@
+class e_u056_a extends Emitter;
+
+defaultproperties
+{
+     Begin Object Class=MeshEmitter Name=MeshEmitter6
+          StaticMesh=StaticMesh'LineageEffectsStaticmeshes.etc.coin01'
+          ColorScale(0)=(RelativeTime=0.000000,Color=(B=255,G=255,R=255,A=255))
+          ColorScale(1)=(RelativeTime=1.000000,Color=(B=255,G=255,R=255,A=255))
+          MaxParticles=1
+          RespawnDeadParticles=False
+          Name="CoinJunk"
+          StartLocationOffset=(X=0.000000,Y=0.000000,Z=-4.000000)
+          StartSizeRange=(X=(Min=3.000000,Max=3.000000),Y=(Min=3.000000,Max=3.000000),Z=(Min=3.000000,Max=3.000000))
+          InitialParticlesPerSecond=1000.000000
+          AutomaticInitialSpawning=False
+          DrawStyle=PTDS_Regular
+          LifetimeRange=(Min=7.000000,Max=7.000000)
+          InitialDelayRange=(Min=0.700000,Max=0.700000)
+          StartVelocityRange=(X=(Min=0.000000,Max=0.000000),Y=(Min=0.000000,Max=0.000000),Z=(Min=10.000000,Max=10.000000))
+          VelocityLossRange=(X=(Min=0.000000,Max=0.000000),Y=(Min=0.000000,Max=0.000000),Z=(Min=5.000000,Max=5.000000))
+     End Object
+     Emitters(0)=MeshEmitter'MeshEmitter6'
+     Begin Object Class=MeshEmitter Name=MeshEmitter7
+          StaticMesh=StaticMesh'LineageEffectsStaticmeshes.etc.coin00'
+          RenderTwoSided=True
+          Acceleration=(X=0.000000,Y=0.000000,Z=-200.000000)
+          ColorScale(0)=(RelativeTime=0.000000,Color=(B=255,G=255,R=255,A=255))
+          ColorScale(1)=(RelativeTime=1.000000,Color=(B=255,G=255,R=255,A=255))
+          RespawnDeadParticles=False
+          Name="Coin"
+          StartLocationOffset=(X=0.000000,Y=0.000000,Z=27.100000)
+          StartLocationRange=(X=(Min=-3.000000,Max=3.000000),Y=(Min=-3.000000,Max=3.000000),Z=(Min=-5.000000,Max=5.000000))
+          SpinParticles=True
+          SpinsPerSecondRange=(X=(Min=0.000000,Max=5.000000),Y=(Min=0.000000,Max=5.000000),Z=(Min=0.000000,Max=5.000000))
+          StartSpinRange=(X=(Min=0.000000,Max=1.000000),Y=(Min=0.000000,Max=1.000000),Z=(Min=0.000000,Max=1.000000))
+          StartSizeRange=(X=(Min=2.500000,Max=2.500000),Y=(Min=2.500000,Max=2.500000),Z=(Min=2.500000,Max=2.500000))
+          InitialParticlesPerSecond=1000.000000
+          AutomaticInitialSpawning=False
+          DrawStyle=PTDS_Regular
+          LifetimeRange=(Min=1.000000,Max=1.000000)
+          StartVelocityRange=(X=(Min=0.000000,Max=0.000000),Y=(Min=0.000000,Max=0.000000),Z=(Min=30.000000,Max=80.000000))
+     End Object
+     Emitters(1)=MeshEmitter'MeshEmitter7'
+     Begin Object Class=SpriteEmitter Name=SpriteEmitter11
+          ColorScale(0)=(RelativeTime=0.000000,Color=(B=255,G=255,R=255,A=255))
+          ColorScale(1)=(RelativeTime=1.000000,Color=(B=255,G=255,R=255,A=255))
+          FadeOutStartTime=0.240000
+          FadeOut=True
+          MaxParticles=8
+          RespawnDeadParticles=False
+          Name="Kira00"
+          StartLocationOffset=(X=0.000000,Y=0.000000,Z=27.100000)
+          StartLocationRange=(X=(Min=-4.000000,Max=4.000000),Y=(Min=-4.000000,Max=4.000000),Z=(Min=-10.000000,Max=10.000000))
+          SpinParticles=True
+          StartSpinRange=(X=(Min=0.030000,Max=0.030000),Y=(Min=0.000000,Max=0.000000),Z=(Min=0.000000,Max=0.000000))
+          UseSizeScale=True
+          UseRegularSizeScale=False
+          UniformSize=True
+          SizeScale(0)=(RelativeTime=0.070000,RelativeSize=2.500000)
+          SizeScale(1)=(RelativeTime=0.310000,RelativeSize=1.500000)
+          SizeScale(2)=(RelativeTime=1.000000,RelativeSize=0.010000)
+          StartSizeRange=(X=(Min=0.300000,Max=1.200000),Y=(Min=0.300000,Max=1.200000),Z=(Min=0.300000,Max=1.200000))
+          InitialParticlesPerSecond=10.000000
+          AutomaticInitialSpawning=False
+          Texture=Texture'LineageEffectsTextures.Particles.fx_m_t0085'
+          TextureUSubdivisions=2
+          TextureVSubdivisions=2
+          BlendBetweenSubdivisions=True
+          SubdivisionEnd=2
+          LifetimeRange=(Min=0.300000,Max=0.300000)
+     End Object
+     Emitters(2)=SpriteEmitter'SpriteEmitter11'
+     Begin Object Class=SpriteEmitter Name=SpriteEmitter12
+          ColorScale(0)=(RelativeTime=0.000000,Color=(B=255,G=255,R=255,A=255))
+          ColorScale(1)=(RelativeTime=1.000000,Color=(B=255,G=255,R=255,A=255))
+          FadeOutStartTime=1.500000
+          RespawnDeadParticles=False
+          Name="Kira01"
+          StartLocationOffset=(X=0.000000,Y=0.000000,Z=1.100000)
+          StartLocationRange=(X=(Min=-6.000000,Max=6.000000),Y=(Min=-6.000000,Max=6.000000),Z=(Min=-2.500000,Max=2.500000))
+          SpinParticles=True
+          StartSpinRange=(X=(Min=0.030000,Max=0.030000),Y=(Min=0.000000,Max=0.000000),Z=(Min=0.000000,Max=0.000000))
+          UseSizeScale=True
+          UseRegularSizeScale=False
+          UniformSize=True
+          SizeScale(0)=(RelativeTime=0.060000,RelativeSize=2.500000)
+          SizeScale(1)=(RelativeTime=0.180000,RelativeSize=1.500000)
+          SizeScale(2)=(RelativeTime=0.410000,RelativeSize=0.001000)
+          SizeScale(3)=(RelativeTime=1.000000,RelativeSize=0.001000)
+          SizeScaleRepeats=2.000000
+          StartSizeRange=(X=(Min=1.200000,Max=1.800000),Y=(Min=1.200000,Max=1.800000),Z=(Min=1.200000,Max=1.800000))
+          InitialParticlesPerSecond=2.000000
+          AutomaticInitialSpawning=False
+          Texture=Texture'LineageEffectsTextures.Particles.fx_m_t0085'
+          TextureUSubdivisions=2
+          TextureVSubdivisions=2
+          BlendBetweenSubdivisions=True
+          SubdivisionEnd=2
+          LifetimeRange=(Min=0.800000,Max=1.600000)
+          InitialDelayRange=(Min=0.500000,Max=0.500000)
+          StartVelocityRange=(X=(Min=-2.000000,Max=2.000000),Y=(Min=-2.000000,Max=2.000000),Z=(Min=-2.000000,Max=2.000000))
+     End Object
+     Emitters(3)=SpriteEmitter'SpriteEmitter12'
+     FixedBoundingBox=True
+     FixedBoundingBoxExpand=5.000000
+     bLightChanged=True
+     bNoDelete=False
+     bUnlit=False
+     Tag="Emitter"
+}

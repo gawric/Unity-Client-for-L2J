@@ -110,6 +110,7 @@ Shader "L2/Effects/ShieldTaFlash"
 
             "RenderType" = "Transparent"
 
+                    "L2FxGpuInstancing" = "On"
         }
 
 
@@ -140,6 +141,7 @@ Shader "L2/Effects/ShieldTaFlash"
 
             #pragma fragment frag
 
+            #pragma multi_compile_instancing
             #pragma target 3.0
 
 
@@ -236,6 +238,8 @@ Shader "L2/Effects/ShieldTaFlash"
 
             CBUFFER_END
 
+            #include "../Common/L2FxInstancing.hlsl"
+
 
 
             struct Attributes
@@ -247,6 +251,7 @@ Shader "L2/Effects/ShieldTaFlash"
                 float3 normalOS : NORMAL;
 
                 float2 uv : TEXCOORD0;
+                UNITY_VERTEX_INPUT_INSTANCE_ID
 
             };
 
@@ -275,6 +280,7 @@ Shader "L2/Effects/ShieldTaFlash"
             Varyings vert(Attributes IN)
 
             {
+                UNITY_SETUP_INSTANCE_ID(IN);
 
                 Varyings OUT;
 

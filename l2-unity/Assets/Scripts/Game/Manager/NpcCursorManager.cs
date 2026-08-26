@@ -1,141 +1,102 @@
 ﻿using UnityEngine;
-using UnityEngine.Rendering;
-using static UnityEngine.EventSystems.EventTrigger;
+using VContainer;
 
 public class NpcCursorManager : MonoBehaviour
 {
-
+    [Inject] ItemDropPicker _dropPicker;
     private Texture2D _defaultCursor;
     private Texture2D _hoverCursorTalk;
     private Texture2D _hoverCursorAtk;
-    private Collider[] colliders;
-    private LayerMask _entityMask = 8192;
-    private ObjectData _hoverObjectData;
-    private ObjectData lastHoveredObject;
-    private ObjectData _targetObjectData;
+    private Texture2D _hoverCursorPickup;
+    private LayerMask _entityMask;
     private int _currentCursor;
-    private int defaultCursorId = 0;
-    private int atkCursorId = 1;
-    private int talkCursorId = 2;
+    private ItemEntity _stickyDropItem;
+    const int DefaultCursorId = 0;
+    const int AtkCursorId = 1;
+    const int TalkCursorId = 2;
+    const int PickupCursorId = 3;
+    const float PickDistance = 1000f;
+
     void Start()
     {
         _defaultCursor = IconManager.Instance.LoadCursorByName("Default");
         _hoverCursorAtk = IconManager.Instance.LoadCursorByName("Attack");
         _hoverCursorTalk = IconManager.Instance.LoadCursorByName("Talk");
+        _hoverCursorPickup = IconManager.Instance.LoadCursorByName("Pickup");
+        _entityMask = LayerMask.GetMask("EntityClick");
         _currentCursor = -1;
-
     }
 
     void Update()
     {
-        // Создаём луч из позиции мыши в 3D-пространство
-        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-        RaycastHit hit;
-
-        if(Physics.Raycast(ray, out hit, 1000f, ~23158))
+        if (Camera.main == null)
         {
-        
-            //GameObject hoveredObject = hit.collider.gameObject;
-            int hitLayer = hit.collider.gameObject.layer;
-            if (_entityMask == (_entityMask | (1 << hitLayer)))
-            {
-                _hoverObjectData = new ObjectData(hit.transform.parent.gameObject);
-            }
-            else
-            {
-                _hoverObjectData = new ObjectData(hit.collider.gameObject);
-            }
-
-            _targetObjectData = _hoverObjectData;
-            if(hitLayer == 13)
-            {
-                int targetID = PlayerEntity.Instance.TargetId;
-                if(_targetObjectData != null)
-                {
-                    if(_targetObjectData.Entity != null)
-                    {
-                        if (_targetObjectData.Entity.Identity.Id == targetID)
-                        {
-                            OnMouseEnterTest(_targetObjectData);
-                        }
-                        else
-                        {
-                            OnMouseExitTest(_targetObjectData);
-                        }
-                    }
-                    else
-                    {
-                        OnMouseExitTest(_targetObjectData);
-                    }
-                    
-                }
-           
-            }
-            else
-            {
-                OnMouseExitTest(lastHoveredObject);
-            }
-           
+            ApplyCursor(DefaultCursorId, _defaultCursor);
+            return;
         }
 
+        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        ItemEntity dropEntity = null;
+        bool dropHit = _dropPicker != null &&
+            _dropPicker.TryPick(ray, PickDistance, _stickyDropItem, out dropEntity, out _);
+        _stickyDropItem = dropHit ? dropEntity : null;
+
+        if (dropHit && dropEntity != null)
+        {
+            ApplyCursor(PickupCursorId, _hoverCursorPickup);
+            return;
+        }
+
+        if (L2GameUI.Instance != null && L2GameUI.Instance.MouseOverUI)
+        {
+            ApplyCursor(DefaultCursorId, _defaultCursor);
+            return;
+        }
+
+        if (!Physics.Raycast(ray, out RaycastHit hit, PickDistance, _entityMask))
+        {
+            ApplyCursor(DefaultCursorId, _defaultCursor);
+            return;
+        }
+
+        Entity entity = hit.collider.GetComponentInParent<Entity>();
+        if (entity != null &&
+            entity.Identity != null &&
+            PlayerEntity.Instance != null &&
+            entity.Identity.Id == PlayerEntity.Instance.TargetId)
+        {
+            ApplyTargetedEntityCursor(entity);
+            return;
+        }
+
+        ApplyCursor(DefaultCursorId, _defaultCursor);
     }
 
-    private void OnMouseEnterTest(ObjectData obj)
+    void ApplyTargetedEntityCursor(Entity entity)
     {
-        if (obj?.Entity == null) return;
-
-        var entity = obj.Entity;
-
         switch (entity)
         {
             case MonsterEntity _:
-                if (_currentCursor != 1)
-                {
-                    _currentCursor = 1;
-                    Cursor.SetCursor(_hoverCursorAtk, Vector2.zero, CursorMode.Auto);
-                }
+                ApplyCursor(AtkCursorId, _hoverCursorAtk);
                 break;
-
             case NpcEntity _:
-
-                if (L2GameUI.Instance.MouseOverUI)
-                {
-                    return;
-                }
-
-                if (_currentCursor != 2)
-                {
-                    _currentCursor = 2;
-                    Cursor.SetCursor(_hoverCursorTalk, Vector2.zero, CursorMode.Auto);
-                }
+                ApplyCursor(TalkCursorId, _hoverCursorTalk);
                 break;
-
             default:
-
+                ApplyCursor(DefaultCursorId, _defaultCursor);
                 break;
         }
     }
 
-    private void OnMouseEnter()
+    void ApplyCursor(int id, Texture2D texture)
     {
-       
-
-    }
-
-    private void OnMouseExit()
-    {
-        
-    }
-
-    private void OnMouseExitTest(ObjectData obj)
-    {
-        if (_currentCursor == -1 | _currentCursor != 0)
+        if (_currentCursor == id)
         {
-            _currentCursor = 0;
-            Cursor.SetCursor(_defaultCursor, Vector2.zero, CursorMode.Auto);
+            Cursor.SetCursor(texture, Vector2.zero, CursorMode.Auto);
+            return;
         }
-           
-        //Debug.Log("Курсор вернулся к стандартному.");
+
+        _currentCursor = id;
+        Cursor.SetCursor(texture, Vector2.zero, CursorMode.Auto);
     }
 }
-

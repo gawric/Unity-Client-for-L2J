@@ -17,12 +17,13 @@ Material:
   - _BALPHABLEND_ON
   - _FADEOUT_ON
   - _HASLIFETIME_ON
+  - _SPINPARTICLES_ON
   - _UNIFORMSIZE_ON
   - _USESIZESCALE_ON
-  - _USETRAILVELOCITY_ON
   - _USETRAILPATHFADE_ON
+  - _USETRAILVELOCITY_ON
   m_LightmapFlags: 4
-  m_EnableInstancingVariants: 0
+  m_EnableInstancingVariants: 1
   m_DoubleSidedGI: 0
   m_CustomRenderQueue: 3000
   stringTagMap: {}
@@ -62,14 +63,14 @@ Material:
     - _TextureDilateTexels: 2.2
     - _TextureUSubdivisions: 4
     - _TextureVSubdivisions: 4
+    - _TrailPathFadeHead: 1
+    - _TrailPathFadeT: 0
+    - _TrailPathFadeTail: 0.12
     - _UniformSize: 1
     - _UseRandomSubdivision: 0
     - _UseSizeScale: 1
-    - _UseTrailVelocity: 1
     - _UseTrailPathFade: 1
-    - _TrailPathFadeHead: 1
-    - _TrailPathFadeTail: 0.12
-    - _TrailPathFadeT: 0
+    - _UseTrailVelocity: 1
     - _bAlphaBlend: 1
     m_Colors:
     - _Acceleration: {r: 0, g: 0, b: 0, a: 0}

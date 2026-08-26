@@ -189,6 +189,8 @@ public class WeapongrpTable {
 
                         grp.Soulshot =(byte) Int32.Parse(ids[52]);
                         grp.Spiritshot = (byte)Int32.Parse(ids[53]);
+                        grp.DropType = Int32.Parse(ids[2]);
+                        grp.DropAnimType = Int32.Parse(ids[3]);
                     }
                     else
                     {
@@ -232,6 +234,8 @@ public class WeapongrpTable {
 
                         grp.Soulshot = (byte)Int32.Parse(ids[52]);
                         grp.Spiritshot = (byte)Int32.Parse(ids[53]);
+                        grp.DropType = Int32.Parse(ids[2]);
+                        grp.DropAnimType = Int32.Parse(ids[3]);
 
                         _weaponGrps.Add(id , grp);
                     }

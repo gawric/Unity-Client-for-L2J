@@ -8,7 +8,7 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: SpriteEmitter2
-  m_Shader: {fileID: 4800000, guid: d0e1f2a3b4c56778899aabbccddeef01, type: 3}
+  m_Shader: {fileID: 4800000, guid: 748e51cf1e6d475fbb467f790cbb8a74, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
@@ -16,7 +16,7 @@ Material:
   - _FADEOUT_ON
   - _USESIZESCALE_ON
   m_LightmapFlags: 4
-  m_EnableInstancingVariants: 0
+  m_EnableInstancingVariants: 1
   m_DoubleSidedGI: 0
   m_CustomRenderQueue: -1
   stringTagMap:
@@ -50,6 +50,23 @@ Material:
     - _TextureUSubdivisions: 2
     - _TextureVSubdivisions: 2
     - _UseSizeScale: 1
+    - _SpawnMode: 3
+    - _FullTlsShape: 1
+    - _MotionMode: 2
+    - _OrientationMode: 1
+    - _PtvdMode: 0
+    - _SizeMode: 1
+    - _SpinMode: 0
+    - _FlipbookMode: 3
+    - _SrcBlend: 1
+    - _DstBlend: 1
+    - _ZWrite: 0
+    - _Cull: 0
+    - _ColorFadeAlphaBlend: 0
+    - _AlphaClipThreshold: -1
+    - _StaticSubdivision: 0
+    - _SizeScaleCount: 2
+    - _ColorKey3Time: 1
     m_Colors:
     - _AccelerationUc: {r: 0, g: 0, b: 200, a: 0}
     - _ColorMulMax: {r: 0.7, g: 0.7, b: 1, a: 0}
@@ -68,6 +85,8 @@ Material:
     - _StartVelocityRangeYUc: {r: 0, g: 0, b: 0, a: 0}
     - _StartVelocityRangeZUc: {r: 0, g: 30, b: 0, a: 0}
     - _VelocityLossRangeUc: {r: 0, g: 0, b: 1, a: 0}
+    - _ColorKey0: {r: 1, g: 1, b: 1, a: 1}
+    - _ColorKey3: {r: 1, g: 1, b: 1, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1
 --- !u!114 &4267010063871005513

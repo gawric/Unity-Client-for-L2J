@@ -4,7 +4,7 @@
 
 // sizeInMeters = sizeUU / 52.5
 
-// sizeM via L2Fx_GetFinalVertexSizeMeters (verified global K = 1.4).
+// sizeM via L2Fx_GetFinalVertexSizeMeters (global SpriteEmitter K = 1.1).
 
 Shader "L2/Effects/Calib/HealingPotionTa2SpriteEmitter6"
 
@@ -18,7 +18,7 @@ Shader "L2/Effects/Calib/HealingPotionTa2SpriteEmitter6"
 
 
 
-        _L2FxWorldCalibration ("World Calibration K", Float) = 1.4
+        _L2FxWorldCalibration ("World Calibration K", Float) = 1.1
 
         _SizeRange ("Start Size UU Min Max", Vector) = (2, 2, 0, 0)
 
@@ -74,6 +74,7 @@ Shader "L2/Effects/Calib/HealingPotionTa2SpriteEmitter6"
 
             "RenderType" = "Transparent"
 
+                    "L2FxGpuInstancing" = "On"
         }
 
 
@@ -104,6 +105,7 @@ Shader "L2/Effects/Calib/HealingPotionTa2SpriteEmitter6"
 
             #pragma fragment frag
 
+            #pragma multi_compile_instancing
             #pragma target 3.0
 
 
@@ -159,6 +161,8 @@ Shader "L2/Effects/Calib/HealingPotionTa2SpriteEmitter6"
                 float _LumaAlphaFloor;
 
             CBUFFER_END
+
+            #include "../Common/L2FxInstancing.hlsl"
 
 
 
@@ -257,6 +261,7 @@ Shader "L2/Effects/Calib/HealingPotionTa2SpriteEmitter6"
                 float4 positionOS : POSITION;
 
                 float2 uv : TEXCOORD0;
+                UNITY_VERTEX_INPUT_INSTANCE_ID
 
             };
 
@@ -277,6 +282,7 @@ Shader "L2/Effects/Calib/HealingPotionTa2SpriteEmitter6"
             Varyings vert(Attributes IN)
 
             {
+                UNITY_SETUP_INSTANCE_ID(IN);
 
                 Varyings OUT;
 

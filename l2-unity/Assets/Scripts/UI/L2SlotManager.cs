@@ -314,11 +314,59 @@ public class L2SlotManager : L2PopupWindow
         slot.UseItem();
     }
 
+    private enum PendingItemOp
+    {
+        None,
+        Destroy,
+        Drop
+    }
+
+    private PendingItemOp _pendingOp = PendingItemOp.None;
+    private Vector3 _pendingDropWorldPos;
+    private bool _hasPendingDropPos;
+
     private void DropItem()
     {
-        // Drop item logic
         InventorySlot slot = (InventorySlot)_draggedSlot;
-        Debug.Log($"Drop {slot.Id}.");
+        _slotTemp = slot;
+        _pendingOp = PendingItemOp.Drop;
+        _hasPendingDropPos = TryPickDropWorldPos(out _pendingDropWorldPos);
+        if (!_hasPendingDropPos)
+            Debug.LogWarning("DropItem: no ground under cursor, will fallback near player.");
+
+        if (slot.Count > 1)
+        {
+            PauseAndShowQuantity(slot.Count);
+            return;
+        }
+
+        SystemMessageWindow.Instance.OnButtonOk += OkDrop;
+        SystemMessageWindow.Instance.OnButtonClosed += OnCancel;
+        SystemMessageWindow.Instance.ShowWindowDialogYesOrNot("Do you want to drop your " + slot.Name + "?");
+    }
+
+    /// <summary>Mouse ray → world hit (same idea as ClickManager move pick).</summary>
+    private static bool TryPickDropWorldPos(out Vector3 worldPos)
+    {
+        worldPos = default;
+        Camera cam = Camera.main;
+        if (cam == null)
+            return false;
+
+        Ray ray = cam.ScreenPointToRay(Input.mousePosition);
+        const float pickDistance = 10000f;
+        int groundMask = World.Instance != null ? World.Instance.GroundMask : 0;
+        if (groundMask != 0 && Physics.Raycast(ray, out RaycastHit groundHit, pickDistance, groundMask))
+        {
+            worldPos = groundHit.point;
+            return true;
+        }
+
+        if (!Physics.Raycast(ray, out RaycastHit hit, pickDistance))
+            return false;
+
+        worldPos = hit.point;
+        return true;
     }
 
     private InventorySlot _slotTemp = null;
@@ -327,6 +375,7 @@ public class L2SlotManager : L2PopupWindow
         // Destroy item logic
         InventorySlot slot = (InventorySlot)_draggedSlot;
         _slotTemp = slot;
+        _pendingOp = PendingItemOp.Destroy;
         if (slot.Count > 1)
         {
             PauseAndShowQuantity(slot.Count);
@@ -343,7 +392,13 @@ public class L2SlotManager : L2PopupWindow
     private void OkDestroy()
     {
         PlayerInventory.Instance.DestroyItem(_slotTemp.ObjectId, 1);
-        //SystemMessageWindow.Instance.OnButtonOk -= OkDestroy;
+        CancelEvent();
+    }
+
+    private void OkDrop()
+    {
+        if (_slotTemp != null && PlayerInventory.Instance != null)
+            SendDrop(_slotTemp.ObjectId, 1);
         CancelEvent();
     }
 
@@ -355,9 +410,18 @@ public class L2SlotManager : L2PopupWindow
     private void CancelEvent()
     {
         SystemMessageWindow.Instance.OnButtonOk -= OkDestroy;
+        SystemMessageWindow.Instance.OnButtonOk -= OkDrop;
         SystemMessageWindow.Instance.OnButtonClosed -= OnCancel;
+        _pendingOp = PendingItemOp.None;
+        _hasPendingDropPos = false;
     }
 
+    private void SendDrop(int objectId, int quantity)
+    {
+        Vector3? worldPos = _hasPendingDropPos ? _pendingDropWorldPos : (Vector3?)null;
+        PlayerInventory.Instance.DropItem(objectId, quantity, worldPos);
+        _hasPendingDropPos = false;
+    }
 
     private void PauseAndShowQuantity(int count)
     {
@@ -367,8 +431,16 @@ public class L2SlotManager : L2PopupWindow
 
     private void OnSelectedQuantity(string value)
     {
-        PlayerInventory.Instance.DestroyItem(_slotTemp.ObjectId, int.Parse(value));
+        int qty = int.Parse(value);
+        if (_slotTemp != null && PlayerInventory.Instance != null)
+        {
+            if (_pendingOp == PendingItemOp.Drop)
+                SendDrop(_slotTemp.ObjectId, qty);
+            else
+                PlayerInventory.Instance.DestroyItem(_slotTemp.ObjectId, qty);
+        }
         QuantityInput.Instance.OnButtonOk -= OnSelectedQuantity;
+        _pendingOp = PendingItemOp.None;
     }
 
     private void AddActionToSkillbar()

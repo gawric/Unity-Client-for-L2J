@@ -1,0 +1,45 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e744811f2c432c443bee152b8fab6534, type: 3}
+  m_Name: Effect56001
+  m_EditorClassIdentifier: 
+  defaultLifeTime: 8
+  isFollowCaster: 0
+  showTime: 0.05
+  hideTime: 0.2
+  maxAlpha: 1
+  stopAlphaShow: 1
+  startAlphaTimeV1: 0
+  endAlphaTimeV1: 0
+  startAlphaTimeV0: 1
+  endAlphaTimeV0: 1
+  maxAlphaFooter: 1
+  speedRotateMin: 0
+  speedRotateMax: 0
+  useRandomPosition: 0
+  minZ: 0
+  maxZ: 0
+  minY: 0
+  maxY: 0
+  footerYOffset: 0
+  bodyYOffset: 0
+  defaultFooterSize: 1
+  defaultBodySize: 1
+  scaleSizeStart: 1
+  scaleSizeEnd: 1
+  startTimeScale: 0
+  endTimeScale: 1
+  auraDefaultSize: 0.1
+  auraYOffset: 0
+  flyJumpHeight: 0
+  flyJumpSpeed: 1
+  flyAlphaThreshold: 0

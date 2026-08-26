@@ -129,6 +129,7 @@ Shader "L2/Effects/MightTaSprite"
             "RenderPipeline" = "UniversalPipeline"
             "Queue" = "Transparent"
             "RenderType" = "Transparent"
+                    "L2FxGpuInstancing" = "On"
         }
 
         Blend One OneMinusSrcColor
@@ -144,6 +145,7 @@ Shader "L2/Effects/MightTaSprite"
             HLSLPROGRAM
             #pragma vertex vert
             #pragma fragment frag
+            #pragma multi_compile_instancing
             #pragma target 3.0
             #pragma shader_feature_local _DEBUGSPAWNREGION_ON
 
@@ -271,11 +273,14 @@ Shader "L2/Effects/MightTaSprite"
                 float4 _DebugSpawnRegionColor;
             CBUFFER_END
 
+            #include "../Common/L2FxInstancing.hlsl"
+
             struct Attributes
             {
                 float4 positionOS : POSITION;
                 float3 normalOS : NORMAL;
                 float2 uv : TEXCOORD0;
+                UNITY_VERTEX_INPUT_INSTANCE_ID
             };
 
             struct Varyings
@@ -453,6 +458,7 @@ Shader "L2/Effects/MightTaSprite"
 
             Varyings vert(Attributes IN)
             {
+                UNITY_SETUP_INSTANCE_ID(IN);
                 Varyings OUT;
                 float pSeed = L2Fx_SpriteMaterialSeed(_Seed);
                 float delay = L2Fx_RandomInitialDelay(_InitialDelayRange.xy, pSeed, _StartTime, 3.0);

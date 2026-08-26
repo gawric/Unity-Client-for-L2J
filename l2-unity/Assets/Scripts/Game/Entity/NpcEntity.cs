@@ -1,7 +1,6 @@
 ﻿using UnityEngine;
 
 [RequireComponent(typeof(NetworkAnimationController)),
-    RequireComponent(typeof(NetworkTransformReceive)),
     RequireComponent(typeof(CharacterAnimationAudioHandler))]
 public class NpcEntity : NetworkEntity
 {

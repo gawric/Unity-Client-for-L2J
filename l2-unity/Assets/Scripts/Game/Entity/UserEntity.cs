@@ -1,7 +1,6 @@
 ﻿using UnityEngine;
 
-[RequireComponent(typeof(NetworkAnimationController)),
-    RequireComponent(typeof(NetworkTransformReceive))]
+[RequireComponent(typeof(NetworkAnimationController))]
 
 public class UserEntity : NetworkEntity
 {
@@ -13,8 +12,6 @@ public class UserEntity : NetworkEntity
     public override void Initialize()
     {
         base.Initialize();
-        if (_networkTransformReceive != null)
-            _networkTransformReceive.enabled = false;
         _characterController = GetComponent<CharacterController>();
         if (transform.childCount > 0)
             _characterAnimationAudioHandler = transform.GetChild(0).GetComponentInChildren<CharacterAnimationAudioHandler>();

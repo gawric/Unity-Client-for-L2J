@@ -55,8 +55,17 @@ public sealed class PlayerSpawner
         player.Running = appearance.Running;
         player.SetDead(false);
 
-        go.GetComponent<NetworkTransformShare>().enabled = true;
+        NetworkTransformShare share = go.GetComponent<NetworkTransformShare>();
+        if (share != null)
+            share.enabled = true;
+        EntitySpawnShared.DisableLegacyPositionSync(go);
         PlayerController controller = go.GetComponent<PlayerController>();
+        if (controller == null)
+        {
+            Debug.LogError("PlayerSpawner: PlayerController missing on " + go.name);
+            UnityEngine.Object.Destroy(go);
+            return null;
+        }
         controller.enabled = true;
         controller.Initialize();
         App.InjectGameObject(go);

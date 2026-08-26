@@ -87,6 +87,7 @@ Shader "L2/Effects/CurePoisonLightSplash"
             "RenderPipeline" = "UniversalPipeline"
             "Queue" = "Transparent"
             "RenderType" = "Transparent"
+                    "L2FxGpuInstancing" = "On"
         }
 
         // RenderDoc Pixel History EID 1299: TexAfter = TexBefore + ShaderOut (One One), not SrcAlpha*src.
@@ -104,6 +105,7 @@ Shader "L2/Effects/CurePoisonLightSplash"
             HLSLPROGRAM
             #pragma vertex vert
             #pragma fragment frag
+            #pragma multi_compile_instancing
             #pragma target 3.0
 
             #include "../Common/L2FxMeshEmitterUrp.hlsl"
@@ -174,12 +176,15 @@ Shader "L2/Effects/CurePoisonLightSplash"
                 float4 _DebugAtlasBackground;
             CBUFFER_END
 
+            #include "../Common/L2FxInstancing.hlsl"
+
             struct Attributes
             {
                 float4 positionOS : POSITION;
                 float3 normalOS : NORMAL;
                 float2 uv : TEXCOORD0;
                 float4 color : COLOR;
+                UNITY_VERTEX_INPUT_INSTANCE_ID
             };
 
             struct Varyings
@@ -192,6 +197,7 @@ Shader "L2/Effects/CurePoisonLightSplash"
 
             Varyings vert(Attributes IN)
             {
+                UNITY_SETUP_INSTANCE_ID(IN);
                 Varyings OUT;
 
                 float delay, lifetime, age, ageNorm;

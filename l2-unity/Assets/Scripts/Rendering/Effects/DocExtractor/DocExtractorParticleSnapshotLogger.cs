@@ -821,7 +821,7 @@ public static class DocExtractorParticleSnapshotLogger
             ? mat.GetFloat("_L2FxWorldCalibration")
             : 1.8f;
 
-        // Same path as L2Fx_UcPositionToUnityMeters: (ue.x, ue.z, ue.y) * UU * K
+        // Same path as L2Fx_UcPositionToUnityMeters: (ue.x, ue.z, ue.y) * UU/52.5 (no size K)
         Vector3 velOs = DocExtractorSpriteEmitter0MotionSimulator.UcPositionToUnityMeters(velUe, worldK);
         Vector3 deltaOs = DocExtractorSpriteEmitter0MotionSimulator.UcPositionToUnityMeters(deltaLocUe, worldK);
         Vector3 locOs = DocExtractorSpriteEmitter0MotionSimulator.UcPositionToUnityMeters(locLocalUe, worldK);

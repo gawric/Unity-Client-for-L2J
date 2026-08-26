@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System;
 using UnityEngine;
 
 public enum EntityType
@@ -15,10 +14,9 @@ public enum EntityType
 
 public static class EntityTypeParser {
     public static EntityType ParseEntityType(string type) {
-        if(type.Contains("LineageNPC")) {
+        if (!string.IsNullOrEmpty(type) &&
+            type.IndexOf("LineageNPC", StringComparison.OrdinalIgnoreCase) >= 0)
             return EntityType.NPC;
-        } else {
-            return EntityType.Monster;
-        }
+        return EntityType.Monster;
     }
 }

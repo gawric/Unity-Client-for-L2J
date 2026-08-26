@@ -86,6 +86,7 @@ Shader "L2/Effects/SteamInterlude"
             "RenderPipeline"="UniversalPipeline"
             "RenderType"="Transparent"
             "Queue"="Transparent"
+                    "L2FxGpuInstancing" = "On"
         }
 
         Blend SrcAlpha One
@@ -100,6 +101,7 @@ Shader "L2/Effects/SteamInterlude"
             HLSLPROGRAM
             #pragma vertex vert
             #pragma fragment frag
+            #pragma multi_compile_instancing
             #pragma target 3.0
 
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
@@ -111,6 +113,7 @@ Shader "L2/Effects/SteamInterlude"
                 float3 normalOS : NORMAL;
                 float2 uv : TEXCOORD0;
                 float4 color : COLOR;
+                UNITY_VERTEX_INPUT_INSTANCE_ID
             };
 
             struct Varyings
@@ -183,6 +186,8 @@ Shader "L2/Effects/SteamInterlude"
                 float _ColorScaleTime1;
             CBUFFER_END
 
+            #include "../../../Common/L2FxInstancing.hlsl"
+
             float ParticleSeed(float4 vertexColor, float globalSeed)
             {
                 return globalSeed + vertexColor.r * 31.917 + vertexColor.g * 11.713;
@@ -190,6 +195,7 @@ Shader "L2/Effects/SteamInterlude"
 
             Varyings vert(Attributes v)
             {
+                UNITY_SETUP_INSTANCE_ID(v);
                 Varyings o;
                 float pSeed = ParticleSeed(v.color, _Seed);
                 float delay = L2Fx_RandomInitialDelay(_InitialDelayRange.xy, pSeed, _StartTime, 3.0);
@@ -251,10 +257,7 @@ Shader "L2/Effects/SteamInterlude"
 
                     float3 rightWS = normalize(cross(upRef, toCamera));
                     float3 upWS = normalize(cross(toCamera, rightWS));
-                    float3 objectScale = float3(
-                        length(float3(unity_ObjectToWorld._m00, unity_ObjectToWorld._m10, unity_ObjectToWorld._m20)),
-                        length(float3(unity_ObjectToWorld._m01, unity_ObjectToWorld._m11, unity_ObjectToWorld._m21)),
-                        length(float3(unity_ObjectToWorld._m02, unity_ObjectToWorld._m12, unity_ObjectToWorld._m22)));
+                    float3 objectScale = L2Fx_ObjectWorldScale();
                     posWS = centerWS
                         + rightWS * (quadOS.x * objectScale.x)
                         + upWS * (quadOS.y * objectScale.y)

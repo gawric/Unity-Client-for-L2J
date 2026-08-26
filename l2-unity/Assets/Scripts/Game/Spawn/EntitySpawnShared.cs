@@ -34,7 +34,7 @@ public static class EntitySpawnShared
             return false;
         }
 
-        identity.EntityType = EntityTypeParser.ParseEntityType(npcgrp.ClassName);
+        identity.EntityType = ResolveEntityType(prefab, npcgrp.ClassName);
         if (identity.NpcId == 31760)
         {
             Debug.Log("SpawnNpc>>> Spawn 31760 p5");
@@ -49,6 +49,25 @@ public static class EntitySpawnShared
             Prefab = prefab
         };
         return true;
+    }
+
+    public static EntityType ResolveEntityType(GameObject prefab, string className)
+    {
+        bool hasMonster = FindOnPrefab<MonsterEntity>(prefab) != null;
+        bool hasNpc = FindOnPrefab<NpcEntity>(prefab) != null;
+        if (hasMonster && !hasNpc)
+            return EntityType.Monster;
+        if (hasNpc && !hasMonster)
+            return EntityType.NPC;
+        return EntityTypeParser.ParseEntityType(className);
+    }
+
+    public static T FindOnPrefab<T>(GameObject go) where T : Component
+    {
+        if (go == null)
+            return null;
+        T component = go.GetComponent<T>();
+        return component != null ? component : go.GetComponentInChildren<T>(true);
     }
 
     public static GameObject AcquireNpcGameObject(
@@ -184,6 +203,19 @@ public static class EntitySpawnShared
                 continue;
             cc.stepOffset = 0f;
         }
+    }
+
+    /// <summary>
+    /// Leftover client-prediction: SetNewPosition is never called, so it lerps back to spawn.
+    /// </summary>
+    public static void DisableLegacyPositionSync(GameObject root)
+    {
+        if (root == null)
+            return;
+
+        NetworkTransformReceive receive = root.GetComponent<NetworkTransformReceive>();
+        if (receive != null)
+            receive.enabled = false;
     }
 
     public static void ApplyNpcIdentity(Entity npc, NpcSpawnRequest request)
