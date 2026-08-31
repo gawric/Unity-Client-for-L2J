@@ -159,8 +159,33 @@ public class ParticleGroup : EffectPart
             Renderers.ResolveObjectToWorldMatrices());
     }
 
+    public ParticleGroupAuthoring CaptureAuthoring()
+    {
+        return new ParticleGroupAuthoring
+        {
+            particles = _particles,
+            startDelay = _startDelay,
+            countPerSecond = _countPerSecond,
+            maxCount = _maxCount,
+            cloneToMaxCount = _cloneParticlesToMaxCount,
+            cloneLimit = _cloneParticleLimit,
+            useGpuInstancing = _useGpuInstancing,
+            isBurstSpawning = _isBurstSpawning,
+            relativeWarmupTime = _relativeWarmupTime,
+            duration = _duration,
+            hasFixedDuration = _hasFixedDuration,
+            instantKillAtCastEnd = _instantKillAtCastEnd,
+            // Cast-window parts keep emitting into free slots until StopPart.
+            // Active slots are never overwritten.
+            respawnDeadParticles = !_hasFixedDuration
+        };
+    }
+
     public override void PlayPart()
     {
+        if (!isActiveAndEnabled)
+            return;
+
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
         if (!_playback.Stopped)
             EffectDoublePlayLog.Repeat(

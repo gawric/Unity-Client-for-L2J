@@ -4,11 +4,13 @@ public sealed class NpcSpawner
 {
     private readonly ObjectPoolManager _pool;
     private readonly AppearFadeService _appearFade;
+    private readonly NpcDecoService _deco;
 
-    public NpcSpawner(ObjectPoolManager pool, AppearFadeService appearFade)
+    public NpcSpawner(ObjectPoolManager pool, AppearFadeService appearFade, NpcDecoService deco)
     {
         _pool = pool;
         _appearFade = appearFade;
+        _deco = deco;
     }
 
     public Entity Spawn(NpcSpawnRequest request, IWorldSpawnContext world)
@@ -46,6 +48,7 @@ public sealed class NpcSpawner
         EntitySpawnShared.ReapplyGroundAfterActivate(npcGo, identity);
 
         InitNpc(npc, npcGo, world);
+        _deco.Start(npc);
         world.RegisterNpc(npc);
         if (_appearFade != null && !npc.IsDead())
             _appearFade.Begin(npc);

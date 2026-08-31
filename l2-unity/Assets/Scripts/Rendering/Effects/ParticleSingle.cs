@@ -172,8 +172,37 @@ public class ParticleSingle : EffectPart
         }
     }
 
+    public ParticleGroupAuthoring CaptureAuthoring()
+    {
+        if (_particles == null || _particles.Length == 0)
+        {
+            _particles = GetComponentsInChildren<Renderer>(true);
+        }
+
+        return new ParticleGroupAuthoring
+        {
+            particles = _particles,
+            startDelay = _startDelay,
+            countPerSecond = _countPerSecond,
+            maxCount = Mathf.Max(1, _maxCount),
+            cloneToMaxCount = false,
+            cloneLimit = 8,
+            useGpuInstancing = false,
+            isBurstSpawning = _isBurstSpawning || _maxCount <= 1,
+            relativeWarmupTime = _relativeWarmupTime,
+            duration = _duration,
+            hasFixedDuration = _hasFixedDuration,
+            instantKillAtCastEnd = _instantKillAtCastEnd,
+            respawnDeadParticles = false,
+            stretchParticleLifeToWindow = _maxCount <= 1
+        };
+    }
+
     public override void PlayPart()
     {
+        if (!isActiveAndEnabled)
+            return;
+
         if (_fitToBounds && OwnerTarget != null)
         {
             FitToOwnerWidth(OwnerTarget);

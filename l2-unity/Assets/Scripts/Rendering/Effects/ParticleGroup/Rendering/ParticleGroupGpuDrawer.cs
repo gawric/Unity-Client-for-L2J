@@ -23,11 +23,13 @@ public sealed class ParticleGroupGpuDrawer
         Renderer[] particles,
         out Mesh mesh,
         out Material[] materials,
-        out int layer)
+        out int layer,
+        out int rendererPriority)
     {
         mesh = null;
         materials = null;
         layer = 0;
+        rendererPriority = 0;
         if (particles == null || particles.Length == 0)
             return false;
 
@@ -71,6 +73,9 @@ public sealed class ParticleGroupGpuDrawer
 
         materials = shared;
         layer = first.gameObject.layer;
+        // Unity 6.0 RenderParams has no sortingLayerID/sortingOrder.
+        // MeshRenderer.sortingOrder still applies to GO draws; GPU uses rendererPriority.
+        rendererPriority = first.sortingOrder != 0 ? first.sortingOrder : first.rendererPriority;
         for (int m = 0; m < materials.Length; m++)
         {
             if (materials[m] != null)
@@ -90,6 +95,7 @@ public sealed class ParticleGroupGpuDrawer
         Mesh mesh,
         Material[] materials,
         int layer,
+        int rendererPriority,
         NativeArray<L2FxParticleInstance> packedSlots,
         NativeArray<Matrix4x4> matrices,
         int packed)
@@ -119,6 +125,7 @@ public sealed class ParticleGroupGpuDrawer
             {
                 worldBounds = worldBounds,
                 layer = layer,
+                rendererPriority = rendererPriority,
                 shadowCastingMode = ShadowCastingMode.Off,
                 receiveShadows = false,
                 matProps = _properties

@@ -78,6 +78,8 @@ public sealed class GameLifetimeScope : LifetimeScope
             return user => new UserBowArrowEvents(user, bowArrow, animations);
         }, Lifetime.Singleton);
         builder.Register<UserSpawner>(Lifetime.Singleton);
+        builder.Register<NpcDecoCatalog>(Lifetime.Singleton);
+        builder.Register<NpcDecoService>(Lifetime.Singleton);
         builder.Register<NpcSpawner>(Lifetime.Singleton);
         builder.Register<MonsterSpawner>(Lifetime.Singleton);
         builder.Register<ItemSpawner>(Lifetime.Singleton);

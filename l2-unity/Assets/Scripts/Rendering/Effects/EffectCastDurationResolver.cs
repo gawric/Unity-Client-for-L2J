@@ -1,8 +1,8 @@
 using UnityEngine;
 
 /// <summary>
-/// Resolves emitter duration from cast timing vs static EffectSettings.
-/// Server HitTime wins over asset defaultLifeTime when both are present.
+/// Stationary emitter window from server HitTime vs asset defaultLifeTime.
+/// Shot projectile flytime is ProjectileFlightTimeCalculator in ProjectileManager — not here.
 /// </summary>
 public static class EffectCastDurationResolver
 {

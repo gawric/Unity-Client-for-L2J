@@ -22,6 +22,7 @@ public class Npcgrp {
     [SerializeField] private float _maxHp;
     [SerializeField] private float _maxMp;
     [SerializeField] private string _npcType;
+    [SerializeField] private NpcDecoEffect _deco;
 
     public int NpcId { get { return _npcId; } set { _npcId = value; } }
     public string ClassName { get => _className; set => _className = value; }
@@ -43,4 +44,5 @@ public class Npcgrp {
     public float MaxMp { get => _maxMp; set => _maxMp = value; }
 
     public string Type { get => _npcType; set => _npcType = value; }
+    public NpcDecoEffect Deco { get => _deco; set => _deco = value; }
 }

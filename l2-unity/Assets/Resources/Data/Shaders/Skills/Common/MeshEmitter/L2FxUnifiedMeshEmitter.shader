@@ -3,6 +3,8 @@ Shader "L2/Effects/MeshEmitter"
     Properties
     {
         _MainTex ("Texture", 2D) = "white" {}
+        _SecondTex ("Second Texture (D3D9 t1)", 2D) = "white" {}
+        [Toggle] _UseSecondTex ("Use Second Tex MODULATE2X", Float) = 0
         _StartTime ("Start Time", Float) = 0
         _Seed ("Seed", Float) = 0
         _InitialDelayRange ("Initial Delay Min Max", Vector) = (0, 0, 0, 0)
@@ -11,6 +13,8 @@ Shader "L2/Effects/MeshEmitter"
         _ManualAge ("Manual Age sec", Float) = 0
 
         [Enum(None,0,ZOnly,1,XYZ,2,LocationRange,3)] _SpawnMode ("Spawn Mode", Float) = 0
+        [Toggle] _FullTlsShape ("PTLS Polar Spawn", Float) = 0
+        [Enum(None,0,StartPositionAndOwner,1,OwnerAndStartPosition,2)] _PtvdMode ("GetVelocityDirectionFrom", Float) = 0
         [Enum(None,0,Ballistic,1,Drag,2)] _MotionMode ("Motion Mode", Float) = 0
         [Enum(Regular,0,PTRS_Actor,1)] _TransformMode ("Transform Mode", Float) = 0
         [Enum(Uniform,0,XYPlusZ,1,XYZ,2,UniformRange,3)] _SizeMode ("Size Mode", Float) = 0
@@ -39,6 +43,9 @@ Shader "L2/Effects/MeshEmitter"
         _StartLocationRangeXUc ("StartLocation X Min Max", Vector) = (0, 0, 0, 0)
         _StartLocationRangeYUc ("StartLocation Y Min Max", Vector) = (0, 0, 0, 0)
         _StartLocationRangeZUc ("StartLocation Z Min Max", Vector) = (0, 0, 0, 0)
+        _PolarThetaRangeUc ("Polar Theta Min Max", Vector) = (0, 360, 0, 0)
+        _PolarPhiRangeUc ("Polar Phi Min Max", Vector) = (0, 180, 0, 0)
+        _PolarRadiusRangeUc ("Polar Radius UU Min Max", Vector) = (0, 0, 0, 0)
         _StartVelocityZRangeUU ("StartVelocity Z Min Max", Vector) = (0, 0, 0, 0)
         _StartVelocityRangeXUc ("StartVelocity X Min Max", Vector) = (0, 0, 0, 0)
         _StartVelocityRangeYUc ("StartVelocity Y Min Max", Vector) = (0, 0, 0, 0)

@@ -4,7 +4,7 @@ using UnityEngine;
 /// <summary>
 /// GameObject/Material side of ParticleGroup. Simulation stays Burst-only.
 /// </summary>
-internal sealed class ParticleGroupRendererService
+public sealed class ParticleGroupRendererService
 {
     const string OwnerWorldPosShaderProperty = "_OwnerWorldPos";
     static readonly int StartTimeShaderId = Shader.PropertyToID("_StartTime");
@@ -192,7 +192,17 @@ internal sealed class ParticleGroupRendererService
         uint meshRandBase,
         uint spriteRandBase)
     {
+        if (_particles == null || slot < 0 || slot >= _particles.Length)
+        {
+            return;
+        }
+
         Renderer renderer = _particles[slot];
+        if (renderer == null)
+        {
+            return;
+        }
+
         // A group can fall back after having used GPU drawing on an earlier
         // playback/domain reload. DisableForGpuDraw leaves the component off.
         renderer.enabled = true;
@@ -270,6 +280,42 @@ internal sealed class ParticleGroupRendererService
         }
 
         return 0.5f;
+    }
+
+    public float ReadLifetimeCenter(float fallbackDuration)
+    {
+        if (_particles == null || _particles.Length == 0 || _particles[0] == null)
+        {
+            return fallbackDuration;
+        }
+
+        foreach (Material material in _particles[0].sharedMaterials)
+        {
+            if (material == null || !material.HasProperty("_LifetimeRange"))
+            {
+                continue;
+            }
+
+            Vector4 range = material.GetVector("_LifetimeRange");
+            float min = range.x;
+            float max = range.y;
+            if (min > 0f || max > 0f)
+            {
+                if (min <= 0f)
+                {
+                    min = max;
+                }
+
+                if (max <= 0f)
+                {
+                    max = min;
+                }
+
+                return (min + max) * 0.5f;
+            }
+        }
+
+        return fallbackDuration;
     }
 
     public Vector4 ResolveGpuOwnerWorldPos(Material[] gpuMaterials)

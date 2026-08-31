@@ -13,6 +13,9 @@ public abstract class BaseEffect : MonoBehaviour
     private float _castHitTimeSnapshot = -1f;
     private float _castFlightTimeSnapshot = -1f;
     private bool _deferDestroyUntilHomeArrival;
+    private bool _lifetimeOwnedByProjectile;
+    private bool _lifetimeOwnedByAuthoredStreams;
+    private bool _lifetimeOwnedByHost;
     public virtual void Initialize()
     {
         propBlock = new MaterialPropertyBlock();
@@ -41,6 +44,41 @@ public abstract class BaseEffect : MonoBehaviour
     }
 
     public bool IsDestroyDeferredUntilHomeArrival => _deferDestroyUntilHomeArrival;
+
+    public bool IsLifetimeOwnedByProjectile => _lifetimeOwnedByProjectile;
+
+    public bool IsLifetimeOwnedByAuthoredStreams => _lifetimeOwnedByAuthoredStreams;
+
+    public bool IsLifetimeOwnedByHost => _lifetimeOwnedByHost;
+
+    /// <summary>
+    /// NPC deco: do not DestoryEffect on Play. Owner (NpcDecoService) destroys the GO.
+    /// </summary>
+    public void BindLifetimeToHost()
+    {
+        _lifetimeOwnedByHost = true;
+        CancelInvoke(nameof(BeginFadeOut));
+    }
+
+    /// <summary>
+    /// Shot projectile: do not DestoryEffect on Play. ProjectileManager fires
+    /// OnHitEffectProjectile then Destroys the GO.
+    /// </summary>
+    public void BindLifetimeToProjectile()
+    {
+        _lifetimeOwnedByProjectile = true;
+        CancelInvoke(nameof(BeginFadeOut));
+    }
+
+    /// <summary>
+    /// Skill _ta overlay (wind strike impact, heal target light): do not DestoryEffect
+    /// on Play. ParticleGroupV2 plays its authored window, then the GO is destroyed.
+    /// </summary>
+    public void BindLifetimeToAuthoredStreams()
+    {
+        _lifetimeOwnedByAuthoredStreams = true;
+        CancelInvoke(nameof(BeginFadeOut));
+    }
 
     public void PrepareDestroyOnHomeArrival()
     {
@@ -133,6 +171,8 @@ public abstract class BaseEffect : MonoBehaviour
                 singles[i].SetRuntimeContinuousLoopOverride(true, false);
             }
         }
+
+        ParticleEmitterV2.StopAll(this);
     }
 
     public void DestoryEffect(EffectSettings settings, MagicCastData castData = null)

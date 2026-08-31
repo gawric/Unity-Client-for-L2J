@@ -10,6 +10,9 @@
 #include "../Decompile_Common/L2FxAppRand.hlsl"
 #include "../Decompile_Common/L2FxMeshSpawnParticle.hlsl"
 #include "../Decompile_Common/L2FxStartLocationRange.hlsl"
+#include "../Decompile_Common/L2FxSpritePolar.hlsl"
+#include "../Decompile_Common/L2FxPTVD_StartPositionAndOwner.hlsl"
+#include "../Decompile_Common/L2FxPTVD_OwnerAndStartPosition.hlsl"
 #include "../Decompile_Common/L2FxMeshMotion.hlsl"
 #include "../Decompile_Common/L2FxMeshSizeScale.hlsl"
 #include "../Decompile_Common/L2FxMeshColorFade.hlsl"
@@ -17,9 +20,12 @@
 #include "../Decompile_Common/L2FxMeshSpin.hlsl"
 #include "../Decompile_Common/L2FxPTRS_Actor.hlsl"
 #include "../Decompile_Common/L2FxPTDS_DrawStyle.hlsl"
+#include "../Decompile_Common/L2FxD3d9FixedFunction.hlsl"
 
 TEXTURE2D(_MainTex);
 SAMPLER(sampler_MainTex);
+TEXTURE2D(_SecondTex);
+SAMPLER(sampler_SecondTex);
 
 // Modes are material data, not formula replacements:
 // Spawn: 0=None, 1=Z-only SpawnParticle, 2=full XYZ SpawnParticle,
@@ -29,6 +35,8 @@ SAMPLER(sampler_MainTex);
 // Size: 0=uniform, 1=XY + sampled Z, 2=full XYZ.
 CBUFFER_START(UnityPerMaterial)
     float4 _MainTex_ST;
+    float4 _SecondTex_ST;
+    float _UseSecondTex;
     float _StartTime;
     float _Seed;
     float4 _InitialDelayRange;
@@ -37,6 +45,8 @@ CBUFFER_START(UnityPerMaterial)
     float _ManualAge;
 
     float _SpawnMode;
+    float _FullTlsShape;
+    float _PtvdMode;
     float _MotionMode;
     float _TransformMode;
     float _SizeMode;
@@ -65,6 +75,9 @@ CBUFFER_START(UnityPerMaterial)
     float4 _StartLocationRangeXUc;
     float4 _StartLocationRangeYUc;
     float4 _StartLocationRangeZUc;
+    float4 _PolarThetaRangeUc;
+    float4 _PolarPhiRangeUc;
+    float4 _PolarRadiusRangeUc;
     float4 _StartVelocityZRangeUU;
     float4 _StartVelocityRangeXUc;
     float4 _StartVelocityRangeYUc;
@@ -205,29 +218,58 @@ void L2FxUnified_ResolveSpawn(
         float sampledDelay;
         if (state != 0u)
         {
-            L2Fx_MeshSpawnParticle_SampleLocVelSize(
-                _StartVelocityRangeXUc.xy,
-                _StartVelocityRangeYUc.xy,
-                _StartVelocityRangeZUc.xy,
-                _StartLocationRangeXUc.xy,
-                _StartLocationRangeYUc.xy,
-                _StartLocationRangeZUc.xy,
-                float2(_ColorMulMin.x, _ColorMulMax.x),
-                float2(_ColorMulMin.y, _ColorMulMax.y),
-                float2(_ColorMulMin.z, _ColorMulMax.z),
-                _LifetimeRange.xy,
-                _InitialDelayRange.xy,
-                float2(1.0, 1.0),
-                _StartSizeRangeXUc.xy,
-                _StartSizeRangeYUc.xy,
-                _StartSizeRangeZUc.xy,
-                state,
-                velocityUe,
-                sampledLocation,
-                colorMul,
-                sampledLifetime,
-                sampledDelay,
-                sizeUe);
+            if (_FullTlsShape > 0.5)
+            {
+                L2Fx_MeshSpawnParticle_SampleVelPolarSize(
+                    _StartVelocityRangeXUc.xy,
+                    _StartVelocityRangeYUc.xy,
+                    _StartVelocityRangeZUc.xy,
+                    _PolarThetaRangeUc.xy,
+                    _PolarPhiRangeUc.xy,
+                    _PolarRadiusRangeUc.xy,
+                    float2(_ColorMulMin.x, _ColorMulMax.x),
+                    float2(_ColorMulMin.y, _ColorMulMax.y),
+                    float2(_ColorMulMin.z, _ColorMulMax.z),
+                    _LifetimeRange.xy,
+                    _InitialDelayRange.xy,
+                    float2(1.0, 1.0),
+                    _StartSizeRangeXUc.xy,
+                    _StartSizeRangeYUc.xy,
+                    _StartSizeRangeZUc.xy,
+                    state,
+                    velocityUe,
+                    sampledLocation,
+                    colorMul,
+                    sampledLifetime,
+                    sampledDelay,
+                    sizeUe);
+            }
+            else
+            {
+                L2Fx_MeshSpawnParticle_SampleLocVelSize(
+                    _StartVelocityRangeXUc.xy,
+                    _StartVelocityRangeYUc.xy,
+                    _StartVelocityRangeZUc.xy,
+                    _StartLocationRangeXUc.xy,
+                    _StartLocationRangeYUc.xy,
+                    _StartLocationRangeZUc.xy,
+                    float2(_ColorMulMin.x, _ColorMulMax.x),
+                    float2(_ColorMulMin.y, _ColorMulMax.y),
+                    float2(_ColorMulMin.z, _ColorMulMax.z),
+                    _LifetimeRange.xy,
+                    _InitialDelayRange.xy,
+                    float2(1.0, 1.0),
+                    _StartSizeRangeXUc.xy,
+                    _StartSizeRangeYUc.xy,
+                    _StartSizeRangeZUc.xy,
+                    state,
+                    velocityUe,
+                    sampledLocation,
+                    colorMul,
+                    sampledLifetime,
+                    sampledDelay,
+                    sizeUe);
+            }
             locationUe = offsetUe + sampledLocation;
             lifetime = max(sampledLifetime, 1e-4);
             delay = sampledDelay;
@@ -238,10 +280,20 @@ void L2FxUnified_ResolveSpawn(
                 L2Fx_RandomRange(_StartVelocityRangeXUc.xy, _Seed, _StartTime, 17.0),
                 L2Fx_RandomRange(_StartVelocityRangeYUc.xy, _Seed, _StartTime, 19.0),
                 L2Fx_RandomRange(_StartVelocityRangeZUc.xy, _Seed, _StartTime, 23.0));
-            locationUe += float3(
-                L2Fx_RandomRange(_StartLocationRangeXUc.xy, _Seed, _StartTime, 29.0),
-                L2Fx_RandomRange(_StartLocationRangeYUc.xy, _Seed, _StartTime, 31.0),
-                L2Fx_RandomRange(_StartLocationRangeZUc.xy, _Seed, _StartTime, 37.0));
+            if (_FullTlsShape > 0.5)
+            {
+                locationUe = offsetUe + L2Fx_SpritePolar_CartesianUe(
+                    L2Fx_RandomRange(_PolarThetaRangeUc.xy, _Seed, _StartTime, 29.0),
+                    L2Fx_RandomRange(_PolarPhiRangeUc.xy, _Seed, _StartTime, 31.0),
+                    L2Fx_RandomRange(_PolarRadiusRangeUc.xy, _Seed, _StartTime, 37.0));
+            }
+            else
+            {
+                locationUe += float3(
+                    L2Fx_RandomRange(_StartLocationRangeXUc.xy, _Seed, _StartTime, 29.0),
+                    L2Fx_RandomRange(_StartLocationRangeYUc.xy, _Seed, _StartTime, 31.0),
+                    L2Fx_RandomRange(_StartLocationRangeZUc.xy, _Seed, _StartTime, 37.0));
+            }
             sizeUe = float3(
                 L2Fx_RandomRange(_StartSizeRangeXUc.xy, _Seed, _StartTime, 41.0),
                 L2Fx_RandomRange(_StartSizeRangeYUc.xy, _Seed, _StartTime, 43.0),
@@ -414,6 +466,17 @@ Varyings vert(Attributes IN)
     float delay;
     L2FxUnified_ResolveSpawn(
         locationUe, velocityUe, sizeUe, colorMul, lifetime, delay);
+    locationUe = L2Fx_ApplySpawnLocationAddUe(locationUe);
+    if (_PtvdMode > 1.5)
+        velocityUe = L2FxPTVD_OwnerAndStartPosition(
+            velocityUe, locationUe, float3(0.0, 0.0, 0.0));
+    else if (_PtvdMode > 0.5)
+        velocityUe = L2FxPTVD_StartPositionAndOwner(
+            velocityUe, locationUe, float3(0.0, 0.0, 0.0));
+    // SpawnMode 2 samples Size FRangeVector XYZ for TLS, then returns.
+    // SizeMode 0 = UniformSize: keep X only (L2Fx_MeshSize_ApplyUniformSize).
+    if (_SizeMode < 0.5)
+        sizeUe = L2Fx_MeshSize_ApplyUniformSize(sizeUe);
 
     float ageSeconds = L2FxUnified_ResolveAge(lifetime, delay);
     float ageNorm = saturate(ageSeconds / lifetime);
@@ -493,9 +556,19 @@ half4 frag(Varyings IN) : SV_Target
     if (_AlphaClipThreshold >= 0.0)
         clip(tex.a - (half)_AlphaClipThreshold);
 
-    half4 color = half4(
-        tex.rgb * IN.color.rgb * (half)_RgbBoost,
-        tex.a * IN.color.a);
+    half4 color;
+    if (_UseSecondTex > 0.5)
+    {
+        float2 uv1 = IN.uv * _SecondTex_ST.xy + _SecondTex_ST.zw;
+        half4 tex1 = SAMPLE_TEXTURE2D(_SecondTex, sampler_SecondTex, uv1);
+        color = L2Fx_D3d9_Modulate2xTwoTexTFactor(tex, tex1, IN.color);
+    }
+    else
+    {
+        color = half4(
+            tex.rgb * IN.color.rgb * (half)_RgbBoost,
+            tex.a * IN.color.a);
+    }
     color.rgb += (half3)(IN.debugData.xyz * (_DebugMeshOut * 1e-10));
     return color;
 }

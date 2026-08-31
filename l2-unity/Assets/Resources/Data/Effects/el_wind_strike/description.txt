@@ -1,4 +1,13 @@
-fl - это кольца вокруг orbs
-pr - это orbs
-ta - эффект попадания
-ca - это эффект низа
+el_wind_strike — V2 / unified HLSL (Decompile_Common).
+
+Generate from Tools → L2 Effects → Effect Generator:
+select this folder, Skill Visual ID 1177 (required: 5734 shares the same UC classes),
+Bind to GlobalEffect on, Generate Effect Assets.
+
+UC parts:
+ca — caster lower / cast window
+pr — orbs during cast
+fl — projectile (NSkillProjectile), spawn on shoot
+ta — hit / explosion
+
+Previous Shader Graph assets live in el_wind_strike_deprecated.

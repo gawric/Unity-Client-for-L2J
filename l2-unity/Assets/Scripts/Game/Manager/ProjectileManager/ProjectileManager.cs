@@ -208,9 +208,9 @@ public class ProjectileManager : AbstractProjectile, IProjectileManager
         {
             if (activeProjectiles.TryGetValue(projectileId, out ProjectileData projectile))
             {
-                if (projectile.prefab != null)
+                if (projectile.prefab != null && projectile.impactType == ProjectileImpactType.EffectOnly)
                 {
-                    //Destroy(projectile.prefab);
+                    Destroy(projectile.prefab);
                 }
                 activeProjectiles.Remove(projectileId);
             }
@@ -372,9 +372,9 @@ public class ProjectileManager : AbstractProjectile, IProjectileManager
         if (activeProjectiles.TryGetValue(projectileId, out ProjectileData projectile))
         {
             projectile.isActive = false;
-            if (projectile.prefab != null)
+            if (projectile.prefab != null && projectile.impactType == ProjectileImpactType.EffectOnly)
             {
-                //Destroy(projectile.prefab);
+                Destroy(projectile.prefab);
             }
             activeProjectiles.Remove(projectileId);
         }

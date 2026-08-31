@@ -16,7 +16,8 @@ Shader "L2/Effects/SpriteEmitter"
         [Enum(None,0,Box,1,Polar,2,FullTLS,3)] _SpawnMode ("Spawn Mode", Float) = 0
         [Enum(Shape0Box,0,Polar,1)] _FullTlsShape ("Full TLS Shape", Float) = 0
         [Enum(None,0,Ballistic,1,Drag,2)] _MotionMode ("Motion Mode", Float) = 0
-        [Enum(CameraBillboard,0,PTDU_Up,1)] _OrientationMode ("Orientation Mode", Float) = 0
+        [Enum(CameraBillboard,0,PTDU_Up,1,PTDU_Normal,2)] _OrientationMode ("Orientation Mode", Float) = 0
+        _SurfaceNormals ("Surface Normals", Vector) = (0, 0, 0, 0)
         [Enum(None,0,StartAndOwner,1,OwnerAndStart,2)] _PtvdMode ("PTVD Mode", Float) = 0
         [Enum(Uniform,0,XYZ,1)] _SizeMode ("Size Mode", Float) = 0
         [Enum(None,0,AppRand,1)] _SpinMode ("Spin Mode", Float) = 0
@@ -88,7 +89,7 @@ Shader "L2/Effects/SpriteEmitter"
         [Toggle] _UseSoftLumaAlpha ("Soft Luma Alpha", Float) = 0
         _LumaAlphaPower ("Luma Alpha Power", Float) = 1
         _AlphaClipThreshold ("Alpha Clip Threshold (-1 off)", Float) = -1
-        [Toggle] _DebugSpriteOut ("Debug Sprite Output", Float) = 0
+        [Enum(Off,0,TexAlpha,1,Luma,2,RgbOpaque,3,DarkOpaqueHoles,4)] _DebugSpriteOut ("Debug Sprite Output", Float) = 0
 
         [Enum(UnityEngine.Rendering.BlendMode)] _SrcBlend ("Src Blend", Float) = 1
         [Enum(UnityEngine.Rendering.BlendMode)] _DstBlend ("Dst Blend", Float) = 1

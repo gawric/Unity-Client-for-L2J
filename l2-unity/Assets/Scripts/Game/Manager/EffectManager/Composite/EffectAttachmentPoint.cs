@@ -20,5 +20,9 @@ public enum EffectAttachmentPoint
     /// <summary>
     /// Capsule / renderer bounds center on caster (waist–chest area for humanoids).
     /// </summary>
-    CasterCenter = 10
+    CasterCenter = 10,
+    /// <summary>
+    /// Left-hand weapon socket (HF268 attach_on=3). Additive value; existing serialized parts stay valid.
+    /// </summary>
+    LeftWeaponSocket = 11
 }

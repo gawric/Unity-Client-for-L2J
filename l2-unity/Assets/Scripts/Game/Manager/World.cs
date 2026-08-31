@@ -39,6 +39,7 @@ public class World : MonoBehaviour, IWorldSpawnContext {
     [Inject] private MonsterSpawner _monsterSpawner;
     [Inject] private ItemSpawner _itemSpawner;
     [Inject] private ItemDropPresentationService _itemDropPresentation;
+    [Inject] private NpcDecoService _npcDeco;
     [Inject] private ItemDropLayerService _dropLayers;
     [Inject] private NpcgrpTable _npcGrps;
     [Inject] private NpcNameTable _npcNames;
@@ -184,6 +185,9 @@ public class World : MonoBehaviour, IWorldSpawnContext {
             $"[DeleteObject] RemoveObject START id={id} type={typeName} name={goName} " +
             $"activeSelf={wasActive} parent={parentBefore}");
 
+        if (_npcDeco != null)
+            _npcDeco.Stop(id);
+
         UnregisterObject(id, entity);
         if (_appearFade != null)
             _appearFade.Cancel(id);
@@ -240,6 +244,8 @@ public class World : MonoBehaviour, IWorldSpawnContext {
     void BeginActorDisappear(int id, Entity entity, Action<GameObject> onFinished)
     {
         GameObject go = entity != null ? entity.gameObject : null;
+        if (_npcDeco != null)
+            _npcDeco.Stop(id);
         UnregisterObject(id, entity);
         if (NameplatesManager.Instance != null)
             NameplatesManager.Instance.Remove(id);

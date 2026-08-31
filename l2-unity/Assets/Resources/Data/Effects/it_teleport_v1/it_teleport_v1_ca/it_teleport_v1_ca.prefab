@@ -8619,7 +8619,7 @@ MeshFilter:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2875648040319351905}
-  m_Mesh: {fileID: 813094668336062808, guid: 408b3966c0e5b49489e3190244c856be, type: 3}
+  m_Mesh: {fileID: -2432090755550338912, guid: 9c503e12d4f76b80ae3c1f20617d89a2, type: 3}
 --- !u!23 &365407375774140079
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -11407,6 +11407,7 @@ MonoBehaviour:
   _cloneParticlesToMaxCount: 0
   _cloneParticleLimit: 64
   _forceContinuousSpawning: 0
+  _useGpuInstancing: 1
   _preserveShaderTimeInContinuousLoop: 0
   _isBurstSpawning: 0
   _relativeWarmupTime: 0
@@ -12401,6 +12402,7 @@ MonoBehaviour:
   _cloneParticlesToMaxCount: 0
   _cloneParticleLimit: 64
   _forceContinuousSpawning: 0
+  _useGpuInstancing: 1
   _preserveShaderTimeInContinuousLoop: 0
   _isBurstSpawning: 0
   _relativeWarmupTime: 0

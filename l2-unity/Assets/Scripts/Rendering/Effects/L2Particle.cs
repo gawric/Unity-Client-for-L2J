@@ -56,6 +56,8 @@ public class L2Particle : BaseEffect, IRegisteredBillboard
         {
             ApplyBillboardRotation(Camera.main);
         }
+
+        TryDestroyWhenAuthoredStreamsComplete();
     }
 
     private void ApplyBillboardRotation(Camera camera)
@@ -67,6 +69,21 @@ public class L2Particle : BaseEffect, IRegisteredBillboard
 
         // Copy camera orientation so the whole mesh turns as an object, preserving its authored 3D shape.
         transform.rotation = camera.transform.rotation * Quaternion.Euler(_billboardRotationOffsetEuler);
+    }
+
+    void TryDestroyWhenAuthoredStreamsComplete()
+    {
+        if (!IsLifetimeOwnedByAuthoredStreams || _playStartedAt < 0f)
+        {
+            return;
+        }
+
+        if (!ParticleEmitterV2.TryAllComplete(this, out bool anyEnabled) || !anyEnabled)
+        {
+            return;
+        }
+
+        Destroy(gameObject);
     }
 
     public override void Setup(EffectSettings settings, MagicCastData castData, Transform owner)
@@ -114,7 +131,11 @@ public class L2Particle : BaseEffect, IRegisteredBillboard
 #endif
         _playStartedAt = Time.time;
         ResetTimer();
-        if (!_skipScheduledDestroyForDebug && !IsDestroyDeferredUntilHomeArrival)
+        if (!_skipScheduledDestroyForDebug &&
+            !IsDestroyDeferredUntilHomeArrival &&
+            !IsLifetimeOwnedByProjectile &&
+            !IsLifetimeOwnedByAuthoredStreams &&
+            !IsLifetimeOwnedByHost)
         {
             DestoryEffect(_settings, _castData);
         }
@@ -145,6 +166,7 @@ public class L2Particle : BaseEffect, IRegisteredBillboard
             EffectDoublePlayLog.Repeat("L2Particle.ResetTimer", this, _playStartedAt, _firstPlayStack);
 #endif
         RefreshParticleGroups();
+        L2FxAlphaBlendDrawOrder.Apply(this);
 
         for (int i = 0; i < _particleGroups.Length; i++)
         {
@@ -183,9 +205,10 @@ public class L2Particle : BaseEffect, IRegisteredBillboard
         List<EffectPart> refreshed = new List<EffectPart>(_particleGroups.Length + 1);
         for (int i = 0; i < _particleGroups.Length; i++)
         {
-            if (_particleGroups[i] != null && !refreshed.Contains(_particleGroups[i]))
+            EffectPart part = _particleGroups[i];
+            if (part != null && part.isActiveAndEnabled && !refreshed.Contains(part))
             {
-                refreshed.Add(_particleGroups[i]);
+                refreshed.Add(part);
             }
         }
 
@@ -193,12 +216,13 @@ public class L2Particle : BaseEffect, IRegisteredBillboard
         for (int i = 0; i < children.Length; i++)
         {
             EffectPart part = children[i];
-            if (part == null || refreshed.Contains(part))
+            if (part == null || !part.isActiveAndEnabled || refreshed.Contains(part))
             {
                 continue;
             }
 
-            if (part is ParticleGroup group && group.IsHomeFlightAnchor)
+            if (part is IParticleEmitterV2 ||
+                (part is ParticleGroup group && group.IsHomeFlightAnchor))
             {
                 refreshed.Add(part);
             }
@@ -280,5 +304,4 @@ public class L2Particle : BaseEffect, IRegisteredBillboard
 
         return sb.Length > 0 ? sb.ToString() : "no_LifetimeRange";
     }
-
 }

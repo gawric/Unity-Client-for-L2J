@@ -1011,9 +1011,11 @@ public sealed class L2HtmlRenderer
         image.AddToClassList("html_image");
 
         Texture2D texture = LoadTexture(src);
+        // Unity 6 UITK asserts in RepaintPanels / RenderChain when Image.image is null.
+        if (texture == null)
+            return;
 
-        if (texture != null)
-            image.image = texture;
+        image.image = texture;
 
         if (TryFloat(GetAttr("width", ""), out float width))
             image.style.width = width;

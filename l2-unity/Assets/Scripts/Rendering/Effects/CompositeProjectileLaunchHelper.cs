@@ -241,6 +241,11 @@ public static class CompositeProjectileLaunchHelper
         return part != null && part.projectile != null ? part.projectile : new CompositeProjectileConfig();
     }
 
+    public static void SetPartVisualsVisible(Transform root, bool visible)
+    {
+        SetVisualsVisible(root, visible);
+    }
+
     private static void SetVisualsVisible(Transform root, bool visible)
     {
         if (root == null)
@@ -248,10 +253,18 @@ public static class CompositeProjectileLaunchHelper
             return;
         }
 
+        ParticleEmitterV2.SetVisible(root, visible);
+
         Renderer[] renderers = root.GetComponentsInChildren<Renderer>(true);
         for (int i = 0; i < renderers.Length; i++)
         {
-            renderers[i].enabled = visible;
+            Renderer renderer = renderers[i];
+            if (renderer == null || IsOwnedByGpuStream(renderer))
+            {
+                continue;
+            }
+
+            renderer.enabled = visible;
         }
 
         ParticleSystem[] particleSystems = root.GetComponentsInChildren<ParticleSystem>(true);
@@ -268,5 +281,17 @@ public static class CompositeProjectileLaunchHelper
                 system.Clear(true);
             }
         }
+    }
+
+    private static bool IsOwnedByGpuStream(Renderer renderer)
+    {
+        ParticleStreamDriver driver = renderer.GetComponentInParent<ParticleStreamDriver>();
+        if (driver != null && driver.IsGpuDraw)
+        {
+            return true;
+        }
+
+        ParticleGroupV2 groupV2 = renderer.GetComponentInParent<ParticleGroupV2>();
+        return groupV2 != null && groupV2.IsGpuDraw;
     }
 }

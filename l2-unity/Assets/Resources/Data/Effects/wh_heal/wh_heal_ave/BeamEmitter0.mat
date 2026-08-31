@@ -1,0 +1,73 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!21 &2100000
+Material:
+  serializedVersion: 8
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: BeamEmitter0
+  m_Shader: {fileID: 4800000, guid: 8fe13f7ab13b46df8e038de0920b067b, type: 3}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
+  m_ValidKeywords: []
+  m_InvalidKeywords:
+  - _FADEIN_ON
+  - _FADEOUT_ON
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 1
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: 3000
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_LockedProperties: 
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - _MainTex:
+        m_Texture: {fileID: 2800000, guid: 3324246f647015849b61cd68e27fb6cf, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Ints: []
+    m_Floats:
+    - _BeamEndpointMode: 0
+    - _ColorKey1Time: 0.521429
+    - _ColorKey2Time: 1
+    - _ColorScaleCount: 3
+    - _ColorScaleParam: 10
+    - _DstBlend: 1
+    - _FadeIn: 1
+    - _FadeInEndTime: 0.5
+    - _Fadeout: 1
+    - _FadeoutStartTime: 1
+    - _L2FxWorldCalibration: 1.4
+    - _Opacity: 0.18
+    - _OpacityRatio: 1
+    - _RgbBoost: 1
+    - _SpriteMotionRandStateBits: 0
+    - _SrcBlend: 1
+    - _StartTime: 0
+    - _UsePolar: 0
+    m_Colors:
+    - _BeamDistanceRangeUc: {r: 0, g: 0, b: 0, a: 0}
+    - _BeamEndOffsetXUc: {r: 0, g: 0, b: 0, a: 0}
+    - _BeamEndOffsetYUc: {r: 0, g: 0, b: 0, a: 0}
+    - _BeamEndOffsetZUc: {r: -220, g: -150, b: 0, a: 0}
+    - _ColorKey0: {r: 1, g: 1, b: 1, a: 1}
+    - _ColorKey1: {r: 0.8666667, g: 0.8666667, b: 0.8666667, a: 1}
+    - _ColorKey2: {r: 1, g: 1, b: 1, a: 1}
+    - _ColorMulMax: {r: 0.704, g: 0.704, b: 0.704, a: 0}
+    - _ColorMulMin: {r: 0.5, g: 0.5, b: 0.5, a: 0}
+    - _InitialDelayRange: {r: 0, g: 0, b: 0, a: 0}
+    - _LifetimeRange: {r: 2, g: 3, b: 0, a: 0}
+    - _PolarPhiRangeUc: {r: 70, g: 110, b: 0, a: 0}
+    - _PolarRadiusRangeUc: {r: 13, g: 13, b: 0, a: 0}
+    - _PolarThetaRangeUc: {r: 0, g: 360, b: 0, a: 0}
+    - _SizeRange: {r: 6, g: 9, b: 0, a: 0}
+    - _StartLocationOffsetUc: {r: 0, g: 0, b: 160, a: 0}
+    - _StartLocationRangeXUc: {r: -8, g: 8, b: 0, a: 0}
+    - _StartLocationRangeYUc: {r: -8, g: 8, b: 0, a: 0}
+    - _StartLocationRangeZUc: {r: -20, g: 20, b: 0, a: 0}
+  m_BuildTextureStacks: []
+  m_AllowLocking: 1

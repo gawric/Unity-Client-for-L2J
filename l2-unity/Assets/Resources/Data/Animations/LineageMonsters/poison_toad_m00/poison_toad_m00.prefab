@@ -373,7 +373,6 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: bdb671c21cf39cb4d95189321c9f365b, type: 3}
   m_PrefabInstance: {fileID: 4205193272498876674}
   m_PrefabAsset: {fileID: 0}
-
 --- !u!114 &807976280187974056
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -388,7 +387,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _animator: {fileID: 0}
   _resetStateOnReceive: 1
-  _atk01ClipLength: 1000
   _spAtk01ClipLength: 1000
 --- !u!95 &2883078449225306254
 Animator:

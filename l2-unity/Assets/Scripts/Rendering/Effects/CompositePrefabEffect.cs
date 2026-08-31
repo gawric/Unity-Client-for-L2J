@@ -77,6 +77,10 @@ public class CompositePrefabPart
     public CompositePartSpawnTiming spawnTiming = CompositePartSpawnTiming.Immediate;
     // Spawns hit-timed part earlier than castData.HitTime (seconds).
     public float hitLeadSeconds = 0f;
+    // Extra wait after the resolved spawn event (HF268 spawn_delay).
+    public float spawnDelaySeconds = 0f;
+    // Optional named bone when attach_on=7. Resolved on the caster Gear before the enum point.
+    public string attachmentBoneName;
     // Local offset from resolved attachment point (in attachment transform space if available).
     public Vector3 positionOffset = Vector3.zero;
     // Scales positionOffset by model height to keep visual placement consistent across races.
@@ -135,7 +139,7 @@ public class CompositePrefabEffect : TimedCompositeEffectBase
     public event Action<CompositePrefabEffect, EffectResolveContext> StartSpawn;
 
     private readonly IEffectAttachmentResolver _resolver = new DefaultEffectAttachmentResolver();
-    private EffectResolveContext _context;
+    protected EffectResolveContext _context;
     private readonly List<PendingCompositePart> _pendingParts = new List<PendingCompositePart>();
     private readonly List<CompositePrefabPart> _pendingHitColliderParts = new List<CompositePrefabPart>();
     private readonly List<CompositePrefabPart> _pendingAnimationShootParts = new List<CompositePrefabPart>();
@@ -147,7 +151,7 @@ public class CompositePrefabEffect : TimedCompositeEffectBase
     private Coroutine _fallbackShootRoutine;
     private Coroutine _visibilityProbeRoutine;
     private AnimationEventsBase _animationEvents;
-    private float _playStartedAt;
+    protected float _playStartedAt;
     private bool _isSubscribedToAnyShoot;
     private bool _isSubscribedToProjectileEffectHit;
     private bool _lightSpawned;
@@ -180,12 +184,22 @@ public class CompositePrefabEffect : TimedCompositeEffectBase
         _pendingHitColliderParts.Clear();
         _pendingAnimationShootParts.Clear();
         _lightSpawned = false;
-        SubscribeShootEventIfNeeded();
-        SubscribeProjectileHitEventIfNeeded();
+        if (ShouldUseLegacyPartPipeline)
+        {
+            SubscribeShootEventIfNeeded();
+            SubscribeProjectileHitEventIfNeeded();
+        }
     }
+
+    protected virtual bool ShouldUseLegacyPartPipeline => true;
 
     public override void Play()
     {
+        if (!ShouldUseLegacyPartPipeline)
+        {
+            PlayV2();
+            return;
+        }
 
         if (_parts == null || _parts.Length == 0)
         {
@@ -219,10 +233,16 @@ public class CompositePrefabEffect : TimedCompositeEffectBase
 #endif
     }
 
+    protected virtual void PlayV2()
+    {
+    }
+
     public override void SetProgress(float normalizedTime)
     {
         // Composite root delegates playback to spawned child effects.
     }
+
+    protected bool SkipDestroyCompositeByLifetime => _skipDestroyCompositeByLifetime;
 
     private void RefreshResolveContext()
     {
@@ -279,7 +299,7 @@ public class CompositePrefabEffect : TimedCompositeEffectBase
             return;
         }
 
-        if (part.overrideHideTime && partSettings != null)
+        if (UseLegacyLifetimeHacks && part.overrideHideTime && partSettings != null)
         {
             float hide = part.customHideTime > 1e-4f
                 ? part.customHideTime
@@ -290,18 +310,27 @@ public class CompositePrefabEffect : TimedCompositeEffectBase
         Transform setupOwner = ResolveSetupOwner(resolvedTransform, instance.transform);
         MagicCastData partCastData = part.passCastDataToPart ? _castData : null;
         instance.Setup(partSettings, partCastData, setupOwner);
-        ApplyPartShaderTargetPosition(part, instance.transform);
-        ApplyPartLoopOverrides(part, instance.transform);
+        if (UseLegacyLifetimeHacks)
+        {
+            ApplyPartLoopOverrides(part, instance.transform);
+        }
+
         ApplyPartHomeFlightOverrides(part, instance.transform);
         if (CompositeHomeProjectileLaunchHelper.IsEnabled(part))
         {
             instance.PrepareDestroyOnHomeArrival();
         }
 
+        PreparePartPlayback(part, instance);
+        ApplyPartShaderTargetPosition(part, instance.transform);
         instance.Play();
         CompositeProjectileLaunchHelper.ApplyPreShootVisibility(part, instance, DebugPrefix);
         _spawnedPartInstances[part] = instance;
-        StartFinalShaderLifetimeRoutineIfNeeded(part, instance.transform, partSettings);
+        if (UseLegacyLifetimeHacks)
+        {
+            StartFinalShaderLifetimeRoutineIfNeeded(part, instance.transform, partSettings);
+        }
+
         TryLaunchPartAsProjectileImmediately(part, instance);
         TryLaunchPartAsHomeProjectileImmediately(part, instance);
 
@@ -313,7 +342,7 @@ public class CompositePrefabEffect : TimedCompositeEffectBase
     /// Light is created here — composite part spawn — never inside ParticleGroup/ParticleSingle.
     /// Chain: CompositePrefabEffect.SpawnPart → StartSpawn → FNManagerLight (if useLight).
     /// </summary>
-    private void RaiseStartSpawnAndMaybeSpawnLight()
+    protected void RaiseStartSpawnAndMaybeSpawnLight()
     {
         StartSpawn?.Invoke(this, _context);
         if (!_useLight || _lightSettings == null || _lightSpawned)
@@ -443,10 +472,22 @@ public class CompositePrefabEffect : TimedCompositeEffectBase
                 continue;
             }
 
+            float extraDelay = Mathf.Max(0f, part.spawnDelaySeconds);
+            if (extraDelay > 0f)
+            {
+                _pendingParts.Add(new PendingCompositePart
+                {
+                    Part = part,
+                    SpawnAtTime = Time.time + extraDelay
+                });
+                continue;
+            }
+
             SpawnPart(part);
         }
 
         _pendingAnimationShootParts.Clear();
+        StartPendingPartsRoutineIfNeeded();
     }
 
     private void HandleProjectileEffectHit(GameObject projectilePrefab, Transform target, Vector3 hitPoint, Vector3 hitDirection, int attackerEntityId)
@@ -587,6 +628,20 @@ public class CompositePrefabEffect : TimedCompositeEffectBase
 
     private bool TryResolveAttachment(CompositePrefabPart part, out Transform resolvedTransform, out Vector3 worldPosition)
     {
+        if (!string.IsNullOrEmpty(part.attachmentBoneName) &&
+            _context != null &&
+            _context.CasterEntity != null &&
+            _context.CasterEntity.Gear != null)
+        {
+            Transform bone = _context.CasterEntity.Gear.FindRecursiveBone(part.attachmentBoneName);
+            if (bone != null)
+            {
+                resolvedTransform = bone;
+                worldPosition = bone.position;
+                return true;
+            }
+        }
+
         if (_resolver.Resolve(part.attachmentPoint, _context, out resolvedTransform, out worldPosition))
         {
             return true;
@@ -612,9 +667,22 @@ public class CompositePrefabEffect : TimedCompositeEffectBase
 
         AttachToResolvedTransformIfNeeded(part, resolvedTransform, instance.transform, adjustedOffset, worldPosition);
         ApplyPartScale(part, instance.transform);
-        ApplyShaderLifetimeOverride(part, instance.transform);
+        if (UseLegacyLifetimeHacks)
+        {
+            ApplyShaderLifetimeOverride(part, instance.transform);
+        }
 
         return instance;
+    }
+
+    /// <summary>
+    /// Legacy ParticleGroup loop/hold/disableShaderLifetime path.
+    /// V2 composites turn this off and hijack groups before Play.
+    /// </summary>
+    protected virtual bool UseLegacyLifetimeHacks => true;
+
+    protected virtual void PreparePartPlayback(CompositePrefabPart part, BaseEffect instance)
+    {
     }
 
     /// <summary>
@@ -811,6 +879,7 @@ public class CompositePrefabEffect : TimedCompositeEffectBase
             }
 
             float delay = CompositeEffectUtilities.ResolveSpawnDelay(part.spawnTiming, _castData, part.hitLeadSeconds);
+            delay += Mathf.Max(0f, part.spawnDelaySeconds);
             if (delay <= 0f)
             {
                 SpawnPart(part);
@@ -827,7 +896,7 @@ public class CompositePrefabEffect : TimedCompositeEffectBase
 
     private void StartPendingPartsRoutineIfNeeded()
     {
-        if (_pendingParts.Count > 0)
+        if (_pendingParts.Count > 0 && _pendingSpawnRoutine == null)
         {
             _pendingSpawnRoutine = StartCoroutine(SpawnPendingPartsRoutine());
         }

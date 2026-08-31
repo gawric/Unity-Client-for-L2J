@@ -3,10 +3,12 @@ using UnityEngine;
 public sealed class MonsterSpawner
 {
     private readonly ObjectPoolManager _pool;
+    private readonly NpcDecoService _deco;
 
-    public MonsterSpawner(ObjectPoolManager pool)
+    public MonsterSpawner(ObjectPoolManager pool, NpcDecoService deco)
     {
         _pool = pool;
+        _deco = deco;
     }
 
     public Entity Spawn(NpcSpawnRequest request, IWorldSpawnContext world)
@@ -45,6 +47,7 @@ public sealed class MonsterSpawner
         EntitySpawnShared.ReapplyGroundAfterActivate(npcGo, identity);
 
         InitMonster(npc, npcGo, world);
+        _deco.Start(npc);
         CharInfoSpeedLog.LogNpcPacket(npc, "OnNpcInfo spawn");
         world.RegisterNpc(npc);
         return npc;

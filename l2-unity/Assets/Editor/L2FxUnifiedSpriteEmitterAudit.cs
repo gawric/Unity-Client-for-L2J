@@ -70,7 +70,7 @@ public static class L2FxUnifiedSpriteEmitterAudit
         ValidateIntegerRange(material, path, "_SpawnMode", 0, 3, errors);
         ValidateIntegerRange(material, path, "_FullTlsShape", 0, 1, errors);
         ValidateIntegerRange(material, path, "_MotionMode", 0, 2, errors);
-        ValidateIntegerRange(material, path, "_OrientationMode", 0, 1, errors);
+        ValidateIntegerRange(material, path, "_OrientationMode", 0, 2, errors);
         ValidateIntegerRange(material, path, "_PtvdMode", 0, 2, errors);
         ValidateIntegerRange(material, path, "_SizeMode", 0, 1, errors);
         ValidateIntegerRange(material, path, "_SpinMode", 0, 1, errors);

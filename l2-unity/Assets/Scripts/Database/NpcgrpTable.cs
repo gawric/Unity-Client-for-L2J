@@ -17,10 +17,18 @@ public class NpcgrpTable {
     }
 
     private Dictionary<int, Npcgrp> _npcgrps;
+    private NpcDecoEffectsTable _decoEffects;
 
     public Dictionary<int, Npcgrp> Npcgrps { get { return _npcgrps; } }
 
     public void Initialize() {
+        Initialize(null);
+    }
+
+    public void Initialize(NpcDecoEffectsTable decoEffects) {
+        _decoEffects = decoEffects;
+        if (_decoEffects != null)
+            _decoEffects.Initialize();
         ReadNpcgrps();
     }
 
@@ -108,6 +116,9 @@ public class NpcgrpTable {
                             break;
                     }
                 }
+
+                if (_decoEffects != null && _decoEffects.TryGet(npcgrp.NpcId, out NpcDecoEffect deco))
+                    npcgrp.Deco = deco;
 
                 _npcgrps.TryAdd(npcgrp.NpcId, npcgrp);
             }

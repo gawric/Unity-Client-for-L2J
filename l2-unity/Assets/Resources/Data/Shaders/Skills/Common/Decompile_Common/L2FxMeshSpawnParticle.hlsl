@@ -27,6 +27,7 @@
 //
 
 #include "L2FxAppRand.hlsl"
+#include "L2FxSpritePolar.hlsl"
 
 static const int L2FX_MESH_SPAWN_DRAWS_BEFORE_START_SPIN = 22;
 static const int L2FX_MESH_SPAWN_SLOT_TO_SLOT_DRAW_COUNT = 31;
@@ -171,6 +172,66 @@ void L2Fx_MeshSpawnParticle_SampleLocVelSize(
 
     sizeUe = L2Fx_FRangeVector_GetRandYawPitchRoll(
         sizeXRange, sizeYRange, sizeZRange, state);
+}
+
+// Same 31-draw mesh spawn stream as SampleLocVelSize, but Loc FRangeVector
+// is StartLocationPolarRange (radius→phi→theta) when StartLocationShape=PTLS_Polar.
+void L2Fx_MeshSpawnParticle_SampleVelPolarSize(
+    float2 velocityXRange,
+    float2 velocityYRange,
+    float2 velocityZRange,
+    float2 polarThetaDegreesMinMax,
+    float2 polarPhiDegreesMinMax,
+    float2 polarRadiusUuMinMax,
+    float2 colorMulXRange,
+    float2 colorMulYRange,
+    float2 colorMulZRange,
+    float2 lifetimeRange,
+    float2 initialDelayRange,
+    float2 trailingScalarRange,
+    float2 sizeXRange,
+    float2 sizeYRange,
+    float2 sizeZRange,
+    inout uint state,
+    out float3 velocityUe,
+    out float3 polarOffsetUe,
+    out float3 colorMulRgb,
+    out float lifetimeSeconds,
+    out float initialDelaySeconds,
+    out float3 sizeUe)
+{
+    velocityUe = L2Fx_FRangeVector_GetRandYawPitchRoll(
+        velocityXRange, velocityYRange, velocityZRange, state);
+
+    polarOffsetUe = L2Fx_SpritePolar_GetRandUe(
+        polarThetaDegreesMinMax,
+        polarPhiDegreesMinMax,
+        polarRadiusUuMinMax,
+        state);
+
+    L2Fx_FRange_GetRand(float2(0.0, 1.0), state);
+    [unroll]
+    for (int i = 0; i < 6; ++i)
+    {
+        L2Fx_AppFrand(state);
+    }
+
+    colorMulRgb = L2Fx_FRangeVector_GetRandYawPitchRoll(
+        colorMulXRange, colorMulYRange, colorMulZRange, state);
+    lifetimeSeconds = L2Fx_FRange_GetRand(lifetimeRange, state);
+    initialDelaySeconds = L2Fx_FRange_GetRand(initialDelayRange, state);
+    L2Fx_FRange_GetRand(trailingScalarRange, state);
+
+    sizeUe = L2Fx_FRangeVector_GetRandYawPitchRoll(
+        sizeXRange, sizeYRange, sizeZRange, state);
+}
+
+// UParticleEmitter UniformSize: StartSizeRange still GetRand's X/Y/Z for TLS,
+// then particle Size uses X on all axes. Y/Z in UC are leftover and must not
+// scale the mesh. Call after SampleLocVelSize / any XYZ size sample.
+float3 L2Fx_MeshSize_ApplyUniformSize(float3 sampledSizeUe)
+{
+    return sampledSizeUe.xxx;
 }
 
 #endif // L2_FX_MESH_SPAWN_PARTICLE_INCLUDED

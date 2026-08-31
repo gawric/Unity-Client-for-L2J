@@ -1,4 +1,4 @@
-Shader "L2/Reference/BeamEmitterVerified"
+Shader "L2/Effects/BeamEmitter"
 {
     Properties
     {
@@ -49,6 +49,8 @@ Shader "L2/Reference/BeamEmitterVerified"
             "RenderPipeline" = "UniversalPipeline"
             "Queue" = "Transparent"
             "RenderType" = "Transparent"
+            "UniversalMaterialType" = "Unlit"
+            "L2FxGpuInstancing" = "On"
         }
         Cull Off
         ZWrite Off
@@ -56,14 +58,15 @@ Shader "L2/Reference/BeamEmitterVerified"
 
         Pass
         {
-            Name "VerifiedBeamReference"
-            Tags { "LightMode" = "UniversalForward" }
+            Name "BeamForwardOnly"
+            Tags { "LightMode" = "UniversalForwardOnly" }
             Blend [_SrcBlend] [_DstBlend]
 
             HLSLPROGRAM
             #pragma vertex vert
             #pragma fragment frag
             #pragma target 4.5
+            #pragma multi_compile_instancing
 
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
             #include "../L2FxEmitterSpawn.hlsl"
@@ -118,10 +121,13 @@ Shader "L2/Reference/BeamEmitterVerified"
                 float _DstBlend;
             CBUFFER_END
 
+            #include "../L2FxInstancing.hlsl"
+
             struct Attributes
             {
                 float4 positionOS : POSITION;
                 float2 uv : TEXCOORD0;
+                UNITY_VERTEX_INPUT_INSTANCE_ID
             };
 
             struct Varyings
@@ -136,6 +142,7 @@ Shader "L2/Reference/BeamEmitterVerified"
             Varyings vert(Attributes input)
             {
                 Varyings output;
+                UNITY_SETUP_INSTANCE_ID(input);
                 uint spawnState = asuint(_SpriteMotionRandStateBits);
 
                 float3 spawnLocalUe;

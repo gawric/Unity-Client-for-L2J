@@ -1,0 +1,465 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &9212157841642340684
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5252646020838701862}
+  - component: {fileID: 7332513459391841777}
+  m_Layer: 0
+  m_Name: el_wind_strike_composite_v2
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &5252646020838701862
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9212157841642340684}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 4697.011, y: -70.29302, z: -1557.7172}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &7332513459391841777
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9212157841642340684}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9f3c1a7e2b8d4c6fa1e05d92b47c8e31, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _owner: {fileID: 0}
+  _parts:
+  - name: el_wind_strike_ca
+    prefab: {fileID: 8160978421502104532, guid: 5cde4dc4a6eb4524f8fd0be90ec56976, type: 3}
+    settingsOverride: {fileID: 11400000, guid: 3b8a7b8e3f154c1995b8f7f0e8f4e5b1, type: 2}
+    attachmentPoint: 0
+    spawnTiming: 0
+    positionOffset: {x: 0, y: 0, z: 0}
+    normalizeOffsetByOwnerHeight: 0
+    referenceHeight: 1.8
+    scale: 1.3
+    followResolvedTransform: 1
+    inheritRotation: 0
+    passCastDataToPart: 1
+    useCastTimedLifetime: 1
+    overrideContinuousLoop: 0
+    continuousLoop: 0
+    disableShaderLifetime: 0
+    overrideHideTime: 0
+    customHideTime: 0.5
+    enableFinalShaderLifetimeOnFade: 0
+    finalShaderLifetimeMin: 0.15
+    finalShaderLifetimeMax: 0.5
+    projectile:
+      launchMode: 0
+      showBeforeAnimationShoot: 1
+      impactType: 1
+      settingsOverride:
+        id: 0
+        prefab: {fileID: 0}
+        transform: {fileID: 0}
+        startPosition: {x: 0, y: 0, z: 0}
+        targetTransform: {fileID: 0}
+        targetPosition: {x: 0, y: 0, z: 0}
+        speed: 8
+        damage: 0
+        lifetime: 5
+        speedCurve:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0.3
+            inSlope: 0
+            outSlope: 0.5
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 0.25
+            value: 0.5
+            inSlope: 0
+            outSlope: 1
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 0.5
+            value: 1
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 0.75
+            value: 1
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 1
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        startTime: 0
+        distance: 0
+        useGravity: 0
+        gravityScale: 1
+        isActive: 1
+        hitPoint: {x: 0, y: 0, z: 0}
+        hitNormal: {x: 0, y: 0, z: 0}
+        flytime: 5
+        hitPointCollider: {x: 0, y: 0, z: 0}
+        hitNormalCollider: {x: 0, y: 0, z: 0}
+        hitDirection: {x: 0, y: 0, z: 0}
+        arrowCollider: {fileID: 0}
+        impactType: 0
+        lastPosition: {x: 0, y: 0, z: 0}
+        castStartTimeSnapshot: 0
+        castServerShootSnapshot: 0
+        castServerHitSnapshot: 0
+        projectileLaunchGlobalFromCast: 0
+  - name: el_wind_strike_pr
+    prefab: {fileID: 6683423473267202711, guid: c2485b432957a65449c22eea3cc77576, type: 3}
+    settingsOverride: {fileID: 0}
+    attachmentPoint: 1
+    spawnTiming: 0
+    positionOffset: {x: 0, y: 1, z: 0.35}
+    normalizeOffsetByOwnerHeight: 1
+    referenceHeight: 1.8
+    scale: 1.3
+    followResolvedTransform: 1
+    inheritRotation: 0
+    passCastDataToPart: 1
+    useCastTimedLifetime: 1
+    overrideContinuousLoop: 0
+    continuousLoop: 0
+    disableShaderLifetime: 0
+    overrideHideTime: 0
+    customHideTime: 0.5
+    enableFinalShaderLifetimeOnFade: 0
+    finalShaderLifetimeMin: 0.15
+    finalShaderLifetimeMax: 0.5
+    projectile:
+      launchMode: 2
+      showBeforeAnimationShoot: 1
+      impactType: 1
+      settingsOverride:
+        id: 0
+        prefab: {fileID: 0}
+        transform: {fileID: 0}
+        startPosition: {x: 0, y: 0, z: 0}
+        targetTransform: {fileID: 0}
+        targetPosition: {x: 0, y: 0, z: 0}
+        speed: 8
+        damage: 0
+        lifetime: 5
+        speedCurve:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0.3
+            inSlope: 0
+            outSlope: 0.5
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 0.25
+            value: 0.5
+            inSlope: 0
+            outSlope: 1
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 0.5
+            value: 1
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 0.75
+            value: 1
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 1
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        startTime: 0
+        distance: 0
+        useGravity: 0
+        gravityScale: 1
+        isActive: 1
+        hitPoint: {x: 0, y: 0, z: 0}
+        hitNormal: {x: 0, y: 0, z: 0}
+        flytime: 5
+        hitPointCollider: {x: 0, y: 0, z: 0}
+        hitNormalCollider: {x: 0, y: 0, z: 0}
+        hitDirection: {x: 0, y: 0, z: 0}
+        arrowCollider: {fileID: 0}
+        impactType: 0
+        lastPosition: {x: 0, y: 0, z: 0}
+        castStartTimeSnapshot: 0
+        castServerShootSnapshot: 0
+        castServerHitSnapshot: 0
+        projectileLaunchGlobalFromCast: 0
+  - name: el_wind_strike_fl
+    prefab: {fileID: 323604255229771861, guid: 66c4773401de47f4998ee1ebd6f00c35, type: 3}
+    settingsOverride: {fileID: 0}
+    attachmentPoint: 1
+    spawnTiming: 5
+    positionOffset: {x: 0, y: 1, z: 0.35}
+    normalizeOffsetByOwnerHeight: 1
+    referenceHeight: 1.8
+    scale: 1
+    followResolvedTransform: 1
+    inheritRotation: 0
+    passCastDataToPart: 1
+    useCastTimedLifetime: 1
+    overrideContinuousLoop: 0
+    continuousLoop: 0
+    disableShaderLifetime: 0
+    overrideHideTime: 1
+    customHideTime: 0.5
+    enableFinalShaderLifetimeOnFade: 0
+    finalShaderLifetimeMin: 0.15
+    finalShaderLifetimeMax: 0.5
+    projectile:
+      launchMode: 2
+      showBeforeAnimationShoot: 0
+      impactType: 1
+      settingsOverride:
+        id: 0
+        prefab: {fileID: 0}
+        transform: {fileID: 0}
+        startPosition: {x: 0, y: 0, z: 0}
+        targetTransform: {fileID: 0}
+        targetPosition: {x: 0, y: 0, z: 0}
+        speed: 8
+        damage: 0
+        lifetime: 5
+        speedCurve:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0.3
+            inSlope: 0
+            outSlope: 0.5
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 0.25
+            value: 0.5
+            inSlope: 0
+            outSlope: 1
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 0.5
+            value: 1
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 0.75
+            value: 1
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 1
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        startTime: 0
+        distance: 0
+        useGravity: 0
+        gravityScale: 1
+        isActive: 1
+        hitPoint: {x: 0, y: 0, z: 0}
+        hitNormal: {x: 0, y: 0, z: 0}
+        flytime: 5
+        hitPointCollider: {x: 0, y: 0, z: 0}
+        hitNormalCollider: {x: 0, y: 0, z: 0}
+        hitDirection: {x: 0, y: 0, z: 0}
+        arrowCollider: {fileID: 0}
+        impactType: 0
+        lastPosition: {x: 0, y: 0, z: 0}
+        castStartTimeSnapshot: 0
+        castServerShootSnapshot: 0
+        castServerHitSnapshot: 0
+        projectileLaunchGlobalFromCast: 0
+  - name: el_wind_strike_ta
+    prefab: {fileID: 7042530700687733667, guid: fb21acaa02922a34abe2064d13824ad4, type: 3}
+    settingsOverride: {fileID: 11400000, guid: 3b8a7b8e3f154c1995b8f7f0e8f4e5b1, type: 2}
+    attachmentPoint: 5
+    spawnTiming: 4
+    positionOffset: {x: 0, y: 0, z: 0}
+    normalizeOffsetByOwnerHeight: 1
+    referenceHeight: 1.8
+    scale: 1.8
+    followResolvedTransform: 1
+    inheritRotation: 0
+    passCastDataToPart: 1
+    useCastTimedLifetime: 0
+    overrideContinuousLoop: 0
+    continuousLoop: 0
+    disableShaderLifetime: 0
+    overrideHideTime: 0
+    customHideTime: 0.5
+    enableFinalShaderLifetimeOnFade: 0
+    finalShaderLifetimeMin: 0.15
+    finalShaderLifetimeMax: 0.5
+    projectile:
+      launchMode: 0
+      showBeforeAnimationShoot: 0
+      impactType: 1
+      settingsOverride:
+        id: 0
+        prefab: {fileID: 0}
+        transform: {fileID: 0}
+        startPosition: {x: 0, y: 0, z: 0}
+        targetTransform: {fileID: 0}
+        targetPosition: {x: 0, y: 0, z: 0}
+        speed: 8
+        damage: 0
+        lifetime: 5
+        speedCurve:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0.3
+            inSlope: 0
+            outSlope: 0.5
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 0.25
+            value: 0.5
+            inSlope: 0
+            outSlope: 1
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 0.5
+            value: 1
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 0.75
+            value: 1
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 1
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        startTime: 0
+        distance: 0
+        useGravity: 0
+        gravityScale: 1
+        isActive: 1
+        hitPoint: {x: 0, y: 0, z: 0}
+        hitNormal: {x: 0, y: 0, z: 0}
+        flytime: 5
+        hitPointCollider: {x: 0, y: 0, z: 0}
+        hitNormalCollider: {x: 0, y: 0, z: 0}
+        hitDirection: {x: 0, y: 0, z: 0}
+        arrowCollider: {fileID: 0}
+        impactType: 0
+        lastPosition: {x: 0, y: 0, z: 0}
+        castStartTimeSnapshot: 0
+        castServerShootSnapshot: 0
+        castServerHitSnapshot: 0
+        projectileLaunchGlobalFromCast: 0
+  _serverHitLifetimeTailSeconds: 0.5

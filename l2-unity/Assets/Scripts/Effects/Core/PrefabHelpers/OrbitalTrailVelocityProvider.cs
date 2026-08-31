@@ -44,11 +44,17 @@ public sealed class OrbitalTrailVelocityProvider : MonoBehaviour
     [Header("Bindings (Tail -> Source)")]
     [SerializeField] private List<TrailBinding> _bindings = new();
 
+    // UE2.5 macro-world: Unity meters * 52.5 = Unreal Units (L2Fx_UcPositionToUnityMeters).
+    private const float UnityMetersToUu = 52.5f;
+
     private static readonly int UseDirectionAsID = Shader.PropertyToID("_UseDirectionAs");
     private static readonly int GetVelocityDirectionFromID = Shader.PropertyToID("_GetVelocityDirectionFrom");
     private static readonly int StartVelocityRangeXID = Shader.PropertyToID("_StartVelocityRangeX");
     private static readonly int StartVelocityRangeYID = Shader.PropertyToID("_StartVelocityRangeY");
     private static readonly int StartVelocityRangeZID = Shader.PropertyToID("_StartVelocityRangeZ");
+    private static readonly int StartVelocityRangeXUcID = Shader.PropertyToID("_StartVelocityRangeXUc");
+    private static readonly int StartVelocityRangeYUcID = Shader.PropertyToID("_StartVelocityRangeYUc");
+    private static readonly int StartVelocityRangeZUcID = Shader.PropertyToID("_StartVelocityRangeZUc");
 
     private void OnEnable()
     {
@@ -136,7 +142,117 @@ public sealed class OrbitalTrailVelocityProvider : MonoBehaviour
             Debug.Log($"[OrbitalTrailVelocityProvider] binding='{binding.name}' raw={rawVelocity:F4} shader={shaderVelocity:F4}", this);
         }
 
-        ApplyVelocityToRenderers(binding, shaderVelocity);
+        ApplyVelocityToMaterials(ResolveBindingMaterials(binding), binding, shaderVelocity);
+    }
+
+    static Material[] ResolveBindingMaterials(TrailBinding binding)
+    {
+        if (binding.tailRoot != null)
+        {
+            ParticleGroupV2 group = binding.tailRoot.GetComponent<ParticleGroupV2>();
+            if (group != null && group.IsGpuDraw)
+            {
+                Material[] gpuMaterials = group.GpuMaterials;
+                if (gpuMaterials != null && gpuMaterials.Length > 0)
+                {
+                    return gpuMaterials;
+                }
+            }
+        }
+
+        if (binding.targetRenderers == null)
+        {
+            return null;
+        }
+
+        int count = 0;
+        for (int i = 0; i < binding.targetRenderers.Length; i++)
+        {
+            Renderer renderer = binding.targetRenderers[i];
+            if (renderer != null && renderer.sharedMaterial != null)
+            {
+                count++;
+            }
+        }
+
+        if (count == 0)
+        {
+            return null;
+        }
+
+        Material[] materials = new Material[count];
+        int write = 0;
+        for (int i = 0; i < binding.targetRenderers.Length; i++)
+        {
+            Renderer renderer = binding.targetRenderers[i];
+            if (renderer == null)
+            {
+                continue;
+            }
+
+            Material material = renderer.sharedMaterial;
+            if (material != null)
+            {
+                materials[write++] = material;
+            }
+        }
+
+        return materials;
+    }
+
+    void ApplyVelocityToMaterials(Material[] materials, TrailBinding binding, Vector3 velocity)
+    {
+        if (materials == null)
+        {
+            return;
+        }
+
+        for (int i = 0; i < materials.Length; i++)
+        {
+            Material mat = materials[i];
+            if (mat == null)
+            {
+                continue;
+            }
+
+            if (binding.setDirectionFlags)
+            {
+                if (mat.HasProperty(UseDirectionAsID))
+                {
+                    mat.SetFloat(UseDirectionAsID, 1f);
+                }
+                if (mat.HasProperty(GetVelocityDirectionFromID))
+                {
+                    mat.SetFloat(GetVelocityDirectionFromID, 1f);
+                }
+            }
+
+            // Unified V2 sprite/mesh: StartVelocityRange*Uc is UU, Z-up.
+            Vector3 velocityUe = UnityMetersToUeUu(velocity);
+            SetRangeProperty(mat, StartVelocityRangeXUcID, velocityUe.x, binding.rangeSpread);
+            SetRangeProperty(mat, StartVelocityRangeYUcID, velocityUe.y, binding.rangeSpread);
+            SetRangeProperty(mat, StartVelocityRangeZUcID, velocityUe.z, binding.rangeSpread);
+            // Legacy ice-bolt / vampiric shaders still read the Unity-meter names.
+            SetRangeProperty(mat, StartVelocityRangeXID, velocity.x, binding.rangeSpread);
+            SetRangeProperty(mat, StartVelocityRangeYID, velocity.y, binding.rangeSpread);
+            SetRangeProperty(mat, StartVelocityRangeZID, velocity.z, binding.rangeSpread);
+        }
+    }
+
+    void SetRangeProperty(Material mat, int id, float value, float rangeSpread)
+    {
+        if (mat.HasProperty(id))
+        {
+            mat.SetVector(id, BuildRangeVector(value, rangeSpread));
+        }
+    }
+
+    static Vector3 UnityMetersToUeUu(Vector3 unityMeters)
+    {
+        return new Vector3(
+            unityMeters.x * UnityMetersToUu,
+            unityMeters.z * UnityMetersToUu,
+            unityMeters.y * UnityMetersToUu);
     }
 
     private void ResolveSharedSources()
@@ -258,63 +374,9 @@ public sealed class OrbitalTrailVelocityProvider : MonoBehaviour
         return Vector3.zero;
     }
 
-    private void ApplyVelocityToRenderers(TrailBinding binding, Vector3 velocity)
-    {
-        if (binding.targetRenderers == null)
-        {
-            return;
-        }
-
-        for (int i = 0; i < binding.targetRenderers.Length; i++)
-        {
-            Renderer renderer = binding.targetRenderers[i];
-            if (renderer == null)
-            {
-                continue;
-            }
-
-            Material[] materials = renderer.materials;
-            for (int m = 0; m < materials.Length; m++)
-            {
-                Material mat = materials[m];
-                if (mat == null)
-                {
-                    continue;
-                }
-
-                if (binding.setDirectionFlags)
-                {
-                    if (mat.HasProperty(UseDirectionAsID))
-                    {
-                        mat.SetFloat(UseDirectionAsID, 1f);
-                    }
-                    if (mat.HasProperty(GetVelocityDirectionFromID))
-                    {
-                        mat.SetFloat(GetVelocityDirectionFromID, 1f);
-                    }
-                }
-
-                if (mat.HasProperty(StartVelocityRangeXID))
-                {
-                    mat.SetColor(StartVelocityRangeXID, BuildRangeColor(velocity.x, binding.rangeSpread));
-                }
-                if (mat.HasProperty(StartVelocityRangeYID))
-                {
-                    mat.SetColor(StartVelocityRangeYID, BuildRangeColor(velocity.y, binding.rangeSpread));
-                }
-                if (mat.HasProperty(StartVelocityRangeZID))
-                {
-                    mat.SetColor(StartVelocityRangeZID, BuildRangeColor(velocity.z, binding.rangeSpread));
-                }
-            }
-        }
-    }
-
-    private Color BuildRangeColor(float value, float rangeSpread)
+    private Vector4 BuildRangeVector(float value, float rangeSpread)
     {
         float spread = Mathf.Max(_minimumAxisRange, Mathf.Abs(value) * rangeSpread);
-        float min = value - spread;
-        float max = value + spread;
-        return new Color(min, max, 0f, 0f);
+        return new Vector4(value - spread, value + spread, 0f, 0f);
     }
 }

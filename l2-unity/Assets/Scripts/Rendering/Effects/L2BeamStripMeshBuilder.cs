@@ -1,5 +1,36 @@
 using UnityEngine;
 
+/// <summary>
+/// Host on the BeamEmitter GameObject. Assigns the Interlude unit strip from
+/// <see cref="L2BeamEmitterStripBuilder"/> to this object and its particle slots.
+/// Do not use <see cref="L2MultiLayerBeamBuilder"/> for Interlude BeamEmitter:
+/// that mesh does not match L2FxBeamSegment.
+/// </summary>
+[DisallowMultipleComponent]
+public class L2BeamStripMeshBuilder : MonoBehaviour
+{
+    [SerializeField] int _highFrequencyPoints = 10;
+    [SerializeField] float _beamTextureUScale = 1f;
+    [SerializeField] float _beamTextureVScale = 1f;
+    [SerializeField] Mesh _stripMesh;
+
+    public void ApplyToFilters()
+    {
+        Mesh mesh = _stripMesh != null
+            ? _stripMesh
+            : L2BeamEmitterStripBuilder.Build(
+                _highFrequencyPoints,
+                _beamTextureUScale,
+                _beamTextureVScale);
+        L2BeamEmitterStripBuilder.AssignStripToFilters(this, mesh);
+    }
+
+    void OnEnable()
+    {
+        ApplyToFilters();
+    }
+}
+
 [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
 public class L2MultiLayerBeamBuilder : MonoBehaviour
 {

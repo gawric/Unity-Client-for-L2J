@@ -745,6 +745,21 @@ public class Gear : AbstractMeshManager
         return transfroms;
     }
 
+    public Transform[] GetAllTransformByLeftHand(string[] arrNameGameObject)
+    {
+        Transform[] transforms = new Transform[arrNameGameObject.Length];
+        for (int i = 0; i < arrNameGameObject.Length; i++)
+        {
+            foreach (Transform match in FindTransformsWithName(GetLeftHandBone(), arrNameGameObject[i]))
+            {
+                transforms[i] = match;
+                break;
+            }
+        }
+
+        return transforms;
+    }
+
     public bool IsTwoHandedEquipped()
     {
         return _rightHandType == WeaponType.bigword || 

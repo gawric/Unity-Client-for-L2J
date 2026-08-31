@@ -19,6 +19,7 @@ public class GameManager : MonoBehaviour {
     [Inject] ArmorgrpTable _armorGrps;
     [Inject] EtcItemgrpTable _etcItemGrps;
     [Inject] WeapongrpTable _weaponGrps;
+    [Inject] NpcDecoEffectsTable _npcDecoEffects;
     [Inject] NpcgrpTable _npcGrps;
     [Inject] NpcNameTable _npcNames;
     [Inject] QuestNameTable _questNames;
@@ -84,7 +85,9 @@ public class GameManager : MonoBehaviour {
         Table(_etcItemGrps, EtcItemgrpTable.Instance).Initialize();
         Table(_weaponGrps, WeapongrpTable.Instance).Initialize();
         items.CacheItems();
-        Table(_npcGrps, NpcgrpTable.Instance).Initialize();
+        NpcDecoEffectsTable decoEffects = Table(_npcDecoEffects, NpcDecoEffectsTable.Instance);
+        decoEffects.Initialize();
+        Table(_npcGrps, NpcgrpTable.Instance).Initialize(decoEffects);
         Table(_questNames, QuestNameTable.Instance).Initialize();
         Table(_recipes, RecipeTable.Instance).Initialize();
         Table(_npcNames, NpcNameTable.Instance).Initialize();

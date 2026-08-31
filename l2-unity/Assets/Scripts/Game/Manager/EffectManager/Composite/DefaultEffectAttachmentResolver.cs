@@ -27,7 +27,9 @@ public class DefaultEffectAttachmentResolver : IEffectAttachmentResolver
             case EffectAttachmentPoint.CasterLowerBody:
                 return ResolveLowerBody(context.CasterEntity, context.CasterTransform, out resolvedTransform, out worldPosition);
             case EffectAttachmentPoint.WeaponSocket:
-                return ResolveWeapon(context.CasterEntity, context.CasterTransform, out resolvedTransform, out worldPosition);
+                return ResolveWeapon(context.CasterEntity, context.CasterTransform, leftHand: false, out resolvedTransform, out worldPosition);
+            case EffectAttachmentPoint.LeftWeaponSocket:
+                return ResolveWeapon(context.CasterEntity, context.CasterTransform, leftHand: true, out resolvedTransform, out worldPosition);
             case EffectAttachmentPoint.TargetRoot:
                 return ResolveRoot(context.TargetTransform, out resolvedTransform, out worldPosition);
             case EffectAttachmentPoint.TargetLowerBody:
@@ -39,12 +41,28 @@ public class DefaultEffectAttachmentResolver : IEffectAttachmentResolver
             case EffectAttachmentPoint.CasterCenter:
                 return ResolveTargetCenter(context.CasterEntity, context.CasterTransform, out resolvedTransform, out worldPosition);
             case EffectAttachmentPoint.WorldHitPoint:
+            {
                 if (context.HasHitPoint)
                 {
                     worldPosition = context.HitPoint;
                     return true;
                 }
-                return false;
+
+                Transform fallbackTarget = context.TargetTransform != null
+                    ? context.TargetTransform
+                    : context.CasterTransform;
+                Entity fallbackEntity = context.TargetEntity != null
+                    ? context.TargetEntity
+                    : context.CasterEntity;
+                Transform hitAnchor = HitAnchorResolver.ResolveHitAnchor(fallbackEntity, fallbackTarget);
+                if (hitAnchor == null)
+                {
+                    return false;
+                }
+
+                worldPosition = hitAnchor.position;
+                return true;
+            }
             case EffectAttachmentPoint.CasterPosition:
                 if (context.CasterTransform != null)
                 {
@@ -361,12 +379,17 @@ public class DefaultEffectAttachmentResolver : IEffectAttachmentResolver
         return false;
     }
 
-    private bool ResolveWeapon(Entity entity, Transform fallbackRoot, out Transform resolvedTransform, out Vector3 worldPosition)
+    private bool ResolveWeapon(
+        Entity entity,
+        Transform fallbackRoot,
+        bool leftHand,
+        out Transform resolvedTransform,
+        out Vector3 worldPosition)
     {
         resolvedTransform = null;
         worldPosition = Vector3.zero;
 
-        if (entity is PlayerEntity playerEntity)
+        if (!leftHand && entity is PlayerEntity playerEntity)
         {
             Transform weapon = playerEntity.GetWeaponTransform();
             if (weapon != null)
@@ -377,12 +400,13 @@ public class DefaultEffectAttachmentResolver : IEffectAttachmentResolver
             }
         }
 
-        // Generic path for both Player/Monster (and anything with Gear):
-        // search under right-hand bone for "weapon_" objects using Gear's naming search.
         Gear gear = entity != null ? entity.Gear : null;
         if (gear != null)
         {
-            Transform guessed = gear.GetAllTransformByRightHand(WeaponNamePattern).FirstOrDefault();
+            Transform[] found = leftHand
+                ? gear.GetAllTransformByLeftHand(WeaponNamePattern)
+                : gear.GetAllTransformByRightHand(WeaponNamePattern);
+            Transform guessed = found != null ? found.FirstOrDefault() : null;
             if (guessed != null)
             {
                 resolvedTransform = guessed;
@@ -391,7 +415,7 @@ public class DefaultEffectAttachmentResolver : IEffectAttachmentResolver
             }
         }
 
-        if (entity != null)
+        if (!leftHand && entity != null)
         {
             Transform guessed = entity.transform.Find("weapon_");
             if (guessed != null)

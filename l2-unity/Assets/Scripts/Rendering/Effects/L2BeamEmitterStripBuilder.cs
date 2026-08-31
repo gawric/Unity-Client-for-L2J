@@ -2,7 +2,10 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// Builds the CPU-side unit strip used by the verified Interlude BeamEmitter port.
+/// Builds the CPU-side unit strip used by the Interlude BeamEmitter port.
+/// Hang <see cref="L2BeamStripMeshBuilder"/> on the BeamEmitter GameObject.
+/// This type stays a MonoBehaviour so Unity can import the script; do not add it
+/// as a component. Use the static factory methods only.
 ///
 /// Mesh contract:
 /// - position.z: normalized distance along the beam, 0..1;
@@ -11,10 +14,10 @@ using UnityEngine;
 /// - UV.y: sheet edge, 0 / 1.
 ///
 /// The BeamEmitter shader expands this unit strip to the sampled start/end points
-/// and rotates its width axis toward the camera. This class is intentionally not
-/// connected to EffectPart or the skill loader yet.
+/// and rotates its width axis toward the camera.
 /// </summary>
-public static class L2BeamEmitterStripBuilder
+[AddComponentMenu("")]
+public class L2BeamEmitterStripBuilder : MonoBehaviour
 {
     public const int MaxSegments = 32;
 
@@ -82,5 +85,22 @@ public static class L2BeamEmitterStripBuilder
     {
         int points = Mathf.Clamp(highFrequencyPoints, 2, MaxSegments + 1);
         return points - 1;
+    }
+
+    public static void AssignStripToFilters(Component host, Mesh mesh)
+    {
+        if (host == null || mesh == null)
+        {
+            return;
+        }
+
+        MeshFilter[] filters = host.GetComponentsInChildren<MeshFilter>(true);
+        for (int i = 0; i < filters.Length; i++)
+        {
+            if (filters[i] != null)
+            {
+                filters[i].sharedMesh = mesh;
+            }
+        }
     }
 }

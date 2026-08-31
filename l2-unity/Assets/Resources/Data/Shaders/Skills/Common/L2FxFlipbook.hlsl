@@ -61,8 +61,16 @@ float2 L2Fx_FlipbookAtlasUV_Padded(
 }
 
 // Discrete frame in [subStart, subEnd] vs normalized particle age 0..1 (matches UE span = end - start).
+// Reversed (End < Start) and adjacent (End == Start+1) pairs are a single cell:
+// L2 ParticleEmitter writes both indices for a picked frame, then samples only
+// the higher / Start cell. Do not min/max-swap — that invents a 2-frame loop.
 int L2Fx_FlipbookFrameIndex(float normalizedAge, int subStart, int subEnd)
 {
+    if (subEnd < subStart)
+        return subStart;
+    if (subEnd == subStart + 1)
+        return subEnd;
+
     int span = max(subEnd - subStart, 1);
     float t = saturate(normalizedAge);
     int f = subStart + (int) floor(t * (float) span);

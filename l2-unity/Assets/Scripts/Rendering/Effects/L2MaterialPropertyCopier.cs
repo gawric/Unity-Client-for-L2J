@@ -448,6 +448,8 @@ public static class L2MaterialPropertyCopier
         CopyFloatIfPresent(runtimeMat, sharedMat, FadeInEndTimeId);
         CopyFloatIfPresent(runtimeMat, sharedMat, FadeoutId);
         CopyFloatIfPresent(runtimeMat, sharedMat, FadeoutStartTimeId);
+        CopyFloatIfPresent(runtimeMat, sharedMat, Shader.PropertyToID("_FadeOutStartTime"));
+        CopyFloatIfPresent(runtimeMat, sharedMat, Shader.PropertyToID("_FadeOut"));
         CopyFloatIfPresent(runtimeMat, sharedMat, FadeOutPowerId);
         if (Application.isPlaying && runtimeMat.HasProperty(DebugAtlasPreviewId))
         {

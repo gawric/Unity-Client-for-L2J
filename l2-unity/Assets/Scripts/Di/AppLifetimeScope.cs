@@ -53,6 +53,7 @@ public sealed class AppLifetimeScope : LifetimeScope
         builder.RegisterInstance(ArmorgrpTable.Instance);
         builder.RegisterInstance(EtcItemgrpTable.Instance);
         builder.RegisterInstance(WeapongrpTable.Instance);
+        builder.RegisterInstance(NpcDecoEffectsTable.Instance);
         builder.RegisterInstance(NpcgrpTable.Instance);
         builder.RegisterInstance(NpcNameTable.Instance);
         builder.RegisterInstance(QuestNameTable.Instance);

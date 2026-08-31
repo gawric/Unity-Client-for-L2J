@@ -213,6 +213,16 @@ public abstract class TimedCompositeEffectBase : BaseEffect
         }
     }
 
+    protected void ApplyPartScale(float scale, Transform instanceTransform)
+    {
+        if (instanceTransform == null || Mathf.Approximately(scale, 1f))
+        {
+            return;
+        }
+
+        instanceTransform.localScale *= scale;
+    }
+
     protected void ApplyPartScale(CompositePrefabPart part, Transform instanceTransform)
     {
         if (part == null || instanceTransform == null || Mathf.Approximately(part.scale, 1f))
@@ -304,6 +314,22 @@ public abstract class TimedCompositeEffectBase : BaseEffect
 
             break;
         }
+    }
+
+    protected void AttachToResolvedTransformIfNeeded(
+        bool follow,
+        Transform resolvedTransform,
+        Transform instanceTransform,
+        Vector3 resolvedWorldPosition)
+    {
+        if (!follow || instanceTransform == null || resolvedTransform == null)
+        {
+            return;
+        }
+
+        instanceTransform.SetParent(resolvedTransform, true);
+        Vector3 localAnchor = resolvedTransform.InverseTransformPoint(resolvedWorldPosition);
+        instanceTransform.localPosition = localAnchor;
     }
 
     protected void AttachToResolvedTransformIfNeeded(

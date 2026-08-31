@@ -1,0 +1,116 @@
+class wh_heal_ave extends Emitter;
+
+defaultproperties
+{
+     Begin Object Class=BeamEmitter Name=BeamEmitter0
+          BeamEndPoints(0)=(ActorTag="None",offset=(X=(Min=0.000000,Max=0.000000),Y=(Min=0.000000,Max=0.000000),Z=(Min=-220.000000,Max=-150.000000)),Weight=0.000000,CreatureID=0,bonename="")
+          DetermineEndPointBy=PTEP_Offset
+          LowFrequencyPoints=2
+          HighFrequencyPoints=2
+          UseColorScale=True
+          ColorScale(0)=(RelativeTime=0.000000,Color=(B=255,G=255,R=255,A=255))
+          ColorScale(1)=(RelativeTime=0.521429,Color=(B=221,G=221,R=221,A=255))
+          ColorScale(2)=(RelativeTime=1.000000,Color=(B=255,G=255,R=255,A=255))
+          ColorScaleRepeats=10.000000
+          ColorMultiplierRange=(X=(Min=0.500000,Max=0.704000),Y=(Min=0.500000,Max=0.704000),Z=(Min=0.500000,Max=0.704000))
+          Opacity=0.180000
+          FadeOutStartTime=1.000000
+          FadeOut=True
+          FadeInEndTime=0.500000
+          FadeIn=True
+          MaxParticles=7
+          RespawnDeadParticles=False
+          Name="heal"
+          StartLocationOffset=(X=0.000000,Y=0.000000,Z=160.000000)
+          StartLocationRange=(X=(Min=-8.000000,Max=8.000000),Y=(Min=-8.000000,Max=8.000000),Z=(Min=-20.000000,Max=20.000000))
+          StartLocationPolarRange=(X=(Min=0.000000,Max=360.000000),Y=(Min=70.000000,Max=110.000000),Z=(Min=13.000000,Max=13.000000))
+          StartSizeRange=(X=(Min=6.000000,Max=9.000000),Y=(Min=0.000000,Max=0.000000),Z=(Min=0.000000,Max=0.000000))
+          InitialParticlesPerSecond=6.000000
+          AutomaticInitialSpawning=False
+          Texture=Texture'LineageEffectsTextures.Particles.fx_m_t0004'
+          LifetimeRange=(Min=2.000000,Max=3.000000)
+     End Object
+     Emitters(0)=BeamEmitter'BeamEmitter0'
+     Begin Object Class=SpriteEmitter Name=SpriteEmitter49
+          ColorScale(0)=(RelativeTime=0.000000,Color=(B=255,G=255,R=255,A=255))
+          ColorScale(1)=(RelativeTime=1.000000,Color=(B=255,G=255,R=255,A=255))
+          ColorMultiplierRange=(X=(Min=1.000000,Max=1.000000),Y=(Min=0.800000,Max=0.800000),Z=(Min=0.600000,Max=0.600000))
+          Opacity=0.800000
+          FadeOutStartTime=0.910000
+          FadeOut=True
+          MaxParticles=20
+          WeatherSoundCheck=True
+          RespawnDeadParticles=False
+          Name="star"
+          StartLocationOffset=(X=5.000000,Y=0.000000,Z=40.000000)
+          StartLocationRange=(X=(Min=-18.000000,Max=18.000000),Y=(Min=-7.000000,Max=7.000000),Z=(Min=-7.000000,Max=7.000000))
+          StartLocationShape=PTLS_Polar
+          SphereRadiusRange=(Min=20.000000,Max=20.000000)
+          StartLocationPolarRange=(X=(Min=0.000000,Max=360.000000),Y=(Min=0.000000,Max=360.000000),Z=(Min=10.000000,Max=15.000000))
+          SpinParticles=True
+          StartSpinRange=(X=(Min=0.030000,Max=0.030000),Y=(Min=0.000000,Max=0.000000),Z=(Min=0.000000,Max=0.000000))
+          UseSizeScale=True
+          UseRegularSizeScale=False
+          UniformSize=True
+          SizeScale(0)=(RelativeTime=0.120000,RelativeSize=3.000000)
+          SizeScale(1)=(RelativeTime=0.500000,RelativeSize=1.000000)
+          SizeScale(2)=(RelativeTime=0.790000,RelativeSize=0.100000)
+          SizeScale(3)=(RelativeTime=1.000000,RelativeSize=0.010000)
+          SizeScaleRepeats=1.000000
+          StartSizeRange=(X=(Min=1.000000,Max=2.000000),Y=(Min=1.000000,Max=2.000000),Z=(Min=1.000000,Max=2.000000))
+          InitialParticlesPerSecond=7.000000
+          AutomaticInitialSpawning=False
+          Texture=Texture'LineageEffectsTextures.Particles.fx_m_t0085'
+          TextureUSubdivisions=2
+          TextureVSubdivisions=2
+          BlendBetweenSubdivisions=True
+          SubdivisionEnd=2
+          LifetimeRange=(Min=0.600000,Max=0.600000)
+          StartVelocityRange=(X=(Min=-15.000000,Max=15.000000),Y=(Min=-15.000000,Max=15.000000),Z=(Min=15.000000,Max=25.000000))
+     End Object
+     Emitters(1)=SpriteEmitter'SpriteEmitter49'
+     Begin Object Class=SpriteEmitter Name=SpriteEmitter71
+          UseDirectionAs=PTDU_Normal
+          ProjectionNormal=(X=1.000000,Y=1.000000,Z=0.000000)
+          ColorScale(0)=(RelativeTime=0.000000,Color=(B=255,G=255,R=255,A=255))
+          ColorScale(1)=(RelativeTime=1.000000,Color=(B=255,G=255,R=255,A=255))
+          ColorMultiplierRange=(X=(Min=0.700000,Max=1.000000),Y=(Min=0.700000,Max=0.700000),Z=(Min=0.700000,Max=0.700000))
+          Opacity=0.770000
+          FadeOutStartTime=0.264000
+          FadeOut=True
+          FadeInEndTime=0.088000
+          FadeIn=True
+          MaxParticles=15
+          AlwaysFullSpawnRate=True
+          RespawnDeadParticles=False
+          Name="Lines"
+          StartLocationRange=(X=(Min=-12.000000,Max=12.000000),Y=(Min=-12.000000,Max=12.000000),Z=(Min=-20.000000,Max=40.000000))
+          StartLocationPolarRange=(X=(Min=0.000000,Max=360.000000),Y=(Min=110.000000,Max=150.000000),Z=(Min=8.000000,Max=12.000000))
+          SpinParticles=True
+          StartSpinRange=(X=(Min=0.500000,Max=0.500000),Y=(Min=0.000000,Max=0.000000),Z=(Min=0.000000,Max=0.000000))
+          UseSizeScale=True
+          UseRegularSizeScale=False
+          SizeScale(0)=(RelativeTime=0.000000,RelativeSize=0.200000)
+          SizeScale(1)=(RelativeTime=0.100000,RelativeSize=0.800000)
+          SizeScale(2)=(RelativeTime=1.000000,RelativeSize=1.000000)
+          StartSizeRange=(X=(Min=5.000000,Max=7.000000),Y=(Min=110.000000,Max=160.000000),Z=(Min=5.000000,Max=7.000000))
+          InitialParticlesPerSecond=8.000000
+          AutomaticInitialSpawning=False
+          Texture=Texture'LineageEffectsTextures2.Particles.FX_M_T4194'
+          UseRandomSubdivision=True
+          LifetimeRange=(Min=0.800000,Max=0.800000)
+          InitialDelayRange=(Min=0.300000,Max=0.300000)
+          StartVelocityRange=(X=(Min=0.000000,Max=0.000000),Y=(Min=0.000000,Max=0.000000),Z=(Min=100.000000,Max=150.000000))
+          VelocityLossRange=(X=(Min=0.000000,Max=0.000000),Y=(Min=0.000000,Max=0.000000),Z=(Min=1.000000,Max=1.000000))
+     End Object
+     Emitters(2)=SpriteEmitter'SpriteEmitter71'
+     AutoDestroy=False
+     SpawnSound(0)=None
+     SpawnSound(1)=Sound'SkillSound10.wh_heal.wh_heal_ave'
+     SoundRadius=40.000000
+     SoundVolume=250.000000
+     bNoDelete=False
+     bSunAffect=True
+     bUnlit=False
+     DrawScale=0.200000
+}

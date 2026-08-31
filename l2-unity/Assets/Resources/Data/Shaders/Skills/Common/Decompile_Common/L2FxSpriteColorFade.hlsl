@@ -198,14 +198,11 @@ float4 L2Fx_SpriteColorFade_SpawnColor(
     return float4(rgb, 1.0);
 }
 
-// Subtractive fade-in AND fade-out: subtract the same normalized amount from ALL
-// channels (R,G,B,A), then clamp at 0. This is the verified engine behaviour
-// (additive fade-to/from-black), expressed in 0..1 float space. Mirrors
-// L2Fx_ApplyFadeInOut but driven by absolute seconds (1:1 with .uc fields).
-//   fade-in : age < FadeInEndTime  -> subtract (FadeInEndTime - age)/FadeInEndTime
-//   fade-out: age > FadeOutStart   -> subtract (age - start)/(lifetime - start)
-//   out     = max(0, color - subtracted)
-// Flags fadeIn / fadeOut map directly to the .uc FadeIn / FadeOut booleans.
+// Subtractive fade-in AND fade-out.
+// Brighten / additive (alphaBlend=0): subtract the same amount from RGB+A
+// (fade-from-black). AlphaBlend: fade A only so RGB stays the authored milk
+// color. BlendBetween steals vertex A for the frame lerp; if RGB also goes
+// to black while texture a=1, a new puff is an opaque black quad.
 float4 L2Fx_SpriteColorFade_Apply(
     float4 color,
     float ageSeconds,
@@ -214,7 +211,8 @@ float4 L2Fx_SpriteColorFade_Apply(
     float fadeIn,
     float fadeInEndTime,
     float fadeOut,
-    float fadeOutStart)
+    float fadeOutStart,
+    float alphaBlend)
 {
     if (hasLifetime < 0.5)
     {
@@ -229,22 +227,29 @@ float4 L2Fx_SpriteColorFade_Apply(
         return float4(0.0, 0.0, 0.0, 0.0);
     }
 
-    // Fade-in: particle rises from black over [0, FadeInEndTime].
+    float fadeAmount = 0.0;
     if (fadeIn >= 0.5 && fadeInEndTime > 0.0 && ageSeconds < fadeInEndTime)
     {
-        float fi = (fadeInEndTime - ageSeconds) / max(1e-4, fadeInEndTime);
-        color -= saturate(fi);
+        fadeAmount += saturate((fadeInEndTime - ageSeconds) / max(1e-4, fadeInEndTime));
     }
 
-    // Fade-out: particle sinks to black over [FadeOutStart, lifetime].
     if (fadeOut >= 0.5)
     {
         float start = clamp(fadeOutStart, 0.0, lt);
         if (ageSeconds > start)
         {
-            float fo = (ageSeconds - start) / max(1e-4, lt - start);
-            color -= saturate(fo);
+            fadeAmount += saturate((ageSeconds - start) / max(1e-4, lt - start));
         }
+    }
+
+    fadeAmount = saturate(fadeAmount);
+    if (alphaBlend >= 0.5)
+    {
+        color.a -= fadeAmount;
+    }
+    else
+    {
+        color -= fadeAmount;
     }
 
     return max(color, 0.0);
@@ -279,7 +284,8 @@ float4 L2Fx_SpriteColorFade_White(
         fadeIn,
         fadeInEndTime,
         fadeOut,
-        fadeOutStart);
+        fadeOutStart,
+        0.0);
 }
 
 // Variant for effects that DO use a colored ColorScale gradient. Pass the
@@ -297,7 +303,8 @@ float4 L2Fx_SpriteColorFade_WithScale(
     float fadeOut,
     float fadeOutStart,
     float seed,
-    float startTime)
+    float startTime,
+    float alphaBlend)
 {
     float3 rgb = L2Fx_ApplyColorMultiplier(
         scaleColor.rgb,
@@ -314,7 +321,8 @@ float4 L2Fx_SpriteColorFade_WithScale(
         fadeIn,
         fadeInEndTime,
         fadeOut,
-        fadeOutStart);
+        fadeOutStart,
+        alphaBlend);
 }
 
 // ─── Opacity (UpdateParticles → runtimeColorA8) ──────────────────────────────
@@ -421,7 +429,8 @@ float4 L2Fx_SpriteColorFade_Full(
         fadeOut,
         fadeOutStart,
         seed,
-        startTime);
+        startTime,
+        alphaBlend);
 
     // 4. Opacity (UpdateParticles): AlphaBlend→A, else→RGB (Brighten smog).
     return L2Fx_SpriteColorFade_ApplyOpacity(col, opacity, opacityRatio, alphaBlend);

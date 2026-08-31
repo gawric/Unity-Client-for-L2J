@@ -13,10 +13,12 @@
 #include "../Decompile_Common/L2FxSpriteMotion.hlsl"
 #include "../Decompile_Common/L2FxSpriteSpin.hlsl"
 #include "../Decompile_Common/L2FxPTDU_Up.hlsl"
+#include "../Decompile_Common/L2FxPTDU_Normal.hlsl"
 #include "../Decompile_Common/L2FxSpriteSizeScale.hlsl"
 #include "../Decompile_Common/L2FxSpriteColorFade.hlsl"
 #include "../Decompile_Common/L2FxSpriteColorGammaLinear.hlsl"
 #include "../Decompile_Common/L2FxPTDS_DrawStyle.hlsl"
+#include "../Decompile_Common/L2FxD3d9FixedFunction.hlsl"
 #include "../L2FxSpriteEmitterVertex.hlsl"
 #include "../L2FxFlipbook.hlsl"
 #include "../L2FxMeshFragment.hlsl"
@@ -27,7 +29,7 @@ SAMPLER(sampler_MainTex);
 // Spawn: 0=None, 1=Box, 2=Polar, 3=Full TLS stream.
 // Full TLS shape: 0=Shape0/box, 1=Polar.
 // Motion: 0=None, 1=Ballistic, 2=Drag.
-// Orientation: 0=Camera billboard, 1=PTDU_Up.
+// Orientation: 0=Camera billboard, 1=PTDU_Up, 2=PTDU_Normal.
 // PTVD: 0=None, 1=StartPositionAndOwner, 2=OwnerAndStartPosition.
 // Size: 0=Uniform, 1=XYZ. Spin: 0=None, 1=appRand.
 // Flipbook: 0=Static, 1=Timed, 2=Random, 3=BlendBetween.
@@ -47,6 +49,7 @@ CBUFFER_START(UnityPerMaterial)
     float _FullTlsShape;
     float _MotionMode;
     float _OrientationMode;
+    float4 _SurfaceNormals;
     float _PtvdMode;
     float _SizeMode;
     float _SpinMode;
@@ -328,8 +331,8 @@ void L2FxUnifiedSprite_ResolveFlipbook(
 {
     int uSub = max(1, (int)_TextureUSubdivisions);
     int vSub = max(1, (int)_TextureVSubdivisions);
-    int lo = min((int)_SubdivisionStart, (int)_SubdivisionEnd);
-    int hi = max((int)_SubdivisionStart, (int)_SubdivisionEnd);
+    int s0 = (int)_SubdivisionStart;
+    int s1 = (int)_SubdivisionEnd;
     float2 baseUv = TRANSFORM_TEX(uv, _MainTex);
     uvA = baseUv;
     uvB = uvA;
@@ -338,18 +341,18 @@ void L2FxUnifiedSprite_ResolveFlipbook(
     if (_FlipbookMode > 2.5)
     {
         L2Fx_FlipbookAtlasUVBlend(
-            baseUv, ageNorm, uSub, vSub, lo, hi, uvA, uvB, blend);
+            baseUv, ageNorm, uSub, vSub, s0, s1, uvA, uvB, blend);
     }
     else if (_FlipbookMode > 1.5)
     {
         int frame = L2Fx_FlipbookSubDivisionRandomFrame(
-            _SpriteMotionRandStateBits, _StartTime, lo, hi, 19.0);
+            _SpriteMotionRandStateBits, _StartTime, s0, s1, 19.0);
         uvA = L2Fx_FlipbookAtlasUV(baseUv, frame, uSub, vSub);
         uvB = uvA;
     }
     else if (_FlipbookMode > 0.5)
     {
-        int frame = L2Fx_FlipbookFrameIndex(ageNorm, lo, hi);
+        int frame = L2Fx_FlipbookFrameIndex(ageNorm, s0, s1);
         uvA = L2Fx_FlipbookAtlasUV(baseUv, frame, uSub, vSub);
         uvB = uvA;
     }
@@ -366,6 +369,7 @@ Varyings vert(Attributes IN)
     UNITY_SETUP_INSTANCE_ID(IN);
     Varyings OUT;
     L2FxUnifiedSpriteSpawn spawn = L2FxUnifiedSprite_ResolveSpawn();
+    spawn.positionUe = L2Fx_ApplySpawnLocationAddUe(spawn.positionUe);
 
     float ageSeconds = _UseManualAge > 0.5
         ? _ManualAge
@@ -406,8 +410,20 @@ Varyings vert(Attributes IN)
         spawn.positionUe + displacementUe, worldK);
     float3 previousOS = L2Fx_UcPositionToUnityMeters(
         spawn.positionUe + previousDisplacementUe, worldK);
+    currentOS = L2Fx_ApplySpawnWorldPositionOs(currentOS);
+    previousOS = L2Fx_ApplySpawnWorldPositionOs(previousOS);
 
-    if (_OrientationMode > 0.5)
+    if (_OrientationMode > 1.5)
+    {
+        float3 positionWS = L2FxPTDU_Normal_PositionWS(
+            TransformObjectToWorld(currentOS),
+            IN.positionOS.xy,
+            sizeXM,
+            sizeYM,
+            _SurfaceNormals.xyz);
+        OUT.positionHCS = TransformWorldToHClip(positionWS);
+    }
+    else if (_OrientationMode > 0.5)
     {
         float3 cameraOS = TransformWorldToObject(GetCameraPositionWS());
         float3 cornerOS = L2FxPTDU_Up_PositionUnityFromQuadOs(
@@ -439,7 +455,6 @@ half4 frag(Varyings IN) : SV_Target
 {
     half4 texA = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, IN.uvA);
     half4 texB = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, IN.uvB);
-    half4 tex = lerp(texA, texB, (half)IN.blend);
 
     float4 colorFade = L2Fx_SpriteColorFade_FullKeys(
         (uint)_ColorScaleCount,
@@ -465,20 +480,68 @@ half4 frag(Varyings IN) : SV_Target
     colorFade = L2Fx_SpriteColor_ApplyGammaToLinearIfEnabled(
         colorFade, _L2SpriteColorGammaToLinear);
 
-    float textureAlpha = L2Fx_MeshFrag_SampleTextureAlphaSoft(
-        tex,
-        _AlphaFromLuma,
-        _LumaAlphaFloor,
-        _LumaAlphaPower,
-        _UseSoftLumaAlpha,
-        _IgnoreMainTexAlpha);
-    if (_AlphaClipThreshold >= 0.0)
-        clip(textureAlpha - _AlphaClipThreshold);
+    half4 color;
+    if (_FlipbookMode > 2.5)
+    {
+        // D3D9 BlendBetweenSubdivisions: t0/t1 are the same atlas, UV A/B.
+        // in_Color0.a is the frame blend (IN.blend), not particle opacity.
+        half4 mixed = lerp(texA, texB, (half)IN.blend);
+        float textureAlpha = L2Fx_MeshFrag_SampleTextureAlphaSoft(
+            mixed,
+            _AlphaFromLuma,
+            _LumaAlphaFloor,
+            _LumaAlphaPower,
+            _UseSoftLumaAlpha,
+            _IgnoreMainTexAlpha);
+        if (_AlphaClipThreshold >= 0.0)
+            clip(textureAlpha - _AlphaClipThreshold);
+        color = L2Fx_D3d9_BlendDiffuseAlphaTwoTex(
+            texA, texB, half4((half3)colorFade.rgb, (half)IN.blend));
+        // Combiner a = texture. FadeIn/Out only — not Opacity 0.1, or steam
+        // becomes invisible. New puffs ramp coverage instead of drawing black.
+        color.a = L2Fx_D3d9_BlendBetweenParticleCoverage(
+            (half)textureAlpha,
+            colorFade.a,
+            _Opacity,
+            _ColorFadeAlphaBlend);
+        color.rgb *= (half)_RgbBoost;
+    }
+    else
+    {
+        half4 tex = lerp(texA, texB, (half)IN.blend);
+        float textureAlpha = L2Fx_MeshFrag_SampleTextureAlphaSoft(
+            tex,
+            _AlphaFromLuma,
+            _LumaAlphaFloor,
+            _LumaAlphaPower,
+            _UseSoftLumaAlpha,
+            _IgnoreMainTexAlpha);
+        if (_AlphaClipThreshold >= 0.0)
+            clip(textureAlpha - _AlphaClipThreshold);
+        color = tex * (half4)colorFade;
+        color.a = (half)(textureAlpha * colorFade.a);
+        color.rgb *= (half)_RgbBoost;
+    }
 
-    half4 color = tex * (half4)colorFade;
-    color.a = (half)(textureAlpha * colorFade.a);
-    color.rgb *= (half)_RgbBoost;
-    color.rgb += (half3)(IN.debugData.xyz * (_DebugSpriteOut * 1e-10));
+    color.rgb += (half3)(IN.debugData.xyz * 1e-10);
+    if (_DebugSpriteOut > 0.5)
+    {
+        half3 lumaW = half3(0.299h, 0.587h, 0.114h);
+        half luma = dot(color.rgb, lumaW);
+        if (_DebugSpriteOut < 1.5)
+            color = half4(color.a, color.a, color.a, 1.0h);
+        else if (_DebugSpriteOut < 2.5)
+            color = half4(luma, luma, luma, 1.0h);
+        else if (_DebugSpriteOut < 3.5)
+            color = half4(color.rgb, 1.0h);
+        else
+        {
+            // Red = would punch a hole: high coverage alpha, dark RGB.
+            half hole = step(0.5h, color.a) * (1.0h - step(0.25h, luma));
+            color = half4(hole, luma, color.a, 1.0h);
+        }
+    }
+
     return color;
 }
 

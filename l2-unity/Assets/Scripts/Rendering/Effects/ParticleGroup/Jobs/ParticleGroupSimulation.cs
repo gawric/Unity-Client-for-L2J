@@ -6,7 +6,7 @@ using UnityEngine;
 /// Jobs facade: native slot buffers, expire/activate/pack Burst jobs, GPU bind flags.
 /// Does not touch GameObject or Material APIs.
 /// </summary>
-internal sealed class ParticleGroupSimulation
+public sealed class ParticleGroupSimulation
 {
     readonly ParticleGroupGpuDrawer _gpuDrawer = new ParticleGroupGpuDrawer();
     NativeArray<float> _spawnTimes;
@@ -23,9 +23,13 @@ internal sealed class ParticleGroupSimulation
     public Mesh GpuMesh { get; private set; }
     public Material[] GpuMaterials { get; private set; }
     public int GpuLayer { get; private set; }
+    public int GpuRendererPriority { get; private set; }
     public bool HasMeshSpawn { get; private set; }
     public bool HasStartSpin { get; private set; }
     public bool HasLifetimeBuffers => _active.IsCreated;
+    public NativeArray<L2FxParticleInstance> PackedSlots => _packedSlots;
+    public NativeArray<Matrix4x4> PackedMatrices => _packedMatrices;
+
     public bool CanPackAndDraw =>
         GpuEnabled &&
         _gpuSlots.IsCreated &&
@@ -65,6 +69,7 @@ internal sealed class ParticleGroupSimulation
         GpuEnabled = false;
         GpuMesh = null;
         GpuMaterials = null;
+        GpuRendererPriority = 0;
         HasMeshSpawn = false;
         HasStartSpin = false;
         DisposeGpu();
@@ -72,13 +77,19 @@ internal sealed class ParticleGroupSimulation
         if (!useGpuInstancing || particles == null || particles.Length == 0)
             return false;
 
-        if (!ParticleGroupGpuDrawer.TryBind(particles, out Mesh mesh, out Material[] materials, out int layer))
+        if (!ParticleGroupGpuDrawer.TryBind(
+                particles,
+                out Mesh mesh,
+                out Material[] materials,
+                out int layer,
+                out int rendererPriority))
             return false;
 
         GpuEnabled = true;
         GpuMesh = mesh;
         GpuMaterials = materials;
         GpuLayer = layer;
+        GpuRendererPriority = rendererPriority;
         Material shared = materials != null && materials.Length > 0 ? materials[0] : null;
         HasMeshSpawn = L2MaterialPropertyCopier.IsMeshSpawnParticleMaterial(shared);
         HasStartSpin = L2MaterialPropertyCopier.IsMeshStartSpinMaterial(shared);
@@ -140,10 +151,11 @@ internal sealed class ParticleGroupSimulation
         uint meshBase,
         uint spriteBase,
         bool[] managedActive,
-        float[] managedTimes)
+        float[] managedTimes,
+        Vector4 spawnLocationAddUe = default)
     {
         MarkSlotActive(slot, now, managedActive, managedTimes);
-        WriteGpuInstance(slot, shaderStartTime, seed, meshBase, spriteBase);
+        WriteGpuInstance(slot, shaderStartTime, seed, meshBase, spriteBase, spawnLocationAddUe);
     }
 
     public bool TryActivateGpuBurst(
@@ -226,12 +238,13 @@ internal sealed class ParticleGroupSimulation
         }
     }
 
-    public void PackAndDraw(Vector4 ownerWorldPos, Matrix4x4[] objectToWorldMatrices)
+    public bool TryPack(Vector4 ownerWorldPos, Matrix4x4[] objectToWorldMatrices, out int packed)
     {
+        packed = 0;
         if (!CanPackAndDraw ||
             objectToWorldMatrices == null ||
             objectToWorldMatrices.Length < _active.Length)
-            return;
+            return false;
 
         for (int i = 0; i < _active.Length; i++)
             _sourceMatrices[i] = objectToWorldMatrices[i];
@@ -248,14 +261,20 @@ internal sealed class ParticleGroupSimulation
             count = _active.Length
         }.Run();
 
-        int packed = _packedCount[0];
-        if (packed <= 0)
+        packed = _packedCount[0];
+        return packed > 0;
+    }
+
+    public void PackAndDraw(Vector4 ownerWorldPos, Matrix4x4[] objectToWorldMatrices)
+    {
+        if (!TryPack(ownerWorldPos, objectToWorldMatrices, out int packed))
             return;
 
         _gpuDrawer.Draw(
             GpuMesh,
             GpuMaterials,
             GpuLayer,
+            GpuRendererPriority,
             _packedSlots,
             _packedMatrices,
             packed);
@@ -308,7 +327,13 @@ internal sealed class ParticleGroupSimulation
         DisposeGpu();
     }
 
-    void WriteGpuInstance(int slot, float shaderStartTime, float seed, uint meshBase, uint spriteBase)
+    void WriteGpuInstance(
+        int slot,
+        float shaderStartTime,
+        float seed,
+        uint meshBase,
+        uint spriteBase,
+        Vector4 spawnLocationAddUe)
     {
         if (!_gpuSlots.IsCreated || slot < 0 || slot >= _gpuSlots.Length)
             return;
@@ -331,6 +356,7 @@ internal sealed class ParticleGroupSimulation
         instance.startSpinRandBits = startSpinRandBits;
         instance.spriteMotionRandBits = spriteMotionRandBits;
         instance.spriteSpinRandBits = spriteSpinRandBits;
+        instance.spawnLocationAddUe = spawnLocationAddUe;
         _gpuSlots[slot] = instance;
     }
 

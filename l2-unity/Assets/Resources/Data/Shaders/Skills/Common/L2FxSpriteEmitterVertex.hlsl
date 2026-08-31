@@ -86,12 +86,9 @@ float3 L2Fx_CameraBillboardPositionWS(
 // Default Normal is (0,0,1) in UE local space -> Unity local (0,1,0), transformed to world.
 float3 L2Fx_ResolveParticleNormalWS(float3 surfaceNormalMaterial)
 {
-    if (dot(surfaceNormalMaterial, surfaceNormalMaterial) > 1e-6)
-    {
-        return normalize(surfaceNormalMaterial);
-    }
-
-    float3 localNormal = float3(0.0, 1.0, 0.0);
+    float3 localNormal = dot(surfaceNormalMaterial, surfaceNormalMaterial) > 1e-6
+        ? surfaceNormalMaterial
+        : float3(0.0, 1.0, 0.0);
     float3 normalWS = mul((float3x3)UNITY_MATRIX_M, localNormal);
     return dot(normalWS, normalWS) > 1e-6 ? normalize(normalWS) : float3(0.0, 1.0, 0.0);
 }
