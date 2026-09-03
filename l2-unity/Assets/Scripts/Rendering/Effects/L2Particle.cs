@@ -8,10 +8,12 @@ public class L2Particle : BaseEffect, IRegisteredBillboard
     [Tooltip("Не вызывать DestoryEffect при Play — объект не удаляется по таймеру (отладка шейдера, Hold и т.п.). Выключено по умолчанию.")]
     [SerializeField] private bool _skipScheduledDestroyForDebug;
 
+    [HideInInspector]
     [SerializeField] private Vector3 _surfaceNormal;
     [Header("Billboard")]
     [SerializeField] private bool _billboardToCamera;
     [SerializeField] private Vector3 _billboardRotationOffsetEuler;
+    [HideInInspector]
     [SerializeField] private PooledEffect _pooledEffect;
     [SerializeField] private EffectPart[] _particleGroups;
     private EffectSettings _settings;
@@ -83,6 +85,16 @@ public class L2Particle : BaseEffect, IRegisteredBillboard
             return;
         }
 
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        float lived = Time.time - _playStartedAt;
+        if (lived < 0.25f)
+        {
+            V2TaSpawnLog.Warn(
+                "AUTH STREAMS COMPLETE TOO FAST effect='" + name +
+                "' lived=" + lived.ToString("0.###") +
+                "s — destroying GO before burst is visible");
+        }
+#endif
         Destroy(gameObject);
     }
 

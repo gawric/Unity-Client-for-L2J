@@ -72,7 +72,6 @@ public sealed class L2EffectGeneratorWindow : EditorWindow
         }
     }
 
-    [MenuItem("Tools/L2 Effects/Generate NPC Deco (u_npc_id_buff)")]
     public static void GenerateNpcDecoBuffMenu()
     {
         bool ok = GenerateDeco("Assets/Resources/Data/Effects/deco", "u_npc_id_buff");
@@ -177,7 +176,9 @@ public sealed class L2EffectGeneratorWindow : EditorWindow
             "from skill-effects.tsv (one composite part per unique TSV row). Emitters use ParticleGroupV2 " +
             "(stream + DrawBatch). Skill Visual ID 0 auto-detects only " +
             "when exactly one skill matches all UC classes. Wind Strike is 1177. Heal is 1011. " +
-            "_ca casts immediately, _ave or BeamEmitter waits for ShootEvent on the target, _ta is hit.",
+            "_ca casts immediately, _ave or BeamEmitter waits for ShootEvent on the target, _ta is hit. " +
+            "Skill ID is the server skill (1147 Vampiric Touch). Launch rows use skill_visual_effect " +
+            "from skillgrp (1147 → 1090).",
             MessageType.Info);
         EditorGUILayout.Space(8f);
 
@@ -199,8 +200,9 @@ public sealed class L2EffectGeneratorWindow : EditorWindow
         _effectName = EditorGUILayout.TextField("Effect Name", _effectName);
         _skillVisualId = EditorGUILayout.IntField(
             new GUIContent(
-                "Skill Visual ID",
-                "0 = auto-detect only when exactly one launch-table skill matches all UC classes."),
+                "Skill ID",
+                "Server skill id for GlobalEffect bind (1147 = Vampiric Touch). " +
+                "0 = auto-detect launch-table visual id. Changing the folder only updates Effect Name, not this field."),
             _skillVisualId);
         _bindToGlobalEffect = EditorGUILayout.Toggle(
             new GUIContent(
@@ -279,7 +281,15 @@ public sealed class L2EffectGeneratorWindow : EditorWindow
             return;
         }
 
-        EditorGUILayout.LabelField("Resolved skill visual id", preview.SkillVisualId.ToString());
+        EditorGUILayout.LabelField("Bind skill id", preview.SkillVisualId.ToString());
+        int launchTableId = L2EffectSkillLaunchTable.ResolveLaunchTableId(preview.SkillVisualId);
+        if (launchTableId != preview.SkillVisualId && launchTableId > 0)
+        {
+            EditorGUILayout.LabelField(
+                "Launch table id",
+                launchTableId + "  (skill_visual_effect for " + preview.SkillVisualId + ")");
+        }
+
         if (preview.SkillVisualId <= 0)
         {
             EditorGUILayout.HelpBox(
@@ -290,11 +300,16 @@ public sealed class L2EffectGeneratorWindow : EditorWindow
         bool hasProjectileCompanion = false;
         for (int i = 0; i < preview.Planned.Count; i++)
         {
-            if (preview.Planned[i].IsProjectile)
+            if (preview.Planned[i].IsProjectile && !preview.Planned[i].IsHomeFlight)
             {
                 hasProjectileCompanion = true;
                 break;
             }
+        }
+
+        if (L2EffectGeneratorAssetOverrides.ShouldPrependSharedBodyToMindCa(preview.Planned))
+        {
+            DrawSharedBodyToMindCaPreview(preview.SkillVisualId, hasProjectileCompanion);
         }
 
         for (int i = 0; i < preview.Planned.Count; i++)
@@ -308,11 +323,27 @@ public sealed class L2EffectGeneratorWindow : EditorWindow
                 EditorStyles.textField,
                 GUILayout.Height(18f));
             EditorGUILayout.LabelField("UC", planned.SourceUcPath);
+            if (L2EffectGeneratorAssetOverrides.IsM_u003_bHomeFlight(planned))
+            {
+                EditorGUILayout.HelpBox(
+                    "m_u003_b live lock (class name, not UC): " +
+                    "speed=" + L2EffectGeneratorAssetOverrides.M_u003_bLockedSpeed.ToString("0.###") +
+                    " accel=" + L2EffectGeneratorAssetOverrides.M_u003_bLockedAcceleration.ToString("0.##") +
+                    " max=" + L2EffectGeneratorAssetOverrides.M_u003_bLockedMaxSpeed.ToString("0.##") +
+                    " side=" + L2EffectGeneratorAssetOverrides.M_u003_bLockedPathSideOffset.ToString("0.##") +
+                    " height=" + L2EffectGeneratorAssetOverrides.M_u003_bLockedPathHeightOffset.ToString("0.##") +
+                    " trail=" + L2EffectGeneratorAssetOverrides.M_u003_bLockedTrailHistorySeconds.ToString("0.###") +
+                    "s spark=" + L2EffectGeneratorAssetOverrides.M_u003_bLockedTrailSparkSizeMeters.ToString("0.###") +
+                    "m dual=1",
+                    MessageType.Info);
+            }
             EditorGUILayout.LabelField(
                 "Class",
                 planned.ClassName +
                 (string.IsNullOrEmpty(planned.ExtendsClass) ? string.Empty : " extends " + planned.ExtendsClass) +
-                (planned.IsProjectile ? "  [projectile]" : string.Empty) +
+                (planned.IsHomeFlight ? "  [home→caster]" : string.Empty) +
+                (planned.IsTargetTrailer ? "  [trailer→target]" : string.Empty) +
+                (planned.IsProjectile && !planned.IsHomeFlight ? "  [projectile]" : string.Empty) +
                 (planned.HasBeamEmitter ? "  [beam→shoot/target]" : string.Empty));
 
             List<L2EffectSkillLaunchTable.LaunchRow> rows =
@@ -321,7 +352,11 @@ public sealed class L2EffectGeneratorWindow : EditorWindow
             {
                 CompositePart mapped = L2EffectSkillLaunchTable.CreateV2Part(
                     planned, null, hasProjectileCompanion);
-                EditorGUILayout.LabelField("Launch", "table miss → suffix defaults");
+                EditorGUILayout.LabelField(
+                    "Launch",
+                    planned.IsHomeFlight || planned.IsTargetTrailer
+                        ? "table miss → UC defaults (shoot/target)"
+                        : "table miss → suffix defaults");
                 EditorGUILayout.LabelField("Composite", mapped.Describe());
             }
             else
@@ -353,20 +388,50 @@ public sealed class L2EffectGeneratorWindow : EditorWindow
                 }
             }
 
-            DrawPlannedEmittersPreview(planned.SourceUcPath);
+            DrawPlannedEmittersPreview(planned);
             EditorGUILayout.EndVertical();
         }
     }
 
-    private static void DrawPlannedEmittersPreview(string ucAssetPath)
+    private static void DrawSharedBodyToMindCaPreview(int skillVisualId, bool hasProjectileCompanion)
     {
-        if (string.IsNullOrWhiteSpace(ucAssetPath))
+        L2EffectGeneratorFolderBuilder.PlannedFolder planned =
+            L2EffectGeneratorAssetOverrides.CreateSharedBodyToMindCaPlanned();
+        L2EffectSkillLaunchTable.LaunchRow row =
+            L2EffectGeneratorAssetOverrides.ResolveSharedBodyToMindCaRow(skillVisualId);
+        CompositePart mapped = L2EffectSkillLaunchTable.CreateV2Part(
+            planned, row, hasProjectileCompanion);
+        EditorGUILayout.BeginVertical(EditorStyles.helpBox);
+        EditorGUILayout.LabelField("CA  " + planned.ClassName, EditorStyles.boldLabel);
+        EditorGUILayout.SelectableLabel(
+            L2EffectGeneratorAssetOverrides.SharedBodyToMindCaPrefabPath,
+            EditorStyles.textField,
+            GUILayout.Height(18f));
+        EditorGUILayout.HelpBox(
+            "Shared from curse_poison. Detected m_u003_b + m_u003_c; TSV CA is m_u003_a (not in this folder).",
+            MessageType.Info);
+        if (row != null)
+        {
+            EditorGUILayout.LabelField(
+                "Launch",
+                row.Phase +
+                " attach=" + (row.HasAttachOn ? row.AttachOn.ToString() : "-") +
+                (row.HasScale ? " scale=" + row.Scale.ToString("0.###") : string.Empty));
+        }
+
+        EditorGUILayout.LabelField("Composite", mapped.Describe());
+        EditorGUILayout.EndVertical();
+    }
+
+    private static void DrawPlannedEmittersPreview(L2EffectGeneratorFolderBuilder.PlannedFolder planned)
+    {
+        if (planned == null || string.IsNullOrWhiteSpace(planned.SourceUcPath))
         {
             return;
         }
 
         if (!L2EffectUcEmitterParser.TryParseFile(
-                ucAssetPath,
+                planned.SourceUcPath,
                 out List<UcEmitterDefinition> emitters,
                 out string parseError))
         {
@@ -374,15 +439,64 @@ public sealed class L2EffectGeneratorWindow : EditorWindow
             return;
         }
 
+        List<UcEmitterDefinition> activeEmitters = new List<UcEmitterDefinition>();
+        for (int i = 0; i < emitters.Count; i++)
+        {
+            UcEmitterDefinition emitter = emitters[i];
+            if (emitter == null ||
+                L2EffectGeneratorAssetOverrides.ShouldSkipEmitter(planned.ClassName, emitter.EmitterName))
+            {
+                continue;
+            }
+
+            activeEmitters.Add(emitter);
+        }
+
+        bool isHomeOrb = planned.IsHomeFlight ||
+                         L2EffectGeneratorAssetOverrides.IsM_u003_bHomeFlight(planned);
+        UcEmitterDefinition trail = null;
+        UcEmitterDefinition core = null;
+        if (isHomeOrb)
+        {
+            L2EffectGeneratorHomeOrbLayout.TryResolve(activeEmitters, out trail, out core);
+        }
+
+        if (trail != null && core != null)
+        {
+            EditorGUILayout.HelpBox(
+                "Home orbs: trail=" + trail.EmitterName +
+                " (" + (string.IsNullOrEmpty(trail.CoordinateSystem) ? "Independent" : trail.CoordinateSystem) +
+                " life=" + L2EffectGeneratorHomeOrbLayout.ResolveLifetime(trail).ToString("0.###") +
+                "s) core=" + core.EmitterName +
+                " (life=" + L2EffectGeneratorHomeOrbLayout.ResolveLifetime(core).ToString("0.###") +
+                "s) → HomeProjectileTrailVelocityProvider",
+                MessageType.Info);
+        }
+
         EditorGUILayout.LabelField("Emitters", EditorStyles.miniBoldLabel);
         for (int i = 0; i < emitters.Count; i++)
         {
             UcEmitterDefinition emitter = emitters[i];
+            if (L2EffectGeneratorAssetOverrides.ShouldSkipEmitter(
+                    planned.ClassName, emitter.EmitterName))
+            {
+                EditorGUILayout.LabelField(
+                    "  " + emitter.EmitterName,
+                    "skipped");
+                continue;
+            }
+
+            string role = L2EffectGeneratorHomeOrbLayout.DescribeRole(emitter, trail, core);
+            string coord = string.IsNullOrEmpty(emitter.CoordinateSystem)
+                ? string.Empty
+                : " " + emitter.CoordinateSystem;
             EditorGUILayout.LabelField(
                 "  " + emitter.EmitterName,
-                emitter.ClassName +
+                (string.IsNullOrEmpty(role) ? string.Empty : role + ", ") +
+                emitter.ClassName + coord +
                 ", ParticleGroupV2, slots=" + System.Math.Max(1, emitter.MaxParticles) +
-                ", slotName=" + (string.IsNullOrWhiteSpace(emitter.ParticleSlotName)
+                ", life=" + L2EffectGeneratorHomeOrbLayout.ResolveLifetime(emitter).ToString("0.###") +
+                "s, slotName=" + (string.IsNullOrWhiteSpace(emitter.ParticleSlotName)
                     ? emitter.EmitterName
                     : emitter.ParticleSlotName));
         }

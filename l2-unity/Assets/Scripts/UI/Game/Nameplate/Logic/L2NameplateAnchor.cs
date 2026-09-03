@@ -7,6 +7,8 @@ using UnityEngine;
 public static class L2NameplateAnchor
 {
     public const float DefaultCollisionHeightMeters = 0.46f;
+    // NameplatesManager._headHeightOffset default. Spawn TargetOverHead uses this too.
+    public const float DefaultHeadHeightOffsetMeters = -0.12f;
 
     /// <summary>
     /// World position just above the capsule top (+ <paramref name="headHeightOffset"/>).

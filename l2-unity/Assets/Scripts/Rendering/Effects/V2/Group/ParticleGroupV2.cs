@@ -9,24 +9,27 @@ public sealed class ParticleGroupV2 : EffectPart, IParticleEmitterV2
 {
     [SerializeField] L2Particle _owner;
     [SerializeField] Renderer[] _particles;
-    [Header("Spawning")]
+    [Header("Spawning (UC)")]
     [SerializeField] float _startDelay;
     [SerializeField] int _countPerSecond = 15;
     [SerializeField] int _maxCount = 1;
-    [SerializeField] bool _cloneParticlesToMaxCount;
-    [SerializeField] int _cloneParticleLimit = 64;
-    [SerializeField] bool _useGpuInstancing = true;
+    [HideInInspector] [SerializeField] bool _cloneParticlesToMaxCount;
+    [HideInInspector] [SerializeField] int _cloneParticleLimit = 64;
+    [HideInInspector] [SerializeField] bool _useGpuInstancing = true;
     [SerializeField] bool _isBurstSpawning;
-    [SerializeField] float _relativeWarmupTime;
-    [SerializeField] float _warmupTicksPerSecond;
-    [Header("Timing")]
+    [HideInInspector] [SerializeField] float _relativeWarmupTime;
+    [HideInInspector] [SerializeField] float _warmupTicksPerSecond;
+    [Header("Timing (UC)")]
     [SerializeField] float _duration = 0.2f;
     [SerializeField] bool _hasFixedDuration = true;
-    [SerializeField] bool _instantKillAtCastEnd;
+    [HideInInspector] [SerializeField] bool _instantKillAtCastEnd;
     [Tooltip("UC RespawnDeadParticles. Independent of HasFixedDuration.")]
     [SerializeField] bool _respawnDeadParticles = true;
+    [HideInInspector]
     [Tooltip("UC MaxParticles=1 + no respawn: AdjustparticleLife stretches shader life to HitTime.")]
     [SerializeField] bool _stretchParticleLifeToWindow;
+    [Tooltip("NSkillProjectile / NPC deco: keep emitting until the host GO is destroyed.")]
+    [SerializeField] bool _hostOwnedEmission;
 
     ParticleSlotSet _slots;
     ParticleDrawBatch _batch;
@@ -34,7 +37,6 @@ public sealed class ParticleGroupV2 : EffectPart, IParticleEmitterV2
     ParticleLifetimePolicy _lifetimePolicy = ParticleLifetimePolicy.Authored;
     float _emissionWindow = 1f;
     bool _hasExternalEmissionWindow;
-    bool _hostOwnedEmission;
     bool _streamVisible = true;
     bool _destroying;
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
@@ -83,7 +85,7 @@ public sealed class ParticleGroupV2 : EffectPart, IParticleEmitterV2
     }
 
     /// <summary>
-    /// NPC deco: keep emitting until StopPart. Call before PlayPart.
+    /// NPC deco / NSkillProjectile: keep emitting until StopPart. Call before PlayPart.
     /// </summary>
     public void BindHostOwnedEmission()
     {

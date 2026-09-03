@@ -83,7 +83,6 @@ Shader "L2/Effects/MightTaAuraRing"
         _SubdivisionStart ("Subdivision Start", Float) = 4
         _SubdivisionEnd ("Subdivision End", Float) = 7
         [Toggle] _BlendBetweenSubdivisions ("Blend Between Subdivisions", Float) = 1
-        _AtlasInsetTexels ("Atlas inset (texels, anti-bleed)", Range(0, 2)) = 1
 
         [Header(Debug)]
         [Toggle] _DebugAtlasPreview ("Debug Atlas Preview (_StartTime=0)", Float) = 0
@@ -139,7 +138,6 @@ Shader "L2/Effects/MightTaAuraRing"
 
             CBUFFER_START(UnityPerMaterial)
                 float4 _MainTex_ST;
-                float4 _MainTex_TexelSize;
                 float _StartTime;
                 float _HasLifetime;
                 float4 _InitialDelayRange;
@@ -208,7 +206,6 @@ Shader "L2/Effects/MightTaAuraRing"
                 float _SubdivisionStart;
                 float _SubdivisionEnd;
                 float _BlendBetweenSubdivisions;
-                float _AtlasInsetTexels;
                 float _DebugAtlasPreview;
                 float _DebugAtlasPreviewLoop;
                 float _DebugAtlasPreviewAge;
@@ -281,20 +278,18 @@ Shader "L2/Effects/MightTaAuraRing"
                 out float fBlend)
             {
                 fBlend = 0.0;
-                float2 texel = _MainTex_TexelSize.xy;
-                float inset = _AtlasInsetTexels;
                 if (_BlendBetweenSubdivisions > 0.5)
                 {
                     int fa;
                     int fb;
                     L2Fx_FlipbookBlendFrames(ageNorm, s0, s1, fa, fb, fBlend);
-                    uvA = L2Fx_FlipbookAtlasUV_Padded(quadUv, fa, uSub, vSub, texel, inset);
-                    uvB = L2Fx_FlipbookAtlasUV_Padded(quadUv, fb, uSub, vSub, texel, inset);
+                    uvA = L2Fx_FlipbookAtlasUV(quadUv, fa, uSub, vSub);
+                    uvB = L2Fx_FlipbookAtlasUV(quadUv, fb, uSub, vSub);
                 }
                 else
                 {
                     int fi = L2Fx_FlipbookFrameIndex(ageNorm, s0, s1);
-                    uvA = L2Fx_FlipbookAtlasUV_Padded(quadUv, fi, uSub, vSub, texel, inset);
+                    uvA = L2Fx_FlipbookAtlasUV(quadUv, fi, uSub, vSub);
                     uvB = uvA;
                 }
             }

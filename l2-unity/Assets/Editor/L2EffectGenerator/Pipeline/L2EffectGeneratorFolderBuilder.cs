@@ -22,9 +22,17 @@ public static class L2EffectGeneratorFolderBuilder
         public string ClassName;
         public string ExtendsClass;
         public bool IsProjectile;
+        /// <summary>NSkillProjectile that flies target→caster (m_u003_b / FNMover home).</summary>
+        public bool IsHomeFlight;
+        /// <summary>PHYS_Trailer / m_u003_c: ShotAction on the hit pawn, not the caster.</summary>
+        public bool IsTargetTrailer;
+        /// <summary>UC dumped bAcceptsProjectors (typical NSkillProjectile actor). One part per class.</summary>
+        public bool HasAcceptsProjectors;
         public bool HasBeamEmitter;
         public float ProjectileSpeedUnreal;
         public bool HasProjectileSpeed;
+        public float ProjectileAccSpeedUnreal;
+        public bool HasProjectileAccSpeed;
         public bool CopyUcIntoFolder;
         public bool UseCastWindow = true;
     }
@@ -95,13 +103,27 @@ public static class L2EffectGeneratorFolderBuilder
         result.SkillVisualId = skillResolve.SkillId;
         result.SkillIdAmbiguous = skillResolve.Ambiguous;
         result.SkillIdCandidates = skillResolve.Candidates;
-        if (skillResolve.Ambiguous)
+        int launchTableId = L2EffectSkillLaunchTable.ResolveLaunchTableId(result.SkillVisualId);
+        if (launchTableId != result.SkillVisualId && launchTableId > 0)
+        {
+            result.LogLines.Add(
+                "Skill " + result.SkillVisualId + " uses skill_visual_effect " + launchTableId +
+                " for launch rows (skillgrp).");
+        }
+        if (skillResolve.Ambiguous && skillResolve.SkillId <= 0)
         {
             result.ErrorMessage =
                 "Ambiguous skill visual id (" + string.Join(", ", skillResolve.Candidates) +
                 "). Enter Skill Visual ID before generating.";
             result.Success = false;
             return false;
+        }
+
+        if (skillResolve.Ambiguous && skillResolve.SkillId > 0)
+        {
+            result.LogLines.Add(
+                "Ambiguous skill visual ids " + string.Join(", ", skillResolve.Candidates) +
+                " share the same launch rows; using " + skillResolve.SkillId + ".");
         }
 
         result.Success = true;
@@ -290,6 +312,11 @@ public static class L2EffectGeneratorFolderBuilder
             }
         }
 
+        // Flush configured .mat files before composite SerializeReference.
+        // A RefId assert in SaveAsPrefabAsset aborts SaveAssets and leaves
+        // newly created materials as shader defaults (empty _MainTex).
+        AssetDatabase.SaveAssets();
+
         string compositePath = L2EffectGeneratorCompositeBuilder.GetCompositeAssetPath(
             effectRootPath.Replace('\\', '/').TrimEnd('/'),
             result.EffectName);
@@ -410,7 +437,8 @@ public static class L2EffectGeneratorFolderBuilder
             return false;
         }
 
-        string className = Path.GetFileNameWithoutExtension(ucAssetPath);
+        string fileClassName = Path.GetFileNameWithoutExtension(ucAssetPath);
+        string className = fileClassName;
         string extendsClass = null;
         bool isProjectile = false;
         float projectileSpeed = 0f;
@@ -434,9 +462,15 @@ public static class L2EffectGeneratorFolderBuilder
         isProjectile = ucInfo.IsProjectile;
         hasProjectileSpeed = ucInfo.HasSpeed;
         projectileSpeed = ucInfo.Speed;
+        bool lockM_u003_b =
+            L2EffectGeneratorAssetOverrides.IsM_u003_bHomeFlight(className) ||
+            L2EffectGeneratorAssetOverrides.IsM_u003_bHomeFlight(fileClassName);
+        bool isHomeFlight = lockM_u003_b ||
+            L2EffectGeneratorAssetOverrides.IsHomeFlightProjectile(className, extendsClass);
+        bool isTargetTrailer = L2EffectGeneratorAssetOverrides.IsTargetTrailerEffect(className);
 
         bool hasBeamEmitter = ContainsBeamEmitter(ucInfo);
-        string suffix = ResolveSuffix(effectName, className);
+        string suffix = ResolveSuffix(effectName, className, ucAssetPath);
         string folderName = className;
         string assetPath = effectRootPath + "/" + folderName;
 
@@ -450,13 +484,20 @@ public static class L2EffectGeneratorFolderBuilder
             ClassName = className,
             ExtendsClass = extendsClass,
             IsProjectile = isProjectile,
+            IsHomeFlight = isHomeFlight,
+            IsTargetTrailer = isTargetTrailer,
+            HasAcceptsProjectors = ucInfo.HasAcceptsProjectors,
             HasBeamEmitter = hasBeamEmitter,
-            ProjectileSpeedUnreal = projectileSpeed,
-            HasProjectileSpeed = hasProjectileSpeed,
+            ProjectileSpeedUnreal = lockM_u003_b ? 0f : projectileSpeed,
+            HasProjectileSpeed = !lockM_u003_b && hasProjectileSpeed,
+            ProjectileAccSpeedUnreal = lockM_u003_b ? 0f : ucInfo.AccSpeed,
+            HasProjectileAccSpeed = !lockM_u003_b && ucInfo.HasAccSpeed,
             CopyUcIntoFolder = false,
             UseCastWindow = !L2EffectSkillLaunchTable.IsImpactSuffix(suffix) &&
                             !L2EffectSkillLaunchTable.IsShootVisualSuffix(suffix) &&
-                            !hasBeamEmitter
+                            !hasBeamEmitter &&
+                            !isHomeFlight &&
+                            !isTargetTrailer
         });
         return true;
     }
@@ -481,22 +522,51 @@ public static class L2EffectGeneratorFolderBuilder
         return false;
     }
 
-    private static string ResolveSuffix(string effectName, string className)
+    private static string ResolveSuffix(string effectName, string className, string ucAssetPath)
     {
-        if (!string.IsNullOrEmpty(effectName) &&
-            className.StartsWith(effectName, StringComparison.OrdinalIgnoreCase) &&
-            className.Length > effectName.Length)
+        string fromClass = ResolveSuffixFromName(effectName, className);
+        if (IsKnownLaunchSuffix(fromClass))
         {
-            return className.Substring(effectName.Length);
+            return fromClass;
         }
 
-        int lastUnderscore = className.LastIndexOf('_');
-        if (lastUnderscore > 0 && lastUnderscore < className.Length - 1)
+        string parentFolder = Path.GetFileName(
+            (Path.GetDirectoryName(ucAssetPath) ?? string.Empty).Replace('\\', '/'));
+        string fromFolder = ResolveSuffixFromName(effectName, parentFolder);
+        if (IsKnownLaunchSuffix(fromFolder))
         {
-            return className.Substring(lastUnderscore);
+            return fromFolder;
+        }
+
+        return fromClass;
+    }
+
+    private static string ResolveSuffixFromName(string effectName, string name)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            return string.Empty;
+        }
+
+        if (!string.IsNullOrEmpty(effectName) &&
+            name.StartsWith(effectName, StringComparison.OrdinalIgnoreCase) &&
+            name.Length > effectName.Length)
+        {
+            return name.Substring(effectName.Length);
+        }
+
+        int lastUnderscore = name.LastIndexOf('_');
+        if (lastUnderscore > 0 && lastUnderscore < name.Length - 1)
+        {
+            return name.Substring(lastUnderscore);
         }
 
         return string.Empty;
+    }
+
+    private static bool IsKnownLaunchSuffix(string suffix)
+    {
+        return SuffixSortIndex(suffix) < SuffixOrder.Length;
     }
 
     private static void SortPlanned(List<PlannedFolder> planned)

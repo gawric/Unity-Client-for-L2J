@@ -13,28 +13,33 @@ public static class L2EffectTextureResolver
     public static List<Texture2D> Resolve(UcEmitterDefinition emitter, Mesh slotMesh)
     {
         var result = new List<Texture2D>();
-        string meshOverrideName;
+        string[] meshOverrideNames;
         if (emitter != null &&
-            L2EffectGeneratorAssetOverrides.TryGetTextureForStaticMesh(
+            L2EffectGeneratorAssetOverrides.TryGetTexturesForStaticMesh(
                 emitter.StaticMeshReference,
-                out meshOverrideName))
+                out meshOverrideNames) &&
+            meshOverrideNames != null)
         {
-            Texture2D overrideTexture = FindByUcName(meshOverrideName);
-            if (overrideTexture != null)
+            string meshName = L2EffectGeneratorAssetOverrides.GetUcObjectName(
+                emitter.StaticMeshReference);
+            for (int i = 0; i < meshOverrideNames.Length; i++)
             {
-                string ucName = ObjectName(emitter.TextureReference);
-                if (!string.IsNullOrWhiteSpace(ucName) &&
-                    !string.Equals(ucName, meshOverrideName, StringComparison.OrdinalIgnoreCase))
+                string meshOverrideName = meshOverrideNames[i];
+                Texture2D overrideTexture = FindByUcName(meshOverrideName);
+                if (overrideTexture == null)
                 {
                     Debug.LogWarning(
                         "[L2EffectGenerator] " + emitter.EmitterName +
-                        ": decompiler texture '" + ucName +
-                        "' overridden by mesh map " +
-                        L2EffectGeneratorAssetOverrides.GetUcObjectName(emitter.StaticMeshReference) +
-                        " -> " + meshOverrideName);
+                        ": mesh map " + meshName + " slot " + i +
+                        " texture '" + meshOverrideName + "' not found");
+                    continue;
                 }
 
-                AddUnique(result, overrideTexture);
+                result.Add(overrideTexture);
+            }
+
+            if (result.Count > 0)
+            {
                 return result;
             }
         }
@@ -113,6 +118,7 @@ public static class L2EffectTextureResolver
         {
             "Assets/Resources/Data/SysTextures/LineageEffectsTextures",
             "Assets/Resources/Data/SysTextures/LineageEffectsTextures/Particles",
+            "Assets/Resources/Data/SysTextures/LineageEffectsTextures/SRGB",
             "Assets/Resources/Data/Textures/FX_E_T",
             "Assets/Resources/Data/SysTextures"
         };

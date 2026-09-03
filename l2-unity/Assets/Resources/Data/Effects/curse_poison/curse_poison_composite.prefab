@@ -52,11 +52,12 @@ MonoBehaviour:
   _useLight: 0
   _lightSettings: {fileID: 0}
   _v2Parts:
-  - rid: 2881200547543646308
+  - rid: 2881200563453689934
+  - rid: 2881200563453689936
   references:
     version: 2
     RefIds:
-    - rid: 2881200547543646308
+    - rid: 2881200563453689934
       type: {class: StationaryPart, ns: , asm: Assembly-CSharp}
       data:
         name: bl_body_to_mind_ca
@@ -67,7 +68,22 @@ MonoBehaviour:
         follow: 1
         inheritRotation: 0
         placement:
-          rid: 2881200547543646309
-    - rid: 2881200547543646309
+          rid: 2881200563453689935
+    - rid: 2881200563453689935
       type: {class: FeetPlacement, ns: , asm: Assembly-CSharp}
+      data: 
+    - rid: 2881200563453689936
+      type: {class: IndependentEffectPart, ns: , asm: Assembly-CSharp}
+      data:
+        name: bl_curse_poison_ta
+        prefab: {fileID: 3262603948908325176, guid: c06f0eefdd2e55b47bfc50947ec32c48, type: 3}
+        scale: 1
+        spawnTiming: 5
+        spawnDelaySeconds: 0
+        follow: 1
+        inheritRotation: 0
+        placement:
+          rid: 2881200563453689937
+    - rid: 2881200563453689937
+      type: {class: TargetCenterPlacement, ns: , asm: Assembly-CSharp}
       data: 

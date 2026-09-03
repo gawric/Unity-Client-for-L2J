@@ -39,6 +39,11 @@ public struct ParticleGroupHomeFlightProfile
         };
 }
 
+public sealed class HomeProjectileFlightAnchor : MonoBehaviour
+{
+    public ParticleGroupHomeFlightProfile profile = ParticleGroupHomeFlightProfile.DefaultAnchor;
+}
+
 public class HomeProjectileFlightCoordinator : MonoBehaviour
 {
     private BaseEffect _effect;

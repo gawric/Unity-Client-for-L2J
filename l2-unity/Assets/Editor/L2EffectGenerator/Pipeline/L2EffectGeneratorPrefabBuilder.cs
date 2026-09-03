@@ -69,13 +69,10 @@ public static class L2EffectGeneratorPrefabBuilder
             InitializeDefaultL2Particle(particle);
 
             bool saveSucceeded;
-            GameObject prefabAsset = PrefabUtility.SaveAsPrefabAsset(
+            GameObject prefabAsset =             PrefabUtility.SaveAsPrefabAsset(
                 root,
                 prefabPath,
                 out saveSucceeded);
-
-            AssetDatabase.SaveAssets();
-            AssetDatabase.Refresh();
 
             if (!saveSucceeded || prefabAsset == null)
             {
@@ -219,6 +216,19 @@ public static class L2EffectGeneratorPrefabBuilder
             return false;
         }
 
+        for (int skipIndex = emitters.Count - 1; skipIndex >= 0; skipIndex--)
+        {
+            UcEmitterDefinition skipEmitter = emitters[skipIndex];
+            string skipName = skipEmitter != null ? skipEmitter.EmitterName : null;
+            if (!L2EffectGeneratorAssetOverrides.ShouldSkipEmitter(planned.ClassName, skipName))
+            {
+                continue;
+            }
+
+            emitters.RemoveAt(skipIndex);
+            logLines.Add(planned.Label + ": skipped emitter " + skipName);
+        }
+
         string prefabPath = GetPrefabAssetPath(planned);
         if (AssetDatabase.LoadMainAssetAtPath(prefabPath) == null)
         {
@@ -271,7 +281,8 @@ public static class L2EffectGeneratorPrefabBuilder
                     wasCreated = true;
                 }
 
-                EffectPart effectPart = ConfigureEmitterPart(owner, emitterObject, emitter, planned.UseCastWindow);
+                EffectPart effectPart = ConfigureEmitterPart(
+                    owner, emitterObject, emitter, planned.UseCastWindow, planned.IsProjectile);
                 Mesh slotMesh = ResolveSlotMesh(emitter);
                 Material[] emitterMaterials = EnsureEmitterMaterials(
                     planned.AssetPath,
@@ -318,7 +329,17 @@ public static class L2EffectGeneratorPrefabBuilder
             ApplyAlphaBlendDrawOrder(prefabRoot.transform, emitters);
             ApplyLocalDrawOrder(prefabRoot.transform, planned.ClassName, emitters);
 
-            AssetDatabase.SaveAssets();
+            if (L2EffectGeneratorTrailProviderConfigurator.TryApplyHomeOrbTrailProvider(
+                    prefabRoot,
+                    planned,
+                    emitters,
+                    planned.Label,
+                    out string trailProviderLogLine) &&
+                !string.IsNullOrEmpty(trailProviderLogLine))
+            {
+                logLines.Add(trailProviderLogLine);
+            }
+
             PrefabUtility.SaveAsPrefabAsset(prefabRoot, prefabPath);
             logLines.Insert(
                 0,
@@ -397,7 +418,8 @@ public static class L2EffectGeneratorPrefabBuilder
         L2Particle owner,
         GameObject emitterObject,
         UcEmitterDefinition emitter,
-        bool useCastWindow)
+        bool useCastWindow,
+        bool isNSkillProjectile)
     {
         if (emitterObject == null || emitter == null)
         {
@@ -430,7 +452,7 @@ public static class L2EffectGeneratorPrefabBuilder
             group = emitterObject.AddComponent<ParticleGroupV2>();
         }
 
-        InitializeEmitterPart(group, owner, emitter, useCastWindow);
+        InitializeEmitterPart(group, owner, emitter, useCastWindow, isNSkillProjectile);
         return group;
     }
 
@@ -438,7 +460,8 @@ public static class L2EffectGeneratorPrefabBuilder
         MonoBehaviour emitterPart,
         L2Particle owner,
         UcEmitterDefinition emitter,
-        bool useCastWindow)
+        bool useCastWindow,
+        bool isNSkillProjectile)
     {
         if (emitterPart == null || emitter == null)
         {
@@ -465,6 +488,10 @@ public static class L2EffectGeneratorPrefabBuilder
         SetBoolIfPresent(serializedPart, "_preserveShaderTimeInContinuousLoop", false);
         SetBoolIfPresent(serializedPart, "_hasFixedDuration", !useCastWindow);
         SetBoolIfPresent(serializedPart, "_respawnDeadParticles", emitter.RespawnDeadParticles);
+        // NSkillProjectile (home-flight m_u003_b, outbound _fl/_ra/_pr): actor
+        // lives until FNMover / ProjectileManager destroys the GO. Short UC
+        // lifetimes (SpriteEmitter5 0.01s @ 3000 pps) recycle for that trip.
+        SetBoolIfPresent(serializedPart, "_hostOwnedEmission", isNSkillProjectile);
         SetBoolIfPresent(
             serializedPart,
             "_stretchParticleLifeToWindow",
@@ -737,14 +764,24 @@ public static class L2EffectGeneratorPrefabBuilder
             string suffix = i == 0 ? string.Empty : "_sub" + i;
             string materialPath = effectAssetPath + "/" + emitter.EmitterName + suffix + ".mat";
             Material material = AssetDatabase.LoadAssetAtPath<Material>(materialPath);
+            if (material == null && File.Exists(ToAbsoluteAssetPath(materialPath)))
+            {
+                AssetDatabase.ImportAsset(materialPath, ImportAssetOptions.ForceSynchronousImport);
+                material = AssetDatabase.LoadAssetAtPath<Material>(materialPath);
+            }
+
             if (material == null)
             {
+                if (File.Exists(ToAbsoluteAssetPath(materialPath)))
+                {
+                    AssetDatabase.DeleteAsset(materialPath);
+                }
+
                 material = new Material(shader)
                 {
                     name = emitter.EmitterName + suffix
                 };
                 AssetDatabase.CreateAsset(material, materialPath);
-                AssetDatabase.ImportAsset(materialPath);
                 material = AssetDatabase.LoadAssetAtPath<Material>(materialPath);
                 createdCount++;
             }
@@ -755,7 +792,10 @@ public static class L2EffectGeneratorPrefabBuilder
                 continue;
             }
 
-            material.shader = shader;
+            if (material.shader == null || material.shader.name != shader.name)
+            {
+                material.shader = shader;
+            }
             Texture2D texture = textures.Count > 0
                 ? textures[Math.Min(i, textures.Count - 1)]
                 : null;
@@ -765,8 +805,10 @@ public static class L2EffectGeneratorPrefabBuilder
                 slotMesh,
                 texture,
                 effectClassName,
-                extendsClass));
+                extendsClass,
+                i));
             EditorUtility.SetDirty(material);
+            AssetDatabase.SaveAssetIfDirty(material);
             materials[i] = material;
         }
 
@@ -1053,6 +1095,25 @@ public static class L2EffectGeneratorPrefabBuilder
         }
 
         return _defaultSlotMesh;
+    }
+
+    private static string ToAbsoluteAssetPath(string assetPath)
+    {
+        if (string.IsNullOrWhiteSpace(assetPath))
+        {
+            return string.Empty;
+        }
+
+        if (Path.IsPathRooted(assetPath))
+        {
+            return assetPath;
+        }
+
+        string dataPath = Application.dataPath.Replace('\\', '/');
+        string projectRoot = dataPath.EndsWith("/Assets", StringComparison.Ordinal)
+            ? dataPath.Substring(0, dataPath.Length - "Assets".Length)
+            : dataPath + "/";
+        return Path.GetFullPath(Path.Combine(projectRoot, assetPath));
     }
 
     private static string GetParticleSlotName(string slotBaseName, int slotIndex)

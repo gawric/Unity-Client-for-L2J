@@ -26,7 +26,8 @@ public static class L2EffectGeneratorMaterialConfigurator
         Mesh slotMesh,
         Texture2D textureOverride = null,
         string effectClassName = null,
-        string extendsClass = null)
+        string extendsClass = null,
+        int meshSlotIndex = 0)
     {
         if (material == null || emitter == null)
             return "material configuration skipped";
@@ -36,7 +37,10 @@ public static class L2EffectGeneratorMaterialConfigurator
         Shader shader = ResolveShader(emitter.ClassName);
         if (shader == null)
             return "unified shader is missing";
-        material.shader = shader;
+        if (material.shader == null || material.shader.name != shader.name)
+        {
+            material.shader = shader;
+        }
         // Deferred URP: Geometry queue + UniversalForward never draws unlit meshes.
         material.renderQueue = (int)RenderQueue.Transparent;
         if (L2EffectGeneratorAssetOverrides.TryGetDrawOrder(
@@ -61,6 +65,7 @@ public static class L2EffectGeneratorMaterialConfigurator
         Texture2D texture = textureOverride ??
                             (resolvedTextures.Count > 0 ? resolvedTextures[0] : null);
         ApplyMainTexture(material, texture);
+        ApplyFxMt0005Overrides(material, emitter, ref texture);
         bool multiSection = slotMesh != null && slotMesh.subMeshCount > 1;
         bool meshHasSeparateSlots = false;
         if (isMesh && !string.IsNullOrWhiteSpace(emitter.StaticMeshReference))
@@ -76,8 +81,10 @@ public static class L2EffectGeneratorMaterialConfigurator
             ? resolvedTextures[1]
             : null;
         ApplySecondTexture(material, secondTexture);
+        ApplyMeshSlotShading(material, emitter, meshSlotIndex);
 
         EditorUtility.SetDirty(material);
+        AssetDatabase.SaveAssetIfDirty(material);
         if (texture == null)
             return "unified material configured, texture unresolved";
         return secondTexture != null
@@ -93,6 +100,12 @@ public static class L2EffectGeneratorMaterialConfigurator
         string extendsClass)
     {
         Vector3 offset = emitter.StartLocationOffset;
+        if (L2EffectGeneratorAssetOverrides.TryGetStartLocationOffset(
+                effectClassName, emitter, out Vector3 offsetOverride))
+        {
+            offset = offsetOverride;
+        }
+
         Vector3 accel = emitter.Acceleration;
         UcVectorRange velocity = emitter.StartVelocityRange;
         if (L2EffectGeneratorAssetOverrides.ShouldAlignActorXWithProjectileFlight(
@@ -256,6 +269,12 @@ public static class L2EffectGeneratorMaterialConfigurator
         SetFloat(material, "_SubdivisionStart", subdivStart);
         SetFloat(material, "_SubdivisionEnd", subdivEnd);
         SetFloat(material, "_StaticSubdivision", subdivStart);
+        if (L2EffectGeneratorAssetOverrides.TryGetFxMt0054Uv44Cell2(
+                emitter, out _, out _, out _))
+        {
+            SetFloat(material, "_FlipbookMode", 0f);
+            SetFloat(material, "_StaticSubdivision", 2f);
+        }
 
         if (ResolveOrientationMode(emitter.UseDirectionAs) > 1.5f)
         {
@@ -361,6 +380,46 @@ public static class L2EffectGeneratorMaterialConfigurator
         }
     }
 
+    static void ApplyMeshSlotShading(
+        Material material,
+        UcEmitterDefinition emitter,
+        int meshSlotIndex)
+    {
+        if (material == null || emitter == null || !IsMeshEmitter(emitter.ClassName))
+        {
+            return;
+        }
+
+        SetFloat(material, "_IgnoreMainTexAlpha", 0f);
+        SetColor(material, "_TextureFactor", Color.white);
+        SetFloat(material, "_TextureContrast", 1f);
+        SetFloat(material, "_TextureFloor", 0f);
+        if (!L2EffectGeneratorAssetOverrides.TryGetMeshSlotShading(
+                emitter.StaticMeshReference,
+                meshSlotIndex,
+                out var shading))
+        {
+            return;
+        }
+
+        if (shading.IgnoreMainTexAlpha)
+        {
+            SetFloat(material, "_IgnoreMainTexAlpha", 1f);
+        }
+
+        if (shading.CullOff)
+        {
+            SetFloat(material, "_Cull", (float)CullMode.Off);
+        }
+
+        if (shading.HasTexturePaint)
+        {
+            SetColor(material, "_TextureFactor", shading.TextureFactor);
+            SetFloat(material, "_TextureContrast", shading.TextureContrast);
+            SetFloat(material, "_TextureFloor", shading.TextureFloor);
+        }
+    }
+
     static void ConfigureColorKeys(
         Material material,
         UcEmitterDefinition emitter)
@@ -449,6 +508,45 @@ public static class L2EffectGeneratorMaterialConfigurator
         material.mainTexture = texture;
     }
 
+    static void ApplyFxMt0005Overrides(
+        Material material,
+        UcEmitterDefinition emitter,
+        ref Texture2D currentTexture)
+    {
+        ResolveSubdivisionRange(emitter, out int start, out int end);
+        bool colorGammaToLinear = false;
+        float worldCalibration = 0f;
+        if (!L2EffectGeneratorAssetOverrides.TryGetFxMt0005Uv2Cell23(
+                emitter, out string texName, out float rgbBoost) &&
+            !L2EffectGeneratorAssetOverrides.TryGetFxMt0005StarCell(
+                emitter, currentTexture, start, end, out texName, out rgbBoost) &&
+            !L2EffectGeneratorAssetOverrides.TryGetFxMt0054Uv44Cell2(
+                emitter, out texName, out rgbBoost, out worldCalibration) &&
+            !L2EffectGeneratorAssetOverrides.TryGetFxMt0006Uv42LinearTexture(
+                emitter, out texName, out rgbBoost, out colorGammaToLinear))
+        {
+            return;
+        }
+
+        Texture2D overrideTex = L2EffectTextureResolver.FindByUcName(texName);
+        if (overrideTex != null)
+        {
+            ApplyMainTexture(material, overrideTex);
+            currentTexture = overrideTex;
+        }
+
+        SetFloat(material, "_RgbBoost", rgbBoost);
+        if (worldCalibration > 0f)
+        {
+            SetFloat(material, "_L2FxWorldCalibration", worldCalibration);
+        }
+
+        if (colorGammaToLinear)
+        {
+            SetFloat(material, "_L2SpriteColorGammaToLinear", 1f);
+        }
+    }
+
     static void ApplySecondTexture(Material material, Texture2D texture)
     {
         if (material == null || !material.HasProperty("_SecondTex"))
@@ -508,6 +606,14 @@ public static class L2EffectGeneratorMaterialConfigurator
         start = emitter.SubdivisionStart;
         end = emitter.SubdivisionEnd;
         if (L2EffectGeneratorAssetOverrides.TryCorrectFxMt0005Subdivision68(
+                emitter, ref start, ref end) ||
+            L2EffectGeneratorAssetOverrides.TryCorrectFxMt0005Uv2Cell2(
+                emitter, ref start, ref end) ||
+            L2EffectGeneratorAssetOverrides.TryCorrectFxMt0054Uv44Cell2(
+                emitter, ref start, ref end) ||
+            L2EffectGeneratorAssetOverrides.TryCorrectFxMt0006Uv42Cell4(
+                emitter, ref start, ref end) ||
+            L2EffectGeneratorAssetOverrides.TryCorrectFxMt0000Uv44Cell15(
                 emitter, ref start, ref end))
         {
             return;

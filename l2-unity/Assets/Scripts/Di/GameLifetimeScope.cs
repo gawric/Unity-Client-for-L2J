@@ -25,6 +25,10 @@ public sealed class GameLifetimeScope : LifetimeScope
         RegisterIfFound<CombatFacingService>(builder);
         RegisterIfFound<EventBus>(builder);
         builder.Register<L2ActorFade>(Lifetime.Singleton);
+        builder.Register<DefaultEffectAttachmentResolver>(Lifetime.Singleton).As<IEffectAttachmentResolver>();
+        builder.Register<HomeProjectileDualFlightRoots>(Lifetime.Singleton);
+        builder.Register<HomeProjectileLauncher>(Lifetime.Singleton);
+        builder.Register<HomeProjectileService>(Lifetime.Singleton).As<IHomeProjectileService>();
         builder.RegisterEntryPoint<AppearFadeService>().AsSelf();
         RegisterIfFound<DeadManager>(builder);
         RegisterIfFound<MoveAllCharacters>(builder);

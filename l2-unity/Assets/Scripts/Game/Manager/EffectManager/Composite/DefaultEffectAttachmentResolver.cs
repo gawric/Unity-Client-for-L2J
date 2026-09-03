@@ -165,100 +165,22 @@ public class DefaultEffectAttachmentResolver : IEffectAttachmentResolver
         }
 
         resolvedTransform = fallbackRoot;
-        EntityBodyType bodyType = entity != null ? entity.BodyType : EntityBodyType.Humanoid;
 
-        CharacterController controller = ResolveCharacterController(entity, fallbackRoot);
-        if (controller != null)
+        float collisionHeight = L2NameplateAnchor.DefaultCollisionHeightMeters;
+        if (entity != null && entity.Appearance != null)
         {
-            Vector3 localPoint = controller.center;
-            float radius = Mathf.Max(0.01f, controller.radius);
-            float overheadMargin = Mathf.Max(0.04f, radius * 0.2f);
-            localPoint += Vector3.up * (controller.height * 0.5f + overheadMargin);
-            worldPosition = controller.transform.TransformPoint(localPoint);
-            return true;
+            collisionHeight = entity.Appearance.CollisionHeight;
         }
 
-        Transform searchRoot = entity != null ? entity.transform : fallbackRoot;
-        if (TryEncapsulateCharacterRenderBounds(searchRoot, out Bounds bounds))
-        {
-            float margin = Mathf.Max(0.04f, bounds.extents.y * 0.08f);
-            Vector3 horizontal = ResolveCharacterHorizontalWorld(entity, fallbackRoot);
-            worldPosition = new Vector3(horizontal.x, bounds.max.y + margin, horizontal.z);
-            return true;
-        }
-
-        return ResolveTargetOverHeadFromRenderers(entity, fallbackRoot, bodyType, out resolvedTransform, out worldPosition);
-    }
-
-    private static Vector3 ResolveCharacterHorizontalWorld(Entity entity, Transform fallbackRoot)
-    {
-        CharacterController controller = null;
-        if (entity != null)
-        {
-            controller = entity.GetComponent<CharacterController>();
-            if (controller == null)
-            {
-                controller = entity.GetComponentInChildren<CharacterController>(true);
-            }
-        }
-
-        if (controller == null && fallbackRoot != null)
-        {
-            controller = fallbackRoot.GetComponent<CharacterController>();
-            if (controller == null)
-            {
-                controller = fallbackRoot.GetComponentInChildren<CharacterController>(true);
-            }
-        }
-
-        if (controller != null)
-        {
-            return controller.transform.TransformPoint(controller.center);
-        }
-
-        return fallbackRoot != null ? fallbackRoot.position : Vector3.zero;
-    }
-
-    private static bool ShouldIncludeRendererForCharacterBounds(Renderer renderer)
-    {
-        if (renderer == null)
-        {
-            return false;
-        }
-
-        return renderer.GetComponentInParent<BaseEffect>() == null;
-    }
-
-    private static bool TryEncapsulateCharacterRenderBounds(Transform searchRoot, out Bounds bounds)
-    {
-        bounds = default;
-        if (searchRoot == null)
-        {
-            return false;
-        }
-
-        Renderer[] renderers = searchRoot.GetComponentsInChildren<Renderer>(true);
-        bool hasBounds = false;
-        for (int i = 0; i < renderers.Length; i++)
-        {
-            Renderer renderer = renderers[i];
-            if (!ShouldIncludeRendererForCharacterBounds(renderer))
-            {
-                continue;
-            }
-
-            if (!hasBounds)
-            {
-                bounds = renderer.bounds;
-                hasBounds = true;
-            }
-            else
-            {
-                bounds.Encapsulate(renderer.bounds);
-            }
-        }
-
-        return hasBounds && bounds.size.sqrMagnitude > 0.00001f;
+        // Same call as NameplateEntryStore / NameplatesManager._headHeightOffset.
+        worldPosition = L2NameplateAnchor.GetHeadWorldPos(
+            fallbackRoot,
+            collisionHeight,
+            L2NameplateAnchor.DefaultHeadHeightOffsetMeters);
+        Debug.Log(
+            $"[HOME_SPAWN] ResolveTargetOverHead entity='{(entity != null ? entity.name : "null")}' " +
+            $"nameplate={worldPosition:F3} dY={(worldPosition.y - fallbackRoot.position.y):F3}");
+        return true;
     }
 
     private CharacterController ResolveCharacterController(Entity entity, Transform fallbackRoot)
@@ -283,28 +205,6 @@ public class DefaultEffectAttachmentResolver : IEffectAttachmentResolver
         }
 
         return controller;
-    }
-
-    private bool ResolveTargetOverHeadFromRenderers(
-        Entity entity,
-        Transform fallbackRoot,
-        EntityBodyType bodyType,
-        out Transform resolvedTransform,
-        out Vector3 worldPosition)
-    {
-        resolvedTransform = fallbackRoot;
-        worldPosition = Vector3.zero;
-
-        if (TryEncapsulateCharacterRenderBounds(entity != null ? entity.transform : fallbackRoot, out Bounds bounds))
-        {
-            float margin = Mathf.Max(0.04f, bounds.extents.y * 0.08f);
-            Vector3 horizontal = ResolveCharacterHorizontalWorld(entity, fallbackRoot);
-            worldPosition = new Vector3(horizontal.x, bounds.max.y + margin, horizontal.z);
-            return true;
-        }
-
-        worldPosition = fallbackRoot.position;
-        return true;
     }
 
     private bool ResolveRoot(Transform src, out Transform resolvedTransform, out Vector3 worldPosition)

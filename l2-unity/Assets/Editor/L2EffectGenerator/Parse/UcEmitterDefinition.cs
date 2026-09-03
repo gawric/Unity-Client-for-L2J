@@ -75,6 +75,7 @@ public sealed class UcEmitterDefinition
     public string UseDirectionAs;
     public string GetVelocityDirectionFrom;
     public string UseRotationFrom;
+    public string CoordinateSystem;
     public bool HasProjectionNormal;
     public Vector3 ProjectionNormal;
     public bool HasBeamEndOffset;
@@ -186,6 +187,9 @@ public sealed class UcFileInfo
     public bool HasSpeed;
     public float AccSpeed;
     public bool HasAccSpeed;
+    public string Physics;
+    public bool HasAcceptsProjectors;
+    public bool AcceptsProjectors;
     public readonly List<UcEmitterDefinition> Emitters = new List<UcEmitterDefinition>();
 
     public bool IsProjectile

@@ -64,7 +64,7 @@ MonoBehaviour:
     settings: {fileID: 11400000, guid: 32b8e356a6514494cb7425f31ee60898, type: 2}
     ignoreFlightTimeForCast: 1
   - id: 1147
-    prefab: {fileID: 0}
+    prefab: {fileID: 3739915897607163408, guid: 470f1e7645a302147b6d2b0dee399c30, type: 3}
     comment: vampiric-touch-effect
     settings: {fileID: 11400000, guid: 5b8dc6046d4381541bf1b9e6b1e707ee, type: 2}
     ignoreFlightTimeForCast: 1
@@ -84,12 +84,12 @@ MonoBehaviour:
     settings: {fileID: 11400000, guid: 379a78eda0ba8ef40961f6ef9d85878a, type: 2}
     ignoreFlightTimeForCast: 1
   - id: 1040
-    prefab: {fileID: -2331866982259287529, guid: d1b012004056a204199b49bc2dbe78a5, type: 3}
+    prefab: {fileID: 5193115092179553701, guid: dc1d7e3decd583c42b78da4a2c0414a4, type: 3}
     comment: shield-composite-effect
     settings: {fileID: 11400000, guid: a8f3c2e1d4b5678901234abcdef56789, type: 2}
     ignoreFlightTimeForCast: 1
   - id: 1068
-    prefab: {fileID: -2331866982259287529, guid: 6318d4c82b090cd4c8c287625d958b1f, type: 3}
+    prefab: {fileID: 797508600007295199, guid: 2836745c77435f34091cf86a98ac9a61, type: 3}
     comment: might-composite-effect
     settings: {fileID: 11400000, guid: e73b899fdfd5e1243a008820002a9c0e, type: 2}
     ignoreFlightTimeForCast: 1

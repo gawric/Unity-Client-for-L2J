@@ -87,6 +87,10 @@ Shader "L2/Effects/MeshEmitter"
         _Opacity ("Opacity", Range(0, 2)) = 1
         _RgbBoost ("RGB Boost", Range(0, 16)) = 1
         [Toggle] _L2SpriteColorGammaToLinear ("Color Gamma To Linear", Float) = 0
+        [Toggle] _IgnoreMainTexAlpha ("Ignore Texture Alpha", Float) = 0
+        _TextureFactor ("Texture Factor (D3D TFactor)", Color) = (1, 1, 1, 1)
+        _TextureContrast ("Texture Contrast", Range(0, 1)) = 1
+        _TextureFloor ("Texture Dark Floor", Range(0, 1)) = 0
         _AlphaClipThreshold ("Alpha Clip Threshold (-1 off)", Float) = -1
         [Toggle] _DebugMeshOut ("Debug Mesh Output", Float) = 0
         [Toggle] _ExpandShaderBounds ("Expand CPU Bounds For Vertex Motion", Float) = 0

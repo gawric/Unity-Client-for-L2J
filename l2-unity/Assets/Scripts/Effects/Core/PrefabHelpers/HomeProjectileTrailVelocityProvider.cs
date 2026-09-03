@@ -40,7 +40,7 @@ public sealed class HomeProjectileTrailVelocityProvider : MonoBehaviour
         public float trailFadeTail = 0f;
         [Range(0.5f, 3f)]
         public float trailFadePower = 1.25f;
-        public bool onlyActiveRenderers = true;
+        public bool onlyActiveRenderers = false;
         public bool convertWorldToLocal = true;
         public Transform localSpaceReference;
         public float velocityScale = 0.08f;
@@ -66,6 +66,158 @@ public sealed class HomeProjectileTrailVelocityProvider : MonoBehaviour
     [SerializeField] private float _smoothing = 18f;
     [SerializeField] private bool _debugLogs;
     [SerializeField] private List<TrailBinding> _bindings = new List<TrailBinding>();
+
+    public void CopySettingsFrom(HomeProjectileTrailVelocityProvider other)
+    {
+        if (other == null)
+        {
+            return;
+        }
+
+        _minimumAxisRange = other._minimumAxisRange;
+        _smoothing = other._smoothing;
+        _debugLogs = other._debugLogs;
+        _bindings = new List<TrailBinding>();
+        if (other._bindings == null)
+        {
+            return;
+        }
+
+        for (int i = 0; i < other._bindings.Count; i++)
+        {
+            TrailBinding source = other._bindings[i];
+            if (source == null)
+            {
+                continue;
+            }
+
+            _bindings.Add(CloneBinding(source));
+        }
+    }
+
+    public void ResetRuntimeState()
+    {
+        OnEnable();
+    }
+
+    public static void MoveFromRootToFlightRoot(Transform root, Transform flightRoot)
+    {
+        if (root == null || flightRoot == null)
+        {
+            return;
+        }
+
+        HomeProjectileTrailVelocityProvider source = root.GetComponent<HomeProjectileTrailVelocityProvider>();
+        if (source == null)
+        {
+            return;
+        }
+
+        HomeProjectileTrailVelocityProvider dest = flightRoot.GetComponent<HomeProjectileTrailVelocityProvider>();
+        if (dest == null)
+        {
+            dest = flightRoot.gameObject.AddComponent<HomeProjectileTrailVelocityProvider>();
+        }
+
+        dest.CopySettingsFrom(source);
+        dest.RetargetBindingsTo(flightRoot);
+        dest.ResetRuntimeState();
+        source.enabled = false;
+        UnityEngine.Object.Destroy(source);
+    }
+
+    public void RetargetBindingsTo(Transform searchRoot)
+    {
+        if (searchRoot == null || _bindings == null)
+        {
+            return;
+        }
+
+        for (int i = 0; i < _bindings.Count; i++)
+        {
+            TrailBinding binding = _bindings[i];
+            if (binding == null)
+            {
+                continue;
+            }
+
+            string tailName = binding.tailRoot != null ? binding.tailRoot.name : "SpriteEmitter2";
+            string coreName = string.IsNullOrEmpty(binding.velocitySourceName)
+                ? "SpriteEmitter5"
+                : binding.velocitySourceName;
+            binding.tailRoot = FindChildByName(searchRoot, tailName);
+            binding.velocitySource = FindChildByName(searchRoot, coreName);
+            binding.localSpaceReference = binding.tailRoot;
+            binding.targetRenderers = null;
+            binding.hasLastPosition = false;
+            binding.history = null;
+            binding.baseLocalScales = null;
+        }
+    }
+
+    private static Transform FindChildByName(Transform searchRoot, string childName)
+    {
+        if (searchRoot == null || string.IsNullOrEmpty(childName))
+        {
+            return null;
+        }
+
+        if (searchRoot.name.Equals(childName, StringComparison.OrdinalIgnoreCase))
+        {
+            return searchRoot;
+        }
+
+        Transform[] children = searchRoot.GetComponentsInChildren<Transform>(true);
+        for (int i = 0; i < children.Length; i++)
+        {
+            Transform child = children[i];
+            if (child != null && child.name.Equals(childName, StringComparison.OrdinalIgnoreCase))
+            {
+                return child;
+            }
+        }
+
+        return null;
+    }
+
+    private static TrailBinding CloneBinding(TrailBinding source)
+    {
+        return new TrailBinding
+        {
+            name = source.name,
+            tailRoot = source.tailRoot,
+            velocitySource = source.velocitySource,
+            velocitySourceName = source.velocitySourceName,
+            targetRenderers = null,
+            autoCollectChildren = source.autoCollectChildren,
+            followSourcePosition = source.followSourcePosition,
+            placeRenderersOnHistory = source.placeRenderersOnHistory,
+            historySeconds = source.historySeconds,
+            headLagPercent = source.headLagPercent,
+            useCylinderSpread = source.useCylinderSpread,
+            cylinderRadiusHead = source.cylinderRadiusHead,
+            cylinderRadiusTail = source.cylinderRadiusTail,
+            cylinderRadiusPower = source.cylinderRadiusPower,
+            scaleOverTrail = source.scaleOverTrail,
+            particleScaleHead = source.particleScaleHead,
+            particleScaleTail = source.particleScaleTail,
+            particleScalePower = source.particleScalePower,
+            alongTrailPower = source.alongTrailPower,
+            placeByParticleAge = source.placeByParticleAge,
+            trailTravelSeconds = source.trailTravelSeconds,
+            fadeAlphaOverTrail = source.fadeAlphaOverTrail,
+            trailFadeHead = source.trailFadeHead,
+            trailFadeTail = source.trailFadeTail,
+            trailFadePower = source.trailFadePower,
+            onlyActiveRenderers = source.onlyActiveRenderers,
+            convertWorldToLocal = source.convertWorldToLocal,
+            localSpaceReference = source.localSpaceReference,
+            velocityScale = source.velocityScale,
+            rangeSpread = source.rangeSpread,
+            invertTrailDirection = source.invertTrailDirection,
+            trailSign = source.trailSign
+        };
+    }
 
     private const float GoldenAngleRad = 2.39996323f;
     private static readonly int StartVelocityRangeXID = Shader.PropertyToID("_StartVelocityRangeX");
@@ -270,7 +422,9 @@ public sealed class HomeProjectileTrailVelocityProvider : MonoBehaviour
                 continue;
             }
 
-            if (binding.onlyActiveRenderers && !renderer.gameObject.activeInHierarchy)
+            if (binding.onlyActiveRenderers &&
+                !renderer.gameObject.activeInHierarchy &&
+                !renderer.enabled)
             {
                 continue;
             }
@@ -281,26 +435,40 @@ public sealed class HomeProjectileTrailVelocityProvider : MonoBehaviour
         return result;
     }
 
-    private static float GetRendererTrailT(TrailBinding binding, Renderer renderer, float fallbackLinearT, float headLag)
+    private float GetRendererTrailT(TrailBinding binding, Renderer renderer, float fallbackLinearT, float headLag)
     {
         if (!binding.placeByParticleAge || renderer == null)
         {
             return fallbackLinearT;
         }
 
-        Material[] materials = renderer.materials;
-        if (materials == null || materials.Length == 0 || materials[0] == null || !materials[0].HasProperty(StartTimeID))
+        if (_propertyBlock == null)
         {
-            return fallbackLinearT;
+            _propertyBlock = new MaterialPropertyBlock();
         }
 
-        Material mat = materials[0];
-        float startTime = mat.GetFloat(StartTimeID);
+        renderer.GetPropertyBlock(_propertyBlock);
+        float startTime = _propertyBlock.GetFloat(StartTimeID);
+        Material material = renderer.sharedMaterial;
+        if (startTime <= 0f)
+        {
+            if (material == null || !material.HasProperty(StartTimeID))
+            {
+                return fallbackLinearT;
+            }
+
+            startTime = material.GetFloat(StartTimeID);
+            if (startTime <= 0f)
+            {
+                return fallbackLinearT;
+            }
+        }
+
         float age = Mathf.Max(0f, Time.time - startTime);
         float travelSeconds = binding.trailTravelSeconds;
-        if (travelSeconds <= 0f && mat.HasProperty(LifetimeRangeID))
+        if (travelSeconds <= 0f && material != null && material.HasProperty(LifetimeRangeID))
         {
-            travelSeconds = mat.GetVector(LifetimeRangeID).y;
+            travelSeconds = material.GetVector(LifetimeRangeID).y;
         }
 
         float ageT = Mathf.Clamp01(age / Mathf.Max(0.001f, travelSeconds));

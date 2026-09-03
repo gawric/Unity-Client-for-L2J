@@ -1,10 +1,13 @@
 ﻿using UnityEngine;
+using VContainer;
+using VContainer.Unity;
 
 public class EffectManager : MonoBehaviour
 {
     public static EffectManager Instance;
     public EffectDatabase database;
     [SerializeField] private Transform _activeEffectsContainer;
+    [Inject] IObjectResolver _container;
     private const string IMPACT_DEBUG_TAG = "[HIT_DEBUG]";
     private int _impactSpawnCounter = 0;
     private readonly System.Collections.Generic.Dictionary<string, (int count, float windowStartSec)> _impactWindowByPoint
@@ -24,7 +27,13 @@ public class EffectManager : MonoBehaviour
             return;
         }
 
+        Debug.Log(
+            $"[HOME_SPAWN] EffectManager.PlayEffect id={id} prefab='{data.prefab.name}' " +
+            $"target='{target.name}' targetPos={target.position} " +
+            $"castTargetId={(castData != null ? castData.TargetObjectId : 0)}");
+
         BaseEffect instance = Instantiate(data.prefab, target.position, target.rotation, target);
+        InjectSpawned(instance);
 
         instance.gameObject.SetActive(true);
         instance.Setup(data.settings, castData, target);
@@ -97,6 +106,7 @@ public class EffectManager : MonoBehaviour
         }
 
         BaseEffect instance = Instantiate(data.prefab, point, rotation, dummy.transform);
+        InjectSpawned(instance);
         _impactSpawnCounter += 1;
         string pointKey = $"{Mathf.Round(point.x * 10f) / 10f},{Mathf.Round(point.y * 10f) / 10f},{Mathf.Round(point.z * 10f) / 10f}";
         float now = Time.time;
@@ -194,5 +204,15 @@ public class EffectManager : MonoBehaviour
         }
 
         return Vector3.forward;
+    }
+
+    void InjectSpawned(BaseEffect instance)
+    {
+        if (instance == null || _container == null)
+        {
+            return;
+        }
+
+        _container.InjectGameObject(instance.gameObject);
     }
 }

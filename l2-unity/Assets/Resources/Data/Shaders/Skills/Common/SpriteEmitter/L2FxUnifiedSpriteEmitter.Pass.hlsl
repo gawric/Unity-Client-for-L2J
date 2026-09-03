@@ -523,6 +523,13 @@ half4 frag(Varyings IN) : SV_Target
         color.rgb *= (half)_RgbBoost;
     }
 
+    // One+One ignores framebuffer alpha. Dark atlas RGB (and bilinear bleed from
+    // the neighbor cell) still adds as a square. MightTaAuraRing bakes luma into rgb.
+    if (_AlphaFromLuma > 0.5 && _ColorFadeAlphaBlend < 0.5)
+    {
+        color.rgb *= (half)saturate(color.a);
+    }
+
     color.rgb += (half3)(IN.debugData.xyz * 1e-10);
     if (_DebugSpriteOut > 0.5)
     {

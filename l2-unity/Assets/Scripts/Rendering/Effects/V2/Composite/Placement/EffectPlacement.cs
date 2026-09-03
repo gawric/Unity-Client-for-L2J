@@ -29,14 +29,67 @@ public abstract class EffectPlacement
             case EffectAttachmentPoint.TargetCenter:
             case EffectAttachmentPoint.TargetRoot:
             case EffectAttachmentPoint.TargetLowerBody:
-            case EffectAttachmentPoint.TargetOverHead:
             case EffectAttachmentPoint.TargetPosition:
                 return new TargetCenterPlacement();
+            case EffectAttachmentPoint.TargetOverHead:
+                return new TargetOverHeadPlacement();
             case EffectAttachmentPoint.CasterPosition:
                 return new CasterPositionPlacement();
             default:
                 return new ChestPlacement();
         }
+    }
+
+    public static bool MatchesAttachment(EffectPlacement placement, EffectAttachmentPoint point)
+    {
+        return placement != null &&
+               !(placement is BonePlacement) &&
+               ToAttachment(placement) == point;
+    }
+
+    public static EffectAttachmentPoint ToAttachment(EffectPlacement placement)
+    {
+        if (placement is TargetOverHeadPlacement)
+        {
+            return EffectAttachmentPoint.TargetOverHead;
+        }
+
+        if (placement is TargetCenterPlacement)
+        {
+            return EffectAttachmentPoint.TargetCenter;
+        }
+
+        if (placement is FeetPlacement)
+        {
+            return EffectAttachmentPoint.CasterRoot;
+        }
+
+        if (placement is WeaponPlacement)
+        {
+            return EffectAttachmentPoint.WeaponSocket;
+        }
+
+        if (placement is LeftWeaponPlacement)
+        {
+            return EffectAttachmentPoint.LeftWeaponSocket;
+        }
+
+        if (placement is HitPointPlacement)
+        {
+            return EffectAttachmentPoint.WorldHitPoint;
+        }
+
+        if (placement is CasterPositionPlacement)
+        {
+            return EffectAttachmentPoint.CasterPosition;
+        }
+
+        if (placement is ChestPlacement)
+        {
+            return EffectAttachmentPoint.CasterCenter;
+        }
+
+        return EffectAttachmentPoint.CasterRoot;
     }
 }
 
@@ -136,6 +189,23 @@ public sealed class TargetCenterPlacement : EffectPlacement
     {
         return resolver.Resolve(
             EffectAttachmentPoint.TargetCenter,
+            context,
+            out followTransform,
+            out worldPosition);
+    }
+}
+
+[System.Serializable]
+public sealed class TargetOverHeadPlacement : EffectPlacement
+{
+    public override bool TryResolve(
+        IEffectAttachmentResolver resolver,
+        EffectResolveContext context,
+        out Transform followTransform,
+        out Vector3 worldPosition)
+    {
+        return resolver.Resolve(
+            EffectAttachmentPoint.TargetOverHead,
             context,
             out followTransform,
             out worldPosition);

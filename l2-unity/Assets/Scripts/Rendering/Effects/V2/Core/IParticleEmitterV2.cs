@@ -86,6 +86,20 @@ public static class ParticleEmitterV2
         return life;
     }
 
+    public static void BindHostOwnedEmission(Component root)
+    {
+        if (root == null)
+        {
+            return;
+        }
+
+        ParticleGroupV2[] groups = root.GetComponentsInChildren<ParticleGroupV2>(true);
+        for (int i = 0; i < groups.Length; i++)
+        {
+            groups[i]?.BindHostOwnedEmission();
+        }
+    }
+
     public static void SetVisible(Component root, bool visible)
     {
         IParticleEmitterV2[] emitters = InChildren(root);

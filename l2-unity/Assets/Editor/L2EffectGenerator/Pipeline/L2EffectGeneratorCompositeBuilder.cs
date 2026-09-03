@@ -102,7 +102,11 @@ public static class L2EffectGeneratorCompositeBuilder
             logLine = (compositeExists ? "composite updated" : "composite created") +
                       " -> " + compositePath +
                       " (V2, parts=" + partCount +
-                      ", skill=" + skillVisualId + ")";
+                      ", skill=" + skillVisualId +
+                      (L2EffectGeneratorAssetOverrides.ShouldPrependSharedBodyToMindCa(plannedFolders)
+                          ? ", shared CA=" + L2EffectGeneratorAssetOverrides.SharedBodyToMindCaClassName
+                          : string.Empty) +
+                      ")";
             return true;
         }
         catch (Exception exception)
@@ -146,7 +150,11 @@ public static class L2EffectGeneratorCompositeBuilder
         bool hasProjectileCompanion = false;
         for (int i = 0; i < plannedFolders.Count; i++)
         {
-            if (plannedFolders[i] != null && plannedFolders[i].IsProjectile)
+            // Outbound caster→target only. Home flight (m_u003_b) does not fire
+            // ProjectileManager hit events, so _ta must not wait OnHitCollider.
+            if (plannedFolders[i] != null &&
+                plannedFolders[i].IsProjectile &&
+                !plannedFolders[i].IsHomeFlight)
             {
                 hasProjectileCompanion = true;
                 break;
@@ -176,6 +184,13 @@ public static class L2EffectGeneratorCompositeBuilder
                 continue;
             }
 
+            // One UC projectile actor = one composite part. skill-effects may list
+            // NSkillProjectile twice (m_u003_b); the dump always has bAcceptsProjectors.
+            if (planned.IsProjectile && planned.HasAcceptsProjectors && rows.Count > 1)
+            {
+                rows = new List<L2EffectSkillLaunchTable.LaunchRow> { rows[0] };
+            }
+
             for (int rowIndex = 0; rowIndex < rows.Count; rowIndex++)
             {
                 L2EffectSkillLaunchTable.LaunchRow row = rows[rowIndex];
@@ -195,6 +210,16 @@ public static class L2EffectGeneratorCompositeBuilder
 
                 builtParts.Add(part);
             }
+        }
+
+        if (L2EffectGeneratorAssetOverrides.ShouldPrependSharedBodyToMindCa(plannedFolders) &&
+            !TryPrependSharedBodyToMindCa(
+                builtParts,
+                skillVisualId,
+                hasProjectileCompanion,
+                out errorMessage))
+        {
+            return false;
         }
 
         if (!TryWriteV2Parts(compositeEffect, builtParts.ToArray(), out errorMessage))
@@ -221,9 +246,16 @@ public static class L2EffectGeneratorCompositeBuilder
             return false;
         }
 
+        v2Parts.arraySize = 0;
+        serialized.ApplyModifiedPropertiesWithoutUndo();
         v2Parts.arraySize = parts.Length;
         for (int i = 0; i < parts.Length; i++)
         {
+            if (parts[i] != null)
+            {
+                parts[i].placement = null;
+            }
+
             v2Parts.GetArrayElementAtIndex(i).managedReferenceValue = parts[i];
         }
 
@@ -234,6 +266,40 @@ public static class L2EffectGeneratorCompositeBuilder
         }
 
         serialized.ApplyModifiedPropertiesWithoutUndo();
+        return true;
+    }
+
+    /// <summary>
+    /// Vampiric folder has m_u003_b/c only. TSV CastingAction is m_u003_a;
+    /// reuse curse_poison bl_body_to_mind_ca (Immediate, caster feet, follow).
+    /// </summary>
+    private static bool TryPrependSharedBodyToMindCa(
+        List<CompositePart> builtParts,
+        int skillVisualId,
+        bool hasProjectileCompanion,
+        out string errorMessage)
+    {
+        errorMessage = null;
+        string prefabPath = L2EffectGeneratorAssetOverrides.SharedBodyToMindCaPrefabPath;
+        BaseEffect partPrefab = LoadPartPrefab(prefabPath);
+        if (partPrefab == null)
+        {
+            errorMessage =
+                "Vampiric CA is missing shared prefab: " + prefabPath +
+                " (expected curse_poison bl_body_to_mind_ca).";
+            return false;
+        }
+
+        string caName = L2EffectGeneratorAssetOverrides.SharedBodyToMindCaClassName;
+        L2EffectGeneratorFolderBuilder.PlannedFolder planned =
+            L2EffectGeneratorAssetOverrides.CreateSharedBodyToMindCaPlanned();
+        L2EffectSkillLaunchTable.LaunchRow row =
+            L2EffectGeneratorAssetOverrides.ResolveSharedBodyToMindCaRow(skillVisualId);
+        CompositePart part = L2EffectSkillLaunchTable.CreateV2Part(
+            planned, row, hasProjectileCompanion);
+        part.name = caName;
+        part.prefab = partPrefab;
+        builtParts.Insert(0, part);
         return true;
     }
 

@@ -34,32 +34,6 @@ float2 L2Fx_FlipbookAtlasUV(float2 uv01, int cellIndex, int uSubdivisions, int v
     return origin + saturate(uv01 * cellSize);
 }
 
-// Shrink UV into cell interior so bilinear/BC1 does not bleed adjacent atlas tiles
-// (fx_m_t0033 cell 6 neighbors the firework burst in cell 2 on the left).
-float2 L2Fx_FlipbookAtlasUV_Padded(
-    float2 uv01,
-    int cellIndex,
-    int uSubdivisions,
-    int vSubdivisions,
-    float2 texelSize,
-    float insetTexels)
-{
-    int uSub = max(uSubdivisions, 1);
-    int vSub = max(vSubdivisions, 1);
-    int tiles = uSub * vSub;
-    cellIndex = clamp(cellIndex, 0, tiles - 1);
-    float du = 1.0 / (float) uSub;
-    float dv = 1.0 / (float) vSub;
-    int u = cellIndex / vSub;
-    int v = (vSub - 1) - (cellIndex % vSub);
-    float2 cellSize = float2(du, dv);
-    float2 origin = float2((float) u * du, (float) v * dv);
-    float2 pad = texelSize * max(insetTexels, 0.0);
-    float2 inner = max(cellSize - pad * 2.0, cellSize * 0.25);
-    float2 uv = saturate(uv01);
-    return origin + pad + uv * inner;
-}
-
 // Discrete frame in [subStart, subEnd] vs normalized particle age 0..1 (matches UE span = end - start).
 // Reversed (End < Start) and adjacent (End == Start+1) pairs are a single cell:
 // L2 ParticleEmitter writes both indices for a picked frame, then samples only

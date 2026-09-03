@@ -119,6 +119,10 @@ CBUFFER_START(UnityPerMaterial)
     float _Opacity;
     float _RgbBoost;
     float _L2SpriteColorGammaToLinear;
+    float _IgnoreMainTexAlpha;
+    float4 _TextureFactor;
+    float _TextureContrast;
+    float _TextureFloor;
     float _AlphaClipThreshold;
     float _DebugMeshOut;
 CBUFFER_END
@@ -553,7 +557,8 @@ Varyings vert(Attributes IN)
 half4 frag(Varyings IN) : SV_Target
 {
     half4 tex = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, IN.uv);
-    if (_AlphaClipThreshold >= 0.0)
+    half texAlpha = _IgnoreMainTexAlpha > 0.5 ? 1.0h : tex.a;
+    if (_AlphaClipThreshold >= 0.0 && _IgnoreMainTexAlpha < 0.5)
         clip(tex.a - (half)_AlphaClipThreshold);
 
     half4 color;
@@ -562,12 +567,18 @@ half4 frag(Varyings IN) : SV_Target
         float2 uv1 = IN.uv * _SecondTex_ST.xy + _SecondTex_ST.zw;
         half4 tex1 = SAMPLE_TEXTURE2D(_SecondTex, sampler_SecondTex, uv1);
         color = L2Fx_D3d9_Modulate2xTwoTexTFactor(tex, tex1, IN.color);
+        if (_IgnoreMainTexAlpha > 0.5)
+            color.a = IN.color.a;
     }
     else
     {
+        half3 compressed = lerp(
+            (half)_TextureFloor.xxx,
+            tex.rgb,
+            saturate((half)_TextureContrast));
         color = half4(
-            tex.rgb * IN.color.rgb * (half)_RgbBoost,
-            tex.a * IN.color.a);
+            compressed * (half3)_TextureFactor.rgb * IN.color.rgb * (half)_RgbBoost,
+            texAlpha * IN.color.a * (half)_TextureFactor.a);
     }
     color.rgb += (half3)(IN.debugData.xyz * (_DebugMeshOut * 1e-10));
     return color;

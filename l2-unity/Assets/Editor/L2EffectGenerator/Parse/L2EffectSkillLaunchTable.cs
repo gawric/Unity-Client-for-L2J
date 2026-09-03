@@ -119,7 +119,8 @@ public static class L2EffectSkillLaunchTable
     public static List<LaunchRow> FindRows(int skillId, string className)
     {
         var matches = new List<LaunchRow>();
-        if (skillId <= 0 || !TryLoad(out _))
+        int tableId = ResolveLaunchTableId(skillId);
+        if (tableId <= 0 || !TryLoad(out _))
         {
             return matches;
         }
@@ -128,7 +129,7 @@ public static class L2EffectSkillLaunchTable
         for (int i = 0; i < _rows.Count; i++)
         {
             LaunchRow candidate = _rows[i];
-            if (candidate.SkillId == skillId &&
+            if (candidate.SkillId == tableId &&
                 string.Equals(candidate.EffectClass, key, StringComparison.OrdinalIgnoreCase))
             {
                 matches.Add(candidate);
@@ -138,18 +139,64 @@ public static class L2EffectSkillLaunchTable
         return matches;
     }
 
+    /// <summary>
+    /// skill-effects.tsv is keyed by skill_visual_effect, not always the server skill id.
+    /// 1147 Vampiric Touch → visual 1090.
+    /// </summary>
+    public static int ResolveLaunchTableId(int skillOrVisualId)
+    {
+        if (skillOrVisualId <= 0 || !TryLoad(out _))
+        {
+            return skillOrVisualId;
+        }
+
+        if (HasAnyLaunchRow(skillOrVisualId))
+        {
+            return skillOrVisualId;
+        }
+
+        if (L2EffectSkillgrpVisualMap.TryGetVisualEffect(skillOrVisualId, out int visual) &&
+            visual > 0 &&
+            visual != skillOrVisualId &&
+            HasAnyLaunchRow(visual))
+        {
+            return visual;
+        }
+
+        return skillOrVisualId;
+    }
+
+    static bool HasAnyLaunchRow(int skillId)
+    {
+        if (_rows == null)
+        {
+            return false;
+        }
+
+        for (int i = 0; i < _rows.Count; i++)
+        {
+            if (_rows[i].SkillId == skillId)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     public static List<LaunchRow> RowsForComposite(int skillId, string className, string suffix)
     {
-        List<LaunchRow> unique = UniqueRows(FindRows(skillId, className));
+        List<LaunchRow> found = FindRows(skillId, className);
+        List<LaunchRow> rows = UniqueRows(found);
         if (!IsImpactSuffix(suffix))
         {
-            return unique;
+            return rows;
         }
 
         bool hasShot = false;
-        for (int i = 0; i < unique.Count; i++)
+        for (int i = 0; i < rows.Count; i++)
         {
-            if (string.Equals(unique[i].Phase, "ShotAction", StringComparison.OrdinalIgnoreCase))
+            if (string.Equals(rows[i].Phase, "ShotAction", StringComparison.OrdinalIgnoreCase))
             {
                 hasShot = true;
                 break;
@@ -158,19 +205,19 @@ public static class L2EffectSkillLaunchTable
 
         if (!hasShot)
         {
-            return unique;
+            return rows;
         }
 
         var filtered = new List<LaunchRow>();
-        for (int i = 0; i < unique.Count; i++)
+        for (int i = 0; i < rows.Count; i++)
         {
-            if (!string.Equals(unique[i].Phase, "CastingAction", StringComparison.OrdinalIgnoreCase))
+            if (!string.Equals(rows[i].Phase, "CastingAction", StringComparison.OrdinalIgnoreCase))
             {
-                filtered.Add(unique[i]);
+                filtered.Add(rows[i]);
             }
         }
 
-        return filtered.Count > 0 ? filtered : unique;
+        return filtered.Count > 0 ? filtered : rows;
     }
 
     static List<LaunchRow> UniqueRows(List<LaunchRow> rows)
@@ -269,10 +316,61 @@ public static class L2EffectSkillLaunchTable
         }
         else if (result.Candidates.Count > 1)
         {
+            // m_u003_b/c match both 1090 and 6689 with the same ShotAction rows.
+            // Prefer the lowest id so composite still gets table timing/attach.
             result.Ambiguous = true;
+            if (CandidatesShareLaunchRows(result.Candidates, keys))
+            {
+                result.SkillId = result.Candidates[0];
+            }
         }
 
         return result;
+    }
+
+    static bool CandidatesShareLaunchRows(List<int> skillIds, List<string> classKeys)
+    {
+        if (skillIds == null || skillIds.Count < 2 || classKeys == null || classKeys.Count == 0)
+        {
+            return false;
+        }
+
+        string signature = BuildLaunchSignature(skillIds[0], classKeys);
+        for (int i = 1; i < skillIds.Count; i++)
+        {
+            if (!string.Equals(
+                    signature,
+                    BuildLaunchSignature(skillIds[i], classKeys),
+                    StringComparison.Ordinal))
+            {
+                return false;
+            }
+        }
+
+        return !string.IsNullOrEmpty(signature);
+    }
+
+    static string BuildLaunchSignature(int skillId, List<string> classKeys)
+    {
+        var parts = new List<string>();
+        for (int k = 0; k < classKeys.Count; k++)
+        {
+            List<LaunchRow> rows = FindRows(skillId, classKeys[k]);
+            for (int i = 0; i < rows.Count; i++)
+            {
+                LaunchRow row = rows[i];
+                parts.Add(
+                    row.Phase + "|" +
+                    row.EffectClass + "|" +
+                    (row.HasAttachOn ? row.AttachOn.ToString() : "-") + "|" +
+                    (row.Bone ?? string.Empty) + "|" +
+                    (row.HasSpawnDelay ? row.SpawnDelay.ToString("0.###") : "-") + "|" +
+                    (row.OnTarget ? "1" : "0"));
+            }
+        }
+
+        parts.Sort(StringComparer.Ordinal);
+        return string.Join("\n", parts);
     }
 
     public static CompositePrefabPart CreatePart(
@@ -300,16 +398,24 @@ public static class L2EffectSkillLaunchTable
         };
 
         string suffix = planned != null ? planned.Suffix : null;
-        bool isProjectile = planned != null && planned.IsProjectile;
+        bool isHomeFlight = planned != null &&
+            (planned.IsHomeFlight ||
+             L2EffectGeneratorAssetOverrides.IsM_u003_bHomeFlight(planned));
+        bool isTargetTrailer = planned != null && planned.IsTargetTrailer;
+        bool isProjectile = planned != null && planned.IsProjectile && !isHomeFlight;
         string phase = row != null ? row.Phase : null;
 
         part.spawnTiming = ResolveSpawnTiming(phase, suffix, hasProjectileCompanion, planned);
-        part.attachmentPoint = ResolveAttachment(row, suffix, isProjectile, part.spawnTiming, planned);
-        part.followResolvedTransform = ShouldFollow(row, part.attachmentPoint, part.spawnTiming);
+        part.attachmentPoint = ResolveAttachment(
+            row, suffix, isProjectile, isHomeFlight, part.spawnTiming, planned, phase);
+        part.followResolvedTransform = ShouldFollow(
+            row, part.attachmentPoint, part.spawnTiming, isHomeFlight);
         part.useCastTimedLifetime = part.spawnTiming != CompositePartSpawnTiming.OnHitCollider &&
                                     part.spawnTiming != CompositePartSpawnTiming.OnAnimationShoot &&
                                     !IsImpactSuffix(suffix) &&
-                                    !IsBlessingBeamPart(planned);
+                                    !IsBlessingBeamPart(planned) &&
+                                    !isHomeFlight &&
+                                    !isTargetTrailer;
         part.scale = row != null && row.HasScale && row.Scale > 0f ? row.Scale : 1f;
         if (row != null && row.HasSpawnDelay && row.SpawnDelay > 0f)
         {
@@ -324,7 +430,11 @@ public static class L2EffectSkillLaunchTable
             part.attachmentBoneName = row.Bone;
         }
 
-        if (isProjectile)
+        if (isHomeFlight)
+        {
+            ApplyHomeFlightConfig(part.homeProjectile, planned, part.spawnTiming);
+        }
+        else if (isProjectile)
         {
             bool spawnOnShoot = part.spawnTiming == CompositePartSpawnTiming.OnAnimationShoot;
             part.projectile.launchMode = spawnOnShoot
@@ -347,18 +457,60 @@ public static class L2EffectSkillLaunchTable
         return part;
     }
 
+    static void ApplyHomeFlightConfig(
+        CompositeHomeProjectileConfig home,
+        L2EffectGeneratorFolderBuilder.PlannedFolder planned,
+        CompositePartSpawnTiming spawnTiming)
+    {
+        if (home == null)
+        {
+            return;
+        }
+
+        bool spawnOnShoot = spawnTiming == CompositePartSpawnTiming.OnAnimationShoot;
+        home.launchMode = spawnOnShoot
+            ? ProjectileLaunchMode.OnAnimationShoot
+            : ProjectileLaunchMode.Immediate;
+        home.homeAttachmentPoint = EffectAttachmentPoint.CasterCenter;
+        home.homeOffset = new Vector3(0f, 0.1f, 0f);
+        home.usePathArc = true;
+        home.rotateToVelocity = true;
+        home.destroyOnArrive = true;
+        home.mirrorDualFlight = false;
+
+        if (L2EffectGeneratorAssetOverrides.IsM_u003_bHomeFlight(planned))
+        {
+            L2EffectGeneratorAssetOverrides.ApplyM_u003_bLiveHomeFlight(home);
+            return;
+        }
+
+        if (planned != null && planned.HasProjectileSpeed)
+        {
+            home.speed = Mathf.Max(0.01f, planned.ProjectileSpeedUnreal * UnrealSpeedToUnity);
+        }
+
+        if (planned != null && planned.HasProjectileAccSpeed)
+        {
+            home.acceleration = Mathf.Max(0f, planned.ProjectileAccSpeedUnreal * UnrealSpeedToUnity);
+        }
+    }
+
     public static CompositePart CreateV2Part(
         L2EffectGeneratorFolderBuilder.PlannedFolder planned,
         LaunchRow row,
         bool hasProjectileCompanion)
     {
         string suffix = planned != null ? planned.Suffix : null;
-        bool isProjectile = planned != null && planned.IsProjectile;
+        bool isHomeFlight = planned != null &&
+            (planned.IsHomeFlight ||
+             L2EffectGeneratorAssetOverrides.IsM_u003_bHomeFlight(planned));
+        bool isTargetTrailer = planned != null && planned.IsTargetTrailer;
+        bool isProjectile = planned != null && planned.IsProjectile && !isHomeFlight;
         string phase = row != null ? row.Phase : null;
         CompositePartSpawnTiming timing = ResolveSpawnTiming(
             phase, suffix, hasProjectileCompanion, planned);
         EffectAttachmentPoint attachment = ResolveAttachment(
-            row, suffix, isProjectile, timing, planned);
+            row, suffix, isProjectile, isHomeFlight, timing, planned, phase);
         string bone = null;
         if (row != null &&
             row.HasAttachOn &&
@@ -369,7 +521,45 @@ public static class L2EffectSkillLaunchTable
         }
 
         CompositePart part;
-        if (isProjectile)
+        if (isHomeFlight)
+        {
+            bool spawnOnShoot = timing == CompositePartSpawnTiming.OnAnimationShoot;
+            var home = new HomeFlightPart
+            {
+                launchMode = spawnOnShoot
+                    ? ProjectileLaunchMode.OnAnimationShoot
+                    : ProjectileLaunchMode.Immediate,
+                homeAttachmentPoint = EffectAttachmentPoint.CasterCenter,
+                spawnAttachmentPoint = EffectAttachmentPoint.TargetOverHead,
+                homeOffset = new Vector3(0f, 0.1f, 0f),
+                usePathArc = true,
+                rotateToVelocity = true,
+                destroyOnArrive = true
+            };
+            if (L2EffectGeneratorAssetOverrides.IsM_u003_bHomeFlight(planned))
+            {
+                L2EffectGeneratorAssetOverrides.ApplyM_u003_bLiveHomeFlight(home);
+            }
+            else if (planned != null)
+            {
+                if (planned.HasProjectileSpeed)
+                {
+                    home.speed = Mathf.Max(
+                        0.01f,
+                        planned.ProjectileSpeedUnreal * UnrealSpeedToUnity);
+                }
+
+                if (planned.HasProjectileAccSpeed)
+                {
+                    home.acceleration = Mathf.Max(
+                        0f,
+                        planned.ProjectileAccSpeedUnreal * UnrealSpeedToUnity);
+                }
+            }
+
+            part = home;
+        }
+        else if (isProjectile)
         {
             bool spawnOnShoot = timing == CompositePartSpawnTiming.OnAnimationShoot;
             var shot = new ShotProjectilePart
@@ -387,7 +577,8 @@ public static class L2EffectSkillLaunchTable
 
             part = shot;
         }
-        else if (timing == CompositePartSpawnTiming.OnHitCollider ||
+        else if (isTargetTrailer ||
+                 timing == CompositePartSpawnTiming.OnHitCollider ||
                  timing == CompositePartSpawnTiming.OnHitTime ||
                  timing == CompositePartSpawnTiming.OnAnimationShoot ||
                  IsImpactSuffix(suffix) ||
@@ -401,11 +592,13 @@ public static class L2EffectSkillLaunchTable
         }
 
         part.name = planned != null ? planned.FolderName : string.Empty;
-        part.inheritRotation = false;
+        part.inheritRotation = isTargetTrailer;
         part.spawnTiming = timing;
-        part.follow = ShouldFollow(row, attachment, timing);
+        part.follow = ShouldFollow(row, attachment, timing, isHomeFlight);
         part.scale = row != null && row.HasScale && row.Scale > 0f ? row.Scale : 1f;
-        part.placement = EffectPlacement.FromAttachment(attachment, bone);
+        part.spawnAttachmentPoint = attachment;
+        part.boneName = bone;
+        part.placement = null;
         if (row != null && row.HasSpawnDelay && row.SpawnDelay > 0f)
         {
             part.spawnDelaySeconds = row.SpawnDelay;
@@ -468,6 +661,14 @@ public static class L2EffectSkillLaunchTable
         bool hasProjectileCompanion,
         L2EffectGeneratorFolderBuilder.PlannedFolder planned)
     {
+        // Table miss only. A real CastingAction row must still win (caster trailers).
+        if (string.IsNullOrEmpty(phase) &&
+            planned != null &&
+            (planned.IsHomeFlight || planned.IsTargetTrailer))
+        {
+            return CompositePartSpawnTiming.OnAnimationShoot;
+        }
+
         if (string.Equals(phase, "ShotAction", StringComparison.OrdinalIgnoreCase) ||
             IsBlessingBeamPart(planned) ||
             IsShootVisualSuffix(suffix))
@@ -475,8 +676,14 @@ public static class L2EffectSkillLaunchTable
             return CompositePartSpawnTiming.OnAnimationShoot;
         }
 
-        if (string.Equals(phase, "ExplosionAction", StringComparison.OrdinalIgnoreCase) ||
-            IsImpactSuffix(suffix))
+        if (IsImpactSuffix(suffix))
+        {
+            return hasProjectileCompanion
+                ? CompositePartSpawnTiming.OnHitCollider
+                : CompositePartSpawnTiming.OnAnimationShoot;
+        }
+
+        if (string.Equals(phase, "ExplosionAction", StringComparison.OrdinalIgnoreCase))
         {
             return hasProjectileCompanion
                 ? CompositePartSpawnTiming.OnHitCollider
@@ -490,19 +697,37 @@ public static class L2EffectSkillLaunchTable
         LaunchRow row,
         string suffix,
         bool isProjectile,
+        bool isHomeFlight,
         CompositePartSpawnTiming spawnTiming,
-        L2EffectGeneratorFolderBuilder.PlannedFolder planned)
+        L2EffectGeneratorFolderBuilder.PlannedFolder planned,
+        string phase)
     {
         if (spawnTiming == CompositePartSpawnTiming.OnHitCollider)
         {
             return EffectAttachmentPoint.WorldHitPoint;
         }
 
+        // Home flight (m_u003_b): LocateEffect attach_on=0 spawns at pawn Location
+        // (capsule center). Live orb still reads as above the mesh because
+        // nameplates sit at Location+CollisionHeight (capsule top). Spawn there.
+        if (isHomeFlight)
+        {
+            return EffectAttachmentPoint.TargetOverHead;
+        }
+
+        // PHYS_Trailer / m_u003_c VampireEye: sit at the nameplate (capsule top).
+        if (planned != null && planned.IsTargetTrailer)
+        {
+            return EffectAttachmentPoint.TargetOverHead;
+        }
+
         // _ta without a projectile collider: sit on the skill target (self-cast = caster).
         // WorldHitPoint is only valid after an actual hit event.
         if (IsImpactSuffix(suffix) && spawnTiming != CompositePartSpawnTiming.OnAnimationShoot)
         {
-            return EffectAttachmentPoint.WorldHitPoint;
+            return spawnTiming == CompositePartSpawnTiming.OnHitCollider
+                ? EffectAttachmentPoint.WorldHitPoint
+                : EffectAttachmentPoint.TargetCenter;
         }
 
         if (IsImpactSuffix(suffix) && spawnTiming == CompositePartSpawnTiming.OnAnimationShoot)
@@ -526,8 +751,14 @@ public static class L2EffectSkillLaunchTable
             case 3:
                 return EffectAttachmentPoint.LeftWeaponSocket;
             case 9:
-                // attach_on=9 follows the pawn. CasterRoot pivot is at the feet
-                // (_ca ground swirl). Body-centered parts use capsule center.
+                // attach_on=9 Trail: CastingAction trails the caster; Shot/Explosion
+                // trails the hit pawn (m_u003_c VampireEye on target).
+                if (string.Equals(phase, "ShotAction", StringComparison.OrdinalIgnoreCase) ||
+                    string.Equals(phase, "ExplosionAction", StringComparison.OrdinalIgnoreCase))
+                {
+                    return EffectAttachmentPoint.TargetCenter;
+                }
+
                 return string.Equals(suffix, "_ca", StringComparison.Ordinal)
                     ? EffectAttachmentPoint.CasterRoot
                     : EffectAttachmentPoint.CasterCenter;
@@ -546,8 +777,14 @@ public static class L2EffectSkillLaunchTable
     private static bool ShouldFollow(
         LaunchRow row,
         EffectAttachmentPoint attachment,
-        CompositePartSpawnTiming spawnTiming)
+        CompositePartSpawnTiming spawnTiming,
+        bool isHomeFlight)
     {
+        if (isHomeFlight)
+        {
+            return false;
+        }
+
         if (attachment == EffectAttachmentPoint.WorldHitPoint ||
             attachment == EffectAttachmentPoint.CasterPosition ||
             attachment == EffectAttachmentPoint.TargetPosition)

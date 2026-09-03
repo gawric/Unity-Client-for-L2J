@@ -26,6 +26,9 @@ public static class L2MaterialPropertyCopier
     public static readonly int FadeOutPowerId = Shader.PropertyToID("_FadeOutPower");
     public static readonly int DebugAtlasPreviewId = Shader.PropertyToID("_DebugAtlasPreview");
     public static readonly int RgbBoostId = Shader.PropertyToID("_RgbBoost");
+    public static readonly int TextureFactorId = Shader.PropertyToID("_TextureFactor");
+    public static readonly int TextureContrastId = Shader.PropertyToID("_TextureContrast");
+    public static readonly int TextureFloorId = Shader.PropertyToID("_TextureFloor");
     public static readonly int AlphaBoostId = Shader.PropertyToID("_AlphaBoost");
     public static readonly int OpacityId = Shader.PropertyToID("_Opacity");
     public static readonly int AtlasUvRemapId = Shader.PropertyToID("_AtlasUvRemap");
@@ -460,6 +463,9 @@ public static class L2MaterialPropertyCopier
             CopyFloatIfPresent(runtimeMat, sharedMat, DebugAtlasPreviewId);
         }
         CopyFloatIfPresent(runtimeMat, sharedMat, RgbBoostId);
+        CopyColorIfPresent(runtimeMat, sharedMat, TextureFactorId);
+        CopyFloatIfPresent(runtimeMat, sharedMat, TextureContrastId);
+        CopyFloatIfPresent(runtimeMat, sharedMat, TextureFloorId);
         CopyFloatIfPresent(runtimeMat, sharedMat, AlphaBoostId);
         CopyFloatIfPresent(runtimeMat, sharedMat, OpacityId);
         CopyFloatIfPresent(runtimeMat, sharedMat, AtlasUvRemapId);

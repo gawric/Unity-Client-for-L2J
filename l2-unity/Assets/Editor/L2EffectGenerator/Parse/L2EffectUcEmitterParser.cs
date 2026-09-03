@@ -283,6 +283,17 @@ public static class L2EffectUcEmitterParser
                 }
 
                 return;
+            case "Physics":
+                info.Physics = value.Trim().Trim('\'', '"');
+                return;
+            case "bAcceptsProjectors":
+                info.HasAcceptsProjectors = true;
+                if (TryAssignBool(value, out bool acceptsProjectors))
+                {
+                    info.AcceptsProjectors = acceptsProjectors;
+                }
+
+                return;
         }
     }
 
@@ -354,6 +365,7 @@ public static class L2EffectUcEmitterParser
             case "UseDirectionAs": emitter.UseDirectionAs = value; return true;
             case "GetVelocityDirectionFrom": emitter.GetVelocityDirectionFrom = value; return true;
             case "UseRotationFrom": emitter.UseRotationFrom = value; return true;
+            case "CoordinateSystem": emitter.CoordinateSystem = value; return true;
             case "ProjectionNormal":
                 emitter.ProjectionNormal = ParseVector(value, Vector3.zero);
                 emitter.HasProjectionNormal = true;
