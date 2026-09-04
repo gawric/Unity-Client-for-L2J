@@ -1,4 +1,5 @@
 #if UNITY_EDITOR
+using System;
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
@@ -494,6 +495,7 @@ public sealed class L2EffectGeneratorWindow : EditorWindow
                 "  " + emitter.EmitterName,
                 (string.IsNullOrEmpty(role) ? string.Empty : role + ", ") +
                 emitter.ClassName + coord +
+                DescribeEssencePreview(emitter) +
                 ", ParticleGroupV2, slots=" + System.Math.Max(1, emitter.MaxParticles) +
                 ", life=" + L2EffectGeneratorHomeOrbLayout.ResolveLifetime(emitter).ToString("0.###") +
                 "s, slotName=" + (string.IsNullOrWhiteSpace(emitter.ParticleSlotName)
@@ -582,7 +584,7 @@ public sealed class L2EffectGeneratorWindow : EditorWindow
         }
     }
 
-    private static string GetAssetPath(Object asset)
+    private static string GetAssetPath(UnityEngine.Object asset)
     {
         return asset == null ? string.Empty : AssetDatabase.GetAssetPath(asset);
     }
@@ -616,7 +618,7 @@ public sealed class L2EffectGeneratorWindow : EditorWindow
         return "Assets" + absolutePath.Substring(dataPath.Length);
     }
 
-    private static T LoadAssetByGuid<T>(string prefKey) where T : Object
+    private static T LoadAssetByGuid<T>(string prefKey) where T : UnityEngine.Object
     {
         string guid = EditorPrefs.GetString(prefKey, string.Empty);
         if (string.IsNullOrEmpty(guid))
@@ -628,11 +630,63 @@ public sealed class L2EffectGeneratorWindow : EditorWindow
         return string.IsNullOrEmpty(path) ? null : AssetDatabase.LoadAssetAtPath<T>(path);
     }
 
-    private static void SaveAssetGuid(string prefKey, Object asset)
+    private static void SaveAssetGuid(string prefKey, UnityEngine.Object asset)
     {
         string path = GetAssetPath(asset);
         string guid = string.IsNullOrEmpty(path) ? string.Empty : AssetDatabase.AssetPathToGUID(path);
         EditorPrefs.SetString(prefKey, guid ?? string.Empty);
+    }
+
+    private static string DescribeEssencePreview(UcEmitterDefinition emitter)
+    {
+        if (emitter == null)
+        {
+            return string.Empty;
+        }
+
+        var flags = new List<string>();
+        if (emitter.IsPolarShape)
+        {
+            flags.Add("polar");
+        }
+        else if (emitter.IsSphereShape)
+        {
+            flags.Add("sphere");
+        }
+
+        if (emitter.UseRevolution)
+        {
+            flags.Add("rev");
+        }
+
+        if (!string.IsNullOrEmpty(emitter.UseDirectionAs) &&
+            !string.Equals(emitter.UseDirectionAs, "PTDU_None", StringComparison.OrdinalIgnoreCase))
+        {
+            flags.Add(emitter.UseDirectionAs);
+        }
+
+        if (string.Equals(emitter.ClassName, "VertMeshEmitter", StringComparison.OrdinalIgnoreCase))
+        {
+            flags.Add("VertMesh");
+        }
+
+        int coordinateSystem = emitter.ResolveNativeCoordinateSystem();
+        if (coordinateSystem != L2ParticleCoordinateSystemUtil.NativeRelative)
+        {
+            flags.Add("CS=" + coordinateSystem);
+        }
+
+        if (emitter.IndependentSprayAccel)
+        {
+            flags.Add("IndependentSprayAccel");
+        }
+
+        if (emitter.AddLocationFromOtherEmitter >= 0)
+        {
+            flags.Add("AddLocation=" + emitter.AddLocationFromOtherEmitter);
+        }
+
+        return flags.Count == 0 ? string.Empty : ", " + string.Join("+", flags);
     }
 }
 #endif

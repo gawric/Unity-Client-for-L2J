@@ -16,6 +16,7 @@ public sealed class ParticleGroupV2 : EffectPart, IParticleEmitterV2
     [HideInInspector] [SerializeField] bool _cloneParticlesToMaxCount;
     [HideInInspector] [SerializeField] int _cloneParticleLimit = 64;
     [HideInInspector] [SerializeField] bool _useGpuInstancing = true;
+    [HideInInspector] [SerializeField] L2ParticleCoordinateSystem _coordinateSystem;
     [SerializeField] bool _isBurstSpawning;
     [HideInInspector] [SerializeField] float _relativeWarmupTime;
     [HideInInspector] [SerializeField] float _warmupTicksPerSecond;
@@ -30,6 +31,8 @@ public sealed class ParticleGroupV2 : EffectPart, IParticleEmitterV2
     [SerializeField] bool _stretchParticleLifeToWindow;
     [Tooltip("NSkillProjectile / NPC deco: keep emitting until the host GO is destroyed.")]
     [SerializeField] bool _hostOwnedEmission;
+    [Tooltip("Write HE-style EffectLog snapshot to Logs/ParticleGroupV2Compare.txt")]
+    [SerializeField] bool _compareLogEnabled;
 
     ParticleSlotSet _slots;
     ParticleDrawBatch _batch;
@@ -43,6 +46,7 @@ public sealed class ParticleGroupV2 : EffectPart, IParticleEmitterV2
     bool _loggedHiddenTick;
 #endif
 
+    public bool CompareLogEnabled => _compareLogEnabled;
     public bool IsGpuDraw => _runtime != null && _runtime.IsGpuDraw;
     public Material[] GpuMaterials => _runtime != null ? _runtime.GpuMaterials : null;
     public bool IsComplete => _runtime != null && _runtime.IsComplete;
@@ -69,6 +73,7 @@ public sealed class ParticleGroupV2 : EffectPart, IParticleEmitterV2
             cloneToMaxCount = _cloneParticlesToMaxCount,
             cloneLimit = _cloneParticleLimit,
             useGpuInstancing = _useGpuInstancing,
+            coordinateSystem = _coordinateSystem,
             isBurstSpawning = _isBurstSpawning,
             relativeWarmupTime = _relativeWarmupTime,
             warmupTicksPerSecond = _warmupTicksPerSecond,
@@ -180,6 +185,18 @@ public sealed class ParticleGroupV2 : EffectPart, IParticleEmitterV2
             " warmupFrac=" + warmupFrac.ToString("0.###") +
             " warmupTicks=" + _warmupTicksPerSecond.ToString("0.###") +
             " now=" + now.ToString("0.###"));
+        if (_compareLogEnabled)
+        {
+            ParticleGroupV2CompareLog.WritePlay(
+                this,
+                authoring,
+                runtime.GpuMaterials != null && runtime.GpuMaterials.Length > 0
+                    ? runtime.GpuMaterials[0]
+                    : ResolveSlotRenderer() != null
+                        ? ResolveSlotRenderer().sharedMaterial
+                        : null);
+        }
+
         if (NpcDeco2911Trace.Matches(name))
         {
             NpcDeco2911Trace.Log(

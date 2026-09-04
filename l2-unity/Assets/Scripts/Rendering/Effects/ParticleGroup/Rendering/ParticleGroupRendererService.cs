@@ -18,6 +18,15 @@ public sealed class ParticleGroupRendererService
     ParticleGroupSpawnSpin _spawnSpin;
     bool _spawnSpinResolved;
     Matrix4x4[] _objectToWorldMatrices;
+    TransformOrigin[] _transformOrigins;
+
+    struct TransformOrigin
+    {
+        public Transform parent;
+        public Vector3 localPosition;
+        public Quaternion localRotation;
+        public Vector3 localScale;
+    }
 
     public ParticleGroupRendererService(EffectPart host)
     {
@@ -30,7 +39,9 @@ public sealed class ParticleGroupRendererService
 
     public void SetParticles(Renderer[] particles)
     {
+        RestoreCoordinateSystemSlots();
         _particles = particles;
+        _transformOrigins = null;
     }
 
     public void CollectIfEmpty()
@@ -250,6 +261,104 @@ public sealed class ParticleGroupRendererService
             if (_host.SurfaceNormal != Vector3.zero)
                 material.SetVector("_SurfaceNormals", _host.SurfaceNormal);
         }
+    }
+
+    public void ApplyCoordinateSystemToGoSlot(
+        int slot,
+        L2ParticleCoordinateSystem coordinateSystem)
+    {
+        if (_particles == null || slot < 0 || slot >= _particles.Length)
+        {
+            return;
+        }
+
+        Renderer renderer = _particles[slot];
+        if (renderer == null)
+        {
+            return;
+        }
+
+        EnsureTransformOrigins();
+        RestoreCoordinateSystemSlot(slot);
+
+        Transform particleTransform = renderer.transform;
+        if (coordinateSystem == L2ParticleCoordinateSystem.Spray)
+        {
+            // Native PTCS_Spray rotates position, velocity and acceleration by
+            // the owner rotation once at SpawnParticle, then remains world-space.
+            particleTransform.SetParent(null, true);
+        }
+        else if (coordinateSystem == L2ParticleCoordinateSystem.Independent)
+        {
+            // Native PTCS_Independent inherits spawn translation but not owner
+            // rotation, and no longer follows later owner movement.
+            Vector3 worldPosition = particleTransform.position;
+            Vector3 worldScale = particleTransform.lossyScale;
+            particleTransform.SetParent(null, false);
+            particleTransform.SetPositionAndRotation(worldPosition, Quaternion.identity);
+            particleTransform.localScale = worldScale;
+        }
+    }
+
+    public void RestoreCoordinateSystemSlots()
+    {
+        if (_particles == null || _transformOrigins == null)
+        {
+            return;
+        }
+
+        int count = Mathf.Min(_particles.Length, _transformOrigins.Length);
+        for (int i = 0; i < count; i++)
+        {
+            RestoreCoordinateSystemSlot(i);
+        }
+    }
+
+    void EnsureTransformOrigins()
+    {
+        int count = Count;
+        if (_transformOrigins != null && _transformOrigins.Length == count)
+        {
+            return;
+        }
+
+        _transformOrigins = new TransformOrigin[count];
+        for (int i = 0; i < count; i++)
+        {
+            Transform particleTransform = _particles[i] != null ? _particles[i].transform : null;
+            if (particleTransform == null)
+            {
+                continue;
+            }
+
+            _transformOrigins[i] = new TransformOrigin
+            {
+                parent = particleTransform.parent,
+                localPosition = particleTransform.localPosition,
+                localRotation = particleTransform.localRotation,
+                localScale = particleTransform.localScale
+            };
+        }
+    }
+
+    void RestoreCoordinateSystemSlot(int slot)
+    {
+        if (_particles == null ||
+            _transformOrigins == null ||
+            slot < 0 ||
+            slot >= _particles.Length ||
+            slot >= _transformOrigins.Length ||
+            _particles[slot] == null)
+        {
+            return;
+        }
+
+        TransformOrigin origin = _transformOrigins[slot];
+        Transform particleTransform = _particles[slot].transform;
+        particleTransform.SetParent(origin.parent, false);
+        particleTransform.localPosition = origin.localPosition;
+        particleTransform.localRotation = origin.localRotation;
+        particleTransform.localScale = origin.localScale;
     }
 
     public float ReadShaderSlotDuration(float fallbackDuration)

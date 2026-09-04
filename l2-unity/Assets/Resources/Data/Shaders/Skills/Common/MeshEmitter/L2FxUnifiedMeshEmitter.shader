@@ -14,6 +14,25 @@ Shader "L2/Effects/MeshEmitter"
 
         [Enum(None,0,ZOnly,1,XYZ,2,LocationRange,3)] _SpawnMode ("Spawn Mode", Float) = 0
         [Toggle] _FullTlsShape ("PTLS Polar Spawn", Float) = 0
+        [Enum(Box,0,Sphere,1,Polar,2)] _HeLocationShape ("HE Location Shape", Float) = 0
+        [Toggle] _UseRevolution ("UseRevolution", Float) = 0
+        _RevolutionCenterOffsetRangeXUc ("Revolution Center X Min Max", Vector) = (0, 0, 0, 0)
+        _RevolutionCenterOffsetRangeYUc ("Revolution Center Y Min Max", Vector) = (0, 0, 0, 0)
+        _RevolutionCenterOffsetRangeZUc ("Revolution Center Z Min Max", Vector) = (0, 0, 0, 0)
+        _RevolutionsPerSecondRangeXUc ("Revolution RPS X Min Max", Vector) = (0, 0, 0, 0)
+        _RevolutionsPerSecondRangeYUc ("Revolution RPS Y Min Max", Vector) = (0, 0, 0, 0)
+        _RevolutionsPerSecondRangeZUc ("Revolution RPS Z Min Max", Vector) = (0, 0, 0, 0)
+        [Toggle] _UseRevolutionScale ("Use RevolutionScale", Float) = 0
+        _RevolutionScaleRepeats ("RevolutionScale Repeats", Float) = 0
+        _RevolutionScaleCount ("RevolutionScale Key Count", Float) = 1
+        _RevolutionScaleKey0 ("RevolutionScale Key 0", Vector) = (0, 1, 1, 1)
+        _RevolutionScaleKey1 ("RevolutionScale Key 1", Vector) = (1, 1, 1, 1)
+        _RevolutionScaleKey2 ("RevolutionScale Key 2", Vector) = (1, 1, 1, 1)
+        _RevolutionScaleKey3 ("RevolutionScale Key 3", Vector) = (1, 1, 1, 1)
+        _RevolutionScaleKey4 ("RevolutionScale Key 4", Vector) = (1, 1, 1, 1)
+        _RevolutionScaleKey5 ("RevolutionScale Key 5", Vector) = (1, 1, 1, 1)
+        _RevolutionScaleKey6 ("RevolutionScale Key 6", Vector) = (1, 1, 1, 1)
+        _SphereRadiusRangeUc ("Sphere Radius Min Max", Vector) = (0, 0, 0, 0)
         [Enum(None,0,StartPositionAndOwner,1,OwnerAndStartPosition,2)] _PtvdMode ("GetVelocityDirectionFrom", Float) = 0
         [Enum(None,0,Ballistic,1,Drag,2)] _MotionMode ("Motion Mode", Float) = 0
         [Enum(Regular,0,PTRS_Actor,1)] _TransformMode ("Transform Mode", Float) = 0
@@ -52,6 +71,19 @@ Shader "L2/Effects/MeshEmitter"
         _StartVelocityRangeZUc ("StartVelocity Z Min Max", Vector) = (0, 0, 0, 0)
         _AccelerationUc ("Acceleration UC XYZ", Vector) = (0, 0, 0, 0)
         _VelocityLossRangeUc ("VelocityLoss UC XYZ", Vector) = (0, 0, 0, 0)
+        [Enum(Independent,0,Relative,1,Absolute,2,RelativeRotation,3,Spray,4,RelativePosition,5,ScreenAbsolute,6,ScreenRelative,7)] _CoordinateSystem ("CoordinateSystem", Float) = 1
+        [Toggle] _IndependentSprayAccel ("IndependentSprayAccel", Float) = 0
+        _MaxAbsVelocityUc ("MaxAbsVelocity XYZ", Vector) = (10000, 10000, 10000, 0)
+        [Toggle] _UseVelocityScale ("Use VelocityScale", Float) = 0
+        _VelocityScaleRepeats ("VelocityScale Repeats", Float) = 0
+        _VelocityScaleCount ("VelocityScale Key Count", Float) = 1
+        _VelocityScaleKey0 ("VelocityScale Key 0", Vector) = (0, 1, 1, 1)
+        _VelocityScaleKey1 ("VelocityScale Key 1", Vector) = (1, 1, 1, 1)
+        _VelocityScaleKey2 ("VelocityScale Key 2", Vector) = (1, 1, 1, 1)
+        _VelocityScaleKey3 ("VelocityScale Key 3", Vector) = (1, 1, 1, 1)
+        _VelocityScaleKey4 ("VelocityScale Key 4", Vector) = (1, 1, 1, 1)
+        _VelocityScaleKey5 ("VelocityScale Key 5", Vector) = (1, 1, 1, 1)
+        _VelocityScaleKey6 ("VelocityScale Key 6", Vector) = (1, 1, 1, 1)
         _MeshSpawnRandStateBits ("Mesh Spawn appRand TLS", Float) = 0
 
         [Toggle] _SpinParticles ("SpinParticles", Float) = 0

@@ -45,7 +45,7 @@ public static class L2EffectTextureResolver
         }
 
         if (emitter != null &&
-            string.Equals(emitter.ClassName, "MeshEmitter", StringComparison.OrdinalIgnoreCase) &&
+            L2EffectGeneratorMaterialConfigurator.IsMeshEmitter(emitter.ClassName) &&
             string.IsNullOrWhiteSpace(emitter.TextureReference) &&
             !string.IsNullOrWhiteSpace(emitter.StaticMeshReference))
         {

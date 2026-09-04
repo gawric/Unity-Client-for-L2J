@@ -49,6 +49,13 @@ public struct UcSizeScaleKey
     public float RelativeSize;
 }
 
+public struct UcVectorScaleKey
+{
+    public int Index;
+    public float RelativeTime;
+    public Vector3 RelativeValue;
+}
+
 public sealed class UcEmitterDefinition
 {
     public string ClassName;
@@ -76,6 +83,7 @@ public sealed class UcEmitterDefinition
     public string GetVelocityDirectionFrom;
     public string UseRotationFrom;
     public string CoordinateSystem;
+    public bool IndependentSprayAccel;
     public bool HasProjectionNormal;
     public Vector3 ProjectionNormal;
     public bool HasBeamEndOffset;
@@ -92,6 +100,9 @@ public sealed class UcEmitterDefinition
     public bool FadeOut;
     public bool UseRandomSubdivision;
     public bool BlendBetweenSubdivisions;
+    public bool UseRevolution;
+    public bool UseRevolutionScale;
+    public bool UseVelocityScale;
     public int AddLocationFromOtherEmitter = -1;
     public bool RespawnDeadParticles = true;
 
@@ -100,6 +111,8 @@ public sealed class UcEmitterDefinition
     public float FadeOutStartTime;
     public float ColorScaleRepeats;
     public float SizeScaleRepeats;
+    public float RevolutionScaleRepeats;
+    public float VelocityScaleRepeats;
     public int TextureUSubdivisions = 1;
     public int TextureVSubdivisions = 1;
     public int SubdivisionStart;
@@ -111,13 +124,55 @@ public sealed class UcEmitterDefinition
     public UcVectorRange StartLocationRange = UcVectorRange.Uniform(0f);
     public UcVectorRange StartLocationPolarRange = UcVectorRange.Uniform(0f);
     public UcVectorRange StartVelocityRange = UcVectorRange.Uniform(0f);
+    public Vector3 MaxAbsVelocity = new Vector3(10000f, 10000f, 10000f);
     public UcVectorRange VelocityLossRange = UcVectorRange.Uniform(0f);
     public UcVectorRange StartSizeRange = UcVectorRange.Uniform(1f);
     public UcVectorRange StartSpinRange = UcVectorRange.Uniform(0f);
     public UcVectorRange SpinsPerSecondRange = UcVectorRange.Uniform(0f);
+    public UcVectorRange RevolutionsPerSecondRange = UcVectorRange.Uniform(0f);
+    public UcVectorRange RevolutionCenterOffsetRange = UcVectorRange.Uniform(0f);
+    public bool HasSphereRadiusRange;
+    public UcRange SphereRadiusRange;
     public UcVectorRange ColorMultiplierRange = UcVectorRange.Uniform(1f);
+
+    public bool IsMeshClass
+    {
+        get
+        {
+            return string.Equals(ClassName, "MeshEmitter", StringComparison.OrdinalIgnoreCase) ||
+                   string.Equals(ClassName, "VertMeshEmitter", StringComparison.OrdinalIgnoreCase);
+        }
+    }
+
+    public bool IsPolarShape
+    {
+        get
+        {
+            return string.Equals(StartLocationShape, "PTLS_Polar", StringComparison.OrdinalIgnoreCase);
+        }
+    }
+
+    public bool IsSphereShape
+    {
+        get
+        {
+            return string.Equals(StartLocationShape, "PTLS_Sphere", StringComparison.OrdinalIgnoreCase);
+        }
+    }
+
+    public int ResolveNativeCoordinateSystem()
+    {
+        return L2ParticleCoordinateSystemUtil.ParseNative(CoordinateSystem);
+    }
+
+    public L2ParticleCoordinateSystem ResolveRuntimeCoordinateSystem()
+    {
+        return L2ParticleCoordinateSystemUtil.FromNative(ResolveNativeCoordinateSystem());
+    }
     public readonly List<UcColorScaleKey> ColorScaleKeys = new List<UcColorScaleKey>();
     public readonly List<UcSizeScaleKey> SizeScaleKeys = new List<UcSizeScaleKey>();
+    public readonly List<UcVectorScaleKey> RevolutionScaleKeys = new List<UcVectorScaleKey>();
+    public readonly List<UcVectorScaleKey> VelocityScaleKeys = new List<UcVectorScaleKey>();
 
     /// <summary>
     /// UE default when LifetimeRange is omitted from the UC.

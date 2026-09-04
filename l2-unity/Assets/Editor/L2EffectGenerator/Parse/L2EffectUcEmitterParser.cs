@@ -23,6 +23,9 @@ public static class L2EffectUcEmitterParser
     private static readonly Regex StaticMeshRegex =
         new Regex(@"^\s*StaticMesh=StaticMesh'(?<path>[^']+)'\s*$", RegexOptions.Compiled);
 
+    private static readonly Regex VertexMeshRegex =
+        new Regex(@"^\s*VertexMesh=VertMesh'(?<path>[^']+)'\s*$", RegexOptions.Compiled);
+
     private static readonly Regex TextureRegex =
         new Regex(@"^\s*Texture=Texture'(?<path>[^']+)'\s*$", RegexOptions.Compiled);
 
@@ -52,6 +55,12 @@ public static class L2EffectUcEmitterParser
 
     private static readonly Regex SizeScaleRegex =
         new Regex(@"^\s*SizeScale\((?<index>\d+)\)=\((?<content>.*)\)\s*$", RegexOptions.Compiled);
+
+    private static readonly Regex VelocityScaleRegex =
+        new Regex(@"^\s*VelocityScale\((?<index>\d+)\)=\((?<content>.*)\)\s*$", RegexOptions.Compiled);
+
+    private static readonly Regex RevolutionScaleRegex =
+        new Regex(@"^\s*RevolutionScale\((?<index>\d+)\)=\((?<content>.*)\)\s*$", RegexOptions.Compiled);
 
     private static readonly Regex BeamEndPointsRegex =
         new Regex(@"^\s*BeamEndPoints\(\d+\)=\((?<content>.*)\)\s*$", RegexOptions.Compiled);
@@ -169,6 +178,13 @@ public static class L2EffectUcEmitterParser
             if (staticMeshMatch.Success)
             {
                 current.StaticMeshReference = staticMeshMatch.Groups["path"].Value;
+                continue;
+            }
+
+            Match vertexMeshMatch = VertexMeshRegex.Match(line);
+            if (vertexMeshMatch.Success)
+            {
+                current.StaticMeshReference = vertexMeshMatch.Groups["path"].Value;
                 continue;
             }
 
@@ -311,6 +327,8 @@ public static class L2EffectUcEmitterParser
 
         emitter.ColorScaleKeys.Sort((a, b) => a.Index.CompareTo(b.Index));
         emitter.SizeScaleKeys.Sort((a, b) => a.Index.CompareTo(b.Index));
+        emitter.VelocityScaleKeys.Sort((a, b) => a.Index.CompareTo(b.Index));
+        emitter.RevolutionScaleKeys.Sort((a, b) => a.Index.CompareTo(b.Index));
         if (emitter.HighFrequencyPoints < 2)
         {
             emitter.HighFrequencyPoints = 2;
@@ -344,6 +362,26 @@ public static class L2EffectUcEmitterParser
             return true;
         }
 
+        Match velocityScaleMatch = VelocityScaleRegex.Match(line);
+        if (velocityScaleMatch.Success)
+        {
+            emitter.VelocityScaleKeys.Add(ParseVectorScaleKey(
+                int.Parse(velocityScaleMatch.Groups["index"].Value, CultureInfo.InvariantCulture),
+                velocityScaleMatch.Groups["content"].Value,
+                "RelativeVelocity"));
+            return true;
+        }
+
+        Match revolutionScaleMatch = RevolutionScaleRegex.Match(line);
+        if (revolutionScaleMatch.Success)
+        {
+            emitter.RevolutionScaleKeys.Add(ParseVectorScaleKey(
+                int.Parse(revolutionScaleMatch.Groups["index"].Value, CultureInfo.InvariantCulture),
+                revolutionScaleMatch.Groups["content"].Value,
+                "RelativeRevolution"));
+            return true;
+        }
+
         Match beamEndMatch = BeamEndPointsRegex.Match(line);
         if (beamEndMatch.Success)
         {
@@ -366,6 +404,8 @@ public static class L2EffectUcEmitterParser
             case "GetVelocityDirectionFrom": emitter.GetVelocityDirectionFrom = value; return true;
             case "UseRotationFrom": emitter.UseRotationFrom = value; return true;
             case "CoordinateSystem": emitter.CoordinateSystem = value; return true;
+            case "IndependentSprayAccel":
+                return TryAssignBool(value, out emitter.IndependentSprayAccel);
             case "ProjectionNormal":
                 emitter.ProjectionNormal = ParseVector(value, Vector3.zero);
                 emitter.HasProjectionNormal = true;
@@ -381,6 +421,9 @@ public static class L2EffectUcEmitterParser
             case "FadeOut": return TryAssignBool(value, out emitter.FadeOut);
             case "UseRandomSubdivision": return TryAssignBool(value, out emitter.UseRandomSubdivision);
             case "BlendBetweenSubdivisions": return TryAssignBool(value, out emitter.BlendBetweenSubdivisions);
+            case "UseRevolution": return TryAssignBool(value, out emitter.UseRevolution);
+            case "UseRevolutionScale": return TryAssignBool(value, out emitter.UseRevolutionScale);
+            case "UseVelocityScale": return TryAssignBool(value, out emitter.UseVelocityScale);
             case "AddLocationFromOtherEmitter":
                 return TryAssignInt(value, out emitter.AddLocationFromOtherEmitter);
             case "RespawnDeadParticles": return TryAssignBool(value, out emitter.RespawnDeadParticles);
@@ -389,6 +432,8 @@ public static class L2EffectUcEmitterParser
             case "FadeOutStartTime": return TryAssignFloat(value, out emitter.FadeOutStartTime);
             case "ColorScaleRepeats": return TryAssignFloat(value, out emitter.ColorScaleRepeats);
             case "SizeScaleRepeats": return TryAssignFloat(value, out emitter.SizeScaleRepeats);
+            case "RevolutionScaleRepeats": return TryAssignFloat(value, out emitter.RevolutionScaleRepeats);
+            case "VelocityScaleRepeats": return TryAssignFloat(value, out emitter.VelocityScaleRepeats);
             case "TextureUSubdivisions": return TryAssignInt(value, out emitter.TextureUSubdivisions);
             case "TextureVSubdivisions": return TryAssignInt(value, out emitter.TextureVSubdivisions);
             case "SubdivisionStart": return TryAssignInt(value, out emitter.SubdivisionStart);
@@ -407,6 +452,10 @@ public static class L2EffectUcEmitterParser
             case "StartVelocityRange":
                 emitter.StartVelocityRange = ParseVectorRange(value, UniformVectorRange(0f));
                 return true;
+            case "MaxAbsVelocity":
+                emitter.MaxAbsVelocity = ParseVector(
+                    value, new Vector3(10000f, 10000f, 10000f));
+                return true;
             case "VelocityLossRange":
                 emitter.VelocityLossRange = ParseVectorRange(value, UniformVectorRange(0f));
                 return true;
@@ -418,6 +467,29 @@ public static class L2EffectUcEmitterParser
                 return true;
             case "SpinsPerSecondRange":
                 emitter.SpinsPerSecondRange = ParseVectorRange(value, UniformVectorRange(0f));
+                return true;
+            case "RevolutionsPerSecondRange":
+                emitter.RevolutionsPerSecondRange = ParseVectorRange(value, UniformVectorRange(0f));
+                return true;
+            case "RevolutionCenterOffsetRange":
+                emitter.RevolutionCenterOffsetRange = ParseVectorRange(value, UniformVectorRange(0f));
+                return true;
+            case "SphereRadiusRange":
+                if (!TryParseMinMaxRange(
+                        value,
+                        out float sphereMin,
+                        out float sphereMax,
+                        out bool hasSphereMin,
+                        out bool hasSphereMax) ||
+                    (!hasSphereMin && !hasSphereMax))
+                {
+                    return false;
+                }
+
+                emitter.HasSphereRadiusRange = true;
+                emitter.SphereRadiusRange = new UcRange(
+                    hasSphereMin ? sphereMin : sphereMax,
+                    hasSphereMax ? sphereMax : sphereMin);
                 return true;
             case "ColorMultiplierRange":
                 emitter.ColorMultiplierRange = ParseVectorRange(value, UniformVectorRange(1f));
@@ -587,6 +659,24 @@ public static class L2EffectUcEmitterParser
             Index = index,
             RelativeTime = ParseNamedFloat(content, "RelativeTime", 0f),
             RelativeSize = ParseNamedFloat(content, "RelativeSize", 1f)
+        };
+    }
+
+    private static UcVectorScaleKey ParseVectorScaleKey(
+        int index,
+        string content,
+        string vectorFieldName)
+    {
+        Match vectorMatch = Regex.Match(
+            content,
+            Regex.Escape(vectorFieldName) + @"=\((?<vector>[^)]*)\)");
+        return new UcVectorScaleKey
+        {
+            Index = index,
+            RelativeTime = ParseNamedFloat(content, "RelativeTime", 0f),
+            RelativeValue = ParseVector(
+                vectorMatch.Success ? vectorMatch.Groups["vector"].Value : string.Empty,
+                Vector3.one)
         };
     }
 

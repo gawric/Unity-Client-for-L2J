@@ -15,6 +15,8 @@ public sealed class ParticleStreamRuntime
     ParticleGroupAuthoring _authoring;
     bool[] _active;
     float[] _spawnTimes;
+    Matrix4x4[] _spawnObjectToWorld;
+    bool[] _hasSpawnObjectToWorld;
     int _cursor;
     uint _meshRandBase;
     uint _spriteRandBase;
@@ -83,6 +85,7 @@ public sealed class ParticleStreamRuntime
 
         int count = _slots.Count;
         EnsureSlots(count);
+        EnsureCoordinateMatrices(count);
         _simulation.EnsureLifetime(count, reset: true);
         bool gpu = _batch.TryBind(_slots.Particles, _authoring.useGpuInstancing, _simulation);
         if (gpu)
@@ -228,10 +231,11 @@ public sealed class ParticleStreamRuntime
         }
 
         _simulation.CompleteExpire();
+        Matrix4x4[] objectToWorldMatrices = _slots.ResolveObjectToWorldMatrices();
         _batch.Draw(
             _simulation,
             _slots.ResolveGpuOwnerWorldPos(_simulation.GpuMaterials),
-            _slots.ResolveObjectToWorldMatrices());
+            ResolveDrawMatrices(objectToWorldMatrices));
     }
 
     public void Stop(EmitterStopMode mode)
@@ -258,6 +262,7 @@ public sealed class ParticleStreamRuntime
     {
         _simulation.CompleteExpire();
         _simulation.Dispose();
+        _slots.RestoreCoordinateSystemSlots();
         _batch.Release();
     }
 
@@ -371,6 +376,7 @@ public sealed class ParticleStreamRuntime
         float shaderStartTime = now - _warmupAgeAtSpawn;
         float seed = Random.Range(-100f, 100f);
         Vector4 spawnLocationAddUe = ResolveSpawnLocationAddUe(now);
+        CaptureSpawnObjectToWorld(slot);
         _simulation.EnsureLifetime(_slots.Count);
         if (_batch.Bound)
         {
@@ -392,6 +398,7 @@ public sealed class ParticleStreamRuntime
                 : null;
             if (renderer != null)
             {
+                _slots.ApplyCoordinateSystemToGoSlot(slot, _authoring.coordinateSystem);
                 renderer.gameObject.SetActive(true);
             }
 
@@ -423,6 +430,18 @@ public sealed class ParticleStreamRuntime
                 " shaderAge=" + shaderAge.ToString("0.###") +
                 " simLife=" + _particleLifetime.ToString("0.###") +
                 (deadInShader ? " DEAD_IN_SHADER_AT_SPAWN" : string.Empty));
+            ParticleGroupV2 compareHost = _host as ParticleGroupV2;
+            if (compareHost != null && compareHost.CompareLogEnabled)
+            {
+                ParticleGroupV2CompareLog.WriteSpawn(
+                    compareHost,
+                    slot,
+                    _slots.Count,
+                    now,
+                    shaderStartTime,
+                    _particleLifetime);
+            }
+
             if (NpcDeco2911Trace.Matches(DebugName))
             {
                 NpcDeco2911Trace.Log(
@@ -528,6 +547,76 @@ public sealed class ParticleStreamRuntime
 
         _active = new bool[count];
         _spawnTimes = new float[count];
+    }
+
+    void EnsureCoordinateMatrices(int count)
+    {
+        if (count <= 0)
+        {
+            return;
+        }
+
+        if (_spawnObjectToWorld == null || _spawnObjectToWorld.Length != count)
+        {
+            _spawnObjectToWorld = new Matrix4x4[count];
+            _hasSpawnObjectToWorld = new bool[count];
+            return;
+        }
+
+        for (int i = 0; i < _hasSpawnObjectToWorld.Length; i++)
+        {
+            _hasSpawnObjectToWorld[i] = false;
+        }
+    }
+
+    void CaptureSpawnObjectToWorld(int slot)
+    {
+        if (!L2ParticleCoordinateSystemUtil.FreezesSpawnMatrix(_authoring.coordinateSystem))
+        {
+            return;
+        }
+
+        Matrix4x4[] current = _slots.ResolveObjectToWorldMatrices();
+        if (current == null || slot < 0 || slot >= current.Length)
+        {
+            return;
+        }
+
+        Matrix4x4 matrix = current[slot];
+        if (_authoring.coordinateSystem == L2ParticleCoordinateSystem.Independent)
+        {
+            matrix = Matrix4x4.TRS(
+                matrix.GetColumn(3),
+                Quaternion.identity,
+                new Vector3(
+                    matrix.GetColumn(0).magnitude,
+                    matrix.GetColumn(1).magnitude,
+                    matrix.GetColumn(2).magnitude));
+        }
+
+        _spawnObjectToWorld[slot] = matrix;
+        _hasSpawnObjectToWorld[slot] = true;
+    }
+
+    Matrix4x4[] ResolveDrawMatrices(Matrix4x4[] current)
+    {
+        if (!L2ParticleCoordinateSystemUtil.FreezesSpawnMatrix(_authoring.coordinateSystem) ||
+            current == null ||
+            _spawnObjectToWorld == null)
+        {
+            return current;
+        }
+
+        int count = Mathf.Min(current.Length, _spawnObjectToWorld.Length);
+        for (int i = 0; i < count; i++)
+        {
+            if (_hasSpawnObjectToWorld[i])
+            {
+                current[i] = _spawnObjectToWorld[i];
+            }
+        }
+
+        return current;
     }
 
     void ApplyLifeStretchToRenderer(Renderer renderer)

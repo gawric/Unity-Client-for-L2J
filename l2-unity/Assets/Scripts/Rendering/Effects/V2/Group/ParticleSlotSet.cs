@@ -44,6 +44,14 @@ public sealed class ParticleSlotSet
         uint spriteRandBase) =>
         _renderers.ActivateGoSlot(slot, shaderStartTime, seed, meshRandBase, spriteRandBase);
 
+    public void ApplyCoordinateSystemToGoSlot(
+        int slot,
+        L2ParticleCoordinateSystem coordinateSystem) =>
+        _renderers.ApplyCoordinateSystemToGoSlot(slot, coordinateSystem);
+
+    public void RestoreCoordinateSystemSlots() =>
+        _renderers.RestoreCoordinateSystemSlots();
+
     public float ReadShaderSlotDuration(float fallbackDuration) =>
         _renderers.ReadShaderSlotDuration(fallbackDuration);
 

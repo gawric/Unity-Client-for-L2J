@@ -314,6 +314,7 @@ public static class L2EffectGeneratorPrefabBuilder
                     "ParticleGroupV2" +
                     ", slots=" + slotCount + ", slotName=" + emitter.ParticleSlotName + materialAction +
                     ", " + materialConfiguration +
+                    DescribeEssenceBind(emitter, slotMesh) +
                     ", delay=" + FormatUcDelay(emitter) +
                     ", cps=" + FormatUcCountPerSecond(emitter) +
                     ", duration=" + FormatUcDuration(emitter) + ")");
@@ -338,6 +339,19 @@ public static class L2EffectGeneratorPrefabBuilder
                 !string.IsNullOrEmpty(trailProviderLogLine))
             {
                 logLines.Add(trailProviderLogLine);
+            }
+
+            if (L2EffectGeneratorAddLocationProviderConfigurator.TryApply(
+                    prefabRoot,
+                    emitters,
+                    planned.Label,
+                    out string addLocationLogLine) ||
+                !string.IsNullOrEmpty(addLocationLogLine))
+            {
+                if (!string.IsNullOrEmpty(addLocationLogLine))
+                {
+                    logLines.Add(addLocationLogLine);
+                }
             }
 
             PrefabUtility.SaveAsPrefabAsset(prefabRoot, prefabPath);
@@ -484,6 +498,10 @@ public static class L2EffectGeneratorPrefabBuilder
 
         SetBoolIfPresent(serializedPart, "_cloneParticlesToMaxCount", maxCount > 1);
         SetBoolIfPresent(serializedPart, "_useGpuInstancing", maxCount > 1);
+        SetIntIfPresent(
+            serializedPart,
+            "_coordinateSystem",
+            (int)emitter.ResolveRuntimeCoordinateSystem());
         SetBoolIfPresent(serializedPart, "_forceContinuousSpawning", false);
         SetBoolIfPresent(serializedPart, "_preserveShaderTimeInContinuousLoop", false);
         SetBoolIfPresent(serializedPart, "_hasFixedDuration", !useCastWindow);
@@ -509,6 +527,8 @@ public static class L2EffectGeneratorPrefabBuilder
         {
             SetFloatIfPresent(serializedPart, "_warmupTicksPerSecond", emitter.WarmupTicksPerSecond);
         }
+
+        SetBoolIfPresent(serializedPart, "_compareLogEnabled", true);
 
         if (emitter.HasInitialDelayRange)
         {
@@ -752,8 +772,7 @@ public static class L2EffectGeneratorPrefabBuilder
 
         List<Texture2D> textures = L2EffectGeneratorMaterialConfigurator.ResolveTextures(
             emitter, slotMesh);
-        bool isMesh = string.Equals(
-            emitter.ClassName, "MeshEmitter", StringComparison.OrdinalIgnoreCase);
+        bool isMesh = L2EffectGeneratorMaterialConfigurator.IsMeshEmitter(emitter.ClassName);
         int materialCount = isMesh && slotMesh != null
             ? Math.Max(1, slotMesh.subMeshCount)
             : 1;
@@ -993,7 +1012,7 @@ public static class L2EffectGeneratorPrefabBuilder
         }
 
         if (emitter != null &&
-            string.Equals(emitter.ClassName, "MeshEmitter", StringComparison.OrdinalIgnoreCase) &&
+            L2EffectGeneratorMaterialConfigurator.IsMeshEmitter(emitter.ClassName) &&
             !string.IsNullOrWhiteSpace(emitter.StaticMeshReference))
         {
             Mesh staticMesh = TryResolveStaticMesh(emitter.StaticMeshReference);
@@ -1001,6 +1020,11 @@ public static class L2EffectGeneratorPrefabBuilder
             {
                 return staticMesh;
             }
+
+            Debug.LogWarning(
+                "L2 Effect Generator: mesh missing for " + emitter.EmitterName +
+                " (" + emitter.ClassName + ") ref=" + emitter.StaticMeshReference +
+                " — slot would fall back to Quad and leave a geometry hole.");
         }
 
         return GetDefaultSlotMesh();
@@ -1027,6 +1051,76 @@ public static class L2EffectGeneratorPrefabBuilder
         Mesh mesh = L2BeamEmitterStripBuilder.Build(points, 1f, 1f, HideFlags.None);
         AssetDatabase.CreateAsset(mesh, meshPath);
         return AssetDatabase.LoadAssetAtPath<Mesh>(meshPath);
+    }
+
+    private static string DescribeEssenceBind(UcEmitterDefinition emitter, Mesh slotMesh)
+    {
+        if (emitter == null)
+        {
+            return string.Empty;
+        }
+
+        var parts = new List<string>();
+        if (emitter.IsPolarShape)
+        {
+            parts.Add("polar");
+        }
+        else if (emitter.IsSphereShape)
+        {
+            parts.Add("sphere");
+        }
+
+        if (emitter.UseRevolution)
+        {
+            parts.Add("revolution");
+        }
+
+        if (string.Equals(emitter.UseDirectionAs, "PTDU_Forward", StringComparison.OrdinalIgnoreCase))
+        {
+            parts.Add("PTDU_Forward");
+        }
+        else if (string.Equals(emitter.UseDirectionAs, "PTDU_Normal", StringComparison.OrdinalIgnoreCase))
+        {
+            parts.Add("PTDU_Normal");
+        }
+
+        if (string.Equals(emitter.ClassName, "VertMeshEmitter", StringComparison.OrdinalIgnoreCase))
+        {
+            parts.Add(slotMesh != null ? "VertMesh=" + slotMesh.name : "VertMesh=MISSING");
+        }
+
+        if (emitter.HasRelativeWarmupTime || emitter.HasWarmupTicksPerSecond)
+        {
+            parts.Add("warmup");
+        }
+
+        int coordinateSystem = emitter.ResolveNativeCoordinateSystem();
+        if (coordinateSystem != L2ParticleCoordinateSystemUtil.NativeRelative)
+        {
+            parts.Add("CS=" + coordinateSystem);
+        }
+
+        if (emitter.IndependentSprayAccel)
+        {
+            parts.Add("IndependentSprayAccel");
+        }
+
+        if (emitter.AddLocationFromOtherEmitter >= 0)
+        {
+            parts.Add("AddLocation=" + emitter.AddLocationFromOtherEmitter);
+        }
+
+        if (emitter.UseVelocityScale)
+        {
+            parts.Add("VelocityScale");
+        }
+
+        if (emitter.UseRevolutionScale)
+        {
+            parts.Add("RevolutionScale");
+        }
+
+        return parts.Count == 0 ? string.Empty : ", essence=" + string.Join("+", parts);
     }
 
     private static Mesh TryResolveStaticMesh(string staticMeshReference)

@@ -19,6 +19,7 @@ public static class L2EffectGeneratorAssetOverrides
             { "windblowin00", new[] { "fx_m_t0001" } },
             { "windblowin01", new[] { "fx_m_t0001" } },
             { "black_vampire01", new[] { "fx_m_t0032", "fx_m_t0032", "fx_m_t0009" } },
+            { "sh2", new[] { "FX_M_T8030" } },
         };
 
     // Slot 2 diamond: live TFactor + floor/contrast from RenderDoc
@@ -90,6 +91,40 @@ public static class L2EffectGeneratorAssetOverrides
     const int FxMt0006VSub = 2;
     const int FxMt0006DumpedEnd = 5;
     const int FxMt0006Cell = 4;
+
+    const string FxMt8146Atlas = "fx_m_t8146";
+    const float FxMt8146DarkenRgbBoost = 5f;
+    const float FxMt8146DarkenOpacity = 1f;
+    const string FxMt8138Atlas = "fx_m_t8138";
+    const float FxMt8138BrightenRgbBoost = 2f;
+
+    const string CrossPoisonMesh = "cross_poison";
+    const string FxMt8115Atlas = "fx_m_t8115";
+    const float FxMt8115CrossPoisonRgbBoost = 2f;
+
+    const string FxEFireLight02 = "FX_E_fire_light02";
+    const float FxEFireLight02RgbBoost = 2f;
+
+    const string FxMt3037Atlas = "fx_m_t_3037";
+    const float FxMt3037RgbBoost = 2f;
+
+    const string FxMt1003Atlas = "fx_m_t1003";
+    const float FxMt1003RgbBoost = 2f;
+
+    const string GuardnaiaCenterMesh = "guardnaiaCenter";
+    const string FxMt8034Atlas = "fx_m_t8034";
+    const float FxMt8034GuardnaiaRgbBoost = 2f;
+
+    const string SpriteEmitter33Name = "SpriteEmitter33";
+    const string SpriteEmitter33Alias = "smorke";
+    const string FxMt1018Atlas = "fx_m_t1018";
+    const float FxMt1018RgbBoost = 2f;
+    const float FxMt1018WorldCalibration = 0.5f;
+
+    const string SpriteEmitter30Name = "SpriteEmitter30";
+    const string SpriteEmitter30Alias = "Aura";
+    const string FxMt4009Atlas = "fx_m_t4009";
+    const float FxMt4009WorldCalibration = 0.5f;
 
     const string FxMt0000Atlas = "fx_m_t0000";
     const int FxMt0000Uv = 4;
@@ -423,6 +458,256 @@ public static class L2EffectGeneratorAssetOverrides
             GetUcObjectName(emitter.TextureReference),
             FxMt0006Atlas,
             StringComparison.OrdinalIgnoreCase);
+    }
+
+    /// <summary>
+    /// Darken smoke (d_mon_fire_ta SpriteEmitter1482): UC Texture=fx_m_t8146
+    /// + PTDS_Darken. Linear atlas + Boost 5 + Opacity 1 restore the shadow.
+    /// </summary>
+    public static bool TryGetFxMt8146PtdsDarken(
+        UcEmitterDefinition emitter,
+        out float rgbBoost,
+        out float opacity)
+    {
+        rgbBoost = 1f;
+        opacity = 0f;
+        if (emitter == null ||
+            !string.Equals(emitter.DrawStyle, "PTDS_Darken", StringComparison.OrdinalIgnoreCase))
+        {
+            return false;
+        }
+
+        if (!string.Equals(
+                GetUcObjectName(emitter.TextureReference),
+                FxMt8146Atlas,
+                StringComparison.OrdinalIgnoreCase))
+        {
+            return false;
+        }
+
+        rgbBoost = FxMt8146DarkenRgbBoost;
+        opacity = FxMt8146DarkenOpacity;
+        return true;
+    }
+
+    /// <summary>
+    /// Brighten center (d_mon_fire_ta SpriteEmitter1487): UC Texture=fx_m_t8138
+    /// + PTDS_Brighten. Linear atlas + Boost 2. D3D9 is tex * vertexColor.
+    /// </summary>
+    public static bool TryGetFxMt8138PtdsBrighten(
+        UcEmitterDefinition emitter,
+        out float rgbBoost)
+    {
+        rgbBoost = 1f;
+        if (emitter == null ||
+            !string.Equals(emitter.DrawStyle, "PTDS_Brighten", StringComparison.OrdinalIgnoreCase))
+        {
+            return false;
+        }
+
+        if (!string.Equals(
+                GetUcObjectName(emitter.TextureReference),
+                FxMt8138Atlas,
+                StringComparison.OrdinalIgnoreCase))
+        {
+            return false;
+        }
+
+        rgbBoost = FxMt8138BrightenRgbBoost;
+        return true;
+    }
+
+    /// <summary>
+    /// MeshEmitter833 / cross_poison: dump binds Texture=fx_m_t8115.
+    /// Linear atlas + Color Gamma To Linear + Boost 2.
+    /// </summary>
+    public static bool TryGetCrossPoisonFxMt8115(
+        UcEmitterDefinition emitter,
+        Texture2D currentTexture,
+        out float rgbBoost)
+    {
+        rgbBoost = 1f;
+        if (emitter == null ||
+            !string.Equals(
+                GetUcObjectName(emitter.StaticMeshReference),
+                CrossPoisonMesh,
+                StringComparison.OrdinalIgnoreCase))
+        {
+            return false;
+        }
+
+        string textureName = currentTexture != null
+            ? currentTexture.name
+            : GetUcObjectName(emitter.TextureReference);
+        if (!string.Equals(textureName, FxMt8115Atlas, StringComparison.OrdinalIgnoreCase))
+        {
+            return false;
+        }
+
+        rgbBoost = FxMt8115CrossPoisonRgbBoost;
+        return true;
+    }
+
+    /// <summary>
+    /// guardnaiaCenter + fx_m_t8034: linear atlas + Color Gamma To Linear + Boost 2.
+    /// </summary>
+    public static bool TryGetGuardnaiaCenterFxMt8034(
+        UcEmitterDefinition emitter,
+        Texture2D currentTexture,
+        out float rgbBoost)
+    {
+        rgbBoost = 1f;
+        if (emitter == null ||
+            !string.Equals(
+                GetUcObjectName(emitter.StaticMeshReference),
+                GuardnaiaCenterMesh,
+                StringComparison.OrdinalIgnoreCase))
+        {
+            return false;
+        }
+
+        string textureName = currentTexture != null
+            ? currentTexture.name
+            : GetUcObjectName(emitter.TextureReference);
+        if (!string.Equals(textureName, FxMt8034Atlas, StringComparison.OrdinalIgnoreCase))
+        {
+            return false;
+        }
+
+        rgbBoost = FxMt8034GuardnaiaRgbBoost;
+        return true;
+    }
+
+    /// <summary>
+    /// FX_E_fire_light02 (d_mon_fire_ta SpriteEmitter1488): linear atlas +
+    /// Color Gamma To Linear + Boost 2.
+    /// </summary>
+    public static bool TryGetFxEFireLight02(
+        UcEmitterDefinition emitter,
+        Texture2D currentTexture,
+        out float rgbBoost)
+    {
+        rgbBoost = 1f;
+        string textureName = currentTexture != null
+            ? currentTexture.name
+            : GetUcObjectName(emitter != null ? emitter.TextureReference : null);
+        if (!string.Equals(textureName, FxEFireLight02, StringComparison.OrdinalIgnoreCase))
+        {
+            return false;
+        }
+
+        rgbBoost = FxEFireLight02RgbBoost;
+        return true;
+    }
+
+    /// <summary>
+    /// fx_m_t_3037 (d_mon_fire2_ca): linear atlas + Color Gamma To Linear + Boost 2.
+    /// </summary>
+    public static bool TryGetFxMt3037(
+        UcEmitterDefinition emitter,
+        Texture2D currentTexture,
+        out float rgbBoost)
+    {
+        rgbBoost = 1f;
+        string textureName = currentTexture != null
+            ? currentTexture.name
+            : GetUcObjectName(emitter != null ? emitter.TextureReference : null);
+        if (!string.Equals(textureName, FxMt3037Atlas, StringComparison.OrdinalIgnoreCase))
+        {
+            return false;
+        }
+
+        rgbBoost = FxMt3037RgbBoost;
+        return true;
+    }
+
+    /// <summary>
+    /// fx_m_t1003: linear atlas + Boost 2.
+    /// </summary>
+    public static bool TryGetFxMt1003(
+        UcEmitterDefinition emitter,
+        Texture2D currentTexture,
+        out float rgbBoost)
+    {
+        rgbBoost = 1f;
+        string textureName = currentTexture != null
+            ? currentTexture.name
+            : GetUcObjectName(emitter != null ? emitter.TextureReference : null);
+        if (!string.Equals(textureName, FxMt1003Atlas, StringComparison.OrdinalIgnoreCase))
+        {
+            return false;
+        }
+
+        rgbBoost = FxMt1003RgbBoost;
+        return true;
+    }
+
+    /// <summary>
+    /// d_mon_fire2_ca SpriteEmitter33 / smorke: fx_m_t1018 linear atlas,
+    /// Color Gamma To Linear, Boost 2, K World 0.5 (PTDU_Forward sheet).
+    /// </summary>
+    public static bool TryGetSpriteEmitter33FxMt1018(
+        UcEmitterDefinition emitter,
+        Texture2D currentTexture,
+        out float rgbBoost,
+        out float worldCalibration)
+    {
+        rgbBoost = 1f;
+        worldCalibration = 0f;
+        if (emitter == null || !IsSpriteEmitter33(emitter))
+        {
+            return false;
+        }
+
+        string textureName = currentTexture != null
+            ? currentTexture.name
+            : GetUcObjectName(emitter.TextureReference);
+        if (!string.Equals(textureName, FxMt1018Atlas, StringComparison.OrdinalIgnoreCase))
+        {
+            return false;
+        }
+
+        rgbBoost = FxMt1018RgbBoost;
+        worldCalibration = FxMt1018WorldCalibration;
+        return true;
+    }
+
+    static bool IsSpriteEmitter33(UcEmitterDefinition emitter)
+    {
+        return string.Equals(emitter.EmitterName, SpriteEmitter33Name, StringComparison.OrdinalIgnoreCase) ||
+               string.Equals(emitter.ParticleSlotName, SpriteEmitter33Alias, StringComparison.OrdinalIgnoreCase);
+    }
+
+    /// <summary>
+    /// d_mon_fire2_ca SpriteEmitter30 / Aura: K World 0.5. No DrawScale.
+    /// </summary>
+    public static bool TryGetSpriteEmitter30FxMt4009(
+        UcEmitterDefinition emitter,
+        Texture2D currentTexture,
+        out float worldCalibration)
+    {
+        worldCalibration = 0f;
+        if (emitter == null || !IsSpriteEmitter30(emitter))
+        {
+            return false;
+        }
+
+        string textureName = currentTexture != null
+            ? currentTexture.name
+            : GetUcObjectName(emitter.TextureReference);
+        if (!string.Equals(textureName, FxMt4009Atlas, StringComparison.OrdinalIgnoreCase))
+        {
+            return false;
+        }
+
+        worldCalibration = FxMt4009WorldCalibration;
+        return true;
+    }
+
+    static bool IsSpriteEmitter30(UcEmitterDefinition emitter)
+    {
+        return string.Equals(emitter.EmitterName, SpriteEmitter30Name, StringComparison.OrdinalIgnoreCase) ||
+               string.Equals(emitter.ParticleSlotName, SpriteEmitter30Alias, StringComparison.OrdinalIgnoreCase);
     }
 
     /// <summary>

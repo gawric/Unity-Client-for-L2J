@@ -150,6 +150,36 @@ public static class L2EffectGeneratorMaterialConfigurator
             emitter.VelocityLossRange.Y.Max,
             emitter.VelocityLossRange.Z.Max,
             0f));
+        ConfigureLocationShape(material, emitter);
+        ConfigureRevolution(material, emitter);
+        if (!IsBeamEmitter(emitter.ClassName))
+        {
+            SetFloat(
+                material,
+                "_CoordinateSystem",
+                emitter.ResolveNativeCoordinateSystem());
+            SetFloat(
+                material,
+                "_IndependentSprayAccel",
+                emitter.IndependentSprayAccel ? 1f : 0f);
+            SetVector(material, "_MaxAbsVelocityUc", new Vector4(
+                emitter.MaxAbsVelocity.x,
+                emitter.MaxAbsVelocity.y,
+                emitter.MaxAbsVelocity.z,
+                0f));
+            ConfigureVectorScaleKeys(
+                material,
+                "_VelocityScale",
+                emitter.UseVelocityScale,
+                emitter.VelocityScaleRepeats,
+                emitter.VelocityScaleKeys);
+            ConfigureVectorScaleKeys(
+                material,
+                "_RevolutionScale",
+                emitter.UseRevolutionScale,
+                emitter.RevolutionScaleRepeats,
+                emitter.RevolutionScaleKeys);
+        }
 
         SetFloat(material, "_FadeIn", emitter.FadeIn ? 1f : 0f);
         SetFloat(material, "_FadeInEndTime", emitter.FadeInEndTime);
@@ -169,10 +199,8 @@ public static class L2EffectGeneratorMaterialConfigurator
         Material material,
         UcEmitterDefinition emitter)
     {
-        bool polar = string.Equals(
-            emitter.StartLocationShape, "PTLS_Polar", StringComparison.OrdinalIgnoreCase);
         SetFloat(material, "_SpawnMode", 2f);
-        SetFloat(material, "_FullTlsShape", polar ? 1f : 0f);
+        SetFloat(material, "_FullTlsShape", emitter.IsPolarShape ? 1f : 0f);
         SetFloat(material, "_PtvdMode", ResolvePtvdMode(emitter.GetVelocityDirectionFrom));
         SetFloat(material, "_MotionMode", ResolveMotionMode(emitter));
         SetFloat(material, "_TransformMode",
@@ -229,10 +257,8 @@ public static class L2EffectGeneratorMaterialConfigurator
         Material material,
         UcEmitterDefinition emitter)
     {
-        bool polar = string.Equals(
-            emitter.StartLocationShape, "PTLS_Polar", StringComparison.OrdinalIgnoreCase);
         SetFloat(material, "_SpawnMode", 3f);
-        SetFloat(material, "_FullTlsShape", polar ? 1f : 0f);
+        SetFloat(material, "_FullTlsShape", emitter.IsPolarShape ? 1f : 0f);
         SetFloat(material, "_MotionMode", ResolveMotionMode(emitter));
         SetFloat(material, "_OrientationMode", ResolveOrientationMode(emitter.UseDirectionAs));
         SetFloat(material, "_PtvdMode", ResolvePtvdMode(emitter.GetVelocityDirectionFrom));
@@ -276,11 +302,21 @@ public static class L2EffectGeneratorMaterialConfigurator
             SetFloat(material, "_StaticSubdivision", 2f);
         }
 
-        if (ResolveOrientationMode(emitter.UseDirectionAs) > 1.5f)
+        float orientation = ResolveOrientationMode(emitter.UseDirectionAs);
+        if (orientation > 1.5f && orientation < 2.5f)
         {
             Vector3 ue = emitter.HasProjectionNormal
                 ? emitter.ProjectionNormal
                 : new Vector3(0f, 0f, 1f);
+            if (ue.sqrMagnitude > 1e-8f)
+            {
+                ue.Normalize();
+            }
+            else
+            {
+                ue = new Vector3(0f, 0f, 1f);
+            }
+
             Vector3 unity = new Vector3(ue.x, ue.z, ue.y);
             SetVector(material, "_SurfaceNormals", new Vector4(unity.x, unity.y, unity.z, 0f));
         }
@@ -290,10 +326,8 @@ public static class L2EffectGeneratorMaterialConfigurator
         Material material,
         UcEmitterDefinition emitter)
     {
-        bool polar = string.Equals(
-            emitter.StartLocationShape, "PTLS_Polar", StringComparison.OrdinalIgnoreCase);
         SetFloat(material, "_L2FxWorldCalibration", 1.4f);
-        SetFloat(material, "_UsePolar", polar ? 1f : 0f);
+        SetFloat(material, "_UsePolar", emitter.IsPolarShape ? 1f : 0f);
         SetFloat(material, "_BeamEndpointMode", ResolveBeamEndpointMode(emitter.DetermineEndPointBy));
         SetFloat(material, "_OpacityRatio", 1f);
         SetVector(material, "_SizeRange", RangeVector(
@@ -513,6 +547,85 @@ public static class L2EffectGeneratorMaterialConfigurator
         UcEmitterDefinition emitter,
         ref Texture2D currentTexture)
     {
+        if (L2EffectGeneratorAssetOverrides.TryGetFxMt8146PtdsDarken(
+                emitter, out float darkenBoost, out float darkenOpacity))
+        {
+            L2EffectImportUtil.EnsureSrgbOff(currentTexture);
+            SetFloat(material, "_RgbBoost", darkenBoost);
+            SetFloat(material, "_Opacity", darkenOpacity);
+            return;
+        }
+
+        if (L2EffectGeneratorAssetOverrides.TryGetFxMt8138PtdsBrighten(
+                emitter, out float brightenBoost))
+        {
+            L2EffectImportUtil.EnsureSrgbOff(currentTexture);
+            SetFloat(material, "_RgbBoost", brightenBoost);
+            SetFloat(material, "_L2SpriteColorGammaToLinear", 0f);
+            return;
+        }
+
+        if (L2EffectGeneratorAssetOverrides.TryGetCrossPoisonFxMt8115(
+                emitter, currentTexture, out float crossPoisonBoost))
+        {
+            L2EffectImportUtil.EnsureSrgbOff(currentTexture);
+            SetFloat(material, "_RgbBoost", crossPoisonBoost);
+            SetFloat(material, "_L2SpriteColorGammaToLinear", 1f);
+            return;
+        }
+
+        if (L2EffectGeneratorAssetOverrides.TryGetGuardnaiaCenterFxMt8034(
+                emitter, currentTexture, out float guardnaiaBoost))
+        {
+            L2EffectImportUtil.EnsureSrgbOff(currentTexture);
+            SetFloat(material, "_RgbBoost", guardnaiaBoost);
+            SetFloat(material, "_L2SpriteColorGammaToLinear", 1f);
+            return;
+        }
+
+        if (L2EffectGeneratorAssetOverrides.TryGetFxEFireLight02(
+                emitter, currentTexture, out float fireLightBoost))
+        {
+            L2EffectImportUtil.EnsureSrgbOff(currentTexture);
+            SetFloat(material, "_RgbBoost", fireLightBoost);
+            SetFloat(material, "_L2SpriteColorGammaToLinear", 1f);
+            return;
+        }
+
+        if (L2EffectGeneratorAssetOverrides.TryGetFxMt3037(
+                emitter, currentTexture, out float fxMt3037Boost))
+        {
+            L2EffectImportUtil.EnsureSrgbOff(currentTexture);
+            SetFloat(material, "_RgbBoost", fxMt3037Boost);
+            SetFloat(material, "_L2SpriteColorGammaToLinear", 1f);
+            return;
+        }
+
+        if (L2EffectGeneratorAssetOverrides.TryGetFxMt1003(
+                emitter, currentTexture, out float fxMt1003Boost))
+        {
+            L2EffectImportUtil.EnsureSrgbOff(currentTexture);
+            SetFloat(material, "_RgbBoost", fxMt1003Boost);
+            return;
+        }
+
+        if (L2EffectGeneratorAssetOverrides.TryGetSpriteEmitter33FxMt1018(
+                emitter, currentTexture, out float fxMt1018Boost, out float fxMt1018WorldK))
+        {
+            L2EffectImportUtil.EnsureSrgbOff(currentTexture);
+            SetFloat(material, "_RgbBoost", fxMt1018Boost);
+            SetFloat(material, "_L2SpriteColorGammaToLinear", 1f);
+            SetFloat(material, "_L2FxWorldCalibration", fxMt1018WorldK);
+            return;
+        }
+
+        if (L2EffectGeneratorAssetOverrides.TryGetSpriteEmitter30FxMt4009(
+                emitter, currentTexture, out float fxMt4009WorldK))
+        {
+            SetFloat(material, "_L2FxWorldCalibration", fxMt4009WorldK);
+            return;
+        }
+
         ResolveSubdivisionRange(emitter, out int start, out int end);
         bool colorGammaToLinear = false;
         float worldCalibration = 0f;
@@ -564,8 +677,72 @@ public static class L2EffectGeneratorMaterialConfigurator
             material.SetFloat("_UseSecondTex", 1f);
     }
 
+    static void ConfigureLocationShape(Material material, UcEmitterDefinition emitter)
+    {
+        float shape = 0f;
+        if (emitter.IsSphereShape)
+        {
+            shape = 1f;
+        }
+        else if (emitter.IsPolarShape)
+        {
+            shape = 2f;
+        }
+
+        SetFloat(material, "_HeLocationShape", shape);
+        if (emitter.HasSphereRadiusRange)
+        {
+            SetVector(material, "_SphereRadiusRangeUc", RangeVector(
+                emitter.SphereRadiusRange.Min, emitter.SphereRadiusRange.Max));
+        }
+    }
+
+    static void ConfigureRevolution(Material material, UcEmitterDefinition emitter)
+    {
+        SetFloat(material, "_UseRevolution", emitter.UseRevolution ? 1f : 0f);
+        SetVectorRange(material, "_RevolutionCenterOffsetRange", emitter.RevolutionCenterOffsetRange);
+        SetVectorRange(material, "_RevolutionsPerSecondRange", emitter.RevolutionsPerSecondRange);
+    }
+
+    static void ConfigureVectorScaleKeys(
+        Material material,
+        string propertyPrefix,
+        bool enabled,
+        float repeats,
+        List<UcVectorScaleKey> sourceKeys)
+    {
+        var keys = new List<UcVectorScaleKey>(sourceKeys);
+        keys.Sort((a, b) => a.Index.CompareTo(b.Index));
+        if (keys.Count == 0)
+        {
+            keys.Add(new UcVectorScaleKey
+            {
+                Index = 0,
+                RelativeTime = 0f,
+                RelativeValue = Vector3.one
+            });
+        }
+
+        const int capacity = 7;
+        int count = Math.Min(keys.Count, capacity);
+        SetFloat(material, "_Use" + propertyPrefix.Substring(1), enabled ? 1f : 0f);
+        SetFloat(material, propertyPrefix + "Repeats", repeats);
+        SetFloat(material, propertyPrefix + "Count", count);
+        for (int i = 0; i < capacity; i++)
+        {
+            UcVectorScaleKey key = keys[Math.Min(i, count - 1)];
+            SetVector(material, propertyPrefix + "Key" + i, new Vector4(
+                key.RelativeTime,
+                key.RelativeValue.x,
+                key.RelativeValue.y,
+                key.RelativeValue.z));
+        }
+    }
+
     static float ResolveOrientationMode(string useDirectionAs)
     {
+        if (string.Equals(useDirectionAs, "PTDU_Forward", StringComparison.OrdinalIgnoreCase))
+            return 3f;
         if (string.Equals(useDirectionAs, "PTDU_Normal", StringComparison.OrdinalIgnoreCase))
             return 2f;
         if (string.Equals(useDirectionAs, "PTDU_Up", StringComparison.OrdinalIgnoreCase))
@@ -648,12 +825,13 @@ public static class L2EffectGeneratorMaterialConfigurator
                Math.Abs(range.Z.Min) > 1e-6f || Math.Abs(range.Z.Max) > 1e-6f;
     }
 
-    static bool IsMeshEmitter(string className)
+    public static bool IsMeshEmitter(string className)
     {
-        return string.Equals(className, "MeshEmitter", StringComparison.OrdinalIgnoreCase);
+        return string.Equals(className, "MeshEmitter", StringComparison.OrdinalIgnoreCase) ||
+               string.Equals(className, "VertMeshEmitter", StringComparison.OrdinalIgnoreCase);
     }
 
-    static bool IsBeamEmitter(string className)
+    public static bool IsBeamEmitter(string className)
     {
         return string.Equals(className, "BeamEmitter", StringComparison.OrdinalIgnoreCase);
     }

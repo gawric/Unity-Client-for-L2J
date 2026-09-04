@@ -1,0 +1,159 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!21 &2100000
+Material:
+  serializedVersion: 8
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: MeshEmitter833
+  m_Shader: {fileID: 4800000, guid: 699f590baf9747f39ab2925f3970aa59, type: 3}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
+  m_ValidKeywords: []
+  m_InvalidKeywords: []
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 1
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: 3000
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_LockedProperties: 
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - _MainTex:
+        m_Texture: {fileID: 2800000, guid: 9a3a29ccdfadbc84e8a660e52cd6b78b, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _SecondTex:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Ints: []
+    m_Floats:
+    - _AlphaClipThreshold: -1
+    - _ColorKey1Time: 1
+    - _ColorKey2Time: 1
+    - _ColorKey3Time: 1
+    - _ColorKey4Time: 1
+    - _ColorKey5Time: 1
+    - _ColorScaleRepeats: 0
+    - _CoordinateSystem: 1
+    - _Cull: 0
+    - _DebugMeshOut: 0
+    - _DstBlend: 1
+    - _ExpandShaderBounds: 0
+    - _FadeIn: 1
+    - _FadeInEndTime: 0.0385
+    - _FadeOut: 1
+    - _FadeOutStartTime: 0.0945
+    - _FullTlsShape: 0
+    - _HeLocationShape: 0
+    - _IgnoreMainTexAlpha: 0
+    - _IndependentSprayAccel: 0
+    - _L2FxWorldCalibration: 1.8
+    - _L2SpriteColorGammaToLinear: 1
+    - _ManualAge: 0
+    - _MeshSpawnRandStateBits: 0
+    - _MotionMode: 0
+    - _OffsetSource: 0
+    - _Opacity: 0.6
+    - _PtvdMode: 2
+    - _RevolutionScaleCount: 1
+    - _RevolutionScaleRepeats: 0
+    - _RgbBoost: 2
+    - _Seed: 0
+    - _SizeKeyCount: 3
+    - _SizeMode: 2
+    - _SpawnMode: 2
+    - _SpinParticles: 1
+    - _SpinSpsMode: 1
+    - _SrcBlend: 1
+    - _StartSize: 0.6
+    - _StartSizeXY: 0.6
+    - _StartSpinRandStateBits: 0
+    - _StartTime: 0
+    - _TextureContrast: 1
+    - _TextureFloor: 0
+    - _TransformMode: 0
+    - _UseManualAge: 0
+    - _UseRevolution: 0
+    - _UseRevolutionScale: 0
+    - _UseSecondTex: 0
+    - _UseSizeScale: 1
+    - _UseVelocityScale: 0
+    - _VelocityScaleCount: 1
+    - _VelocityScaleRepeats: 0
+    - _ZWrite: 0
+    m_Colors:
+    - _AccelerationUc: {r: 0, g: 0, b: 0, a: 0}
+    - _ColorKey0: {r: 1, g: 1, b: 1, a: 1}
+    - _ColorKey1: {r: 0.1882353, g: 0.24313726, b: 0.2627451, a: 1}
+    - _ColorKey2: {r: 0.1882353, g: 0.24313726, b: 0.2627451, a: 1}
+    - _ColorKey3: {r: 0.1882353, g: 0.24313726, b: 0.2627451, a: 1}
+    - _ColorKey4: {r: 0.1882353, g: 0.24313726, b: 0.2627451, a: 1}
+    - _ColorKey5: {r: 0.1882353, g: 0.24313726, b: 0.2627451, a: 1}
+    - _ColorMulMax: {r: 1, g: 0.75, b: 0.5, a: 0}
+    - _ColorMulMin: {r: 1, g: 0.75, b: 0.5, a: 0}
+    - _ColorMultiplier: {r: 1, g: 0.75, b: 0.5, a: 0}
+    - _InitialDelayRange: {r: 0, g: 0, b: 0, a: 0}
+    - _LifetimeRange: {r: 0.3, g: 0.3, b: 0, a: 0}
+    - _MaxAbsVelocityUc: {r: 10000, g: 10000, b: 10000, a: 0}
+    - _PolarPhiRangeUc: {r: 0, g: 0, b: 0, a: 0}
+    - _PolarRadiusRangeUc: {r: 0, g: 0, b: 0, a: 0}
+    - _PolarThetaRangeUc: {r: 0, g: 0, b: 0, a: 0}
+    - _RevolutionCenterOffsetRangeXUc: {r: 0, g: 0, b: 0, a: 0}
+    - _RevolutionCenterOffsetRangeYUc: {r: 0, g: 0, b: 0, a: 0}
+    - _RevolutionCenterOffsetRangeZUc: {r: 0, g: 0, b: 0, a: 0}
+    - _RevolutionScaleKey0: {r: 0, g: 1, b: 1, a: 1}
+    - _RevolutionScaleKey1: {r: 0, g: 1, b: 1, a: 1}
+    - _RevolutionScaleKey2: {r: 0, g: 1, b: 1, a: 1}
+    - _RevolutionScaleKey3: {r: 0, g: 1, b: 1, a: 1}
+    - _RevolutionScaleKey4: {r: 0, g: 1, b: 1, a: 1}
+    - _RevolutionScaleKey5: {r: 0, g: 1, b: 1, a: 1}
+    - _RevolutionScaleKey6: {r: 0, g: 1, b: 1, a: 1}
+    - _RevolutionsPerSecondRangeXUc: {r: 0, g: 0, b: 0, a: 0}
+    - _RevolutionsPerSecondRangeYUc: {r: 0, g: 0, b: 0, a: 0}
+    - _RevolutionsPerSecondRangeZUc: {r: 0, g: 0, b: 0, a: 0}
+    - _SizeKey0: {r: 0, g: 0.25, b: 0, a: 0}
+    - _SizeKey1: {r: 0.3, g: 1, b: 0, a: 0}
+    - _SizeKey2: {r: 1, g: 2, b: 0, a: 0}
+    - _SizeKey3: {r: 1, g: 2, b: 0, a: 0}
+    - _SizeKey4: {r: 1, g: 2, b: 0, a: 0}
+    - _SphereRadiusRangeUc: {r: 0, g: 0, b: 0, a: 0}
+    - _SpinCCWorCW: {r: 0.5, g: 0.5, b: 0.5, a: 0}
+    - _SpsPitchRangeUc: {r: 0, g: 0, b: 0, a: 0}
+    - _SpsRollRangeUc: {r: 0.5, g: 0.5, b: 0, a: 0}
+    - _SpsYawPitchRollUc: {r: 0, g: 0, b: 0.5, a: 0}
+    - _SpsYawRangeUc: {r: 0, g: 0, b: 0, a: 0}
+    - _StartLocationOffsetUc: {r: 0, g: 0, b: 0, a: 0}
+    - _StartLocationOffsetUe: {r: 0, g: 0, b: 0, a: 0}
+    - _StartLocationRangeXUc: {r: 0, g: 0, b: 0, a: 0}
+    - _StartLocationRangeYUc: {r: 0, g: 0, b: 0, a: 0}
+    - _StartLocationRangeZUc: {r: 0, g: 0, b: 0, a: 0}
+    - _StartLocationZRangeUU: {r: 0, g: 0, b: 0, a: 0}
+    - _StartSizeRange: {r: 0.6, g: 0.6, b: 0, a: 0}
+    - _StartSizeRangeXUc: {r: 0.6, g: 0.6, b: 0, a: 0}
+    - _StartSizeRangeYUc: {r: 0.6, g: 0.6, b: 0, a: 0}
+    - _StartSizeRangeZUc: {r: 0.6, g: 0.6, b: 0, a: 0}
+    - _StartSizeZRange: {r: 0.6, g: 0.6, b: 0, a: 0}
+    - _StartSpinPitchRangeUc: {r: -1, g: 1, b: 0, a: 0}
+    - _StartSpinRollRangeUc: {r: -1, g: 1, b: 0, a: 0}
+    - _StartSpinYawRangeUc: {r: -1, g: 1, b: 0, a: 0}
+    - _StartVelocityRangeXUc: {r: 0, g: 0, b: 0, a: 0}
+    - _StartVelocityRangeYUc: {r: 0, g: 0, b: 0, a: 0}
+    - _StartVelocityRangeZUc: {r: 0, g: 0, b: 0, a: 0}
+    - _StartVelocityZRangeUU: {r: 0, g: 0, b: 0, a: 0}
+    - _TextureFactor: {r: 1, g: 1, b: 1, a: 1}
+    - _VelocityLossRangeUc: {r: 0, g: 0, b: 0, a: 0}
+    - _VelocityScaleKey0: {r: 0, g: 1, b: 1, a: 1}
+    - _VelocityScaleKey1: {r: 0, g: 1, b: 1, a: 1}
+    - _VelocityScaleKey2: {r: 0, g: 1, b: 1, a: 1}
+    - _VelocityScaleKey3: {r: 0, g: 1, b: 1, a: 1}
+    - _VelocityScaleKey4: {r: 0, g: 1, b: 1, a: 1}
+    - _VelocityScaleKey5: {r: 0, g: 1, b: 1, a: 1}
+    - _VelocityScaleKey6: {r: 0, g: 1, b: 1, a: 1}
+  m_BuildTextureStacks: []
+  m_AllowLocking: 1

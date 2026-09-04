@@ -250,5 +250,30 @@ public static class L2EffectImportUtil
 
         return null;
     }
+
+    public static bool EnsureSrgbOff(Texture2D texture)
+    {
+        if (texture == null)
+        {
+            return false;
+        }
+
+        string path = AssetDatabase.GetAssetPath(texture);
+        if (string.IsNullOrEmpty(path))
+        {
+            return false;
+        }
+
+        TextureImporter importer = UnityEditor.AssetImporter.GetAtPath(path) as TextureImporter;
+        if (importer == null || !importer.sRGBTexture)
+        {
+            return false;
+        }
+
+        importer.sRGBTexture = false;
+        importer.SaveAndReimport();
+        Debug.Log("[L2EffectGenerator] sRGB OFF " + path);
+        return true;
+    }
 }
 #endif

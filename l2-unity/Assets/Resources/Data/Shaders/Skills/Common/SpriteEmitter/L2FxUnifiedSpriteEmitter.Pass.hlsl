@@ -19,6 +19,11 @@
 #include "../Decompile_Common/L2FxSpriteColorGammaLinear.hlsl"
 #include "../Decompile_Common/L2FxPTDS_DrawStyle.hlsl"
 #include "../Decompile_Common/L2FxD3d9FixedFunction.hlsl"
+#include "../Decompile_Common/Essence/L2FxHE_VectorScale.hlsl"
+#include "../Decompile_Common/Essence/L2FxHE_CoordinateSystem.hlsl"
+#include "../Decompile_Common/Essence/L2FxHE_Revolution.hlsl"
+#include "../Decompile_Common/Essence/L2FxHE_PTDU_Forward.hlsl"
+#include "../Decompile_Common/Essence/L2FxHE_LocationShape.hlsl"
 #include "../L2FxSpriteEmitterVertex.hlsl"
 #include "../L2FxFlipbook.hlsl"
 #include "../L2FxMeshFragment.hlsl"
@@ -28,8 +33,9 @@ SAMPLER(sampler_MainTex);
 
 // Spawn: 0=None, 1=Box, 2=Polar, 3=Full TLS stream.
 // Full TLS shape: 0=Shape0/box, 1=Polar.
+// HE shape: 0=box, 1=sphere, 2=polar. Atlas stays L2FxFlipbook.
 // Motion: 0=None, 1=Ballistic, 2=Drag.
-// Orientation: 0=Camera billboard, 1=PTDU_Up, 2=PTDU_Normal.
+// Orientation: 0=Camera billboard, 1=PTDU_Up, 2=PTDU_Normal, 3=PTDU_Forward.
 // PTVD: 0=None, 1=StartPositionAndOwner, 2=OwnerAndStartPosition.
 // Size: 0=Uniform, 1=XYZ. Spin: 0=None, 1=appRand.
 // Flipbook: 0=Static, 1=Timed, 2=Random, 3=BlendBetween.
@@ -47,6 +53,7 @@ CBUFFER_START(UnityPerMaterial)
 
     float _SpawnMode;
     float _FullTlsShape;
+    float _HeLocationShape;
     float _MotionMode;
     float _OrientationMode;
     float4 _SurfaceNormals;
@@ -64,12 +71,43 @@ CBUFFER_START(UnityPerMaterial)
     float4 _PolarThetaRangeUc;
     float4 _PolarPhiRangeUc;
     float4 _PolarRadiusRangeUc;
+    float4 _SphereRadiusRangeUc;
+    float _UseRevolution;
+    float4 _RevolutionCenterOffsetRangeXUc;
+    float4 _RevolutionCenterOffsetRangeYUc;
+    float4 _RevolutionCenterOffsetRangeZUc;
+    float4 _RevolutionsPerSecondRangeXUc;
+    float4 _RevolutionsPerSecondRangeYUc;
+    float4 _RevolutionsPerSecondRangeZUc;
+    float _UseRevolutionScale;
+    float _RevolutionScaleRepeats;
+    float _RevolutionScaleCount;
+    float4 _RevolutionScaleKey0;
+    float4 _RevolutionScaleKey1;
+    float4 _RevolutionScaleKey2;
+    float4 _RevolutionScaleKey3;
+    float4 _RevolutionScaleKey4;
+    float4 _RevolutionScaleKey5;
+    float4 _RevolutionScaleKey6;
     float4 _StartVelocityRangeXUc;
     float4 _StartVelocityRangeYUc;
     float4 _StartVelocityRangeZUc;
     float4 _StartVelocityRadialRangeUc;
     float4 _AccelerationUc;
     float4 _VelocityLossRangeUc;
+    float _CoordinateSystem;
+    float _IndependentSprayAccel;
+    float4 _MaxAbsVelocityUc;
+    float _UseVelocityScale;
+    float _VelocityScaleRepeats;
+    float _VelocityScaleCount;
+    float4 _VelocityScaleKey0;
+    float4 _VelocityScaleKey1;
+    float4 _VelocityScaleKey2;
+    float4 _VelocityScaleKey3;
+    float4 _VelocityScaleKey4;
+    float4 _VelocityScaleKey5;
+    float4 _VelocityScaleKey6;
     float _SpawnDeltaTime;
 
     float4 _SizeRange;
@@ -255,6 +293,23 @@ void L2FxUnifiedSprite_ResolveFullTls(
         state);
 }
 
+void L2FxUnifiedSprite_ApplySphereIfNeeded(inout L2FxUnifiedSpriteSpawn spawn)
+{
+    if (_HeLocationShape < 0.5 || _HeLocationShape > 1.5)
+    {
+        return;
+    }
+
+    float radius = L2Fx_RandomRange(_SphereRadiusRangeUc.xy, _Seed, _StartTime, 211.0);
+    float u = L2Fx_RandomRange(float2(0.0, 1.0), _Seed, _StartTime, 212.0);
+    float v = L2Fx_RandomRange(float2(0.0, 1.0), _Seed, _StartTime, 213.0);
+    float theta = 6.28318530718 * u;
+    float z = 1.0 - 2.0 * v;
+    float ring = sqrt(max(0.0, 1.0 - z * z));
+    spawn.positionUe = _StartLocationOffsetUc.xyz
+        + float3(ring * cos(theta), ring * sin(theta), z) * radius;
+}
+
 L2FxUnifiedSpriteSpawn L2FxUnifiedSprite_ResolveSpawn()
 {
     L2FxUnifiedSpriteSpawn spawn;
@@ -262,11 +317,13 @@ L2FxUnifiedSpriteSpawn L2FxUnifiedSprite_ResolveSpawn()
     if (_SpawnMode > 2.5)
     {
         L2FxUnifiedSprite_ResolveFullTls(state, spawn);
+        L2FxUnifiedSprite_ApplySphereIfNeeded(spawn);
         return spawn;
     }
     if (_SpawnMode > 0.5)
     {
         L2FxUnifiedSprite_ResolveSimpleSpawn(state, _SpawnMode, spawn);
+        L2FxUnifiedSprite_ApplySphereIfNeeded(spawn);
         return spawn;
     }
 
@@ -280,7 +337,60 @@ L2FxUnifiedSpriteSpawn L2FxUnifiedSprite_ResolveSpawn()
         _LifetimeRange.xy, _Seed, _StartTime, 7.0), 1e-4);
     spawn.delay = L2Fx_RandomInitialDelay(
         _InitialDelayRange.xy, _Seed, _StartTime, 3.0);
+    L2FxUnifiedSprite_ApplySphereIfNeeded(spawn);
     return spawn;
+}
+
+void L2FxUnifiedSprite_SampleRevolution(out float3 centerUe, out float3 rps)
+{
+    uint revState = asuint(_SpriteMotionRandStateBits) ^ 0xA5A5u;
+    centerUe = L2Fx_FRangeVector_GetRandYawPitchRoll(
+        _RevolutionCenterOffsetRangeXUc.xy,
+        _RevolutionCenterOffsetRangeYUc.xy,
+        _RevolutionCenterOffsetRangeZUc.xy,
+        revState);
+    rps = L2Fx_FRangeVector_GetRandYawPitchRoll(
+        _RevolutionsPerSecondRangeXUc.xy,
+        _RevolutionsPerSecondRangeYUc.xy,
+        _RevolutionsPerSecondRangeZUc.xy,
+        revState);
+}
+
+float3 L2FxUnifiedSprite_ApplyRevolution(
+    float3 locationUe,
+    float ageSeconds,
+    float lifetimeSeconds)
+{
+    float3 centerUe;
+    float3 rps;
+    L2FxUnifiedSprite_SampleRevolution(centerUe, rps);
+    float times[7];
+    float3 values[7];
+    L2FxHE_VectorScale_BuildKeys7(
+        _RevolutionScaleKey0,
+        _RevolutionScaleKey1,
+        _RevolutionScaleKey2,
+        _RevolutionScaleKey3,
+        _RevolutionScaleKey4,
+        _RevolutionScaleKey5,
+        _RevolutionScaleKey6,
+        times,
+        values);
+    float3 integratedMultiplierSeconds =
+        L2FxHE_VectorScale_IntegrateMultiplierMidpoint32(
+            ageSeconds,
+            lifetimeSeconds,
+            _UseRevolutionScale,
+            _RevolutionScaleRepeats,
+            (uint)clamp(_RevolutionScaleCount, 0.0, 7.0),
+            times,
+            values);
+    return L2FxHE_Revolution_ApplyIntegratedMultiplierUe(
+        _UseRevolution,
+        locationUe,
+        centerUe,
+        rps,
+        integratedMultiplierSeconds);
 }
 
 float L2FxUnifiedSprite_SizeScale(float ageNorm)
@@ -310,15 +420,63 @@ float3 L2FxUnifiedSprite_ApplyPtvd(float3 velocityUe, float3 positionUe)
     return velocityUe;
 }
 
-float3 L2FxUnifiedSprite_Displacement(float3 velocityUe, float age)
+float3 L2FxUnifiedSprite_Displacement(
+    float3 velocityUe,
+    float age,
+    float lifetime)
 {
+    float3 accelerationUe;
+    float3 velocityLossUe;
+    L2FxHE_IndependentSprayAccel_Resolve(
+        _CoordinateSystem,
+        _IndependentSprayAccel,
+        _AccelerationUc.xyz,
+        _VelocityLossRangeUc.xyz,
+        accelerationUe,
+        velocityLossUe);
+    bool maxAbsClamps = L2FxHE_MaxAbsWouldClamp(
+        velocityUe,
+        accelerationUe,
+        velocityLossUe,
+        _MaxAbsVelocityUc.xyz,
+        age,
+        _MotionMode);
+    if (_UseVelocityScale > 0.5 || maxAbsClamps)
+    {
+        float times[7];
+        float3 values[7];
+        L2FxHE_VectorScale_BuildKeys7(
+            _VelocityScaleKey0,
+            _VelocityScaleKey1,
+            _VelocityScaleKey2,
+            _VelocityScaleKey3,
+            _VelocityScaleKey4,
+            _VelocityScaleKey5,
+            _VelocityScaleKey6,
+            times,
+            values);
+        return L2FxHE_VectorScale_IntegrateVelocityMidpoint16(
+            velocityUe,
+            accelerationUe,
+            velocityLossUe,
+            _MaxAbsVelocityUc.xyz,
+            age,
+            lifetime,
+            _MotionMode,
+            _UseVelocityScale,
+            _VelocityScaleRepeats,
+            (uint)clamp(_VelocityScaleCount, 0.0, 7.0),
+            times,
+            values);
+    }
+
     if (_MotionMode > 1.5)
         return L2Fx_SpriteMotion_DisplacementUeWithDrag(
-            velocityUe, _AccelerationUc.xyz,
-            _VelocityLossRangeUc.xyz, age, 1.0);
+            velocityUe, accelerationUe,
+            velocityLossUe, age, 1.0);
     if (_MotionMode > 0.5)
         return L2Fx_SpriteMotion_DisplacementUe(
-            velocityUe, _AccelerationUc.xyz, age, 1.0);
+            velocityUe, accelerationUe, age, 1.0);
     return float3(0.0, 0.0, 0.0);
 }
 
@@ -380,10 +538,14 @@ Varyings vert(Attributes IN)
         spawn.velocityUe + _AccelerationUc.xyz * _SpawnDeltaTime,
         spawn.positionUe);
     float3 displacementUe = L2FxUnifiedSprite_Displacement(
-        velocityUe, ageSeconds);
+        velocityUe, ageSeconds, spawn.lifetime);
     float prevAge = max(0.0, ageSeconds - max(_SpawnDeltaTime, 1e-4));
     float3 previousDisplacementUe = L2FxUnifiedSprite_Displacement(
-        velocityUe, prevAge);
+        velocityUe, prevAge, spawn.lifetime);
+    float3 currentUe = L2FxUnifiedSprite_ApplyRevolution(
+        spawn.positionUe + displacementUe, ageSeconds, spawn.lifetime);
+    float3 previousUe = L2FxUnifiedSprite_ApplyRevolution(
+        spawn.positionUe + previousDisplacementUe, prevAge, spawn.lifetime);
 
     float startSpin = 0.0;
     float spinsPerSecond = 0.0;
@@ -406,14 +568,18 @@ Varyings vert(Attributes IN)
     float sizeYM = L2Fx_GetFinalVertexSizeMeters(
         (_SizeMode > 0.5 ? spawn.sizeUu.y : spawn.sizeUu.x) * sizeMul,
         worldK);
-    float3 currentOS = L2Fx_UcPositionToUnityMeters(
-        spawn.positionUe + displacementUe, worldK);
-    float3 previousOS = L2Fx_UcPositionToUnityMeters(
-        spawn.positionUe + previousDisplacementUe, worldK);
+    float3 currentOS = L2Fx_UcPositionToUnityMeters(currentUe, worldK);
+    float3 previousOS = L2Fx_UcPositionToUnityMeters(previousUe, worldK);
     currentOS = L2Fx_ApplySpawnWorldPositionOs(currentOS);
     previousOS = L2Fx_ApplySpawnWorldPositionOs(previousOS);
 
-    if (_OrientationMode > 1.5)
+    if (_OrientationMode > 2.5)
+    {
+        float3 cornerOS = L2FxHE_PTDU_Forward_PositionUnityFromQuadOs(
+            currentOS, previousOS, sizeXM, sizeYM, IN.positionOS.xy);
+        OUT.positionHCS = TransformObjectToHClip(cornerOS);
+    }
+    else if (_OrientationMode > 1.5)
     {
         float3 positionWS = L2FxPTDU_Normal_PositionWS(
             TransformObjectToWorld(currentOS),

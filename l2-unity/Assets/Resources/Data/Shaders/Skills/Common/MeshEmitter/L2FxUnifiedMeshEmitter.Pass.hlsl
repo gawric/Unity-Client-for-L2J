@@ -21,6 +21,9 @@
 #include "../Decompile_Common/L2FxPTRS_Actor.hlsl"
 #include "../Decompile_Common/L2FxPTDS_DrawStyle.hlsl"
 #include "../Decompile_Common/L2FxD3d9FixedFunction.hlsl"
+#include "../Decompile_Common/Essence/L2FxHE_VectorScale.hlsl"
+#include "../Decompile_Common/Essence/L2FxHE_CoordinateSystem.hlsl"
+#include "../Decompile_Common/Essence/L2FxHE_Revolution.hlsl"
 
 TEXTURE2D(_MainTex);
 SAMPLER(sampler_MainTex);
@@ -46,6 +49,25 @@ CBUFFER_START(UnityPerMaterial)
 
     float _SpawnMode;
     float _FullTlsShape;
+    float _HeLocationShape;
+    float _UseRevolution;
+    float4 _RevolutionCenterOffsetRangeXUc;
+    float4 _RevolutionCenterOffsetRangeYUc;
+    float4 _RevolutionCenterOffsetRangeZUc;
+    float4 _RevolutionsPerSecondRangeXUc;
+    float4 _RevolutionsPerSecondRangeYUc;
+    float4 _RevolutionsPerSecondRangeZUc;
+    float _UseRevolutionScale;
+    float _RevolutionScaleRepeats;
+    float _RevolutionScaleCount;
+    float4 _RevolutionScaleKey0;
+    float4 _RevolutionScaleKey1;
+    float4 _RevolutionScaleKey2;
+    float4 _RevolutionScaleKey3;
+    float4 _RevolutionScaleKey4;
+    float4 _RevolutionScaleKey5;
+    float4 _RevolutionScaleKey6;
+    float4 _SphereRadiusRangeUc;
     float _PtvdMode;
     float _MotionMode;
     float _TransformMode;
@@ -84,6 +106,19 @@ CBUFFER_START(UnityPerMaterial)
     float4 _StartVelocityRangeZUc;
     float4 _AccelerationUc;
     float4 _VelocityLossRangeUc;
+    float _CoordinateSystem;
+    float _IndependentSprayAccel;
+    float4 _MaxAbsVelocityUc;
+    float _UseVelocityScale;
+    float _VelocityScaleRepeats;
+    float _VelocityScaleCount;
+    float4 _VelocityScaleKey0;
+    float4 _VelocityScaleKey1;
+    float4 _VelocityScaleKey2;
+    float4 _VelocityScaleKey3;
+    float4 _VelocityScaleKey4;
+    float4 _VelocityScaleKey5;
+    float4 _VelocityScaleKey6;
     float _MeshSpawnRandStateBits;
 
     float _SpinParticles;
@@ -522,13 +557,57 @@ Varyings vert(Attributes IN)
     }
 
     float3 evaluatedLocationUe = locationUe;
-    if (_MotionMode > 1.5)
+    float3 accelerationUe;
+    float3 velocityLossUe;
+    L2FxHE_IndependentSprayAccel_Resolve(
+        _CoordinateSystem,
+        _IndependentSprayAccel,
+        _AccelerationUc.xyz,
+        _VelocityLossRangeUc.xyz,
+        accelerationUe,
+        velocityLossUe);
+    bool maxAbsClamps = L2FxHE_MaxAbsWouldClamp(
+        velocityUe,
+        accelerationUe,
+        velocityLossUe,
+        _MaxAbsVelocityUc.xyz,
+        ageSeconds,
+        _MotionMode);
+    if (_UseVelocityScale > 0.5 || maxAbsClamps)
+    {
+        float velocityScaleTimes[7];
+        float3 velocityScaleValues[7];
+        L2FxHE_VectorScale_BuildKeys7(
+            _VelocityScaleKey0,
+            _VelocityScaleKey1,
+            _VelocityScaleKey2,
+            _VelocityScaleKey3,
+            _VelocityScaleKey4,
+            _VelocityScaleKey5,
+            _VelocityScaleKey6,
+            velocityScaleTimes,
+            velocityScaleValues);
+        evaluatedLocationUe += L2FxHE_VectorScale_IntegrateVelocityMidpoint16(
+            velocityUe,
+            accelerationUe,
+            velocityLossUe,
+            _MaxAbsVelocityUc.xyz,
+            ageSeconds,
+            lifetime,
+            _MotionMode,
+            _UseVelocityScale,
+            _VelocityScaleRepeats,
+            (uint)clamp(_VelocityScaleCount, 0.0, 7.0),
+            velocityScaleTimes,
+            velocityScaleValues);
+    }
+    else if (_MotionMode > 1.5)
     {
         evaluatedLocationUe = L2Fx_MeshMotion_EvaluatePositionUeWithDrag(
             locationUe,
             velocityUe,
-            _AccelerationUc.xyz,
-            _VelocityLossRangeUc.xyz,
+            accelerationUe,
+            velocityLossUe,
             ageSeconds);
     }
     else if (_MotionMode > 0.5)
@@ -536,9 +615,48 @@ Varyings vert(Attributes IN)
         evaluatedLocationUe = L2Fx_MeshMotion_EvaluatePositionUe(
             locationUe,
             velocityUe,
-            _AccelerationUc.xyz,
+            accelerationUe,
             ageSeconds);
     }
+
+    uint revState = asuint(_MeshSpawnRandStateBits) ^ 0xA5A5u;
+    float3 revCenter = L2Fx_FRangeVector_GetRandYawPitchRoll(
+        _RevolutionCenterOffsetRangeXUc.xy,
+        _RevolutionCenterOffsetRangeYUc.xy,
+        _RevolutionCenterOffsetRangeZUc.xy,
+        revState);
+    float3 rps = L2Fx_FRangeVector_GetRandYawPitchRoll(
+        _RevolutionsPerSecondRangeXUc.xy,
+        _RevolutionsPerSecondRangeYUc.xy,
+        _RevolutionsPerSecondRangeZUc.xy,
+        revState);
+    float revolutionScaleTimes[7];
+    float3 revolutionScaleValues[7];
+    L2FxHE_VectorScale_BuildKeys7(
+        _RevolutionScaleKey0,
+        _RevolutionScaleKey1,
+        _RevolutionScaleKey2,
+        _RevolutionScaleKey3,
+        _RevolutionScaleKey4,
+        _RevolutionScaleKey5,
+        _RevolutionScaleKey6,
+        revolutionScaleTimes,
+        revolutionScaleValues);
+    float3 integratedRevolutionMultiplierSeconds =
+        L2FxHE_VectorScale_IntegrateMultiplierMidpoint32(
+            ageSeconds,
+            lifetime,
+            _UseRevolutionScale,
+            _RevolutionScaleRepeats,
+            (uint)clamp(_RevolutionScaleCount, 0.0, 7.0),
+            revolutionScaleTimes,
+            revolutionScaleValues);
+    evaluatedLocationUe = L2FxHE_Revolution_ApplyIntegratedMultiplierUe(
+        _UseRevolution,
+        evaluatedLocationUe,
+        revCenter,
+        rps,
+        integratedRevolutionMultiplierSeconds);
 
     float3 motionOS = L2Fx_UcPositionToUnityMeters(
         evaluatedLocationUe, _L2FxWorldCalibration);
