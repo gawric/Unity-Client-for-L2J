@@ -415,18 +415,6 @@ public sealed class ParticleStreamRuntime
         }
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-        AuraSpriteEmitter30SpawnLog.TryWriteSpawn(
-            _host,
-            DebugName,
-            slot,
-            _slots.Count,
-            _spawn.SpawnedTotal,
-            _spriteRandBase,
-            shaderStartTime,
-            now,
-            spawnLocationAddUe,
-            _simulation.GpuMaterials);
-
         if (!_loggedFirstSpawn)
         {
             _loggedFirstSpawn = true;
