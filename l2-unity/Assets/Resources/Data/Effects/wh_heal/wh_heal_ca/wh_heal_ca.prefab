@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 329693718315606653}
   - component: {fileID: 2460978058132415877}
   - component: {fileID: 6159592349885556355}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: star (8)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -96,7 +96,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6026318236385052706}
   - component: {fileID: 6025626058421876422}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: MeshEmitter417
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -140,6 +140,7 @@ MonoBehaviour:
   _cloneParticlesToMaxCount: 0
   _cloneParticleLimit: 64
   _useGpuInstancing: 0
+  _coordinateSystem: 0
   _isBurstSpawning: 1
   _relativeWarmupTime: 0
   _warmupTicksPerSecond: 0
@@ -148,6 +149,8 @@ MonoBehaviour:
   _instantKillAtCastEnd: 0
   _respawnDeadParticles: 0
   _stretchParticleLifeToWindow: 1
+  _hostOwnedEmission: 0
+  _compareLogEnabled: 0
 --- !u!1 &913265275942525719
 GameObject:
   m_ObjectHideFlags: 0
@@ -159,7 +162,7 @@ GameObject:
   - component: {fileID: 5821547135318006391}
   - component: {fileID: 8870202315605392917}
   - component: {fileID: 8726660346793525039}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: rev_sph
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -244,7 +247,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8499190577640658687}
   - component: {fileID: 5329652575330408922}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: MeshEmitter411
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -288,6 +291,7 @@ MonoBehaviour:
   _cloneParticlesToMaxCount: 0
   _cloneParticleLimit: 64
   _useGpuInstancing: 0
+  _coordinateSystem: 0
   _isBurstSpawning: 1
   _relativeWarmupTime: 0
   _warmupTicksPerSecond: 0
@@ -296,6 +300,8 @@ MonoBehaviour:
   _instantKillAtCastEnd: 0
   _respawnDeadParticles: 0
   _stretchParticleLifeToWindow: 1
+  _hostOwnedEmission: 0
+  _compareLogEnabled: 0
 --- !u!1 &1300699700616293683
 GameObject:
   m_ObjectHideFlags: 0
@@ -307,7 +313,7 @@ GameObject:
   - component: {fileID: 382875872155209604}
   - component: {fileID: 4183248151864232192}
   - component: {fileID: 5153624652799602698}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: star (5)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -393,7 +399,7 @@ GameObject:
   - component: {fileID: 3915528636322181758}
   - component: {fileID: 1549169853153981859}
   - component: {fileID: 661543921177304169}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: star (4)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -478,7 +484,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3171742923428896064}
   - component: {fileID: 1400034774561651834}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: MeshEmitter416
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -522,6 +528,7 @@ MonoBehaviour:
   _cloneParticlesToMaxCount: 0
   _cloneParticleLimit: 64
   _useGpuInstancing: 0
+  _coordinateSystem: 0
   _isBurstSpawning: 1
   _relativeWarmupTime: 0
   _warmupTicksPerSecond: 0
@@ -530,6 +537,8 @@ MonoBehaviour:
   _instantKillAtCastEnd: 0
   _respawnDeadParticles: 0
   _stretchParticleLifeToWindow: 1
+  _hostOwnedEmission: 0
+  _compareLogEnabled: 0
 --- !u!1 &2020147389568061324
 GameObject:
   m_ObjectHideFlags: 0
@@ -540,7 +549,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3537175993673746687}
   - component: {fileID: 477733648550555663}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: MeshEmitter410
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -584,6 +593,7 @@ MonoBehaviour:
   _cloneParticlesToMaxCount: 0
   _cloneParticleLimit: 64
   _useGpuInstancing: 0
+  _coordinateSystem: 0
   _isBurstSpawning: 1
   _relativeWarmupTime: 0
   _warmupTicksPerSecond: 0
@@ -592,6 +602,8 @@ MonoBehaviour:
   _instantKillAtCastEnd: 0
   _respawnDeadParticles: 0
   _stretchParticleLifeToWindow: 1
+  _hostOwnedEmission: 0
+  _compareLogEnabled: 0
 --- !u!1 &2701633366329554195
 GameObject:
   m_ObjectHideFlags: 0
@@ -603,7 +615,7 @@ GameObject:
   - component: {fileID: 6065368606046528040}
   - component: {fileID: 6887760354124634496}
   - component: {fileID: 2676941150147093925}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: star (2)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -688,7 +700,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7386191555469761911}
   - component: {fileID: 1612496248919034865}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: MeshEmitter421
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -732,6 +744,7 @@ MonoBehaviour:
   _cloneParticlesToMaxCount: 0
   _cloneParticleLimit: 64
   _useGpuInstancing: 0
+  _coordinateSystem: 0
   _isBurstSpawning: 1
   _relativeWarmupTime: 0
   _warmupTicksPerSecond: 0
@@ -740,6 +753,8 @@ MonoBehaviour:
   _instantKillAtCastEnd: 0
   _respawnDeadParticles: 0
   _stretchParticleLifeToWindow: 1
+  _hostOwnedEmission: 0
+  _compareLogEnabled: 0
 --- !u!1 &3746908153892917416
 GameObject:
   m_ObjectHideFlags: 0
@@ -750,7 +765,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3363665696494323633}
   - component: {fileID: 7534290330708048010}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: wh_heal_ca
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -831,7 +846,7 @@ GameObject:
   - component: {fileID: 4623665995979702052}
   - component: {fileID: 2437730166000074428}
   - component: {fileID: 1041243097333610209}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: star (7)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -917,7 +932,7 @@ GameObject:
   - component: {fileID: 2991545239411503341}
   - component: {fileID: 3441018820687413046}
   - component: {fileID: 5861636056342905201}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: healray
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1008,7 +1023,7 @@ GameObject:
   - component: {fileID: 4479376324045128845}
   - component: {fileID: 2503532249093174444}
   - component: {fileID: 558159143947727774}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Ring1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1093,7 +1108,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1927559012500500677}
   - component: {fileID: 7759097721877469759}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: SpriteEmitter469
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1155,6 +1170,7 @@ MonoBehaviour:
   _cloneParticlesToMaxCount: 1
   _cloneParticleLimit: 64
   _useGpuInstancing: 1
+  _coordinateSystem: 0
   _isBurstSpawning: 0
   _relativeWarmupTime: 0
   _warmupTicksPerSecond: 0
@@ -1163,6 +1179,8 @@ MonoBehaviour:
   _instantKillAtCastEnd: 0
   _respawnDeadParticles: 0
   _stretchParticleLifeToWindow: 0
+  _hostOwnedEmission: 0
+  _compareLogEnabled: 0
 --- !u!1 &6364570833933077348
 GameObject:
   m_ObjectHideFlags: 0
@@ -1174,7 +1192,7 @@ GameObject:
   - component: {fileID: 6709824505766064424}
   - component: {fileID: 4075460591765774862}
   - component: {fileID: 7624717266112376599}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: star
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1260,7 +1278,7 @@ GameObject:
   - component: {fileID: 2228871554202499497}
   - component: {fileID: 973934327581272370}
   - component: {fileID: 3807969780749986900}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: star (6)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1346,7 +1364,7 @@ GameObject:
   - component: {fileID: 8703252253635522008}
   - component: {fileID: 9128621137057602219}
   - component: {fileID: 4237875964927336912}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: ring2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1432,7 +1450,7 @@ GameObject:
   - component: {fileID: 4324581440836114069}
   - component: {fileID: 7405047264154589711}
   - component: {fileID: 8013804542731296648}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: star (9)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1518,7 +1536,7 @@ GameObject:
   - component: {fileID: 893150098039933379}
   - component: {fileID: 2701151113757002645}
   - component: {fileID: 5240186665874551367}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: circleflow
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1604,7 +1622,7 @@ GameObject:
   - component: {fileID: 7459702768826554535}
   - component: {fileID: 8175357039567787603}
   - component: {fileID: 5277192385615610275}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Ring3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1690,7 +1708,7 @@ GameObject:
   - component: {fileID: 2200539326270829858}
   - component: {fileID: 5868120102083219482}
   - component: {fileID: 3941064208039609749}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: star (3)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1775,7 +1793,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2212736969067890631}
   - component: {fileID: 7508772921702163234}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: MeshEmitter420
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1819,6 +1837,7 @@ MonoBehaviour:
   _cloneParticlesToMaxCount: 0
   _cloneParticleLimit: 64
   _useGpuInstancing: 0
+  _coordinateSystem: 0
   _isBurstSpawning: 1
   _relativeWarmupTime: 0
   _warmupTicksPerSecond: 0
@@ -1827,6 +1846,8 @@ MonoBehaviour:
   _instantKillAtCastEnd: 0
   _respawnDeadParticles: 0
   _stretchParticleLifeToWindow: 1
+  _hostOwnedEmission: 0
+  _compareLogEnabled: 0
 --- !u!1 &8080875394440845379
 GameObject:
   m_ObjectHideFlags: 0
@@ -1838,7 +1859,7 @@ GameObject:
   - component: {fileID: 3824175670685921504}
   - component: {fileID: 97765652905525375}
   - component: {fileID: 4648191230370652747}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: star (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1923,7 +1944,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3849752794006074705}
   - component: {fileID: 4734107654477203753}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: SpriteEmitter458
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1967,6 +1988,7 @@ MonoBehaviour:
   _cloneParticlesToMaxCount: 0
   _cloneParticleLimit: 64
   _useGpuInstancing: 0
+  _coordinateSystem: 0
   _isBurstSpawning: 1
   _relativeWarmupTime: 0
   _warmupTicksPerSecond: 0
@@ -1975,6 +1997,8 @@ MonoBehaviour:
   _instantKillAtCastEnd: 0
   _respawnDeadParticles: 0
   _stretchParticleLifeToWindow: 1
+  _hostOwnedEmission: 0
+  _compareLogEnabled: 0
 --- !u!1 &8955881045038212740
 GameObject:
   m_ObjectHideFlags: 0
@@ -1986,7 +2010,7 @@ GameObject:
   - component: {fileID: 5220941098150452441}
   - component: {fileID: 7887107260778657128}
   - component: {fileID: 8401309581386834130}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: MC
   m_TagString: Untagged
   m_Icon: {fileID: 0}

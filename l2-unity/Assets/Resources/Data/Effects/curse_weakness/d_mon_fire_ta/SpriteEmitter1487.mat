@@ -12,7 +12,9 @@ Material:
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
-  m_InvalidKeywords: []
+  m_InvalidKeywords:
+  - _FADEOUT_ON
+  - _USESIZESCALE_ON
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 1
   m_DoubleSidedGI: 0
@@ -50,6 +52,8 @@ Material:
     - _HeLocationShape: 0
     - _IgnoreMainTexAlpha: 0
     - _IndependentSprayAccel: 0
+    - _L2FxHeUnitScale: 0.58308
+    - _L2FxHeUnitScaleEnable: 0
     - _L2FxWorldCalibration: 1.1
     - _L2SpriteColorGammaToLinear: 0
     - _LumaAlphaFloor: 0
@@ -61,7 +65,7 @@ Material:
     - _PtvdMode: 0
     - _RevolutionScaleCount: 1
     - _RevolutionScaleRepeats: 0
-    - _RgbBoost: 2
+    - _RgbBoost: 1
     - _Seed: 0
     - _SizeMode: 0
     - _SizeScaleCount: 4

@@ -118,13 +118,36 @@ public static class L2EffectGeneratorAssetOverrides
     const string SpriteEmitter33Name = "SpriteEmitter33";
     const string SpriteEmitter33Alias = "smorke";
     const string FxMt1018Atlas = "fx_m_t1018";
-    const float FxMt1018RgbBoost = 2f;
-    const float FxMt1018WorldCalibration = 0.5f;
 
+    const string DMonFire2CaEffect = "d_mon_fire2_ca";
+    const string DMonFireTaEffect = "d_mon_fire_ta";
     const string SpriteEmitter30Name = "SpriteEmitter30";
     const string SpriteEmitter30Alias = "Aura";
     const string FxMt4009Atlas = "fx_m_t4009";
-    const float FxMt4009WorldCalibration = 0.5f;
+
+    // HE-tuned Opacity for u_npc_id_buff Brighten slots (not raw UC).
+    // 2911: UC 0.35 → 1 + ignore tex A (pixel history: ColorScale*tex, A=1).
+    // 2398: UC 0.3 → 0.5 (aura_cy / fx_m_t8279).
+    // 2399: UC 0.06 → 0.09 + ignore tex A (auracharge01 / fx_m_t0069 BC1).
+    const string UNpcIdBuffEffect = "u_npc_id_buff";
+    const string SpriteEmitter2911Name = "SpriteEmitter2911";
+    const string AuraWooh02Atlas = "aura_wooh02";
+    const float SpriteEmitter2911Opacity = 1f;
+    const string MeshEmitter2398Name = "MeshEmitter2398";
+    const string AuraCyMesh = "aura_cy";
+    const string FxMt8279Atlas = "fx_m_t8279";
+    const float MeshEmitter2398Opacity = 0.5f;
+    const string MeshEmitter2399Name = "MeshEmitter2399";
+    const string AuraCharge01Mesh = "auracharge01";
+    const string FxMt0069Atlas = "fx_m_t0069";
+    const float MeshEmitter2399Opacity = 0.09f;
+
+    /// <summary>
+    /// Live High Elf: d_mon_fire2_ca linear UU are baked ×0.583
+    /// (StartSize 15→8.746). d_mon_fire_ta stays raw Interlude UC.
+    /// Keep Interlude K World 1.1; this scale is applied to UU first.
+    /// </summary>
+    public const float HighElfUnitScale = 0.58308f;
 
     const string FxMt0000Atlas = "fx_m_t0000";
     const int FxMt0000Uv = 4;
@@ -643,17 +666,14 @@ public static class L2EffectGeneratorAssetOverrides
     }
 
     /// <summary>
-    /// d_mon_fire2_ca SpriteEmitter33 / smorke: fx_m_t1018 linear atlas,
-    /// Color Gamma To Linear, Boost 2, K World 0.5 (PTDU_Forward sheet).
+    /// d_mon_fire2_ca SpriteEmitter33 / smorke: fx_m_t1018, PTDU_Forward.
+    /// L2 FF is tex * vertexColor, Blend One One. Do not Boost or Gamma→Linear:
+    /// dark ColorScale + Opacity 0.3 then pow(rgb,2) crushes the additive smoke.
     /// </summary>
     public static bool TryGetSpriteEmitter33FxMt1018(
         UcEmitterDefinition emitter,
-        Texture2D currentTexture,
-        out float rgbBoost,
-        out float worldCalibration)
+        Texture2D currentTexture)
     {
-        rgbBoost = 1f;
-        worldCalibration = 0f;
         if (emitter == null || !IsSpriteEmitter33(emitter))
         {
             return false;
@@ -662,13 +682,20 @@ public static class L2EffectGeneratorAssetOverrides
         string textureName = currentTexture != null
             ? currentTexture.name
             : GetUcObjectName(emitter.TextureReference);
-        if (!string.Equals(textureName, FxMt1018Atlas, StringComparison.OrdinalIgnoreCase))
+        return string.Equals(textureName, FxMt1018Atlas, StringComparison.OrdinalIgnoreCase);
+    }
+
+    public static bool TryGetHighElfSpriteUnitScale(string effectClassName, out float unitScale)
+    {
+        unitScale = 0f;
+        // Live HE: d_mon_fire2_ca bakes UU ×0.583; d_mon_fire_ta stays raw UC (ratio=1).
+        if (string.IsNullOrWhiteSpace(effectClassName) ||
+            !string.Equals(effectClassName, DMonFire2CaEffect, StringComparison.OrdinalIgnoreCase))
         {
             return false;
         }
 
-        rgbBoost = FxMt1018RgbBoost;
-        worldCalibration = FxMt1018WorldCalibration;
+        unitScale = HighElfUnitScale;
         return true;
     }
 
@@ -678,15 +705,111 @@ public static class L2EffectGeneratorAssetOverrides
                string.Equals(emitter.ParticleSlotName, SpriteEmitter33Alias, StringComparison.OrdinalIgnoreCase);
     }
 
+    public static bool TryGetHeBrightenUnbakedOpacity(
+        string effectClassName,
+        UcEmitterDefinition emitter,
+        out float opacity,
+        out bool ignoreMainTexAlpha)
+    {
+        opacity = 1f;
+        ignoreMainTexAlpha = false;
+        if (emitter == null ||
+            !string.Equals(effectClassName, UNpcIdBuffEffect, StringComparison.OrdinalIgnoreCase) ||
+            !string.Equals(emitter.DrawStyle, "PTDS_Brighten", StringComparison.OrdinalIgnoreCase))
+        {
+            return false;
+        }
+
+        if (IsHeBrightenSprite2911(emitter))
+        {
+            opacity = SpriteEmitter2911Opacity;
+            ignoreMainTexAlpha = true;
+            return true;
+        }
+
+        if (IsHeBrightenMesh2398(emitter))
+        {
+            opacity = MeshEmitter2398Opacity;
+            return true;
+        }
+
+        if (IsHeBrightenMesh2399(emitter))
+        {
+            opacity = MeshEmitter2399Opacity;
+            ignoreMainTexAlpha = true;
+            return true;
+        }
+
+        return false;
+    }
+
+    static bool IsHeBrightenSprite2911(UcEmitterDefinition emitter)
+    {
+        if (!string.Equals(emitter.EmitterName, SpriteEmitter2911Name, StringComparison.OrdinalIgnoreCase))
+        {
+            return false;
+        }
+
+        string textureName = GetUcObjectName(emitter.TextureReference);
+        return string.IsNullOrEmpty(textureName) ||
+               textureName.IndexOf(AuraWooh02Atlas, StringComparison.OrdinalIgnoreCase) >= 0;
+    }
+
+    static bool IsHeBrightenMesh2398(UcEmitterDefinition emitter)
+    {
+        if (!string.Equals(emitter.EmitterName, MeshEmitter2398Name, StringComparison.OrdinalIgnoreCase))
+        {
+            return false;
+        }
+
+        string meshName = GetUcObjectName(emitter.StaticMeshReference);
+        if (!string.IsNullOrEmpty(meshName) &&
+            meshName.IndexOf(AuraCyMesh, StringComparison.OrdinalIgnoreCase) < 0)
+        {
+            return false;
+        }
+
+        string textureName = GetUcObjectName(emitter.TextureReference);
+        return string.IsNullOrEmpty(textureName) ||
+               textureName.IndexOf(FxMt8279Atlas, StringComparison.OrdinalIgnoreCase) >= 0;
+    }
+
+    static bool IsHeBrightenMesh2399(UcEmitterDefinition emitter)
+    {
+        if (!string.Equals(emitter.EmitterName, MeshEmitter2399Name, StringComparison.OrdinalIgnoreCase))
+        {
+            return false;
+        }
+
+        string meshName = GetUcObjectName(emitter.StaticMeshReference);
+        if (!string.IsNullOrEmpty(meshName) &&
+            meshName.IndexOf(AuraCharge01Mesh, StringComparison.OrdinalIgnoreCase) < 0)
+        {
+            return false;
+        }
+
+        string textureName = GetUcObjectName(emitter.TextureReference);
+        return string.IsNullOrEmpty(textureName) ||
+               textureName.IndexOf(FxMt0069Atlas, StringComparison.OrdinalIgnoreCase) >= 0;
+    }
+
+    public static bool UsesPassthroughAdditiveColor(string effectClassName)
+    {
+        if (string.IsNullOrWhiteSpace(effectClassName))
+            return false;
+
+        return string.Equals(effectClassName, DMonFire2CaEffect, StringComparison.OrdinalIgnoreCase) ||
+               string.Equals(effectClassName, DMonFireTaEffect, StringComparison.OrdinalIgnoreCase);
+    }
+
     /// <summary>
-    /// d_mon_fire2_ca SpriteEmitter30 / Aura: K World 0.5. No DrawScale.
+    /// d_mon_fire2_ca SpriteEmitter30 / Aura: authored UC color, no Boost/Gamma.
+    /// Size uses High Elf Unit Scale + K World 1.1, not a per-atlas K.
     /// </summary>
     public static bool TryGetSpriteEmitter30FxMt4009(
         UcEmitterDefinition emitter,
-        Texture2D currentTexture,
-        out float worldCalibration)
+        Texture2D currentTexture)
     {
-        worldCalibration = 0f;
         if (emitter == null || !IsSpriteEmitter30(emitter))
         {
             return false;
@@ -695,13 +818,7 @@ public static class L2EffectGeneratorAssetOverrides
         string textureName = currentTexture != null
             ? currentTexture.name
             : GetUcObjectName(emitter.TextureReference);
-        if (!string.Equals(textureName, FxMt4009Atlas, StringComparison.OrdinalIgnoreCase))
-        {
-            return false;
-        }
-
-        worldCalibration = FxMt4009WorldCalibration;
-        return true;
+        return string.Equals(textureName, FxMt4009Atlas, StringComparison.OrdinalIgnoreCase);
     }
 
     static bool IsSpriteEmitter30(UcEmitterDefinition emitter)

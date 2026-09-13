@@ -45,9 +45,9 @@ Material:
     - _DebugSpriteOut: 0
     - _DstBlend: 6
     - _FadeIn: 1
-    - _FadeInEndTime: 1.872
+    - _FadeInEndTime: 1.56
     - _Fadeout: 1
-    - _FadeoutStartTime: 2.208
+    - _FadeoutStartTime: 1.84
     - _FlipbookMode: 0
     - _FullTlsShape: 0
     - _IgnoreMainTexAlpha: 1
@@ -57,7 +57,7 @@ Material:
     - _LumaAlphaPower: 1
     - _ManualAge: 0
     - _MotionMode: 0
-    - _Opacity: 0.35
+    - _Opacity: 1
     - _OrientationMode: 2
     - _PtvdMode: 0
     - _RgbBoost: 1
@@ -90,7 +90,7 @@ Material:
     - _ColorMulMax: {r: 1, g: 1, b: 1, a: 0}
     - _ColorMulMin: {r: 1, g: 1, b: 1, a: 0}
     - _InitialDelayRange: {r: 0, g: 0, b: 0, a: 0}
-    - _LifetimeRange: {r: 2.4, g: 2.4, b: 0, a: 0}
+    - _LifetimeRange: {r: 3.4, g: 3.4, b: 0, a: 0}
     - _OwnerWorldPos: {r: 0, g: 0, b: 0, a: 0}
     - _PolarPhiRangeUc: {r: 0, g: 0, b: 0, a: 0}
     - _PolarRadiusRangeUc: {r: 0, g: 0, b: 0, a: 0}

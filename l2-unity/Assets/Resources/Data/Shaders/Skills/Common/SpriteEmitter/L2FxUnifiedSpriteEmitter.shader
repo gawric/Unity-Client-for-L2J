@@ -25,6 +25,8 @@ Shader "L2/Effects/SpriteEmitter"
         [Enum(Static,0,Timed,1,Random,2,BlendBetween,3)] _FlipbookMode ("Flipbook Mode", Float) = 0
 
         _L2FxWorldCalibration ("World Calibration K", Float) = 1.1
+        [Toggle] _L2FxHeUnitScaleEnable ("High Elf Unit Scale", Float) = 0
+        _L2FxHeUnitScale ("High Elf UU Scale", Float) = 0.583
         _StartLocationOffsetUc ("StartLocationOffset UC XYZ", Vector) = (0, 0, 0, 0)
         _StartLocationRangeUU ("StartLocation Range UU", Vector) = (0, 0, 0, 0)
         _StartLocationRangeXUc ("StartLocation X Min Max", Vector) = (0, 0, 0, 0)

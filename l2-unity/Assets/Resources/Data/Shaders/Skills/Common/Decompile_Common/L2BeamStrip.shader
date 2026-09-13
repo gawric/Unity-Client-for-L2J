@@ -76,6 +76,7 @@ Shader "L2/Effects/BeamEmitter"
             #include "L2FxStartLocationRange.hlsl"
             #include "L2FxBeamSegment.hlsl"
             #include "L2FxBeamColor.hlsl"
+            #include "L2FxD3d9ColorPath.hlsl"
 
             TEXTURE2D(_MainTex);
             SAMPLER(sampler_MainTex);
@@ -251,7 +252,7 @@ Shader "L2/Effects/BeamEmitter"
 
                 // Keep raw runtime color for verified PTDS_Translucent Blend One One.
                 half4 result = textureColor * (half4)runtimeColor;
-                result.rgb *= (half)_RgbBoost;
+                result.rgb *= (half)L2Fx_D3d9EffectiveRgbBoost(_RgbBoost);
                 return result;
             }
             ENDHLSL

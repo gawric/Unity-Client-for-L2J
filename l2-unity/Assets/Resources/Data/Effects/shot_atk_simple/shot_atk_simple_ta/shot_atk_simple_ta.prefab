@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 3674102600591414828}
   - component: {fileID: 7408342074487536928}
   - component: {fileID: 5046729460570639663}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Spark (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -96,7 +96,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3489512535837041717}
   - component: {fileID: 2152542665323936736}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: MeshEmitter1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -162,7 +162,7 @@ GameObject:
   - component: {fileID: 7203110722418550483}
   - component: {fileID: 5732901187210608544}
   - component: {fileID: 4252493116485893240}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Spark (10)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -248,7 +248,7 @@ GameObject:
   - component: {fileID: 2423834957143874665}
   - component: {fileID: 2948951316317361816}
   - component: {fileID: 3249107905286646003}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Spark (7)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -334,7 +334,7 @@ GameObject:
   - component: {fileID: 726336340903543764}
   - component: {fileID: 4375091709302355352}
   - component: {fileID: 1242027701967551885}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: SparkCone
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -420,7 +420,7 @@ GameObject:
   - component: {fileID: 9136141029202149529}
   - component: {fileID: 3298742426020086322}
   - component: {fileID: 7073616349271195587}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Spark (9)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -506,7 +506,7 @@ GameObject:
   - component: {fileID: 4595053976262675323}
   - component: {fileID: 7967376889968089225}
   - component: {fileID: 2207287633315538196}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Spark (14)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -592,7 +592,7 @@ GameObject:
   - component: {fileID: 6347081822424912341}
   - component: {fileID: 1041260359956659857}
   - component: {fileID: 2586358025909738555}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Spark (12)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -677,7 +677,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2932773223021805416}
   - component: {fileID: 4499443209789300439}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: SpriteEmitter2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -749,6 +749,7 @@ MonoBehaviour:
   _cloneParticlesToMaxCount: 0
   _cloneParticleLimit: 64
   _forceContinuousSpawning: 0
+  _useGpuInstancing: 1
   _preserveShaderTimeInContinuousLoop: 0
   _isBurstSpawning: 0
   _relativeWarmupTime: 0
@@ -772,7 +773,7 @@ GameObject:
   - component: {fileID: 3897821622166945573}
   - component: {fileID: 5225741303043331188}
   - component: {fileID: 3396830839712433328}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Spark (3)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -858,7 +859,7 @@ GameObject:
   - component: {fileID: 4621203475240829094}
   - component: {fileID: 1430670952304089698}
   - component: {fileID: 6945085985667778738}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Spark
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -944,7 +945,7 @@ GameObject:
   - component: {fileID: 1022222290525149511}
   - component: {fileID: 3897515381050873332}
   - component: {fileID: 2394313913584208976}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Spark (8)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1030,7 +1031,7 @@ GameObject:
   - component: {fileID: 6373114820112127699}
   - component: {fileID: 3593853474424902607}
   - component: {fileID: 8327285215721442407}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Spark (4)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1116,7 +1117,7 @@ GameObject:
   - component: {fileID: 6146108234397509019}
   - component: {fileID: 4183313204081127489}
   - component: {fileID: 7410424504597826991}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Wave2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1202,7 +1203,7 @@ GameObject:
   - component: {fileID: 7805021019507203923}
   - component: {fileID: 2784140418812882760}
   - component: {fileID: 6384268733929497425}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Spark (2)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1287,7 +1288,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2566999843328455653}
   - component: {fileID: 16034501135265371}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: shot_atk_simple_ta
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1358,7 +1359,7 @@ GameObject:
   - component: {fileID: 6876905222638737396}
   - component: {fileID: 7672863563597752888}
   - component: {fileID: 892665350261834407}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Spark (11)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1443,7 +1444,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5439454652009798616}
   - component: {fileID: 6933888569188400652}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: MeshEmitter0
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1509,7 +1510,7 @@ GameObject:
   - component: {fileID: 231336259363977327}
   - component: {fileID: 7743204629272845161}
   - component: {fileID: 7752667079727382911}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Spark (5)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1595,7 +1596,7 @@ GameObject:
   - component: {fileID: 7856111807167162575}
   - component: {fileID: 8282490808649306719}
   - component: {fileID: 5838337838919601835}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Spark (13)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1681,7 +1682,7 @@ GameObject:
   - component: {fileID: 6787099197916738434}
   - component: {fileID: 5995354104512767895}
   - component: {fileID: 5527514465594732905}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Spark (6)
   m_TagString: Untagged
   m_Icon: {fileID: 0}

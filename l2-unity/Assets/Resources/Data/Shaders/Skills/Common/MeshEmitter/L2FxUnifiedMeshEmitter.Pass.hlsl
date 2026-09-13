@@ -17,6 +17,7 @@
 #include "../Decompile_Common/L2FxMeshSizeScale.hlsl"
 #include "../Decompile_Common/L2FxMeshColorFade.hlsl"
 #include "../Decompile_Common/L2FxSpriteColorGammaLinear.hlsl"
+#include "../Decompile_Common/L2FxD3d9ColorPath.hlsl"
 #include "../Decompile_Common/L2FxMeshSpin.hlsl"
 #include "../Decompile_Common/L2FxPTRS_Actor.hlsl"
 #include "../Decompile_Common/L2FxPTDS_DrawStyle.hlsl"
@@ -24,11 +25,15 @@
 #include "../Decompile_Common/Essence/L2FxHE_VectorScale.hlsl"
 #include "../Decompile_Common/Essence/L2FxHE_CoordinateSystem.hlsl"
 #include "../Decompile_Common/Essence/L2FxHE_Revolution.hlsl"
+#include "../Decompile_Common/Essence/L2FxHE_VertMesh.hlsl"
 
 TEXTURE2D(_MainTex);
 SAMPLER(sampler_MainTex);
+#if defined(_USE_SECOND_TEX)
 TEXTURE2D(_SecondTex);
 SAMPLER(sampler_SecondTex);
+#endif
+TEXTURE2D(_VertMeshFramePosTex);
 
 // Modes are material data, not formula replacements:
 // Spawn: 0=None, 1=Z-only SpawnParticle, 2=full XYZ SpawnParticle,
@@ -151,6 +156,9 @@ CBUFFER_START(UnityPerMaterial)
     float _FadeInEndTime;
     float _FadeOut;
     float _FadeOutStartTime;
+    float _ColorFadeAlphaBlend;
+    float _SrcBlend;
+    float _DstBlend;
     float _Opacity;
     float _RgbBoost;
     float _L2SpriteColorGammaToLinear;
@@ -160,6 +168,9 @@ CBUFFER_START(UnityPerMaterial)
     float _TextureFloor;
     float _AlphaClipThreshold;
     float _DebugMeshOut;
+    float _VertMeshAnimEnable;
+    float _VertMeshFrameCount;
+    float _VertMeshSeqRate;
 CBUFFER_END
 
 // Remaps timing and appRand values to ParticleGroup GPU slot data only when
@@ -170,6 +181,7 @@ struct Attributes
 {
     float4 positionOS : POSITION;
     float2 uv : TEXCOORD0;
+    uint vertexId : SV_VertexID;
     UNITY_VERTEX_INPUT_INSTANCE_ID
 };
 
@@ -206,6 +218,17 @@ float L2FxUnified_ResolveSizeScale(float ageNorm)
         _SizeKey4.x, _SizeKey4.y);
 }
 
+// Sprite _ColorFadeAlphaBlend: PTDS_AlphaBlend fades A only.
+// Existing mesh mats may not serialize the toggle; SrcAlpha/InvSrcAlpha is that draw style.
+float L2FxUnified_ResolveColorFadeAlphaBlend()
+{
+    if (_ColorFadeAlphaBlend >= 0.5)
+        return 1.0;
+    if (abs(_SrcBlend - 5.0) < 0.5 && abs(_DstBlend - 10.0) < 0.5)
+        return 1.0;
+    return 0.0;
+}
+
 float4 L2FxUnified_ResolveColor(float ageSeconds, float lifetime, float3 colorMul)
 {
     float4 color = L2Fx_MeshColorFade_FullKeys6(
@@ -218,6 +241,7 @@ float4 L2FxUnified_ResolveColor(float ageSeconds, float lifetime, float3 colorMu
         _FadeOut,
         _FadeOutStartTime,
         _Opacity,
+        L2FxUnified_ResolveColorFadeAlphaBlend(),
         _ColorKey0,
         _ColorKey1Time, _ColorKey1,
         _ColorKey2Time, _ColorKey2,
@@ -225,7 +249,8 @@ float4 L2FxUnified_ResolveColor(float ageSeconds, float lifetime, float3 colorMu
         _ColorKey4Time, _ColorKey4,
         _ColorKey5Time, _ColorKey5);
     return L2Fx_SpriteColor_ApplyGammaToLinearIfEnabled(
-        color, _L2SpriteColorGammaToLinear);
+        color,
+        L2Fx_D3d9EffectiveGammaToggle(_L2SpriteColorGammaToLinear));
 }
 
 void L2FxUnified_ResolveSpawn(
@@ -529,12 +554,24 @@ Varyings vert(Attributes IN)
     float3 spinRateC012;
     L2FxUnified_ResolveSpin(ageSeconds, startSpinC012, spinRateC012);
 
+    bool vertMeshAnim = _VertMeshAnimEnable > 0.5 && _VertMeshFrameCount > 0.5;
+    float3 meshPositionOS = IN.positionOS.xyz;
+    if (vertMeshAnim)
+    {
+        float animTime = L2FxHE_VertMesh_AnimTimeFromAge(
+            ageSeconds, _VertMeshSeqRate, _VertMeshFrameCount);
+        float3 frameUu = L2FxHE_VertMesh_GetFramePos(
+            _VertMeshFramePosTex, (float)IN.vertexId, animTime, _VertMeshFrameCount);
+        meshPositionOS = L2FxHE_VertMesh_FrameToLocalMeshOS(
+            frameUu, L2FxHE_VertMesh_MeshScale(sizeUe, sizeScale, _L2FxWorldCalibration));
+    }
+
     float3 localMeshOS;
     if (_TransformMode > 0.5)
     {
         localMeshOS = L2FxPTRSActor_TransformLocalMeshUnity(
-            IN.positionOS.xyz,
-            finalSizeUe,
+            meshPositionOS,
+            vertMeshAnim ? float3(1.0, 1.0, 1.0) : finalSizeUe,
             spinRateC012,
             startSpinC012,
             ageSeconds);
@@ -542,8 +579,10 @@ Varyings vert(Attributes IN)
     else
     {
         // Imported mesh axes are UE(X,Z,Y) in Unity.
-        localMeshOS = IN.positionOS.xyz
-            * float3(finalSizeUe.x, finalSizeUe.z, finalSizeUe.y);
+        // VertMesh already applied UU→meters * StartSize * sprite K (1.1).
+        localMeshOS = vertMeshAnim
+            ? meshPositionOS
+            : meshPositionOS * float3(finalSizeUe.x, finalSizeUe.z, finalSizeUe.y);
         if (_SpinParticles > 0.5)
         {
             float3 yawPitchRollUru = L2Fx_MeshSpin_EvaluateYawPitchRollUru(
@@ -680,24 +719,22 @@ half4 frag(Varyings IN) : SV_Target
         clip(tex.a - (half)_AlphaClipThreshold);
 
     half4 color;
-    if (_UseSecondTex > 0.5)
-    {
-        float2 uv1 = IN.uv * _SecondTex_ST.xy + _SecondTex_ST.zw;
-        half4 tex1 = SAMPLE_TEXTURE2D(_SecondTex, sampler_SecondTex, uv1);
-        color = L2Fx_D3d9_Modulate2xTwoTexTFactor(tex, tex1, IN.color);
-        if (_IgnoreMainTexAlpha > 0.5)
-            color.a = IN.color.a;
-    }
-    else
-    {
-        half3 compressed = lerp(
-            (half)_TextureFloor.xxx,
-            tex.rgb,
-            saturate((half)_TextureContrast));
-        color = half4(
-            compressed * (half3)_TextureFactor.rgb * IN.color.rgb * (half)_RgbBoost,
-            texAlpha * IN.color.a * (half)_TextureFactor.a);
-    }
+#if defined(_USE_SECOND_TEX)
+    float2 uv1 = IN.uv * _SecondTex_ST.xy + _SecondTex_ST.zw;
+    half4 tex1 = SAMPLE_TEXTURE2D(_SecondTex, sampler_SecondTex, uv1);
+    color = L2Fx_D3d9_Modulate2xTwoTexTFactor(tex, tex1, IN.color);
+    if (_IgnoreMainTexAlpha > 0.5)
+        color.a = IN.color.a;
+#else
+    half3 compressed = lerp(
+        (half)_TextureFloor.xxx,
+        tex.rgb,
+        saturate((half)_TextureContrast));
+    color = half4(
+        compressed * (half3)_TextureFactor.rgb * IN.color.rgb *
+            (half)L2Fx_D3d9EffectiveRgbBoost(_RgbBoost),
+        texAlpha * IN.color.a * (half)_TextureFactor.a);
+#endif
     color.rgb += (half3)(IN.debugData.xyz * (_DebugMeshOut * 1e-10));
     return color;
 }

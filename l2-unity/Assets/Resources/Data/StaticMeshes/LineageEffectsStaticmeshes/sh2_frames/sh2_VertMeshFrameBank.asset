@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d0f676e44ad807746a2dcb10e6ad887a, type: 3}
+  m_Name: sh2_VertMeshFrameBank
+  m_EditorClassIdentifier: 
+  sequenceName: sh2
+  frameCount: 21
+  vertCount: 26
+  sequenceRate: 30
+  startSizeUu: 0.12
+  framePositionTex: {fileID: 2800000, guid: 53131d35c1a34d74885c07d22740feaa, type: 2}
+  baseMesh: {fileID: 4300000, guid: 9d2dbea5aeeb35d4599e43136462a955, type: 2}

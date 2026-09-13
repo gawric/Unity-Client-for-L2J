@@ -447,6 +447,7 @@ public static class L2MaterialPropertyCopier
         CopyVectorIfPresent(runtimeMat, sharedMat, LifetimeRangeId);
         CopyVectorIfPresent(runtimeMat, sharedMat, InitialDelayRangeId);
         CopyFloatIfPresent(runtimeMat, sharedMat, LoopSizeScalePreviewId);
+        CopyFloatIfPresent(runtimeMat, sharedMat, Shader.PropertyToID("_ColorFadeAlphaBlend"));
         CopyFloatIfPresent(runtimeMat, sharedMat, FadeInId);
         CopyFloatIfPresent(runtimeMat, sharedMat, FadeInEndTimeId);
         CopyFloatIfPresent(runtimeMat, sharedMat, FadeoutId);
@@ -461,6 +462,17 @@ public static class L2MaterialPropertyCopier
         else
         {
             CopyFloatIfPresent(runtimeMat, sharedMat, DebugAtlasPreviewId);
+        }
+        CopyFloatIfPresent(runtimeMat, sharedMat, Shader.PropertyToID("_L2FxWorldCalibration"));
+        CopyFloatIfPresent(runtimeMat, sharedMat, Shader.PropertyToID("_L2FxHeUnitScaleEnable"));
+        CopyFloatIfPresent(runtimeMat, sharedMat, Shader.PropertyToID("_L2FxHeUnitScale"));
+        CopyFloatIfPresent(runtimeMat, sharedMat, Shader.PropertyToID("_VertMeshAnimEnable"));
+        CopyFloatIfPresent(runtimeMat, sharedMat, Shader.PropertyToID("_VertMeshFrameCount"));
+        CopyFloatIfPresent(runtimeMat, sharedMat, Shader.PropertyToID("_VertMeshSeqRate"));
+        CopyFloatIfPresent(runtimeMat, sharedMat, Shader.PropertyToID("_ExpandShaderBounds"));
+        if (runtimeMat.HasProperty("_VertMeshFramePosTex") && sharedMat.HasProperty("_VertMeshFramePosTex"))
+        {
+            runtimeMat.SetTexture("_VertMeshFramePosTex", sharedMat.GetTexture("_VertMeshFramePosTex"));
         }
         CopyFloatIfPresent(runtimeMat, sharedMat, RgbBoostId);
         CopyColorIfPresent(runtimeMat, sharedMat, TextureFactorId);

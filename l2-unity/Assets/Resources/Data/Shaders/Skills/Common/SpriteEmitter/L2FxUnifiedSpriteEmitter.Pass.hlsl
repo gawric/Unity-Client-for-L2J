@@ -17,10 +17,12 @@
 #include "../Decompile_Common/L2FxSpriteSizeScale.hlsl"
 #include "../Decompile_Common/L2FxSpriteColorFade.hlsl"
 #include "../Decompile_Common/L2FxSpriteColorGammaLinear.hlsl"
+#include "../Decompile_Common/L2FxD3d9ColorPath.hlsl"
 #include "../Decompile_Common/L2FxPTDS_DrawStyle.hlsl"
 #include "../Decompile_Common/L2FxD3d9FixedFunction.hlsl"
 #include "../Decompile_Common/Essence/L2FxHE_VectorScale.hlsl"
 #include "../Decompile_Common/Essence/L2FxHE_CoordinateSystem.hlsl"
+#include "../Decompile_Common/Essence/L2FxHE_UnitScale.hlsl"
 #include "../Decompile_Common/Essence/L2FxHE_Revolution.hlsl"
 #include "../Decompile_Common/Essence/L2FxHE_PTDU_Forward.hlsl"
 #include "../Decompile_Common/Essence/L2FxHE_LocationShape.hlsl"
@@ -63,6 +65,8 @@ CBUFFER_START(UnityPerMaterial)
     float _FlipbookMode;
 
     float _L2FxWorldCalibration;
+    float _L2FxHeUnitScaleEnable;
+    float _L2FxHeUnitScale;
     float4 _StartLocationOffsetUc;
     float4 _StartLocationRangeUU;
     float4 _StartLocationRangeXUc;
@@ -563,13 +567,14 @@ Varyings vert(Attributes IN)
         startSpin, spinsPerSecond, ageSeconds);
 
     float worldK = _L2FxWorldCalibration;
+    float heUnit = L2FxHE_ResolveUnitScale(_L2FxHeUnitScaleEnable, _L2FxHeUnitScale);
     float sizeXM = L2Fx_GetFinalVertexSizeMeters(
-        spawn.sizeUu.x * sizeMul, worldK);
+        spawn.sizeUu.x * sizeMul * heUnit, worldK);
     float sizeYM = L2Fx_GetFinalVertexSizeMeters(
-        (_SizeMode > 0.5 ? spawn.sizeUu.y : spawn.sizeUu.x) * sizeMul,
+        (_SizeMode > 0.5 ? spawn.sizeUu.y : spawn.sizeUu.x) * sizeMul * heUnit,
         worldK);
-    float3 currentOS = L2Fx_UcPositionToUnityMeters(currentUe, worldK);
-    float3 previousOS = L2Fx_UcPositionToUnityMeters(previousUe, worldK);
+    float3 currentOS = L2Fx_UcPositionToUnityMeters(currentUe * heUnit, worldK);
+    float3 previousOS = L2Fx_UcPositionToUnityMeters(previousUe * heUnit, worldK);
     currentOS = L2Fx_ApplySpawnWorldPositionOs(currentOS);
     previousOS = L2Fx_ApplySpawnWorldPositionOs(previousOS);
 
@@ -644,7 +649,9 @@ half4 frag(Varyings IN) : SV_Target
         _SpriteMotionRandStateBits,
         _StartTime);
     colorFade = L2Fx_SpriteColor_ApplyGammaToLinearIfEnabled(
-        colorFade, _L2SpriteColorGammaToLinear);
+        colorFade,
+        L2Fx_D3d9EffectiveGammaToggle(_L2SpriteColorGammaToLinear));
+    half effectiveRgbBoost = (half)L2Fx_D3d9EffectiveRgbBoost(_RgbBoost);
 
     half4 color;
     if (_FlipbookMode > 2.5)
@@ -670,7 +677,7 @@ half4 frag(Varyings IN) : SV_Target
             colorFade.a,
             _Opacity,
             _ColorFadeAlphaBlend);
-        color.rgb *= (half)_RgbBoost;
+        color.rgb *= effectiveRgbBoost;
     }
     else
     {
@@ -686,7 +693,7 @@ half4 frag(Varyings IN) : SV_Target
             clip(textureAlpha - _AlphaClipThreshold);
         color = tex * (half4)colorFade;
         color.a = (half)(textureAlpha * colorFade.a);
-        color.rgb *= (half)_RgbBoost;
+        color.rgb *= effectiveRgbBoost;
     }
 
     // One+One ignores framebuffer alpha. Dark atlas RGB (and bilinear bleed from

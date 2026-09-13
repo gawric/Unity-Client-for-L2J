@@ -55,7 +55,10 @@ public static class L2EffectGeneratorMaterialConfigurator
         ApplyMeshPackageExtras(material, emitter);
         ConfigureCommon(material, emitter, effectClassName, extendsClass);
         if (isMesh)
+        {
             ConfigureMesh(material, emitter);
+            ConfigureVertMesh(material, emitter);
+        }
         else if (isBeam)
             ConfigureBeam(material, emitter);
         else
@@ -65,7 +68,8 @@ public static class L2EffectGeneratorMaterialConfigurator
         Texture2D texture = textureOverride ??
                             (resolvedTextures.Count > 0 ? resolvedTextures[0] : null);
         ApplyMainTexture(material, texture);
-        ApplyFxMt0005Overrides(material, emitter, ref texture);
+        ApplyFxMt0005Overrides(material, emitter, ref texture, effectClassName);
+        ApplyHighElfSpriteUnitScale(material, emitter, effectClassName);
         bool multiSection = slotMesh != null && slotMesh.subMeshCount > 1;
         bool meshHasSeparateSlots = false;
         if (isMesh && !string.IsNullOrWhiteSpace(emitter.StaticMeshReference))
@@ -82,6 +86,8 @@ public static class L2EffectGeneratorMaterialConfigurator
             : null;
         ApplySecondTexture(material, secondTexture);
         ApplyMeshSlotShading(material, emitter, meshSlotIndex);
+        // After slot shading: it resets _IgnoreMainTexAlpha on every mesh.
+        ApplyHeBrightenUnbakedOpacity(material, emitter, effectClassName);
 
         EditorUtility.SetDirty(material);
         AssetDatabase.SaveAssetIfDirty(material);
@@ -181,6 +187,12 @@ public static class L2EffectGeneratorMaterialConfigurator
                 emitter.RevolutionScaleKeys);
         }
 
+        SetFloat(
+            material,
+            "_ColorFadeAlphaBlend",
+            string.Equals(emitter.DrawStyle, "PTDS_AlphaBlend", StringComparison.OrdinalIgnoreCase)
+                ? 1f
+                : 0f);
         SetFloat(material, "_FadeIn", emitter.FadeIn ? 1f : 0f);
         SetFloat(material, "_FadeInEndTime", emitter.FadeInEndTime);
         SetFloat(material, "_FadeOut", emitter.FadeOut ? 1f : 0f);
@@ -251,6 +263,56 @@ public static class L2EffectGeneratorMaterialConfigurator
             emitter.SpinCcwOrCw.y,
             emitter.SpinCcwOrCw.z,
             0f));
+    }
+
+    const string Sh2VertMeshBankPath =
+        "Assets/Resources/Data/StaticMeshes/LineageEffectsStaticmeshes/sh2_frames/sh2_VertMeshFrameBank.asset";
+
+    static void ConfigureVertMesh(
+        Material material,
+        UcEmitterDefinition emitter)
+    {
+        if (material == null)
+        {
+            return;
+        }
+
+        if (emitter == null ||
+            !string.Equals(emitter.ClassName, "VertMeshEmitter", StringComparison.OrdinalIgnoreCase))
+        {
+            SetFloat(material, "_VertMeshAnimEnable", 0f);
+            return;
+        }
+
+        string meshName = L2EffectGeneratorAssetOverrides.GetUcObjectName(emitter.StaticMeshReference);
+        L2VertMeshFrameBank bank = null;
+        if (string.Equals(meshName, "sh2", StringComparison.OrdinalIgnoreCase))
+        {
+            bank = AssetDatabase.LoadAssetAtPath<L2VertMeshFrameBank>(Sh2VertMeshBankPath);
+        }
+
+        if (bank == null || bank.framePositionTex == null || bank.frameCount <= 0)
+        {
+            SetFloat(material, "_VertMeshAnimEnable", 0f);
+            Debug.LogWarning(
+                "[L2EffectGenerator] VertMesh '" + meshName +
+                "' has no frame bank — GetFrame anim disabled.");
+            return;
+        }
+
+        SetFloat(material, "_VertMeshAnimEnable", 1f);
+        SetFloat(material, "_VertMeshFrameCount", bank.frameCount);
+        SetFloat(material, "_VertMeshSeqRate", bank.sequenceRate > 0f ? bank.sequenceRate : 30f);
+        // VertMesh bank is UU like sprites, not imported MeshEmitter FBX.
+        SetFloat(material, "_L2FxWorldCalibration", 1.1f);
+        // Vertex animation expands far past imported frame0 AABB.
+        SetFloat(material, "_ExpandShaderBounds", 1f);
+        // Flat VertMesh ribbon — same two-sided draw as live RenderDoc faces.
+        SetFloat(material, "_Cull", (float)CullMode.Off);
+        if (material.HasProperty("_VertMeshFramePosTex"))
+        {
+            material.SetTexture("_VertMeshFramePosTex", bank.framePositionTex);
+        }
     }
 
     static void ConfigureSprite(
@@ -380,6 +442,10 @@ public static class L2EffectGeneratorMaterialConfigurator
                 src = BlendMode.One;
                 dst = BlendMode.OneMinusSrcColor;
                 break;
+            case "PTDS_Translucent":
+                src = BlendMode.One;
+                dst = BlendMode.One;
+                break;
         }
         SetFloat(material, "_SrcBlend", (float)src);
         SetFloat(material, "_DstBlend", (float)dst);
@@ -473,10 +539,21 @@ public static class L2EffectGeneratorMaterialConfigurator
         int capacity = IsMeshEmitter(emitter.ClassName)
             ? 6
             : (IsBeamEmitter(emitter.ClassName) ? 3 : 4);
-        int count = Math.Min(keys.Count, capacity);
+        // UParticleEmitter: ColorScale is skipped unless UseColorScale=True.
+        // SpriteEmitter30 Aura dumps keys black→white→black + Repeats=100 without
+        // the flag; applying them makes additive fire spend most of life at RGB=0.
+        int count = emitter.UseColorScale ? Math.Min(keys.Count, capacity) : 0;
         SetFloat(material, "_ColorScaleCount", count);
         for (int i = 0; i < capacity; i++)
         {
+            if (count == 0)
+            {
+                SetColor(material, "_ColorKey" + i, Color.white);
+                if (i > 0)
+                    SetFloat(material, "_ColorKey" + i + "Time", 1f);
+                continue;
+            }
+
             UcColorScaleKey key = keys[Math.Min(i, count - 1)];
             SetColor(material, "_ColorKey" + i, key.Color);
             if (i > 0)
@@ -542,11 +619,66 @@ public static class L2EffectGeneratorMaterialConfigurator
         material.mainTexture = texture;
     }
 
+    static void ApplyHighElfSpriteUnitScale(
+        Material material,
+        UcEmitterDefinition emitter,
+        string effectClassName)
+    {
+        if (material == null || emitter == null || IsMeshEmitter(emitter.ClassName) ||
+            IsBeamEmitter(emitter.ClassName))
+        {
+            return;
+        }
+
+        if (!L2EffectGeneratorAssetOverrides.TryGetHighElfSpriteUnitScale(
+                effectClassName, out float heScale))
+        {
+            return;
+        }
+
+        SetFloat(material, "_L2FxWorldCalibration", 1.1f);
+        SetFloat(material, "_L2FxHeUnitScaleEnable", 1f);
+        SetFloat(material, "_L2FxHeUnitScale", heScale);
+    }
+
+    static void ApplyHeBrightenUnbakedOpacity(
+        Material material,
+        UcEmitterDefinition emitter,
+        string effectClassName)
+    {
+        if (!L2EffectGeneratorAssetOverrides.TryGetHeBrightenUnbakedOpacity(
+                effectClassName,
+                emitter,
+                out float opacity,
+                out bool ignoreMainTexAlpha))
+        {
+            return;
+        }
+
+        SetFloat(material, "_Opacity", opacity);
+        if (ignoreMainTexAlpha)
+        {
+            SetFloat(material, "_IgnoreMainTexAlpha", 1f);
+        }
+    }
+
     static void ApplyFxMt0005Overrides(
         Material material,
         UcEmitterDefinition emitter,
-        ref Texture2D currentTexture)
+        ref Texture2D currentTexture,
+        string effectClassName)
     {
+        if (L2EffectGeneratorAssetOverrides.UsesPassthroughAdditiveColor(effectClassName))
+        {
+            // d_mon_fire2_ca / d_mon_fire_ta: L2 FF is tex * vertexColor.
+            // Texture-name Boost/Gamma (8146 Darken×5, 8138×2, 8115, fire_light02,
+            // 3037, 1003, guardnaia) crush or inflate authored UC color.
+            L2EffectImportUtil.EnsureSrgbOff(currentTexture);
+            SetFloat(material, "_RgbBoost", 1f);
+            SetFloat(material, "_L2SpriteColorGammaToLinear", 0f);
+            return;
+        }
+
         if (L2EffectGeneratorAssetOverrides.TryGetFxMt8146PtdsDarken(
                 emitter, out float darkenBoost, out float darkenOpacity))
         {
@@ -610,19 +742,13 @@ public static class L2EffectGeneratorMaterialConfigurator
         }
 
         if (L2EffectGeneratorAssetOverrides.TryGetSpriteEmitter33FxMt1018(
-                emitter, currentTexture, out float fxMt1018Boost, out float fxMt1018WorldK))
+                emitter, currentTexture) ||
+            L2EffectGeneratorAssetOverrides.TryGetSpriteEmitter30FxMt4009(
+                emitter, currentTexture))
         {
             L2EffectImportUtil.EnsureSrgbOff(currentTexture);
-            SetFloat(material, "_RgbBoost", fxMt1018Boost);
-            SetFloat(material, "_L2SpriteColorGammaToLinear", 1f);
-            SetFloat(material, "_L2FxWorldCalibration", fxMt1018WorldK);
-            return;
-        }
-
-        if (L2EffectGeneratorAssetOverrides.TryGetSpriteEmitter30FxMt4009(
-                emitter, currentTexture, out float fxMt4009WorldK))
-        {
-            SetFloat(material, "_L2FxWorldCalibration", fxMt4009WorldK);
+            SetFloat(material, "_RgbBoost", 1f);
+            SetFloat(material, "_L2SpriteColorGammaToLinear", 0f);
             return;
         }
 
@@ -667,14 +793,17 @@ public static class L2EffectGeneratorMaterialConfigurator
 
         if (texture == null)
         {
+            material.SetTexture("_SecondTex", null);
             if (material.HasProperty("_UseSecondTex"))
                 material.SetFloat("_UseSecondTex", 0f);
+            material.DisableKeyword("_USE_SECOND_TEX");
             return;
         }
 
         material.SetTexture("_SecondTex", texture);
         if (material.HasProperty("_UseSecondTex"))
             material.SetFloat("_UseSecondTex", 1f);
+        material.EnableKeyword("_USE_SECOND_TEX");
     }
 
     static void ConfigureLocationShape(Material material, UcEmitterDefinition emitter)

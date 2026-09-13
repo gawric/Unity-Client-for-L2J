@@ -401,7 +401,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9d6d14ae56a466245bff1789fbd03a5b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  partType: 0
   _owner: {fileID: 8500736706040560274}
   _particles:
   - {fileID: 1775258182356109232}
@@ -434,17 +433,25 @@ MonoBehaviour:
   - {fileID: 622236270894085245}
   - {fileID: 2150368556173845936}
   - {fileID: 1409011824050025666}
-  _warmup: 0
-  _warmupTimeSec: 0
-  _warmupTimeTickPerSec: 0
+  _startDelay: 0
   _countPerSecond: 12
   _maxCount: 30
-  _hasCastDuration: 0
-  _castDurationAffectsLifetime: 0
-  _hasFixedDuration: 1
+  _cloneParticlesToMaxCount: 0
+  _cloneParticleLimit: 64
+  _forceContinuousSpawning: 0
+  _useGpuInstancing: 1
+  _preserveShaderTimeInContinuousLoop: 0
+  _isBurstSpawning: 0
+  _relativeWarmupTime: 0
   _duration: 2
+  _hasFixedDuration: 1
   _instantKillAtCastEnd: 0
   _fitToBounds: 0
+  _homeFlightAnchor: 0
+  _homePathSideOffsetMultiplier: 1
+  _homePathSideOffsetScale: 1
+  _homePathHeightOffsetScale: 1
+  _homeFlightSpeedScale: 1
 --- !u!1 &714123396989909627
 GameObject:
   m_ObjectHideFlags: 0
@@ -1478,7 +1485,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _owner: {fileID: 0}
+  _skipScheduledDestroyForDebug: 0
   _surfaceNormal: {x: 0, y: 0, z: 0}
+  _billboardToCamera: 0
+  _billboardRotationOffsetEuler: {x: 0, y: 0, z: 0}
   _pooledEffect:
     _effectClass: 
     _effectDurationSec: 15
@@ -4873,21 +4883,28 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9d6d14ae56a466245bff1789fbd03a5b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  partType: 0
   _owner: {fileID: 8500736706040560274}
   _particles:
   - {fileID: 285968424575068918}
-  _warmup: 0
-  _warmupTimeSec: 0
-  _warmupTimeTickPerSec: 0
+  _startDelay: 0
   _countPerSecond: 140
   _maxCount: 0
-  _hasCastDuration: 0
-  _castDurationAffectsLifetime: 0
-  _hasFixedDuration: 0
+  _cloneParticlesToMaxCount: 0
+  _cloneParticleLimit: 64
+  _forceContinuousSpawning: 0
+  _useGpuInstancing: 1
+  _preserveShaderTimeInContinuousLoop: 0
+  _isBurstSpawning: 0
+  _relativeWarmupTime: 0
   _duration: 5
+  _hasFixedDuration: 0
   _instantKillAtCastEnd: 0
   _fitToBounds: 0
+  _homeFlightAnchor: 0
+  _homePathSideOffsetMultiplier: 1
+  _homePathSideOffsetScale: 1
+  _homePathHeightOffsetScale: 1
+  _homeFlightSpeedScale: 1
 --- !u!1 &6456016457293307418
 GameObject:
   m_ObjectHideFlags: 0
@@ -5260,21 +5277,28 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9d6d14ae56a466245bff1789fbd03a5b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  partType: 0
   _owner: {fileID: 8500736706040560274}
   _particles:
   - {fileID: 4180273773136041442}
-  _warmup: 0
-  _warmupTimeSec: 0
-  _warmupTimeTickPerSec: 0
+  _startDelay: 0
   _countPerSecond: 1000
   _maxCount: 1
-  _hasCastDuration: 0
-  _castDurationAffectsLifetime: 0
-  _hasFixedDuration: 0
+  _cloneParticlesToMaxCount: 0
+  _cloneParticleLimit: 64
+  _forceContinuousSpawning: 0
+  _useGpuInstancing: 1
+  _preserveShaderTimeInContinuousLoop: 0
+  _isBurstSpawning: 0
+  _relativeWarmupTime: 0
   _duration: 5
+  _hasFixedDuration: 0
   _instantKillAtCastEnd: 0
   _fitToBounds: 1
+  _homeFlightAnchor: 0
+  _homePathSideOffsetMultiplier: 1
+  _homePathSideOffsetScale: 1
+  _homePathHeightOffsetScale: 1
+  _homeFlightSpeedScale: 1
 --- !u!1 &6941048210784020998
 GameObject:
   m_ObjectHideFlags: 0
@@ -5343,7 +5367,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9d6d14ae56a466245bff1789fbd03a5b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  partType: 0
   _owner: {fileID: 8500736706040560274}
   _particles:
   - {fileID: 8127273910511731308}
@@ -5370,17 +5393,25 @@ MonoBehaviour:
   - {fileID: 4342925127971592800}
   - {fileID: 4706291322406334608}
   - {fileID: 1771840116051498944}
-  _warmup: 0
-  _warmupTimeSec: 0
-  _warmupTimeTickPerSec: 0
+  _startDelay: 0
   _countPerSecond: 32
   _maxCount: 24
-  _hasCastDuration: 0
-  _castDurationAffectsLifetime: 0
-  _hasFixedDuration: 0
+  _cloneParticlesToMaxCount: 0
+  _cloneParticleLimit: 64
+  _forceContinuousSpawning: 0
+  _useGpuInstancing: 1
+  _preserveShaderTimeInContinuousLoop: 0
+  _isBurstSpawning: 0
+  _relativeWarmupTime: 0
   _duration: 5
+  _hasFixedDuration: 0
   _instantKillAtCastEnd: 0
   _fitToBounds: 0
+  _homeFlightAnchor: 0
+  _homePathSideOffsetMultiplier: 1
+  _homePathSideOffsetScale: 1
+  _homePathHeightOffsetScale: 1
+  _homeFlightSpeedScale: 1
 --- !u!1 &7172636460436384511
 GameObject:
   m_ObjectHideFlags: 0
@@ -5535,21 +5566,28 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9d6d14ae56a466245bff1789fbd03a5b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  partType: 0
   _owner: {fileID: 8500736706040560274}
   _particles:
   - {fileID: 1536803620613001198}
-  _warmup: 0
-  _warmupTimeSec: 0
-  _warmupTimeTickPerSec: 0
+  _startDelay: 0
   _countPerSecond: 1000
   _maxCount: 1
-  _hasCastDuration: 0
-  _castDurationAffectsLifetime: 0
-  _hasFixedDuration: 0
+  _cloneParticlesToMaxCount: 0
+  _cloneParticleLimit: 64
+  _forceContinuousSpawning: 0
+  _useGpuInstancing: 1
+  _preserveShaderTimeInContinuousLoop: 0
+  _isBurstSpawning: 0
+  _relativeWarmupTime: 0
   _duration: 5
+  _hasFixedDuration: 0
   _instantKillAtCastEnd: 0
   _fitToBounds: 0
+  _homeFlightAnchor: 0
+  _homePathSideOffsetMultiplier: 1
+  _homePathSideOffsetScale: 1
+  _homePathHeightOffsetScale: 1
+  _homeFlightSpeedScale: 1
 --- !u!1 &7752197848735134062
 GameObject:
   m_ObjectHideFlags: 0
@@ -6031,21 +6069,28 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9d6d14ae56a466245bff1789fbd03a5b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  partType: 0
   _owner: {fileID: 8500736706040560274}
   _particles:
   - {fileID: 2576043862087656804}
-  _warmup: 0
-  _warmupTimeSec: 0
-  _warmupTimeTickPerSec: 0
+  _startDelay: 0
   _countPerSecond: 100
   _maxCount: 0
-  _hasCastDuration: 0
-  _castDurationAffectsLifetime: 0
-  _hasFixedDuration: 0
+  _cloneParticlesToMaxCount: 0
+  _cloneParticleLimit: 64
+  _forceContinuousSpawning: 0
+  _useGpuInstancing: 1
+  _preserveShaderTimeInContinuousLoop: 0
+  _isBurstSpawning: 0
+  _relativeWarmupTime: 0
   _duration: 5
+  _hasFixedDuration: 0
   _instantKillAtCastEnd: 0
   _fitToBounds: 0
+  _homeFlightAnchor: 0
+  _homePathSideOffsetMultiplier: 1
+  _homePathSideOffsetScale: 1
+  _homePathHeightOffsetScale: 1
+  _homeFlightSpeedScale: 1
 --- !u!1 &8484770293731718141
 GameObject:
   m_ObjectHideFlags: 0

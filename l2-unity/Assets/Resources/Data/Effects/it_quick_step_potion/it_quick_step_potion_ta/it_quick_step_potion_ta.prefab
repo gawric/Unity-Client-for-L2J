@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 6984242605239247291}
   - component: {fileID: 6340648385115982857}
   - component: {fileID: 4073155707018104282}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: kirakira (3)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -97,7 +97,7 @@ GameObject:
   - component: {fileID: 4216459948554565683}
   - component: {fileID: 8242633884563024592}
   - component: {fileID: 1919174402129065396}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: needlelight (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -183,7 +183,7 @@ GameObject:
   - component: {fileID: 7709896864596717324}
   - component: {fileID: 7432073676814365478}
   - component: {fileID: 5265380695043420921}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: kirakira (2)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -268,7 +268,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6361114737267537588}
   - component: {fileID: 94732310365978293}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: it_quick_step_potion_ta
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -339,7 +339,7 @@ GameObject:
   - component: {fileID: 7524987257543774143}
   - component: {fileID: 8696106699105237231}
   - component: {fileID: 1186953263693861683}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: kirakira (6)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -425,7 +425,7 @@ GameObject:
   - component: {fileID: 8884742418245864282}
   - component: {fileID: 6521213775903133988}
   - component: {fileID: 5032242529509123856}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Wave (3)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -511,7 +511,7 @@ GameObject:
   - component: {fileID: 6629321919196957256}
   - component: {fileID: 2758754135687713143}
   - component: {fileID: 4952734780247819423}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: needlelight (2)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -597,7 +597,7 @@ GameObject:
   - component: {fileID: 7998599690262121158}
   - component: {fileID: 8098194338276359325}
   - component: {fileID: 6701557018454646342}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Wave (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -683,7 +683,7 @@ GameObject:
   - component: {fileID: 8092198222015605081}
   - component: {fileID: 4812374430361703520}
   - component: {fileID: 409127142077030522}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: kirakira (7)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -769,7 +769,7 @@ GameObject:
   - component: {fileID: 1890533410071698718}
   - component: {fileID: 6136718481724199384}
   - component: {fileID: 8884664215388890461}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: kirakira (4)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -854,7 +854,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2773228607712068821}
   - component: {fileID: 7473871464470153078}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: SpriteEmitter7
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -912,6 +912,7 @@ MonoBehaviour:
   _cloneParticlesToMaxCount: 0
   _cloneParticleLimit: 64
   _forceContinuousSpawning: 0
+  _useGpuInstancing: 1
   _preserveShaderTimeInContinuousLoop: 0
   _isBurstSpawning: 0
   _relativeWarmupTime: 0
@@ -934,7 +935,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3376947481613045062}
   - component: {fileID: 499649914587795142}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: MeshEmitter0
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -986,6 +987,7 @@ MonoBehaviour:
   _cloneParticlesToMaxCount: 0
   _cloneParticleLimit: 64
   _forceContinuousSpawning: 0
+  _useGpuInstancing: 1
   _preserveShaderTimeInContinuousLoop: 0
   _isBurstSpawning: 0
   _relativeWarmupTime: 0
@@ -1009,7 +1011,7 @@ GameObject:
   - component: {fileID: 5001508655925861194}
   - component: {fileID: 2877673498143413144}
   - component: {fileID: 5684347154888737731}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: needlelight
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1095,7 +1097,7 @@ GameObject:
   - component: {fileID: 1788528050750534089}
   - component: {fileID: 1096733767509063451}
   - component: {fileID: 635020242356708257}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: kirakira (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1181,7 +1183,7 @@ GameObject:
   - component: {fileID: 9073899412701566988}
   - component: {fileID: 6436922168556378441}
   - component: {fileID: 4462765666418962867}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: kirakira
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1267,7 +1269,7 @@ GameObject:
   - component: {fileID: 180211357590236038}
   - component: {fileID: 4821481966150918498}
   - component: {fileID: 615259516142696905}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: kirakira (5)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1353,7 +1355,7 @@ GameObject:
   - component: {fileID: 7341843302732854686}
   - component: {fileID: 3719090729496265828}
   - component: {fileID: 2716602190854031969}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Wave (4)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1439,7 +1441,7 @@ GameObject:
   - component: {fileID: 2813778116289797904}
   - component: {fileID: 6774735952220719286}
   - component: {fileID: 1477929302294816065}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Wave
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1525,7 +1527,7 @@ GameObject:
   - component: {fileID: 5288083902661593806}
   - component: {fileID: 2896316950369358366}
   - component: {fileID: 1613722421417779846}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Wave (2)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1610,7 +1612,7 @@ GameObject:
   m_Component:
   - component: {fileID: 956703697721353069}
   - component: {fileID: 3593670271202085538}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: MeshEmitter2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1658,6 +1660,7 @@ MonoBehaviour:
   _cloneParticlesToMaxCount: 0
   _cloneParticleLimit: 64
   _forceContinuousSpawning: 0
+  _useGpuInstancing: 1
   _preserveShaderTimeInContinuousLoop: 0
   _isBurstSpawning: 0
   _relativeWarmupTime: 0

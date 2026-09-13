@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8189798835613475292}
   - component: {fileID: 5276285404103129625}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: MeshEmitter5
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -64,6 +64,7 @@ MonoBehaviour:
   _releaseShaderHoldByCastProgress: 1
   _shaderHoldReleaseStartNormalized: 0.85
   _smoothShaderHoldRelease: 1
+  _castEndHoldReleaseLead: 0.1
 --- !u!1 &2820121982044638098
 GameObject:
   m_ObjectHideFlags: 0
@@ -74,7 +75,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8049358338934574522}
   - component: {fileID: 533138916183887364}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: bl_vampiric_touch_ta
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -144,7 +145,7 @@ GameObject:
   - component: {fileID: 8995816705064788383}
   - component: {fileID: 2084183958851995765}
   - component: {fileID: 6997170421713178952}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: SpriteEmitter5(Clone)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -229,7 +230,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7551885339028827518}
   - component: {fileID: 7921085672857995234}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: SpriteEmitter5
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -280,7 +281,10 @@ MonoBehaviour:
   _startDelay: 0
   _countPerSecond: 15
   _maxCount: 2
+  _cloneParticlesToMaxCount: 0
+  _cloneParticleLimit: 64
   _forceContinuousSpawning: 0
+  _useGpuInstancing: 1
   _preserveShaderTimeInContinuousLoop: 0
   _isBurstSpawning: 0
   _relativeWarmupTime: 0
@@ -288,6 +292,11 @@ MonoBehaviour:
   _hasFixedDuration: 1
   _instantKillAtCastEnd: 0
   _fitToBounds: 0
+  _homeFlightAnchor: 0
+  _homePathSideOffsetMultiplier: 1
+  _homePathSideOffsetScale: 1
+  _homePathHeightOffsetScale: 1
+  _homeFlightSpeedScale: 1
 --- !u!1 &4427046817538033095
 GameObject:
   m_ObjectHideFlags: 0
@@ -299,7 +308,7 @@ GameObject:
   - component: {fileID: 1890640442188768189}
   - component: {fileID: 3447060548265303438}
   - component: {fileID: 6334173192629779071}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: SpriteEmitter5(Clone)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -385,7 +394,7 @@ GameObject:
   - component: {fileID: 6095214153127900444}
   - component: {fileID: 2977077265555303015}
   - component: {fileID: 3645565391444871876}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: MeshEmitter4
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -470,7 +479,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1719428930027570459}
   - component: {fileID: 7770158175432897050}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: MeshEmitter4
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -524,6 +533,7 @@ MonoBehaviour:
   _releaseShaderHoldByCastProgress: 1
   _shaderHoldReleaseStartNormalized: 0.85
   _smoothShaderHoldRelease: 1
+  _castEndHoldReleaseLead: 0.1
 --- !u!1 &6424572308250822681
 GameObject:
   m_ObjectHideFlags: 0
@@ -535,7 +545,7 @@ GameObject:
   - component: {fileID: 5585102436961512681}
   - component: {fileID: 1041539511492770238}
   - component: {fileID: 581229763098997189}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: MeshEmitter5
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -621,7 +631,7 @@ GameObject:
   - component: {fileID: 5478552668768680417}
   - component: {fileID: 1578774617781443680}
   - component: {fileID: 65155216067345694}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: SpriteEmitter5(Clone)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -707,7 +717,7 @@ GameObject:
   - component: {fileID: 454530317709476628}
   - component: {fileID: 1784973997758404787}
   - component: {fileID: 4398759471699303545}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: SpriteEmitter5(Clone)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -793,7 +803,7 @@ GameObject:
   - component: {fileID: 2242286855573758848}
   - component: {fileID: 529089988477241344}
   - component: {fileID: 9202622067029977110}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: SpriteEmitter5(Clone)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -879,7 +889,7 @@ GameObject:
   - component: {fileID: 4577447889427072381}
   - component: {fileID: 8870892913253735755}
   - component: {fileID: 8640892481801292652}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: SpriteEmitter5
   m_TagString: Untagged
   m_Icon: {fileID: 0}

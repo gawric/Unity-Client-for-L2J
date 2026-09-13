@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4577377763629958438}
   - component: {fileID: 5073533988503188716}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: curse_poison_composite
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -65,6 +65,8 @@ MonoBehaviour:
         scale: 1
         spawnTiming: 0
         spawnDelaySeconds: 0
+        spawnAttachmentPoint: 0
+        boneName: 
         follow: 1
         inheritRotation: 0
         placement:
@@ -80,6 +82,8 @@ MonoBehaviour:
         scale: 1
         spawnTiming: 5
         spawnDelaySeconds: 0
+        spawnAttachmentPoint: 8
+        boneName: 
         follow: 1
         inheritRotation: 0
         placement:

@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 8448969221239079003}
   - component: {fileID: 8358357114232759131}
   - component: {fileID: 4045837462824764475}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: heal (2)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -97,7 +97,7 @@ GameObject:
   - component: {fileID: 7779261505899811355}
   - component: {fileID: 2009621776455809669}
   - component: {fileID: 8526498057618663317}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: star (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -183,7 +183,7 @@ GameObject:
   - component: {fileID: 8316821699736987455}
   - component: {fileID: 6054946523644201569}
   - component: {fileID: 5351620221985778900}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: star (11)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -269,7 +269,7 @@ GameObject:
   - component: {fileID: 7225438613626035891}
   - component: {fileID: 4457883603827500981}
   - component: {fileID: 2013913195664783658}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: star (12)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -355,7 +355,7 @@ GameObject:
   - component: {fileID: 5964136672811211339}
   - component: {fileID: 7495579381273670032}
   - component: {fileID: 1317974190541437451}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: heal (3)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -441,7 +441,7 @@ GameObject:
   - component: {fileID: 4195746333582165843}
   - component: {fileID: 3371816326996564544}
   - component: {fileID: 6513418033736327601}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Lines (4)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -527,7 +527,7 @@ GameObject:
   - component: {fileID: 4237115258287271348}
   - component: {fileID: 5408899146138024391}
   - component: {fileID: 8640981111134030285}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Lines (11)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -613,7 +613,7 @@ GameObject:
   - component: {fileID: 8263948595350552615}
   - component: {fileID: 2568503630589955252}
   - component: {fileID: 13642947408819305}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: star (9)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -698,7 +698,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6096244920624890739}
   - component: {fileID: 5587415511521970293}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: SpriteEmitter71
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -770,6 +770,7 @@ MonoBehaviour:
   _cloneParticlesToMaxCount: 1
   _cloneParticleLimit: 64
   _useGpuInstancing: 1
+  _coordinateSystem: 0
   _isBurstSpawning: 0
   _relativeWarmupTime: 0
   _warmupTicksPerSecond: 0
@@ -778,6 +779,8 @@ MonoBehaviour:
   _instantKillAtCastEnd: 0
   _respawnDeadParticles: 0
   _stretchParticleLifeToWindow: 0
+  _hostOwnedEmission: 0
+  _compareLogEnabled: 0
 --- !u!1 &2068085823481537198
 GameObject:
   m_ObjectHideFlags: 0
@@ -789,7 +792,7 @@ GameObject:
   - component: {fileID: 1129912035419267453}
   - component: {fileID: 8982161923518998406}
   - component: {fileID: 8338503881592309594}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Lines (10)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -875,7 +878,7 @@ GameObject:
   - component: {fileID: 526487279800795100}
   - component: {fileID: 3079184302789574577}
   - component: {fileID: 5884668934261275009}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: star (18)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -961,7 +964,7 @@ GameObject:
   - component: {fileID: 2825239977235431328}
   - component: {fileID: 3432440132112167250}
   - component: {fileID: 5677137964514163744}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: heal
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1047,7 +1050,7 @@ GameObject:
   - component: {fileID: 6961050358958953075}
   - component: {fileID: 5838891730799282364}
   - component: {fileID: 6673342996136899315}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Lines (6)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1133,7 +1136,7 @@ GameObject:
   - component: {fileID: 7984503455453362383}
   - component: {fileID: 717080091790993678}
   - component: {fileID: 5322417865487660141}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Lines (13)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1219,7 +1222,7 @@ GameObject:
   - component: {fileID: 7285771200049147969}
   - component: {fileID: 2372802047407757409}
   - component: {fileID: 8144261694586711493}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Lines (12)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1305,7 +1308,7 @@ GameObject:
   - component: {fileID: 239902726491088053}
   - component: {fileID: 7073633208947839541}
   - component: {fileID: 2574205752150516016}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: star (17)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1391,7 +1394,7 @@ GameObject:
   - component: {fileID: 1283912888234624619}
   - component: {fileID: 5659124905562221601}
   - component: {fileID: 6642692583772022341}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: star (3)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1477,7 +1480,7 @@ GameObject:
   - component: {fileID: 4170148255417609101}
   - component: {fileID: 2119635082588245479}
   - component: {fileID: 6053148075982159572}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: heal (6)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1563,7 +1566,7 @@ GameObject:
   - component: {fileID: 3936896003703175399}
   - component: {fileID: 5895088515625570135}
   - component: {fileID: 6812231173556307422}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Lines (8)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1649,7 +1652,7 @@ GameObject:
   - component: {fileID: 158787051763926288}
   - component: {fileID: 8744752512033059828}
   - component: {fileID: 6486978715679691792}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: star (8)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1735,7 +1738,7 @@ GameObject:
   - component: {fileID: 6196500518025993230}
   - component: {fileID: 4428635382153184054}
   - component: {fileID: 3318039154875261995}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: star (10)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1821,7 +1824,7 @@ GameObject:
   - component: {fileID: 5656368534256485772}
   - component: {fileID: 6205590186540998592}
   - component: {fileID: 6308980672183618918}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Lines (3)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1907,7 +1910,7 @@ GameObject:
   - component: {fileID: 7142386630862169645}
   - component: {fileID: 1572422221250024699}
   - component: {fileID: 5464200452786487941}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: star (14)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1993,7 +1996,7 @@ GameObject:
   - component: {fileID: 489649821050258985}
   - component: {fileID: 3648887686181108834}
   - component: {fileID: 4765237522456258980}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: star (7)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2079,7 +2082,7 @@ GameObject:
   - component: {fileID: 7822389302291808585}
   - component: {fileID: 4371114388143141265}
   - component: {fileID: 6981820492205690083}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Lines (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2165,7 +2168,7 @@ GameObject:
   - component: {fileID: 224352684630294035}
   - component: {fileID: 6682752316798310493}
   - component: {fileID: 2856522191832481421}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: star (6)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2251,7 +2254,7 @@ GameObject:
   - component: {fileID: 4536604666930113747}
   - component: {fileID: 8953160152439174608}
   - component: {fileID: 1386913882500608339}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: star
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2337,7 +2340,7 @@ GameObject:
   - component: {fileID: 8772902279526818128}
   - component: {fileID: 3347809920006345065}
   - component: {fileID: 313602436847952315}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: star (13)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2423,7 +2426,7 @@ GameObject:
   - component: {fileID: 3405666055725025315}
   - component: {fileID: 9085930798331701782}
   - component: {fileID: 5618430359188700328}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: star (19)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2509,7 +2512,7 @@ GameObject:
   - component: {fileID: 7099065181775077475}
   - component: {fileID: 4148180701260236110}
   - component: {fileID: 8065928894078567742}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Lines (5)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2595,7 +2598,7 @@ GameObject:
   - component: {fileID: 8497764380996196617}
   - component: {fileID: 4623843630953843829}
   - component: {fileID: 4207108941375653790}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: star (2)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2681,7 +2684,7 @@ GameObject:
   - component: {fileID: 7861092870591909368}
   - component: {fileID: 65902609974326025}
   - component: {fileID: 3876592977729729738}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: star (4)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2767,7 +2770,7 @@ GameObject:
   - component: {fileID: 122839523405287802}
   - component: {fileID: 3333393792305438314}
   - component: {fileID: 1441752307567745390}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: heal (4)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2853,7 +2856,7 @@ GameObject:
   - component: {fileID: 2454606418134932182}
   - component: {fileID: 7598402030508271511}
   - component: {fileID: 2857455889583838197}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: heal (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2939,7 +2942,7 @@ GameObject:
   - component: {fileID: 9013361549666738975}
   - component: {fileID: 8539019251865996231}
   - component: {fileID: 5175362331227030368}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: star (5)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3025,7 +3028,7 @@ GameObject:
   - component: {fileID: 8427117303957217857}
   - component: {fileID: 3464449885295251114}
   - component: {fileID: 6782435568954971224}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: BeamEmitter0
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3081,6 +3084,7 @@ MonoBehaviour:
   _cloneParticlesToMaxCount: 1
   _cloneParticleLimit: 64
   _useGpuInstancing: 1
+  _coordinateSystem: 0
   _isBurstSpawning: 0
   _relativeWarmupTime: 0
   _warmupTicksPerSecond: 0
@@ -3089,6 +3093,8 @@ MonoBehaviour:
   _instantKillAtCastEnd: 0
   _respawnDeadParticles: 0
   _stretchParticleLifeToWindow: 0
+  _hostOwnedEmission: 0
+  _compareLogEnabled: 0
 --- !u!114 &6782435568954971224
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3116,7 +3122,7 @@ GameObject:
   - component: {fileID: 2890456228183041748}
   - component: {fileID: 9013872742178736520}
   - component: {fileID: 3442327753217918256}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Lines (2)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3201,7 +3207,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3031311233166118345}
   - component: {fileID: 8765376738630372577}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: SpriteEmitter49
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3283,6 +3289,7 @@ MonoBehaviour:
   _cloneParticlesToMaxCount: 1
   _cloneParticleLimit: 64
   _useGpuInstancing: 1
+  _coordinateSystem: 0
   _isBurstSpawning: 0
   _relativeWarmupTime: 0
   _warmupTicksPerSecond: 0
@@ -3291,6 +3298,8 @@ MonoBehaviour:
   _instantKillAtCastEnd: 0
   _respawnDeadParticles: 0
   _stretchParticleLifeToWindow: 0
+  _hostOwnedEmission: 0
+  _compareLogEnabled: 0
 --- !u!1 &7920400795977029530
 GameObject:
   m_ObjectHideFlags: 0
@@ -3302,7 +3311,7 @@ GameObject:
   - component: {fileID: 5520539162790562072}
   - component: {fileID: 3226749818029451160}
   - component: {fileID: 2426322842668618145}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Lines
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3388,7 +3397,7 @@ GameObject:
   - component: {fileID: 5420457690042767500}
   - component: {fileID: 6183673982250274496}
   - component: {fileID: 8056627070292838959}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: star (16)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3474,7 +3483,7 @@ GameObject:
   - component: {fileID: 3072688546685902201}
   - component: {fileID: 5479760528393732459}
   - component: {fileID: 7800225747786242838}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Lines (7)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3559,7 +3568,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8374755752346745561}
   - component: {fileID: 3316680953689571854}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: wh_heal_ave
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3630,7 +3639,7 @@ GameObject:
   - component: {fileID: 6662699730935304255}
   - component: {fileID: 1247490884695156196}
   - component: {fileID: 5405918094352773162}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Lines (9)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3716,7 +3725,7 @@ GameObject:
   - component: {fileID: 1674838513880524001}
   - component: {fileID: 1290738105133780539}
   - component: {fileID: 2887263776381844500}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: heal (5)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3802,7 +3811,7 @@ GameObject:
   - component: {fileID: 2345013644862569}
   - component: {fileID: 5177676471144877925}
   - component: {fileID: 3031415963622658310}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: star (15)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3888,7 +3897,7 @@ GameObject:
   - component: {fileID: 3104242766686028682}
   - component: {fileID: 3091624991985353509}
   - component: {fileID: 6557130593480911502}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Lines (14)
   m_TagString: Untagged
   m_Icon: {fileID: 0}

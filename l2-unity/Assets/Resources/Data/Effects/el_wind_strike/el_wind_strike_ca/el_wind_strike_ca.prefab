@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 5716828541307553238}
   - component: {fileID: 833480844484250490}
   - component: {fileID: 266479345115975960}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: MeshEmitter24 (5)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -97,7 +97,7 @@ GameObject:
   - component: {fileID: 1039806670452970756}
   - component: {fileID: 8813663924606959200}
   - component: {fileID: 8960887624553515819}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: MeshEmitter24 (12)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -182,7 +182,7 @@ GameObject:
   m_Component:
   - component: {fileID: 194810927286252568}
   - component: {fileID: 5237150447596099924}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: el_wind_strike_ca
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -251,7 +251,7 @@ GameObject:
   - component: {fileID: 2465901404513918934}
   - component: {fileID: 3546356022543755515}
   - component: {fileID: 4446184631473742802}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: MeshEmitter24 (11)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -337,7 +337,7 @@ GameObject:
   - component: {fileID: 2771703934913321545}
   - component: {fileID: 1669547525435074658}
   - component: {fileID: 7730740494355339639}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: MeshEmitter24 (14)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -422,7 +422,7 @@ GameObject:
   m_Component:
   - component: {fileID: 806689931357324639}
   - component: {fileID: 8968865197400830151}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: MeshEmitter24
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -494,11 +494,17 @@ MonoBehaviour:
   _cloneParticlesToMaxCount: 1
   _cloneParticleLimit: 64
   _useGpuInstancing: 1
+  _coordinateSystem: 0
   _isBurstSpawning: 0
   _relativeWarmupTime: 0
+  _warmupTicksPerSecond: 0
   _duration: 1
   _hasFixedDuration: 0
   _instantKillAtCastEnd: 0
+  _respawnDeadParticles: 1
+  _stretchParticleLifeToWindow: 0
+  _hostOwnedEmission: 0
+  _compareLogEnabled: 0
 --- !u!1 &3216486448950892831
 GameObject:
   m_ObjectHideFlags: 0
@@ -510,7 +516,7 @@ GameObject:
   - component: {fileID: 6836394117845695700}
   - component: {fileID: 891100019617839498}
   - component: {fileID: 23911859506793207}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: SpriteEmitter7 (3)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -596,7 +602,7 @@ GameObject:
   - component: {fileID: 8353895073602117514}
   - component: {fileID: 7575816474040874350}
   - component: {fileID: 6796703689946592625}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: MeshEmitter24 (13)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -682,7 +688,7 @@ GameObject:
   - component: {fileID: 5195163815433617043}
   - component: {fileID: 3628641355871175385}
   - component: {fileID: 8540636083074486689}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: MeshEmitter24 (4)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -768,7 +774,7 @@ GameObject:
   - component: {fileID: 666148708098485880}
   - component: {fileID: 4235499720545908075}
   - component: {fileID: 6715140399644288301}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: SpriteEmitter7 (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -854,7 +860,7 @@ GameObject:
   - component: {fileID: 8193129332741313849}
   - component: {fileID: 5195655776974919968}
   - component: {fileID: 3326709551809317015}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: MeshEmitter24 (3)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -940,7 +946,7 @@ GameObject:
   - component: {fileID: 6426440156978856022}
   - component: {fileID: 6757435899824425938}
   - component: {fileID: 2479218236369638067}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: MeshEmitter24 (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1026,7 +1032,7 @@ GameObject:
   - component: {fileID: 1657658051768179410}
   - component: {fileID: 2461703596838061306}
   - component: {fileID: 8193022578787139982}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: SpriteEmitter7 (4)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1112,7 +1118,7 @@ GameObject:
   - component: {fileID: 2891274318389919140}
   - component: {fileID: 8055902471447126773}
   - component: {fileID: 8498400928866782105}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: MeshEmitter24 (9)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1198,7 +1204,7 @@ GameObject:
   - component: {fileID: 796630029117453083}
   - component: {fileID: 5585496321723218856}
   - component: {fileID: 5544731390359312892}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: MeshEmitter24 (7)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1284,7 +1290,7 @@ GameObject:
   - component: {fileID: 8476402176792484389}
   - component: {fileID: 6248722980339710372}
   - component: {fileID: 7090732269644933237}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: MeshEmitter24
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1370,7 +1376,7 @@ GameObject:
   - component: {fileID: 8231047339955697839}
   - component: {fileID: 5807319839242937578}
   - component: {fileID: 3842747380280350372}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: MeshEmitter24 (10)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1456,7 +1462,7 @@ GameObject:
   - component: {fileID: 4338717839259294304}
   - component: {fileID: 2626387824928631772}
   - component: {fileID: 5635378034240115082}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: MeshEmitter24 (8)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1542,7 +1548,7 @@ GameObject:
   - component: {fileID: 5552349447557748095}
   - component: {fileID: 4094011506270982964}
   - component: {fileID: 236520030931360588}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: MeshEmitter24 (2)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1628,7 +1634,7 @@ GameObject:
   - component: {fileID: 6474917502802444452}
   - component: {fileID: 2381946850403502065}
   - component: {fileID: 5858726349312811263}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: SpriteEmitter7
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1714,7 +1720,7 @@ GameObject:
   - component: {fileID: 450020405201391586}
   - component: {fileID: 902183973252460887}
   - component: {fileID: 6869317817353680895}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: MeshEmitter24 (6)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1799,7 +1805,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2841876708196153079}
   - component: {fileID: 8791579111592755663}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: SpriteEmitter7
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1851,11 +1857,17 @@ MonoBehaviour:
   _cloneParticlesToMaxCount: 1
   _cloneParticleLimit: 64
   _useGpuInstancing: 1
+  _coordinateSystem: 0
   _isBurstSpawning: 1
   _relativeWarmupTime: 0
+  _warmupTicksPerSecond: 0
   _duration: 5
   _hasFixedDuration: 0
   _instantKillAtCastEnd: 0
+  _respawnDeadParticles: 1
+  _stretchParticleLifeToWindow: 0
+  _hostOwnedEmission: 0
+  _compareLogEnabled: 0
 --- !u!1 &9207958408061846301
 GameObject:
   m_ObjectHideFlags: 0
@@ -1867,7 +1879,7 @@ GameObject:
   - component: {fileID: 4123041005541405877}
   - component: {fileID: 1674846272874661854}
   - component: {fileID: 4213781334331871146}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: SpriteEmitter7 (2)
   m_TagString: Untagged
   m_Icon: {fileID: 0}

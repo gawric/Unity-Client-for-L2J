@@ -111,7 +111,15 @@ public static class L2FxQuadSizeDiagnostic
         }
 
         snap.sizeUU = snap.startSizeMidUU * snap.sizeMul;
-        float sizeInMeters = snap.sizeUU * UuToMeters;
+        float heUnit = 1f;
+        if (mat.HasProperty("_L2FxHeUnitScaleEnable") &&
+            mat.GetFloat("_L2FxHeUnitScaleEnable") > 0.5f &&
+            mat.HasProperty("_L2FxHeUnitScale"))
+        {
+            heUnit = Mathf.Max(mat.GetFloat("_L2FxHeUnitScale"), 1e-6f);
+        }
+
+        float sizeInMeters = snap.sizeUU * heUnit * UuToMeters;
         snap.sizeMetersVertex = sizeInMeters * snap.worldCalibrationK;
         float worldDiameterM = sizeInMeters * snap.worldCalibrationK;
         snap.finalWidthM = snap.quadSpan.x * worldDiameterM * Mathf.Abs(snap.lossyScale.x);

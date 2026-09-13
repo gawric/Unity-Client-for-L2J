@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 8014336592637338754}
   - component: {fileID: 3155312274235565403}
   - component: {fileID: 1696260206866846188}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: smog (5)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -97,7 +97,7 @@ GameObject:
   - component: {fileID: 4727373684987740047}
   - component: {fileID: 4202005561147142967}
   - component: {fileID: 7632517127491987990}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Needle (4)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -183,7 +183,7 @@ GameObject:
   - component: {fileID: 9166066223278741644}
   - component: {fileID: 8696753050330696498}
   - component: {fileID: 3777622509478480273}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Particle (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -269,7 +269,7 @@ GameObject:
   - component: {fileID: 3203915433895949218}
   - component: {fileID: 5971320545266784614}
   - component: {fileID: 2031290083668371670}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: smog (4)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -355,7 +355,7 @@ GameObject:
   - component: {fileID: 1351478958493391760}
   - component: {fileID: 4877532631440972844}
   - component: {fileID: 2046103728524936647}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Needle (6)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -441,7 +441,7 @@ GameObject:
   - component: {fileID: 3463520761504291294}
   - component: {fileID: 2126923345407938425}
   - component: {fileID: 3751221843162940050}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Particle
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -526,7 +526,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2955737796304963569}
   - component: {fileID: 6435954435065189080}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: SpriteEmitter326
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -584,6 +584,7 @@ MonoBehaviour:
   _cloneParticlesToMaxCount: 0
   _cloneParticleLimit: 64
   _forceContinuousSpawning: 0
+  _useGpuInstancing: 1
   _preserveShaderTimeInContinuousLoop: 0
   _isBurstSpawning: 0
   _relativeWarmupTime: 0
@@ -606,7 +607,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6814410213862856730}
   - component: {fileID: 456056669239086103}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: shot_N_atk_v1_ta
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -680,7 +681,7 @@ GameObject:
   m_Component:
   - component: {fileID: 897283766482319507}
   - component: {fileID: 7526666339529987658}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: MeshEmitter226
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -726,6 +727,7 @@ MonoBehaviour:
   _cloneParticlesToMaxCount: 0
   _cloneParticleLimit: 64
   _forceContinuousSpawning: 0
+  _useGpuInstancing: 1
   _preserveShaderTimeInContinuousLoop: 0
   _isBurstSpawning: 0
   _relativeWarmupTime: 0.01
@@ -749,7 +751,7 @@ GameObject:
   - component: {fileID: 5916200435877911259}
   - component: {fileID: 4212123446599528700}
   - component: {fileID: 4517992315553456733}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Particle (5)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -835,7 +837,7 @@ GameObject:
   - component: {fileID: 920342878514362734}
   - component: {fileID: 7701362904313214885}
   - component: {fileID: 2604966887683640758}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: smog
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -921,7 +923,7 @@ GameObject:
   - component: {fileID: 4938845468221399658}
   - component: {fileID: 6663495668299450679}
   - component: {fileID: 8729424210616842605}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Spirit
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1007,7 +1009,7 @@ GameObject:
   - component: {fileID: 1514435811343682086}
   - component: {fileID: 5427816012434091619}
   - component: {fileID: 8657873732915860241}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Spirit (3)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1092,7 +1094,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3822308718293505147}
   - component: {fileID: 5251905454813921004}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: MeshEmitter225
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1146,6 +1148,7 @@ MonoBehaviour:
   _cloneParticlesToMaxCount: 0
   _cloneParticleLimit: 64
   _forceContinuousSpawning: 0
+  _useGpuInstancing: 1
   _preserveShaderTimeInContinuousLoop: 0
   _isBurstSpawning: 0
   _relativeWarmupTime: 0
@@ -1169,7 +1172,7 @@ GameObject:
   - component: {fileID: 3456821400460883998}
   - component: {fileID: 7677923023015861523}
   - component: {fileID: 4106309483425543473}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: ShockWave (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1255,7 +1258,7 @@ GameObject:
   - component: {fileID: 5661136457163837765}
   - component: {fileID: 6917770206789236669}
   - component: {fileID: 2919135217433559023}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Needle
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1341,7 +1344,7 @@ GameObject:
   - component: {fileID: 1879187276565058701}
   - component: {fileID: 6338911341190165867}
   - component: {fileID: 1859086354379841272}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Particle (2)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1427,7 +1430,7 @@ GameObject:
   - component: {fileID: 2928330676882096237}
   - component: {fileID: 2217552333684737661}
   - component: {fileID: 333529323995016054}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Needle (3)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1513,7 +1516,7 @@ GameObject:
   - component: {fileID: 5867743524599004351}
   - component: {fileID: 62020936055473398}
   - component: {fileID: 6104674194081743225}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: smog (3)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1599,7 +1602,7 @@ GameObject:
   - component: {fileID: 4147470188423354852}
   - component: {fileID: 6459368451538964330}
   - component: {fileID: 7253183153267932910}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Spirit (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1685,7 +1688,7 @@ GameObject:
   - component: {fileID: 5015815727246866541}
   - component: {fileID: 8314990366457322543}
   - component: {fileID: 7274781749588862230}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Spirit (4)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1771,7 +1774,7 @@ GameObject:
   - component: {fileID: 1808622481842172863}
   - component: {fileID: 2451250233520642805}
   - component: {fileID: 8466617160291783528}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Needle (5)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1857,7 +1860,7 @@ GameObject:
   - component: {fileID: 6191581511199436975}
   - component: {fileID: 2153136193076443293}
   - component: {fileID: 563333582628219637}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: smog (2)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1942,7 +1945,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1839241616152134950}
   - component: {fileID: 1199685176110561016}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: SpriteEmitter325
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1996,6 +1999,7 @@ MonoBehaviour:
   _cloneParticlesToMaxCount: 0
   _cloneParticleLimit: 64
   _forceContinuousSpawning: 0
+  _useGpuInstancing: 1
   _preserveShaderTimeInContinuousLoop: 0
   _isBurstSpawning: 0
   _relativeWarmupTime: 0
@@ -2019,7 +2023,7 @@ GameObject:
   - component: {fileID: 9127390655053109103}
   - component: {fileID: 6673147216914902608}
   - component: {fileID: 1197765549142916728}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: smog (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2104,7 +2108,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7700656717641720051}
   - component: {fileID: 3843589127831480348}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: SpriteEmitter324
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2158,6 +2162,7 @@ MonoBehaviour:
   _cloneParticlesToMaxCount: 0
   _cloneParticleLimit: 64
   _forceContinuousSpawning: 0
+  _useGpuInstancing: 1
   _preserveShaderTimeInContinuousLoop: 0
   _isBurstSpawning: 1
   _relativeWarmupTime: 0
@@ -2181,7 +2186,7 @@ GameObject:
   - component: {fileID: 4196308403338397759}
   - component: {fileID: 9157973451229013904}
   - component: {fileID: 7949002140052820881}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Needle (7)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2267,7 +2272,7 @@ GameObject:
   - component: {fileID: 1638875513583264715}
   - component: {fileID: 6739464752594614486}
   - component: {fileID: 6869486622282700981}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Needle (2)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2353,7 +2358,7 @@ GameObject:
   - component: {fileID: 2913077823804103093}
   - component: {fileID: 8542030047234385914}
   - component: {fileID: 4618222568628024755}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Spirit (2)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2439,7 +2444,7 @@ GameObject:
   - component: {fileID: 6110527276622977984}
   - component: {fileID: 7032041789413043010}
   - component: {fileID: 3815747477704635352}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Particle (4)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2525,7 +2530,7 @@ GameObject:
   - component: {fileID: 795208654273325036}
   - component: {fileID: 4140474578559813741}
   - component: {fileID: 7704711353117544657}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Spirit (5)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2611,7 +2616,7 @@ GameObject:
   - component: {fileID: 1901309756258935628}
   - component: {fileID: 8543087682128741917}
   - component: {fileID: 6835189408199321113}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Particle (3)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2697,7 +2702,7 @@ GameObject:
   - component: {fileID: 3751826550201283060}
   - component: {fileID: 3814890108045605042}
   - component: {fileID: 7947493593829660860}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Needle (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2783,7 +2788,7 @@ GameObject:
   - component: {fileID: 7410769072386157794}
   - component: {fileID: 5646466789874665275}
   - component: {fileID: 3080629412815815079}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: ShockWave
   m_TagString: Untagged
   m_Icon: {fileID: 0}

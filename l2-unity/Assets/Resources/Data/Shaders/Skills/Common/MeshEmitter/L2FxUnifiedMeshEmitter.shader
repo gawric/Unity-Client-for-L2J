@@ -3,8 +3,10 @@ Shader "L2/Effects/MeshEmitter"
     Properties
     {
         _MainTex ("Texture", 2D) = "white" {}
-        _SecondTex ("Second Texture (D3D9 t1)", 2D) = "white" {}
-        [Toggle] _UseSecondTex ("Use Second Tex MODULATE2X", Float) = 0
+        // Empty default: do not use "white". Unity would bind UnityWhite (sRGB) on t1
+        // even when the material leaves this slot empty.
+        _SecondTex ("Second Texture (D3D9 t1)", 2D) = "" {}
+        [Toggle(_USE_SECOND_TEX)] _UseSecondTex ("Use Second Tex MODULATE2X", Float) = 0
         _StartTime ("Start Time", Float) = 0
         _Seed ("Seed", Float) = 0
         _InitialDelayRange ("Initial Delay Min Max", Vector) = (0, 0, 0, 0)
@@ -116,6 +118,7 @@ Shader "L2/Effects/MeshEmitter"
         _FadeInEndTime ("FadeIn End Time", Float) = 0
         [Toggle] _FadeOut ("FadeOut", Float) = 0
         _FadeOutStartTime ("FadeOut Start Time", Float) = 0
+        [Toggle] _ColorFadeAlphaBlend ("ColorFade AlphaBlend", Float) = 0
         _Opacity ("Opacity", Range(0, 2)) = 1
         _RgbBoost ("RGB Boost", Range(0, 16)) = 1
         [Toggle] _L2SpriteColorGammaToLinear ("Color Gamma To Linear", Float) = 0
@@ -126,6 +129,10 @@ Shader "L2/Effects/MeshEmitter"
         _AlphaClipThreshold ("Alpha Clip Threshold (-1 off)", Float) = -1
         [Toggle] _DebugMeshOut ("Debug Mesh Output", Float) = 0
         [Toggle] _ExpandShaderBounds ("Expand CPU Bounds For Vertex Motion", Float) = 0
+        [Toggle] _VertMeshAnimEnable ("VertMesh GetFrame Anim", Float) = 0
+        _VertMeshFramePosTex ("VertMesh Frame Positions VAT", 2D) = "black" {}
+        _VertMeshFrameCount ("VertMesh Frame Count", Float) = 0
+        _VertMeshSeqRate ("VertMesh Seq Rate", Float) = 30
 
         [Enum(UnityEngine.Rendering.BlendMode)] _SrcBlend ("Src Blend", Float) = 1
         [Enum(UnityEngine.Rendering.BlendMode)] _DstBlend ("Dst Blend", Float) = 0
@@ -164,6 +171,7 @@ Shader "L2/Effects/MeshEmitter"
             #pragma vertex vert
             #pragma fragment frag
             #pragma multi_compile_instancing
+            #pragma shader_feature_local _ _USE_SECOND_TEX
             #include "L2FxUnifiedMeshEmitter.Pass.hlsl"
             ENDHLSL
         }

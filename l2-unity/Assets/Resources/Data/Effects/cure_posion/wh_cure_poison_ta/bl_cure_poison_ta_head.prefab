@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 1364123741600273263}
   - component: {fileID: 2647926094499511795}
   - component: {fileID: 8400874220504925353}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: MeshEmitter1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -97,7 +97,7 @@ GameObject:
   - component: {fileID: 405152970363185052}
   - component: {fileID: 6287887662260447273}
   - component: {fileID: 6798875181088548196}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: MeshEmitter1 (5)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -182,7 +182,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4725731313583912682}
   - component: {fileID: -8605063496294535788}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: bl_cure_poison_ta_head
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -249,7 +249,7 @@ GameObject:
   - component: {fileID: 2068582950490522118}
   - component: {fileID: 5801848145706544735}
   - component: {fileID: 1238554880781361608}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: MeshEmitter1 (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -335,7 +335,7 @@ GameObject:
   - component: {fileID: 7946745853864709152}
   - component: {fileID: 7423379569063340253}
   - component: {fileID: 8827465519032241178}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: windAround
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -383,6 +383,7 @@ MonoBehaviour:
   _cloneParticlesToMaxCount: 0
   _cloneParticleLimit: 64
   _forceContinuousSpawning: 0
+  _useGpuInstancing: 1
   _preserveShaderTimeInContinuousLoop: 0
   _isBurstSpawning: 0
   _relativeWarmupTime: 0

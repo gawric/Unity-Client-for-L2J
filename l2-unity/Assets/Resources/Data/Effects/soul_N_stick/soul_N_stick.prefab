@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 1540437907844574113}
   - component: {fileID: 9113213093636108443}
   - component: {fileID: 5192280664516478786}
-  m_Layer: 20
+  m_Layer: 18
   m_Name: MeshEmitter288
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -98,7 +98,7 @@ GameObject:
   - component: {fileID: 7792150236541702004}
   - component: {fileID: 3647985325026462093}
   - component: {fileID: 3667557137351626255}
-  m_Layer: 20
+  m_Layer: 18
   m_Name: SpriteEmitter443(Clone)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -206,7 +206,7 @@ GameObject:
   - component: {fileID: 2772935637158563746}
   - component: {fileID: 5973224616133891396}
   - component: {fileID: 7877680112170959044}
-  m_Layer: 20
+  m_Layer: 18
   m_Name: MeshEmitter288(Clone)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -293,7 +293,7 @@ GameObject:
   - component: {fileID: 6899848528798228099}
   - component: {fileID: 1898559860575477542}
   - component: {fileID: 864822634847310239}
-  m_Layer: 20
+  m_Layer: 18
   m_Name: SpriteEmitter443(Clone)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -401,7 +401,7 @@ GameObject:
   - component: {fileID: 794252156187778645}
   - component: {fileID: 7998630482544879645}
   - component: {fileID: 4328873811362436522}
-  m_Layer: 20
+  m_Layer: 18
   m_Name: MeshEmitter288(Clone)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -487,7 +487,7 @@ GameObject:
   - component: {fileID: 694386914450826019}
   - component: {fileID: 3091488983316869550}
   - component: {fileID: 5455993403294378809}
-  m_Layer: 20
+  m_Layer: 18
   m_Name: MeshEmitter288(Clone)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -572,7 +572,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4017549085049835808}
   - component: {fileID: 562392202250582017}
-  m_Layer: 20
+  m_Layer: 18
   m_Name: Spirits
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -607,7 +607,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c2d88f0c419b64342b8ea4b59fa3d0d3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  partType: 0
   _effectInstances:
   - component: {fileID: 5073117067996754218}
   _countPerSecond: 1000
@@ -615,6 +614,7 @@ MonoBehaviour:
   _duration: 0.7
   useFixedLifetime: 0
   minLifeTime: 0.8
+  _startDelay: 0
 --- !u!1 &3503987303337432418
 GameObject:
   m_ObjectHideFlags: 0
@@ -627,7 +627,7 @@ GameObject:
   - component: {fileID: 3285394526946677566}
   - component: {fileID: 2879858654575736371}
   - component: {fileID: 4656840984348714426}
-  m_Layer: 20
+  m_Layer: 18
   m_Name: SpriteEmitter443(Clone)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -734,7 +734,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6279848696465789959}
   - component: {fileID: -3189580720888355194}
-  m_Layer: 20
+  m_Layer: 18
   m_Name: soul_N_stick
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -791,7 +791,7 @@ GameObject:
   - component: {fileID: 6197714253550259586}
   - component: {fileID: 5962001713871181880}
   - component: {fileID: 4786460864838613017}
-  m_Layer: 20
+  m_Layer: 18
   m_Name: SpriteEmitter443
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -900,7 +900,7 @@ GameObject:
   - component: {fileID: 3880412351921176832}
   - component: {fileID: 7919227188298111735}
   - component: {fileID: 310688433337486387}
-  m_Layer: 20
+  m_Layer: 18
   m_Name: SpriteEmitter443(Clone)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1007,7 +1007,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8032505581739609176}
   - component: {fileID: 5852650102395590685}
-  m_Layer: 20
+  m_Layer: 18
   m_Name: glow
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1053,7 +1053,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c2d88f0c419b64342b8ea4b59fa3d0d3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  partType: 0
   _effectInstances:
   - component: {fileID: 6871204292661746668}
   - component: {fileID: 2188505606485021410}
@@ -1072,6 +1071,7 @@ MonoBehaviour:
   _duration: 0.6
   useFixedLifetime: 0
   minLifeTime: 0.4
+  _startDelay: 0
 --- !u!1 &5741550227584836121
 GameObject:
   m_ObjectHideFlags: 0
@@ -1083,7 +1083,7 @@ GameObject:
   - component: {fileID: 8658682429603780692}
   - component: {fileID: 8704929442123709214}
   - component: {fileID: 5624514688086727266}
-  m_Layer: 20
+  m_Layer: 18
   m_Name: MeshEmitter288(Clone)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1170,7 +1170,7 @@ GameObject:
   - component: {fileID: 2076879726229575028}
   - component: {fileID: 6582604478512753389}
   - component: {fileID: 3352652251393869732}
-  m_Layer: 20
+  m_Layer: 18
   m_Name: SpriteEmitter443(Clone)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1279,7 +1279,7 @@ GameObject:
   - component: {fileID: 7311748337032234951}
   - component: {fileID: 3990446802115053610}
   - component: {fileID: 5049145291741855710}
-  m_Layer: 20
+  m_Layer: 18
   m_Name: SpriteEmitter443(Clone)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1388,7 +1388,7 @@ GameObject:
   - component: {fileID: 2892264643136521954}
   - component: {fileID: 1074188796105643564}
   - component: {fileID: 9123841302739863668}
-  m_Layer: 20
+  m_Layer: 18
   m_Name: SpriteEmitter443(Clone)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1497,7 +1497,7 @@ GameObject:
   - component: {fileID: 1602783779147160640}
   - component: {fileID: 2812078939926426885}
   - component: {fileID: 8190051425799031560}
-  m_Layer: 20
+  m_Layer: 18
   m_Name: SpriteEmitter443(Clone)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1606,7 +1606,7 @@ GameObject:
   - component: {fileID: 891951007713583327}
   - component: {fileID: 6489874568445448684}
   - component: {fileID: 803773898960423609}
-  m_Layer: 20
+  m_Layer: 18
   m_Name: SpriteEmitter443(Clone)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1713,7 +1713,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1214092446915911620}
   - component: {fileID: 2884654235230686938}
-  m_Layer: 20
+  m_Layer: 18
   m_Name: Ignition
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1752,7 +1752,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c2d88f0c419b64342b8ea4b59fa3d0d3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  partType: 0
   _effectInstances:
   - component: {fileID: 1540437907844574113}
   - component: {fileID: 794252156187778645}
@@ -1764,6 +1763,7 @@ MonoBehaviour:
   _duration: 1
   useFixedLifetime: 1
   minLifeTime: 0
+  _startDelay: 0
 --- !u!1 &7318513629380064613
 GameObject:
   m_ObjectHideFlags: 0
@@ -1776,7 +1776,7 @@ GameObject:
   - component: {fileID: 7404163529871259808}
   - component: {fileID: 8202788845550632796}
   - component: {fileID: 5352538401382522176}
-  m_Layer: 20
+  m_Layer: 18
   m_Name: SpriteEmitter443(Clone)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1885,7 +1885,7 @@ GameObject:
   - component: {fileID: 2364297960918449227}
   - component: {fileID: 7995993694937683137}
   - component: {fileID: 8680618418558251028}
-  m_Layer: 20
+  m_Layer: 18
   m_Name: SpriteEmitter443(Clone)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1994,7 +1994,7 @@ GameObject:
   - component: {fileID: 6978411672900029795}
   - component: {fileID: 1840130106073276978}
   - component: {fileID: 2514870722178388722}
-  m_Layer: 20
+  m_Layer: 18
   m_Name: SpriteEmitter444
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2101,7 +2101,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2812283484208956137}
   - component: {fileID: 2462637293784526818}
-  m_Layer: 20
+  m_Layer: 18
   m_Name: Ring
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2136,7 +2136,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c2d88f0c419b64342b8ea4b59fa3d0d3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  partType: 0
   _effectInstances:
   - component: {fileID: 832366012156906236}
   _countPerSecond: 1000
@@ -2144,6 +2143,7 @@ MonoBehaviour:
   _duration: 1
   useFixedLifetime: 1
   minLifeTime: 0
+  _startDelay: 0
 --- !u!1001 &4133180192227506626
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2163,6 +2163,10 @@ PrefabInstance:
     - target: {fileID: 7070056212078896546, guid: 0d92f89f7608f624cb3c7a74ae31af3f, type: 3}
       propertyPath: m_Name
       value: VFX_MeshEmitter287
+      objectReference: {fileID: 0}
+    - target: {fileID: 7070056212078896546, guid: 0d92f89f7608f624cb3c7a74ae31af3f, type: 3}
+      propertyPath: m_Layer
+      value: 18
       objectReference: {fileID: 0}
     - target: {fileID: 7070056212078896546, guid: 0d92f89f7608f624cb3c7a74ae31af3f, type: 3}
       propertyPath: m_IsActive

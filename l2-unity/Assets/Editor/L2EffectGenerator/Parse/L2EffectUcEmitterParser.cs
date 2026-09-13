@@ -417,6 +417,7 @@ public static class L2EffectUcEmitterParser
             case "SpinParticles": return TryAssignBool(value, out emitter.SpinParticles);
             case "UniformSize": return TryAssignBool(value, out emitter.UniformSize);
             case "UseSizeScale": return TryAssignBool(value, out emitter.UseSizeScale);
+            case "UseColorScale": return TryAssignBool(value, out emitter.UseColorScale);
             case "FadeIn": return TryAssignBool(value, out emitter.FadeIn);
             case "FadeOut": return TryAssignBool(value, out emitter.FadeOut);
             case "UseRandomSubdivision": return TryAssignBool(value, out emitter.UseRandomSubdivision);

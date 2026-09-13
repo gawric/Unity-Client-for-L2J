@@ -96,6 +96,7 @@ public sealed class UcEmitterDefinition
     public bool SpinParticles;
     public bool UniformSize;
     public bool UseSizeScale;
+    public bool UseColorScale;
     public bool FadeIn;
     public bool FadeOut;
     public bool UseRandomSubdivision;

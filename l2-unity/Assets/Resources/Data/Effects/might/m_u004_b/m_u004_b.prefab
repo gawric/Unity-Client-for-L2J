@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 4057963659853057594}
   - component: {fileID: 168507122448849444}
   - component: {fileID: 8719683540808471935}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: SpriteEmitter0 (8)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -96,7 +96,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2854220122632922510}
   - component: {fileID: 4864967397232717669}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: SpriteEmitter2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -140,6 +140,7 @@ MonoBehaviour:
   _cloneParticlesToMaxCount: 0
   _cloneParticleLimit: 64
   _useGpuInstancing: 0
+  _coordinateSystem: 0
   _isBurstSpawning: 1
   _relativeWarmupTime: 0
   _warmupTicksPerSecond: 0
@@ -149,6 +150,7 @@ MonoBehaviour:
   _respawnDeadParticles: 0
   _stretchParticleLifeToWindow: 0
   _hostOwnedEmission: 0
+  _compareLogEnabled: 0
 --- !u!1 &2296990315652495077
 GameObject:
   m_ObjectHideFlags: 0
@@ -160,7 +162,7 @@ GameObject:
   - component: {fileID: 2232456510131711218}
   - component: {fileID: 3852698700673932507}
   - component: {fileID: 919336007682658668}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: SpriteEmitter0 (3)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -245,7 +247,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3985040349322849405}
   - component: {fileID: 4554880128007477851}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: MeshEmitter0
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -289,6 +291,7 @@ MonoBehaviour:
   _cloneParticlesToMaxCount: 0
   _cloneParticleLimit: 64
   _useGpuInstancing: 0
+  _coordinateSystem: 0
   _isBurstSpawning: 1
   _relativeWarmupTime: 0
   _warmupTicksPerSecond: 0
@@ -298,6 +301,7 @@ MonoBehaviour:
   _respawnDeadParticles: 0
   _stretchParticleLifeToWindow: 0
   _hostOwnedEmission: 0
+  _compareLogEnabled: 0
 --- !u!1 &2477258350587159085
 GameObject:
   m_ObjectHideFlags: 0
@@ -309,7 +313,7 @@ GameObject:
   - component: {fileID: 5574596103138027436}
   - component: {fileID: 7529466018050330907}
   - component: {fileID: 8122536374547328688}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: MeshEmitter0
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -394,7 +398,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6118362694640803575}
   - component: {fileID: 2424978433279580955}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: MeshEmitter3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -440,6 +444,7 @@ MonoBehaviour:
   _cloneParticlesToMaxCount: 1
   _cloneParticleLimit: 64
   _useGpuInstancing: 1
+  _coordinateSystem: 0
   _isBurstSpawning: 1
   _relativeWarmupTime: 0
   _warmupTicksPerSecond: 0
@@ -449,6 +454,7 @@ MonoBehaviour:
   _respawnDeadParticles: 0
   _stretchParticleLifeToWindow: 0
   _hostOwnedEmission: 0
+  _compareLogEnabled: 0
 --- !u!1 &3670309687798282310
 GameObject:
   m_ObjectHideFlags: 0
@@ -460,7 +466,7 @@ GameObject:
   - component: {fileID: 7480903032901104613}
   - component: {fileID: 1003980023812453744}
   - component: {fileID: 4853417088771110901}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: SpriteEmitter0 (6)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -546,7 +552,7 @@ GameObject:
   - component: {fileID: 6148172373091597690}
   - component: {fileID: 5012286844452135386}
   - component: {fileID: 7740849620026552525}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: SpriteEmitter2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -632,7 +638,7 @@ GameObject:
   - component: {fileID: 198333333690253600}
   - component: {fileID: 8619865041652394073}
   - component: {fileID: 6755958388907001285}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: SpriteEmitter0
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -718,7 +724,7 @@ GameObject:
   - component: {fileID: 2148911256842929122}
   - component: {fileID: 1659103114849981386}
   - component: {fileID: 1155092141170183903}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: SpriteEmitter0 (11)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -804,7 +810,7 @@ GameObject:
   - component: {fileID: 5489526928108286597}
   - component: {fileID: 1767521072483363260}
   - component: {fileID: 4848427020606079385}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: SpriteEmitter0 (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -890,7 +896,7 @@ GameObject:
   - component: {fileID: 3939047776805272863}
   - component: {fileID: 6982142627082177696}
   - component: {fileID: 1652441843380215070}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: SpriteEmitter0 (5)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -976,7 +982,7 @@ GameObject:
   - component: {fileID: 2440906759432249970}
   - component: {fileID: 1722199082225475807}
   - component: {fileID: 1131270755191057396}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: SpriteEmitter0 (10)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1062,7 +1068,7 @@ GameObject:
   - component: {fileID: 1937986948839980266}
   - component: {fileID: 7971898393044464751}
   - component: {fileID: 5538816844122600847}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: SpriteEmitter0 (7)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1148,7 +1154,7 @@ GameObject:
   - component: {fileID: 2550709846222438827}
   - component: {fileID: 7139224505683923976}
   - component: {fileID: 6155412951172520744}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: SpriteEmitter0 (2)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1233,7 +1239,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7549334730342871689}
   - component: {fileID: 3068482020953340846}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: SpriteEmitter0
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1299,6 +1305,7 @@ MonoBehaviour:
   _cloneParticlesToMaxCount: 1
   _cloneParticleLimit: 64
   _useGpuInstancing: 1
+  _coordinateSystem: 0
   _isBurstSpawning: 1
   _relativeWarmupTime: 0
   _warmupTicksPerSecond: 0
@@ -1308,6 +1315,7 @@ MonoBehaviour:
   _respawnDeadParticles: 0
   _stretchParticleLifeToWindow: 0
   _hostOwnedEmission: 0
+  _compareLogEnabled: 0
 --- !u!1 &7328769423770540049
 GameObject:
   m_ObjectHideFlags: 0
@@ -1319,7 +1327,7 @@ GameObject:
   - component: {fileID: 4297271885969205871}
   - component: {fileID: 7469371044406231895}
   - component: {fileID: 6463383565789917328}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: MeshEmitter3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1405,7 +1413,7 @@ GameObject:
   - component: {fileID: 3834053930488506490}
   - component: {fileID: 1552670801015023073}
   - component: {fileID: 7271335949039512474}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: MeshEmitter3 (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1491,7 +1499,7 @@ GameObject:
   - component: {fileID: 109591295294116894}
   - component: {fileID: 4493720022438862407}
   - component: {fileID: 1327674603933136051}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: SpriteEmitter0 (4)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1576,7 +1584,7 @@ GameObject:
   m_Component:
   - component: {fileID: 645571111599668175}
   - component: {fileID: 6978840613642517129}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: m_u004_b
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1649,7 +1657,7 @@ GameObject:
   - component: {fileID: 2337656348705054988}
   - component: {fileID: 1125017865692382889}
   - component: {fileID: 7131969450504179007}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: SpriteEmitter0 (9)
   m_TagString: Untagged
   m_Icon: {fileID: 0}

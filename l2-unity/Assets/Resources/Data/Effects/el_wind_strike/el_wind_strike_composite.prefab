@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1823943341178541943}
   - component: {fileID: 2600326504193966759}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: el_wind_strike_composite
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -67,6 +67,8 @@ MonoBehaviour:
         scale: 1
         spawnTiming: 0
         spawnDelaySeconds: 0
+        spawnAttachmentPoint: 0
+        boneName: 
         follow: 1
         inheritRotation: 0
         placement:
@@ -82,6 +84,8 @@ MonoBehaviour:
         scale: 1
         spawnTiming: 0
         spawnDelaySeconds: 0
+        spawnAttachmentPoint: 10
+        boneName: 
         follow: 1
         inheritRotation: 0
         placement:
@@ -97,6 +101,8 @@ MonoBehaviour:
         scale: 1
         spawnTiming: 5
         spawnDelaySeconds: 0
+        spawnAttachmentPoint: 10
+        boneName: 
         follow: 1
         inheritRotation: 0
         placement:
@@ -116,6 +122,8 @@ MonoBehaviour:
         scale: 1
         spawnTiming: 4
         spawnDelaySeconds: 0
+        spawnAttachmentPoint: 5
+        boneName: 
         follow: 1
         inheritRotation: 0
         placement:

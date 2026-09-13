@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 6310290208086589103}
   - component: {fileID: 231506790100647919}
   - component: {fileID: 3595623730333252910}
-  m_Layer: 6
+  m_Layer: 18
   m_Name: Effect
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -60,6 +60,7 @@ MeshRenderer:
   m_RayTraceProcedural: 0
   m_RayTracingAccelStructBuildFlagsOverride: 0
   m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -95,7 +96,7 @@ GameObject:
   m_Component:
   - component: {fileID: 800034881326912370}
   - component: {fileID: 4756603458671266511}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: EffectBase
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -150,7 +151,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3257322496429290547}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Locator
   m_TagString: Untagged
   m_Icon: {fileID: 0}

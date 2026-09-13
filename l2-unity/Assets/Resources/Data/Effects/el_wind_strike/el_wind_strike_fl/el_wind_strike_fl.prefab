@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1442421896212815750}
   - component: {fileID: 2089652963895817064}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: SpriteEmitter13
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -252,11 +252,17 @@ MonoBehaviour:
   _cloneParticlesToMaxCount: 1
   _cloneParticleLimit: 64
   _useGpuInstancing: 1
+  _coordinateSystem: 0
   _isBurstSpawning: 0
   _relativeWarmupTime: 1
+  _warmupTicksPerSecond: 0
   _duration: 0.625
   _hasFixedDuration: 0
   _instantKillAtCastEnd: 0
+  _respawnDeadParticles: 1
+  _stretchParticleLifeToWindow: 0
+  _hostOwnedEmission: 0
+  _compareLogEnabled: 0
 --- !u!1 &62635931772336411
 GameObject:
   m_ObjectHideFlags: 0
@@ -268,7 +274,7 @@ GameObject:
   - component: {fileID: 5013450009355890130}
   - component: {fileID: 7945545337426246737}
   - component: {fileID: 5156806235122809455}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Particle (30)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -354,7 +360,7 @@ GameObject:
   - component: {fileID: 557769745285574895}
   - component: {fileID: 5612588422979369950}
   - component: {fileID: 9021933956444876259}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Particle (40)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -440,7 +446,7 @@ GameObject:
   - component: {fileID: 287560338878555020}
   - component: {fileID: 5881740627087949698}
   - component: {fileID: 7919923024044815029}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Rings (18)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -526,7 +532,7 @@ GameObject:
   - component: {fileID: 268635358612156561}
   - component: {fileID: 4584661920636369504}
   - component: {fileID: 4229957898736959731}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Core (27)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -612,7 +618,7 @@ GameObject:
   - component: {fileID: 6338556624532279438}
   - component: {fileID: 5232995528821968130}
   - component: {fileID: 6422452201620123637}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Particle (73)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -698,7 +704,7 @@ GameObject:
   - component: {fileID: 5011355234789342800}
   - component: {fileID: 4045357969951875996}
   - component: {fileID: 7935227875445030680}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Particle (46)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -784,7 +790,7 @@ GameObject:
   - component: {fileID: 4215789127555297931}
   - component: {fileID: 4024636982740247113}
   - component: {fileID: 1981289785687534110}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Core (97)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -870,7 +876,7 @@ GameObject:
   - component: {fileID: 952842353472623951}
   - component: {fileID: 2009471579449161381}
   - component: {fileID: 8888590414871608170}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Core (67)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -956,7 +962,7 @@ GameObject:
   - component: {fileID: 7605661577641747923}
   - component: {fileID: 7235257041068946669}
   - component: {fileID: 6010467156569984331}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Core (12)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1042,7 +1048,7 @@ GameObject:
   - component: {fileID: 7560708537727286600}
   - component: {fileID: 5737783999529265122}
   - component: {fileID: 4716324695007064073}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Core (10)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1128,7 +1134,7 @@ GameObject:
   - component: {fileID: 207121615838050644}
   - component: {fileID: 3315978862525320931}
   - component: {fileID: 2010098364942490017}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Core (49)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1214,7 +1220,7 @@ GameObject:
   - component: {fileID: 461777206211824198}
   - component: {fileID: 8693035936218429232}
   - component: {fileID: 1501042226359558101}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Rings (23)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1300,7 +1306,7 @@ GameObject:
   - component: {fileID: 9169668935136078094}
   - component: {fileID: 3762808465589085656}
   - component: {fileID: 853542720678501625}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Core (32)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1386,7 +1392,7 @@ GameObject:
   - component: {fileID: 2492581180102742609}
   - component: {fileID: 393722223017936244}
   - component: {fileID: 201755009883965070}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Core (56)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1472,7 +1478,7 @@ GameObject:
   - component: {fileID: 7080951417566546448}
   - component: {fileID: 757126092560419057}
   - component: {fileID: 3711611978102410695}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Particle (14)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1558,7 +1564,7 @@ GameObject:
   - component: {fileID: 1670302139525946839}
   - component: {fileID: 5345396767729636001}
   - component: {fileID: 7139790187821216392}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Particle (37)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1644,7 +1650,7 @@ GameObject:
   - component: {fileID: 2811840068731914060}
   - component: {fileID: 2410557370405610617}
   - component: {fileID: 1691997668982348014}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Core (62)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1730,7 +1736,7 @@ GameObject:
   - component: {fileID: 8784650147513095483}
   - component: {fileID: 6095757871301182085}
   - component: {fileID: 589551880683568764}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Rings (46)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1816,7 +1822,7 @@ GameObject:
   - component: {fileID: 7321756733232149723}
   - component: {fileID: 144118583515725734}
   - component: {fileID: 770783040398386230}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Core (91)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1902,7 +1908,7 @@ GameObject:
   - component: {fileID: 6136640927845800924}
   - component: {fileID: 4490286767836856422}
   - component: {fileID: 4643074793163108742}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Core (81)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1988,7 +1994,7 @@ GameObject:
   - component: {fileID: 657749454166461837}
   - component: {fileID: 67745283451146169}
   - component: {fileID: 8980960083494079840}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Particle (10)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2074,7 +2080,7 @@ GameObject:
   - component: {fileID: 5553160693940094082}
   - component: {fileID: 6372453516932263623}
   - component: {fileID: 5469047711458732544}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Core (65)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2160,7 +2166,7 @@ GameObject:
   - component: {fileID: 7580275459031849348}
   - component: {fileID: 1901398817125096182}
   - component: {fileID: 1349948722738522268}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: screws (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2246,7 +2252,7 @@ GameObject:
   - component: {fileID: 3469778538561353884}
   - component: {fileID: 1623279896721669029}
   - component: {fileID: 2740196017923883078}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Rings (55)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2332,7 +2338,7 @@ GameObject:
   - component: {fileID: 38994806362044408}
   - component: {fileID: 833818945877686575}
   - component: {fileID: 618511845340690274}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Particle (64)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2418,7 +2424,7 @@ GameObject:
   - component: {fileID: 55838101129667699}
   - component: {fileID: 7506490834066177828}
   - component: {fileID: 5317482179323440936}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Rings (42)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2504,7 +2510,7 @@ GameObject:
   - component: {fileID: 8746537169399552899}
   - component: {fileID: 882848030257036371}
   - component: {fileID: 6053138509526113255}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Rings (11)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2590,7 +2596,7 @@ GameObject:
   - component: {fileID: 7818734047938741959}
   - component: {fileID: 7595511716210365634}
   - component: {fileID: 2675205568664339735}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Rings (36)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2676,7 +2682,7 @@ GameObject:
   - component: {fileID: 5435216229417983410}
   - component: {fileID: 6910927407534328876}
   - component: {fileID: 3418863297317912159}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Rings (10)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2762,7 +2768,7 @@ GameObject:
   - component: {fileID: 8007146487281827125}
   - component: {fileID: 1241005333973102743}
   - component: {fileID: 4041515891448594920}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Rings (17)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2847,7 +2853,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3595388036772273603}
   - component: {fileID: 6975425242203596397}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: SpriteEmitter14
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3049,11 +3055,17 @@ MonoBehaviour:
   _cloneParticlesToMaxCount: 1
   _cloneParticleLimit: 64
   _useGpuInstancing: 1
+  _coordinateSystem: 0
   _isBurstSpawning: 0
   _relativeWarmupTime: 1
+  _warmupTicksPerSecond: 0
   _duration: 1.5
   _hasFixedDuration: 0
   _instantKillAtCastEnd: 0
+  _respawnDeadParticles: 1
+  _stretchParticleLifeToWindow: 0
+  _hostOwnedEmission: 0
+  _compareLogEnabled: 0
 --- !u!1 &1484502353338280820
 GameObject:
   m_ObjectHideFlags: 0
@@ -3065,7 +3077,7 @@ GameObject:
   - component: {fileID: 2386695850557358555}
   - component: {fileID: 6023689869840473353}
   - component: {fileID: 5209484765962083840}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Rings (34)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3151,7 +3163,7 @@ GameObject:
   - component: {fileID: 6922793213363467988}
   - component: {fileID: 7321599803381172231}
   - component: {fileID: 4170356827412275598}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Core (53)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3237,7 +3249,7 @@ GameObject:
   - component: {fileID: 4981746764092711837}
   - component: {fileID: 6887327717608177435}
   - component: {fileID: 6596857377640501362}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Core (15)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3323,7 +3335,7 @@ GameObject:
   - component: {fileID: 1259834352971218118}
   - component: {fileID: 6620527907042161424}
   - component: {fileID: 2584992167058226399}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Particle (8)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3409,7 +3421,7 @@ GameObject:
   - component: {fileID: 3723435051067290754}
   - component: {fileID: 5160058184807755390}
   - component: {fileID: 2616093731994871244}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Core (4)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3495,7 +3507,7 @@ GameObject:
   - component: {fileID: 8404690243137227419}
   - component: {fileID: 5324616860198316492}
   - component: {fileID: 3082914997621069579}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Core (50)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3581,7 +3593,7 @@ GameObject:
   - component: {fileID: 3915942878528509043}
   - component: {fileID: 8044497714409288210}
   - component: {fileID: 4659941380045840788}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Core (43)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3667,7 +3679,7 @@ GameObject:
   - component: {fileID: 5739835311811145647}
   - component: {fileID: 3273550020207795285}
   - component: {fileID: 5497944652254942201}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Core (44)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3753,7 +3765,7 @@ GameObject:
   - component: {fileID: 6184286882469802456}
   - component: {fileID: 7838460742723873304}
   - component: {fileID: 3961302331675303629}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Particle (65)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3839,7 +3851,7 @@ GameObject:
   - component: {fileID: 663438066062593346}
   - component: {fileID: 7405534815115932340}
   - component: {fileID: 4313013246839792790}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Rings (9)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3925,7 +3937,7 @@ GameObject:
   - component: {fileID: 7489171780795608053}
   - component: {fileID: 8460761715971715256}
   - component: {fileID: 3592069380948681183}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Core (30)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4011,7 +4023,7 @@ GameObject:
   - component: {fileID: 6774623904449874937}
   - component: {fileID: 3066435838043122805}
   - component: {fileID: 1840349883303131580}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Particle (49)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4097,7 +4109,7 @@ GameObject:
   - component: {fileID: 3408493218524191598}
   - component: {fileID: 2874690808529545976}
   - component: {fileID: 416254335071831009}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Rings (3)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4183,7 +4195,7 @@ GameObject:
   - component: {fileID: 4861820180769919369}
   - component: {fileID: 5773439392610740207}
   - component: {fileID: 7353262683480100258}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Rings (44)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4269,7 +4281,7 @@ GameObject:
   - component: {fileID: 3108855487231882338}
   - component: {fileID: 2496177004939771076}
   - component: {fileID: 3943794547781998447}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Core (13)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4355,7 +4367,7 @@ GameObject:
   - component: {fileID: 4215808065452525244}
   - component: {fileID: 6568604516730366929}
   - component: {fileID: 4571932870239962700}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Core (59)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4441,7 +4453,7 @@ GameObject:
   - component: {fileID: 7000164317817746794}
   - component: {fileID: 9049450494426913650}
   - component: {fileID: 1839257538154226627}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Core (39)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4527,7 +4539,7 @@ GameObject:
   - component: {fileID: 1383583974254996266}
   - component: {fileID: 8330769920138082150}
   - component: {fileID: 3152273885817680643}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Core (82)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4613,7 +4625,7 @@ GameObject:
   - component: {fileID: 543870877541774208}
   - component: {fileID: 2321565652247232530}
   - component: {fileID: 9090152897076398866}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Core (77)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4699,7 +4711,7 @@ GameObject:
   - component: {fileID: 5295773025491478768}
   - component: {fileID: 762447195217216627}
   - component: {fileID: 991809385996165185}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Core (52)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4785,7 +4797,7 @@ GameObject:
   - component: {fileID: 406372316277065958}
   - component: {fileID: 5338640643708133628}
   - component: {fileID: 6331991254337571354}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Particle (60)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4871,7 +4883,7 @@ GameObject:
   - component: {fileID: 3699521955442378045}
   - component: {fileID: 5163460610654917555}
   - component: {fileID: 8947686209296891046}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Rings (48)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4957,7 +4969,7 @@ GameObject:
   - component: {fileID: 5158677938495959883}
   - component: {fileID: 7655541063154826389}
   - component: {fileID: 4421091740068453128}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Rings (51)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -5043,7 +5055,7 @@ GameObject:
   - component: {fileID: 4136160297136624537}
   - component: {fileID: 8685585995993452283}
   - component: {fileID: 8653770199086395748}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Core (86)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -5129,7 +5141,7 @@ GameObject:
   - component: {fileID: 253311261674052152}
   - component: {fileID: 2461509592592414764}
   - component: {fileID: 5889047123542063357}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Rings (53)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -5215,7 +5227,7 @@ GameObject:
   - component: {fileID: 8057554243717896112}
   - component: {fileID: 1631012307930618510}
   - component: {fileID: 622974127787486104}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Core (41)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -5301,7 +5313,7 @@ GameObject:
   - component: {fileID: 6552334032924470906}
   - component: {fileID: 5491380869089251636}
   - component: {fileID: 7077582244019205134}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Core (11)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -5387,7 +5399,7 @@ GameObject:
   - component: {fileID: 8922975881233060318}
   - component: {fileID: 2263926699152425033}
   - component: {fileID: 5851213989676434246}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Particle (48)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -5473,7 +5485,7 @@ GameObject:
   - component: {fileID: 7724586313332567639}
   - component: {fileID: 7238391868879110580}
   - component: {fileID: 3147731856214856902}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Rings (30)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -5559,7 +5571,7 @@ GameObject:
   - component: {fileID: 1252111731190707069}
   - component: {fileID: 2004868426134644983}
   - component: {fileID: 825047873838731747}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Rings (54)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -5645,7 +5657,7 @@ GameObject:
   - component: {fileID: 40951384700424642}
   - component: {fileID: 1421367302241517329}
   - component: {fileID: 5910808328319196248}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Particle (44)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -5731,7 +5743,7 @@ GameObject:
   - component: {fileID: 1297796149790614101}
   - component: {fileID: 6419696539871121567}
   - component: {fileID: 8593566620516699896}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Particle (31)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -5817,7 +5829,7 @@ GameObject:
   - component: {fileID: 2084051720994282447}
   - component: {fileID: 4491798006817556003}
   - component: {fileID: 7778937876840464858}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Core (23)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -5903,7 +5915,7 @@ GameObject:
   - component: {fileID: 4604428173211914747}
   - component: {fileID: 6273926953724978035}
   - component: {fileID: 5897157546065358147}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Particle (61)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -5989,7 +6001,7 @@ GameObject:
   - component: {fileID: 3542947021334954406}
   - component: {fileID: 3184022260524011214}
   - component: {fileID: 4190239231213822322}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Rings (8)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -6075,7 +6087,7 @@ GameObject:
   - component: {fileID: 5137989134475907786}
   - component: {fileID: 5630325532569766216}
   - component: {fileID: 1416902275577519905}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Core (31)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -6161,7 +6173,7 @@ GameObject:
   - component: {fileID: 455188418127960269}
   - component: {fileID: 5152206865042339457}
   - component: {fileID: 3443159657782304691}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Core (42)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -6247,7 +6259,7 @@ GameObject:
   - component: {fileID: 6218230166825699702}
   - component: {fileID: 5701525200986521903}
   - component: {fileID: 5820636075482294012}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Particle (75)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -6333,7 +6345,7 @@ GameObject:
   - component: {fileID: 2899700881413694207}
   - component: {fileID: 2501632776387425196}
   - component: {fileID: 5009361944107769200}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Core (22)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -6419,7 +6431,7 @@ GameObject:
   - component: {fileID: 4253917502767849567}
   - component: {fileID: 3608339243384932829}
   - component: {fileID: 8349824142803617642}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Core (46)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -6505,7 +6517,7 @@ GameObject:
   - component: {fileID: 4210168434698720656}
   - component: {fileID: 1217933506755202791}
   - component: {fileID: 1775632484167925191}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Rings (45)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -6591,7 +6603,7 @@ GameObject:
   - component: {fileID: 3080689067976737193}
   - component: {fileID: 5201688494333684693}
   - component: {fileID: 1468597301511203290}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Particle (55)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -6677,7 +6689,7 @@ GameObject:
   - component: {fileID: 7126082322479112824}
   - component: {fileID: 917724518834330980}
   - component: {fileID: 3393675789956118687}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Core (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -6763,7 +6775,7 @@ GameObject:
   - component: {fileID: 2072164529950779345}
   - component: {fileID: 2439944518552090250}
   - component: {fileID: 2977815982472722127}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Particle (43)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -6849,7 +6861,7 @@ GameObject:
   - component: {fileID: 15141533971794367}
   - component: {fileID: 921776709819829753}
   - component: {fileID: 704979225715725801}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Particle (71)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -6935,7 +6947,7 @@ GameObject:
   - component: {fileID: 5359587580513531281}
   - component: {fileID: 2042512074260067246}
   - component: {fileID: 2967994605754446292}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Core (7)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -7021,7 +7033,7 @@ GameObject:
   - component: {fileID: 666798625288997233}
   - component: {fileID: 7234489690050384427}
   - component: {fileID: 319022021443092331}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Rings
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -7107,7 +7119,7 @@ GameObject:
   - component: {fileID: 5650255765534261241}
   - component: {fileID: 1972460961209870215}
   - component: {fileID: 3294993509687190298}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Core (93)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -7193,7 +7205,7 @@ GameObject:
   - component: {fileID: 6595101134347483361}
   - component: {fileID: 800101958292801560}
   - component: {fileID: 2289602432078489582}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Core
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -7279,7 +7291,7 @@ GameObject:
   - component: {fileID: 4970712374393276655}
   - component: {fileID: 1160487738216316670}
   - component: {fileID: 1356617242754502772}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Core (3)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -7365,7 +7377,7 @@ GameObject:
   - component: {fileID: 7030706393648113793}
   - component: {fileID: 4292773410025721331}
   - component: {fileID: 7782725766633964664}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: screws
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -7451,7 +7463,7 @@ GameObject:
   - component: {fileID: 4836728148829330668}
   - component: {fileID: 6751600520576127872}
   - component: {fileID: 6484558303505714436}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Core (72)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -7537,7 +7549,7 @@ GameObject:
   - component: {fileID: 6329987874621033870}
   - component: {fileID: 2170707437262894753}
   - component: {fileID: 6846455221575300524}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Rings (50)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -7623,7 +7635,7 @@ GameObject:
   - component: {fileID: 1043645235816470870}
   - component: {fileID: 4456054152319099920}
   - component: {fileID: 2370998529948107770}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Rings (5)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -7709,7 +7721,7 @@ GameObject:
   - component: {fileID: 2081600508960856178}
   - component: {fileID: 1583889219915826052}
   - component: {fileID: 749656881747769344}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Particle (39)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -7795,7 +7807,7 @@ GameObject:
   - component: {fileID: 8175328419364318994}
   - component: {fileID: 2237722307077738496}
   - component: {fileID: 5059855869379230448}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Rings (13)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -7881,7 +7893,7 @@ GameObject:
   - component: {fileID: 690561598223819877}
   - component: {fileID: 3783805806589054376}
   - component: {fileID: 5443676685094640898}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Rings (14)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -7967,7 +7979,7 @@ GameObject:
   - component: {fileID: 2678204580091965821}
   - component: {fileID: 5614650549179943720}
   - component: {fileID: 3687720313380903511}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Particle (68)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -8053,7 +8065,7 @@ GameObject:
   - component: {fileID: 755388595270708539}
   - component: {fileID: 3440051867475297459}
   - component: {fileID: 6200064341726209636}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Rings (29)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -8139,7 +8151,7 @@ GameObject:
   - component: {fileID: 8662224124942272764}
   - component: {fileID: 6199472804023464669}
   - component: {fileID: 957451469738799988}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Core (89)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -8225,7 +8237,7 @@ GameObject:
   - component: {fileID: 9118963103099085251}
   - component: {fileID: 8420762191052791501}
   - component: {fileID: 7576138186005134868}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Core (16)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -8311,7 +8323,7 @@ GameObject:
   - component: {fileID: 7910810487126403695}
   - component: {fileID: 5011681462235055315}
   - component: {fileID: 597933696176771891}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Rings (19)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -8397,7 +8409,7 @@ GameObject:
   - component: {fileID: 7289175571392711945}
   - component: {fileID: 7180102382873803282}
   - component: {fileID: 7636747599939509320}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Particle (56)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -8483,7 +8495,7 @@ GameObject:
   - component: {fileID: 1846544566358150245}
   - component: {fileID: 8932002605908009070}
   - component: {fileID: 4776400108257363231}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Core (36)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -8569,7 +8581,7 @@ GameObject:
   - component: {fileID: 7957526912453994121}
   - component: {fileID: 5471487976015293751}
   - component: {fileID: 3117847263612153950}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Rings (41)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -8655,7 +8667,7 @@ GameObject:
   - component: {fileID: 5255709569899207321}
   - component: {fileID: 5853750706183666863}
   - component: {fileID: 9060189177415384433}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Core (8)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -8741,7 +8753,7 @@ GameObject:
   - component: {fileID: 6051371472217243205}
   - component: {fileID: 1766751436698257067}
   - component: {fileID: 3162285201757499469}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Particle (52)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -8827,7 +8839,7 @@ GameObject:
   - component: {fileID: 1227601422706854484}
   - component: {fileID: 5194400322921413924}
   - component: {fileID: 5706792989999008805}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Particle (78)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -8912,7 +8924,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3683567842896118040}
   - component: {fileID: 4379563046009214539}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: MeshEmitter15
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -8958,11 +8970,17 @@ MonoBehaviour:
   _cloneParticlesToMaxCount: 1
   _cloneParticleLimit: 64
   _useGpuInstancing: 1
+  _coordinateSystem: 0
   _isBurstSpawning: 0
   _relativeWarmupTime: 0
+  _warmupTicksPerSecond: 0
   _duration: 5
   _hasFixedDuration: 0
   _instantKillAtCastEnd: 0
+  _respawnDeadParticles: 1
+  _stretchParticleLifeToWindow: 0
+  _hostOwnedEmission: 0
+  _compareLogEnabled: 0
 --- !u!1 &3987086467228441080
 GameObject:
   m_ObjectHideFlags: 0
@@ -8974,7 +8992,7 @@ GameObject:
   - component: {fileID: 3140932643471654798}
   - component: {fileID: 2133053527248981619}
   - component: {fileID: 3402187654022465474}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Core (85)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -9060,7 +9078,7 @@ GameObject:
   - component: {fileID: 5303278819767136853}
   - component: {fileID: 749895222924783196}
   - component: {fileID: 7824699688725413173}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Particle (42)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -9146,7 +9164,7 @@ GameObject:
   - component: {fileID: 7517917519856678736}
   - component: {fileID: 4818916395675813676}
   - component: {fileID: 6779178455464727238}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Particle (25)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -9232,7 +9250,7 @@ GameObject:
   - component: {fileID: 402684462300063042}
   - component: {fileID: 507760701626029818}
   - component: {fileID: 5372349592101604251}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Core (88)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -9318,7 +9336,7 @@ GameObject:
   - component: {fileID: 151242509773873269}
   - component: {fileID: 1865882044996512605}
   - component: {fileID: 5478684765164544568}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Particle (72)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -9404,7 +9422,7 @@ GameObject:
   - component: {fileID: 918754062634477853}
   - component: {fileID: 8099514177888463286}
   - component: {fileID: 6776762426637771224}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Rings (56)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -9490,7 +9508,7 @@ GameObject:
   - component: {fileID: 2520031280038782719}
   - component: {fileID: 7255464428905212533}
   - component: {fileID: 1758065159846168927}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Core (40)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -9576,7 +9594,7 @@ GameObject:
   - component: {fileID: 1291105265203903430}
   - component: {fileID: 4871635773572624281}
   - component: {fileID: 587423869193841516}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Rings (35)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -9662,7 +9680,7 @@ GameObject:
   - component: {fileID: 4411539724226462171}
   - component: {fileID: 2157837302815460364}
   - component: {fileID: 7468462801817149359}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Core (47)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -9748,7 +9766,7 @@ GameObject:
   - component: {fileID: 5944952897712635446}
   - component: {fileID: 2300098690656481763}
   - component: {fileID: 5441866401104041312}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Core (58)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -9834,7 +9852,7 @@ GameObject:
   - component: {fileID: 3998115279370699059}
   - component: {fileID: 7014723784325725658}
   - component: {fileID: 1466128755991317940}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Particle (69)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -9920,7 +9938,7 @@ GameObject:
   - component: {fileID: 6349886014425319416}
   - component: {fileID: 3187034908733814400}
   - component: {fileID: 574661672363669951}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Particle (19)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -10006,7 +10024,7 @@ GameObject:
   - component: {fileID: 4965840086767273921}
   - component: {fileID: 3795170609555026706}
   - component: {fileID: 6471994203804837380}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Core (75)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -10092,7 +10110,7 @@ GameObject:
   - component: {fileID: 8512004735185431250}
   - component: {fileID: 4482446605755167410}
   - component: {fileID: 3412531210406919437}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Rings (28)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -10178,7 +10196,7 @@ GameObject:
   - component: {fileID: 2718035669687730456}
   - component: {fileID: 1749763453943942915}
   - component: {fileID: 6858066438308165931}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Particle (50)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -10264,7 +10282,7 @@ GameObject:
   - component: {fileID: 3882316086225153103}
   - component: {fileID: 822450116911320259}
   - component: {fileID: 2640842609183962835}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Particle (24)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -10350,7 +10368,7 @@ GameObject:
   - component: {fileID: 5079284714118271245}
   - component: {fileID: 1284546965060987416}
   - component: {fileID: 171911251961411111}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Core (24)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -10435,7 +10453,7 @@ GameObject:
   m_Component:
   - component: {fileID: 429523007144289047}
   - component: {fileID: 4554345185708006644}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: MeshEmitter14
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -10597,11 +10615,17 @@ MonoBehaviour:
   _cloneParticlesToMaxCount: 1
   _cloneParticleLimit: 64
   _useGpuInstancing: 1
+  _coordinateSystem: 0
   _isBurstSpawning: 0
   _relativeWarmupTime: 1
+  _warmupTicksPerSecond: 0
   _duration: 0.55
   _hasFixedDuration: 0
   _instantKillAtCastEnd: 0
+  _respawnDeadParticles: 1
+  _stretchParticleLifeToWindow: 0
+  _hostOwnedEmission: 0
+  _compareLogEnabled: 0
 --- !u!1 &4745257480518911617
 GameObject:
   m_ObjectHideFlags: 0
@@ -10613,7 +10637,7 @@ GameObject:
   - component: {fileID: 7991795112098084154}
   - component: {fileID: 8310379056839526685}
   - component: {fileID: 7312848939282426413}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Core (71)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -10699,7 +10723,7 @@ GameObject:
   - component: {fileID: 8000606299401533504}
   - component: {fileID: 5324357837107497207}
   - component: {fileID: 1216642925658545839}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Rings (4)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -10785,7 +10809,7 @@ GameObject:
   - component: {fileID: 307590108830515561}
   - component: {fileID: 3529313705765674695}
   - component: {fileID: 7444064984535333664}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Particle (74)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -10871,7 +10895,7 @@ GameObject:
   - component: {fileID: 4382949674256294317}
   - component: {fileID: 6338175748387146226}
   - component: {fileID: 3460420334796146385}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Core (6)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -10957,7 +10981,7 @@ GameObject:
   - component: {fileID: 5258784856536614309}
   - component: {fileID: 679115385682662381}
   - component: {fileID: 4817727886218791087}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Rings (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -11043,7 +11067,7 @@ GameObject:
   - component: {fileID: 5132668067737176266}
   - component: {fileID: 8049137285701239325}
   - component: {fileID: 471372765457075787}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Rings (12)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -11129,7 +11153,7 @@ GameObject:
   - component: {fileID: 7499842438723788525}
   - component: {fileID: 6321730984313788042}
   - component: {fileID: 6563905977670070412}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Particle (70)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -11215,7 +11239,7 @@ GameObject:
   - component: {fileID: 5779130001773462498}
   - component: {fileID: 7178146541148412426}
   - component: {fileID: 2766912383262459546}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Particle (38)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -11301,7 +11325,7 @@ GameObject:
   - component: {fileID: 8613672174402718142}
   - component: {fileID: 3354229633874025518}
   - component: {fileID: 2800894373174400715}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Particle (66)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -11387,7 +11411,7 @@ GameObject:
   - component: {fileID: 36055187339843083}
   - component: {fileID: 8273934252444395820}
   - component: {fileID: 838479082336566521}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Particle (9)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -11473,7 +11497,7 @@ GameObject:
   - component: {fileID: 8557549101679917823}
   - component: {fileID: 6386240622867250206}
   - component: {fileID: 2496972795110006510}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Core (95)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -11559,7 +11583,7 @@ GameObject:
   - component: {fileID: 6441921114014239351}
   - component: {fileID: 4284914907833420726}
   - component: {fileID: 1570190397897188581}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Particle (45)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -11645,7 +11669,7 @@ GameObject:
   - component: {fileID: 968459982229171381}
   - component: {fileID: 4947262480940523871}
   - component: {fileID: 5414067158611978864}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Core (69)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -11731,7 +11755,7 @@ GameObject:
   - component: {fileID: 3635608891725886942}
   - component: {fileID: 3591141019064511377}
   - component: {fileID: 8894764938292951904}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Particle (41)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -11817,7 +11841,7 @@ GameObject:
   - component: {fileID: 6970249110257960287}
   - component: {fileID: 9109697267028315142}
   - component: {fileID: 1654311357148292758}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Particle (36)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -11903,7 +11927,7 @@ GameObject:
   - component: {fileID: 3826039812886444986}
   - component: {fileID: 1110892713501427728}
   - component: {fileID: 8119503907759383692}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Rings (7)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -11989,7 +12013,7 @@ GameObject:
   - component: {fileID: 5655847510076029030}
   - component: {fileID: 8232645608609095596}
   - component: {fileID: 2654559123478947649}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Core (21)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -12075,7 +12099,7 @@ GameObject:
   - component: {fileID: 4210117236182897365}
   - component: {fileID: 4548984890515221438}
   - component: {fileID: 6287134793947638543}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Particle (21)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -12161,7 +12185,7 @@ GameObject:
   - component: {fileID: 5482781302194145289}
   - component: {fileID: 5692187535283042751}
   - component: {fileID: 6456798208152748856}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Core (96)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -12247,7 +12271,7 @@ GameObject:
   - component: {fileID: 984179281804851562}
   - component: {fileID: 7246625934406279118}
   - component: {fileID: 7603435362686987742}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Rings (33)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -12333,7 +12357,7 @@ GameObject:
   - component: {fileID: 3070319257739623641}
   - component: {fileID: 829635804745417097}
   - component: {fileID: 2242177946569936248}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Core (34)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -12419,7 +12443,7 @@ GameObject:
   - component: {fileID: 4926258739608512873}
   - component: {fileID: 4908994361275950322}
   - component: {fileID: 9005805155092430533}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Particle (54)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -12505,7 +12529,7 @@ GameObject:
   - component: {fileID: 8640843370176319630}
   - component: {fileID: 720799330151158106}
   - component: {fileID: 6898326123512208918}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Particle (12)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -12591,7 +12615,7 @@ GameObject:
   - component: {fileID: 2604720853436553756}
   - component: {fileID: 4319873875482509686}
   - component: {fileID: 7246841700782485781}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Core (48)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -12677,7 +12701,7 @@ GameObject:
   - component: {fileID: 3130223235062810974}
   - component: {fileID: 8047488412839072225}
   - component: {fileID: 6363073222446207503}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Rings (26)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -12763,7 +12787,7 @@ GameObject:
   - component: {fileID: 4841752017165329316}
   - component: {fileID: 405914337773135783}
   - component: {fileID: 4688935800801873729}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Core (29)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -12849,7 +12873,7 @@ GameObject:
   - component: {fileID: 6383986838056067176}
   - component: {fileID: 3179705647643754985}
   - component: {fileID: 670614427611835301}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Rings (15)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -12935,7 +12959,7 @@ GameObject:
   - component: {fileID: 1913081579566566365}
   - component: {fileID: 6167355335472344509}
   - component: {fileID: 1805723708605955770}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Rings (59)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -13021,7 +13045,7 @@ GameObject:
   - component: {fileID: 2220823176819085841}
   - component: {fileID: 3398845076184564533}
   - component: {fileID: 6144853780680156759}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Rings (47)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -13107,7 +13131,7 @@ GameObject:
   - component: {fileID: 1289070399069897947}
   - component: {fileID: 6690541047866305677}
   - component: {fileID: 2145941286120610757}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Particle (4)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -13193,7 +13217,7 @@ GameObject:
   - component: {fileID: 2585559901283542433}
   - component: {fileID: 855698618360311289}
   - component: {fileID: 4318045726186962820}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Particle (53)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -13279,7 +13303,7 @@ GameObject:
   - component: {fileID: 6923099961600834315}
   - component: {fileID: 1818134946130563311}
   - component: {fileID: 4570700914977842182}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Core (87)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -13365,7 +13389,7 @@ GameObject:
   - component: {fileID: 1461570262988672066}
   - component: {fileID: 4906714171021516308}
   - component: {fileID: 8815535670738421032}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Core (37)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -13451,7 +13475,7 @@ GameObject:
   - component: {fileID: 4332435483217722431}
   - component: {fileID: 9095435364630274283}
   - component: {fileID: 86721406140022837}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Rings (24)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -13537,7 +13561,7 @@ GameObject:
   - component: {fileID: 767254318068167897}
   - component: {fileID: 1463230107666671812}
   - component: {fileID: 7821851268484631997}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Particle (29)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -13623,7 +13647,7 @@ GameObject:
   - component: {fileID: 3022264242029179783}
   - component: {fileID: 6258079623002624515}
   - component: {fileID: 690495277245969653}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Rings (6)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -13709,7 +13733,7 @@ GameObject:
   - component: {fileID: 2576784744795761479}
   - component: {fileID: 2026773374095555084}
   - component: {fileID: 935090107855221236}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Core (84)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -13795,7 +13819,7 @@ GameObject:
   - component: {fileID: 3810548664243661380}
   - component: {fileID: 7204300282827657065}
   - component: {fileID: 6279605870982620142}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Core (17)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -13881,7 +13905,7 @@ GameObject:
   - component: {fileID: 8658208068462440280}
   - component: {fileID: 7714897491124051720}
   - component: {fileID: 3207615440773837528}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Particle (35)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -13967,7 +13991,7 @@ GameObject:
   - component: {fileID: 5132222600686880781}
   - component: {fileID: 7988097014130208122}
   - component: {fileID: 5992070787657915114}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Core (73)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -14053,7 +14077,7 @@ GameObject:
   - component: {fileID: 7839293795278814492}
   - component: {fileID: 8851904519156827401}
   - component: {fileID: 8707097185235188826}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Core (94)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -14139,7 +14163,7 @@ GameObject:
   - component: {fileID: 5262972664985616239}
   - component: {fileID: 1428986720088664800}
   - component: {fileID: 5188930759575970528}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Particle (7)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -14225,7 +14249,7 @@ GameObject:
   - component: {fileID: 5309062833745365367}
   - component: {fileID: 2920527880874598353}
   - component: {fileID: 8433879692450218882}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Core (63)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -14311,7 +14335,7 @@ GameObject:
   - component: {fileID: 6096578781908068752}
   - component: {fileID: 8685227772625643786}
   - component: {fileID: 1950478840953182256}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Core (70)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -14397,7 +14421,7 @@ GameObject:
   - component: {fileID: 7907604815728248099}
   - component: {fileID: 4827204474158002550}
   - component: {fileID: 4774727508039382952}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Particle (17)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -14483,7 +14507,7 @@ GameObject:
   - component: {fileID: 396562985322141141}
   - component: {fileID: 6979842576478392517}
   - component: {fileID: 3195477010945567306}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Particle (51)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -14569,7 +14593,7 @@ GameObject:
   - component: {fileID: 1517338191425577838}
   - component: {fileID: 1308676505380203693}
   - component: {fileID: 8475928392825623422}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Core (51)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -14655,7 +14679,7 @@ GameObject:
   - component: {fileID: 5507284981203645413}
   - component: {fileID: 2448223487760771903}
   - component: {fileID: 6054072327630946378}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Rings (49)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -14741,7 +14765,7 @@ GameObject:
   - component: {fileID: 2415834224918513737}
   - component: {fileID: 3302265766954936158}
   - component: {fileID: 2232149025869894048}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Particle (57)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -14827,7 +14851,7 @@ GameObject:
   - component: {fileID: 3370110771294846947}
   - component: {fileID: 3004832293233887360}
   - component: {fileID: 7014558416386509912}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Particle (18)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -14913,7 +14937,7 @@ GameObject:
   - component: {fileID: 1938255579630118622}
   - component: {fileID: 4873744225215514214}
   - component: {fileID: 6687870646730733817}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Core (26)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -14999,7 +15023,7 @@ GameObject:
   - component: {fileID: 8287809215266770904}
   - component: {fileID: 1169118107928294317}
   - component: {fileID: 4713289588688368018}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Rings (37)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -15085,7 +15109,7 @@ GameObject:
   - component: {fileID: 6065783275208424744}
   - component: {fileID: 2000654476321231315}
   - component: {fileID: 5229841914318451012}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Core (38)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -15171,7 +15195,7 @@ GameObject:
   - component: {fileID: 3716036256249629145}
   - component: {fileID: 5501336943361820143}
   - component: {fileID: 6447828345625687744}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Rings (31)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -15257,7 +15281,7 @@ GameObject:
   - component: {fileID: 277855302830688258}
   - component: {fileID: 5132841777102022234}
   - component: {fileID: 7380835130219627557}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Core (61)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -15343,7 +15367,7 @@ GameObject:
   - component: {fileID: 3591678248441541130}
   - component: {fileID: 2261866080767973921}
   - component: {fileID: 118477629418898010}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Particle (77)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -15429,7 +15453,7 @@ GameObject:
   - component: {fileID: 5288998920895356570}
   - component: {fileID: 9044110531108820713}
   - component: {fileID: 5143920708331107929}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Rings (22)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -15515,7 +15539,7 @@ GameObject:
   - component: {fileID: 5548812720004455944}
   - component: {fileID: 3892038462537800793}
   - component: {fileID: 2036145538409345674}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Core (19)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -15601,7 +15625,7 @@ GameObject:
   - component: {fileID: 4616877390931640169}
   - component: {fileID: 1319795677387133379}
   - component: {fileID: 6740850550171491187}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Particle (11)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -15687,7 +15711,7 @@ GameObject:
   - component: {fileID: 2144159349391086081}
   - component: {fileID: 124515928244437325}
   - component: {fileID: 2746957440714154021}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Core (83)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -15773,7 +15797,7 @@ GameObject:
   - component: {fileID: 2072213372597000028}
   - component: {fileID: 3115250721313272340}
   - component: {fileID: 369975318235251416}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Core (64)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -15859,7 +15883,7 @@ GameObject:
   - component: {fileID: 8336156370428286051}
   - component: {fileID: 8102976916834170430}
   - component: {fileID: 280589059016808848}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Rings (21)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -15945,7 +15969,7 @@ GameObject:
   - component: {fileID: 9020528578212954334}
   - component: {fileID: 7996165180432956204}
   - component: {fileID: 4499832932126575445}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Core (5)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -16031,7 +16055,7 @@ GameObject:
   - component: {fileID: 6654008336448437031}
   - component: {fileID: 3634926481737556946}
   - component: {fileID: 207134539394991803}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Particle (59)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -16117,7 +16141,7 @@ GameObject:
   - component: {fileID: 9149480611492935331}
   - component: {fileID: 6506011455270759694}
   - component: {fileID: 8440952178607362145}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Core (54)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -16203,7 +16227,7 @@ GameObject:
   - component: {fileID: 3941908509499706247}
   - component: {fileID: 7341745377443078481}
   - component: {fileID: 5817043563875413550}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Particle (33)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -16289,7 +16313,7 @@ GameObject:
   - component: {fileID: 8455484723827121119}
   - component: {fileID: 3788862717353890291}
   - component: {fileID: 8705474247968180626}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Core (79)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -16375,7 +16399,7 @@ GameObject:
   - component: {fileID: 399700028797818501}
   - component: {fileID: 8610492248633661453}
   - component: {fileID: 599406275134040677}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Particle (76)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -16461,7 +16485,7 @@ GameObject:
   - component: {fileID: 5860241364678147341}
   - component: {fileID: 5326133290352809800}
   - component: {fileID: 7121264722680942923}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Rings (2)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -16547,7 +16571,7 @@ GameObject:
   - component: {fileID: 8841967861967822538}
   - component: {fileID: 6259092042202682400}
   - component: {fileID: 164934064449277285}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Particle (34)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -16633,7 +16657,7 @@ GameObject:
   - component: {fileID: 8697462099010265686}
   - component: {fileID: 6488270264335687479}
   - component: {fileID: 4368295431151035611}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Particle (15)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -16719,7 +16743,7 @@ GameObject:
   - component: {fileID: 38583702735747908}
   - component: {fileID: 5415196418458700586}
   - component: {fileID: 6300183021210962529}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Core (55)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -16805,7 +16829,7 @@ GameObject:
   - component: {fileID: 9086606298724796680}
   - component: {fileID: 4985342210305272739}
   - component: {fileID: 528911953786815157}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Core (76)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -16891,7 +16915,7 @@ GameObject:
   - component: {fileID: 8462666460988709916}
   - component: {fileID: 447497824149612482}
   - component: {fileID: 1175368438006446516}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Core (18)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -16977,7 +17001,7 @@ GameObject:
   - component: {fileID: 1718052898205188309}
   - component: {fileID: 2954126825715304887}
   - component: {fileID: 7874692259001085175}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Particle (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -17063,7 +17087,7 @@ GameObject:
   - component: {fileID: 3566079939381980807}
   - component: {fileID: 6874615675386478307}
   - component: {fileID: 5264282735814431921}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Particle (47)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -17149,7 +17173,7 @@ GameObject:
   - component: {fileID: 7356406138267468187}
   - component: {fileID: 7764520706381282842}
   - component: {fileID: 7272936706995064633}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Particle (58)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -17235,7 +17259,7 @@ GameObject:
   - component: {fileID: 3626884897565810574}
   - component: {fileID: 4054417224330026405}
   - component: {fileID: 7197618419305852876}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Rings (58)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -17321,7 +17345,7 @@ GameObject:
   - component: {fileID: 9010144945787893267}
   - component: {fileID: 8087668665684764796}
   - component: {fileID: 4156496187311159562}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Rings (27)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -17407,7 +17431,7 @@ GameObject:
   - component: {fileID: 8530371442018067220}
   - component: {fileID: 1962235046302291229}
   - component: {fileID: 3246722417091362144}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Rings (57)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -17492,7 +17516,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5578461074686472421}
   - component: {fileID: 2164068037979795567}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: el_wind_strike_fl
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -17565,7 +17589,7 @@ GameObject:
   - component: {fileID: 7386795119959489169}
   - component: {fileID: 4366991386819490626}
   - component: {fileID: 1383800037632810120}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Rings (43)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -17651,7 +17675,7 @@ GameObject:
   - component: {fileID: 1074596175231176262}
   - component: {fileID: 7903431448212827087}
   - component: {fileID: 7644535905797733405}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Particle (22)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -17737,7 +17761,7 @@ GameObject:
   - component: {fileID: 8852022673310945476}
   - component: {fileID: 5362637143055963015}
   - component: {fileID: 887406115772658519}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Core (90)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -17823,7 +17847,7 @@ GameObject:
   - component: {fileID: 6931069402571728811}
   - component: {fileID: 8869877959944723466}
   - component: {fileID: 7716215047976895170}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Core (80)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -17909,7 +17933,7 @@ GameObject:
   - component: {fileID: 5871899803263123389}
   - component: {fileID: 5907606808424000687}
   - component: {fileID: 1180390920414072879}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Particle (27)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -17995,7 +18019,7 @@ GameObject:
   - component: {fileID: 1528279843972656827}
   - component: {fileID: 2559619914561144042}
   - component: {fileID: 1022729152143136053}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Rings (32)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -18081,7 +18105,7 @@ GameObject:
   - component: {fileID: 2400667060101549261}
   - component: {fileID: 4005045578897927072}
   - component: {fileID: 6452755116958029455}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Core (2)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -18167,7 +18191,7 @@ GameObject:
   - component: {fileID: 6106822239371591373}
   - component: {fileID: 8389867117811156469}
   - component: {fileID: 2241566917282559108}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Core (45)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -18253,7 +18277,7 @@ GameObject:
   - component: {fileID: 6795841613206115358}
   - component: {fileID: 3643164950987043255}
   - component: {fileID: 6503043232835705632}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Particle (16)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -18339,7 +18363,7 @@ GameObject:
   - component: {fileID: 7676651260280412289}
   - component: {fileID: 5857788008845801342}
   - component: {fileID: 5864597661641073597}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Particle (32)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -18425,7 +18449,7 @@ GameObject:
   - component: {fileID: 7640462944663042488}
   - component: {fileID: 2895579801507358338}
   - component: {fileID: 5080516743995023198}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Core (20)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -18511,7 +18535,7 @@ GameObject:
   - component: {fileID: 1834350696247385585}
   - component: {fileID: 5660187696125423513}
   - component: {fileID: 4880970789426189249}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Core (92)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -18597,7 +18621,7 @@ GameObject:
   - component: {fileID: 1251070824480203689}
   - component: {fileID: 6403369264766070643}
   - component: {fileID: 915097971249110229}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Core (99)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -18683,7 +18707,7 @@ GameObject:
   - component: {fileID: 3846512502125177970}
   - component: {fileID: 4372537352180744593}
   - component: {fileID: 2481817857656078001}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Particle (2)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -18769,7 +18793,7 @@ GameObject:
   - component: {fileID: 3000835768405343162}
   - component: {fileID: 8384522858421239807}
   - component: {fileID: 6490430788673052537}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Core (35)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -18855,7 +18879,7 @@ GameObject:
   - component: {fileID: 3741308050807006253}
   - component: {fileID: 1052590395210453108}
   - component: {fileID: 6186083032102584164}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Core (78)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -18941,7 +18965,7 @@ GameObject:
   - component: {fileID: 3462191774208253636}
   - component: {fileID: 8269717720950842328}
   - component: {fileID: 2284147164726531826}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Rings (39)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -19027,7 +19051,7 @@ GameObject:
   - component: {fileID: 9061722375213550067}
   - component: {fileID: 1988421580420782395}
   - component: {fileID: 2027088826220263274}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Particle (62)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -19113,7 +19137,7 @@ GameObject:
   - component: {fileID: 7542691075342228398}
   - component: {fileID: 4518237935396377845}
   - component: {fileID: 3278564823458932348}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Core (66)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -19199,7 +19223,7 @@ GameObject:
   - component: {fileID: 7833044579737207158}
   - component: {fileID: 4492634352525138495}
   - component: {fileID: 3999967792526596276}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Core (28)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -19285,7 +19309,7 @@ GameObject:
   - component: {fileID: 4153167365816784232}
   - component: {fileID: 7849397656196068306}
   - component: {fileID: 3983060159992174025}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Core (60)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -19371,7 +19395,7 @@ GameObject:
   - component: {fileID: 1400880767715173899}
   - component: {fileID: 721371719339858875}
   - component: {fileID: 3371556389591708096}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Particle (28)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -19457,7 +19481,7 @@ GameObject:
   - component: {fileID: 3086582764711777863}
   - component: {fileID: 2083750587963718687}
   - component: {fileID: 1959463658175765471}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Particle (5)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -19543,7 +19567,7 @@ GameObject:
   - component: {fileID: 2783658590686970606}
   - component: {fileID: 848773570836959208}
   - component: {fileID: 8837332647495247216}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Particle (3)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -19629,7 +19653,7 @@ GameObject:
   - component: {fileID: 5551688658180174198}
   - component: {fileID: 1118882507719803210}
   - component: {fileID: 7199048772448852733}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Particle (6)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -19715,7 +19739,7 @@ GameObject:
   - component: {fileID: 8077650121382133063}
   - component: {fileID: 5963689455586874504}
   - component: {fileID: 4811373654161163906}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Particle (13)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -19801,7 +19825,7 @@ GameObject:
   - component: {fileID: 4363262235398649207}
   - component: {fileID: 3287676150044540392}
   - component: {fileID: 8424000750071380075}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Core (98)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -19887,7 +19911,7 @@ GameObject:
   - component: {fileID: 3991313727044355183}
   - component: {fileID: 7660666728904498830}
   - component: {fileID: 7475834233859158724}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Rings (38)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -19973,7 +19997,7 @@ GameObject:
   - component: {fileID: 344115132048661498}
   - component: {fileID: 7319086596534405983}
   - component: {fileID: 747755276778521291}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Particle (79)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -20059,7 +20083,7 @@ GameObject:
   - component: {fileID: 5769690049804360827}
   - component: {fileID: 7899775228236855501}
   - component: {fileID: 6654820460238009863}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Particle (20)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -20145,7 +20169,7 @@ GameObject:
   - component: {fileID: 1912292821674972997}
   - component: {fileID: 8847971277846838576}
   - component: {fileID: 8257092123424635361}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Particle (26)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -20231,7 +20255,7 @@ GameObject:
   - component: {fileID: 1111780131953834439}
   - component: {fileID: 7397153919135732605}
   - component: {fileID: 6036028358814147505}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Particle (23)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -20317,7 +20341,7 @@ GameObject:
   - component: {fileID: 8375710616077336238}
   - component: {fileID: 5794121751292888173}
   - component: {fileID: 6017525492250655709}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Core (9)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -20403,7 +20427,7 @@ GameObject:
   - component: {fileID: 1800356578178951750}
   - component: {fileID: 6351509716737519610}
   - component: {fileID: 8982204652771725442}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Rings (25)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -20489,7 +20513,7 @@ GameObject:
   - component: {fileID: 46135510277647860}
   - component: {fileID: 4096902541642701022}
   - component: {fileID: 6772863492584510448}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Core (74)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -20575,7 +20599,7 @@ GameObject:
   - component: {fileID: 4721135113558181783}
   - component: {fileID: 231508883537399739}
   - component: {fileID: 4197659936792609624}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Rings (20)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -20661,7 +20685,7 @@ GameObject:
   - component: {fileID: 1191147886093545888}
   - component: {fileID: 6937528747683974230}
   - component: {fileID: 2206533717189591547}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Core (68)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -20747,7 +20771,7 @@ GameObject:
   - component: {fileID: 8429920093567998352}
   - component: {fileID: 4632695861057153504}
   - component: {fileID: 3668168431872765140}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Rings (16)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -20833,7 +20857,7 @@ GameObject:
   - component: {fileID: 4873204954417475761}
   - component: {fileID: 472842298919147272}
   - component: {fileID: 459390320031797962}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Rings (52)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -20919,7 +20943,7 @@ GameObject:
   - component: {fileID: 6909606058391809765}
   - component: {fileID: 1450688344851128570}
   - component: {fileID: 6040597745149553852}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Core (14)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -21005,7 +21029,7 @@ GameObject:
   - component: {fileID: 4097767778531417773}
   - component: {fileID: 5299141080554365772}
   - component: {fileID: 5807573003540514088}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Particle
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -21091,7 +21115,7 @@ GameObject:
   - component: {fileID: 5744165178422158}
   - component: {fileID: 8682104746389127856}
   - component: {fileID: 8949988577691046650}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Particle (67)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -21177,7 +21201,7 @@ GameObject:
   - component: {fileID: 5264423574586748032}
   - component: {fileID: 4949084489099957608}
   - component: {fileID: 2767469678527673379}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Core (57)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -21263,7 +21287,7 @@ GameObject:
   - component: {fileID: 187388177557692458}
   - component: {fileID: 459530806657663135}
   - component: {fileID: 3539659998277041786}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Rings (40)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -21349,7 +21373,7 @@ GameObject:
   - component: {fileID: 2269123897499174475}
   - component: {fileID: 8290073307857256911}
   - component: {fileID: 5163482227875000986}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Particle (63)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -21435,7 +21459,7 @@ GameObject:
   - component: {fileID: 7402643698218866566}
   - component: {fileID: 4286459780492439443}
   - component: {fileID: 941237042885879450}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Core (25)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -21521,7 +21545,7 @@ GameObject:
   - component: {fileID: 7178102072042437395}
   - component: {fileID: 7639540339867183831}
   - component: {fileID: 248082183845323568}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Core (33)
   m_TagString: Untagged
   m_Icon: {fileID: 0}

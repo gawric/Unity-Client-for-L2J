@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3082876817921927240}
   - component: {fileID: 1907917464583194202}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: e_u056_a_composite
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -52,6 +52,8 @@ MonoBehaviour:
     attachmentPoint: 10
     spawnTiming: 0
     hitLeadSeconds: 0
+    spawnDelaySeconds: 0
+    attachmentBoneName: 
     positionOffset: {x: 0, y: 0, z: 0}
     normalizeOffsetByOwnerHeight: 0
     referenceHeight: 1.8
@@ -114,6 +116,7 @@ MonoBehaviour:
       launchMode: 0
       speed: 4.5
       acceleration: 0
+      maxSpeed: 0
       fadeStartDistance: 0.5
       fadeOutSeconds: 0.35
       arriveDistance: 0.2

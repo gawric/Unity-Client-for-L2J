@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8541115398003305731}
   - component: {fileID: 6873886470929080953}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: SpriteEmitter8
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -54,11 +54,17 @@ MonoBehaviour:
   _cloneParticlesToMaxCount: 0
   _cloneParticleLimit: 64
   _useGpuInstancing: 0
+  _coordinateSystem: 0
   _isBurstSpawning: 1
   _relativeWarmupTime: 0.2
+  _warmupTicksPerSecond: 0
   _duration: 0.3
   _hasFixedDuration: 1
   _instantKillAtCastEnd: 0
+  _respawnDeadParticles: 1
+  _stretchParticleLifeToWindow: 0
+  _hostOwnedEmission: 0
+  _compareLogEnabled: 0
 --- !u!1 &2018502889361653160
 GameObject:
   m_ObjectHideFlags: 0
@@ -69,7 +75,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4852676596208949804}
   - component: {fileID: 6028568411778833831}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: MeshEmitter5
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -115,11 +121,17 @@ MonoBehaviour:
   _cloneParticlesToMaxCount: 1
   _cloneParticleLimit: 64
   _useGpuInstancing: 1
+  _coordinateSystem: 0
   _isBurstSpawning: 1
   _relativeWarmupTime: 0.55
+  _warmupTicksPerSecond: 0
   _duration: 1
   _hasFixedDuration: 1
   _instantKillAtCastEnd: 0
+  _respawnDeadParticles: 1
+  _stretchParticleLifeToWindow: 0
+  _hostOwnedEmission: 0
+  _compareLogEnabled: 0
 --- !u!1 &2463714281255027397
 GameObject:
   m_ObjectHideFlags: 0
@@ -131,7 +143,7 @@ GameObject:
   - component: {fileID: 9209633045840859342}
   - component: {fileID: 5037192127437247646}
   - component: {fileID: 4287505846930554116}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: WindMesh
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -216,7 +228,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6083730995942481777}
   - component: {fileID: 7743554842690168185}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: el_wind_strike_ta
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -287,7 +299,7 @@ GameObject:
   - component: {fileID: 7325465463113490071}
   - component: {fileID: 2733416410825985559}
   - component: {fileID: 7009596331434806560}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Ring
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -373,7 +385,7 @@ GameObject:
   - component: {fileID: 6574720457905253592}
   - component: {fileID: 6747633501219756796}
   - component: {fileID: 1253146105711883814}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: Core
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -458,7 +470,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1239987653724835460}
   - component: {fileID: 8528144290935440544}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: SpriteEmitter9
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -502,11 +514,17 @@ MonoBehaviour:
   _cloneParticlesToMaxCount: 0
   _cloneParticleLimit: 64
   _useGpuInstancing: 0
+  _coordinateSystem: 0
   _isBurstSpawning: 1
   _relativeWarmupTime: 0
+  _warmupTicksPerSecond: 0
   _duration: 0.25
   _hasFixedDuration: 1
   _instantKillAtCastEnd: 0
+  _respawnDeadParticles: 1
+  _stretchParticleLifeToWindow: 0
+  _hostOwnedEmission: 0
+  _compareLogEnabled: 0
 --- !u!1 &8806539501841189048
 GameObject:
   m_ObjectHideFlags: 0
@@ -518,7 +536,7 @@ GameObject:
   - component: {fileID: 3078126247923709772}
   - component: {fileID: 5751524283183734998}
   - component: {fileID: 5733007527203263314}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: WindMesh (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}

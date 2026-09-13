@@ -31,6 +31,10 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - _VertMeshFramePosTex:
+        m_Texture: {fileID: 2800000, guid: 53131d35c1a34d74885c07d22740feaa, type: 2}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
     - _AlphaClipThreshold: -1
@@ -41,10 +45,10 @@ Material:
     - _ColorKey5Time: 1
     - _ColorScaleRepeats: 0
     - _CoordinateSystem: 1
-    - _Cull: 2
+    - _Cull: 0
     - _DebugMeshOut: 0
     - _DstBlend: 1
-    - _ExpandShaderBounds: 0
+    - _ExpandShaderBounds: 1
     - _FadeIn: 1
     - _FadeInEndTime: 0.1235
     - _FadeOut: 1
@@ -53,7 +57,7 @@ Material:
     - _HeLocationShape: 0
     - _IgnoreMainTexAlpha: 0
     - _IndependentSprayAccel: 0
-    - _L2FxWorldCalibration: 1.8
+    - _L2FxWorldCalibration: 1.1
     - _L2SpriteColorGammaToLinear: 0
     - _ManualAge: 0
     - _MeshSpawnRandStateBits: 0
@@ -86,6 +90,9 @@ Material:
     - _UseVelocityScale: 0
     - _VelocityScaleCount: 1
     - _VelocityScaleRepeats: 0
+    - _VertMeshAnimEnable: 1
+    - _VertMeshFrameCount: 21
+    - _VertMeshSeqRate: 30
     - _ZWrite: 0
     m_Colors:
     - _AccelerationUc: {r: 0, g: 0, b: 0, a: 0}

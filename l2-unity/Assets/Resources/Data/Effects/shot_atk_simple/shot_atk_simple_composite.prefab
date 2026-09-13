@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8146827462196577189}
   - component: {fileID: 720686262775047825}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: shot_atk_simple_composite
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -52,6 +52,8 @@ MonoBehaviour:
     attachmentPoint: 10
     spawnTiming: 0
     hitLeadSeconds: 0
+    spawnDelaySeconds: 0
+    attachmentBoneName: 
     positionOffset: {x: 0, y: 0, z: 0}
     normalizeOffsetByOwnerHeight: 0
     referenceHeight: 1.8
@@ -114,6 +116,7 @@ MonoBehaviour:
       launchMode: 0
       speed: 4.5
       acceleration: 0
+      maxSpeed: 0
       fadeStartDistance: 0.5
       fadeOutSeconds: 0.35
       arriveDistance: 0.2
@@ -135,6 +138,7 @@ MonoBehaviour:
       destroyOnArrive: 1
       mirrorDualFlight: 0
   _serverHitLifetimeTailSeconds: 0
+  _matchLifetimeToSkillAnimation: 0
   _skipDestroyCompositeByLifetime: 0
   _useLight: 1
   _lightSettings: {fileID: 11400000, guid: f0e1d2c3b4a5968778695a4b3c2d1e0f, type: 2}

@@ -32,11 +32,11 @@ Material:
     - _AlphaClipThreshold: -1
     - _AlphaFromLuma: 0
     - _ColorFadeAlphaBlend: 0
-    - _ColorKey1Time: 0.464286
+    - _ColorKey1Time: 1
     - _ColorKey2Time: 1
     - _ColorKey3Time: 1
-    - _ColorScaleCount: 3
-    - _ColorScaleParam: 100
+    - _ColorScaleCount: 0
+    - _ColorScaleParam: 0
     - _CoordinateSystem: 1
     - _Cull: 0
     - _DebugSpriteOut: 0
@@ -50,7 +50,9 @@ Material:
     - _HeLocationShape: 0
     - _IgnoreMainTexAlpha: 0
     - _IndependentSprayAccel: 0
-    - _L2FxWorldCalibration: 0.5
+    - _L2FxHeUnitScale: 0.58308
+    - _L2FxHeUnitScaleEnable: 1
+    - _L2FxWorldCalibration: 1.1
     - _L2SpriteColorGammaToLinear: 0
     - _LumaAlphaFloor: 0
     - _LumaAlphaPower: 1
@@ -89,10 +91,10 @@ Material:
     - _ZWrite: 0
     m_Colors:
     - _AccelerationUc: {r: 0, g: 0, b: 0, a: 0}
-    - _ColorKey0: {r: 0, g: 0, b: 0, a: 0}
+    - _ColorKey0: {r: 1, g: 1, b: 1, a: 1}
     - _ColorKey1: {r: 1, g: 1, b: 1, a: 1}
-    - _ColorKey2: {r: 0, g: 0, b: 0, a: 0}
-    - _ColorKey3: {r: 0, g: 0, b: 0, a: 0}
+    - _ColorKey2: {r: 1, g: 1, b: 1, a: 1}
+    - _ColorKey3: {r: 1, g: 1, b: 1, a: 1}
     - _ColorMulMax: {r: 1, g: 0.53, b: 0.886, a: 0}
     - _ColorMulMin: {r: 0.47, g: 0.53, b: 0.59, a: 0}
     - _InitialDelayRange: {r: 0, g: 0, b: 0, a: 0}

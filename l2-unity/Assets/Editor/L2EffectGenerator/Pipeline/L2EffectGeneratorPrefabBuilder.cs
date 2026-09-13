@@ -62,6 +62,7 @@ public static class L2EffectGeneratorPrefabBuilder
         try
         {
             root = new GameObject(planned.FolderName);
+            root.layer = L2FxCompositorLayers.SkillEffect;
             root.transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
             root.transform.localScale = Vector3.one;
 
@@ -269,11 +270,13 @@ public static class L2EffectGeneratorPrefabBuilder
                 if (existingTransform != null)
                 {
                     emitterObject = existingTransform.gameObject;
+                    L2FxCompositorLayers.ApplySkillEffectLayer(emitterObject);
                     updatedCount++;
                 }
                 else
                 {
                     emitterObject = new GameObject(emitter.EmitterName);
+                    emitterObject.layer = L2FxCompositorLayers.SkillEffect;
                     emitterObject.transform.SetParent(prefabRoot.transform, false);
                     emitterObject.transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
                     emitterObject.transform.localScale = Vector3.one;
@@ -893,6 +896,8 @@ public static class L2EffectGeneratorPrefabBuilder
             return;
         }
 
+        L2FxCompositorLayers.ApplySkillEffectLayer(slotObject);
+
         MeshFilter meshFilter = slotObject.GetComponent<MeshFilter>();
         if (meshFilter == null)
         {
@@ -1133,6 +1138,17 @@ public static class L2EffectGeneratorPrefabBuilder
         if (string.IsNullOrWhiteSpace(meshFileName))
         {
             return null;
+        }
+
+        // VertMesh sh2: prefer frame0 mesh that matches VERTMESH_FRAME_BANK vertex order.
+        if (string.Equals(meshFileName, "sh2", StringComparison.OrdinalIgnoreCase))
+        {
+            Mesh bankMesh = AssetDatabase.LoadAssetAtPath<Mesh>(
+                LineageEffectsStaticMeshesFolder + "/sh2_frames/sh2_frame0_mesh.asset");
+            if (bankMesh != null)
+            {
+                return bankMesh;
+            }
         }
 
         Mesh mesh = LoadMeshFromProjectFile(meshFileName);
