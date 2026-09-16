@@ -26,41 +26,155 @@ public struct Clock {
 
 [ExecuteInEditMode]
 public class WorldClock : MonoBehaviour {
-    [SerializeField] private float _dayDurationMinutes = 30;
+    [SerializeField] private float _dayDurationMinutes = 2.5f;
     [SerializeField] private string _timeHour;
     [SerializeField] private float _timeElapsed = 0;
-    [SerializeField] private bool _startClock;
+    [SerializeField] private bool _startClock = true;
     [SerializeField] private WorldTimer _worldTimer;
     [SerializeField] private Clock _clock;
 
     public Clock Clock { get { return _clock; } }
 
+    /// <summary>L2 world hour in [0, 24). Maps Clock.totalRatio * 24 (midnight = 0).</summary>
+    public float WorldHours
+    {
+        get { return _clock.totalRatio * 24f; }
+    }
+
     private static WorldClock _instance;
     public static WorldClock Instance { get { return _instance; } }
 
+    bool _persistentDriver;
+    static bool _bootstrapping;
+
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+    static void ResetStatics()
+    {
+        _instance = null;
+        _bootstrapping = false;
+    }
+
+    /// <summary>
+    /// Menu is unloaded on world enter; Game clock lives under World/Environment and can stay disabled.
+    /// Keep one DontDestroyOnLoad driver so time always ticks.
+    /// </summary>
+    public static WorldClock EnsurePersistent()
+    {
+        if (_instance != null && _instance._persistentDriver)
+        {
+            _instance.enabled = true;
+            _instance.gameObject.SetActive(true);
+            _instance._startClock = true;
+            _instance._dayDurationMinutes = 2.5f;
+            return _instance;
+        }
+
+        // DayNightCycle is ExecuteInEditMode — never create DDOL drivers in edit mode.
+        if (!Application.isPlaying)
+        {
+            if (_instance != null)
+                return _instance;
+            return FindFirstObjectByType<WorldClock>(FindObjectsInactive.Include);
+        }
+
+        if (_bootstrapping)
+        {
+            return _instance;
+        }
+
+        WorldClock existing = _instance;
+        if (existing == null)
+        {
+            existing = FindFirstObjectByType<WorldClock>(FindObjectsInactive.Include);
+        }
+
+        _bootstrapping = true;
+        var go = new GameObject("L2ClockDriver");
+        DontDestroyOnLoad(go);
+        WorldClock driver = go.AddComponent<WorldClock>();
+        driver._persistentDriver = true;
+        driver._startClock = true;
+        driver._dayDurationMinutes = 2.5f;
+        if (existing != null && existing != driver)
+        {
+            driver._timeElapsed = existing._timeElapsed;
+            driver._clock = existing._clock;
+            driver._timeHour = existing._timeHour;
+        }
+
+        _instance = driver;
+        _bootstrapping = false;
+        Debug.Log("[L2Clock] persistent driver started (survives Menu unload / map tiles)");
+        return driver;
+    }
+
     private void Awake()
     {
-        if (_instance == null)
+        ClaimInstance();
+    }
+
+    void OnEnable()
+    {
+        if (Application.isPlaying)
         {
-            _instance = this;
+            _startClock = true;
+            if (_dayDurationMinutes < 0.5f || _dayDurationMinutes > 5f)
+            {
+                _dayDurationMinutes = 2.5f;
+            }
         }
-        else if (_instance != this)
+
+        ClaimInstance();
+    }
+
+    void ClaimInstance()
+    {
+        if (_bootstrapping || _persistentDriver)
         {
-            if (Application.isPlaying)
+            _persistentDriver = true;
+            _instance = this;
+            return;
+        }
+
+        if (!Application.isPlaying)
+        {
+            if (_instance == null)
             {
-                Destroy(this);
+                _instance = this;
             }
-            else
-            {
-                DestroyImmediate(this);
-            }
+
+            return;
+        }
+
+        EnsurePersistent();
+    }
+
+    void OnDisable()
+    {
+        if (_persistentDriver)
+        {
+            return;
+        }
+
+        if (_instance == this)
+        {
+            _instance = null;
         }
     }
+
     void OnDestroy() {
-        _instance = null;
+        if (_instance == this)
+        {
+            _instance = null;
+        }
     }
 
     void Update() {
+        if (!_persistentDriver && Application.isPlaying && _instance != null && _instance != this)
+        {
+            return;
+        }
+
         if(_startClock) {
             UpdateClock();
         }
@@ -93,7 +207,31 @@ public class WorldClock : MonoBehaviour {
         _timeHour = time.ToString(@"hh\:mm\:ss");
     }
 
+    public void SetWorldHours(float hours)
+    {
+        float t = hours % 24f;
+        if (t < 0f)
+        {
+            t += 24f;
+        }
+
+        _clock.totalRatio = t / 24f;
+        _timeElapsed = _clock.totalRatio * _dayDurationMinutes * 60f;
+        int seconds = (int)(_clock.totalRatio * 86400);
+        int h = seconds / 3600;
+        int m = (seconds % 3600) / 60;
+        int s = seconds % 60;
+        _timeHour = new TimeSpan(h, m, s).ToString(@"hh\:mm\:ss");
+        CalculateDayNightRatio();
+        CalculateSunPhaseRatio();
+    }
+
     public void SynchronizeClock(long gameTicks, int tickDurationMs, int dayDurationMinutes) {
+        if (_startClock)
+        {
+            return;
+        }
+
         float ticksPerDay = (float)dayDurationMinutes * 60 * 1000 / tickDurationMs;
         float currentHours = gameTicks / ticksPerDay * 24 % 24;
         this._dayDurationMinutes = dayDurationMinutes;

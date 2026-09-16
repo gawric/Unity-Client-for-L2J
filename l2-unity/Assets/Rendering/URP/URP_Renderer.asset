@@ -38,7 +38,7 @@ MonoBehaviour:
     m_Bits: 4294967295
   m_TransparentLayerMask:
     serializedVersion: 2
-    m_Bits: 4294705151
+    m_Bits: 4287365119
   m_DefaultStencilState:
     overrideStencilState: 0
     stencilReference: 0
@@ -73,12 +73,29 @@ MonoBehaviour:
     effectLayerMask:
       serializedVersion: 2
       m_Bits: 262144
+    celestialLayerMask:
+      serializedVersion: 2
+      m_Bits: 1048576
+    hazeLayerMask:
+      serializedVersion: 2
+      m_Bits: 2097152
+    cloudLayerMask:
+      serializedVersion: 2
+      m_Bits: 4194304
+    includeSkyInBoost: 0
+    skyBoostStart: 0.3
+    skyBoostFull: 0.5
     encodeLinearToSrgb: 1
     decodeSrgbToLinear: 1
     bindCameraDepth: 1
     gameCameraOnly: 1
     debugMode: 0
+    enableSkillPost: 1
+    bloomThreshold: 0.2
+    bloomIntensity: 0.95
+    fxGain: 1.4
   transferShader: {fileID: 4800000, guid: c3d4e5f6789012345678abcdef070201, type: 3}
+  postShader: {fileID: 4800000, guid: b8e2c1a0497d4f6e9c3a1d5f8e2b7c04, type: 3}
 --- !u!114 &7171716907500193747
 MonoBehaviour:
   m_ObjectHideFlags: 0

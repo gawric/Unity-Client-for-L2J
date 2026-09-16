@@ -43,11 +43,11 @@ public class DayNightCycle : MonoBehaviour
     [SerializeField] private Color _ambientLightduskColor = new Color(82f / 255f, 65f / 255f, 41f / 255f);
     [SerializeField] private Color _ambientLightDawnColor = new Color(96f / 255f, 96f / 255f, 79f / 255f);
 
-    [Header("Clouds opacity")]
-    [SerializeField] private float _dayCloudsOpcacity = 2.54f;
-    [SerializeField] private float _nightCloudsOpacity = 0.12f;
-    [SerializeField] private float _dayHorizonCloudsOpcacity = 1f;
-    [SerializeField] private float _nightHorizonCloudsOpacity = 0.05f;
+    [Header("Skybox cloud leftover (always off — L2 clouds are separate components)")]
+    [SerializeField] private float _dayCloudsOpcacity = 0f;
+    [SerializeField] private float _nightCloudsOpacity = 0f;
+    [SerializeField] private float _dayHorizonCloudsOpcacity = 0f;
+    [SerializeField] private float _nightHorizonCloudsOpacity = 0f;
 
     [Header("Ambient light intensity")]
     [SerializeField] private float _ambientMinIntensity = 0.2f;
@@ -57,6 +57,75 @@ public class DayNightCycle : MonoBehaviour
     [SerializeField] private float _mainLightMinIntensity = 0.4f;
     [SerializeField] private float _mainLightMaxIntensity = 1f;
 
+    [Header("L2 High Elf color LUT")]
+    [SerializeField] private bool _useL2ColorLut = true;
+
+    [Header("L2 High Elf sun/moon discs")]
+    [SerializeField] private bool _useL2Celestial = true;
+
+    [Header("L2 High Elf haze ring")]
+    [SerializeField] private bool _useL2HazeRing = true;
+
+    [Header("L2 High Elf star field")]
+    [SerializeField] private bool _useL2StarDome = true;
+
+    [Header("L2 High Elf simple clouds")]
+    [SerializeField] private bool _useL2CloudSimple = true;
+
+    // EID 1566 myst strip: in the original capture it sits on top of simple
+    // clouds as noise. Current port draws a solid colored card and the
+    // intended effect is not visible — keep off until the combiner/placement
+    // matches L2.
+    [Header("L2 High Elf myst clouds (off — result not visible yet)")]
+    [SerializeField] private bool _useL2CloudMyst = false;
+
+    L2CelestialDiscs _celestialDiscs;
+    L2HazeRing _hazeRing;
+    L2StarDome _starDome;
+    L2CloudSimple _cloudSimple;
+    L2CloudMyst _cloudMyst;
+
+    void OnEnable()
+    {
+        if (_useL2ColorLut)
+        {
+            L2DayNightLut.EnsureLoaded();
+        }
+
+        if (_useL2Celestial)
+        {
+            L2CelestialLut.EnsureLoaded();
+            EnsureCelestialDiscs();
+        }
+
+        if (_useL2HazeRing)
+        {
+            L2HazeLut.EnsureLoaded();
+            EnsureHazeRing();
+        }
+
+        if (_useL2StarDome)
+        {
+            EnsureStarDome();
+        }
+
+        StripLegacyCombinedClouds();
+
+        if (_useL2CloudSimple)
+        {
+            EnsureCloudSimple();
+        }
+
+        if (_useL2CloudMyst && L2CloudMyst.PortEnabled)
+        {
+            EnsureCloudMyst();
+        }
+        else
+        {
+            DisableCloudMyst();
+        }
+    }
+
     // Update is called once per frame
     void Update()
     {
@@ -64,54 +133,171 @@ public class DayNightCycle : MonoBehaviour
         {
             if (_clock == null)
             {
+                _clock = WorldClock.EnsurePersistent();
+            }
+            if (_clock == null)
+            {
                 _clock = GetComponent<WorldClock>();
+            }
+            if (_clock == null)
+            {
+                _clock = WorldClock.Instance;
             }
             if (_mainLight == null)
             {
                 _mainLight = GetComponent<Light>();
             }
-            float test1 = _clock.Clock.dayRatio;
-            float test2 = _clock.Clock.nightRatio;
-            float mainLightLerpValue = _clock.Clock.dayRatio > 0 ? _clock.Clock.dayRatio : _clock.Clock.nightRatio;
-            float sunRotation = Mathf.Lerp(0 - _horizonOffsetDegree, 180 + _horizonOffsetDegree, mainLightLerpValue);
-            transform.eulerAngles = new Vector3(sunRotation, _mainLightRotY, 0);
-
-            // Update main light rotation with sky material
-            ShareMainLightRotation();
-
-            if (transform.eulerAngles.x < -1 || transform.eulerAngles.x > 181)
+            if (_clock == null || _mainLight == null)
             {
-                _mainLight.intensity = 0;
+                return;
+            }
+            if (_useL2Celestial)
+            {
+                L2CelestialLut.EnsureLoaded();
+                EnsureCelestialDiscs();
+            }
+
+            if (_useL2HazeRing)
+            {
+                L2HazeLut.EnsureLoaded();
+                EnsureHazeRing();
+            }
+
+            if (_useL2StarDome)
+            {
+                EnsureStarDome();
+            }
+
+            if (_useL2CloudSimple)
+            {
+                EnsureCloudSimple();
+            }
+
+            if (_useL2CloudMyst && L2CloudMyst.PortEnabled)
+            {
+                EnsureCloudMyst();
             }
             else
             {
-                // Lerping lights
-                UpdateMainLightIntensity();
+                DisableCloudMyst();
             }
+
+            bool usedL2LightDir = false;
+            if (_useL2Celestial && L2CelestialLut.IsReady)
+            {
+                usedL2LightDir = ApplyL2CelestialLight();
+            }
+
+            if (!usedL2LightDir)
+            {
+                float mainLightLerpValue = _clock.Clock.dayRatio > 0 ? _clock.Clock.dayRatio : _clock.Clock.nightRatio;
+                float sunRotation = Mathf.Lerp(0 - _horizonOffsetDegree, 180 + _horizonOffsetDegree, mainLightLerpValue);
+                transform.eulerAngles = new Vector3(sunRotation, _mainLightRotY, 0);
+
+                if (transform.eulerAngles.x < -1 || transform.eulerAngles.x > 181)
+                {
+                    _mainLight.intensity = 0;
+                }
+                else
+                {
+                    UpdateMainLightIntensity();
+                }
+            }
+
+            ShareMainLightRotation();
 
             UpdateAmbientLightIntensity();
 
-            // Lerping sky color
-            UpdateSkyColor();
+            if (_useL2ColorLut)
+            {
+                L2DayNightLut.EnsureLoaded();
+            }
 
-            // Lerping fog color
-            UpdateFogColor();
+            if (_useL2ColorLut && L2DayNightLut.IsReady)
+            {
+                ApplyL2ColorLut();
+            }
+            else
+            {
+                UpdateSkyColor();
+                UpdateFogColor();
+                UpdateAmbientLightColor();
+                UpdateLightColor();
+            }
 
-            // Lerping cloud opacity
             UpdateCloudsOpacity();
-
-            // Update main light texture
-            UpdateMainLightTexture();
-
-            UpdateAmbientLightColor();
-
-            UpdateLightColor();
+            if (_useL2Celestial)
+            {
+                HideSkyboxSunMoon();
+            }
+            else if (_skyboxMaterial != null)
+            {
+                UpdateMainLightTexture();
+            }
         }
         catch (Exception e)
         {
-
+            Debug.LogException(e);
         }
 
+    }
+
+    private void ApplyL2ColorLut()
+    {
+        var sample = L2DayNightLut.SampleAt(_clock.WorldHours);
+
+        if (_skyboxMaterial != null)
+        {
+            // Flat L2 display sky: G1 fills the dome. Clouds / HDR G3 diluted the
+            // LUT into dirty turquoise in unity_soon.rdc (#83A4BE vs #62ADEA).
+            Color displaySky = L2DayNightLut.ApplyPostSky(sample.sky, _clock.WorldHours);
+            ConfigureFlatSkyDome(displaySky);
+        }
+
+        L2FxSkyDebug.LogLut(_clock != null ? _clock.WorldHours : -1f, sample, _skyboxMaterial);
+
+        _mainLight.color = sample.sun;
+
+        RenderSettings.ambientSkyColor = sample.actorAmbient;
+
+        if (HeightFogGlobal.Instance != null)
+        {
+            HeightFogGlobal.Instance.fogColorStart = sample.sky;
+            HeightFogGlobal.Instance.fogColorEnd = sample.sky * 0.74f;
+            float fogDir = sample.sun.r + sample.sun.g + sample.sun.b > 0.05f
+                ? _dayDirectionalIntensity
+                : _nightDirectionalIntensity;
+            HeightFogGlobal.Instance.directionalIntensity = fogDir;
+        }
+    }
+
+    private void ConfigureFlatSkyDome(Color skyColor)
+    {
+        if (_skyboxMaterial != null && _skyboxMaterial.HasProperty("_GradientColor1"))
+            _skyboxMaterial.SetColor("_GradientColor1", skyColor);
+
+        if (_skyboxMaterial != null && RenderSettings.skybox != _skyboxMaterial)
+            RenderSettings.skybox = _skyboxMaterial;
+
+        ApplyCameraSkyClear(skyColor);
+    }
+
+    private static void ApplyCameraSkyClear(Color skyColor)
+    {
+        // Edit-mode DayNightCycle must not rewrite login/lobby camera clears.
+        if (!Application.isPlaying)
+            return;
+
+        Camera cam = Camera.main;
+        if (cam == null)
+            return;
+
+        // L2 sky is a color fill (GetSkyBoxColor). Skybox-clear only works if
+        // Camera.RenderSkybox actually writes; otherwise previous frames trail.
+        // SolidColor always clears. The MIT Unity skybox shader still sits on
+        // RenderSettings.skybox for GI / a later cubemap.
+        cam.clearFlags = CameraClearFlags.SolidColor;
+        cam.backgroundColor = skyColor;
     }
 
     private void UpdateSkyColor()
@@ -148,7 +334,7 @@ public class DayNightCycle : MonoBehaviour
             skyColor = Color.Lerp(_dayColor, _duskColor, _clock.Clock.duskRatio);
         }
 
-        _skyboxMaterial.SetColor("_GradientColor1", skyColor);
+        ConfigureFlatSkyDome(skyColor);
     }
 
     private void UpdateLightColor()
@@ -292,26 +478,14 @@ public class DayNightCycle : MonoBehaviour
 
     private void UpdateCloudsOpacity()
     {
-        if (_clock.Clock.dawnRatio > 0 && _clock.Clock.dawnRatio < 1)
+        if (_skyboxMaterial == null)
         {
-            _skyboxMaterial.SetFloat("_Clouds_Opacity", Mathf.Lerp(_nightCloudsOpacity, _dayCloudsOpcacity, _clock.Clock.dawnRatio));
-            _skyboxMaterial.SetFloat("_Horizon_Clouds_Opacity", Mathf.Lerp(_nightHorizonCloudsOpacity, _dayHorizonCloudsOpcacity, _clock.Clock.dawnRatio));
+            return;
         }
-        if (_clock.Clock.brightRatio > 0 && _clock.Clock.brightRatio < 1)
-        {
-            _skyboxMaterial.SetFloat("_Clouds_Opacity", _dayCloudsOpcacity);
-            _skyboxMaterial.SetFloat("_Horizon_Clouds_Opacity", _dayHorizonCloudsOpcacity);
-        }
-        if (_clock.Clock.duskRatio > 0 && _clock.Clock.duskRatio < 1)
-        {
-            _skyboxMaterial.SetFloat("_Clouds_Opacity", Mathf.Lerp(_dayCloudsOpcacity, _nightCloudsOpacity, _clock.Clock.duskRatio));
-            _skyboxMaterial.SetFloat("_Horizon_Clouds_Opacity", Mathf.Lerp(_dayHorizonCloudsOpcacity, _nightHorizonCloudsOpacity, _clock.Clock.duskRatio));
-        }
-        if (_clock.Clock.darkRatio > 0 && _clock.Clock.darkRatio < 1)
-        {
-            _skyboxMaterial.SetFloat("_Clouds_Opacity", _nightCloudsOpacity);
-            _skyboxMaterial.SetFloat("_Horizon_Clouds_Opacity", _nightHorizonCloudsOpacity);
-        }
+
+        // MIT skybox cloud planes stay off. L2 sheets are L2CloudSimple / L2CloudMyst.
+        _skyboxMaterial.SetFloat("_Clouds_Opacity", 0f);
+        _skyboxMaterial.SetFloat("_Horizon_Clouds_Opacity", 0f);
     }
 
     private void UpdateMainLightTexture()
@@ -331,8 +505,126 @@ public class DayNightCycle : MonoBehaviour
 
     private void ShareMainLightRotation()
     {
-        _skyboxMaterial.SetVector("_MainLightForward", transform.forward);
-        _skyboxMaterial.SetVector("_MainLightUp", transform.up);
-        _skyboxMaterial.SetVector("_MainLightRight", transform.right);
+        if (_skyboxMaterial == null)
+        {
+            return;
+        }
+
+        if (_skyboxMaterial.HasProperty("_MainLightForward"))
+            _skyboxMaterial.SetVector("_MainLightForward", transform.forward);
+        if (_skyboxMaterial.HasProperty("_MainLightUp"))
+            _skyboxMaterial.SetVector("_MainLightUp", transform.up);
+        if (_skyboxMaterial.HasProperty("_MainLightRight"))
+            _skyboxMaterial.SetVector("_MainLightRight", transform.right);
+    }
+
+    void EnsureCelestialDiscs()
+    {
+        if (_celestialDiscs == null)
+        {
+            _celestialDiscs = GetComponent<L2CelestialDiscs>();
+        }
+
+        if (_celestialDiscs == null)
+        {
+            _celestialDiscs = gameObject.AddComponent<L2CelestialDiscs>();
+        }
+
+        if (!_celestialDiscs.enabled)
+        {
+            _celestialDiscs.enabled = true;
+        }
+    }
+
+    void EnsureHazeRing()
+    {
+        _hazeRing = L2HazeRing.EnsureOn(gameObject);
+    }
+
+    void EnsureStarDome()
+    {
+        _starDome = L2StarDome.EnsureOn(gameObject);
+    }
+
+    void StripLegacyCombinedClouds()
+    {
+        L2CloudLayers.StripLegacyCloudChildren(transform);
+        L2CloudLayers leftover = GetComponent<L2CloudLayers>();
+        if (leftover != null)
+        {
+            if (Application.isPlaying)
+                Destroy(leftover);
+            else
+                DestroyImmediate(leftover);
+        }
+    }
+
+    void EnsureCloudSimple()
+    {
+        _cloudSimple = L2CloudSimple.EnsureOn(gameObject);
+    }
+
+    void EnsureCloudMyst()
+    {
+        _cloudMyst = L2CloudMyst.EnsureOn(gameObject);
+    }
+
+    void DisableCloudMyst()
+    {
+        L2CloudMyst myst = _cloudMyst != null ? _cloudMyst : GetComponent<L2CloudMyst>();
+        if (myst == null)
+            return;
+        if (myst.enabled)
+            myst.enabled = false;
+        _cloudMyst = null;
+    }
+
+    bool ApplyL2CelestialLight()
+    {
+        if (_clock == null || _mainLight == null)
+        {
+            return false;
+        }
+
+        var celestial = L2CelestialLut.SampleAt(_clock.WorldHours);
+        Vector3 dir = celestial.sunDirUnity;
+        if (dir.sqrMagnitude < 1e-6f)
+        {
+            return false;
+        }
+
+        Vector3 forward = -dir.normalized;
+        Vector3 up = Vector3.up;
+        if (Mathf.Abs(Vector3.Dot(forward, up)) > 0.99f)
+        {
+            up = Vector3.forward;
+        }
+
+        transform.rotation = Quaternion.LookRotation(forward, up);
+
+        if (celestial.sunScale > 0.02f && celestial.sunElevDeg > 1f)
+        {
+            UpdateMainLightIntensity();
+        }
+        else
+        {
+            _mainLight.intensity = 0f;
+            _mainLight.color = Color.black;
+        }
+
+        return true;
+    }
+
+    void HideSkyboxSunMoon()
+    {
+        if (_skyboxMaterial == null)
+        {
+            return;
+        }
+
+        if (_skyboxMaterial.HasProperty("_SunMoonSize"))
+        {
+            _skyboxMaterial.SetFloat("_SunMoonSize", 0f);
+        }
     }
 }

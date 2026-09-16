@@ -17,6 +17,9 @@ namespace AtmosphericHeightFog
         [StyledBanner(0.55f, 0.75f, 1f, "Height Fog Global", "", "https://docs.google.com/document/d/1pIzIHIZ-cSh2ykODSZCbAPtScJ4Jpuu7lS3rNEHCLbc/edit#heading=h.kfvqsi6kusw4")]
         public bool styledBanner;
 
+        [Tooltip("L2 uses WhiteRing haze instead. Leave off to stop the black horizon strip before L2Fx.")]
+        public bool renderFogSphere = false;
+
         [StyledCategory("Scene Settings", 5, 10)]
         public bool categoryScene;
 
@@ -156,6 +159,15 @@ namespace AtmosphericHeightFog
 
             gameObject.name = "Height Fog Global";
 
+            if (!renderFogSphere)
+            {
+                var mrOff = gameObject.GetComponent<MeshRenderer>();
+                if (mrOff != null)
+                    mrOff.enabled = false;
+                Shader.SetGlobalFloat("AHF_Enabled", 0);
+                return;
+            }
+
             if (!manualPositionAndScale)
             {
                 gameObject.transform.position = Vector3.zero;
@@ -209,6 +221,15 @@ namespace AtmosphericHeightFog
 
         void Update()
         {
+            if (!renderFogSphere)
+            {
+                var mrOff = gameObject.GetComponent<MeshRenderer>();
+                if (mrOff != null && mrOff.enabled)
+                    mrOff.enabled = false;
+                Shader.SetGlobalFloat("AHF_Enabled", 0);
+                return;
+            }
+
             if (mainCamera == null)
             {
                 Debug.Log("[Atmospheric Height Fog] " + "Make sure you set scene camera tag to Main Camera for the fog to work!");

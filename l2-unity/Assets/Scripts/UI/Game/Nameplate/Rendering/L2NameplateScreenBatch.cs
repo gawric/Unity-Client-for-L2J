@@ -239,6 +239,17 @@ public sealed class L2NameplateScreenBatch : IDisposable
         _drawIndexCount = _indices.Count;
 
         _material.SetBuffer("_GlyphBuffer", _glyphBuffer);
+        if (L2FxCompositorRuntime.PreferGpuQueue)
+        {
+            L2NameplateOverlayQueue.Enqueue(
+                _material,
+                _glyphBuffer,
+                _indexBuffer,
+                _drawIndexCount,
+                cam);
+            return true;
+        }
+
         var rp = new RenderParams(_material)
         {
             worldBounds = _drawBounds,

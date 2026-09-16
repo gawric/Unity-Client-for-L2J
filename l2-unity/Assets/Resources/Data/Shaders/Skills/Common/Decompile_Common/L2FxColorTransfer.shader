@@ -35,7 +35,9 @@ Shader "Hidden/L2/FxColorTransfer"
                 half4 c = SAMPLE_TEXTURE2D_X(_BlitTexture, sampler_LinearClamp, uv);
                 if (_TransferMode > 0.5)
                     c.rgb = (half3)L2Fx_LinearToSrgb(c.rgb);
-                return c;
+                // D3D9 Colour Pass is opaque. Cloud SrcA/InvSrcA needs dst.A = 1
+                // (original pixel history Tex Before A=1.00). Camera color often has A=0.
+                return half4(c.rgb, 1);
             }
             ENDHLSL
         }
@@ -71,6 +73,40 @@ Shader "Hidden/L2/FxColorTransfer"
                 if (_TransferMode > 1.5)
                     c.rgb = (half3)L2Fx_SrgbToLinear(c.rgb);
                 return c;
+            }
+            ENDHLSL
+        }
+
+        // Pass 2: sky scratch → UNORM. No pow.
+        // RGB Boost only on bright sky (day blue). Night LUT ~#283146 stays as drawn.
+        Pass
+        {
+            Name "CopySkyOverUnorm"
+            Blend One OneMinusSrcAlpha
+            ZTest Always
+            ZWrite Off
+            HLSLPROGRAM
+            #pragma vertex Vert
+            #pragma fragment FragCopySky
+            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
+            #include "Packages/com.unity.render-pipelines.core/Runtime/Utilities/Blit.hlsl"
+
+            float _FxGain;
+            float _SkyBoostStart;
+            float _SkyBoostFull;
+
+            half4 FragCopySky(Varyings input) : SV_Target
+            {
+                half4 c = SAMPLE_TEXTURE2D_X(_BlitTexture, sampler_LinearClamp, input.texcoord);
+                if (c.a < 0.01h)
+                    return half4(0, 0, 0, 0);
+
+                half peak = max(c.r, max(c.g, c.b));
+                half start = (half)_SkyBoostStart;
+                half full = max(start + 1e-3h, (half)_SkyBoostFull);
+                half w = smoothstep(start, full, peak);
+                half g = lerp(1.0h, (half)_FxGain, w);
+                return half4(saturate(c.rgb * g), 1);
             }
             ENDHLSL
         }

@@ -14,9 +14,16 @@ public static class L2FxCompositorEditorMenus
     const string UltraLowRendererPath = "Assets/Rendering/URP/URP_Renderer_UltraLow.asset";
     const string TransferShaderPath =
         "Assets/Resources/Data/Shaders/Skills/Common/Decompile_Common/L2FxColorTransfer.shader";
+    const string PostShaderPath =
+        "Assets/Resources/Data/Shaders/Skills/Common/Decompile_Common/L2FxPostBloomContrast.shader";
 
-    // Everything except SkillEffect (layer 18).
-    const uint TransparentMaskWithoutSkillEffect = 0xFFFFFFFFu & ~(1u << L2FxCompositorLayers.SkillEffect);
+    // Everything except SkillEffect (18), L2Sky (20), L2Haze (21), L2Clouds (22).
+    const uint TransparentMaskWithoutCompositorLayers =
+        0xFFFFFFFFu
+        & ~(1u << L2FxCompositorLayers.SkillEffect)
+        & ~(1u << L2FxCompositorLayers.L2Sky)
+        & ~(1u << L2FxCompositorLayers.L2Haze)
+        & ~(1u << L2FxCompositorLayers.L2Clouds);
 
     [MenuItem("L2/Effects/Compositor/Repair Now (Mask + Wire Feature)")]
     public static void RepairNow()
@@ -46,7 +53,7 @@ public static class L2FxCompositorEditorMenus
                 "L2Fx Compositor Enable",
                 "This will:\n" +
                 "• Set layer SkillEffect on all effect prefabs under Assets/Resources/Data/Effects\n" +
-                "• Exclude SkillEffect from URP default Transparent mask\n" +
+                "• Exclude SkillEffect, L2Sky, L2Haze and L2Clouds from URP default Transparent mask\n" +
                 "• Add/activate L2FxCompositorRendererFeature on URP_Renderer\n\n" +
                 "It does NOT edit the open scene asset.\nContinue?",
                 "Enable",
@@ -109,7 +116,7 @@ public static class L2FxCompositorEditorMenus
     public static void ExcludeSkillEffectFromTransparent()
     {
         RepairTransparentMasks();
-        Debug.Log("[L2FxCompositor] Transparent masks set to Everything except SkillEffect.");
+        Debug.Log("[L2FxCompositor] Transparent masks set to Everything except SkillEffect, L2Sky, L2Haze and L2Clouds.");
     }
 
     [MenuItem("L2/Effects/Compositor/Fix Missing RendererFeatures Warning")]
@@ -124,19 +131,19 @@ public static class L2FxCompositorEditorMenus
 
     static void RepairTransparentMasks()
     {
-        SetTransparentMask(RendererPath, TransparentMaskWithoutSkillEffect);
+        SetTransparentMask(RendererPath, TransparentMaskWithoutCompositorLayers);
         string ultraFull = Path.GetFullPath(Path.Combine(Application.dataPath, "..", UltraLowRendererPath));
         if (File.Exists(ultraFull))
-            SetTransparentMask(UltraLowRendererPath, TransparentMaskWithoutSkillEffect);
+            SetTransparentMask(UltraLowRendererPath, TransparentMaskWithoutCompositorLayers);
         AssetDatabase.SaveAssets();
     }
 
     static bool VerifyTransparentMasks()
     {
-        bool ok = VerifyTransparentMask(RendererPath, TransparentMaskWithoutSkillEffect);
+        bool ok = VerifyTransparentMask(RendererPath, TransparentMaskWithoutCompositorLayers);
         string ultraFull = Path.GetFullPath(Path.Combine(Application.dataPath, "..", UltraLowRendererPath));
         if (File.Exists(ultraFull))
-            ok &= VerifyTransparentMask(UltraLowRendererPath, TransparentMaskWithoutSkillEffect);
+            ok &= VerifyTransparentMask(UltraLowRendererPath, TransparentMaskWithoutCompositorLayers);
         return ok;
     }
 
@@ -209,25 +216,24 @@ public static class L2FxCompositorEditorMenus
                 enableD3D9Compositor = true,
                 renderPassEvent = RenderPassEvent.BeforeRenderingPostProcessing,
                 effectLayerMask = 1 << L2FxCompositorLayers.SkillEffect,
+                celestialLayerMask = 1 << L2FxCompositorLayers.L2Sky,
+                hazeLayerMask = 1 << L2FxCompositorLayers.L2Haze,
+                cloudLayerMask = 1 << L2FxCompositorLayers.L2Clouds,
+                includeSkyInBoost = false,
+                skyBoostStart = 0.30f,
+                skyBoostFull = 0.50f,
                 encodeLinearToSrgb = true,
                 decodeSrgbToLinear = true,
                 bindCameraDepth = true,
-                gameCameraOnly = true
+                gameCameraOnly = true,
+                enableSkillPost = true
             };
-
-            Shader transfer = AssetDatabase.LoadAssetAtPath<Shader>(TransferShaderPath);
-            if (transfer == null)
-                transfer = Shader.Find("Hidden/L2/FxColorTransfer");
-
-            SerializedObject featureSo = new SerializedObject(feature);
-            SerializedProperty shaderProp = featureSo.FindProperty("transferShader");
-            if (shaderProp != null)
-                shaderProp.objectReferenceValue = transfer;
-            featureSo.ApplyModifiedPropertiesWithoutUndo();
 
             AssetDatabase.AddObjectToAsset(feature, renderer);
             created = true;
         }
+
+        BindFeatureShaders(feature);
 
         // Always ensure the feature is listed (orphaned sub-assets were the prior bug).
         LinkFeatureInRendererList(renderer, feature);
@@ -243,6 +249,25 @@ public static class L2FxCompositorEditorMenus
         Debug.Log(
             "[L2FxCompositor] Feature " + (created ? "created+" : "") +
             "wired, active=" + active + ".");
+    }
+
+    static void BindFeatureShaders(L2FxCompositorRendererFeature feature)
+    {
+        Shader transfer = AssetDatabase.LoadAssetAtPath<Shader>(TransferShaderPath);
+        if (transfer == null)
+            transfer = Shader.Find("Hidden/L2/FxColorTransfer");
+        Shader post = AssetDatabase.LoadAssetAtPath<Shader>(PostShaderPath);
+        if (post == null)
+            post = Shader.Find("Hidden/L2/FxPostBloomContrast");
+
+        SerializedObject featureSo = new SerializedObject(feature);
+        SerializedProperty shaderProp = featureSo.FindProperty("transferShader");
+        if (shaderProp != null)
+            shaderProp.objectReferenceValue = transfer;
+        SerializedProperty postProp = featureSo.FindProperty("postShader");
+        if (postProp != null)
+            postProp.objectReferenceValue = post;
+        featureSo.ApplyModifiedPropertiesWithoutUndo();
     }
 
     static void LinkFeatureInRendererList(

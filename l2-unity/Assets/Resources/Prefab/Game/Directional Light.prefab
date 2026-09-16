@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 5761803617169700733}
   - component: {fileID: 4278919830997632640}
   - component: {fileID: 6026827821703622600}
+  - component: {fileID: 7345019283746501928}
   m_Layer: 0
   m_Name: Directional Light
   m_TagString: Untagged
@@ -157,14 +158,16 @@ MonoBehaviour:
   _ambientLightNightColor: {r: 0.16470589, g: 0.16470589, b: 0.15686275, a: 1}
   _ambientLightduskColor: {r: 0.32156864, g: 0.25490198, b: 0.16078432, a: 1}
   _ambientLightDawnColor: {r: 0.3764706, g: 0.3764706, b: 0.30980393, a: 1}
-  _dayCloudsOpcacity: 2.54
-  _nightCloudsOpacity: 0.12
-  _dayHorizonCloudsOpcacity: 1
-  _nightHorizonCloudsOpacity: 0.05
+  _dayCloudsOpcacity: 0
+  _nightCloudsOpacity: 0
+  _dayHorizonCloudsOpcacity: 0
+  _nightHorizonCloudsOpacity: 0
   _ambientMinIntensity: 0.2
   _ambientMaxIntensity: 0.6
   _mainLightMinIntensity: 0.4
   _mainLightMaxIntensity: 1
+  _useL2ColorLut: 1
+  _useL2Celestial: 1
 --- !u!114 &6026827821703622600
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -177,10 +180,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 474109ebd6107a34da7c11918a8b42a2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _dayDurationMinutes: 2
-  _timeHour: 17:45:00
-  _timeElapsed: 88.75
-  _startClock: 0
+  _dayDurationMinutes: 2.5
+  _timeHour: 00:00:00
+  _timeElapsed: 0
+  _startClock: 1
   _worldTimer:
     dayStartTime: 0.25
     dayEndTime: 0.75
@@ -189,10 +192,26 @@ MonoBehaviour:
     sunsetStartTime: 0.85
     sunsetEndTime: 0.99
   _clock:
-    totalRatio: 0.7395833
-    dayRatio: 0.9791667
+    totalRatio: 0
+    dayRatio: 0
     nightRatio: 0
-    dawnRatio: 1
-    brightRatio: 1
-    duskRatio: 0.922619
-    darkRatio: 1
+    dawnRatio: 0
+    brightRatio: 0
+    duskRatio: 0
+    darkRatio: 0
+--- !u!114 &7345019283746501928
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7616108795757726014}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b7d1e2f3a4c5467089ab1c2d3e4f5061, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _sunTexture: {fileID: 2800000, guid: e2b3c4d5f60718293a4b5c6d7e8f901a, type: 3}
+  _moonTexture: {fileID: 2800000, guid: d1a2b3c4e5f60718293a4b5c6d7e8f90, type: 3}
+  _followCamera: 1
+  _forceDistanceMeters: 0

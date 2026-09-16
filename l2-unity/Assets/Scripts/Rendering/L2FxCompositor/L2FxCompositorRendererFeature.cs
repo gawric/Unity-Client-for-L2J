@@ -12,13 +12,19 @@ public sealed class L2FxCompositorRendererFeature : ScriptableRendererFeature
     [SerializeField]
     Shader transferShader;
 
+    [SerializeField]
+    Shader postShader;
+
     Material _transferMaterial;
+    Material _postMaterial;
     L2FxCompositorRenderPass _pass;
 
     public override void Create()
     {
         if (transferShader == null)
             transferShader = Shader.Find("Hidden/L2/FxColorTransfer");
+        if (postShader == null)
+            postShader = Shader.Find("Hidden/L2/FxPostBloomContrast");
 
         if (transferShader != null)
         {
@@ -26,8 +32,14 @@ public sealed class L2FxCompositorRendererFeature : ScriptableRendererFeature
                 _transferMaterial = CoreUtils.CreateEngineMaterial(transferShader);
         }
 
+        if (postShader != null)
+        {
+            if (_postMaterial == null || _postMaterial.shader != postShader)
+                _postMaterial = CoreUtils.CreateEngineMaterial(postShader);
+        }
+
         _pass?.Dispose();
-        _pass = new L2FxCompositorRenderPass(settings, _transferMaterial)
+        _pass = new L2FxCompositorRenderPass(settings, _transferMaterial, _postMaterial)
         {
             renderPassEvent = settings != null
                 ? settings.renderPassEvent
@@ -66,7 +78,10 @@ public sealed class L2FxCompositorRendererFeature : ScriptableRendererFeature
         _pass = null;
         CoreUtils.Destroy(_transferMaterial);
         _transferMaterial = null;
+        CoreUtils.Destroy(_postMaterial);
+        _postMaterial = null;
         L2FxGpuDrawQueue.Clear();
+        L2NameplateOverlayQueue.Clear();
         base.Dispose(disposing);
     }
 }

@@ -112,6 +112,7 @@ public class SceneLoader : MonoBehaviour
 
         FinishLoadSWMap();
         UnloadLobbyScenes();
+        WorldClock.EnsurePersistent();
         _worldStreaming = true;
     }
 
