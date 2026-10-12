@@ -2,6 +2,13 @@ using UnityEngine;
 
 public sealed class EntityActionAttack : IEntityActionProcess
 {
+    readonly L2PawnYaw _pawnYaw;
+
+    public EntityActionAttack(L2PawnYaw pawnYaw)
+    {
+        _pawnYaw = pawnYaw;
+    }
+
     public void Enter(Entity entity, object payload)
     {
         if (entity == null || entity.IsDead())
@@ -35,7 +42,7 @@ public sealed class EntityActionAttack : IEntityActionProcess
             entity.ActionSlot.Target = target;
             CharInfoMoveBudgetLog.Compare(entity, "ATK", target, attack.AttackerPos, true);
             L2PawnRange.TrySnapUserToPacket(entity, attack.AttackerPos, "Attack pos");
-            EntityActionVisual.FaceTowards(entity, target.transform.position);
+            _pawnYaw.RequestLook(entity.transform, target.transform.position, L2PawnYaw.RotationRateYaw);
             if (entity is MonsterEntity && IncomingPacketActions.Moves != null)
                 IncomingPacketActions.Moves.AddRotate(entity.Identity.Id, new RotateData(target, entity));
             EntityActionCombatLog.Watch(entity);
@@ -60,6 +67,7 @@ public sealed class EntityActionAttack : IEntityActionProcess
                     " pktAtk=" + EntityActionCombatLog.Vec(attack.AttackerPos) +
                     " pktAtkToPawn=" + VectorUtils.Distance2D(attack.AttackerPos, target.transform.position).ToString("F2") +
                     " pktAtkToNow=" + VectorUtils.Distance2D(attack.AttackerPos, entity.transform.position).ToString("F2"));
+            entity.ActionSlot.AttackSwingId++;
             EntityActionVisual.PlayMeleeAttack(entity);
             if (HitManager.Instance != null)
                 HitManager.Instance.ArmRemoteMeleeHit(entity, target, attack);

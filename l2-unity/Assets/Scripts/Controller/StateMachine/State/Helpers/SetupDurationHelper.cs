@@ -12,6 +12,29 @@ public class SetupDurationHelper
         2278, 2279, 2280, 2281, 2282, 2283, 2284, 2285
     };
 
+    public static int CastStyleOf(MagicSkillUseDto useSkill)
+    {
+        if (useSkill == null || useSkill.SkillGrp == null)
+        {
+            return 1;
+        }
+
+        return useSkill.SkillGrp.CastStyle;
+    }
+
+    /// <summary>
+    /// Mix01–Mix09 stretch the first clip. Letters A–I and MS01 stretch the middle one.
+    /// </summary>
+    public static bool MixComboOf(MagicSkillUseDto useSkill)
+    {
+        if (useSkill == null || useSkill.SkillGrp == null || string.IsNullOrEmpty(useSkill.SkillGrp.Animation))
+        {
+            return false;
+        }
+
+        return useSkill.SkillGrp.Animation.IndexOf("Mix", StringComparison.OrdinalIgnoreCase) >= 0;
+    }
+
     public static bool IsLongCastSkill(MagicSkillUseDto useSkill)
     {
         return useSkill != null && useSkill.SkillId == ScrollOfEscapeSkillId;
@@ -84,7 +107,7 @@ public class SetupDurationHelper
             string[] orderedSelfCycle = BuildOrderedCycleForOverrideTiming(selfCombo.GetAnimCycle());
             float[] durations_self = IncomingPacketActions.Animations.GetOverrideClipsDurations(objectId, orderedSelfCycle);
             float shotEventTime_self = ResolveShotEventTime(objectId, orderedSelfCycle);
-            entity.SetupTotalCastDuration(useSkill.HitTime, 0f, durations_self, shotEventTime_self, useSkill.TargetId);
+            entity.SetupTotalCastDuration(useSkill.HitTime, 0f, durations_self, shotEventTime_self, useSkill.TargetId, CastStyleOf(useSkill), MixComboOf(useSkill));
         }
     }
 

@@ -245,6 +245,63 @@ public static class EntitySpawnShared
         npc.Identity.TitleColor = npcName.TitleColor;
         npc.Appearance = appearance;
         npc.SetDead(false);
+        SeedNpcHpFromGrp(npc, npcgrp);
+    }
+
+    public static void ResetNpcRuntimeForSpawn(Entity npc)
+    {
+        if (npc == null)
+            return;
+
+        npc.Running = npc.Identity != null && npc.Identity.IsRunning;
+        npc.InCombat = false;
+        npc.IsSoulshotCharged = false;
+        npc.TargetId = 0;
+        npc.Target = null;
+        npc.LastTarget = null;
+        npc.AttackTarget = null;
+        npc.ActionSlot.Clear();
+    }
+
+    public static void InitializeNpcAnimation(NetworkAnimationController controller)
+    {
+        if (controller == null)
+            return;
+
+        Animator animator = controller.GetAnimator();
+        if (animator != null)
+        {
+            animator.enabled = true;
+            animator.speed = 1f;
+        }
+
+        controller.Initialize();
+        controller.SetAnimatorSpeed(1f);
+        controller.SetPAtkSpeed(1f);
+
+        animator = controller.GetAnimator();
+        if (animator == null)
+            return;
+
+        int waitHash = Animator.StringToHash("wait");
+        if (animator.HasState(0, waitHash))
+        {
+            animator.Play(waitHash, 0, 0f);
+            animator.Update(0f);
+        }
+    }
+
+    static void SeedNpcHpFromGrp(Entity npc, Npcgrp npcgrp)
+    {
+        if (npc == null || npcgrp == null || npc.Stats == null || npc.Status == null)
+            return;
+
+        int grpHp = Mathf.Max(1, Mathf.RoundToInt(npcgrp.MaxHp));
+        if (grpHp <= 1)
+            return;
+
+        npc.Stats.MaxHp = grpHp;
+        npc.Status.SetHp(grpHp);
     }
 
     public static void BindGearAndAnimation(Entity entity, GameObject go, IAnimationController controller)

@@ -17,31 +17,45 @@ public class MovementData
     private bool _spdLastRunning;
     private string _spdLastGait;
     private bool _spdHasGait;
+    private readonly float _locomotionCheckAt;
+    private readonly Vector3 _locomotionCheckStart;
+    private bool _locomotionChecked;
 
-    // Same walk→run as local PlayerController: PeriodicTimer 0.1s, countTrigger <= 3.
-    private PeriodicTimer _gaitTimer;
-    private int _countTrigger;
-    private string _acisAnim;
+    const float LocomotionCheckDelay = 0.4f;
+    const float LocomotionCheckRadius = 50f;
 
-    public MovementData(Entity mEntity , MovementTarget movementTarget)
+    // Interlude MoveTimer. A new click while still moving keeps this value.
+    private float _moveTimer;
+    private string _gaitAnim;
+
+    readonly L2PawnYaw _pawnYaw;
+
+    public MovementData(Entity mEntity , MovementTarget movementTarget, L2PawnYaw pawnYaw)
     {
         _entity = mEntity;
         _movementTarget = movementTarget;
+        _pawnYaw = pawnYaw;
         _isMove = true;
-        if (mEntity is UserEntity)
-        {
-            _gaitTimer = new PeriodicTimer();
-            _gaitTimer.UpdateStartTime(Time.time);
-        }
+        _locomotionCheckAt = Time.time + LocomotionCheckDelay;
+        _locomotionCheckStart = mEntity != null ? mEntity.transform.position : Vector3.zero;
     }
 
-    public void InheritAcisClock(MovementData prev)
+    public bool IsOwnerDead()
     {
-        if (prev == null || _gaitTimer == null || prev._gaitTimer == null)
+        return _entity != null && _entity.IsDead();
+    }
+
+    public static bool IsPlayerPawn(Entity entity)
+    {
+        return entity is UserEntity || entity is PlayerEntity;
+    }
+
+    public void InheritMoveTimer(MovementData prev)
+    {
+        if (prev == null || !IsPlayerPawn(_entity))
             return;
-        _gaitTimer.CopyFrom(prev._gaitTimer);
-        _countTrigger = prev._countTrigger;
-        _acisAnim = prev._acisAnim;
+        _moveTimer = prev._moveTimer;
+        _gaitAnim = prev._gaitAnim;
     }
 
     public Entity GetEntity()
@@ -94,41 +108,86 @@ public class MovementData
         _isMove = isMove;
     }
 
+    public bool ReconcileStoppedAnimation()
+    {
+        if (_entity == null || _entity.IsDead() || _entity.ActionSlot == null)
+            return true;
+
+        EntityActionKind action = _entity.ActionSlot.Action;
+        if (action == EntityActionKind.Attack ||
+            action == EntityActionKind.Skill ||
+            action == EntityActionKind.Stop)
+            return false;
+
+        NetworkAnimationController controller = _entity.GetAnimatorController();
+        Animator animator = controller != null ? controller.GetAnimator() : null;
+        if (animator == null)
+            return true;
+
+        AnimatorStateInfo state = animator.GetCurrentAnimatorStateInfo(0);
+        bool staleLocomotion = state.IsName("walk") || state.IsName("run");
+        if (!staleLocomotion)
+            return true;
+
+        Debug.Log(
+            "[MOVE_ANIM_RECONCILE] nick=" + EntityActionCombatLog.NameOf(_entity) +
+            " objectId=" + (_entity.Identity != null ? _entity.Identity.Id : 0) +
+            " action=" + action +
+            " state=" + (state.IsName("run") ? "run" : "walk") +
+            " moving=false -> idle");
+
+        if (action == EntityActionKind.Move && EntityActionMachine.Instance != null)
+            EntityActionMachine.Instance.Set(_entity, EntityActionKind.Idle, null);
+        else
+            EntityActionVisual.PlayStandWait(_entity);
+        return true;
+    }
+
     public float GetSpeed()
     {
         if (_entity.Stats == null)
             return 0f;
-        if (!(_entity is UserEntity) || !_entity.Running)
-            return _entity.Running ? _entity.Stats.UnitySpeedRun : _entity.Stats.UnitySpeedWalking;
-        return AcisPlayerMoveSpeed();
+        bool npc = !IsPlayerPawn(_entity);
+        return L2PlayerMoveGait.Speed(
+            _moveTimer,
+            _entity.Running,
+            npc,
+            _entity.Stats.UnitySpeedWalking,
+            _entity.Stats.UnitySpeedRun);
     }
 
-    float AcisPlayerMoveSpeed()
+    public bool IsWalkGait()
     {
-        float walk = _entity.Stats.UnitySpeedWalking;
-        float run = _entity.Stats.UnitySpeedRun;
-        return L2PlayerMoveGait.Speed(_countTrigger, true, walk, run);
+        return L2PlayerMoveGait.IsWalkStart(_moveTimer, _entity.Running, !IsPlayerPawn(_entity));
     }
 
-    public bool AcisWalkGait()
+    public void AdvanceMoveTimer()
     {
-        if (!(_entity is UserEntity) || !_entity.Running)
-            return !_entity.Running;
-        return L2PlayerMoveGait.IsWalkStart(_countTrigger, true);
+        if (IsPlayerPawn(_entity))
+            _moveTimer += Time.deltaTime;
+    }
+
+    public float GetMoveTimer()
+    {
+        return _moveTimer;
     }
 
     public void SyncUserGait()
     {
-        if (!(_entity is UserEntity))
+        if (!IsPlayerPawn(_entity))
             return;
-        if (_gaitTimer != null)
-            _countTrigger = _gaitTimer.GetTriggerCount(Time.time, _countTrigger);
-        bool walking = AcisWalkGait();
+        bool walking = IsWalkGait();
         string anim = walking ? "walk" : "run";
-        if (_acisAnim == anim)
+        if (_gaitAnim == anim)
             return;
-        _acisAnim = anim;
+        _gaitAnim = anim;
         EntityActionVisual.StartMove(_entity, walking);
+    }
+
+    public void ReplayUserGait()
+    {
+        _gaitAnim = null;
+        SyncUserGait();
     }
 
     public void SpeedAccum2d(float dist2d)
@@ -182,11 +241,71 @@ public class MovementData
         Vector3 lookDir = new Vector3(direction.x, 0f, direction.z);
         direction = ApplyGravity(direction);
         CharacterMove(_entity, direction, speed);
+        CheckLocomotionAnimation();
         if (lookDir.sqrMagnitude > 0.0001f)
         {
-            Quaternion lookRotation = Quaternion.LookRotation(lookDir);
-            _entity.transform.rotation = Quaternion.Slerp(_entity.transform.rotation, lookRotation, Time.deltaTime * 5.0f);
+            int id = _entity.Identity != null ? _entity.Identity.Id : 0;
+            if (id == 0 || CombatFacingService.Instance == null || !CombatFacingService.Instance.HasFollow(id))
+                if (_pawnYaw != null)
+                    _pawnYaw.RequestLook(_entity.transform, _entity.transform.position + lookDir, L2PawnYaw.RotationRateYaw);
         }
+    }
+
+    private void CheckLocomotionAnimation()
+    {
+        if (_locomotionChecked || Time.time < _locomotionCheckAt)
+            return;
+        if (!(_entity is MonsterEntity) && !(_entity is NpcEntity))
+        {
+            _locomotionChecked = true;
+            return;
+        }
+
+        PlayerEntity player = PlayerEntity.Instance;
+        if (player == null)
+            return;
+
+        float distanceToPlayer = VectorUtils.Distance2D(
+            _entity.transform.position,
+            player.transform.position);
+        if (distanceToPlayer > LocomotionCheckRadius)
+        {
+            _locomotionChecked = true;
+            return;
+        }
+
+        _locomotionChecked = true;
+        string expected = _entity.Running ? "run" : "walk";
+        NetworkAnimationController controller = _entity.GetAnimatorController();
+        Animator animator = controller != null ? controller.GetAnimator() : null;
+        AnimatorStateInfo current = animator != null
+            ? animator.GetCurrentAnimatorStateInfo(0)
+            : default;
+        AnimatorStateInfo next = animator != null && animator.IsInTransition(0)
+            ? animator.GetNextAnimatorStateInfo(0)
+            : default;
+        bool playingExpected = animator != null &&
+            (current.IsName(expected) ||
+             animator.IsInTransition(0) && next.IsName(expected));
+        float moved = VectorUtils.Distance2D(_locomotionCheckStart, _entity.transform.position);
+
+        Debug.Log(
+            "MONSTER_WALK result=" + (playingExpected ? "OK" : "MISS") +
+            " nick=" + EntityActionCombatLog.NameOf(_entity) +
+            " objectId=" + (_entity.Identity != null ? _entity.Identity.Id : 0) +
+            " expected=" + expected +
+            " actual=" + EntityActionSkill.AnimatorStateName(animator) +
+            " action=" + (_entity.ActionSlot != null ? _entity.ActionSlot.Action.ToString() : "-") +
+            " moving=" + _isMove +
+            " running=" + _entity.Running +
+            " moved=" + moved.ToString("F3") +
+            " distance=" + distanceToPlayer.ToString("F1") +
+            " animator=" + (animator != null) +
+            " enabled=" + (animator != null && animator.enabled) +
+            " speed=" + (animator != null ? animator.speed.ToString("F3") : "-") +
+            " walkBool=" + (animator != null ? animator.GetBool("walk").ToString() : "-") +
+            " runBool=" + (animator != null ? animator.GetBool("run").ToString() : "-") +
+            " hasState=" + (animator != null && animator.HasState(0, Animator.StringToHash(expected))));
     }
 
     private void CharacterMove(Entity entity , Vector3 direction , float speed)
@@ -266,6 +385,16 @@ public class MovementData
             " " + EntityActionCombatLog.ClassifyDest(dest, pawn) +
             EntityActionCombatLog.ChaseDump(_entity, pawn));
         CharInfoSpeedLog.LogTripEnd(this, "Move.Finish");
+        float finishD = VectorUtils.Distance2D(_entity.transform.position, dest);
+        if (finishD >= 0.4f)
+        {
+            Vector3 nowL2 = VectorUtils.ConvertPosUnityToL2j(_entity.transform.position);
+            Vector3 destL2 = VectorUtils.ConvertPosUnityToL2j(dest);
+            Debug.Log("[MOVE_SNAP] FINISH nick=" + EntityActionCombatLog.NameOf(_entity) +
+                " snapM=" + finishD.ToString("F2") +
+                " nowL2=" + nowL2.x.ToString("F0") + "," + nowL2.y.ToString("F0") + "," + nowL2.z.ToString("F0") +
+                " destL2=" + destL2.x.ToString("F0") + "," + destL2.y.ToString("F0") + "," + destL2.z.ToString("F0"));
+        }
         if (_entity is UserEntity)
             EntitySpawnShared.ApplyGroundedTransform(_entity.gameObject, dest, _entity.transform.rotation);
         else

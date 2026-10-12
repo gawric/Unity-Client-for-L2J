@@ -14,6 +14,10 @@ Shader "L2/World/ActorModulate2X"
         [Enum(UnityEngine.Rendering.CullMode)] _Cull ("Cull", Float) = 0
         [Toggle(_ALPHATEST_ON)] _AlphaClip ("Alpha Clip", Float) = 0
         _Cutoff ("Alpha Cutoff", Range(0, 1)) = 0.498039216
+        _ActorAlpha ("Actor Alpha", Range(0, 1)) = 1
+        [HideInInspector] _SrcBlend ("Src Blend", Float) = 1
+        [HideInInspector] _DstBlend ("Dst Blend", Float) = 0
+        [HideInInspector] _ZWrite ("ZWrite", Float) = 1
         [HideInInspector] _MainTex ("BaseMap", 2D) = "white" {}
     }
 
@@ -35,6 +39,7 @@ Shader "L2/World/ActorModulate2X"
         float4 _BaseColor;
         float _Cull;
         float _Cutoff;
+        float _ActorAlpha;
     CBUFFER_END
 
     float2 L2_ActorUv(float2 uv)
@@ -78,9 +83,9 @@ Shader "L2/World/ActorModulate2X"
         }
 
         Cull [_Cull]
-        ZWrite On
+        ZWrite [_ZWrite]
         ZTest LEqual
-        Blend One Zero
+        Blend [_SrcBlend] [_DstBlend]
 
         Pass
         {
@@ -131,7 +136,7 @@ Shader "L2/World/ActorModulate2X"
                 float alpha = tex.a * _BaseColor.a;
                 L2_ActorClip(alpha);
                 float3 rgb = L2_LinearFog(L2_Modulate2X(tex.rgb * _BaseColor.rgb, IN.color0), IN.viewAbsZ);
-                return half4(rgb, 1);
+                return half4(rgb, saturate(alpha * _ActorAlpha));
             }
             ENDHLSL
         }

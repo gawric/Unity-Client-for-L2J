@@ -34,9 +34,9 @@ public sealed class MonsterSpawner
             UnityEngine.Object.Destroy(npcGo);
             return null;
         }
-        npc.Running = npc.Identity != null && npc.Identity.IsRunning;
         npc.NpcData = new NpcData(request.NpcName, request.Npcgrp);
         EntitySpawnShared.ApplyNpcIdentity(npc, request);
+        EntitySpawnShared.ResetNpcRuntimeForSpawn(npc);
 
         npcGo.transform.name = request.Prefab != null
             ? request.Prefab.name + "_" + identity.Name
@@ -75,7 +75,7 @@ public sealed class MonsterSpawner
             Debug.LogError("MonsterSpawner: NetworkAnimationController missing on " + npcGo.name);
             return;
         }
-        animationController.Initialize();
+        EntitySpawnShared.InitializeNpcAnimation(animationController);
         EntitySpawnShared.BindGearAndAnimation(npc, npcGo, animationController);
         EntitySpawnShared.RegisterAnimation(world, npc.Identity.Id, animationController, npc);
         EntitySpawnShared.ApplyNpcMoveSpeeds(npc, true);

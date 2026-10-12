@@ -50,77 +50,42 @@ public class NpcEntity : NetworkEntity
 
     public void OnStopL2jMoving()
     {
-        if (!_networkAnimationReceive.GetBool(_wait))
-        {
-           // _networkAnimationReceive.SetAnimationProperty((int)NpcAnimationEvent.Wait, 1f);
-           // _networkAnimationReceive.SetBool(_wait, true);
-            _networkAnimationReceive.SetBoolDisabledOther(_wait, true, allAnim);
-        }
-
-        // Debug.Log("STOPPPPPPPPPPPP L2j MOOOOOOOOVVVVVVVVVVIIIING");
+        PlayNpcLocomotion(_wait);
     }
 
     public void StartRunAnim(bool run)
     {
-        if (run)
-        {
-            //Debug.Log("GETTTTTTTTTTTTT ANIIIIIIII MATION STATUS " + _networkAnimationReceive.name);
-            //_networkAnimationReceive.Test();
-            //_networkAnimationReceive.SetAnimationProperty((int)MonsterAnimationEvent.Run, 1f);
-            // _networkAnimationReceive.SetBool(_run, true);
-            _networkAnimationReceive.SetBoolDisabledOther(_run, true, allAnim);
-
-        }
-        else
-        {
-            if (!_networkAnimationReceive.GetBool(_walk))
-            {
-                //_networkAnimationReceive.SetBool(_walk, true);
-                _networkAnimationReceive.SetBoolDisabledOther(_walk, true, allAnim);
-            }
-        }
+        PlayNpcLocomotion(run ? _run : _walk);
     }
 
     public void OnStartL2jMoving(bool walking)
     {
-        // base.OnStartMoving(walking);
-        float speedAnim = walking ? Stats.ScaledAnimWalkSpeed : Stats.ScaledAnimRunSpeed;
-        if (walking)
-        {
-
-        }
-        else
-        {
-            if (!_networkAnimationReceive.GetBool(_run))
-            {
-                //_networkAnimationReceive.SetAnimationProperty(walking ? (int)MonsterAnimationEvent.Walk : (int)MonsterAnimationEvent.Run, 1f);
-
-                string _runS = walking ? _walk : _run;
-                _networkAnimationReceive.SetBoolDisabledOther(_runS, true, allAnim);
-
-            }
-
-        }
-
-        StartWalkAnim(walking);
+        PlayNpcLocomotion(walking ? _walk : _run);
     }
 
     private void StartWalkAnim(bool walking)
     {
-        if (walking)
-        {
-            _networkAnimationReceive.SetBoolDisabledOther(_walk, true, allAnim);
-            //_networkAnimationReceive.SetBool(_walk, true);
-        }
-        else
-        {
-            if (!_networkAnimationReceive.GetBool(_run))
-            {
-                _networkAnimationReceive.SetBoolDisabledOther(_run, true, allAnim);
-                //_networkAnimationReceive.SetBool(_run, true);
-            }
+        PlayNpcLocomotion(walking ? _walk : _run);
+    }
 
+    void PlayNpcLocomotion(string state)
+    {
+        if (_networkAnimationReceive == null || string.IsNullOrEmpty(state))
+            return;
+
+        Animator animator = _networkAnimationReceive.GetAnimator();
+        int hash = Animator.StringToHash(state);
+        if (animator != null && animator.HasState(0, hash))
+        {
+            // Npc_Basic still has bool-driven wait/walk/run transitions.
+            // Clear them before direct CrossFade so a stale true bool cannot
+            // pull the Animator back to the previous locomotion state.
+            _networkAnimationReceive.SetBoolDisabledOther(state, false, allAnim);
+            PlayerLocomotionCrossFade.TryPlay(_networkAnimationReceive, state);
+            return;
         }
+
+        _networkAnimationReceive.SetBoolDisabledOther(state, true, allAnim);
     }
 
 

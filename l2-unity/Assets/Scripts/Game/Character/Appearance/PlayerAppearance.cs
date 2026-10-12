@@ -15,6 +15,8 @@ public class PlayerAppearance : Appearance
     public int Legs;
     public int Gloves;
     public int Feet;
+    public int WeaponEnchant;
+    public bool PaperdollReady;
     public PaperDollSelection PaperDoll { get; } = new();
 
     public byte FaceByte { get { return Convert.ToByte(Face); } }

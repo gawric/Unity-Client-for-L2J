@@ -15,6 +15,10 @@ public class EffectDatabase : ScriptableObject
     {
         public int id;
         public BaseEffect prefab;
+        [Tooltip("Use weapon_shot.int. The prefab is taken from the weapon section in StreamingAssets/Data/Meta/weapon_shot.int.")]
+        public bool useWeaponShot;
+        [Tooltip("Spiritshot. The same weapon section is used, but SpiritPrefab is taken instead of Prefab.")]
+        public bool spiritShot;
         public string comment = "";
         public EffectSettings settings;
 

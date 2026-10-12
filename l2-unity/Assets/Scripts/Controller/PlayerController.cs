@@ -47,8 +47,7 @@ public class PlayerController : MonoBehaviour
     private bool _isFinish = true;
     private bool _turnsAround = true;
 
-    private int _countTrigger = 0;
-    private int _ppCountTrigger = 0;
+    private float _moveTimer = 0f;
     private float _elapsedTime = 0;
 
     
@@ -64,8 +63,6 @@ public class PlayerController : MonoBehaviour
 
     private PlayerPositionSender _pp_sender;
     private ICalcSpeed _calcSpeed;
-    private PeriodicTimer _timer;
-    private PeriodicTimer _pp_timer;
     public void Initialize()
     {
         if (_instance == null)
@@ -74,8 +71,6 @@ public class PlayerController : MonoBehaviour
 
 
             _calcSpeed = new PlayerMovementSpeedCalculator();
-            _timer = new PeriodicTimer();
-            _pp_timer = new PeriodicTimer();
             _pp_sender = new PlayerPositionSender();
         }
         else
@@ -129,13 +124,12 @@ public class PlayerController : MonoBehaviour
             {
 
                 _elapsedTime = Time.time;
-                _countTrigger = _timer.GetTriggerCount(_elapsedTime, _countTrigger);
-                SwitchWalkToRun(ref _switchWalkToRun, _countTrigger);
+                _moveTimer += Time.deltaTime;
+                SwitchWalkToRun();
 
                 float finalAngle = GetFinalAngle(targetPosition, characterPosition);
 
-                float maxAngle = VectorUtils.GetMaxAngle(VectorUtils.To2D(_movementTarget.GetTarget()), transform);
-                float speed = GetMovementSpeed(targetPosition, transform, maxAngle, _countTrigger);
+                float speed = GetMovementSpeed();
                 Vector3 newPosition = GetNewPosition(targetPosition, characterPosition, speed);
                 Vector3 newPositionPlusGravity = ApplyGravity(newPosition , _elapsedTime);
 
@@ -147,8 +141,7 @@ public class PlayerController : MonoBehaviour
 
 
                 _isFirst = false;
-                _ppCountTrigger = _pp_timer.GetTriggerCount(_elapsedTime, _ppCountTrigger);
-                _pp_sender.SendServerValidPositionEvery1ms(transform.position , _ppCountTrigger);
+                _pp_sender.TickWhileMoving(transform.position, PlayerPositionSender.ToL2Heading(transform.eulerAngles.y), Time.deltaTime);
             }
             else
             {
@@ -211,45 +204,58 @@ public class PlayerController : MonoBehaviour
             transform.position = _targetPosition;
         }
     }
-    private void SwitchWalkToRun(ref bool switchWalkToRun , int countTrigger)
+    private void SwitchWalkToRun()
     {
-        if (countTrigger > 3)
-        {
-            if (!switchWalkToRun)
-            {
-                switchWalkToRun = true;
+        if (_switchWalkToRun)
+            return;
+        if (L2PlayerMoveGait.IsWalkStart(_moveTimer, RunMode(), false))
+            return;
 
-                if (_movementTarget.IsRunningServer())
-                {
-                    Debug.Log("PlayerController->SwitchWalkToRun: Run? " + _movementTarget.IsRunningServer());
-                    PlayerStateMachine.Instance.ChangeState(PlayerState.RUNNING);
-                    PlayerStateMachine.Instance.NotifyEvent(Event.MOVE_TO);
-                }
-                else
-                {
-                    Debug.Log("PlayerController->SwitchWalkToRun: Run? " + _movementTarget.IsRunningServer());
-                    PlayerStateMachine.Instance.ChangeState(PlayerState.WALKING);
-                    PlayerStateMachine.Instance.NotifyEvent(Event.MOVE_TO);
-                }
-
-            }
-        }
-
+        _switchWalkToRun = true;
+        PlayerStateMachine.Instance.ChangeState(PlayerState.RUNNING);
+        PlayerStateMachine.Instance.NotifyEvent(Event.MOVE_TO);
     }
-    private float GetMovementSpeed(Vector3 targetPosition , Transform playerTransfrom , float maxAngle , float countTrigger)
+
+    private bool RunMode()
     {
-       // Debug.Log("Trigger count event " + countTrigger);
+        if (PlayerEntity.Instance != null)
+            return PlayerEntity.Instance.Running;
+        return _movementTarget != null && _movementTarget.IsRunningServer();
+    }
 
-        if (countTrigger <= 3) return _calcSpeed.GetSpeed(false);
+    private float GetMovementSpeed()
+    {
+        bool walking = L2PlayerMoveGait.IsWalkStart(_moveTimer, RunMode(), false);
+        return _calcSpeed.GetSpeed(!walking);
+    }
 
-        if (VectorUtils.InFaceProcent(targetPosition, playerTransfrom, maxAngle) <= 50)
-        {
-            return _calcSpeed.CalculateInitialSpeed();
-        }
-        else
-        {
-            return _calcSpeed.GetSpeed(true);
-        }
+    public float GetMoveTimer()
+    {
+        return _moveTimer;
+    }
+
+    public bool IsWalkGait()
+    {
+        return L2PlayerMoveGait.IsWalkStart(_moveTimer, RunMode(), false);
+    }
+
+    public float GetLiveMoveSpeed()
+    {
+        return GetMovementSpeed();
+    }
+
+    public float GetLiveRotateSpeed()
+    {
+        return _calcSpeed != null ? _calcSpeed.GetSpeedRotate(_behindPlayer) : 0f;
+    }
+
+    public float GetDesiredYawDegrees()
+    {
+        if (_movementTarget == null)
+            return transform.eulerAngles.y;
+        Vector3 characterPosition = VectorUtils.To2D(transform.position);
+        Vector3 targetPosition = VectorUtils.To2D(_movementTarget.GetTarget());
+        return GetFinalAngle(targetPosition, characterPosition);
     }
 
 
@@ -284,23 +290,21 @@ public class PlayerController : MonoBehaviour
 
     public void MoveToPoint(MovementTarget movementTarget)
     {
+        bool wasMoving = _isMove;
         ActivateIfNotMoving(_isMove);
-        _timer.UpdateStartTime(_elapsedTime);
-        _pp_timer.UpdateStartTime(_elapsedTime , 1);
+        if (!wasMoving)
+            _moveTimer = 0f;
         _movementTarget = movementTarget;
         _isMove = true;
         _behindPlayer = VectorUtils.IsTargetBehindPlayer(movementTarget.GetTarget(), transform);
-        _ppCountTrigger = 0;
     }
 
     public void StopMove()
     {
         _isMove = false;
         ClickManager.Instance.HideLocator();
-        _countTrigger = 0;
-        _ppCountTrigger = 0;
+        _moveTimer = 0f;
         _switchWalkToRun = false;
-        _pp_sender.SendServerArrivedPosition(transform.position);
 
     }
 
@@ -343,22 +347,32 @@ public class PlayerController : MonoBehaviour
 
     public void InitMoveToPawn(MoveToPawnDto moveToPawnPacket)
     {
-        
-        if (PlayerEntity.Instance.TargetId == moveToPawnPacket.TarObjid)
+        World world = World.Instance;
+        if (world == null || PlayerEntity.Instance == null)
+            return;
+
+        // Engine OnMoveToPawn uses the packet's pawn directly. It does not require
+        // that pawn to be the UI-selected target. During replay the first attacked
+        // goblin is still selected while this packet already follows the second one.
+        Entity target = world.GetEntityNoLockSync(moveToPawnPacket.TarObjid);
+        if (target == null)
         {
-            World world = World.Instance;
-            if (world == null)
-                return;
-            Entity tarPos = world.GetEntityNoLockSync(moveToPawnPacket.TarObjid);
-            //DebugLineDraw.ShowDrawLineDebug(moveToPawnPacket.ObjId, moveToPawnPacket.ObjPos, tarPos.transform.position, Color.green);
-            if (PlayerEntity.Instance.Target != null) ThinkMoveToPawn(new ModelMovePawn(PlayerEntity.Instance, tarPos,  moveToPawnPacket.Distance));
+            ReplayAttackTrace.Write(
+                "MOVE_TO_PAWN_SKIP",
+                PlayerEntity.Instance,
+                null,
+                "targetId=" + moveToPawnPacket.TarObjid);
+            return;
         }
-        else
-        {
-            //ObjectData data = TargetManager.Instance.GetTargetByIdUseLocator(moveToPawnPacket.TarObjid);
-            //if (data != null) Follow(data.ObjectTransform , data.ObjectTransform.position);
-            //if (data != null) ThinkMoveToPawn(data.ObjectTransform, new ModelMovePawn(moveToPawnPacket.ObjPos , data.ObjectTransform, moveToPawnPacket.Distance));
-        }
+
+        ReplayAttackTrace.Write(
+            "MOVE_TO_PAWN",
+            PlayerEntity.Instance,
+            target,
+            "distanceUu=" + moveToPawnPacket.DistanceUu +
+            " distanceMeters=" + moveToPawnPacket.Distance.ToString("F3") +
+            " selectedTargetId=" + PlayerEntity.Instance.TargetId);
+        ThinkMoveToPawn(new ModelMovePawn(PlayerEntity.Instance, target, moveToPawnPacket.Distance));
     }
 
     

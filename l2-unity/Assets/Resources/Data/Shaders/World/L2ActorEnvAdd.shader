@@ -15,6 +15,7 @@ Shader "L2/World/ActorEnvAdd"
         [Enum(UnityEngine.Rendering.CullMode)] _Cull ("Cull", Float) = 0
         [Toggle(_ALPHATEST_ON)] _AlphaClip ("Alpha Clip", Float) = 1
         _Cutoff ("Alpha Cutoff", Range(0, 1)) = 0.627451
+        _ActorAlpha ("Actor Alpha", Range(0, 1)) = 1
         [HideInInspector] _MainTex ("BaseMap", 2D) = "white" {}
     }
 
@@ -39,6 +40,7 @@ Shader "L2/World/ActorEnvAdd"
         float4 _BaseColor;
         float _Cull;
         float _Cutoff;
+        float _ActorAlpha;
     CBUFFER_END
 
     float2 L2_ActorUv(float2 uv)
@@ -151,10 +153,10 @@ Shader "L2/World/ActorEnvAdd"
             {
                 UNITY_SETUP_INSTANCE_ID(IN);
                 half4 tex = SAMPLE_TEXTURE2D(_BaseMap, sampler_BaseMap, IN.uv);
-                float alpha = tex.a * _BaseColor.a;
-                L2_ActorClip(alpha);
+                float alpha = tex.a * _BaseColor.a * _ActorAlpha;
+                L2_ActorClip(tex.a * _BaseColor.a);
                 float3 rgb = L2_LinearFog(L2_Modulate2X(tex.rgb * _BaseColor.rgb, IN.color0), IN.viewAbsZ);
-                return half4(rgb, alpha);
+                return half4(rgb, saturate(alpha));
             }
             ENDHLSL
         }
@@ -212,7 +214,7 @@ Shader "L2/World/ActorEnvAdd"
                 float3 env = SAMPLE_TEXTURE2D(_EnvMap, sampler_EnvMap, IN.envUv).rgb;
                 float mask = SAMPLE_TEXTURE2D(_SpecMask, sampler_SpecMask, IN.uv).a;
                 float3 rgb = L2_BlackFog(env, IN.viewAbsZ);
-                return half4(rgb, mask);
+                return half4(rgb, saturate(mask * _ActorAlpha));
             }
             ENDHLSL
         }

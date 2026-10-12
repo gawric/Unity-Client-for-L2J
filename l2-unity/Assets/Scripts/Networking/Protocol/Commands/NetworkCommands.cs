@@ -48,12 +48,14 @@ public sealed class ValidatePositionCommand : INetworkCommand
     public float X;
     public float Y;
     public float Z;
+    public int Heading;
 
-    public ValidatePositionCommand(float x, float y, float z)
+    public ValidatePositionCommand(float x, float y, float z, int heading)
     {
         X = x;
         Y = y;
         Z = z;
+        Heading = heading;
     }
 }
 

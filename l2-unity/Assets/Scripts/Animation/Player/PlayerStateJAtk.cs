@@ -137,6 +137,7 @@ public class PlayerStateJAtk : StateMachineBehaviour
             $"{JATK_TIMING_LOG} Enter LINEAR anim={parameterName} serverTimeAtkMs={_fullCycleMs:F1} " +
             $"clipLenMs={clipLenMs:F1} patkspd={_linearPatkSpd:F3} AttackShotWallMs~={attackShotWallMs:F1} " +
             $"player={PlayerEntity.Instance?.RandomName}");
+        UnityChainLog.OnJAtkEnter(PlayerEntity.Instance, parameterName, _fullCycleMs, hitAtMs, pAtkSpd, _linearPatkSpd, timeAnimation);
 
         if (IsDual(parameterName))
         {
@@ -261,6 +262,7 @@ public class PlayerStateJAtk : StateMachineBehaviour
         Debug.Log(
             $"{JATK_TIMING_LOG} Exit anim={parameterName} elapsedMs={elapsedMs:F1} " +
             $"expectedMs={expectedMs:F1} swordHit={_isSwordHitLogged} epoch={_attackEpoch}");
+        UnityChainLog.OnJAtkExit(PlayerEntity.Instance, parameterName, expectedMs, elapsedMs, _lastAnimNormalized);
 
         Debug.Log(
             $"{JATK_EARLY_LOG} Exit anim={parameterName} cause={exitCause} " +
@@ -300,7 +302,7 @@ public class PlayerStateJAtk : StateMachineBehaviour
             $"{JATK_EARLY_LOG} SwitchToIdle FIRE anim={parameterName} " +
             $"reason={(dieTarget ? "dieTarget" : "!isAttack")} " +
             $"wallElapsedMs={elapsedMs:F1}/{_fullCycleMs:F1} animNorm={_lastAnimNormalized:F3} " +
-            $"clipLenSec={_clipLengthSec:F3} → IDLE+WAIT_RETURN");
+            $"clipLenSec={_clipLengthSec:F3}");
 
         if (PlayerEntity.Instance != null)
         {
@@ -309,6 +311,16 @@ public class PlayerStateJAtk : StateMachineBehaviour
 
         _isSwitchIdle = true;
         _exitViaSwitchToIdle = true;
+
+        // A Move packet may already have started the walk. Do not pull that back into atkwait.
+        if (PlayerStateMachine.Instance != null && PlayerStateMachine.Instance.ShouldKeepLocomotion())
+        {
+            Debug.Log(
+                $"{JATK_EARLY_LOG} SwitchToIdle SKIP_LOCOMOTION anim={parameterName} " +
+                $"state={PlayerStateMachine.Instance.State} wallElapsedMs={elapsedMs:F1}/{_fullCycleMs:F1}");
+            return;
+        }
+
         PlayerStateMachine.Instance.ChangeIntention(Intention.INTENTION_IDLE);
         PlayerStateMachine.Instance.NotifyEvent(Event.WAIT_RETURN, NewIdleState.WaitReturnFromCombatSmb);
     }
@@ -394,6 +406,7 @@ public class PlayerStateJAtk : StateMachineBehaviour
             $"{JATK_TIMING_LOG} SwordHit anim={parameterName} elapsedMs={elapsedMs:F1} " +
             $"expectedMs={expectedMs:F1} wallNorm={wallNorm:F3} animNorm={_lastAnimNormalized:F3} " +
             $"sameRoot={sameRoot} attacker={attackerName} target={targetName} hitPoint={hitPointCollider}");
+        UnityChainLog.OnJAtkHit(PlayerEntity.Instance, parameterName, expectedMs, elapsedMs, _lastAnimNormalized, hitPointCollider);
 
         if (IsDual(parameterName))
         {

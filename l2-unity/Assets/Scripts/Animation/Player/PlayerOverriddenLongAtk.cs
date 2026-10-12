@@ -209,6 +209,14 @@ public class PlayerOverriddenLongAtk : StateMachineBehaviour
             PlayerEntity.Instance.IsAttack = false;
         }
 
+        if (PlayerStateMachine.Instance != null && PlayerStateMachine.Instance.ShouldKeepLocomotion())
+        {
+            Debug.Log(
+                $"{LongExitLogTag} SwitchToIdle SKIP_LOCOMOTION state={parameterName} " +
+                $"sm={PlayerStateMachine.Instance.State} intention={PlayerStateMachine.Instance.Intention}");
+            return;
+        }
+
         PlayerStateMachine.Instance.ChangeIntention(Intention.INTENTION_IDLE);
         PlayerStateMachine.Instance.NotifyEvent(Event.WAIT_RETURN, NewIdleState.WaitReturnFromCombatSmb);
     }

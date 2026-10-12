@@ -25,9 +25,9 @@ public class CalcBaseParam
         float attackTimeBase = baseAttackTimeMs - flightTime;
         float attackTime = Mathf.Clamp(attackTimeBase, 0, MAX_ATTACK_TIME);
 
-        Debug.Log(
-            $"[BOW_ARROW] CalcAtkFly dist={distance:F3} flyMs={flightTime:F1} " +
-            $"atkMs={attackTime:F1} baseMs={baseAttackTimeMs:F1} uuAccel=3000");
+        //Debug.Log(
+        //    $"[BOW_ARROW] CalcAtkFly dist={distance:F3} flyMs={flightTime:F1} " +
+        //    $"atkMs={attackTime:F1} baseMs={baseAttackTimeMs:F1} uuAccel=3000");
 
         return new float[2] { attackTime, flightTime };
     }

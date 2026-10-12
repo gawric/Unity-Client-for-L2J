@@ -111,10 +111,21 @@ public sealed class L2PawnRange
 
     static void IgnoreBetween(Entity a, Entity b, bool ignore)
     {
-        CharacterController ca = a != null ? a.GetComponent<CharacterController>() : null;
-        CharacterController cb = b != null ? b.GetComponent<CharacterController>() : null;
-        if (ca == null || cb == null)
+        if (a == null || b == null)
             return;
-        Physics.IgnoreCollision(ca, cb, ignore);
+
+        CharacterController[] movers = a.GetComponentsInChildren<CharacterController>(true);
+        CharacterController[] pawns = b.GetComponentsInChildren<CharacterController>(true);
+        for (int i = 0; i < movers.Length; i++)
+        {
+            if (movers[i] == null)
+                continue;
+            for (int j = 0; j < pawns.Length; j++)
+            {
+                if (pawns[j] == null)
+                    continue;
+                Physics.IgnoreCollision(movers[i], pawns[j], ignore);
+            }
+        }
     }
 }

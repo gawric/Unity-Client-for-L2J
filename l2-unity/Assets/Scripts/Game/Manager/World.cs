@@ -228,6 +228,8 @@ public class World : MonoBehaviour, IWorldSpawnContext {
 
     void UnregisterObject(int id, Entity entity)
     {
+        if (MoveAllCharacters.Instance != null)
+            MoveAllCharacters.Instance.Forget(id);
         _players.Remove(id);
         _npcs.Remove(id);
         _objects.Remove(id);
@@ -243,6 +245,8 @@ public class World : MonoBehaviour, IWorldSpawnContext {
 
     void BeginActorDisappear(int id, Entity entity, Action<GameObject> onFinished)
     {
+        EntityActionVisual.CancelMove(entity);
+        EntityActionVisual.PlayDisappearWait(entity);
         GameObject go = entity != null ? entity.gameObject : null;
         if (_npcDeco != null)
             _npcDeco.Stop(id);
@@ -518,6 +522,10 @@ public class World : MonoBehaviour, IWorldSpawnContext {
         }
         else if (entity is UserEntity)
         {
+            Vector3 l2 = VectorUtils.ConvertPosUnityToL2j(entity.transform.position);
+            string nick = entity.Identity != null ? entity.Identity.Name : entity.name;
+            Debug.Log("[MOVE_SNAP] DESPAWN nick=" + nick +
+                " l2=" + l2.x.ToString("F0") + "," + l2.y.ToString("F0") + "," + l2.z.ToString("F0"));
             BeginActorDisappear(objectId, entity, DestroyDisappearedUser);
             Debug.Log($"[DeleteObject] HANDLER id={objectId} UserEntity → disappear fade");
         }
@@ -579,17 +587,17 @@ public class World : MonoBehaviour, IWorldSpawnContext {
                 Vector3 grounded = teleport.LastTeleportPosition;
                 // Match original client after TeleportToLocationDto / L2_Teleport:
                 // ValidatePosition then Appearing → server onTeleported() + UserInfoDto / knownlist.
-                SendValidatePosition(grounded);
+                SendValidatePosition(grounded, PlayerPositionSender.ToL2Heading(entity.transform.eulerAngles.y));
                 SendAppearing();
             }
         });
     }
 
-    private void SendValidatePosition(Vector3 position)
+    private void SendValidatePosition(Vector3 position, int heading)
     {
         GameClient game = _gameClient != null ? _gameClient : IncomingPacketActions.Game;
         if (game != null)
-            game.Send(new ValidatePositionCommand(position.x, position.y, position.z));
+            game.Send(new ValidatePositionCommand(position.x, position.y, position.z, heading));
     }
 
     private void SendAppearing()
@@ -654,6 +662,8 @@ public class World : MonoBehaviour, IWorldSpawnContext {
             if(_worldCombat != null)
             {
                 _worldCombat.StatusUpdate(e, attributes, id);
+                UnityChainLog.OnStatusUpdate(id, attributes);
+                UnityReplaySession.OnStatus(e, attributes);
                 if (e.GetType() == typeof(PlayerEntity))
                 {
                     if (CharacterInfo != null)

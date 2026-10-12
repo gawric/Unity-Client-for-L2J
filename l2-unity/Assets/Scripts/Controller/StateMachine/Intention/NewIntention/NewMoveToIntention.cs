@@ -31,6 +31,7 @@ public class NewMoveToIntention : IntentionBase
 
             //Debug.Log("NewMoveToIntention> to dict " + distTest + " original " + distTest2);
 
+            L2PawnRange.ClearIgnoredPawn(PlayerEntity.Instance);
             if (dist <= 0.12f) return;
 
             if (PlayerStateMachine.Instance.IsMoveToPawn) PlayerStateMachine.Instance.IsMoveToPawn = false;
@@ -49,7 +50,8 @@ public class NewMoveToIntention : IntentionBase
 
         if (_stateMachine.State == PlayerState.IDLE |
             _stateMachine.State == PlayerState.ATTACKING |
-            _stateMachine.State == PlayerState.PHYSICAL_SKILLS)
+            _stateMachine.State == PlayerState.PHYSICAL_SKILLS |
+            _stateMachine.State == PlayerState.MAGIC_SKILLS)
         {
             // Leaving combat/skills for locomotion — clear attack latch so WAIT_RETURN/ATK_WAIT don't stick.
             if (PlayerEntity.Instance != null)

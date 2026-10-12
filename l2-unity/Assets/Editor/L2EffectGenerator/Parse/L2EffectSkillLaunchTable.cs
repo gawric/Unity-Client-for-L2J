@@ -403,6 +403,9 @@ public static class L2EffectSkillLaunchTable
              L2EffectGeneratorAssetOverrides.IsM_u003_bHomeFlight(planned));
         bool isTargetTrailer = planned != null && planned.IsTargetTrailer;
         bool isProjectile = planned != null && planned.IsProjectile && !isHomeFlight;
+        bool isWeaponChargeBooks =
+            planned != null &&
+            L2EffectGeneratorAssetOverrides.IsWeaponChargeBooksClass(planned.ClassName);
         string phase = row != null ? row.Phase : null;
 
         part.spawnTiming = ResolveSpawnTiming(phase, suffix, hasProjectileCompanion, planned);
@@ -506,6 +509,9 @@ public static class L2EffectSkillLaunchTable
              L2EffectGeneratorAssetOverrides.IsM_u003_bHomeFlight(planned));
         bool isTargetTrailer = planned != null && planned.IsTargetTrailer;
         bool isProjectile = planned != null && planned.IsProjectile && !isHomeFlight;
+        bool isWeaponChargeBooks =
+            planned != null &&
+            L2EffectGeneratorAssetOverrides.IsWeaponChargeBooksClass(planned.ClassName);
         string phase = row != null ? row.Phase : null;
         CompositePartSpawnTiming timing = ResolveSpawnTiming(
             phase, suffix, hasProjectileCompanion, planned);
@@ -577,6 +583,11 @@ public static class L2EffectSkillLaunchTable
 
             part = shot;
         }
+        else if (WeaponTransientChargeBinder.MatchesChargeEffectName(
+                     planned != null ? planned.ClassName : null))
+        {
+            part = new WeaponTransientPart();
+        }
         else if (isTargetTrailer ||
                  timing == CompositePartSpawnTiming.OnHitCollider ||
                  timing == CompositePartSpawnTiming.OnHitTime ||
@@ -602,6 +613,23 @@ public static class L2EffectSkillLaunchTable
         if (row != null && row.HasSpawnDelay && row.SpawnDelay > 0f)
         {
             part.spawnDelaySeconds = row.SpawnDelay;
+        }
+
+        if (part is WeaponTransientPart)
+        {
+            part.inheritRotation = true;
+            part.follow = true;
+            part.spawnTiming = CompositePartSpawnTiming.Immediate;
+            if (part.spawnAttachmentPoint != EffectAttachmentPoint.LeftWeaponSocket)
+            {
+                part.spawnAttachmentPoint = EffectAttachmentPoint.WeaponSocket;
+            }
+        }
+        else if (isWeaponChargeBooks)
+        {
+            part.follow = true;
+            part.spawnTiming = CompositePartSpawnTiming.Immediate;
+            part.spawnAttachmentPoint = EffectAttachmentPoint.LeftWeaponSocket;
         }
 
         return part;

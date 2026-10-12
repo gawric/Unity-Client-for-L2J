@@ -919,6 +919,8 @@ public static class L2EffectGeneratorMaterialConfigurator
                 emitter, ref start, ref end) ||
             L2EffectGeneratorAssetOverrides.TryCorrectFxMt0006Uv42Cell4(
                 emitter, ref start, ref end) ||
+            L2EffectGeneratorAssetOverrides.TryCorrectFxMt0000Uv44GlowCell7(
+                emitter, ref start, ref end) ||
             L2EffectGeneratorAssetOverrides.TryCorrectFxMt0000Uv44Cell15(
                 emitter, ref start, ref end))
         {

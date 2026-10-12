@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
@@ -42,6 +43,8 @@ public sealed class ParticleGroupV2 : EffectPart, IParticleEmitterV2
     bool _hasExternalEmissionWindow;
     bool _streamVisible = true;
     bool _destroying;
+    bool _forceAuthoredTiming;
+    Material[] _runtimeMaterialInstances;
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
     bool _loggedHiddenTick;
 #endif
@@ -78,14 +81,17 @@ public sealed class ParticleGroupV2 : EffectPart, IParticleEmitterV2
             relativeWarmupTime = _relativeWarmupTime,
             warmupTicksPerSecond = _warmupTicksPerSecond,
             duration = _duration,
-            hasFixedDuration = _hasFixedDuration,
+            hasFixedDuration = _hasFixedDuration || _forceAuthoredTiming,
             instantKillAtCastEnd = _instantKillAtCastEnd,
             // Cast-window: UC RespawnDeadParticles (serialized). Fixed-duration
             // parts keep the old no-respawn rule so existing projectile prefabs
             // without this field do not start looping.
-            respawnDeadParticles = _hostOwnedEmission || (!_hasFixedDuration && _respawnDeadParticles),
+            respawnDeadParticles =
+                _hostOwnedEmission ||
+                (!_forceAuthoredTiming && !_hasFixedDuration && _respawnDeadParticles),
             hostOwnedEmission = _hostOwnedEmission,
-            stretchParticleLifeToWindow = _stretchParticleLifeToWindow
+            stretchParticleLifeToWindow =
+                !_forceAuthoredTiming && _stretchParticleLifeToWindow
         };
     }
 
@@ -95,6 +101,19 @@ public sealed class ParticleGroupV2 : EffectPart, IParticleEmitterV2
     public void BindHostOwnedEmission()
     {
         _hostOwnedEmission = true;
+    }
+
+    /// <summary>
+    /// Native transient actors play each emitter with the UC duration/lifetime.
+    /// They do not stretch MaxParticles=1 streams to the skill cast window.
+    /// Call before Setup/PlayPart.
+    /// </summary>
+    public void BindAuthoredTiming()
+    {
+        _forceAuthoredTiming = true;
+        _hasExternalEmissionWindow = false;
+        _lifetimePolicy = ParticleLifetimePolicy.Authored;
+        _emissionWindow = Mathf.Max(0.01f, _duration);
     }
 
     public void SetStreamVisible(bool visible)
@@ -109,6 +128,37 @@ public sealed class ParticleGroupV2 : EffectPart, IParticleEmitterV2
         _castData = castData;
         ResolveEmissionWindow(settings, castData);
         EnsureRuntime().Bind(CaptureAuthoring());
+    }
+
+    /// <summary>
+    /// Reads a material property before an optional instance-local override.
+    /// </summary>
+    public bool TryGetMaterialVector(int propertyId, out Vector4 value)
+    {
+        Material material = ResolveSlotMaterial();
+        if (material == null || !material.HasProperty(propertyId))
+        {
+            value = Vector4.zero;
+            return false;
+        }
+
+        value = material.GetVector(propertyId);
+        return true;
+    }
+
+    /// <summary>
+    /// Writes a material property on this spawned emitter instance without
+    /// changing the prefab material asset.
+    /// </summary>
+    public void SetRuntimeMaterialVector(int propertyId, Vector4 value)
+    {
+        EnsureRuntimeMaterialInstances();
+        WriteMaterialVector(_runtimeMaterialInstances, propertyId, value);
+        Material[] gpu = GpuMaterials;
+        if (gpu != null && gpu != _runtimeMaterialInstances)
+        {
+            WriteMaterialVector(gpu, propertyId, value);
+        }
     }
 
     /// <summary>
@@ -267,6 +317,7 @@ public sealed class ParticleGroupV2 : EffectPart, IParticleEmitterV2
         _batch?.Release();
         _batch = null;
         _slots = null;
+        DestroyRuntimeMaterialInstances();
     }
 
     ParticleStreamRuntime EnsureRuntime()
@@ -298,9 +349,123 @@ public sealed class ParticleGroupV2 : EffectPart, IParticleEmitterV2
         return GetComponentInChildren<Renderer>(true);
     }
 
+    Material ResolveSlotMaterial()
+    {
+        if (_runtimeMaterialInstances != null)
+        {
+            for (int i = 0; i < _runtimeMaterialInstances.Length; i++)
+            {
+                if (_runtimeMaterialInstances[i] != null)
+                {
+                    return _runtimeMaterialInstances[i];
+                }
+            }
+        }
+
+        Renderer renderer = ResolveSlotRenderer();
+        return renderer != null ? renderer.sharedMaterial : null;
+    }
+
+    void EnsureRuntimeMaterialInstances()
+    {
+        if (_runtimeMaterialInstances != null)
+        {
+            return;
+        }
+
+        Renderer[] renderers = ResolveSlotRenderers();
+        if (renderers == null || renderers.Length == 0)
+        {
+            return;
+        }
+
+        var cloneBySource = new Dictionary<Material, Material>();
+        var clones = new List<Material>();
+        for (int rendererIndex = 0; rendererIndex < renderers.Length; rendererIndex++)
+        {
+            Renderer renderer = renderers[rendererIndex];
+            if (renderer == null)
+            {
+                continue;
+            }
+
+            Material[] shared = renderer.sharedMaterials;
+            Material[] instanceMaterials = new Material[shared.Length];
+            for (int materialIndex = 0; materialIndex < shared.Length; materialIndex++)
+            {
+                Material source = shared[materialIndex];
+                if (source == null)
+                {
+                    continue;
+                }
+
+                if (!cloneBySource.TryGetValue(source, out Material clone))
+                {
+                    clone = new Material(source)
+                    {
+                        name = source.name + " (runtime override)"
+                    };
+                    cloneBySource.Add(source, clone);
+                    clones.Add(clone);
+                }
+
+                instanceMaterials[materialIndex] = clone;
+            }
+
+            renderer.sharedMaterials = instanceMaterials;
+        }
+
+        _runtimeMaterialInstances = clones.ToArray();
+    }
+
+    Renderer[] ResolveSlotRenderers()
+    {
+        if (_particles != null && _particles.Length > 0)
+        {
+            return _particles;
+        }
+
+        return GetComponentsInChildren<Renderer>(true);
+    }
+
+    static void WriteMaterialVector(Material[] materials, int propertyId, Vector4 value)
+    {
+        if (materials == null)
+        {
+            return;
+        }
+
+        for (int i = 0; i < materials.Length; i++)
+        {
+            Material material = materials[i];
+            if (material != null && material.HasProperty(propertyId))
+            {
+                material.SetVector(propertyId, value);
+            }
+        }
+    }
+
+    void DestroyRuntimeMaterialInstances()
+    {
+        if (_runtimeMaterialInstances == null)
+        {
+            return;
+        }
+
+        for (int i = 0; i < _runtimeMaterialInstances.Length; i++)
+        {
+            if (_runtimeMaterialInstances[i] != null)
+            {
+                Destroy(_runtimeMaterialInstances[i]);
+            }
+        }
+
+        _runtimeMaterialInstances = null;
+    }
+
     void ResolveEmissionWindow(EffectSettings settings, MagicCastData castData)
     {
-        if (_hostOwnedEmission)
+        if (_forceAuthoredTiming || _hostOwnedEmission)
         {
             _lifetimePolicy = ParticleLifetimePolicy.Authored;
             _emissionWindow = Mathf.Max(0.01f, _duration);

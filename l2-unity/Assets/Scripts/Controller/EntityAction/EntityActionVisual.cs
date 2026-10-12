@@ -7,7 +7,10 @@ public static class EntityActionVisual
         if (entity == null || entity.Identity == null || MoveAllCharacters.Instance == null)
             return;
         if (entity.Identity.Id > 0)
+        {
             MoveAllCharacters.Instance.CancelMove(entity.Identity.Id);
+            MoveAllCharacters.Instance.CancelRotate(entity.Identity.Id);
+        }
     }
 
     public static void FreezeUserMove(Entity entity)
@@ -44,6 +47,18 @@ public static class EntityActionVisual
         }
     }
 
+    public static void PlayDisappearWait(Entity entity)
+    {
+        if (entity == null || entity.IsDead())
+            return;
+        if (entity is UserEntity user)
+        {
+            PlayUserLocomotion(user, "wait", null, true);
+            return;
+        }
+        StopMove(entity);
+    }
+
     public static void StopMove(Entity entity)
     {
         if (entity is UserEntity userStop)
@@ -60,31 +75,13 @@ public static class EntityActionVisual
             npc.OnStopL2jMoving();
         else if (entity is MonsterEntity monster)
         {
-            monster.OnStopL2jMoving();
             if (IncomingPacketActions.Animations != null && monster.Identity != null)
             {
                 IncomingPacketActions.Animations.PlayMonsterAnimation(
-                    monster.Identity.Id, AnimationNames.MONSTER_WAIT.ToString());
+                    monster.Identity.Id,
+                    AnimationNames.MONSTER_WAIT.ToString());
             }
         }
-    }
-
-    public static void FaceTowards(Entity entity, Vector3 worldPoint)
-    {
-        if (entity is UserEntity user)
-        {
-            user.FaceTowards(worldPoint);
-            return;
-        }
-
-        if (entity == null)
-            return;
-
-        Vector3 dir = worldPoint - entity.transform.position;
-        dir.y = 0f;
-        if (dir.sqrMagnitude < 0.0001f)
-            return;
-        entity.transform.rotation = Quaternion.LookRotation(dir);
     }
 
     public static void PlayMeleeAttack(Entity entity)
@@ -116,6 +113,24 @@ public static class EntityActionVisual
         PlayMeleeAttack(entity);
     }
 
+    public static void RestoreLocomotion(Entity entity, string state)
+    {
+        if (entity == null || entity.Identity == null)
+            return;
+        if (state != "walk" && state != "run" && state != "wait")
+            state = "wait";
+
+        if (state == "wait")
+        {
+            StopMove(entity);
+            return;
+        }
+
+        if (IncomingPacketActions.Animations == null)
+            return;
+        IncomingPacketActions.Animations.PlayMonsterAnimation(entity.Identity.Id, state);
+    }
+
     public static void PlayStandWait(Entity entity)
     {
         if (entity == null || entity.IsDead())
@@ -124,7 +139,7 @@ public static class EntityActionVisual
         if (user != null && user.IsAttackVisualPlaying())
             return;
         if (entity.InCombat)
-            PlayCombatWait(entity, 0.2f);
+            PlayCombatWait(entity);
         else
             StopMove(entity);
     }
@@ -148,11 +163,7 @@ public static class EntityActionVisual
         {
             EntityActionCombatLog.LogIfWatch(entity,
                 "Visual.PlayCombatWait " + EntityActionCombatLog.Describe(entity));
-            AnimationManager animations = IncomingPacketActions.Animations as AnimationManager;
-            if (animations != null)
-                animations.PlayMonsterAnimation(monster.Identity.Id, "atkwait", 0f);
-            else
-                IncomingPacketActions.Animations.PlayMonsterAnimation(monster.Identity.Id, "atkwait");
+            IncomingPacketActions.Animations.PlayMonsterAnimation(monster.Identity.Id, "atkwait");
         }
     }
 
@@ -234,11 +245,11 @@ public static class EntityActionVisual
             IncomingPacketActions.Animations.PlayMonsterAnimation(monster.Identity.Id, AnimationNames.DEAD.ToString());
     }
 
-    static void PlayUserLocomotion(UserEntity user, string move, float? fadeDuration = null)
+    static void PlayUserLocomotion(UserEntity user, string move, float? fadeDuration = null, bool force = false)
     {
         if (user == null || user.IsDead())
             return;
-        if (user.IsAttackVisualPlaying() && move != null &&
+        if (!force && user.IsAttackVisualPlaying() && move != null &&
             (move == "wait" || move == "atkwait" || move == "run" || move == "walk"))
             return;
 
@@ -258,7 +269,8 @@ public static class EntityActionVisual
 
         nac.SetAnimatorSpeed(1f);
         nac.SetPAtkSpeed(1f);
-        bool played = PlayerLocomotionCrossFade.TryPlay(nac, state, fadeDuration);
+        float duration = fadeDuration ?? LocomotionCrossFadeSettings.ResolveDuration(state, nac);
+        bool played = PlayerLocomotionCrossFade.TryPlay(nac, state, duration);
         Debug.Log(user.LogTag + " Visual.CrossFade state=" + state + " played=" + played);
     }
 

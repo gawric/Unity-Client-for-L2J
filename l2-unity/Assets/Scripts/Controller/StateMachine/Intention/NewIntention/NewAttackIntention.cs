@@ -8,6 +8,7 @@ public class NewAttackIntention : IntentionBase
 
     public override void Enter(object arg0)
     {
+        L2PawnRange.ClearIgnoredPawn(PlayerEntity.Instance);
         if (!IsSuccessAttack(arg0))
         {
             _stateMachine.ChangeIntention(Intention.INTENTION_IDLE); 
@@ -26,6 +27,14 @@ public class NewAttackIntention : IntentionBase
 
             if (targetEntity != null)
             {
+                SelectPacketTarget(targetEntity);
+                ReplayAttackTrace.Write(
+                    "TARGET_SELECTED",
+                    PlayerEntity.Instance,
+                    targetEntity,
+                    "playerTarget=" +
+                    (PlayerEntity.Instance != null && PlayerEntity.Instance.Target != null));
+
                 // Bow: live follow until OnAnimationShoot. Melee: one-shot snapshot only.
                 if (CombatFacingService.IsPlayerUsingBow(PlayerEntity.Instance))
                 {
@@ -43,15 +52,17 @@ public class NewAttackIntention : IntentionBase
             }
 
             Hit playerHit = myModel.FirstHit;
-
-            targetEntity.SetDamage(playerHit.Damage);
-            PlayerEntity.Instance.IsAttack = true;
-            if (IncomingPacketActions.Targets != null &&
-                IncomingPacketActions.Targets.HasTarget() &&
-                targetEntity is MonsterEntity)
+            if (targetEntity == null || playerHit == null)
             {
-                IncomingPacketActions.Targets.SetAttackTarget();
+                _stateMachine.ChangeIntention(Intention.INTENTION_IDLE);
+                return;
             }
+
+            // Attack carries visual damage only. The official client changes health from
+            // StatusUpdate and enters death only from Die; it doesn't predict death here.
+            PlayerEntity.Instance.IsAttack = true;
+            if (IncomingPacketActions.Targets != null)
+                IncomingPacketActions.Targets.SetAttackTarget();
             PlayerEntity.Instance.SetSelfHit(playerHit);
             // AttackDto packet SS flag — recharge every swing (otherwise only first Hit shows SoulShot).
             PlayerEntity.Instance.IsSoulshotCharged = playerHit.hasSoulshot();
@@ -63,9 +74,28 @@ public class NewAttackIntention : IntentionBase
             {
                 _stateMachine.ChangeState(PlayerState.ATTACKING);
             }
-            _stateMachine.NotifyEvent(Event.READY_TO_ACT);
+            ReplayAttackTrace.Write(
+                "READY_TO_ACT",
+                PlayerEntity.Instance,
+                targetEntity,
+                "damage=" + playerHit.Damage);
+            _stateMachine.NotifyEvent(Event.READY_TO_ACT, targetEntity);
 
         }
+    }
+
+    static void SelectPacketTarget(Entity targetEntity)
+    {
+        if (IncomingPacketActions.Targets != null)
+        {
+            IncomingPacketActions.Targets.SetTarget(new ObjectData(targetEntity.gameObject), "#ffffff");
+            return;
+        }
+
+        if (PlayerEntity.Instance == null)
+            return;
+        PlayerEntity.Instance.TargetId = targetEntity.Identity != null ? targetEntity.Identity.Id : 0;
+        PlayerEntity.Instance.Target = targetEntity.transform;
     }
 
 

@@ -27,7 +27,8 @@ public class NewMagicAttackIntention : IntentionBase
                 CombatFacingService.Ensure().BeginFollow(
                     objectId,
                     IncomingPacketActions.Player.transform,
-                    targetEntity.transform);
+                    targetEntity.transform,
+                    L2PawnYaw.MagicRotationRateYaw);
             }
             else
             {

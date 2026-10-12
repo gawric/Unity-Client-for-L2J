@@ -179,6 +179,7 @@ public class L2Particle : BaseEffect, IRegisteredBillboard
 #endif
         RefreshParticleGroups();
         L2FxAlphaBlendDrawOrder.Apply(this);
+        ConfigurePrePlayModules();
 
         for (int i = 0; i < _particleGroups.Length; i++)
         {
@@ -203,6 +204,18 @@ public class L2Particle : BaseEffect, IRegisteredBillboard
             }
 
             _particleGroups[i].PlayPart();
+        }
+    }
+
+    void ConfigurePrePlayModules()
+    {
+        MonoBehaviour[] behaviours = GetComponentsInChildren<MonoBehaviour>(true);
+        for (int i = 0; i < behaviours.Length; i++)
+        {
+            if (behaviours[i] is IEffectPrePlayConfigurator configurator)
+            {
+                configurator.ConfigureBeforePlay(_owner);
+            }
         }
     }
 

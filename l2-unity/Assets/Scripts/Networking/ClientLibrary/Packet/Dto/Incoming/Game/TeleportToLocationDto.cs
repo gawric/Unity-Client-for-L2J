@@ -11,6 +11,9 @@ public class TeleportToLocationDto : IWireDto
 
     public int TarObjId { get => _targetObjId; }
     public Vector3 TeleportPos { get => _telePos; }
+    public int X { get => _x; }
+    public int Y { get => _y; }
+    public int Z { get => _z; }
     
 
     public void ReadFrom(PacketReader reader)

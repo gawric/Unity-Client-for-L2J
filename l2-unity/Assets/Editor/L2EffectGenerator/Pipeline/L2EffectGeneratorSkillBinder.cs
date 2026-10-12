@@ -56,6 +56,16 @@ public static class L2EffectGeneratorSkillBinder
 
         int boundCount = 0;
         string compositeName = prefabRoot.name;
+        bool isBowVariant =
+            compositeName.EndsWith("_bow_composite", StringComparison.OrdinalIgnoreCase) ||
+            compositePrefabPath.IndexOf("/soul_N_bow/", StringComparison.OrdinalIgnoreCase) >= 0;
+        if (isBowVariant)
+        {
+            logLine = "bow composite stays in weapon_shot.int, GlobalEffect.prefab unchanged: " +
+                      compositePrefabPath;
+            return true;
+        }
+
         for (int i = 0; i < database.effects.Count; i++)
         {
             EffectDatabase.EffectData data = database.effects[i];
@@ -90,7 +100,7 @@ public static class L2EffectGeneratorSkillBinder
         EditorUtility.SetDirty(database);
         AssetDatabase.SaveAssets();
         logLine = "bound " + boundCount + " GlobalEffect row(s) including skill " +
-                  skillId + " -> " + compositePrefabPath;
+                  skillId + " prefab -> " + compositePrefabPath;
         return true;
     }
 

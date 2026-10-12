@@ -44,6 +44,7 @@ public static class CompositePlaybackSubscriptions
                 if (source != null)
                 {
                     source.OnAnimationStartShoot -= handler;
+                    source.OnAnimationAttackShot -= handler;
                 }
             }
 
@@ -64,6 +65,7 @@ public static class CompositePlaybackSubscriptions
         }
 
         source.OnAnimationStartShoot += handler;
+        source.OnAnimationAttackShot += handler;
         shootEventSources.Add(source);
     }
 

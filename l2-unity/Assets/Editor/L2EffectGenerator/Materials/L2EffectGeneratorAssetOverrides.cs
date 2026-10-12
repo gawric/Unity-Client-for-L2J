@@ -11,6 +11,22 @@ public static class L2EffectGeneratorAssetOverrides
 {
     const float ActorXEpsilon = 1e-8f;
 
+    public static bool IsWeaponChargeBooksClass(string className)
+    {
+        if (string.IsNullOrEmpty(className) ||
+            className.Length != 8 ||
+            !className.StartsWith("e_u", StringComparison.OrdinalIgnoreCase) ||
+            !className.EndsWith("_b", StringComparison.OrdinalIgnoreCase) ||
+            !int.TryParse(className.Substring(3, 3), out int effectNumber))
+        {
+            return false;
+        }
+
+        // weapon_shot.int OnBooks / SpiritOnBooks classes.
+        return (effectNumber >= 505 && effectNumber <= 510) ||
+               (effectNumber >= 512 && effectNumber <= 517);
+    }
+
     // Per-slot MainTex names. One entry is applied to every slot; several
     // entries map 1:1 onto MeshEmitter materials (duplicates are kept).
     static readonly Dictionary<string, string[]> StaticMeshToTextures =
@@ -151,6 +167,9 @@ public static class L2EffectGeneratorAssetOverrides
 
     const string FxMt0000Atlas = "fx_m_t0000";
     const int FxMt0000Uv = 4;
+    const int FxMt0000GlowDumpedStart = 7;
+    const int FxMt0000GlowDumpedEnd = 8;
+    const int FxMt0000GlowCell = 7;
     const int FxMt0000DumpedStart = 14;
     const int FxMt0000DumpedEnd = 16;
     const int FxMt0000Cell = 15;
@@ -825,6 +844,33 @@ public static class L2EffectGeneratorAssetOverrides
     {
         return string.Equals(emitter.EmitterName, SpriteEmitter30Name, StringComparison.OrdinalIgnoreCase) ||
                string.Equals(emitter.ParticleSlotName, SpriteEmitter30Alias, StringComparison.OrdinalIgnoreCase);
+    }
+
+    /// <summary>
+    /// soul_N_stick glow: fx_m_t0000 4x4 is dumped as random cells 7..8,
+    /// but the live effect uses the glow tile 7 only.
+    /// </summary>
+    public static bool TryCorrectFxMt0000Uv44GlowCell7(
+        UcEmitterDefinition emitter,
+        ref int start,
+        ref int end)
+    {
+        if (emitter == null ||
+            emitter.TextureUSubdivisions != FxMt0000Uv ||
+            emitter.TextureVSubdivisions != FxMt0000Uv ||
+            emitter.SubdivisionStart != FxMt0000GlowDumpedStart ||
+            emitter.SubdivisionEnd != FxMt0000GlowDumpedEnd ||
+            !string.Equals(
+                GetUcObjectName(emitter.TextureReference),
+                FxMt0000Atlas,
+                StringComparison.OrdinalIgnoreCase))
+        {
+            return false;
+        }
+
+        start = FxMt0000GlowCell;
+        end = FxMt0000GlowCell;
+        return true;
     }
 
     /// <summary>

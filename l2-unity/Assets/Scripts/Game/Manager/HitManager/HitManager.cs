@@ -152,7 +152,7 @@ public class HitManager : MonoBehaviour
         {
             monster.SetDead(true);
             if (EntityActionMachine.Instance != null)
-                EntityActionMachine.Instance.Die(monster);
+                EntityActionMachine.Instance.Die(monster, false, "hit_hp0");
         }
     }
 
@@ -189,6 +189,7 @@ public class HitManager : MonoBehaviour
             Debug.LogWarning("[HIT_FX] 6.HitManager SKIP targetEntity=null");
             return;
         }
+
         Vector3 impactDir = ResolveSoulshotImpactDirection(attaker, targetEntity, hitCollider);
         Vector3 spawnPoint = ResolveSoulshotSpawnPoint(targetEntity, impactDir, hitCollider);
 

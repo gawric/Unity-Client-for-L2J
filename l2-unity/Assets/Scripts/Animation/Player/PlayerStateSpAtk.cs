@@ -176,6 +176,8 @@ public class PlayerStateSpAtk : StateMachineBehaviour
 
         if (PlayerEntity.Instance != null)
             PlayerEntity.Instance.IsAttack = false;
+        if (PlayerStateMachine.Instance != null && PlayerStateMachine.Instance.ShouldKeepLocomotion())
+            return;
         PlayerStateMachine.Instance.ChangeIntention(Intention.INTENTION_IDLE);
         PlayerStateMachine.Instance.NotifyEvent(Event.WAIT_RETURN, NewIdleState.WaitReturnFromCombatSmb);
     }

@@ -5,5 +5,8 @@ public sealed class MagicSkillLaunchedIncoming : IncomingWirePacket<MagicSkillLa
 {
     public override void Apply(MagicSkillLaunchedDto packet)
     {
+        if (packet == null)
+            return;
+        IncomingPacketActions.QueueWorld(apply => apply.MagicSkillLaunched(packet));
     }
 }

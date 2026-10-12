@@ -2,9 +2,8 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// Compare Unity CharInfo (UserEntity) travel vs aCis PlayerMove budget.
-/// aCis: scheduleAtFixedRate(100,100), passed = getRealMoveSpeed(stamp&lt;=5)*dt/1000,
-/// arrive when 2D radius to pawn &lt;= Dist. First 5 ticks use walk-start speed.
+/// Compare Unity CharInfo (UserEntity) travel vs the Interlude gait.
+/// Players walk for 12/30 s, then run if run mode is on. Otherwise they walk the whole way.
 /// </summary>
 public static class CharInfoMoveBudgetLog
 {
@@ -63,7 +62,7 @@ public static class CharInfoMoveBudgetLog
         float startUu = trip.StartToPawn / L2UuToM;
         float distUu = trip.Dist / L2UuToM;
         float needUu = Mathf.Max(0f, startUu - distUu);
-        float budgetMs = AcisBudgetMs(needUu, walkUu, runUu, user.Running);
+        float budgetMs = ExpectedMoveMs(needUu, walkUu, runUu, user.Running);
 
         Debug.Log(Tag + " START kind=Pawn nick=" + trip.Nick +
             " id=" + trip.Id +
@@ -82,8 +81,8 @@ public static class CharInfoMoveBudgetLog
             " unityRun=" + trip.UnityRun.ToString("F4") +
             " unityWalk=" + trip.UnityWalk.ToString("F4") +
             " running=" + (user.Running ? 1 : 0) +
-            " acisBudgetMs=" + budgetMs.ToString("F0") +
-            " formula=delay100ms + stamp1-5 walkStart then run; arrive=isIn2DRadius(pawn,Dist)");
+            " moveBudgetMs=" + budgetMs.ToString("F0") +
+            " formula=walk " + L2PlayerMoveGait.WalkSeconds.ToString("F3") + "s then run if running");
     }
 
     public static void StartPoint(UserEntity user, Vector3 dest)
@@ -115,7 +114,7 @@ public static class CharInfoMoveBudgetLog
         Trips[trip.Id] = trip;
 
         float needUu = dist2d / L2UuToM;
-        float budgetMs = AcisBudgetMs(needUu, walkUu, runUu, user.Running);
+        float budgetMs = ExpectedMoveMs(needUu, walkUu, runUu, user.Running);
         Debug.Log(Tag + " START kind=Point nick=" + trip.Nick +
             " id=" + trip.Id +
             " start=" + Vec(trip.Start) +
@@ -126,7 +125,7 @@ public static class CharInfoMoveBudgetLog
             " walkStartUu=" + walkUu.ToString("F3") +
             " unityRun=" + trip.UnityRun.ToString("F4") +
             " running=" + (user.Running ? 1 : 0) +
-            " acisBudgetMs=" + budgetMs.ToString("F0"));
+            " moveBudgetMs=" + budgetMs.ToString("F0"));
     }
 
     public static void Accum(UserEntity user, float dist2d, Vector3 pos)
@@ -173,9 +172,9 @@ public static class CharInfoMoveBudgetLog
             : 0f;
         float needM = Mathf.Max(0f, trip.StartToPawn - trip.Dist);
         float needUu = needM / L2UuToM;
-        float acisExpectUu = Mathf.Min(needUu + 1f, AcisExpectUu(elapsedMs, trip.WalkUu, trip.RunUu, user.Running));
-        float acisExpectM = acisExpectUu * L2UuToM;
-        float overshootM = disp - acisExpectM;
+        float moveExpectUu = Mathf.Min(needUu + 1f, ExpectedMoveUu(elapsedMs, trip.WalkUu, trip.RunUu, user.Running));
+        float moveExpectM = moveExpectUu * L2UuToM;
+        float overshootM = disp - moveExpectM;
         float overshootNeed = disp - needM;
         float pktDelta = hasPacket ? VectorUtils.Distance2D(now, packetPos) : -1f;
         float pktToPawn = hasPacket && pawn != null
@@ -195,9 +194,9 @@ public static class CharInfoMoveBudgetLog
             " Dist=" + trip.Dist.ToString("F3") +
             " pastDist=" + pastDist.ToString("F3") +
             " need=" + needM.ToString("F3") +
-            " acisExpect=" + acisExpectM.ToString("F3") +
-            " acisExpectUu=" + acisExpectUu.ToString("F1") +
-            " overshootVsAcis=" + overshootM.ToString("F3") +
+            " moveExpect=" + moveExpectM.ToString("F3") +
+            " moveExpectUu=" + moveExpectUu.ToString("F1") +
+            " overshootVsMove=" + overshootM.ToString("F3") +
             " overshootVsNeed=" + overshootNeed.ToString("F3") +
             " pktDelta=" + pktDelta.ToString("F3") +
             " pktToPawn=" + pktToPawn.ToString("F3") +
@@ -218,29 +217,30 @@ public static class CharInfoMoveBudgetLog
     }
 
     /// <summary>
-    /// aCis PlayerMove: first tick after 100ms, stamps 1-5 use walk-start speed.
+    /// Interlude: walk speed until 12/30 s, then run speed when run mode is on.
     /// </summary>
-    public static float AcisExpectUu(float elapsedMs, float walkUuS, float runUuS, bool running)
+    public static float ExpectedMoveUu(float elapsedMs, float walkUuS, float runUuS, bool running)
     {
-        float t = elapsedMs - 100f;
-        if (t <= 0f)
-            return 0f;
-        float walkPhaseMs = Mathf.Min(500f, t);
-        float runPhaseMs = Mathf.Max(0f, t - 500f);
-        float walkSpd = walkUuS;
-        float runSpd = running ? runUuS : walkUuS;
-        return walkSpd * (walkPhaseMs / 1000f) + runSpd * (runPhaseMs / 1000f);
+        float t = elapsedMs / 1000f;
+        if (!running)
+            return walkUuS * t;
+        float walkPhase = Mathf.Min(L2PlayerMoveGait.WalkSeconds, t);
+        float runPhase = Mathf.Max(0f, t - L2PlayerMoveGait.WalkSeconds);
+        return walkUuS * walkPhase + runUuS * runPhase;
     }
 
-    public static float AcisBudgetMs(float needUu, float walkUuS, float runUuS, bool running)
+    public static float ExpectedMoveMs(float needUu, float walkUuS, float runUuS, bool running)
     {
-        float walkSpd = walkUuS;
-        float runSpd = running ? runUuS : walkUuS;
-        float ms = 100f;
-        float walkBudgetUu = walkSpd * 0.5f;
+        if (walkUuS <= 0.01f)
+            return 0f;
+        if (!running)
+            return needUu / walkUuS * 1000f;
+        float walkBudgetUu = walkUuS * L2PlayerMoveGait.WalkSeconds;
         if (needUu <= walkBudgetUu)
-            return ms + (walkSpd > 0.01f ? needUu / walkSpd * 1000f : 0f);
-        return ms + 500f + (runSpd > 0.01f ? (needUu - walkBudgetUu) / runSpd * 1000f : 0f);
+            return needUu / walkUuS * 1000f;
+        if (runUuS <= 0.01f)
+            return L2PlayerMoveGait.WalkSeconds * 1000f;
+        return L2PlayerMoveGait.WalkSeconds * 1000f + (needUu - walkBudgetUu) / runUuS * 1000f;
     }
 
     static string Vec(Vector3 v)

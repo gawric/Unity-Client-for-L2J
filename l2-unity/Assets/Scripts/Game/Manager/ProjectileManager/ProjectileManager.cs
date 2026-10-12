@@ -10,6 +10,7 @@ public class ProjectileManager : AbstractProjectile, IProjectileManager
     [Inject] HitManager _hits;
     private const string PROJECTILE_TIMER_LOG = "[PROJECTILE_TIMER]";
     private const string MagicProjectileSyncTag = "[MAGIC_PROJECTILE_SYNC]";
+    private const float ArrowAnimatorLaunchCompensationSeconds = 0.08f;
 
     [SerializeField] public ProjectileData defaultSettings;
     public event Action<GameObject, Transform, Vector3, Vector3, int> OnHitMonster;
@@ -98,8 +99,23 @@ public class ProjectileManager : AbstractProjectile, IProjectileManager
 
         projectileData.flytime = flightTime;
         projectileData.lifetime = flightTime;
+        if (isArrowStick)
+        {
+            // The bow notify is already aligned with Interlude. Compensate only
+            // Unity's animator-to-projectile handoff by entering the original
+            // (t/T)^2 trajectory 80 ms after its start.
+            float launchCompensation = Mathf.Min(
+                ArrowAnimatorLaunchCompensationSeconds,
+                Mathf.Max(0f, flightTime - 0.01f));
+            projectileData.startTime -= launchCompensation;
+            Debug.Log(
+                $"[BOW_ARROW] LAUNCH_COMPENSATION id={projectileId} " +
+                $"compSec={launchCompensation:F3} nominalFlySec={flightTime:F3} " +
+                $"visibleFlySec={Mathf.Max(0f, flightTime - launchCompensation):F3}");
+        }
         projectileData.lastPosition = Vector3.zero;
         AttachCastTimingSnapshot(projectileData);
+        LogReplayMagicShot(projectileData);
         SetPosition(readyProjectile, startPos);
         var rotation = GetRotation(adjustedTarget, startPos);
         SetRotation(readyProjectile, rotation);
@@ -248,7 +264,17 @@ public class ProjectileManager : AbstractProjectile, IProjectileManager
             // ArrowStick / EffectOnly: Hit Time = end of flytime. No NPC collider dependency.
             SetPosition(projectile, projectile.targetPosition);
             projectile.lastPosition = currentPosition;
-            RefreshHitPositionFromAnchor(projectile);
+            if (projectile.impactType == ProjectileImpactType.EffectOnly)
+            {
+                // NSkillProjectile hands its explosion the projectile collision
+                // point. Keep the orb endpoint and target effect on that same
+                // point instead of resolving a second, potentially distant bone.
+                RefreshHitPosition(projectile);
+            }
+            else
+            {
+                RefreshHitPositionFromAnchor(projectile);
+            }
             projectile.hitPointCollider = projectile.hitPoint;
             LogProjectileImpactTiming(projectile);
 
@@ -265,6 +291,15 @@ public class ProjectileManager : AbstractProjectile, IProjectileManager
                     $"globalSinceCast={gs:F3}s serverHit={projectile.castServerHitSnapshot:F3}s " +
                     $"deltaToServerHit={(gs >= 0f ? gs - projectile.castServerHitSnapshot : -1f):F3}s " +
                     $"elapsedSinceLaunch={(Time.time - projectile.startTime):F3}s");
+
+                // The client removes NSkillProjectile before spawning the target
+                // effect. Destroy() is deferred until the end of Unity's frame,
+                // so hide and clear the orb now while keeping its object alive
+                // for hit ownership/direction resolution in the subscribers.
+                CompositeProjectileLaunchHelper.SetPartVisualsVisible(
+                    projectile.prefab != null ? projectile.prefab.transform : null,
+                    false);
+
                 OnHitEffectProjectile?.Invoke(
                     projectile.prefab,
                     projectile.targetTransform,
@@ -346,6 +381,7 @@ public class ProjectileManager : AbstractProjectile, IProjectileManager
 
     private void LogProjectileImpactTiming(ProjectileData projectile)
     {
+        LogReplayMagicHit(projectile);
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
         float projectileElapsed = Time.time - projectile.startTime;
         if (projectile.castStartTimeSnapshot <= 0f)
@@ -365,6 +401,65 @@ public class ProjectileManager : AbstractProjectile, IProjectileManager
             $"deltaToServerHit={globalSinceCastStart - projectile.castServerHitSnapshot:F3}s " +
             $"configuredFly={projectile.flytime:F3}s elapsedSinceLaunch={projectileElapsed:F3}s.");
 #endif
+    }
+
+    static void LogReplayMagicShot(ProjectileData projectile)
+    {
+        if (projectile == null || projectile.impactType == ProjectileImpactType.ArrowStick)
+            return;
+        Entity caster = ResolveReplayEntity(projectile.attackerEntityId);
+        Entity target = projectile.targetTransform != null
+            ? projectile.targetTransform.GetComponentInParent<Entity>()
+            : null;
+        if (caster == null || caster.Identity == null)
+        {
+            Debug.Log("[MAGIC_SHOT_LOG] SKIP session shot attackerId=" + projectile.attackerEntityId +
+                " casterNull=" + (caster == null));
+            return;
+        }
+        Debug.Log("[MAGIC_SHOT_LOG] SESSION shot nick=" + caster.Identity.Name +
+            " id=" + caster.Identity.Id +
+            " attackerId=" + projectile.attackerEntityId);
+        UnityReplaySession.OnMagicShot(
+            caster,
+            target,
+            VectorUtils.ConvertPosUnityToL2j(projectile.startPosition));
+    }
+
+    static void LogReplayMagicHit(ProjectileData projectile)
+    {
+        if (projectile == null || projectile.impactType == ProjectileImpactType.ArrowStick)
+            return;
+        Entity caster = ResolveReplayEntity(projectile.attackerEntityId);
+        Entity target = projectile.targetTransform != null
+            ? projectile.targetTransform.GetComponentInParent<Entity>()
+            : null;
+        Vector3 hit = projectile.hitPoint;
+        if (hit == Vector3.zero)
+            hit = projectile.targetPosition;
+        if (caster == null || caster.Identity == null)
+        {
+            Debug.Log("[MAGIC_SHOT_LOG] SKIP session hit attackerId=" + projectile.attackerEntityId +
+                " casterNull=" + (caster == null));
+            return;
+        }
+        Debug.Log("[MAGIC_SHOT_LOG] SESSION hit nick=" + caster.Identity.Name +
+            " id=" + caster.Identity.Id);
+        UnityReplaySession.OnMagicHit(
+            caster,
+            target,
+            VectorUtils.ConvertPosUnityToL2j(hit));
+    }
+
+    static Entity ResolveReplayEntity(int objectId)
+    {
+        if (objectId <= 0)
+            return null;
+        if (PlayerEntity.Instance != null && PlayerEntity.Instance.Identity != null &&
+            PlayerEntity.Instance.Identity.Id == objectId)
+            return PlayerEntity.Instance;
+        World world = IncomingPacketActions.GameWorld;
+        return world != null ? world.GetEntityNoLockSync(objectId) : null;
     }
 
     public void StopProjectile(int projectileId)

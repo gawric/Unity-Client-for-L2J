@@ -84480,14 +84480,14 @@ AnimationClip:
   m_HasGenericRootTransform: 0
   m_HasMotionFloatCurves: 1
   m_Events:
-  - time: 0.45833334
+  - time: 0.3375
     functionName: OnAnimationLoadArrow
     data: SpAtk01_bow
     objectReferenceParameter: {fileID: 0}
     floatParameter: 0
     intParameter: 0
     messageOptions: 0
-  - time: 3.875
+  - time: 3.8583331
     functionName: OnAnimationShoot
     data: SpAtk01_bow
     objectReferenceParameter: {fileID: 0}

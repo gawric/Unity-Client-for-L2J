@@ -20,8 +20,11 @@ public class PlayerOverriddenMagicAtk : StateMachineBehaviour
     private const string MagicSpeedTraceTag = "[MAGIC_SPEED_TRACE]";
 
     private const string MagicExitLogTag = "[MAGIC_SMB_EXIT]";
-    /// <summary>Same gate as <see cref="PlayerStateSpAtk.SwitchToIdleNormalizedTime"/>.</summary>
-    private const float PhaseDoneNormalizedTime = 0.95f;
+    /// <summary>
+    /// End the phase with the clip. 0.95 cut CastMid/CastEnd short of the 30 fps length
+    /// that <see cref="MagicCastData"/> schedules. wallDone still fires at clip/speed.
+    /// </summary>
+    private const float PhaseDoneNormalizedTime = 1f;
 
     private MagicCastData _castData;
     private int _objectId;
@@ -223,8 +226,22 @@ public class PlayerOverriddenMagicAtk : StateMachineBehaviour
         float speed = Mathf.Max(0.0001f, animator.speed);
         float wallNeed = _clipLengthAtEnter / speed;
         bool wallDone = localElapsed >= wallNeed;
+        float globalWall = _castData != null
+            ? _castData.GetPhaseEndWallSeconds(stateIndex)
+            : 0f;
+        // Unity applies the transition after this update. Request the final
+        // shot state one blend lead early so its AttackShot notify lands on
+        // the client's absolute f514 wall instead of one transition late.
+        if (stateIndex == 1 && globalWall > ShotBlendCompensationSeconds)
+        {
+            globalWall -= ShotBlendCompensationSeconds;
+        }
+        bool globalWallDone =
+            globalElapsed >= 0f &&
+            globalWall > 0f &&
+            globalElapsed >= globalWall;
         bool normDone = stateInfo.normalizedTime >= PhaseDoneNormalizedTime;
-        bool phaseDone = wallDone || normDone;
+        bool phaseDone = wallDone || normDone || globalWallDone;
 
         bool shouldDiag =
             phaseDone ||
@@ -238,6 +255,7 @@ public class PlayerOverriddenMagicAtk : StateMachineBehaviour
                 $"local={localElapsed:F3}s global={globalElapsed:F3}s " +
                 $"norm={stateInfo.normalizedTime:F3} (need>={PhaseDoneNormalizedTime:F2}) normDone={normDone} " +
                 $"speed={animator.speed:F3} clipLen={_clipLengthAtEnter:F3} wallNeed={wallNeed:F3}s wallDone={wallDone} " +
+                $"globalWall={globalWall:F3}s globalWallDone={globalWallDone} " +
                 $"alreadyFinished={_phaseFinished} gateWillFire={phaseDone}");
         }
 
@@ -250,7 +268,9 @@ public class PlayerOverriddenMagicAtk : StateMachineBehaviour
         int objectId = animator.GetInteger(AnimatorUtils.OBJECT_ID);
         Debug.Log(
             $"{MagicExitLogTag} PHASE_DONE state={parameterName} idx={stateIndex} final={isFinalShotState} " +
-            $"local={localElapsed:F3}s norm={stateInfo.normalizedTime:F3} wallDone={wallDone} → NotifyMagicPhaseFinished");
+            $"local={localElapsed:F3}s global={globalElapsed:F3}s norm={stateInfo.normalizedTime:F3} " +
+            $"wallDone={wallDone} globalWall={globalWall:F3}s globalWallDone={globalWallDone} " +
+            $"→ NotifyMagicPhaseFinished");
 
         if (AnimationManager.Instance != null)
         {
@@ -309,6 +329,15 @@ public class PlayerOverriddenMagicAtk : StateMachineBehaviour
         if (PlayerEntity.Instance != null)
         {
             PlayerEntity.Instance.IsAttack = false;
+        }
+
+        // MOVE_TO after Ice Bolt already started walk/run. Do not pull that back into atkwait.
+        if (PlayerStateMachine.Instance != null && PlayerStateMachine.Instance.ShouldKeepLocomotion())
+        {
+            Debug.Log(
+                $"{MagicExitLogTag} SwitchToIdle SKIP_LOCOMOTION state={parameterName} " +
+                $"sm={PlayerStateMachine.Instance.State} intention={PlayerStateMachine.Instance.Intention}");
+            return;
         }
 
         PlayerStateMachine.Instance.ChangeIntention(Intention.INTENTION_IDLE);

@@ -101,7 +101,7 @@ public static class PlayerLocomotionCrossFade
             return false;
         }
 
-        float duration = fixedDuration ?? LocomotionCrossFadeSettings.FixedDuration;
+        float duration = fixedDuration ?? LocomotionCrossFadeSettings.ResolveDuration(stateName, controller);
         controller.CrossFadeInFixedTime(stateName, duration);
         return true;
     }

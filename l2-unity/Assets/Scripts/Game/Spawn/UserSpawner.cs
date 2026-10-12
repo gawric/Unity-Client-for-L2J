@@ -6,15 +6,18 @@ public sealed class UserSpawner
     private readonly CharacterBuilder _characterBuilder;
     private readonly Func<UserEntity, UserBowArrowEvents> _createBowArrowEvents;
     private readonly AppearFadeService _appearFade;
+    private readonly L2PawnYaw _pawnYaw;
 
     public UserSpawner(
         CharacterBuilder characterBuilder,
         Func<UserEntity, UserBowArrowEvents> createBowArrowEvents,
-        AppearFadeService appearFade)
+        AppearFadeService appearFade,
+        L2PawnYaw pawnYaw)
     {
         _characterBuilder = characterBuilder;
         _createBowArrowEvents = createBowArrowEvents;
         _appearFade = appearFade;
+        _pawnYaw = pawnYaw;
     }
 
     public UserEntity Spawn(CharInfoDto info, IWorldSpawnContext world)
@@ -29,8 +32,19 @@ public sealed class UserSpawner
 
         CharacterRace race = (CharacterRace)appearance.Race;
         int playerClass = identity != null ? identity.PlayerClass : 0;
+        int baseBefore = appearance != null ? appearance.BaseClass : -1;
         CharacterRaceAnimation raceId = CharacterRaceAnimationParser.ResolveRaceAnimation(
             race, appearance, playerClass);
+        Debug.Log("[CHARINFO_CLASS] SPAWN nick=" + identity.Name +
+            " id=" + identity.Id +
+            " race=" + race +
+            " sex=" + (appearance != null ? appearance.Sex : -1) +
+            " classFirst=" + info.PacketClassFirst +
+            " classSecond=" + info.PacketClassSecond +
+            " playerClass=" + playerClass +
+            " baseBefore=" + baseBefore +
+            " baseAfter=" + (appearance != null ? appearance.BaseClass : -1) +
+            " raceId=" + raceId);
 
         CharacterBuilder builder = _characterBuilder != null ? _characterBuilder : CharacterBuilder.Instance;
         if (builder == null)
@@ -164,12 +178,19 @@ public sealed class UserSpawner
         float skipM = VectorUtils.ConvertL2UuToMeters(L2PawnRange.AdjustSkipUu);
         if (snap2d > skipM)
         {
+            Vector3 fromL2 = VectorUtils.ConvertPosUnityToL2j(user.transform.position);
+            Vector3 toL2 = VectorUtils.ConvertPosUnityToL2j(identity.Position);
+            Debug.Log("[MOVE_SNAP] CHARINFO nick=" + user.Nick +
+                " snapM=" + snap2d.ToString("F2") +
+                " skipM=" + skipM.ToString("F2") +
+                " fromL2=" + fromL2.x.ToString("F0") + "," + fromL2.y.ToString("F0") + "," + fromL2.z.ToString("F0") +
+                " toL2=" + toL2.x.ToString("F0") + "," + toL2.y.ToString("F0") + "," + toL2.z.ToString("F0"));
             EntitySpawnShared.ApplyGroundedTransform(user.gameObject, identity.Position, identity.Heading);
             EntitySpawnShared.ReapplyGroundAfterActivate(user.gameObject, user.Identity);
         }
         else
         {
-            user.transform.rotation = identity.Heading;
+            _pawnYaw.RequestYaw(user.transform, identity.Heading.eulerAngles.y, L2PawnYaw.RotationRateYaw);
             Debug.Log("[CI_MOVE] CHARINFO SKIP_SNAP nick=" + user.Nick +
                 " snap2d=" + snap2d.ToString("F3") +
                 " skipM=" + skipM.ToString("F2") +

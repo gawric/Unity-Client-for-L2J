@@ -189,7 +189,8 @@ public static class L2EffectGeneratorFolderBuilder
                 planned.AssetPath = ucFolder;
             }
 
-            planned.UseCastWindow = true;
+            planned.UseCastWindow =
+                !L2EffectGeneratorAssetOverrides.IsWeaponChargeBooksClass(planned.ClassName);
             planned.Label = planned.ClassName;
         }
 
@@ -497,7 +498,8 @@ public static class L2EffectGeneratorFolderBuilder
                             !L2EffectSkillLaunchTable.IsShootVisualSuffix(suffix) &&
                             !hasBeamEmitter &&
                             !isHomeFlight &&
-                            !isTargetTrailer
+                            !isTargetTrailer &&
+                            !L2EffectGeneratorAssetOverrides.IsWeaponChargeBooksClass(className)
         });
         return true;
     }

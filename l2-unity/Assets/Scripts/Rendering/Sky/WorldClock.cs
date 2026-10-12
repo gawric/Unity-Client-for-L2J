@@ -30,8 +30,8 @@ public class WorldClock : MonoBehaviour {
     [SerializeField] private string _timeHour;
     [SerializeField] private float _timeElapsed = 0;
     [SerializeField] private bool _startClock = true;
-    [SerializeField] private bool _holdAtHour = false;
-    [SerializeField] private float _heldHour = 12f;
+    [SerializeField] private bool _holdAtHour = true;
+    [SerializeField] private float _heldHour = 13f;
     [SerializeField] private WorldTimer _worldTimer;
     [SerializeField] private Clock _clock;
 
@@ -70,7 +70,7 @@ public class WorldClock : MonoBehaviour {
             _instance.gameObject.SetActive(true);
             _instance._startClock = true;
             _instance._dayDurationMinutes = 2.5f;
-            _instance._holdAtHour = false;
+            _instance.PinAtHour(13f);
             return _instance;
         }
 
@@ -100,13 +100,12 @@ public class WorldClock : MonoBehaviour {
         driver._persistentDriver = true;
         driver._startClock = true;
         driver._dayDurationMinutes = 2.5f;
-        driver._holdAtHour = false;
         if (existing != null && existing != driver)
         {
-            driver._timeElapsed = existing._timeElapsed;
-            driver._clock = existing._clock;
-            driver._timeHour = existing._timeHour;
+            driver._worldTimer = existing._worldTimer;
         }
+
+        driver.PinAtHour(13f);
 
         _instance = driver;
         _bootstrapping = false;
@@ -228,6 +227,13 @@ public class WorldClock : MonoBehaviour {
 
         // Format the TimeSpan object as a string in the desired format (HH:mm:ss)
         _timeHour = time.ToString(@"hh\:mm\:ss");
+    }
+
+    void PinAtHour(float hours)
+    {
+        _holdAtHour = true;
+        _heldHour = hours;
+        SetWorldHours(hours);
     }
 
     public void SetWorldHours(float hours)

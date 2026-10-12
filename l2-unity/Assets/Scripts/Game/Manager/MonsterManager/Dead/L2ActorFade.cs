@@ -3,35 +3,21 @@ using UnityEngine.Rendering;
 
 /// <summary>
 /// Unity stand-in for AActor::SetAlphaTexModifier(uchar).
-/// Swaps body materials onto L2/Actor/Fade and drives _ActorAlpha.
+/// Instances the current body/armor shader and drives _ActorAlpha.
+/// Does not swap onto Lit or L2/Actor/Fade.
 /// </summary>
 public sealed class L2ActorFade
 {
-    public const string ShaderName = "L2/Actor/Fade";
     public const float DurationSeconds = 2f;
     public const float AlphaPerSecond = 127.5f;
     public const byte AppearStartAlpha = 1;
+    const string FadeKeyword = "_ACTOR_FADE";
 
     static readonly int ActorAlphaId = Shader.PropertyToID("_ActorAlpha");
-    static readonly int BaseMapId = Shader.PropertyToID("_BaseMap");
-    static readonly int MainTexId = Shader.PropertyToID("_MainTex");
     static readonly int BaseColorId = Shader.PropertyToID("_BaseColor");
-
-    readonly Shader _shader;
-
-    public L2ActorFade()
-    {
-        _shader = Shader.Find(ShaderName);
-        if (_shader == null)
-        {
-            Debug.LogError("[L2ActorFade] Shader not found: " + ShaderName);
-        }
-    }
-
-    public Shader FadeShader
-    {
-        get { return _shader; }
-    }
+    static readonly int SrcBlendId = Shader.PropertyToID("_SrcBlend");
+    static readonly int DstBlendId = Shader.PropertyToID("_DstBlend");
+    static readonly int ZWriteId = Shader.PropertyToID("_ZWrite");
 
     /// <summary>Death / logout fade-out: 255 → 0 over DurationSeconds.</summary>
     public byte AlphaByte(float elapsed)
@@ -108,7 +94,7 @@ public sealed class L2ActorFade
         renderers = null;
         instances = null;
         sharedBackup = null;
-        if (entity == null || entity.gameObject == null || _shader == null)
+        if (entity == null || entity.gameObject == null)
         {
             return false;
         }
@@ -144,7 +130,7 @@ public sealed class L2ActorFade
             Material[] mats = renderer.materials;
             for (int m = 0; m < mats.Length; m++)
             {
-                ApplyFadeShader(mats[m]);
+                PrepareCurrentShader(mats[m]);
             }
 
             renderers[write] = renderer;
@@ -202,12 +188,29 @@ public sealed class L2ActorFade
 
             for (int m = 0; m < mats.Length; m++)
             {
-                Material mat = mats[m];
-                if (mat != null && mat.HasProperty(ActorAlphaId))
-                {
-                    mat.SetFloat(ActorAlphaId, alpha);
-                }
+                ApplyAlpha(mats[m], alpha);
             }
+        }
+    }
+
+    static void ApplyAlpha(Material mat, float alpha)
+    {
+        if (mat == null)
+        {
+            return;
+        }
+
+        if (mat.HasProperty(ActorAlphaId))
+        {
+            mat.SetFloat(ActorAlphaId, alpha);
+            return;
+        }
+
+        if (mat.HasProperty(BaseColorId))
+        {
+            Color color = mat.GetColor(BaseColorId);
+            color.a = alpha;
+            mat.SetColor(BaseColorId, color);
         }
     }
 
@@ -249,31 +252,34 @@ public sealed class L2ActorFade
         Object.Destroy(instance);
     }
 
-    void ApplyFadeShader(Material mat)
+    static void PrepareCurrentShader(Material mat)
     {
         if (mat == null)
         {
             return;
         }
 
-        Texture baseMap = mat.HasProperty(BaseMapId) ? mat.GetTexture(BaseMapId) : null;
-        Texture mainTex = mat.HasProperty(MainTexId) ? mat.GetTexture(MainTexId) : null;
-        Color baseColor = mat.HasProperty(BaseColorId) ? mat.GetColor(BaseColorId) : Color.white;
-
-        mat.shader = _shader;
-        Texture albedo = baseMap != null ? baseMap : mainTex;
-        if (albedo != null && mat.HasProperty(BaseMapId))
+        if (mat.HasProperty(SrcBlendId))
         {
-            mat.SetTexture(BaseMapId, albedo);
+            mat.SetFloat(SrcBlendId, (float)BlendMode.SrcAlpha);
         }
 
-        if (mat.HasProperty(BaseColorId))
+        if (mat.HasProperty(DstBlendId))
         {
-            mat.SetColor(BaseColorId, baseColor);
+            mat.SetFloat(DstBlendId, (float)BlendMode.OneMinusSrcAlpha);
         }
 
+        if (mat.HasProperty(ZWriteId))
+        {
+            mat.SetFloat(ZWriteId, 0f);
+        }
+
+        mat.EnableKeyword(FadeKeyword);
         mat.SetOverrideTag("RenderType", "Transparent");
         mat.renderQueue = (int)RenderQueue.Transparent;
-        mat.SetFloat(ActorAlphaId, 1f);
+        if (mat.HasProperty(ActorAlphaId))
+        {
+            mat.SetFloat(ActorAlphaId, 1f);
+        }
     }
 }

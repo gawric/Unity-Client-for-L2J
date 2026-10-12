@@ -558,21 +558,25 @@ public sealed class L2YebisPostRenderPass : ScriptableRenderPass
         }
 
         RenderTexture rt = handle.rt;
+        int width = rt.width;
+        int height = rt.height;
         int frame = _execFrame;
         cmd.RequestAsyncReadback(rt, request =>
         {
+            // RTHandles are released/reallocated before this callback (Dispose, resize).
+            // Never touch the captured RenderTexture here.
             if (request.hasError)
             {
-                Debug.LogWarning($"[Yebis] {tag} readback FAIL f={frame} {rt.width}x{rt.height}");
+                Debug.LogWarning($"[Yebis] {tag} readback FAIL f={frame} {width}x{height}");
                 return;
             }
 
             var bytes = request.GetData<byte>();
-            int pixels = rt.width * rt.height;
+            int pixels = width * height;
             int stride = pixels > 0 ? bytes.Length / pixels : 0;
             if (stride < 1 || bytes.Length < 4)
             {
-                Debug.Log($"[Yebis] {tag} f={frame} bytes={bytes.Length} {rt.width}x{rt.height}");
+                Debug.Log($"[Yebis] {tag} f={frame} bytes={bytes.Length} {width}x{height}");
                 return;
             }
 
@@ -588,7 +592,7 @@ public sealed class L2YebisPostRenderPass : ScriptableRenderPass
                 sum += bytes[i * stride];
             float avg = sum / (n * 255f);
             Debug.Log(
-                $"[Yebis] {tag} f={frame} {rt.width}x{rt.height} stride={stride} " +
+                $"[Yebis] {tag} f={frame} {width}x{height} stride={stride} " +
                 $"p0=({r0},{g0},{b0},{a0}) midR={rMid} avgR={avg:F3}");
         });
     }

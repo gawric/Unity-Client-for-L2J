@@ -20,6 +20,10 @@ public class MoveToPawnDto : IWireDto
 
 
     public float Distance { get => _distance; }
+    public int DistanceUu { get; private set; }
+    public int X { get => _x; }
+    public int Y { get => _y; }
+    public int Z { get => _z; }
 
     public int ObjId { get => _objectId; }
 
@@ -34,7 +38,8 @@ public class MoveToPawnDto : IWireDto
         _targetId = reader.ReadI();
         
         // Engine stores Dist as UU on APawn+0x6C4 and compares to 2D Location (also UU).
-        _distance = VectorUtils.ConvertL2UuToMeters(reader.ReadI());
+        DistanceUu = reader.ReadI();
+        _distance = VectorUtils.ConvertL2UuToMeters(DistanceUu);
 
         _x = reader.ReadI();
         _y = reader.ReadI();

@@ -181,11 +181,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _dayDurationMinutes: 2.5
-  _timeHour: 17:00:00
-  _timeElapsed: 106.25
+  _timeHour: 13:00:00
+  _timeElapsed: 81.25
   _startClock: 1
-  _holdAtHour: 0
-  _heldHour: 17
+  _holdAtHour: 1
+  _heldHour: 13
   _worldTimer:
     dayStartTime: 0.25
     dayEndTime: 0.75
@@ -194,8 +194,8 @@ MonoBehaviour:
     sunsetStartTime: 0.85
     sunsetEndTime: 0.99
   _clock:
-    totalRatio: 0.7083333
-    dayRatio: 0
+    totalRatio: 0.5416667
+    dayRatio: 0.5833333
     nightRatio: 0
     dawnRatio: 0
     brightRatio: 0

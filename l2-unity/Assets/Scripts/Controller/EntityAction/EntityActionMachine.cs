@@ -8,19 +8,21 @@ public sealed class EntityActionMachine : ITickable
     public static EntityActionMachine Instance { get; private set; }
 
     private readonly Dictionary<EntityActionKind, IEntityActionProcess> _processes;
+    private readonly L2PawnRange _pawnRange;
     private readonly List<Entity> _active = new List<Entity>();
     private readonly HashSet<int> _activeIds = new HashSet<int>();
 
-    public EntityActionMachine(L2PawnRange pawnRange)
+    public EntityActionMachine(L2PawnRange pawnRange, L2PawnYaw pawnYaw)
     {
         Instance = this;
+        _pawnRange = pawnRange;
         _processes = new Dictionary<EntityActionKind, IEntityActionProcess>
         {
             { EntityActionKind.Idle, new EntityActionIdle() },
-            { EntityActionKind.Move, new EntityActionMove(pawnRange) },
+            { EntityActionKind.Move, new EntityActionMove(pawnRange, pawnYaw) },
             { EntityActionKind.Stop, new EntityActionStop(pawnRange) },
-            { EntityActionKind.Attack, new EntityActionAttack() },
-            { EntityActionKind.Skill, new EntityActionSkill() }
+            { EntityActionKind.Attack, new EntityActionAttack(pawnYaw) },
+            { EntityActionKind.Skill, new EntityActionSkill(pawnYaw) }
         };
     }
 
@@ -44,6 +46,9 @@ public sealed class EntityActionMachine : ITickable
             return;
 
         EntityActionSlot slot = entity.ActionSlot;
+        if (NpcCombatTrace.IsCombatNpc(entity))
+            NpcCombatTrace.Write("ACTION", entity, null,
+                "from=" + slot.Action + " to=" + action + " " + NpcCombatTrace.Place(entity));
         EntityActionCombatLog.RememberBeforeSet(slot.Action);
         slot.Write(action, payload, slot.Target, slot.Destination);
 
@@ -54,21 +59,27 @@ public sealed class EntityActionMachine : ITickable
         Track(entity, action);
     }
 
-    public void Die(Entity entity, bool alreadyCorpse = false)
+    public void Die(Entity entity, bool alreadyCorpse = false, string source = null)
     {
         if (entity == null)
             return;
+
+        string src = string.IsNullOrEmpty(source) ? "machine" : source;
 
         EntityActionCombatLog.LogIfWatch(entity,
             "Die name=" + EntityActionCombatLog.NameOf(entity) +
             " allowed=" + IsAllowed(entity) +
             " alreadyCorpse=" + alreadyCorpse +
+            " src=" + src +
             " inCombat=" + entity.InCombat +
             " action=" + entity.ActionSlot.Action);
 
         if (IsAllowed(entity))
         {
             entity.InCombat = false;
+            entity.AttackTarget = null;
+            if (entity.ActionSlot != null)
+                entity.ActionSlot.Target = null;
             EntityActionVisual.CancelMove(entity);
             EntityActionVisual.PlayDeath(entity, alreadyCorpse);
             Set(entity, EntityActionKind.Stop, null);
@@ -107,22 +118,27 @@ public sealed class EntityActionMachine : ITickable
         Set(entity, EntityActionKind.Idle, null);
     }
 
-    public void ApplyStop(Entity entity, StopMoveDto dto)
+    public void ApplyStop(Entity entity, StopMoveDto dto, bool skipPositionCorrection = false)
     {
         if (!IsAllowed(entity) || entity.IsDead())
             return;
 
         EntityActionKind action = entity.ActionSlot.Action;
-        if (IsSkillOrAttack(action) || entity.InCombat && action != EntityActionKind.Move)
+        bool preserveCombat = IsSkillOrAttack(action) || IsFinishingSwing(entity);
+
+        EntityActionStop.StopLocomotion(entity);
+        EntityActionStop.TryCorrectPosition(entity, dto, _pawnRange, skipPositionCorrection || preserveCombat);
+
+        if (preserveCombat)
         {
+            EntityActionCombatLog.LogStep(entity,
+                "STOP KEEP_COMBAT nick=" + EntityActionCombatLog.NameOf(entity) +
+                " action=" + action +
+                " skipPos=" + skipPositionCorrection +
+                " nowL2=" + EntityActionCombatLog.L2(entity.transform.position));
             EntityActionCombatLog.LogIfWatch(entity,
-                "StopMove ignore name=" + EntityActionCombatLog.NameOf(entity) +
-                " action=" + action +
-                " inCombat=" + entity.InCombat);
-            EntityActionCombatLog.LogCiPawn(entity,
-                "ApplyStop IGNORE nick=" + EntityActionCombatLog.NameOf(entity) +
-                " action=" + action +
-                " inCombat=" + entity.InCombat);
+                "StopMove keep combat name=" + EntityActionCombatLog.NameOf(entity) +
+                " action=" + action);
             return;
         }
 
@@ -133,7 +149,8 @@ public sealed class EntityActionMachine : ITickable
         EntityActionCombatLog.LogCiPawn(entity,
             "ApplyStop SET Stop nick=" + EntityActionCombatLog.NameOf(entity) +
             " action=" + action +
-            " inCombat=" + entity.InCombat);
+            " inCombat=" + entity.InCombat +
+            " skipPos=" + skipPositionCorrection);
         Set(entity, EntityActionKind.Stop, dto);
     }
 
@@ -305,7 +322,8 @@ public sealed class EntityActionMachine : ITickable
         if (entity is UserEntity && pawn != null && entity.ActionSlot.PawnDist > 0.01f)
         {
             EntityActionVisual.CancelMove(entity);
-            string pose = "Arrived KEEP_RUN";
+            EntityActionVisual.PlayStandWait(entity);
+            string pose = entity.InCombat ? "Arrived ATKWAIT" : "Arrived WAIT";
             EntityActionCombatLog.MarkArrivedPose(pose);
             EntityActionCombatLog.LogCiPawn(entity,
                 pose +
@@ -474,6 +492,20 @@ public static class EntityActionCombatLog
         if (entity.Identity != null && !string.IsNullOrEmpty(entity.Identity.Name))
             return entity.Identity.Name;
         return entity.name;
+    }
+
+    public static void LogStep(Entity entity, string message)
+    {
+        string nick = NameOf(entity);
+        if (nick != "TestM" && nick != "TestF")
+            return;
+        Debug.Log("[MOVE_STEP] " + message);
+    }
+
+    public static string L2(Vector3 unity)
+    {
+        Vector3 p = VectorUtils.ConvertPosUnityToL2j(unity);
+        return p.x.ToString("F0") + "," + p.y.ToString("F0") + "," + p.z.ToString("F0");
     }
 
     public static void Log(string message)

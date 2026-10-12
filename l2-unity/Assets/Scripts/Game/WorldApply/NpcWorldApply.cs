@@ -28,7 +28,7 @@ public sealed class NpcWorldApply : EntityWorldApply
 
     public override void OnDie(Entity entity, DieDto dto)
     {
-        _actions.Die(entity);
+        _actions.Die(entity, false, "packet");
     }
 
     public override void OnAttack(Entity attacker, Entity target, AttackDto dto)

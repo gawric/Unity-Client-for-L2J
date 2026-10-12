@@ -25,7 +25,7 @@ public static class MonsterCrossFade
             return false;
         }
 
-        float duration = fixedDuration ?? LocomotionCrossFadeSettings.FixedDuration;
+        float duration = fixedDuration ?? LocomotionCrossFadeSettings.ResolveDuration(stateName, controller);
         if (duration <= 0f)
         {
             Animator animator = controller.GetAnimator();
@@ -38,6 +38,13 @@ public static class MonsterCrossFade
             animator.Update(0f);
             Debug.Log(
                 $"[ANIM_PLAY] id={objectId} snap state={stateName} hasState={hasState}");
+            return true;
+        }
+
+        // atk01 / spatk01 must rewind. Death and locomotion keep the existing clip.
+        if (family == MonsterAnimState.Atk01 || family == MonsterAnimState.SpAtk01)
+        {
+            controller.CrossFadeRestartInFixedTime(stateName, duration);
             return true;
         }
 
@@ -58,7 +65,7 @@ public static class MonsterCrossFade
             return false;
         }
 
-        float duration = fixedDuration ?? LocomotionCrossFadeSettings.FixedDuration;
+        float duration = fixedDuration ?? LocomotionCrossFadeSettings.ResolveDuration(stateName, controller);
         controller.CrossFadeInFixedTime(stateName, duration);
         return true;
     }

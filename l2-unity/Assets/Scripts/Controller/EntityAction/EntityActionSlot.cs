@@ -17,11 +17,22 @@ public sealed class EntityActionSlot
 
     public float PawnDist { get; set; }
     public Entity CollisionPawn { get; set; }
+    /// <summary>
+    /// Incremented on each remote melee AttackDto. MonsterStateAtk must not
+    /// SwitchToIdle a previous swing after a newer packet already restarted atk01.
+    /// </summary>
+    public int AttackSwingId { get; set; }
+
+    /// <summary>
+    /// Death clip froze on last frame (Loop Time on the clip must not restart the corpse).
+    /// </summary>
+    public bool DeathPoseHeld { get; set; }
 
     public void Clear()
     {
         PawnDist = 0f;
         CollisionPawn = null;
+        DeathPoseHeld = false;
         Write(EntityActionKind.Idle, null, null, Vector3.zero);
     }
 }

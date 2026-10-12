@@ -126,6 +126,21 @@ public class PlayerStateMachine : MonoBehaviour
         _stateInstance?.HandleEvent(evt , payload);
     }
 
+    /// <summary>
+    /// MOVE_TO already started (or the body is already walking/running).
+    /// Combat SMB SwitchToIdle must not ChangeIntention(IDLE) / WAIT_RETURN over that.
+    /// </summary>
+    public bool ShouldKeepLocomotion()
+    {
+        if (_currentState == PlayerState.WALKING || _currentState == PlayerState.RUNNING)
+            return true;
+        if (_currentIntention == Intention.INTENTION_MOVE_TO ||
+            _currentIntention == Intention.INTENTION_MOVE_TO_PAWN)
+            return true;
+        return IncomingPacketActions.Player != null &&
+               IncomingPacketActions.Player.RunningToDestination;
+    }
+
 
 
     public void OnWaitReturn()

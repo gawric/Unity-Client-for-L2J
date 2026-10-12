@@ -217,9 +217,9 @@ public class UserInfoDto : IWireDto
         _info.Appearance.CollisionRadius = (float)reader.ReadD();
         float collision = (float)reader.ReadD();
         _info.Appearance.CollisionHeight = collision;
-        int hairStyle = reader.ReadI();
-        int hairColor = reader.ReadI();
-        int face = reader.ReadI();
+        _info.Appearance.HairStyle = reader.ReadI();
+        _info.Appearance.HairColor = reader.ReadI();
+        _info.Appearance.Face = reader.ReadI();
         int isGm = reader.ReadI();
         _info.Identity.Title = reader.ReadOtherS();
         //_info.Identity.Title = "My title";
@@ -257,7 +257,8 @@ public class UserInfoDto : IWireDto
         _info.Stats.MaxCp = reader.ReadI();
         int cp = reader.ReadI();
         _info.Status.Cp = cp;
-        byte enchantEffect = reader.ReadB();
+        _info.Appearance.WeaponEnchant = reader.ReadB();
+        _info.Appearance.PaperdollReady = true;
         byte teamId = reader.ReadB();
         int clanCrestLargeId = reader.ReadI();
         byte isNoble = reader.ReadB();

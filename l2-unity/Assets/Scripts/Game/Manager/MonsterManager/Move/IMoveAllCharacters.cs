@@ -6,4 +6,7 @@ public interface IMoveAllCharacters
     public void AddRotate(int id, RotateData data);
     public bool IsMoving(int objId);
     public void CancelMove(int objId);
+    public void CancelRotate(int objId);
+    public void Forget(int objId);
+    MovementData GetMove(int objId);
 }

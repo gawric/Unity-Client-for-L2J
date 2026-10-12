@@ -210,6 +210,22 @@ public class BaseAnimationController : AnimationEventsBase, IAnimationController
             $"[ANIM_CROSSFADE] id={objectId} go={name} state={stateName} hasState={hasState} fixedDuration={fixedDuration:F3}s layer={layer}");
     }
 
+    public void CrossFadeRestartInFixedTime(string stateName, float fixedDuration, int layer = 0)
+    {
+        if (!TryGetAnimator() || string.IsNullOrEmpty(stateName))
+            return;
+
+        int objectId = _animator.GetInteger(AnimatorUtils.OBJECT_ID);
+        float normBefore = _animator.GetCurrentAnimatorStateInfo(layer).normalizedTime;
+        bool inTransition = _animator.IsInTransition(layer);
+        // fixedTimeOffset is seconds from the start of the destination clip, not normalized time.
+        _animator.CrossFadeInFixedTime(stateName, fixedDuration, layer, 0f);
+        _lastAnimationVariableName = stateName;
+        Debug.Log(
+            $"[ANIM_RESTART] id={objectId} go={name} state={stateName} fixedDuration={fixedDuration:F3}s " +
+            $"normBefore={normBefore:F3} inTransition={inTransition} layer={layer}");
+    }
+
     public Animator GetAnimator() => _animator;
 
     public void SetBool(string name, bool value , string entityName = "")

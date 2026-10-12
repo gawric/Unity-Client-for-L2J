@@ -357,6 +357,17 @@ public static class L2EffectGeneratorPrefabBuilder
                 }
             }
 
+            L2EffectGeneratorWeaponTransientConfigurator.TryApply(
+                prefabRoot,
+                planned,
+                emitters,
+                planned.Label,
+                out string weaponTransientLogLine);
+            if (!string.IsNullOrEmpty(weaponTransientLogLine))
+            {
+                logLines.Add(weaponTransientLogLine);
+            }
+
             PrefabUtility.SaveAsPrefabAsset(prefabRoot, prefabPath);
             logLines.Insert(
                 0,

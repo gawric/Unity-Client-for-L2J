@@ -49,6 +49,11 @@ public class RotateData
         return _mEntity != null;
     }
 
+    public bool IsMonsterDead()
+    {
+        return _mEntity != null && _mEntity.IsDead();
+    }
+
     public void SetRotate(bool isRotate)
     {
         _isRotate = isRotate;

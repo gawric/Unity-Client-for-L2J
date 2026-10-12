@@ -90,7 +90,7 @@ public sealed class AppearFadeService : ITickable
 
     /// <summary>
     /// Gear refresh replaces renderer materials. Restore fade instances first, then
-    /// re-apply the shader at the same elapsed alpha so CharInfo updates do not abort the ramp.
+    /// re-apply alpha on the current body shader so CharInfo updates do not abort the ramp.
     /// </summary>
     public void AroundVisualRefresh(Entity entity, Action refresh)
     {

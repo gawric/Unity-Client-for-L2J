@@ -79,6 +79,8 @@ public class PlayerStateSpAtkBow : StateMachineBehaviour
 
         AnimationManager.Instance?.NotifyMagicPhaseFinished(objectId, phaseName);
 
+        if (PlayerStateMachine.Instance != null && PlayerStateMachine.Instance.ShouldKeepLocomotion())
+            return;
         PlayerStateMachine.Instance.ChangeIntention(Intention.INTENTION_IDLE);
         PlayerStateMachine.Instance.NotifyEvent(Event.WAIT_RETURN, NewIdleState.WaitReturnFromCombatSmb);
     }

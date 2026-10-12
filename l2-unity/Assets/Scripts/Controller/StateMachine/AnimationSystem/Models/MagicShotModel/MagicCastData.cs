@@ -33,6 +33,17 @@ public class MagicCastData
     private const float WallPenaltySecondsMin = 0.07f;
     private const float WallPenaltySecondsMax = 0.15f;
 
+    /// <summary>
+    /// Imported clips are keyed at 24 fps and stop on the last key, so length is (frames-1)/24.
+    /// The client plays numFrames/30.
+    /// </summary>
+    private const float ClientFramesPerSecond = 30f;
+    private const float UnityClipFramesPerSecond = 24f;
+    /// <summary>Added to the chain before the filler is sized. InitSkillProcess +518 at cast speed 1.</summary>
+    private const float ClientChainSlackSeconds = 0.2f;
+    /// <summary>First clip is shortened by this over (hit - pad) when pad is at least this large.</summary>
+    private const float ClientFirstClipFactorSeconds = 0.15f;
+
     public float StartTime;
     public float HitTime;
     public float FlightTime;
@@ -52,6 +63,25 @@ public class MagicCastData
     public float SpeedShot = 1.0f;
     public float shotEventTime;
     public float serverTimeToShoot;
+    /// <summary>
+    /// Seconds from cast start to the AttackShot frame on the last clip.
+    /// The projectile fallback uses this. serverTimeToShoot (HitTime − flight) moves with distance.
+    /// </summary>
+    public float AnimationShotAtSeconds;
+
+    /// <summary>
+    /// Interlude: AttackShot notify name is None / Mag seq missing → SkillEffectFinalize
+    /// TriggerShot on the first MagicProcess tick with TriggerCasting. Spawn ShotAction now.
+    /// </summary>
+    public bool SpawnShotVisualsImmediately;
+
+    /// <summary>
+    /// Client cumulative clip walls from cast start. MagicProcess advances the
+    /// sequence on these absolute walls, not clip-local completion times.
+    /// </summary>
+    public float PhaseWallMidSeconds { get; private set; }
+    public float PhaseWallEndSeconds { get; private set; }
+    public float PhaseWallShotSeconds { get; private set; }
 
     /// <summary>Object id цели из пакета MagicSkillUseDto (приоритетнее PlayerEntity.TargetId для VFX).</summary>
     public int TargetObjectId;
@@ -85,6 +115,11 @@ public class MagicCastData
         SpeedMid = 1f;
         SpeedEnd = 1f;
         SpeedShot = 1f;
+        AnimationShotAtSeconds = 0f;
+        SpawnShotVisualsImmediately = false;
+        PhaseWallMidSeconds = 0f;
+        PhaseWallEndSeconds = 0f;
+        PhaseWallShotSeconds = 0f;
 
         DurMid = GetDurationSafe(clipsDurations, 0);
         DurEnd = GetDurationSafe(clipsDurations, 1);
@@ -102,13 +137,18 @@ public class MagicCastData
             $"loopEndSec≈{Mathf.Max(0f, ShotTriggerGlobalOffset - DurMid):F3}");
     }
 
-    public void Setup(float serverHitMs, float flyMs, float[] clipsDurations, float shotEventTime, int targetObjectId = 0)
+    public void Setup(float serverHitMs, float flyMs, float[] clipsDurations, float shotEventTime, int targetObjectId = 0, int castStyle = 1, bool mixCombo = false)
     {
         IsLongCast = false;
         StartTime = Time.time;
         HitTime = serverHitMs / 1000f;
         FlightTime = flyMs / 1000f;
         TargetObjectId = targetObjectId;
+        AnimationShotAtSeconds = 0f;
+        SpawnShotVisualsImmediately = false;
+        PhaseWallMidSeconds = 0f;
+        PhaseWallEndSeconds = 0f;
+        PhaseWallShotSeconds = 0f;
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
         Debug.Log(
@@ -218,13 +258,6 @@ public class MagicCastData
             firstWindow = Mathf.Max(MinPhaseWindowSeconds, twoClipAnimPlayBudget * twoClipFirstShare);
             secondWindow = Mathf.Max(MinPhaseWindowSeconds, twoClipAnimPlayBudget * twoClipSecondShare);
 
-            float speedFirst = durMid / firstWindow;
-            float speedSecond = durShotToEvent / secondWindow;
-
-            SpeedMid = 1.0f;
-            SpeedEnd = speedFirst;
-            SpeedShot = speedSecond;
-
             if (HitTime > MinPhaseWindowSeconds)
             {
                 castEndPhaseTotalSec = firstWindow + TwoClipCastEndHoldSeconds;
@@ -232,11 +265,35 @@ public class MagicCastData
                 castEndPlayPctOfHit = firstWindow / HitTime * 100f;
                 magicShotPlayPctOfHit = secondWindow / HitTime * 100f;
             }
+
+            // Tags J/K/L: two sequences. InitSkillProcess writes the scaled duration
+            // into slot 0 and leaves the AttackShot clip (slot 1) at native length.
+            // Unity plays those as CastEnd2P (SpeedEnd) then MagicShot2P (SpeedShot).
+            // No extra pose hold — the client does not insert one.
+            TwoClipCastEndHoldSeconds = 0f;
+            ApplyClientCastSpeeds(2, durMid, durEnd, 0f, durShotToEvent, castStyle, mixCombo);
+        }
+        else if (hasMidPhase && hasEndPhase && hasShotPhase)
+        {
+            TwoClipCastEndHoldSeconds = 0f;
+            ApplyClientCastSpeeds(3, durMid, durEnd, durShot, durShotToEvent, castStyle, mixCombo);
         }
         else
         {
             TwoClipCastEndHoldSeconds = 0f;
+            if (hasMidPhase)
+            {
+                ApplyClientCastSpeeds(1, durMid, 0f, 0f, durShotToEvent, castStyle, mixCombo);
+            }
         }
+
+        float wallMid = isTwoClipCastPath
+            ? durMid / Mathf.Max(SpeedEnd, 0.0001f)
+            : durMid / Mathf.Max(SpeedMid, 0.0001f);
+        float wallEnd = isTwoClipCastPath
+            ? durEnd / Mathf.Max(SpeedShot, 0.0001f)
+            : durEnd / Mathf.Max(SpeedEnd, 0.0001f);
+        float wallNotify = durShotToEvent / Mathf.Max(SpeedShot, 0.0001f);
 
         string wallPenaltyDisabledLabel = MagicCastWallPenaltyDisabledForTesting ? "YES" : "NO";
         Debug.Log(
@@ -250,7 +307,8 @@ public class MagicCastData
             $"windows[first={firstWindow:F3},second={secondWindow:F3},clipShareFirst={twoClipFirstShare:F3},clipShareSecond={twoClipSecondShare:F3}] " +
             $"castEndHoldSec={TwoClipCastEndHoldSeconds:F3} animPlayBudget={twoClipAnimPlayBudget:F3} " +
             $"castEndPhaseTotal={castEndPhaseTotalSec:F3} pctOfHit[hold={holdPctOfHit:F1},castPlay={castEndPlayPctOfHit:F1},shotPlay={magicShotPlayPctOfHit:F1}] " +
-            $"path={(isTwoClipCastPath ? "two_clip_castend_magicshot" : "default_three_phase")}");
+            $"path={(isTwoClipCastPath ? "two_clip_castend_magicshot" : "default_three_phase")} " +
+            $"walls[mid={wallMid:F3},end={wallEnd:F3},notify={wallNotify:F3}]");
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
         Debug.Log(
@@ -261,6 +319,193 @@ public class MagicCastData
             $"timelineDuration={timelineDuration:F3}s timingScale={timingScale:F3} " +
             $"speedMid={SpeedMid:F3} speedEnd={SpeedEnd:F3} speedShot={SpeedShot:F3}");
 #endif
+    }
+
+    /// <summary>
+    /// Playback lengths from APawn::InitSkillProcess, checked against SkillTiming.log.
+    /// cast_style picks the pad (2/5/8/10 = 0.4, 14 = 2, 3/12 = 0, otherwise 0.15).
+    /// Three-clip letters A–I stretch the middle clip. Two-clip J/K/L and Mix stretch the first.
+    /// Other clips stay at numFrames/30. A hit time shorter than that chain zeroes the filler
+    /// and speeds the rest up. pawn+6B8 was 1.0 on the logged character, so it is not applied again.
+    /// </summary>
+    private void ApplyClientCastSpeeds(int clipCount, float dur0, float dur1, float dur2, float shotEventClipTime, int castStyle, bool mixCombo)
+    {
+        float pad = PadSeconds(castStyle);
+        float room = Mathf.Max(0.0001f, HitTime - pad);
+        float headSlack = ClientChainSlackSeconds;
+        float n0 = ClientNativeSeconds(dur0);
+        float n1 = ClientNativeSeconds(dur1);
+        float n2 = ClientNativeSeconds(dur2);
+        float notify = ClientNotifySeconds(shotEventClipTime);
+        int filler = clipCount >= 3 && !mixCombo ? 1 : 0;
+        int shotIndex = clipCount - 1;
+
+        float untilNotify = 0f;
+        if (clipCount > 1)
+        {
+            untilNotify = notify;
+            if (0 != filler && 0 < shotIndex)
+            {
+                untilNotify += n0;
+            }
+            if (clipCount >= 3 && 1 != filler && 1 < shotIndex)
+            {
+                untilNotify += n1;
+            }
+        }
+
+        float fillerInitial = room - (untilNotify + ClientChainSlackSeconds);
+        float budget = room - headSlack;
+        bool rescale = fillerInitial < 0f && budget > 0.0001f && untilNotify > 0.0001f;
+        float scale = rescale ? untilNotify / budget : 1f;
+
+        float play0 = ClipPlaySeconds(0, filler, clipCount, n0, fillerInitial, headSlack, scale, rescale, pad, room);
+        float play1 = ClipPlaySeconds(1, filler, clipCount, n1, fillerInitial, headSlack, scale, rescale, pad, room);
+        float play2 = ClipPlaySeconds(2, filler, clipCount, n2, fillerInitial, headSlack, scale, rescale, pad, room);
+
+        if (clipCount >= 3)
+        {
+            PhaseWallMidSeconds = play0;
+            PhaseWallEndSeconds = play0 + play1;
+            PhaseWallShotSeconds = play0 + play1 + play2;
+            SpeedMid = SpeedFor(dur0, play0);
+            SpeedEnd = SpeedFor(dur1, play1);
+            SpeedShot = SpeedFor(dur2, play2);
+        }
+        else if (clipCount == 2)
+        {
+            PhaseWallMidSeconds = 0f;
+            PhaseWallEndSeconds = play0;
+            PhaseWallShotSeconds = play0 + play1;
+            SpeedEnd = SpeedFor(dur0, play0);
+            SpeedShot = SpeedFor(dur1, play1);
+            SpeedMid = SpeedEnd;
+        }
+        else
+        {
+            PhaseWallMidSeconds = 0f;
+            PhaseWallEndSeconds = play0;
+            PhaseWallShotSeconds = play0;
+            float one = SpeedFor(dur0, play0);
+            SpeedMid = one;
+            SpeedEnd = one;
+            SpeedShot = one;
+        }
+
+        float beforeShot = clipCount >= 3 ? play0 + play1 : (clipCount == 2 ? play0 : 0f);
+        float shotClipLength = clipCount >= 3 ? dur2 : (clipCount == 2 ? dur1 : dur0);
+        float shotPlay = clipCount >= 3 ? play2 : (clipCount == 2 ? play1 : play0);
+        float shotSpeed = SpeedFor(shotClipLength, shotPlay);
+        float eventWall = shotEventClipTime > 0f ? shotEventClipTime / Mathf.Max(shotSpeed, 0.0001f) : 0f;
+        AnimationShotAtSeconds = beforeShot + eventWall;
+
+        Debug.Log(
+            $"[SkillTiming] style={castStyle} pad={pad:F2} filler={filler} rescale={(rescale ? 1 : 0)} " +
+            $"hit={HitTime:F3} untilNotify={untilNotify:F4} " +
+            $"play=[{play0:F4},{play1:F4},{play2:F4}] " +
+            $"speed=[{SpeedMid:F3},{SpeedEnd:F3},{SpeedShot:F3}] shotAt={AnimationShotAtSeconds:F3}");
+    }
+
+    public float GetPhaseEndWallSeconds(int stateIndex)
+    {
+        if (stateIndex == 0) return PhaseWallMidSeconds;
+        if (stateIndex == 1) return PhaseWallEndSeconds;
+        if (stateIndex == 2) return PhaseWallShotSeconds;
+        return 0f;
+    }
+
+    private static float ClipPlaySeconds(int index, int filler, int clipCount, float native, float fillerInitial, float headSlack, float scale, bool rescale, float pad, float room)
+    {
+        if (index >= clipCount || native <= 0f)
+        {
+            return 0f;
+        }
+
+        float play;
+        if (index == filler)
+        {
+            if (rescale)
+            {
+                play = 0f;
+            }
+            else if (index == 0)
+            {
+                play = fillerInitial + headSlack;
+            }
+            else
+            {
+                play = fillerInitial;
+            }
+        }
+        else if (index == 0 && clipCount > 1)
+        {
+            float baseSeconds = native / scale + headSlack;
+            bool rewriteFirstClip = pad >= ClientFirstClipFactorSeconds;
+            play = rewriteFirstClip
+                ? baseSeconds * (1f - ClientFirstClipFactorSeconds / room)
+                : baseSeconds;
+        }
+        else
+        {
+            play = native / scale;
+        }
+
+        return play > 0f ? play : 0f;
+    }
+
+    private static float SpeedFor(float unityLength, float playSeconds)
+    {
+        if (unityLength <= 0f)
+        {
+            return 1f;
+        }
+
+        if (playSeconds <= 0.0001f)
+        {
+            return unityLength / 0.0001f;
+        }
+
+        return unityLength / playSeconds;
+    }
+
+    /// <summary>skillgrp cast_style, stored by the client at pawn+52C.</summary>
+    private static float PadSeconds(int castStyle)
+    {
+        switch (castStyle)
+        {
+            case 2:
+            case 5:
+            case 8:
+            case 10:
+                return 0.4f;
+            case 14:
+                return 2f;
+            case 3:
+            case 12:
+                return 0f;
+            default:
+                return 0.15f;
+        }
+    }
+
+    private static float ClientNativeSeconds(float unityLength)
+    {
+        if (unityLength <= 0f)
+        {
+            return 0f;
+        }
+
+        return (unityLength * UnityClipFramesPerSecond + 1f) / ClientFramesPerSecond;
+    }
+
+    private static float ClientNotifySeconds(float unityEventTime)
+    {
+        if (unityEventTime <= 0f)
+        {
+            return 0f;
+        }
+
+        return unityEventTime * UnityClipFramesPerSecond / ClientFramesPerSecond;
     }
 
     public float GetShotTimeNormalize()

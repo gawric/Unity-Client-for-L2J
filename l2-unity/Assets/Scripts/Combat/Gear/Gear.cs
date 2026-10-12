@@ -46,6 +46,8 @@ public class Gear : AbstractMeshManager
     private int _weaponRange;
 
     public WeaponType WeaponType { get { return _leftHandType != WeaponType.none ? _leftHandType : _rightHandType; } }
+    public WeaponType RightHandWeaponType { get { return _rightHandType; } }
+    public WeaponType LeftHandWeaponType { get { return _leftHandType; } }
     public string WeaponAnim { get { return _weaponAnim; } }
     public string LastWeaponAnim { get { return _lastWeaponAnim; } }
 
@@ -305,6 +307,11 @@ public class Gear : AbstractMeshManager
         return GetRightHandBone();
     }
 
+    public Transform GetTransformLeftHandBone()
+    {
+        return GetLeftHandBone();
+    }
+
     protected virtual Transform GetRightHandBone() {
         if (_rightHandBone == null) {
             _rightHandBone = transform.FindRecursive("Sword Bone");
@@ -364,6 +371,7 @@ public class Gear : AbstractMeshManager
             haveLeft = _leftHandWeapon.Id;
 
         if (haveRight == wantRight && haveLeft == wantLeft && haveShield == wantShield &&
+            HasExpectedHandMeshes(wantRight, wantLeft, wantShield) &&
             !HasOrphanHandMeshes(wantRight, wantLeft, wantShield))
         {
             if (this is UserGear || rHandId != 0 || lHandId != 0)
@@ -465,6 +473,22 @@ public class Gear : AbstractMeshManager
         return BoneHasUnexpectedItem(GetRightHandBone(), weaponName, wantRight) ||
             BoneHasUnexpectedItem(GetLeftHandBone(), weaponName, wantLeft) ||
             BoneHasUnexpectedItem(GetShieldBone(), shieldName, wantShield);
+    }
+
+    bool HasExpectedHandMeshes(int wantRight, int wantLeft, int wantShield)
+    {
+        return BoneHasExpectedItem(GetRightHandBone(), weaponName, wantRight) &&
+            BoneHasExpectedItem(GetLeftHandBone(), weaponName, wantLeft) &&
+            BoneHasExpectedItem(GetShieldBone(), shieldName, wantShield);
+    }
+
+    static bool BoneHasExpectedItem(Transform bone, string prefix, int expectedId)
+    {
+        if (expectedId == 0)
+            return true;
+
+        Transform child = bone?.Find(prefix + expectedId);
+        return child != null && child.gameObject.activeSelf;
     }
 
     bool BoneHasUnexpectedItem(Transform bone, string prefix, int allowedId)

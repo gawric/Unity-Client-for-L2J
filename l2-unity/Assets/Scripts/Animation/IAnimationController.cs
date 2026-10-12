@@ -11,6 +11,11 @@ public interface IAnimationController
     public void ResetAnimationTrigger(string name);
     public void ToggleAnimationCrossFade(string name, float duration = 0.3f);
     public void CrossFadeInFixedTime(string stateName, float fixedDuration, int layer = 0);
+    /// <summary>
+    /// Blend into <paramref name="stateName"/> and start that clip at second 0.
+    /// Locomotion must not use this: a run/wait restart would hitch the loop.
+    /// </summary>
+    public void CrossFadeRestartInFixedTime(string stateName, float fixedDuration, int layer = 0);
     /// <summary>Raw Animator for locomotion helpers (<see cref="PlayerLocomotionCrossFade"/>).</summary>
     public Animator GetAnimator();
 

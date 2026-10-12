@@ -28,21 +28,16 @@ public sealed class UserWorldApply : EntityWorldApply
                 ? VectorUtils.Distance2D(entity.transform.position, pawn.transform.position).ToString("F2")
                 : "-") +
             " " + EntityActionCombatLog.ClassifyDest(destination, pawn) +
-            (holdIdle ? " SKIP" : " APPLY"));
-        if (holdIdle)
-        {
-            float distToDest = VectorUtils.Distance2D(entity.transform.position, destination);
-            if (distToDest <= 1.0f)
-            {
-                EntityActionCombatLog.LogGap(entity, "MoveTo HOLD_IDLE_SKIP", pawn,
-                    " distToDest=" + distToDest.ToString("F2"));
-                return;
-            }
-            EntityActionCombatLog.LogGap(entity, "MoveTo HOLD_IDLE_APPLY", pawn,
-                " distToDest=" + distToDest.ToString("F2"));
-        }
+            " APPLY");
         EntityActionCombatLog.LogIfWatch(entity,
             "User.MoveTo chase action=" + entity.ActionSlot.Action +
+            " inCombat=" + entity.InCombat);
+        EntityActionCombatLog.LogStep(entity,
+            "MOVE APPLY nick=" + EntityActionCombatLog.NameOf(entity) +
+            " distM=" + VectorUtils.Distance2D(entity.transform.position, destination).ToString("F2") +
+            " nowL2=" + EntityActionCombatLog.L2(entity.transform.position) +
+            " destL2=" + EntityActionCombatLog.L2(destination) +
+            " action=" + entity.ActionSlot.Action +
             " inCombat=" + entity.InCombat);
         _actions.Set(entity, EntityActionKind.Move, dto);
     }
@@ -72,7 +67,20 @@ public sealed class UserWorldApply : EntityWorldApply
                 toStop <= 0.35f &&
                 (toDest > 0.5f || atDist) &&
                 !(pawn is NpcEntity);
-            string skip = skipKeepChase ? " SKIP_KEEP_CHASE" : (skipKeepMove ? " SKIP_KEEP_MOVE" : " APPLY");
+            bool skipPos = skipKeepChase || skipKeepMove;
+            string skip = skipKeepChase ? " SKIP_POS_CHASE" : (skipKeepMove ? " SKIP_POS_MOVE" : " APPLY");
+            bool moving = entity.Identity != null && MoveAllCharacters.Instance != null &&
+                MoveAllCharacters.Instance.IsMoving(entity.Identity.Id);
+            EntityActionCombatLog.LogStep(entity,
+                "STOP " + skip.Trim() + " nick=" + EntityActionCombatLog.NameOf(entity) +
+                " moving=" + moving +
+                " action=" + entity.ActionSlot.Action +
+                " inCombat=" + entity.InCombat +
+                " toStopM=" + toStop.ToString("F2") +
+                " toDestM=" + toDest.ToString("F2") +
+                " nowL2=" + EntityActionCombatLog.L2(entity.transform.position) +
+                " stopL2=" + EntityActionCombatLog.L2(dto.StopPos) +
+                " destL2=" + EntityActionCombatLog.L2(entity.ActionSlot.Destination));
             EntityActionCombatLog.LogCiPawn(entity,
                 "StopMove nick=" + EntityActionCombatLog.NameOf(entity) +
                 " action=" + entity.ActionSlot.Action +
@@ -93,15 +101,15 @@ public sealed class UserWorldApply : EntityWorldApply
                 " " + EntityActionCombatLog.ClassifyDest(dto.StopPos, pawn) +
                 skip);
             CharInfoMoveBudgetLog.Compare(entity, "STOP" + skip, pawn, dto.StopPos, true);
-            if (skipKeepChase || skipKeepMove)
-                return;
-            if (nowToPawn >= 2f)
+            if (nowToPawn >= 2f && !skipPos)
                 EntityActionCombatLog.LogGap(entity, "StopMove APPLY_FAR", pawn,
                     " toStop=" + toStop.ToString("F2") +
                     " stop=" + EntityActionCombatLog.Vec(dto.StopPos) +
                     " stopToPawn=" + (pawn != null
                         ? VectorUtils.Distance2D(dto.StopPos, pawn.transform.position).ToString("F2")
                         : "-"));
+            _actions.ApplyStop(entity, dto, skipPos);
+            return;
         }
         _actions.ApplyStop(entity, dto);
     }

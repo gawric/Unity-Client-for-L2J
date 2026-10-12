@@ -11,6 +11,9 @@ public class CharInfoDto : IWireDto
     public PlayerStats Stats { get; private set; }
     public PlayerAppearance Appearance { get; private set; }
     public bool AlikeDead { get; private set; }
+    public int PacketRace { get; private set; }
+    public int PacketClassFirst { get; private set; }
+    public int PacketClassSecond { get; private set; }
 
     public CharInfoDto()
     {
@@ -33,15 +36,17 @@ public class CharInfoDto : IWireDto
         Identity.Name = reader.ReadOtherS();
 
         int race = reader.ReadI();
+        PacketRace = race;
         Appearance.Race = (int)MapClassId.GetRace(race);
         Appearance.Sex = reader.ReadI();
 
         int classId = reader.ReadI();
+        PacketClassFirst = classId;
         Appearance.BaseClass = classId;
         Identity.PlayerClass = classId;
 
-        reader.ReadI();
-        reader.ReadI();
+        int hairAll = reader.ReadI();
+        int head = reader.ReadI();
         int rHand1 = reader.ReadI();
         Appearance.RHand = rHand1;
         Appearance.LHand = reader.ReadI();
@@ -49,11 +54,23 @@ public class CharInfoDto : IWireDto
         Appearance.Chest = reader.ReadI();
         Appearance.Legs = reader.ReadI();
         Appearance.Feet = reader.ReadI();
-        int paperBackOrHair = reader.ReadI();
+        int cloak = reader.ReadI();
         int rHand2 = reader.ReadI();
         Appearance.RHand = rHand2;
-        reader.ReadI();
-        reader.ReadI();
+        int hairItem = reader.ReadI();
+        int faceItem = reader.ReadI();
+        Appearance.PaperDoll.Item_Under = hairAll;
+        Appearance.PaperDoll.Item_Head = head;
+        Appearance.PaperDoll.Item_RHand = rHand2;
+        Appearance.PaperDoll.Item_LHand = Appearance.LHand;
+        Appearance.PaperDoll.Item_Gloves = Appearance.Gloves;
+        Appearance.PaperDoll.Item_Chest = Appearance.Chest;
+        Appearance.PaperDoll.Item_Legs = Appearance.Legs;
+        Appearance.PaperDoll.Item_Feet = Appearance.Feet;
+        Appearance.PaperDoll.Item_Cloak = cloak;
+        Appearance.PaperDoll.Item_Hair = hairItem;
+        Appearance.PaperDoll.Item_Face = faceItem;
+        Appearance.PaperdollReady = true;
 
         reader.ReadH();
         reader.ReadH();
@@ -134,12 +151,13 @@ public class CharInfoDto : IWireDto
         reader.ReadB();
         reader.ReadH();
 
-        Identity.PlayerClass = reader.ReadI();
+        PacketClassSecond = reader.ReadI();
+        Identity.PlayerClass = PacketClassSecond;
 
         Stats.MaxCp = reader.ReadI();
         Status.Cp = reader.ReadI();
 
-        reader.ReadB();
+        Appearance.WeaponEnchant = reader.ReadB();
         reader.ReadB();
         reader.ReadI();
         reader.ReadB();
@@ -169,7 +187,7 @@ public class CharInfoDto : IWireDto
             " cp=" + Status.Cp +
             " maxCp=" + Stats.MaxCp +
             " " + GearFlowLog.Paperdoll(Appearance) +
-            " rHand1=" + rHand1 + " rHand2=" + rHand2 + " backOrHair=" + paperBackOrHair);
+            " rHand1=" + rHand1 + " rHand2=" + rHand2 + " cloak=" + cloak);
 
         Debug.Log("[SPD] PKT OnCharInfo parse nick=" + Identity.Name +
             " id=" + Identity.Id +
@@ -184,12 +202,29 @@ public class CharInfoDto : IWireDto
             " running=" + (running ? 1 : 0) +
             " locL2=(" + x + "," + y + "," + z + ")");
 
+        int baseBefore = Appearance.BaseClass;
+        bool mageByFirst = CharacterClassParser.IsMage((CharacterClass)PacketClassFirst);
+        bool mageBySecond = CharacterClassParser.IsMage((CharacterClass)Identity.PlayerClass);
         if (Appearance.BaseClass != (int)BaseClass.Fighter && Appearance.BaseClass != (int)BaseClass.MMagic)
         {
-            Appearance.BaseClass = CharacterClassParser.IsMage((CharacterClass)Identity.PlayerClass)
+            Appearance.BaseClass = mageBySecond
                 ? (int)BaseClass.MMagic
                 : (int)BaseClass.Fighter;
         }
+
+        Debug.Log("[CHARINFO_CLASS] nick=" + Identity.Name +
+            " id=" + Identity.Id +
+            " raceRaw=" + PacketRace +
+            " raceMapped=" + Appearance.Race +
+            " sex=" + Appearance.Sex +
+            " classFirst=" + PacketClassFirst +
+            " classSecond=" + PacketClassSecond +
+            " mageFirst=" + mageByFirst +
+            " mageSecond=" + mageBySecond +
+            " baseBefore=" + baseBefore +
+            " baseAfter=" + Appearance.BaseClass +
+            " chest=" + Appearance.Chest +
+            " rhand=" + Appearance.RHand);
     }
 
     void ApplyStubHpFromAlikeDead()

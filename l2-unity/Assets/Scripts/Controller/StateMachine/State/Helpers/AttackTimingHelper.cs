@@ -4,6 +4,12 @@ public static class AttackTimingHelper
 {
     // Player 1HS (server): HitTime/full = timeAtk, onHitTimer sAtk = timeAtk / 2 → fraction 0.5
     private const float SIMPLE_MELEE_HIT_OVER_FULL = 0.5f;
+    // Interlude BowAttackProcess live capture:
+    // GetAtk01AnimRate=0.8333=25/30, PlayAnim rate=GetAtk01AnimRate*AttackSpeedMultiplier,
+    // TweenTime=0.2/PlayRate. Player bow source sequences report rate=30.
+    private const float INTERLUDE_BOW_SOURCE_FPS = 30f;
+    private const float INTERLUDE_BOW_BASE_FPS = 25f;
+    private const float INTERLUDE_BOW_TWEEN_BASE_SECONDS = 0.2f;
 
     /// <summary>
     /// Disabled: procedural spine/arm tilt toward the target. Keep for later.
@@ -96,6 +102,71 @@ public static class AttackTimingHelper
             return baseTimeAtkMs;
 
         return CalcBaseParam.CalculateAttackAndFlightTimes(distance, baseTimeAtkMs)[0];
+    }
+
+    /// <summary>
+    /// Bow release wall time. Server Hit is the full 500000/PAtkSpd delay.
+    /// The arrow still flies with ProjectileFlightTimeCalculator, so the clip
+    /// notify must happen at Hit minus that flight. No 1000 ms draw cap.
+    /// </summary>
+    public static void ResolveBowRelease(
+        Entity entity,
+        out float hitSec,
+        out float flightSec,
+        out float releaseSec,
+        out float distance)
+    {
+        hitSec = CalcBaseParam.CalculateTimeL2j(ResolvePAtkSpd(entity)) / 1000f;
+        distance = 0f;
+        flightSec = 0.01f;
+        Transform target = entity != null ? entity.Target : null;
+        if (entity != null && target != null)
+        {
+            Entity targetEntity = target.GetComponent<Entity>();
+            if (targetEntity != null && targetEntity.Appearance != null)
+            {
+                Vector3 start = entity.GetPositionRightHand();
+                Vector3 aim = VectorUtils.GetCollision(start, target);
+                distance = Vector3.Distance(start, aim);
+                flightSec = ProjectileFlightTimeCalculator.CalculateL2ArrowFlightTimeSeconds(distance);
+            }
+        }
+
+        releaseSec = Mathf.Max(0.05f, hitSec - flightSec);
+    }
+
+    /// <summary>
+    /// Reproduces Interlude APawn::BowAttackProcess animation timing.
+    /// Distance and projectile flight do not affect the animation or AttackShot notify.
+    /// Unity clips preserve original frame numbers on their imported sample-rate timeline,
+    /// therefore the original 30 fps PlayAnim rate is converted to the clip sample rate.
+    /// </summary>
+    public static void ResolveClientBowAnimation(
+        Entity entity,
+        float unityClipFps,
+        out float attackSpeedMultiplier,
+        out float clientAnimRate,
+        out float clientPlayRate,
+        out float tweenSeconds,
+        out float unityMotionSpeed)
+    {
+        attackSpeedMultiplier = 1f;
+        if (entity != null && entity.Stats != null &&
+            entity.Stats.PAtkSpd > 0 && entity.Stats.PAtkRealSpeed > 0.0001f)
+        {
+            attackSpeedMultiplier = entity.Stats.PAtkRealSpeed / entity.Stats.PAtkSpd;
+        }
+        if (attackSpeedMultiplier <= 0.0001f || attackSpeedMultiplier > 10f)
+            attackSpeedMultiplier = 1f;
+
+        clientAnimRate = INTERLUDE_BOW_BASE_FPS / INTERLUDE_BOW_SOURCE_FPS;
+        clientPlayRate = clientAnimRate * attackSpeedMultiplier;
+        if (clientPlayRate <= 0.0001f)
+            clientPlayRate = clientAnimRate;
+
+        tweenSeconds = INTERLUDE_BOW_TWEEN_BASE_SECONDS / clientPlayRate;
+        float clipFps = unityClipFps > 0.0001f ? unityClipFps : 24f;
+        unityMotionSpeed = clientPlayRate * INTERLUDE_BOW_SOURCE_FPS / clipFps;
     }
 
     /// <summary>

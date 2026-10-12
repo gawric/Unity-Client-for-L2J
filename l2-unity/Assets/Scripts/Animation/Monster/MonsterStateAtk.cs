@@ -1,5 +1,4 @@
 ﻿
-using System;
 using UnityEngine;
 
 public class MonsterStateAtk : MonsterStateBase
@@ -10,10 +9,18 @@ public class MonsterStateAtk : MonsterStateBase
     public string parameterName;
     private AnimationCurve _animationCurve;
     private bool _isSwitchIdle = false;
+    private bool _loggedSkillHold;
+    private bool _loggedSkillStuck;
+    private int _swingId;
 
     override public void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex) {
+        _isSwitchIdle = false;
+        _loggedSkillHold = false;
+        _loggedSkillStuck = false;
+        _startTime = Time.time;
 
         LoadComponents(animator);
+        _swingId = _entity != null ? _entity.ActionSlot.AttackSwingId : 0;
 
         AnimatorClipInfo[] clipInfos = animator.GetNextAnimatorClipInfo(0);
 
@@ -25,18 +32,25 @@ public class MonsterStateAtk : MonsterStateBase
         _animationCurve = new AnimationCurve();
         //float test = CalcBaseParam.CalculateTimeL2j(_entity.Stats.PAtkRealSpeed);
         float timeAtk = CalcBaseParam.CalculateTimeL2j(_entity.Stats.PAtkRealSpeed);
-        _startTime = Time.time;
         _endTime = TimeUtils.ConvertMsToSec(timeAtk);
         float timeAnimation = clipInfos[0].clip.length;
         RecreateAnimationCurve(_animationCurve, _endTime, timeAnimation);
 
         Debug.Log("Calc Time Monster Atk>>> All Time Animation " + timeAnimation + " timeAtk " + timeAtk);
         _networkAnimationController.UpdateAnimatorAtkSpeedL2j(timeAtk, timeAnimation);
+        if (_entity != null && _entity.ActionSlot.Action == EntityActionKind.Skill)
+        {
+            MobSkillLog.Enter(_entity, timeAnimation, timeAtk, animator.GetFloat("patkspd"));
+        }
         StopAnimationTrigger(animator, parameterName);
     }
 
     override public void OnStateUpdate(Animator animator, AnimatorStateInfo stateInfo, int layerIndex) {
+        if (TryFinishSkill(stateInfo))
+            return;
         if (_entity != null && _entity.ActionSlot.Action != EntityActionKind.Attack)
+            return;
+        if (IsStaleSwing())
             return;
 
         float currentTime = Time.time;
@@ -53,21 +67,61 @@ public class MonsterStateAtk : MonsterStateBase
 
     }
 
+    bool TryFinishSkill(AnimatorStateInfo stateInfo)
+    {
+        if (_entity == null || _entity.ActionSlot.Action != EntityActionKind.Skill)
+            return false;
+
+        if (!_loggedSkillHold && stateInfo.normalizedTime >= 1f)
+        {
+            _loggedSkillHold = true;
+            MobSkillLog.ClipEnd(_entity);
+        }
+
+        if (_isSwitchIdle || stateInfo.normalizedTime < 1f || _entity.IsDead())
+        {
+            if (!_loggedSkillStuck &&
+                _isSwitchIdle &&
+                stateInfo.IsName("atk01") &&
+                stateInfo.normalizedTime >= 1.05f)
+            {
+                _loggedSkillStuck = true;
+                MobSkillLog.Stuck(_entity);
+            }
+            return true;
+        }
+        if (EntityActionMachine.Instance == null)
+            return true;
+
+        string restore = MobSkillLog.CurrentLocomotion(_entity);
+        _isSwitchIdle = true;
+        EntityActionMachine.Instance.Set(_entity, EntityActionKind.Idle, restore);
+        MobSkillLog.Done(_entity, restore);
+        return true;
+    }
+
     private void SwitchToIdle(AnimatorStateInfo stateInfo)
     {
         float currentNormalizedTime = stateInfo.normalizedTime;
 
-        if (!_isSwitchIdle & currentNormalizedTime > 0.9f)
-        {
+        if (_isSwitchIdle || currentNormalizedTime <= 0.9f)
+            return;
+        if (_entity == null || _entity.IsDead() || EntityActionMachine.Instance == null)
+            return;
+        if (_entity.ActionSlot.Action != EntityActionKind.Attack)
+            return;
+        if (IsStaleSwing())
+            return;
 
-            _isSwitchIdle = true;
+        _isSwitchIdle = true;
+        EntityActionMachine.Instance.Set(_entity, EntityActionKind.Idle, null);
+    }
 
-            if (_entity.IsDead() || EntityActionMachine.Instance == null)
-                return;
-            if (_entity.ActionSlot.Action != EntityActionKind.Attack)
-                return;
-            EntityActionMachine.Instance.Set(_entity, EntityActionKind.Idle, null);
-        }
+    bool IsStaleSwing()
+    {
+        return _entity != null &&
+            _swingId != 0 &&
+            _entity.ActionSlot.AttackSwingId != _swingId;
     }
 
     private void StopAnimationTrigger(Animator animator, string parameterName)

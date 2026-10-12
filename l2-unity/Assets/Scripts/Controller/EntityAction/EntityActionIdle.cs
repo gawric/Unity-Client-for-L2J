@@ -8,6 +8,13 @@ public sealed class EntityActionIdle : IEntityActionProcess
             return;
         if (EntityActionMachine.IsFinishingSwing(entity))
             return;
+        string restore = payload as string;
+        if (!string.IsNullOrEmpty(restore) &&
+            (entity is MonsterEntity || entity is NpcEntity))
+        {
+            EntityActionVisual.RestoreLocomotion(entity, restore);
+            return;
+        }
         EntityActionCombatLog.LogCiPawn(entity,
             "Idle.Enter PlayStandWait nick=" + EntityActionCombatLog.NameOf(entity) +
             " inCombat=" + entity.InCombat +

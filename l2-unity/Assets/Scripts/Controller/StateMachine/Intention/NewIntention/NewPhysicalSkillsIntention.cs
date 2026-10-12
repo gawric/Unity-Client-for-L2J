@@ -15,7 +15,7 @@ public class NewPhysicalSkillsIntention : IntentionBase
         {
             MagicSkillUseDto useSkill = (MagicSkillUseDto)arg0;
 
-            if (IsSpecialSkill(useSkill.SkillId))
+            if (WeaponChargeSkill.IsCharge(useSkill.SkillId))
             {
                 // Backup path: charge must never leave current state (ATTACK/RUN/WALK/IDLE).
                 PlayerState prevState = _stateMachine.State;
@@ -65,8 +65,11 @@ public class NewPhysicalSkillsIntention : IntentionBase
         if (_stateMachine.Player == null) return;
 
         _stateMachine.Player.IsSoulshotCharged = true;
-        Transform weapon = _stateMachine.Player.GetWeaponTransform();
-        IncomingPacketActions.Effects.PlayEffect(useSkill.SkillId, weapon);
+        WeaponChargeSkill.Play(
+            IncomingPacketActions.Effects,
+            useSkill.SkillId,
+            _stateMachine.Player.GetWeaponTransform(),
+            _stateMachine.Player.transform);
 
         Debug.Log(
             $"{SS_SM_LOG} ApplySoulshotCharge skillId={useSkill.SkillId} " +
@@ -88,11 +91,6 @@ public class NewPhysicalSkillsIntention : IntentionBase
     }
 
  
-    private bool IsSpecialSkill(int skillId)
-    {
-        return skillId == (int)SpecialSkillType.SoulshotNg ||
-               skillId == (int)SpecialSkillType.SpiritshotNg;
-    }
     public override void Exit() { }
     public override void Update()
     {

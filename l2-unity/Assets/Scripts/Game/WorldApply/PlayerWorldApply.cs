@@ -13,6 +13,12 @@ public sealed class PlayerWorldApply : EntityWorldApply
 
     public override void OnMoveTo(Entity entity, Vector3 destination, Vector3 current, CharMoveToLocationDto dto)
     {
+        ReplayAttackTrace.Write(
+            "PLAYER_MOVE",
+            entity,
+            entity != null ? entity.GetTargetEntity() : null,
+            "state=" + (PlayerStateMachine.Instance != null ? PlayerStateMachine.Instance.State.ToString() : "none") +
+            " destination=" + destination);
         if (PlayerStateMachine.Instance != null)
             PlayerStateMachine.Instance.ChangeIntention(Intention.INTENTION_MOVE_TO, dto);
     }
@@ -69,7 +75,7 @@ public sealed class PlayerWorldApply : EntityWorldApply
         if (_skillbar != null)
             _skillbar.ShowCooldown(dto.SkillId, Shortcut.TYPE_SKILL, dto.Reusedelay);
 
-        if (IsWeaponChargeShot(dto.SkillId))
+        if (WeaponChargeSkill.IsCharge(dto.SkillId))
         {
             ApplyWeaponChargeShot(entity, dto);
             return;
@@ -92,24 +98,14 @@ public sealed class PlayerWorldApply : EntityWorldApply
             dto);
     }
 
-    private static bool IsWeaponChargeShot(int skillId)
-    {
-        return skillId == (int)SpecialSkillType.SoulshotNg ||
-               skillId == (int)SpecialSkillType.SpiritshotNg;
-    }
-
     private void ApplyWeaponChargeShot(Entity entity, MagicSkillUseDto useSkill)
     {
         PlayerEntity player = entity as PlayerEntity;
-        if (player == null)
+        if (player == null || useSkill == null)
             return;
 
         player.IsSoulshotCharged = true;
-        Transform weapon = player.GetWeaponTransform();
-        if (weapon == null || _effects == null)
-            return;
-
-        _effects.PlayEffect(useSkill.SkillId, weapon);
+        WeaponChargeSkill.Play(_effects, useSkill.SkillId, player.GetWeaponTransform(), player.transform);
     }
 
     public override void OnAutoAttackStart(Entity entity, AutoAttackStartDto dto)

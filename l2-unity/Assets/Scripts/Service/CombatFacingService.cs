@@ -18,11 +18,13 @@ public sealed class CombatFacingService : MonoBehaviour
         public Transform Actor;
         public Transform Target;
         public float LastTurnLogTime;
+        public int Rate;
     }
 
     public static CombatFacingService Instance { get; private set; }
 
     [Inject] WeapongrpTable _weaponGrps;
+    [Inject] L2PawnYaw _pawnYaw;
 
     private static WeapongrpTable Weapons
     {
@@ -95,7 +97,7 @@ public sealed class CombatFacingService : MonoBehaviour
     /// <summary>
     /// Start / replace tracking for <paramref name="objectId"/> until <see cref="EndFollow(int)"/>.
     /// </summary>
-    public void BeginFollow(int objectId, Transform actor, Transform target)
+    public void BeginFollow(int objectId, Transform actor, Transform target, int headingUnitsPerSecond = L2PawnYaw.RotationRateYaw)
     {
         if (objectId == 0 || actor == null || target == null || actor == target)
         {
@@ -112,7 +114,8 @@ public sealed class CombatFacingService : MonoBehaviour
         {
             Actor = actor,
             Target = target,
-            LastTurnLogTime = 0f
+            LastTurnLogTime = 0f,
+            Rate = headingUnitsPerSecond > 0 ? headingUnitsPerSecond : L2PawnYaw.RotationRateYaw
         };
 
         Debug.Log(
@@ -228,15 +231,18 @@ public sealed class CombatFacingService : MonoBehaviour
             return;
         }
 
-        Quaternion look = Quaternion.LookRotation(dir.normalized);
-        float angle = Quaternion.Angle(actor.rotation, look);
-        if (angle <= _angleThreshold)
-        {
-            actor.rotation = look;
-            return;
-        }
+        L2PawnYawDrive drive = actor.GetComponent<L2PawnYawDrive>();
+        if (drive != null)
+            drive.Stop();
 
-        actor.rotation = Quaternion.Slerp(actor.rotation, look, Time.deltaTime * _speed);
+        float desired = Quaternion.LookRotation(dir).eulerAngles.y;
+        float current = actor.eulerAngles.y;
+        if (_pawnYaw == null)
+            return;
+        float maxStep = _pawnYaw.DegreesPerSecond(entry.Rate) * Time.deltaTime;
+        float next = _pawnYaw.StepDegrees(current, desired, maxStep);
+        actor.rotation = Quaternion.Euler(0f, next, 0f);
+        float angle = Mathf.Abs(Mathf.DeltaAngle(current, desired));
 
         float now = Time.unscaledTime;
         if (now - entry.LastTurnLogTime >= TurnLogIntervalSeconds)

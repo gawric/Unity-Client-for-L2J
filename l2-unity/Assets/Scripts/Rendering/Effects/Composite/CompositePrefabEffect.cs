@@ -120,6 +120,8 @@ public class CompositePrefabEffect : TimedCompositeEffectBase
             _pendingHitColliderParts,
             _pendingAnimationShootParts,
             SpawnPart);
+        if (_castData != null && _castData.SpawnShotVisualsImmediately)
+            ProcessShootEvent("none-anim");
         StartPendingPartsRoutineIfNeeded();
         StartShootFallbackRoutineIfNeeded();
         if (!_skipDestroyCompositeByLifetime)
@@ -478,9 +480,19 @@ public class CompositePrefabEffect : TimedCompositeEffectBase
         _fallbackShootRoutine = StartCoroutine(ShootFallbackRoutine());
     }
 
+    float FallbackShootDelay()
+    {
+        if (_castData != null && _castData.AnimationShotAtSeconds > 0.01f)
+        {
+            return _castData.AnimationShotAtSeconds;
+        }
+
+        return _castData != null ? _castData.serverTimeToShoot : 0f;
+    }
+
     IEnumerator ShootFallbackRoutine()
     {
-        float shootAt = _castData.StartTime + _castData.serverTimeToShoot;
+        float shootAt = _castData.StartTime + FallbackShootDelay();
         float remaining = shootAt - Time.time;
         if (remaining > 0f)
         {

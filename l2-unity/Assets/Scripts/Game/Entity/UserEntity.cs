@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using VContainer;
 
 [RequireComponent(typeof(NetworkAnimationController))]
 
@@ -8,6 +9,8 @@ public class UserEntity : NetworkEntity
     private CharacterController _characterController;
     private float _attackVisualUntil;
     private UserBowArrowEvents _bowArrowEvents;
+
+    [Inject] L2PawnYaw _pawnYaw;
 
     public override void Initialize()
     {
@@ -153,7 +156,9 @@ public class UserEntity : NetworkEntity
         dir.y = 0f;
         if (dir.sqrMagnitude < 0.0001f)
             return;
-        transform.rotation = Quaternion.LookRotation(dir);
+        if (_pawnYaw == null)
+            return;
+        _pawnYaw.RequestLook(transform, worldPoint, L2PawnYaw.RotationRateYaw);
     }
 
     public void BeginAttackVisual(float durationSec)

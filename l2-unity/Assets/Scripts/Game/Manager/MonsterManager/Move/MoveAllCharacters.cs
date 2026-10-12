@@ -14,6 +14,8 @@ public class MoveAllCharacters : MonoBehaviour, IMoveAllCharacters
     private Dictionary<int, RotateData> _rotateDict;
     private List<int> _removeListMove;
     private List<int> _removeListRotate;
+    private Dictionary<int, MovementData> _stoppedMoveData;
+    private List<int> _reconciledStoppedMoves;
 
     private void Awake()
     {
@@ -24,6 +26,8 @@ public class MoveAllCharacters : MonoBehaviour, IMoveAllCharacters
             _rotateDict = new Dictionary<int, RotateData>();
             _removeListMove = new List<int>();
             _removeListRotate = new List<int>();
+            _stoppedMoveData = new Dictionary<int, MovementData>();
+            _reconciledStoppedMoves = new List<int>();
 
         }
         else
@@ -43,7 +47,11 @@ public class MoveAllCharacters : MonoBehaviour, IMoveAllCharacters
 
             if (isRotate)
             {
-                if (data.IsEntityTarget() & data.IsEntityMonster())
+                if (data.IsMonsterDead())
+                {
+                    _removeListRotate.Add(kvp.Key);
+                }
+                else if (data.IsEntityTarget() & data.IsEntityMonster())
                 {
                     Transform _targetRotation = data.GetTargetTransform();
                     Transform transform = data.GetMonsterTransform();
@@ -87,7 +95,7 @@ public class MoveAllCharacters : MonoBehaviour, IMoveAllCharacters
     {
         MovementData prev;
         if (_moveDict.TryGetValue(id, out prev) && prev != null && prev.IsMove())
-            data.InheritAcisClock(prev);
+            data.InheritMoveTimer(prev);
         _moveDict[id] = data;
     }
 
@@ -102,6 +110,22 @@ public class MoveAllCharacters : MonoBehaviour, IMoveAllCharacters
         }
     }
 
+    public void CancelRotate(int objId)
+    {
+        if (_rotateDict.ContainsKey(objId))
+            _rotateDict.Remove(objId);
+    }
+
+    public void Forget(int objId)
+    {
+        _moveDict.Remove(objId);
+        _rotateDict.Remove(objId);
+        _stoppedMoveData.Remove(objId);
+        _removeListMove.Remove(objId);
+        _removeListRotate.Remove(objId);
+        _reconciledStoppedMoves.Remove(objId);
+    }
+
     public bool IsMoving(int objId)
     {
         if (_moveDict.ContainsKey(objId))
@@ -113,8 +137,15 @@ public class MoveAllCharacters : MonoBehaviour, IMoveAllCharacters
         return false;
     }
 
+    public MovementData GetMove(int objId)
+    {
+        MovementData data;
+        return _moveDict.TryGetValue(objId, out data) ? data : null;
+    }
+
     void FixedUpdate()
     {
+        ReconcileStoppedMoves();
         if (_moveDict.Count == 0) return;
 
         foreach (KeyValuePair<int, MovementData> kvp in _moveDict)
@@ -151,8 +182,6 @@ public class MoveAllCharacters : MonoBehaviour, IMoveAllCharacters
         if (target != null)
         {
             float stopDistance = data.GetDistance();
-            data.SyncUserGait();
-            float speed = data.GetSpeed();
             bool isMove = data.IsMove();
 
             if (!data.IsEntity()) {
@@ -161,6 +190,13 @@ public class MoveAllCharacters : MonoBehaviour, IMoveAllCharacters
             }
 
             Transform transform = data.GetTransform();
+            if (data.IsOwnerDead())
+            {
+                data.SetIsMove(false);
+                _removeListMove.Add(key);
+                data.SetLastPosition(transform.position);
+                return;
+            }
             Vector3 before = transform.position;
             if (!isMove)
             {
@@ -170,7 +206,6 @@ public class MoveAllCharacters : MonoBehaviour, IMoveAllCharacters
             }
 
             float distance = VectorUtils.Distance2D(before, target);
-            bool translated = false;
 
             if (distance >= stopDistance)
             {
@@ -182,14 +217,10 @@ public class MoveAllCharacters : MonoBehaviour, IMoveAllCharacters
 
                 if (isMove && point.sqrMagnitude > 0.0001f)
                 {
+                    data.AdvanceMoveTimer();
+                    data.SyncUserGait();
+                    float speed = data.GetSpeed();
                     data.Move(direction, speed);
-                    translated = true;
-
-                    if (speed > 0.001f && data.HasLastPosition() && data.GetLastPosition() == transform.position)
-                    {
-                        data.OnFinish(target);
-                        _removeListMove.Add(key);
-                    }
                 }
                 else if (!isMove)
                 {
@@ -222,13 +253,40 @@ public class MoveAllCharacters : MonoBehaviour, IMoveAllCharacters
     {
         foreach (int key in _removeListMove)
         {
-            if (_moveDict.ContainsKey(key))
+            MovementData data;
+            if (_moveDict.TryGetValue(key, out data))
             {
+                _stoppedMoveData[key] = data;
                 _moveDict.Remove(key);
             }
         }
 
         _removeListMove.Clear();
+    }
+
+    private void ReconcileStoppedMoves()
+    {
+        if (_stoppedMoveData.Count == 0)
+            return;
+
+        foreach (KeyValuePair<int, MovementData> pair in _stoppedMoveData)
+        {
+            MovementData current;
+            if (_moveDict.TryGetValue(pair.Key, out current) &&
+                current != null &&
+                current.IsMove())
+            {
+                _reconciledStoppedMoves.Add(pair.Key);
+                continue;
+            }
+
+            if (pair.Value == null || pair.Value.ReconcileStoppedAnimation())
+                _reconciledStoppedMoves.Add(pair.Key);
+        }
+
+        for (int i = 0; i < _reconciledStoppedMoves.Count; i++)
+            _stoppedMoveData.Remove(_reconciledStoppedMoves[i]);
+        _reconciledStoppedMoves.Clear();
     }
 
     private void RemoveFinishKeyRotate()
@@ -250,6 +308,8 @@ public class MoveAllCharacters : MonoBehaviour, IMoveAllCharacters
         _rotateDict.Clear();
         _removeListMove.Clear(); 
         _removeListRotate.Clear(); 
+        _stoppedMoveData.Clear();
+        _reconciledStoppedMoves.Clear();
         _rotateDict.Clear(); 
         _removeListMove.Clear();
         _removeListRotate.Clear();
@@ -258,6 +318,8 @@ public class MoveAllCharacters : MonoBehaviour, IMoveAllCharacters
         _rotateDict = null;
         _removeListMove = null;
         _removeListRotate = null;
+        _stoppedMoveData = null;
+        _reconciledStoppedMoves = null;
         _rotateDict = null;
         _removeListMove = null;
         _removeListRotate = null;

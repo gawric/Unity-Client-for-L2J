@@ -11,6 +11,10 @@ public class StopMoveDto : IWireDto
 
     public int ObjId { get => _objectId; }
     public Vector3 StopPos { get => _stopPos; }
+    public int X { get => _x; }
+    public int Y { get => _y; }
+    public int Z { get => _z; }
+    public int Heading { get => _heading; }
     
 
     public void ReadFrom(PacketReader reader)

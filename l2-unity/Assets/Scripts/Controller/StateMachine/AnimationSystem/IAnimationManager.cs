@@ -32,6 +32,7 @@ public interface IAnimationManager
     string GetLastAnimationName(int objectId);
     void StopCurrentAnimation(int objectId , string paramName , string runName = "");
     void PlayMonsterAnimation(int objectId, string animationName);
+    void PlayMonsterAnimation(int objectId, string animationName, float? fixedDuration);
     void StopMonsterCurrentAnimation(int objectId, string animationName);
     Dictionary<string, float> PlayerGetAllFloat(int objectId);
     void PlayerSetAllFloat(int objectId , Dictionary<string, float> floatValues);

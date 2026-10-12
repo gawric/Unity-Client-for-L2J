@@ -24,6 +24,10 @@ public class AttackDto : IWireDto
     public int TargetId { get => _targetObjId; }
 
     public int Damage { get => _damage; }
+    public int Flags { get; private set; }
+    public int AX { get => _aX; }
+    public int AY { get => _aY; }
+    public int AZ { get => _aZ; }
 
     public Vector3 AttackerPos { get => _attackerPos; }
     public Vector3 TargetPos { get => _targetPos; }
@@ -38,8 +42,8 @@ public class AttackDto : IWireDto
         _attackerObjId = reader.ReadI();
         _targetObjId =  reader.ReadI();
         _damage = reader.ReadI();
-       int _flags =  reader.ReadB();
-        _firstHit = new Hit(_targetObjId, _damage, _flags);
+       Flags =  reader.ReadB();
+        _firstHit = new Hit(_targetObjId, _damage, Flags);
 
        _aX = reader.ReadI();
        _aY = reader.ReadI();

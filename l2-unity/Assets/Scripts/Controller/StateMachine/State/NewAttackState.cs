@@ -27,7 +27,9 @@ public class NewAttackState : AbstractAttackEvents
         {
             case Event.READY_TO_ACT:
                 Debug.Log("Attack Sate to Intention> начало новой atk пришел запрос от сервера");
-                Entity targetEntity = _stateMachine.Player.GetTargetEntity();
+                Entity targetEntity = payload as Entity;
+                if (targetEntity == null && _stateMachine.Player != null)
+                    targetEntity = _stateMachine.Player.GetTargetEntity();
                 if (targetEntity == null || targetEntity.IsDead())
                 {
                     // Stale AttackDto after DieDto/despawn — do not start another jatk.
@@ -47,6 +49,12 @@ public class NewAttackState : AbstractAttackEvents
                 float attackDurationMs = AttackTimingHelper.ResolveServerLikeAttackDurationMs(_stateMachine.Player);
                 float hitFraction = AttackTimingHelper.ResolveHitFractionByWeapon(_stateMachine.Player);
                 float pAtkSpd = _stateMachine.Player.Stats != null ? _stateMachine.Player.Stats.BasePAtkSpeed : 0f;
+                ReplayAttackTrace.Write(
+                    "START_ANIMATION",
+                    _stateMachine.Player,
+                    targetEntity,
+                    "cycleMs=" + attackDurationMs.ToString("F1") +
+                    " hitFraction=" + hitFraction.ToString("F3"));
 
                 Debug.Log(
                     $"[ATK_TIMING_CMP] BeginAttack packet→serverCycle " +

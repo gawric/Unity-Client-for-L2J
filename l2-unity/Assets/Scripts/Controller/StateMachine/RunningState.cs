@@ -55,6 +55,9 @@ public class RunningState : StateBase
 
     private void SendValidatePosition(Vector3 playerPosition)
     {
-        IncomingPacketActions.Game.Send(new ValidatePositionCommand(playerPosition.x, playerPosition.y, playerPosition.z));
+        int heading = 0;
+        if (IncomingPacketActions.Player != null)
+            heading = PlayerPositionSender.ToL2Heading(IncomingPacketActions.Player.transform.eulerAngles.y);
+        IncomingPacketActions.Game.Send(new ValidatePositionCommand(playerPosition.x, playerPosition.y, playerPosition.z, heading));
     }
 }

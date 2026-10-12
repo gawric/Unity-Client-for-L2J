@@ -12,6 +12,7 @@ public class CompositeEffectV2 : CompositePrefabEffect
     // Keep this on the whole directional actor: Mesh PTRS_Actor and sprite
     // PTDU_Normal ProjectionNormal=(1,0,0) both read owner +X as hit.
     const float HitDirectionYawOffsetDegrees = -90f;
+    const float ProjectileImpactLifetimeSafetySeconds = 0.15f;
 
     [SerializeField]
     [SerializeReference]
@@ -27,9 +28,10 @@ public class CompositeEffectV2 : CompositePrefabEffect
 
     AnimationEventsBase _v2AnimationEvents;
     Coroutine _v2PendingRoutine;
-    Coroutine _v2FallbackShootRoutine;
+    Coroutine _v2ShootWatchdogRoutine;
     bool _v2SubscribedShoot;
     bool _v2SubscribedHit;
+    bool _v2DirectShootObserved;
 
     protected override string DebugPrefix => "[CompositeEffectV2]";
 
@@ -87,13 +89,16 @@ public class CompositeEffectV2 : CompositePrefabEffect
 #endif
 
         QueueV2Parts();
+        if (_castData != null && _castData.SpawnShotVisualsImmediately)
+            SpawnPendingAnimationShootParts();
         StartV2PendingRoutineIfNeeded();
-        StartV2ShootFallbackIfNeeded();
+        StartV2ShootWatchdogIfNeeded();
         if (!SkipDestroyCompositeByLifetime)
         {
             EffectSettings lifeTimeSettings = SelectLifetimeSettings();
             if (lifeTimeSettings != null)
             {
+                ExtendLifetimeThroughProjectileImpact(lifeTimeSettings);
                 DestoryEffect(lifeTimeSettings, _castData);
             }
         }
@@ -102,6 +107,53 @@ public class CompositeEffectV2 : CompositePrefabEffect
     protected override void PreparePartPlayback(CompositePrefabPart part, BaseEffect instance)
     {
         PrepareV2Playback(instance);
+    }
+
+    void ExtendLifetimeThroughProjectileImpact(EffectSettings lifeTimeSettings)
+    {
+        if (lifeTimeSettings == null ||
+            _castData == null ||
+            _context == null ||
+            _context.TargetTransform == null ||
+            _v2Parts == null)
+        {
+            return;
+        }
+
+        float requiredLifetime = lifeTimeSettings.defaultLifeTime;
+        for (int i = 0; i < _v2Parts.Length; i++)
+        {
+            ShotProjectilePart shot = _v2Parts[i] as ShotProjectilePart;
+            if (shot == null || !shot.IsLaunchedProjectile)
+            {
+                continue;
+            }
+
+            Transform follow;
+            Vector3 start;
+            if (!shot.TryResolveSpawn(_v2Resolver, _context, out follow, out start))
+            {
+                start = _context.CasterTransform != null
+                    ? _context.CasterTransform.position
+                    : transform.position;
+            }
+
+            Vector3 aim = VectorUtils.GetCollision(start, _context.TargetTransform);
+            float flight = ProjectileFlightTimeCalculator.CalculateL2AccelFlightTimeSeconds(
+                Vector3.Distance(start, aim));
+            float impactAt =
+                _castData.AnimationShotAtSeconds +
+                flight +
+                ProjectileImpactLifetimeSafetySeconds;
+            float remainingFromNow =
+                (_castData.StartTime + impactAt) - Time.time;
+            requiredLifetime = Mathf.Max(requiredLifetime, remainingFromNow);
+        }
+
+        lifeTimeSettings.defaultLifeTime = requiredLifetime;
+        lifeTimeSettings.hideTime = Mathf.Min(
+            lifeTimeSettings.hideTime,
+            lifeTimeSettings.defaultLifeTime);
     }
 
     protected override void OnTimedCompositeDestroy()
@@ -115,7 +167,7 @@ public class CompositeEffectV2 : CompositePrefabEffect
         UnsubscribeV2Shoot();
         UnsubscribeV2Hit();
         StopAndClearCoroutine(ref _v2PendingRoutine);
-        StopAndClearCoroutine(ref _v2FallbackShootRoutine);
+        StopAndClearCoroutine(ref _v2ShootWatchdogRoutine);
         DestroyOwnedV2Parts();
         ClearV2Runtime();
         base.OnTimedCompositeDestroy();
@@ -390,6 +442,11 @@ public class CompositeEffectV2 : CompositePrefabEffect
 
     Quaternion ResolveV2SpawnRotation(CompositePart part, Transform resolvedTransform)
     {
+        if (part != null && part.UsesWeaponBoneRotation && resolvedTransform != null)
+        {
+            return resolvedTransform.rotation;
+        }
+
         bool aimAlongHit = part != null && part.IsLaunchedProjectile;
         if (aimAlongHit &&
             _context != null &&
@@ -555,6 +612,7 @@ public class CompositeEffectV2 : CompositePrefabEffect
         }
 
         _v2AnimationEvents.OnAnimationStartShoot += HandleV2AnimationShoot;
+        _v2AnimationEvents.OnAnimationAttackShot += HandleV2AnimationShoot;
         _v2ShootSources.Add(_v2AnimationEvents);
         _v2SubscribedShoot = true;
     }
@@ -631,6 +689,14 @@ public class CompositeEffectV2 : CompositePrefabEffect
 
     void HandleV2AnimationShoot(string _)
     {
+        _v2DirectShootObserved = true;
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        float fromCast = _castData != null ? Time.time - _castData.StartTime : -1f;
+        float expected = _castData != null ? _castData.AnimationShotAtSeconds : -1f;
+        Debug.Log(
+            $"{DebugPrefix} [MAGIC_SHOOT_SOURCE] source=AnimationEvent " +
+            $"fromCast={fromCast:F3}s expected={expected:F3}s delta={fromCast - expected:F3}s.");
+#endif
         ProcessV2Shoot("direct");
     }
 
@@ -937,38 +1003,60 @@ public class CompositeEffectV2 : CompositePrefabEffect
         _v2PendingRoutine = null;
     }
 
-    void StartV2ShootFallbackIfNeeded()
+    void StartV2ShootWatchdogIfNeeded()
     {
         if (_castData == null || !RequiresV2AnimationShoot() || _castData.serverTimeToShoot <= 0f)
         {
             return;
         }
 
-        if (_v2FallbackShootRoutine != null)
+        if (_v2ShootWatchdogRoutine != null)
         {
-            StopCoroutine(_v2FallbackShootRoutine);
+            StopCoroutine(_v2ShootWatchdogRoutine);
         }
 
-        _v2FallbackShootRoutine = StartCoroutine(V2ShootFallbackRoutine());
+        _v2ShootWatchdogRoutine = StartCoroutine(V2ShootWatchdogRoutine());
     }
 
-    IEnumerator V2ShootFallbackRoutine()
+    float FallbackShootDelay()
     {
-        float shootAt = _castData.StartTime + _castData.serverTimeToShoot;
+        if (_castData != null && _castData.AnimationShotAtSeconds > 0.01f)
+        {
+            return _castData.AnimationShotAtSeconds;
+        }
+
+        return _castData != null ? _castData.serverTimeToShoot : 0f;
+    }
+
+    IEnumerator V2ShootWatchdogRoutine()
+    {
+        float shootAt = _castData.StartTime + FallbackShootDelay();
         float remaining = shootAt - Time.time;
         if (remaining > 0f)
         {
             yield return new WaitForSeconds(remaining);
         }
+
+        // Let the Animator dispatch an event that crossed the same wall during
+        // this frame. This routine is diagnostic only and never launches.
+        yield return null;
+
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        float fromCast = Time.time - _castData.StartTime;
+        string message =
+            $"{DebugPrefix} [MAGIC_SHOOT_WATCHDOG] directObserved={_v2DirectShootObserved} " +
+            $"fromCast={fromCast:F3}s expected={FallbackShootDelay():F3}s " +
+            $"pending={_pendingAnimationShoot.Count} launched={_launchedProjectiles.Count}.";
+        if (_v2DirectShootObserved)
+        {
+            Debug.Log(message);
+        }
         else
         {
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
-            Debug.Log($"{DebugPrefix} Shoot fallback catch-up: event time already passed by {-remaining:F3}s.");
-#endif
+            Debug.LogWarning(message + " AnimationEvent was not received; projectile was NOT launched.");
         }
-
-        ProcessV2Shoot("fallback");
-        _v2FallbackShootRoutine = null;
+#endif
+        _v2ShootWatchdogRoutine = null;
     }
 
     void DestroyOwnedV2Parts()
@@ -993,6 +1081,7 @@ public class CompositeEffectV2 : CompositePrefabEffect
         _pendingAnimationShoot.Clear();
         _spawned.Clear();
         _launchedProjectiles.Clear();
+        _v2DirectShootObserved = false;
     }
 
     static bool HasParticleGroupV2(BaseEffect instance)

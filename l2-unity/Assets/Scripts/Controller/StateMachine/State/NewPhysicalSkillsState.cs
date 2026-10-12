@@ -71,9 +71,12 @@ public class NewPhysicalSkillsState : AbstractAttackEvents
                 Debug.Log(
                     $"[SS_CHARGE_SM] State.APPLY_SOULSHOT_CHARGED state={_stateMachine.State} " +
                     $"intention={_stateMachine.Intention} running={_stateMachine.Player != null && _stateMachine.Player.Running}");
-                Transform transform = _stateMachine.Player.GetWeaponTransform();
                 _stateMachine.Player.IsSoulshotCharged = true;
-                EffectManager.Instance.PlayEffect(useSkill.SkillId , transform);
+                WeaponChargeSkill.Play(
+                    EffectManager.Instance,
+                    useSkill.SkillId,
+                    _stateMachine.Player.GetWeaponTransform(),
+                    _stateMachine.Player.transform);
                 break;
 
             case Event.ARRIVED:

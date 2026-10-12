@@ -326,6 +326,20 @@ public class DefaultEffectAttachmentResolver : IEffectAttachmentResolver
             }
         }
 
+        // Empty hands and fists have no weapon_ mesh. weapon_shot.int still attaches to the hand.
+        if (gear != null)
+        {
+            Transform bone = leftHand
+                ? gear.GetTransformLeftHandBone()
+                : gear.GetTransformRightHandBone();
+            if (bone != null)
+            {
+                resolvedTransform = bone;
+                worldPosition = bone.position;
+                return true;
+            }
+        }
+
         if (fallbackRoot != null)
         {
             resolvedTransform = fallbackRoot;

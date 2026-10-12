@@ -3,10 +3,12 @@ using UnityEngine;
 public sealed class EntityActionMove : IEntityActionProcess
 {
     private readonly L2PawnRange _pawnRange;
+    private readonly L2PawnYaw _pawnYaw;
 
-    public EntityActionMove(L2PawnRange pawnRange)
+    public EntityActionMove(L2PawnRange pawnRange, L2PawnYaw pawnYaw)
     {
         _pawnRange = pawnRange;
+        _pawnYaw = pawnYaw;
     }
 
     public void Enter(Entity entity, object payload)
@@ -68,7 +70,7 @@ public sealed class EntityActionMove : IEntityActionProcess
 
         entity.ActionSlot.Destination = destination;
         MovementTarget target = new MovementTarget(destination, 0.1f, entity.Running);
-        MovementData data = new MovementData(entity, target);
+        MovementData data = new MovementData(entity, target, _pawnYaw);
         MoveAllCharacters.Instance.AddMoveData(entity.Identity.Id, data);
         if (entity is UserEntity)
             data.SyncUserGait();
@@ -90,7 +92,8 @@ public sealed class EntityActionMove : IEntityActionProcess
             return;
         }
 
-        entity.Running = true;
+        if (entity.Identity != null)
+            entity.Running = entity.Identity.IsRunning;
         entity.AttackTarget = pawn.transform;
         entity.ActionSlot.Target = pawn;
         L2PawnRange.TrySnapUserToPacket(entity, dto.ObjPos, "MoveToPawn origin");
@@ -133,8 +136,8 @@ public sealed class EntityActionMove : IEntityActionProcess
             " pawnPos=" + EntityActionCombatLog.Vec(pawn.transform.position));
         CharInfoSpeedLog.LogMoveStart(entity, "Pawn", toPawn, toPawn, stopDistance);
         CharInfoMoveBudgetLog.StartPawn(entity as UserEntity, pawn, dto, stopDistance);
-        MovementTarget target = new MovementTarget(pawn, stopDistance);
-        MovementData data = new MovementData(entity, target);
+        MovementTarget target = new MovementTarget(pawn.transform, stopDistance, entity.Running);
+        MovementData data = new MovementData(entity, target, _pawnYaw);
         MoveAllCharacters.Instance.AddMoveData(entity.Identity.Id, data);
         data.SyncUserGait();
     }

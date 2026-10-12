@@ -48,17 +48,33 @@ public class Entity : MonoBehaviour {
         if (_gear == null)
             return null;
 
-        Transform[] found = _gear.GetAllTransformByRightHand(new[] { "weapon_" });
-        if (found != null)
+        // weapon_shot.int [BOW] RH=-1 LH=0: the charge is attached to the left-hand bow, not Sword Bone.
+        if (_gear.WeaponType == WeaponType.bow)
         {
-            for (int i = 0; i < found.Length; i++)
-            {
-                if (found[i] != null)
-                    return found[i];
-            }
+            Transform bow = FirstWeaponMesh(_gear.GetAllTransformByLeftHand(new[] { Gear.weaponName }));
+            if (bow != null)
+                return bow;
         }
 
+        Transform right = FirstWeaponMesh(_gear.GetAllTransformByRightHand(new[] { Gear.weaponName }));
+        if (right != null)
+            return right;
+
         return _gear.GetTransformRightHandBone();
+    }
+
+    static Transform FirstWeaponMesh(Transform[] found)
+    {
+        if (found == null)
+            return null;
+
+        for (int i = 0; i < found.Length; i++)
+        {
+            if (found[i] != null)
+                return found[i];
+        }
+
+        return null;
     }
 
     static readonly string[] SwordBladePointNames = { "Sword_Base", "Sword_Tip" };
@@ -92,10 +108,9 @@ public class Entity : MonoBehaviour {
         get { return _target; }
         set
         {
-            if (_target != value)
-            {
-                _target = value;      
-            }
+            _target = value;
+            _lastTarget = null;
+            _cachedTargetEntity = null;
         }
     }
     public Transform AttackTarget { get { return _attackTarget; } set { _attackTarget = value; } }
@@ -150,6 +165,8 @@ public class Entity : MonoBehaviour {
         UpdateSpeed(_stats.Speed);
 
         EquipAllWeapons();
+        _gear.OnEquipAnimationRefresh -= OnWeaponEquipped;
+        _gear.OnUnequipAnimationRefresh -= OnWeaponUnequipped;
         _gear.OnEquipAnimationRefresh += OnWeaponEquipped;
         _gear.OnUnequipAnimationRefresh += OnWeaponUnequipped;
     }
@@ -473,20 +490,18 @@ public class Entity : MonoBehaviour {
 
     public Entity GetTargetEntity()
     {
-        if (_cachedTargetEntity == null && _target != null)
+        if (_target == null)
+        {
+            _lastTarget = null;
+            _cachedTargetEntity = null;
+            return null;
+        }
+
+        if (_cachedTargetEntity == null || _lastTarget != _target)
         {
             _lastTarget = _target;
             _cachedTargetEntity = _target.GetComponent<Entity>();
         }
-
-        if (_lastTarget == null || _lastTarget != _target)
-        {
-            _lastTarget = _target;
-            _cachedTargetEntity = _target.GetComponent<Entity>();
-        }
-
-        if (_cachedTargetEntity == null) return null;
-
 
         return _cachedTargetEntity;
     }
@@ -512,11 +527,11 @@ public class Entity : MonoBehaviour {
         return _status.GetRemainingHp();
     }
 
-    public void SetupTotalCastDuration(float serverHitTimeMs, float flightTimeMs, float[] clipsDurations, float shotEventTime, int targetObjectId = 0)
+    public void SetupTotalCastDuration(float serverHitTimeMs, float flightTimeMs, float[] clipsDurations, float shotEventTime, int targetObjectId = 0, int castStyle = 1, bool mixCombo = false)
     {
         if (_castData == null) _castData = new MagicCastData();
 
-        _castData.Setup(serverHitTimeMs, flightTimeMs, clipsDurations, shotEventTime, targetObjectId);
+        _castData.Setup(serverHitTimeMs, flightTimeMs, clipsDurations, shotEventTime, targetObjectId, castStyle, mixCombo);
     }
 
     public void SetupLongCastDuration(float serverHitTimeMs, float[] clipsDurations, float shotEventTime, int targetObjectId = 0)

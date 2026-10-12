@@ -195,6 +195,14 @@ public class NewIdleState : StateBase
         string animName = animation.ToString();
         IncomingPacketActions.Queue(() =>
         {
+            // A Move packet can arrive before this frame. Do not put atkwait back over walk/run.
+            if (_stateMachine.ShouldKeepLocomotion() ||
+                _stateMachine.State != PlayerState.IDLE ||
+                _stateMachine.Intention != Intention.INTENTION_IDLE)
+            {
+                return;
+            }
+
             // Re-check only for early external WAIT_RETURN; SMB wall-finish must CrossFade.
             if (!fromCombatSmb && TryGetActiveCombatSwing(out _, out _))
             {

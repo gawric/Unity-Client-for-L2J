@@ -98,7 +98,9 @@ public sealed class GameLifetimeScope : LifetimeScope
         builder.Register<ItemDropPresentationService>(Lifetime.Singleton);
         builder.Register<PlayerPositionSender>(Lifetime.Singleton);
         builder.Register<L2PawnRange>(Lifetime.Singleton);
+        builder.Register<L2PawnYaw>(Lifetime.Singleton);
         builder.RegisterEntryPoint<EntityActionMachine>().AsSelf();
+        builder.RegisterEntryPoint<UnityChainTicker>();
         builder.Register<PlayerWorldApply>(Lifetime.Singleton);
         builder.Register<NpcWorldApply>(Lifetime.Singleton);
         builder.Register<MonsterWorldApply>(Lifetime.Singleton);

@@ -165,7 +165,7 @@ public abstract class AbstractAttackEvents : StateBase
             {
                 monsterEntity.SetDead(true);
                 if (EntityActionMachine.Instance != null)
-                    EntityActionMachine.Instance.Die(monsterEntity);
+                    EntityActionMachine.Instance.Die(monsterEntity, false, "player_hit_hp0");
             }
 
 
@@ -176,6 +176,11 @@ public abstract class AbstractAttackEvents : StateBase
     {
         // Bow / magic: release aim-follow at projectile launch (not during flight).
         CombatFacingService.Instance?.EndFollow(ResolveFacingObjectId(), "shoot");
+        ReplayAttackTrace.Write(
+            "SHOOT_EVENT",
+            PlayerEntity.Instance,
+            PlayerEntity.Instance != null ? PlayerEntity.Instance.GetTargetEntity() : null,
+            "anim=" + animName);
 
         foreach (Animation special in _specialsBows)
         {
@@ -184,6 +189,11 @@ public abstract class AbstractAttackEvents : StateBase
 
                 if (special.Type == TypesAnimation.BowAttack)
                 {
+                    Entity attacker = PlayerEntity.Instance;
+                    UnityReplaySession.OnBowShot(
+                        attacker,
+                        attacker != null ? attacker.GetTargetEntity() : null,
+                        attacker != null ? attacker.GetPositionRightHand() : Vector3.zero);
                     // SpAtk01_bow / jatk*_bow: same ArrowStick path. Ensure wooden arrow exists
                     // if LoadArrow notify was skipped (state exited early before equip).
                     if (PlayerEntity.Instance.GetGoEtcItem() == null)

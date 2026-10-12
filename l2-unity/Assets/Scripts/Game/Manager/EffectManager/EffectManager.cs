@@ -20,27 +20,53 @@ public class EffectManager : MonoBehaviour
     public void PlayEffect(int id, Transform target, MagicCastData castData = null)
     {
         var data = database.effects.Find(e => e.id == id);
+        BaseEffect prefab = ResolvePrefab(data, target);
 
-        if (data == null || data.prefab == null || _activeEffectsContainer == null || target == null)
+        if (data == null || prefab == null || _activeEffectsContainer == null || target == null)
         {
-            Debug.LogWarning($"EffectManager: PlayEffect data == null || data.prefab == null || _activeEffectsContainer == null || target == null");
+            Debug.LogWarning(
+                "[WEAPON_SHOT] PlayEffect failed id=" + id +
+                " data=" + (data != null) +
+                " useWeaponShot=" + (data != null && data.useWeaponShot) +
+                " spiritShot=" + (data != null && data.spiritShot) +
+                " prefab=" + (prefab != null ? prefab.name : "null") +
+                " container=" + (_activeEffectsContainer != null) +
+                " target=" + (target != null ? target.name : "null"));
             return;
         }
 
         Debug.Log(
-            $"[HOME_SPAWN] EffectManager.PlayEffect id={id} prefab='{data.prefab.name}' " +
+            $"[HOME_SPAWN] EffectManager.PlayEffect id={id} prefab='{prefab.name}' " +
             $"target='{target.name}' targetPos={target.position} " +
             $"castTargetId={(castData != null ? castData.TargetObjectId : 0)}");
 
-        BaseEffect instance = Instantiate(data.prefab, target.position, target.rotation, target);
+        BaseEffect instance = Instantiate(prefab, target.position, target.rotation, target);
         InjectSpawned(instance);
 
         instance.gameObject.SetActive(true);
         instance.Setup(data.settings, castData, target);
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-        EffectDoublePlayLog.TrackManagerPlay(id, data.prefab != null ? data.prefab.name : "null");
+        EffectDoublePlayLog.TrackManagerPlay(id, prefab != null ? prefab.name : "null");
 #endif
         instance.Play();
+    }
+
+    static BaseEffect ResolvePrefab(EffectDatabase.EffectData data, Transform target)
+    {
+        if (data == null)
+        {
+            return null;
+        }
+
+        if (data.useWeaponShot)
+        {
+            Gear gear = target != null ? target.GetComponentInParent<Gear>() : null;
+            BaseEffect listed = WeaponShotTable.Instance.ResolvePrefab(gear, data.spiritShot);
+            if (listed != null)
+                return listed;
+        }
+
+        return data.prefab;
     }
 
     /// <summary>

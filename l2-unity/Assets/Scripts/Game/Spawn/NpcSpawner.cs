@@ -38,6 +38,7 @@ public sealed class NpcSpawner
         }
         npc.NpcData = new NpcData(request.NpcName, request.Npcgrp);
         EntitySpawnShared.ApplyNpcIdentity(npc, request);
+        EntitySpawnShared.ResetNpcRuntimeForSpawn(npc);
 
         npcGo.transform.name = request.Prefab != null
             ? request.Prefab.name + "_" + identity.Name
@@ -64,7 +65,7 @@ public sealed class NpcSpawner
             Debug.LogError("NpcSpawner: NetworkAnimationController missing on " + npcGo.name);
             return;
         }
-        animationController.Initialize();
+        EntitySpawnShared.InitializeNpcAnimation(animationController);
         EntitySpawnShared.BindGearAndAnimation(npc, npcGo, animationController);
         EntitySpawnShared.RegisterAnimation(world, npc.Identity.Id, animationController, npc);
         EntitySpawnShared.ApplyNpcMoveSpeeds(npc, false);

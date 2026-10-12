@@ -45,6 +45,11 @@ public abstract class CompositePart : ISerializationCallbackReceiver
         spawnTiming != CompositePartSpawnTiming.OnHitCollider;
 
     /// <summary>
+    /// AttachToBone: keep the weapon socket rotation so Relative CS +X is the blade.
+    /// </summary>
+    public virtual bool UsesWeaponBoneRotation => false;
+
+    /// <summary>
     /// Part-owned playback policy. ParticleGroupV2 only receives a window + stop mode.
     /// </summary>
     public virtual void ConfigurePlayback(
@@ -195,6 +200,24 @@ public class IndependentEffectPart : CompositePart
 [System.Serializable]
 public sealed class ImpactPart : IndependentEffectPart
 {
+}
+
+[System.Serializable]
+public sealed class WeaponTransientPart : IndependentEffectPart
+{
+    public override bool UsesWeaponBoneRotation => true;
+
+    public override void OnAfterSpawn(BaseEffect instance, EffectResolveContext context)
+    {
+        base.OnAfterSpawn(instance, context);
+        if (instance == null)
+        {
+            return;
+        }
+
+        instance.transform.localRotation = Quaternion.identity;
+        instance.transform.localPosition = Vector3.zero;
+    }
 }
 
 [System.Serializable]

@@ -37,7 +37,7 @@ public sealed class MonsterWorldApply : EntityWorldApply
 
     public override void OnDie(Entity entity, DieDto dto)
     {
-        _actions.Die(entity);
+        _actions.Die(entity, false, "packet");
 
         PlayerEntity player = PlayerEntity.Instance;
         bool targetMatch = player != null && dto != null && player.TargetId == dto.ObjectId;

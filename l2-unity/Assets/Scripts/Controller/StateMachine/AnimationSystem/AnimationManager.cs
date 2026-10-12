@@ -106,11 +106,15 @@ public class AnimationManager : BaseAnimationManager , IAnimationManager
             SetRecentName(objectId, locoStateName);
             // MagicShot leaves animator.speed scaled (SpeedShot); wait must not keep that rate.
             controller.SetAnimatorSpeed(1f);
-            float waitExitDuration = LocomotionCrossFadeSettings.ResolveExitDuration(controller);
-            PlayerLocomotionCrossFade.TryPlay(controller, locoStateName, waitExitDuration);
+            if (family == PlayerLocomotionFamily.Walk || family == PlayerLocomotionFamily.Run)
+            {
+                ResetMagicCastTriggers(controller);
+            }
+            float fadeDuration = LocomotionCrossFadeSettings.ResolveDuration(locoStateName, controller);
+            PlayerLocomotionCrossFade.TryPlay(controller, locoStateName, fadeDuration);
             Debug.Log(
                 $"AnimationManager> start crossfade {family} player {entity.name} " +
-                $"state={locoStateName} duration={waitExitDuration:F3}s");
+                $"state={locoStateName} duration={fadeDuration:F3}s");
             return;
         }
 
@@ -142,10 +146,11 @@ public class AnimationManager : BaseAnimationManager , IAnimationManager
         }
 
         // Always play — lobby has no recent-name cache; force pose on place / walk stop.
-        controller.CrossFadeInFixedTime(stateName, LocomotionCrossFadeSettings.FixedDuration);
+        float fadeDuration = LocomotionCrossFadeSettings.ResolveDuration(stateName, controller);
+        controller.CrossFadeInFixedTime(stateName, fadeDuration);
         Debug.Log(
             $"AnimationManager> start crossfade lobby {family} state={stateName} " +
-            $"duration={LocomotionCrossFadeSettings.FixedDuration:F3}s");
+            $"duration={fadeDuration:F3}s");
     }
 
     /// <summary>
@@ -166,7 +171,7 @@ public class AnimationManager : BaseAnimationManager , IAnimationManager
 
         // Always CrossFade — even if animator already in atkwait (stale transition / same pose).
         // Dual jatk often still mid-clip when wall cycle ends — longer blend softens the cut.
-        float duration = LocomotionCrossFadeSettings.ResolveExitDuration(controller);
+        float duration = LocomotionCrossFadeSettings.ResolveDuration(atkWaitStateName, controller);
         controller.CrossFadeInFixedTime(atkWaitStateName, duration);
         WaitReturnLog.Play(objectId, atkWaitStateName);
     }
@@ -174,23 +179,20 @@ public class AnimationManager : BaseAnimationManager , IAnimationManager
     public void PlayAnimationTrigger(int objectId, string animationName)
     {
         IAnimationController controller = GetRegisteredController(objectId);
+        Entity entity = GetEntity(objectId);
         if (controller == null)
             return;
 
         string triggerName = GetFinalNameAnim(objectId , animationName);
-        Entity entity = GetEntity(objectId);
         DesableLastPlayerAnimationElseTrue(objectId, controller);
 
         // Basic melee (jatk*) and SpAtk* → CrossFade; MagicShot/Cast stay on Trigger.
         if (TryPlayCombatCrossFade(objectId, controller, entity, triggerName))
-        {
             return;
-        }
 
         controller.ToggleAnimationTrigger(triggerName);
         SetRecentName(objectId, triggerName);
-
-        Debug.Log($"AnimationManager> start trigger name player  {entity.name} animation {triggerName}");
+        Debug.Log($"AnimationManager> start trigger name player  {(entity != null ? entity.name : objectId.ToString())} animation {triggerName}");
     }
 
     /// <summary>
@@ -548,6 +550,21 @@ public class AnimationManager : BaseAnimationManager , IAnimationManager
 #endif
     }
 
+    private static void ResetMagicCastTriggers(IAnimationController controller)
+    {
+        if (controller == null)
+        {
+            return;
+        }
+
+        controller.ResetAnimationTrigger(CAST_TRIGGER_MID);
+        controller.ResetAnimationTrigger(CAST_TRIGGER_END);
+        controller.ResetAnimationTrigger(CAST_TRIGGER_SHOT);
+        controller.ResetAnimationTrigger(CAST_TRIGGER_END_2P);
+        controller.ResetAnimationTrigger(CAST_TRIGGER_SHOT_2P);
+        ResetLongCastTriggers(controller);
+    }
+
     private static void ResetLongCastTriggers(IAnimationController controller)
     {
         if (controller == null)
@@ -599,7 +616,7 @@ public class AnimationManager : BaseAnimationManager , IAnimationManager
         if (MonsterAnim.TryResolve(animationName, out string stateName, out MonsterAnimState family))
         {
             SetMonsterRecentName(objectId, stateName);
-            float duration = fixedDuration ?? LocomotionCrossFadeSettings.FixedDuration;
+            float duration = fixedDuration ?? LocomotionCrossFadeSettings.ResolveDuration(stateName, controller);
             Debug.Log(
                 $"[ANIM] PlayMonster id={objectId} request='{animationName}' resolved='{stateName}' family={family} duration={duration:F3}s");
             MonsterCrossFade.TryPlay(controller, stateName, family, duration);
@@ -607,7 +624,7 @@ public class AnimationManager : BaseAnimationManager , IAnimationManager
         }
 
         SetMonsterRecentName(objectId, animationName);
-        float rawDuration = fixedDuration ?? LocomotionCrossFadeSettings.FixedDuration;
+        float rawDuration = fixedDuration ?? LocomotionCrossFadeSettings.ResolveDuration(animationName, controller);
         Debug.Log(
             $"[ANIM] PlayMonster RAW id={objectId} request='{animationName}' duration={rawDuration:F3}s");
         MonsterCrossFade.TryPlayRaw(controller, animationName, rawDuration);

@@ -28,7 +28,7 @@ public class NewMagicSkillsState  : AbstractAttackEvents
                 float shotEventTime = SetupDurationHelper.ResolveShotEventTime(objectId, orderedReadyCycle);
                 float flightTimeMs = SetupDurationHelper.ResolveMagicFlightTimeMs(
                     entity, useSkill.SkillId, entity != null ? entity.Target : null);
-                entity.SetupTotalCastDuration(useSkill.HitTime, flightTimeMs, durations, shotEventTime, useSkill.TargetId);
+                entity.SetupTotalCastDuration(useSkill.HitTime, flightTimeMs, durations, shotEventTime, useSkill.TargetId, SetupDurationHelper.CastStyleOf(useSkill), SetupDurationHelper.MixComboOf(useSkill));
 
                 SkillExecutor.Instance.ExecuteSkillOverride(useSkill.SkillGrp, entity, readyCombo, _events);
                 break;
