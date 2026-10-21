@@ -35,7 +35,7 @@ public class AsynchronousClient
         get => _cryptEnabled;
         set
         {
-            Debug.Log("Crypt" + (value ? " enabled." : " disabled."));
+            // Debug.Log("Crypt" + (value ? " enabled." : " disabled."));
             _cryptEnabled = value;
         }
     }
@@ -81,14 +81,14 @@ public class AsynchronousClient
             if (_initPacketEnabled)
                 _initPacket = true;
 
-            Debug.Log("Connecting to " + (isLogin ? "LoginServer" : "GameServer") + " " + ipStr + ":" + port);
+            // Debug.Log("Connecting to " + (isLogin ? "LoginServer" : "GameServer") + " " + ipStr + ":" + port);
             await _socket.ConnectAsync(ip, port);
 
             _stream = new NetworkStream(_socket, ownsSocket: false);
 
             Volatile.Write(ref _state, 2);
 
-            Debug.Log("Connection success for: " + (isLogin ? " LoginClient." : " GameClient."));
+            // Debug.Log("Connection success for: " + (isLogin ? " LoginClient." : " GameClient."));
 
             if (isLogin)
                 _loginReceiving.StartReceiving(_socket, _cts.Token);
@@ -99,7 +99,7 @@ public class AsynchronousClient
         }
         catch
         {
-            Debug.LogWarning("Connection failed for: " + (isLogin ? " LoginClient." : " GameClient."));
+            // Debug.LogWarning("Connection failed for: " + (isLogin ? " LoginClient." : " GameClient."));
             Disconnect();
             EventProcessor events = _network != null ? _network.Events : EventProcessor.Instance;
             events.QueueEvent(() => _client.OnConnectionFailed());
@@ -126,7 +126,7 @@ public class AsynchronousClient
         Interlocked.Exchange(ref _state, 0);
 
         var isLogin = IsLoginClient(_client);
-        Debug.LogWarning((isLogin ? " LoginClient:" : " GameClient:") + " Disconnected.");
+        // Debug.LogWarning((isLogin ? " LoginClient:" : " GameClient:") + " Disconnected.");
     }
 
     private void DisposeQueue()
@@ -164,7 +164,7 @@ public class AsynchronousClient
         }
         catch (Exception e)
         {
-            Debug.Log(e.ToString());
+            // Debug.Log(e.ToString());
         }
     }
 

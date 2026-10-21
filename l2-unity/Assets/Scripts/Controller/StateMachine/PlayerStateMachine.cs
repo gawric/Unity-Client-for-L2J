@@ -59,7 +59,7 @@ public class PlayerStateMachine : MonoBehaviour
     public void ChangeState(PlayerState newState)
     {
         PlayerState prev = _currentState;
-        if (_enableLogs) Debug.Log($"[StateMachine][STATE] {prev} → {newState}");
+        //if (_enableLogs) Debug.Log($"[StateMachine][STATE] {prev} → {newState}");
 
         _stateInstance?.Exit();
         _currentState = newState;
@@ -75,7 +75,7 @@ public class PlayerStateMachine : MonoBehaviour
     public void ChangeIntention(Intention newIntention, object arg0)
     {
         Intention prev = _currentIntention;
-        if (_enableLogs) Debug.Log($"[Player->StateMachine][INTENTION] {prev} → {newIntention}");
+        //if (_enableLogs) Debug.Log($"[Player->StateMachine][INTENTION] {prev} → {newIntention}");
         _intentionInstance?.Exit();
         _currentIntention = newIntention;
         InitializeIntention();
@@ -122,7 +122,7 @@ public class PlayerStateMachine : MonoBehaviour
     }
     public void NotifyEvent(Event evt , object payload = null)
     {
-        if (_enableLogs) Debug.Log("[StateMachine][EVENT] " + evt);
+        //if (_enableLogs) Debug.Log("[StateMachine][EVENT] " + evt);
         _stateInstance?.HandleEvent(evt , payload);
     }
 
@@ -145,7 +145,7 @@ public class PlayerStateMachine : MonoBehaviour
 
     public void OnWaitReturn()
     {
-        WaitReturnLog.Dump("PlayerStateMachine.OnWaitReturn");
+        // WaitReturnLog.Dump("PlayerStateMachine.OnWaitReturn");
         NotifyEvent(Event.WAIT_RETURN);
     }
 }

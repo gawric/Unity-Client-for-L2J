@@ -61,7 +61,7 @@ public class MonsterGear : Gear
 
         if (rightBone == null || leftBone == null || tailBone == null || headBone == null)
         {
-            Debug.LogWarning("Required bones not found!");
+            // Debug.LogWarning("Required bones not found!");
             return null;
         }
 
@@ -81,20 +81,20 @@ public class MonsterGear : Gear
         if (Mathf.Abs(rightDotProduct) >= 0.2f)
         {
             Transform selectedBone = (rightDotProduct > 0) ? rightBone : leftBone;
-            Debug.Log($"Raycaster hit calculated: Hit detected on {(rightDotProduct > 0 ? "Right" : "Left")} side");
+            // Debug.Log($"Raycaster hit calculated: Hit detected on {(rightDotProduct > 0 ? "Right" : "Left")} side");
             return selectedBone;
         }
 
         // Если удар спереди (в сторону "лица")
         if (forwardDotProduct > 0)
         {
-            Debug.Log("Raycaster hit calculated: Front side (face)");
+            // Debug.Log("Raycaster hit calculated: Front side (face)");
             return headBone;
         }
         // Если удар сзади (в сторону "задницы")
         else
         {
-            Debug.Log("Raycaster hit calculated: Back side (buttocks)");
+            // Debug.Log("Raycaster hit calculated: Back side (buttocks)");
             return tailBone;
         }
     }

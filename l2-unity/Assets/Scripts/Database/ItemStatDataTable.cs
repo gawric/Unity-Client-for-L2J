@@ -27,7 +27,7 @@ public class ItemStatDataTable {
         _itemStatData = new Dictionary<int, ItemStatData>();
         string dataPath = Path.Combine(Application.streamingAssetsPath, "Data/Meta/ItemStatData_Classic.txt");
         if (!File.Exists(dataPath)) {
-            Debug.LogWarning("File not found: " + dataPath);
+            // Debug.LogWarning("File not found: " + dataPath);
             return;
         }
 
@@ -104,7 +104,7 @@ public class ItemStatDataTable {
                 _itemStatData.TryAdd(itemStatData.ObjectId, itemStatData);
             }
 
-            Debug.Log($"Successfully imported {_itemStatData.Count} itemStatData(s)");
+            // Debug.Log($"Successfully imported {_itemStatData.Count} itemStatData(s)");
         }
     }
 

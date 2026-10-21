@@ -62,7 +62,7 @@ public class BLink
             _dict[position] = element;
         }
 
-        Debug.Log("Start blink add element ");
+        // Debug.Log("Start blink add element ");
     }
 
     System.Collections.IEnumerator Blink(Dictionary<int, DataCell> _dict , List<int> filter)

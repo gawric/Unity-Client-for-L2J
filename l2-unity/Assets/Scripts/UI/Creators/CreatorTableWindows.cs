@@ -75,7 +75,7 @@ public class CreatorTableWindows : ICreatorTables
         
         if (_templateTable == null || _templateHeader == null)
         {
-            Debug.LogError("CreatorTableWindows not found TemplateTable or TemplateHeader");
+            // Debug.LogError("CreatorTableWindows not found TemplateTable or TemplateHeader");
             return;
         }
 
@@ -337,7 +337,7 @@ public class CreatorTableWindows : ICreatorTables
     {
         if (_templateHeader == null)
         {
-            Debug.LogError("CreatorTableWindows not found TemplateHeader");
+            // Debug.LogError("CreatorTableWindows not found TemplateHeader");
             return new List<VisualElement>();
         }
         //Create Header Box (Only BorderBox)
@@ -425,13 +425,13 @@ public class CreatorTableWindows : ICreatorTables
     {
         if (_table == null)
         {
-            Debug.LogError("Table is not created. Call CreateTable first.");
+            // Debug.LogError("Table is not created. Call CreateTable first.");
             return;
         }
 
         if (_templateTable == null || _templateHeader == null)
         {
-            Debug.LogError("CreatorTableWindows not found TemplateTable or TemplateHeader");
+            // Debug.LogError("CreatorTableWindows not found TemplateTable or TemplateHeader");
             return;
         }
 
@@ -481,7 +481,7 @@ public class CreatorTableWindows : ICreatorTables
     {
         if (_listView == null || _columnsList == null || _columnsList.Count == 0)
         {
-            Debug.LogError("ListView or columns not initialized");
+            // Debug.LogError("ListView or columns not initialized");
             return false;
         }
         return true;

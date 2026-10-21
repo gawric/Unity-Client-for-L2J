@@ -15,7 +15,7 @@ public class L2BrushBuilder {
         string fileToProcess = EditorUtility.OpenFilePanel(title, directory, extension);
 
         if(!string.IsNullOrEmpty(fileToProcess)) {
-            Debug.Log("Selected file: " + fileToProcess);
+            // Debug.Log("Selected file: " + fileToProcess);
 
             Brush[] brushes = L2JSONBrushImporter.ParseBrushFile(fileToProcess);
 
@@ -32,7 +32,7 @@ public class L2BrushBuilder {
         string fileToProcess = EditorUtility.OpenFilePanel(title, directory, extension);
 
         if (!string.IsNullOrEmpty(fileToProcess)) {
-            Debug.Log("Selected file: " + fileToProcess);
+            // Debug.Log("Selected file: " + fileToProcess);
             Brush[] brushes = L2T3DInfoParser.ParseBrushInfo(fileToProcess).ToArray();
             Build(brushes);
         }
@@ -43,7 +43,7 @@ public class L2BrushBuilder {
 
         foreach(Brush b in brushes) {
             if(b.position == Vector3.zero) {
-                Debug.LogWarning(b.name + " position is null");
+                // Debug.LogWarning(b.name + " position is null");
                 continue;
             }
             if(b.polyFlags != null) {
@@ -60,7 +60,7 @@ public class L2BrushBuilder {
             brush.transform.parent = brushContainer.transform;
             brush.transform.position = VectorUtils.ConvertPosToUnity(b.position) - VectorUtils.ConvertPosToUnity(b.prePivot);
 
-            Debug.Log(b.name);
+            // Debug.Log(b.name);
             Model model = b.model;
             Poly poly = model.poly;
 
@@ -208,7 +208,7 @@ public class L2BrushBuilder {
         Material material = AssetDatabase.LoadAssetAtPath<Material>(materialPath);
         if(material == null) {
             material = AssetDatabase.LoadAssetAtPath<Material>("Assets/Prefab/Red.mat");
-            Debug.LogError("Missing material for " + texture);
+            // Debug.LogError("Missing material for " + texture);
         }
 
         return material;

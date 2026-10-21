@@ -58,7 +58,7 @@ public class GeodataImporterFactory : MonoBehaviour {
         if(newJob != null) {
             _todoJobs.Add(newJob);
         } else {
-            Debug.LogWarning("New job is null");
+            // Debug.LogWarning("New job is null");
         }
     }
 }

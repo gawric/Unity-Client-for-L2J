@@ -26,7 +26,7 @@ public class PlayerStateDeadWait : PlayerStateBase
         if (!_enabled) {
             return;
         }
-        Debug.Log("Dead Wait exit " + PlayerStateMachine.Instance.State);
+        // Debug.Log("Dead Wait exit " + PlayerStateMachine.Instance.State);
 
 
         // PlayerController.Instance.SetCanMove(true);

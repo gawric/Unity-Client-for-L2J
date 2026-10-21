@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -39,11 +39,11 @@ public sealed class NpcDecoService
         {
             if (_missingLogged.Add(deco.DecoEffect))
             {
-                Debug.LogWarning(
-                    "NpcDecoService: prefab not found for '" + deco.DecoEffect +
-                    "' under Resources/" + NpcDecoCatalog.ResourcesFolder +
-                    " (expected " + NpcDecoCatalog.ShortName(deco.DecoEffect) +
-                    " or folder of pieces)");
+                // Debug.LogWarning(
+                    // "NpcDecoService: prefab not found for '" + deco.DecoEffect +
+                    // "' under Resources/" + NpcDecoCatalog.ResourcesFolder +
+                    // " (expected " + NpcDecoCatalog.ShortName(deco.DecoEffect) +
+                    // " or folder of pieces)");
             }
             return;
         }
@@ -109,7 +109,7 @@ public sealed class NpcDecoService
         instance.Setup(_hostSettings, null, parent);
         instance.Play();
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-        NpcDeco2911Trace.DumpSpawnedPrefab(instance);
+        // NpcDeco2911Trace.DumpSpawnedPrefab(instance);
 #endif
         return instance;
     }

@@ -107,7 +107,7 @@ namespace L2_login
             }
             catch (Exception ex)
             {
-                Debug.LogWarning("AppendChecksumWord НЕ Сработал Ошибка! " + ex.ToString());
+                // Debug.LogWarning("AppendChecksumWord НЕ Сработал Ошибка! " + ex.ToString());
 
             }
         }

@@ -1,4 +1,4 @@
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using UnityEngine;
 
 public class MagicAttackIntention : IntentionBase
@@ -32,7 +32,7 @@ public class MagicAttackIntention : IntentionBase
         while (IncomingPacketActions.Player.IsTurnsAround())
         {
            // if (await Task.WhenAny(timeout) == timeout) break;
-           Debug.LogWarning("Player turns around");
+           // Debug.LogWarning("Player turns around");
         }
 
         StartUseSkill(useSkill, anim, distance);

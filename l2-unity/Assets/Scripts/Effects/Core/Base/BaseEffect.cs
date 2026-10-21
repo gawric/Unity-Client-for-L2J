@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using System;
 using System.Text;
 
@@ -95,10 +95,10 @@ public abstract class BaseEffect : MonoBehaviour
         float delay = Mathf.Max(0.05f, destroyDelaySeconds);
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-        Debug.Log(
-            $"[HOME_PROJECTILE] BeginHomeArrivalFade effect='{name}' destroyIn={delay:F3}s " +
-            $"childGroups={GetComponentsInChildren<ParticleGroup>(true).Length} " +
-            $"childSingles={GetComponentsInChildren<ParticleSingle>(true).Length}");
+        // Debug.Log(
+            // $"[HOME_PROJECTILE] BeginHomeArrivalFade effect='{name}' destroyIn={delay:F3}s " +
+            // $"childGroups={GetComponentsInChildren<ParticleGroup>(true).Length} " +
+            // $"childSingles={GetComponentsInChildren<ParticleSingle>(true).Length}");
 #endif
 
         Destroy(gameObject, delay);
@@ -139,9 +139,9 @@ public abstract class BaseEffect : MonoBehaviour
         }
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-        Debug.Log(
-            $"[HOME_PROJECTILE] DestroyHomeArrivalImmediate effect='{name}' " +
-            $"renderers={renderers.Length} parts={parts.Length}");
+        // Debug.Log(
+            // $"[HOME_PROJECTILE] DestroyHomeArrivalImmediate effect='{name}' " +
+            // $"renderers={renderers.Length} parts={parts.Length}");
 #endif
 
         Destroy(gameObject);
@@ -184,13 +184,13 @@ public abstract class BaseEffect : MonoBehaviour
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
         float now = Time.time;
         float globalSinceCastStart = _castStartTimeSnapshot > 0f ? now - _castStartTimeSnapshot : -1f;
-        Debug.Log(
-            $"[EffectDestroySchedule] effect='{name}' owner='{(_owner != null ? _owner.name : "null")}' " +
-            $"now={now:F3}s globalSinceCastStart={globalSinceCastStart:F3}s " +
-            $"lifeTime={settings.defaultLifeTime:F3}s hideTime={settings.hideTime:F3}s " +
-            $"fadeStartIn={fadeOutTime:F3}s castHit={_castHitTimeSnapshot:F3}s " +
-            $"castFlight={_castFlightTimeSnapshot:F3}s shader={BuildLifetimeShaderSnapshot()}\n" +
-            $"scheduleStack={Environment.StackTrace}");
+        // Debug.Log(
+            // $"[EffectDestroySchedule] effect='{name}' owner='{(_owner != null ? _owner.name : "null")}' " +
+            // $"now={now:F3}s globalSinceCastStart={globalSinceCastStart:F3}s " +
+            // $"lifeTime={settings.defaultLifeTime:F3}s hideTime={settings.hideTime:F3}s " +
+            // $"fadeStartIn={fadeOutTime:F3}s castHit={_castHitTimeSnapshot:F3}s " +
+            // $"castFlight={_castFlightTimeSnapshot:F3}s shader={BuildLifetimeShaderSnapshot()}\n" +
+            // $"scheduleStack={Environment.StackTrace}");
 #endif
 
         Invoke(nameof(BeginFadeOut), fadeOutTime);
@@ -204,13 +204,13 @@ public abstract class BaseEffect : MonoBehaviour
             Destroy(transform.parent.gameObject, settings.defaultLifeTime);
         }
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-        DropAdenaDestroyLog.Event(
-            "SCHEDULE_DESTROY",
-            this,
-            $"lifeTime={settings.defaultLifeTime:F3}s hideTime={settings.hideTime:F3}s " +
-            $"fadeStartIn={fadeOutTime:F3}s destroyAt={_scheduledDestroyAt:F3}s " +
-            $"alsoDestroyHitPointProxy={(transform.parent != null && transform.parent.name == "HitPointProxy")}",
-            includeStack: true);
+        // DropAdenaDestroyLog.Event(
+            // "SCHEDULE_DESTROY",
+            // this,
+            // $"lifeTime={settings.defaultLifeTime:F3}s hideTime={settings.hideTime:F3}s " +
+            // $"fadeStartIn={fadeOutTime:F3}s destroyAt={_scheduledDestroyAt:F3}s " +
+            // $"alsoDestroyHitPointProxy={(transform.parent != null && transform.parent.name == "HitPointProxy")}",
+            // includeStack: true);
 #endif
     }
 
@@ -293,12 +293,12 @@ public abstract class BaseEffect : MonoBehaviour
     protected virtual void OnDestroy()
     {
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-        DropAdenaDestroyLog.Event(
-            "ON_DESTROY",
-            this,
-            $"scheduledAt={_scheduledDestroyAt:F3}s scheduledLife={_scheduledLifeTime:F3}s " +
-            $"castHit={_castHitTimeSnapshot:F3}s owner='{(_owner != null ? _owner.name : "null")}'",
-            includeStack: true);
+        // DropAdenaDestroyLog.Event(
+            // "ON_DESTROY",
+            // this,
+            // $"scheduledAt={_scheduledDestroyAt:F3}s scheduledLife={_scheduledLifeTime:F3}s " +
+            // $"castHit={_castHitTimeSnapshot:F3}s owner='{(_owner != null ? _owner.name : "null")}'",
+            // includeStack: true);
         if (_scheduledDestroyAt <= 0f)
         {
             return;
@@ -306,11 +306,11 @@ public abstract class BaseEffect : MonoBehaviour
 
         float now = Time.time;
         float globalSinceCastStart = _castStartTimeSnapshot > 0f ? now - _castStartTimeSnapshot : -1f;
-        Debug.Log(
-            $"[EffectDestroyed] effect='{name}' now={now:F3}s scheduledAt={_scheduledDestroyAt:F3}s " +
-            $"globalSinceCastStart={globalSinceCastStart:F3}s castHit={_castHitTimeSnapshot:F3}s castFlight={_castFlightTimeSnapshot:F3}s " +
-            $"deltaToCastHit={(globalSinceCastStart >= 0f && _castHitTimeSnapshot >= 0f ? globalSinceCastStart - _castHitTimeSnapshot : -1f):F3}s " +
-            $"scheduledLifeTime={_scheduledLifeTime:F3}s shader={BuildLifetimeShaderSnapshot()}");
+        // Debug.Log(
+            // $"[EffectDestroyed] effect='{name}' now={now:F3}s scheduledAt={_scheduledDestroyAt:F3}s " +
+            // $"globalSinceCastStart={globalSinceCastStart:F3}s castHit={_castHitTimeSnapshot:F3}s castFlight={_castFlightTimeSnapshot:F3}s " +
+            // $"deltaToCastHit={(globalSinceCastStart >= 0f && _castHitTimeSnapshot >= 0f ? globalSinceCastStart - _castHitTimeSnapshot : -1f):F3}s " +
+            // $"scheduledLifeTime={_scheduledLifeTime:F3}s shader={BuildLifetimeShaderSnapshot()}");
 #endif
     }
 
@@ -319,21 +319,21 @@ public abstract class BaseEffect : MonoBehaviour
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
         float now = Time.time;
         float globalSinceCastStart = _castStartTimeSnapshot > 0f ? now - _castStartTimeSnapshot : -1f;
-        Debug.Log(
-            $"[BeginFadeOut] effect='{name}' now={now:F3}s globalSinceCastStart={globalSinceCastStart:F3}s " +
-            $"castHit={_castHitTimeSnapshot:F3}s castFlight={_castFlightTimeSnapshot:F3}s owner='{(_owner != null ? _owner.name : "null")}'.\n" +
-            $"stack={Environment.StackTrace}");
+        // Debug.Log(
+            // $"[BeginFadeOut] effect='{name}' now={now:F3}s globalSinceCastStart={globalSinceCastStart:F3}s " +
+            // $"castHit={_castHitTimeSnapshot:F3}s castFlight={_castFlightTimeSnapshot:F3}s owner='{(_owner != null ? _owner.name : "null")}'.\n" +
+            // $"stack={Environment.StackTrace}");
 #endif
         EffectPart[] parts = GetComponentsInChildren<EffectPart>(true);
 
         foreach (var part in parts)
         {
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-            DropAdenaDestroyLog.Event(
-                "BEGIN_FADEOUT_STOPPART",
-                part,
-                $"fromEffect='{name}'",
-                includeStack: false);
+            // DropAdenaDestroyLog.Event(
+                // "BEGIN_FADEOUT_STOPPART",
+                // part,
+                // $"fromEffect='{name}'",
+                // includeStack: false);
 #endif
             part.StopPart();
         }

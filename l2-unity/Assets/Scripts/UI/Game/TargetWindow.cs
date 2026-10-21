@@ -57,17 +57,17 @@ public class TargetWindow : L2Window {
 
         _nameLabel = (Label)GetElementById("TargetName");
         if(_nameLabel == null) {
-            Debug.LogError("Target window target name label is null.");
+            // Debug.LogError("Target window target name label is null.");
         }
 
         _HPBar = GetElementById("HPBar");
         if(_HPBar == null) {
-            Debug.LogError("Target window HPBar is null");
+            // Debug.LogError("Target window HPBar is null");
         }
 
         _HPBarBG = GetElementById("HPBarBG");
         if(_HPBarBG == null) {
-            Debug.LogError("Target window HPBarBG is null");
+            // Debug.LogError("Target window HPBarBG is null");
         }
 
         _windowEle.style.position = Position.Absolute;

@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using System.Security.Principal;
 using UnityEngine;
@@ -42,7 +42,7 @@ public class NpcInfoDto : IWireDto
 
         if(Identity.NpcId == 31775)
         {
-            Debug.Log(" object NpcInfo 1 " + objectId);
+            // Debug.Log(" object NpcInfo 1 " + objectId);
         }
 
         Identity.SetHideHp(Identity.NpcId);
@@ -60,7 +60,7 @@ public class NpcInfoDto : IWireDto
 
         if (Identity.NpcId == 31775)
         {
-            Debug.Log(" object NpcInfo  object 2 " + objectId);
+            // Debug.Log(" object NpcInfo  object 2 " + objectId);
         }
 
         Stats.MAtkSpd = reader.ReadI();
@@ -116,7 +116,7 @@ public class NpcInfoDto : IWireDto
 
         if (Identity.NpcId == 31775)
         {
-            Debug.Log(" object NpcInfo  object 3 " + objectId);
+            // Debug.Log(" object NpcInfo  object 3 " + objectId);
         }
 
         //Debug.Log("пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ NPCINFOOO NPCID " + Identity.NpcId);

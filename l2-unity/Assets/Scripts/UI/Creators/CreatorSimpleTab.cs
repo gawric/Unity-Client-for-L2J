@@ -15,7 +15,7 @@ public class CreatorSimpleTab : AbstractLoaderTemplate, ICreatorSimpleTab
 
         if (_injectTemplate == null)
         {
-            Debug.LogWarning("CreatorSimpleTab> SetContent: Not Fount Inject Template");
+            // Debug.LogWarning("CreatorSimpleTab> SetContent: Not Fount Inject Template");
         }
 
         if (tabContent != null & _injectTemplate != null)

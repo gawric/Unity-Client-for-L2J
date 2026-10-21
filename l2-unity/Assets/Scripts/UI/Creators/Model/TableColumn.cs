@@ -119,7 +119,7 @@ public class TableColumn
         }
         else
         {
-            Debug.LogError($"Failed to parse color from hex string: {hex_color}");
+            // Debug.LogError($"Failed to parse color from hex string: {hex_color}");
         }
     }
 

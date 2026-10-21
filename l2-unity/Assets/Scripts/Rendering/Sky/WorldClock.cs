@@ -109,7 +109,7 @@ public class WorldClock : MonoBehaviour {
 
         _instance = driver;
         _bootstrapping = false;
-        Debug.Log("[L2Clock] persistent driver started (survives Menu unload / map tiles)");
+        // Debug.Log("[L2Clock] persistent driver started (survives Menu unload / map tiles)");
         return driver;
     }
 
@@ -186,7 +186,7 @@ public class WorldClock : MonoBehaviour {
             if (Application.isPlaying && !_loggedHold)
             {
                 _loggedHold = true;
-                Debug.Log("[L2Clock] sun held at " + _heldHour.ToString("0.###") + ":00");
+                // Debug.Log("[L2Clock] sun held at " + _heldHour.ToString("0.###") + ":00");
             }
             return;
         }
@@ -194,7 +194,7 @@ public class WorldClock : MonoBehaviour {
         if (Application.isPlaying && !_loggedHold)
         {
             _loggedHold = true;
-            Debug.Log("[L2Clock] day runs in " + _dayDurationMinutes.ToString("0.###") + " min");
+            // Debug.Log("[L2Clock] day runs in " + _dayDurationMinutes.ToString("0.###") + " min");
         }
 
         if(_startClock) {

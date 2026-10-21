@@ -269,7 +269,7 @@ public class L2SlotManager : L2PopupWindow
             case L2Slot.SlotType.Enchant:
                 int oldSlot = _draggedSlot.Id;
                 int newSlot = _hoverSlot.Id;
-                Debug.LogWarning($"Moving skillbar enchant from slot {oldSlot} to slot {newSlot}.");
+                // Debug.LogWarning($"Moving skillbar enchant from slot {oldSlot} to slot {newSlot}.");
                 break;
             default:
                 if (!L2GameUI.Instance.MouseOverUI)
@@ -302,7 +302,7 @@ public class L2SlotManager : L2PopupWindow
     {
         // Unequip logic
         GearSlot slot = (GearSlot)_draggedSlot;
-        Debug.Log($"Unequip {slot.Id}.");
+        // Debug.Log($"Unequip {slot.Id}.");
         slot.UseItem();
     }
 
@@ -310,7 +310,7 @@ public class L2SlotManager : L2PopupWindow
     {
         // Equip logic
         InventorySlot slot = (InventorySlot)_draggedSlot;
-        Debug.Log($"Equip {slot.Id}.");
+        // Debug.Log($"Equip {slot.Id}.");
         slot.UseItem();
     }
 
@@ -447,7 +447,7 @@ public class L2SlotManager : L2PopupWindow
     {
         int actionId = ((ActionSlot)_draggedSlot).ActionId;
         int slot = _hoverSlot.Position;
-        Debug.LogWarning($"Add action ID {actionId} into skillbar slot {slot}.");
+        // Debug.LogWarning($"Add action ID {actionId} into skillbar slot {slot}.");
 
         PlayerShortcuts.Instance.AddShortcut(slot, actionId, Shortcut.TYPE_ACTION , 0);
     }
@@ -457,7 +457,7 @@ public class L2SlotManager : L2PopupWindow
         int fromSlot = _draggedSlot.Position;
         int toSlot = _hoverSlot.Position;
 
-        Debug.Log($"Moving item from slot {fromSlot} to slot {toSlot}.");
+        // Debug.Log($"Moving item from slot {fromSlot} to slot {toSlot}.");
 
         PlayerInventory.Instance.ChangeItemOrder(fromSlot, toSlot);
     }
@@ -466,7 +466,7 @@ public class L2SlotManager : L2PopupWindow
     {
         int itemId = ((InventorySlot)_draggedSlot).ObjectId;
         int slot = _hoverSlot.Position;
-        Debug.LogWarning($"Add item {itemId} to skillbar slot {slot}.");
+        // Debug.LogWarning($"Add item {itemId} to skillbar slot {slot}.");
 
         PlayerShortcuts.Instance.AddShortcut(slot, itemId, Shortcut.TYPE_ITEM, 0);
     }
@@ -476,7 +476,7 @@ public class L2SlotManager : L2PopupWindow
     {
         int _objectId = ((InventorySlot)_draggedSlot).ObjectId;
         int slot = _hoverSlot.Position;
-        Debug.LogWarning($"Add _objectId {_objectId} to EnchantWindow slot {slot}.");
+        // Debug.LogWarning($"Add _objectId {_objectId} to EnchantWindow slot {slot}.");
         EnchantWindow.Instance.AddEnchantItem(_objectId);
     }
 
@@ -484,14 +484,14 @@ public class L2SlotManager : L2PopupWindow
     {
         int oldSlot = _draggedSlot.Position;
         int newSlot = _hoverSlot.Position;
-        Debug.LogWarning($"Moving skillbar shortcut from slot {oldSlot} to slot {newSlot}.");
+        // Debug.LogWarning($"Moving skillbar shortcut from slot {oldSlot} to slot {newSlot}.");
         PlayerShortcuts.Instance.MoveShortcut(oldSlot, newSlot);
     }
 
     private void RemoveSkillbarSlot()
     {
         int oldSlot = _draggedSlot.Position;
-        Debug.LogWarning($"Renoving skillbar shortcut from slot {oldSlot}.");
+        // Debug.LogWarning($"Renoving skillbar shortcut from slot {oldSlot}.");
         PlayerShortcuts.Instance.DeleteShortcut(oldSlot , true);
     }
 

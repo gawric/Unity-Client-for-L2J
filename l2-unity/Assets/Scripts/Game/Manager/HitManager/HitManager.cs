@@ -14,6 +14,9 @@ public class HitManager : MonoBehaviour
     private bool _projectileHitSubscribed;
     private readonly Dictionary<int, RemoteMeleeHit> _remoteHits = new Dictionary<int, RemoteMeleeHit>();
     private readonly List<int> _remoteHitScratch = new List<int>();
+    private AttackDto _localAttack;
+    private int _localAttackToken;
+    private int _localAttackFiredToken;
 
     sealed class RemoteMeleeHit
     {
@@ -24,6 +27,8 @@ public class HitManager : MonoBehaviour
         public bool Fired;
         public float FireAt;
         public bool WaitForShot;
+        public bool Miss;
+        public AttackDto Packet;
         public AnimationEventsBase Events;
         public Action<string> OnShot;
     }
@@ -124,23 +129,23 @@ public class HitManager : MonoBehaviour
         MonsterEntity monster = targetEntity as MonsterEntity;
         if (monster == null)
         {
-            Debug.Log(
-                $"[HIT_FX] OnProjectileHitMonster SKIP not MonsterEntity " +
-                $"type={(targetEntity != null ? targetEntity.GetType().Name : "null")}");
+            // Debug.Log(
+                // $"[HIT_FX] OnProjectileHitMonster SKIP not MonsterEntity " +
+                // $"type={(targetEntity != null ? targetEntity.GetType().Name : "null")}");
             return;
         }
 
         if (attacker != null && attacker.HitIsMissed())
         {
-            Debug.Log(
-                $"[HIT_FX] OnProjectileHitMonster SKIP HitIsMissed=true monster={monster.name}");
+            // Debug.Log(
+                // $"[HIT_FX] OnProjectileHitMonster SKIP HitIsMissed=true monster={monster.name}");
             return;
         }
 
         Transform attackerTf = prefab != null ? prefab.transform : null;
-        Debug.Log(
-            $"[HIT_FX] OnProjectileHitMonster → HandleHitCollider monster={monster.name} " +
-            $"soulshot={(attacker != null && attacker.IsSoulshotCharged)}");
+        // Debug.Log(
+            // $"[HIT_FX] OnProjectileHitMonster → HandleHitCollider monster={monster.name} " +
+            // $"soulshot={(attacker != null && attacker.IsSoulshotCharged)}");
         HandleHitCollider(
             attacker,
             attackerTf,
@@ -167,7 +172,7 @@ public class HitManager : MonoBehaviour
         }
         else
         {
-            Debug.LogWarning("HitManager> HandleHit Errors no detected hit type");
+            // Debug.LogWarning("HitManager> HandleHit Errors no detected hit type");
         }
     }
 
@@ -179,14 +184,14 @@ public class HitManager : MonoBehaviour
         Vector3 hitColliderDirection)
     {
         string attackerName = attacker != null ? attacker.name : "null";
-        Debug.Log(
-            $"[HIT_FX] 6.HitManager.HandleHitCollider ENTER frame={Time.frameCount} t={Time.time:F3} " +
-            $"attacker={attackerName} target={(targetEntity != null ? targetEntity.name : "null")} " +
-            $"soulshot={(attaker != null && attaker.IsSoulshotCharged)} point={hitCollider}");
+        // Debug.Log(
+            // $"[HIT_FX] 6.HitManager.HandleHitCollider ENTER frame={Time.frameCount} t={Time.time:F3} " +
+            // $"attacker={attackerName} target={(targetEntity != null ? targetEntity.name : "null")} " +
+            // $"soulshot={(attaker != null && attaker.IsSoulshotCharged)} point={hitCollider}");
 
         if (targetEntity == null)
         {
-            Debug.LogWarning("[HIT_FX] 6.HitManager SKIP targetEntity=null");
+            // Debug.LogWarning("[HIT_FX] 6.HitManager SKIP targetEntity=null");
             return;
         }
 
@@ -195,24 +200,24 @@ public class HitManager : MonoBehaviour
 
         if (EffectManager.Instance == null)
         {
-            Debug.LogWarning("[HIT_FX] 6.HitManager SKIP EffectManager.Instance=null");
+            // Debug.LogWarning("[HIT_FX] 6.HitManager SKIP EffectManager.Instance=null");
             return;
         }
 
         if (attaker != null && attaker.IsSoulshotCharged)
         {
             LogSoulshotImpactOrientation(attaker, targetEntity, hitCollider, spawnPoint, impactDir);
-            Debug.Log(
-                $"[HIT_FX] 6.HitManager → EffectManager.PlayerImpactEffect " +
-                $"id={SoulshotImpactEffectId} (soulshot) spawn={spawnPoint} dir={impactDir}");
+            // Debug.Log(
+                // $"[HIT_FX] 6.HitManager → EffectManager.PlayerImpactEffect " +
+                // $"id={SoulshotImpactEffectId} (soulshot) spawn={spawnPoint} dir={impactDir}");
             EffectManager.Instance.PlayerImpactEffect(SoulshotImpactEffectId, spawnPoint, impactDir);
             attaker.IsSoulshotCharged = false;
         }
         else
         {
-            Debug.Log(
-                $"[HIT_FX] 6.HitManager → EffectManager.PlayerImpactEffect " +
-                $"id={NormalImpactEffectId} (normal) spawn={spawnPoint} dir={impactDir}");
+            // Debug.Log(
+                // $"[HIT_FX] 6.HitManager → EffectManager.PlayerImpactEffect " +
+                // $"id={NormalImpactEffectId} (normal) spawn={spawnPoint} dir={impactDir}");
             EffectManager.Instance.PlayerImpactEffect(NormalImpactEffectId, spawnPoint, impactDir);
         }
     }
@@ -222,6 +227,21 @@ public class HitManager : MonoBehaviour
     /// Impact waits for clip AttackShot; timer is only a late fallback.
     /// Bow: ignore AttackShot — the arrow has not left yet. Impact is ArrowStick Hit Time.
     /// </summary>
+    public void RememberLocalAttack(AttackDto dto)
+    {
+        _localAttack = dto;
+        _localAttackToken++;
+    }
+
+    public void FireRememberedExtraHits(Entity attacker)
+    {
+        if (attacker == null || _localAttack == null || _localAttackFiredToken == _localAttackToken)
+            return;
+
+        _localAttackFiredToken = _localAttackToken;
+        FireExtraHits(attacker, _localAttack, _localAttack.TargetId);
+    }
+
     public void ArmRemoteMeleeHit(Entity attacker, Entity target, AttackDto dto)
     {
         Hit hit = dto != null ? dto.FirstHit : null;
@@ -230,7 +250,8 @@ public class HitManager : MonoBehaviour
             target,
             miss: hit != null && hit.isMiss(),
             soulshot: hit != null && hit.hasSoulshot(),
-            hitTimeMs: 0);
+            hitTimeMs: 0,
+            packet: dto);
     }
 
     public void ArmRemoteSkillHit(Entity attacker, Entity target, MagicSkillUseDto magic)
@@ -251,16 +272,20 @@ public class HitManager : MonoBehaviour
         Entity target,
         bool miss,
         bool soulshot,
-        int hitTimeMs)
+        int hitTimeMs,
+        AttackDto packet = null)
     {
-        if (attacker == null || target == null || attacker is PlayerEntity)
+        bool hasExtra = packet != null && packet.ArrHit != null && packet.ArrHit.Length > 0;
+        if (attacker == null || attacker is PlayerEntity)
+            return;
+        if (target == null && !hasExtra)
             return;
         if (!(attacker is MonsterEntity) && !(attacker is UserEntity))
             return;
         if (attacker.Identity == null)
             return;
 
-        if (miss)
+        if (miss && !hasExtra)
             return;
 
         if (IsBowWeapon(attacker))
@@ -290,6 +315,8 @@ public class HitManager : MonoBehaviour
             Attacker = attacker,
             Target = target,
             Soulshot = soulshot,
+            Miss = miss,
+            Packet = packet,
             WaitForShot = waitForShot,
             FireAt = Time.time + delay
         };
@@ -370,12 +397,49 @@ public class HitManager : MonoBehaviour
 
         Entity attacker = pending.Attacker;
         Entity target = pending.Target;
-        if (attacker == null || target == null)
+        if (attacker == null)
+            return;
+        if (target == null && (pending.Packet == null || pending.Packet.ArrHit == null || pending.Packet.ArrHit.Length == 0))
             return;
 
-        attacker.IsSoulshotCharged = pending.Soulshot;
-        Vector3 hitPoint = ResolveTargetImpactCenter(target);
-        HandleHitCollider(attacker, attacker.transform, target, hitPoint, Vector3.zero);
+        if (target != null && !pending.Miss)
+        {
+            attacker.IsSoulshotCharged = pending.Soulshot;
+            Vector3 hitPoint = ResolveTargetImpactCenter(target);
+            HandleHitCollider(attacker, attacker.transform, target, hitPoint, Vector3.zero);
+        }
+
+        int primaryId = target != null && target.Identity != null ? target.Identity.Id : 0;
+        FireExtraHits(attacker, pending.Packet, primaryId);
+    }
+
+    void FireExtraHits(Entity attacker, AttackDto dto, int primaryTargetId)
+    {
+        if (attacker == null || dto == null || dto.ArrHit == null)
+            return;
+
+        bool savedCharge = attacker.IsSoulshotCharged;
+        for (int i = 0; i < dto.ArrHit.Length; i++)
+        {
+            Hit hit = dto.ArrHit[i];
+            if (hit == null || hit.isMiss() || hit.TargetId == primaryTargetId)
+                continue;
+
+            Entity extra = ResolveEntityFromWorld(hit.TargetId);
+            if (extra == null &&
+                PlayerEntity.Instance != null &&
+                PlayerEntity.Instance.Identity != null &&
+                PlayerEntity.Instance.Identity.Id == hit.TargetId)
+                extra = PlayerEntity.Instance;
+            if (extra == null || extra == attacker)
+                continue;
+
+            attacker.IsSoulshotCharged = hit.hasSoulshot();
+            Vector3 extraPoint = ResolveTargetImpactCenter(extra);
+            HandleHitCollider(attacker, attacker.transform, extra, extraPoint, Vector3.zero);
+        }
+
+        attacker.IsSoulshotCharged = savedCharge;
     }
 
     void DropRemoteMeleeHit(int attackerId)
@@ -726,15 +790,15 @@ public class HitManager : MonoBehaviour
         int attackerId = attacker != null && attacker.Identity != null ? attacker.Identity.Id : 0;
         int targetId = target != null && target.Identity != null ? target.Identity.Id : 0;
 
-        Debug.Log(
-            $"{IMPACT_DEBUG_TAG} soulshotOrient source={source} " +
-            $"attackerId={attackerId} targetId={targetId} " +
-            $"attackerPos={attackerPos} attackerFwd={attackerFwd} " +
-            $"targetPos={targetPos} targetFwd={targetFwd} hitPoint={hitPoint} " +
-            $"spawnPoint={spawnPoint} collisionRadius={radius:F3} " +
-            $"playerToTarget={playerToTarget} playerToHit={playerToHit} resolved={resolved} " +
-            $"angResolvedVsP2T={angResolvedVsP2T:F1} angResolvedVsP2H={angResolvedVsP2H:F1} " +
-            $"angResolvedVsAttackerFwd={angResolvedVsAttackerFwd:F1} angResolvedVsTargetFwd={angResolvedVsTargetFwd:F1}");
+        // Debug.Log(
+            // $"{IMPACT_DEBUG_TAG} soulshotOrient source={source} " +
+            // $"attackerId={attackerId} targetId={targetId} " +
+            // $"attackerPos={attackerPos} attackerFwd={attackerFwd} " +
+            // $"targetPos={targetPos} targetFwd={targetFwd} hitPoint={hitPoint} " +
+            // $"spawnPoint={spawnPoint} collisionRadius={radius:F3} " +
+            // $"playerToTarget={playerToTarget} playerToHit={playerToHit} resolved={resolved} " +
+            // $"angResolvedVsP2T={angResolvedVsP2T:F1} angResolvedVsP2H={angResolvedVsP2H:F1} " +
+            // $"angResolvedVsAttackerFwd={angResolvedVsAttackerFwd:F1} angResolvedVsTargetFwd={angResolvedVsTargetFwd:F1}");
     }
 
     private static Vector3 Flat(Vector3 v)

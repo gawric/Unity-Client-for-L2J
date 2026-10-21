@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Security.Principal;
 using System.Threading.Tasks;
@@ -169,7 +169,7 @@ public class World : MonoBehaviour, IWorldSpawnContext {
         Entity entity;
         if (!_objects.TryGetValue(id, out entity))
         {
-            Debug.LogWarning($"[DeleteObject] RemoveObject MISS dict id={id} (already gone or never spawned)");
+            // Debug.LogWarning($"[DeleteObject] RemoveObject MISS dict id={id} (already gone or never spawned)");
             return;
         }
 
@@ -181,9 +181,9 @@ public class World : MonoBehaviour, IWorldSpawnContext {
             ? go.transform.parent.name
             : "null";
 
-        Debug.Log(
-            $"[DeleteObject] RemoveObject START id={id} type={typeName} name={goName} " +
-            $"activeSelf={wasActive} parent={parentBefore}");
+        // Debug.Log(
+            // $"[DeleteObject] RemoveObject START id={id} type={typeName} name={goName} " +
+            // $"activeSelf={wasActive} parent={parentBefore}");
 
         if (_npcDeco != null)
             _npcDeco.Stop(id);
@@ -194,36 +194,40 @@ public class World : MonoBehaviour, IWorldSpawnContext {
 
         if (go == null)
         {
-            Debug.LogWarning($"[DeleteObject] RemoveObject id={id} entity.gameObject is null");
+            // Debug.LogWarning($"[DeleteObject] RemoveObject id={id} entity.gameObject is null");
             return;
         }
 
-        // City NPC + field monsters → pool. If pool fails or leaves object visible → Destroy.
+        // City NPC + field monsters + remote users → pool. If pool fails or leaves object visible → Destroy.
         if (_objectPool != null &&
-            (entity is NpcEntity || entity is MonsterEntity) &&
+            (entity is NpcEntity || entity is MonsterEntity || entity is UserEntity) &&
             !(entity is ItemEntity))
         {
-            ObjectType poolType = entity is MonsterEntity ? ObjectType.Monster : ObjectType.Npc;
+            ObjectType poolType = entity is MonsterEntity
+                ? ObjectType.Monster
+                : entity is UserEntity
+                    ? ObjectType.User
+                    : ObjectType.Npc;
             bool returned = _objectPool.ReturnToPool(poolType, go);
             bool stillVisible = go != null && go.activeInHierarchy;
-            Debug.Log(
-                $"[DeleteObject] RemoveObject {poolType} id={id} returned={returned} " +
-                $"activeSelf={(go != null && go.activeSelf)} " +
-                $"activeInHierarchy={stillVisible} " +
-                $"parent={(go != null && go.transform.parent != null ? go.transform.parent.name : "null")}");
+            // Debug.Log(
+                // $"[DeleteObject] RemoveObject {poolType} id={id} returned={returned} " +
+                // $"activeSelf={(go != null && go.activeSelf)} " +
+                // $"activeInHierarchy={stillVisible} " +
+                // $"parent={(go != null && go.transform.parent != null ? go.transform.parent.name : "null")}");
 
             if (returned && !stillVisible)
             {
                 return;
             }
 
-            Debug.LogWarning(
-                $"[DeleteObject] RemoveObject {poolType} id={id} pool did not hide → Destroy " +
-                $"(returned={returned} stillVisible={stillVisible})");
+            // Debug.LogWarning(
+                // $"[DeleteObject] RemoveObject {poolType} id={id} pool did not hide → Destroy " +
+                // $"(returned={returned} stillVisible={stillVisible})");
         }
 
         Destroy(go);
-        Debug.Log($"[DeleteObject] RemoveObject DESTROY id={id} name={goName}");
+        // Debug.Log($"[DeleteObject] RemoveObject DESTROY id={id} name={goName}");
     }
 
     void UnregisterObject(int id, Entity entity)
@@ -267,8 +271,14 @@ public class World : MonoBehaviour, IWorldSpawnContext {
 
     void DestroyDisappearedUser(GameObject go)
     {
-        if (go != null)
-            Destroy(go);
+        if (go == null)
+            return;
+
+        SetEntityInteraction(go, true);
+        if (_objectPool != null && _objectPool.ReturnToPool(ObjectType.User, go))
+            return;
+
+        Destroy(go);
     }
 
     void FinishDisappearedNpc(GameObject go)
@@ -332,27 +342,27 @@ public class World : MonoBehaviour, IWorldSpawnContext {
     {
         if (info == null || info.Identity == null || _userSpawner == null)
         {
-            GearFlowLog.Warn("SpawnUser abort info/spawner null");
+            // GearFlowLog.Warn("SpawnUser abort info/spawner null");
             return;
         }
 
         int id = info.Identity.Id;
         if (_objects.ContainsKey(id))
         {
-            GearFlowLog.Info("SpawnUser SKIP already in world id=" + id +
-                " type=" + _objects[id].GetType().Name);
+            // GearFlowLog.Info("SpawnUser SKIP already in world id=" + id +
+                // " type=" + _objects[id].GetType().Name);
             return;
         }
 
         PlayerEntity local = PlayerEntity.Instance;
         if (local != null && local.Identity != null && local.Identity.Id == id)
         {
-            GearFlowLog.Info("SpawnUser SKIP local PlayerEntity id=" + id);
+            // GearFlowLog.Info("SpawnUser SKIP local PlayerEntity id=" + id);
             return;
         }
 
-        GearFlowLog.Info("SpawnUser CREATE UserEntity id=" + id +
-            " nick=" + info.Identity.Name + " " + GearFlowLog.Paperdoll(info.Appearance));
+        // GearFlowLog.Info("SpawnUser CREATE UserEntity id=" + id +
+            // " nick=" + info.Identity.Name + " " + GearFlowLog.Paperdoll(info.Appearance));
         _userSpawner.Spawn(info, this);
     }
 
@@ -405,7 +415,7 @@ public class World : MonoBehaviour, IWorldSpawnContext {
 
         if (_itemSpawner == null)
         {
-            Debug.LogWarning("[World] ItemSpawner missing — cannot spawn ground item " + objectId);
+            // Debug.LogWarning("[World] ItemSpawner missing — cannot spawn ground item " + objectId);
             return;
         }
 
@@ -417,9 +427,23 @@ public class World : MonoBehaviour, IWorldSpawnContext {
         if (_itemDropPresentation != null)
             _itemDropPresentation.PlayPickup(itemObjectId, pickerCharObjId, unityPos);
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-        DropMeshLifetimeLog.NotifyRemove(itemObjectId, "GetItem_pickup");
+        // DropMeshLifetimeLog.NotifyRemove(itemObjectId, "GetItem_pickup");
 #endif
         RemoveObject(itemObjectId);
+
+        // Pickup crossfades the actor into the "pickup" clip, which desyncs the
+        // animator from the movement gait. If the picker is still moving (running
+        // to the next point after grabbing), replay its gait so the run/walk clip
+        // resumes instead of freezing mid-pickup. Force the replay: the pickup
+        // state has no exit transition, so a normal replay can be suppressed and
+        // leave the pawn standing while it keeps translating.
+        if (pickerCharObjId != 0 && MoveAllCharacters.Instance != null &&
+            MoveAllCharacters.Instance.IsMoving(pickerCharObjId))
+        {
+            MovementData move = MoveAllCharacters.Instance.GetMove(pickerCharObjId);
+            if (move != null && move.GetEntity() is UserEntity)
+                move.ForceReplayUserGait();
+        }
     }
 
     public void SpawnPlayer(EntityIdentity identity, PlayerStatus status, PlayerStats stats, PlayerAppearance appearance)
@@ -442,7 +466,7 @@ public class World : MonoBehaviour, IWorldSpawnContext {
 
         request.Status = status;
         request.Stats = stats;
-        Debug.Log("Name NPC " + request.NpcName.Name);
+        // Debug.Log("Name NPC " + request.NpcName.Name);
 
         if (identity.EntityType == EntityType.NPC)
         {
@@ -472,16 +496,16 @@ public class World : MonoBehaviour, IWorldSpawnContext {
         Entity entity = await GetEntityNoLock(objectId);
         if (entity == null)
         {
-            Debug.LogWarning(
-                $"[DeleteObject] HANDLER id={objectId} → entity NOT in World._objects " +
-                "(packet arrived but client has no entity — GO may be orphaned in Hierarchy)");
+            // Debug.LogWarning(
+                // $"[DeleteObject] HANDLER id={objectId} → entity NOT in World._objects " +
+                // "(packet arrived but client has no entity — GO may be orphaned in Hierarchy)");
             return;
         }
 
         string typeName = entity.GetType().Name;
-        Debug.Log(
-            $"[DeleteObject] HANDLER id={objectId} found type={typeName} name={entity.name} " +
-            $"activeInHierarchy={entity.gameObject.activeInHierarchy}");
+        // Debug.Log(
+            // $"[DeleteObject] HANDLER id={objectId} found type={typeName} name={entity.name} " +
+            // $"activeInHierarchy={entity.gameObject.activeInHierarchy}");
 
         if (entity.GetType() == typeof(MonsterEntity))
         {
@@ -489,12 +513,12 @@ public class World : MonoBehaviour, IWorldSpawnContext {
             {
                 if (_deadManager != null)
                     _deadManager.AddDeadAndRemove(objectId, new DeadData(entity));
-                Debug.Log($"[DeleteObject] HANDLER id={objectId} Monster DEAD → DeadManager");
+                // Debug.Log($"[DeleteObject] HANDLER id={objectId} Monster DEAD → DeadManager");
             }
             else
             {
                 RemoveObject(objectId);
-                Debug.Log($"[DeleteObject] HANDLER id={objectId} Monster → RemoveObject");
+                // Debug.Log($"[DeleteObject] HANDLER id={objectId} Monster → RemoveObject");
             }
         }
         else if (entity is ItemEntity)
@@ -502,38 +526,38 @@ public class World : MonoBehaviour, IWorldSpawnContext {
             if (_itemDropPresentation != null)
                 _itemDropPresentation.StopItemPresentation(objectId);
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-            DropMeshLifetimeLog.NotifyRemove(objectId, "DeleteObject_packet");
+            // DropMeshLifetimeLog.NotifyRemove(objectId, "DeleteObject_packet");
 #endif
             RemoveObject(objectId);
-            Debug.Log($"[DeleteObject] HANDLER id={objectId} ItemEntity → RemoveObject");
+            // Debug.Log($"[DeleteObject] HANDLER id={objectId} ItemEntity → RemoveObject");
         }
         else if (entity is NpcEntity)
         {
             if (entity.IsDead() && _deadManager != null)
             {
                 _deadManager.AddDeadAndRemove(objectId, new DeadData(entity));
-                Debug.Log($"[DeleteObject] HANDLER id={objectId} NpcEntity DEAD → DeadManager");
+                // Debug.Log($"[DeleteObject] HANDLER id={objectId} NpcEntity DEAD → DeadManager");
             }
             else
             {
                 BeginActorDisappear(objectId, entity, FinishDisappearedNpc);
-                Debug.Log($"[DeleteObject] HANDLER id={objectId} NpcEntity → disappear fade");
+                // Debug.Log($"[DeleteObject] HANDLER id={objectId} NpcEntity → disappear fade");
             }
         }
         else if (entity is UserEntity)
         {
             Vector3 l2 = VectorUtils.ConvertPosUnityToL2j(entity.transform.position);
             string nick = entity.Identity != null ? entity.Identity.Name : entity.name;
-            Debug.Log("[MOVE_SNAP] DESPAWN nick=" + nick +
-                " l2=" + l2.x.ToString("F0") + "," + l2.y.ToString("F0") + "," + l2.z.ToString("F0"));
+            // Debug.Log("[MOVE_SNAP] DESPAWN nick=" + nick +
+                // " l2=" + l2.x.ToString("F0") + "," + l2.y.ToString("F0") + "," + l2.z.ToString("F0"));
             BeginActorDisappear(objectId, entity, DestroyDisappearedUser);
-            Debug.Log($"[DeleteObject] HANDLER id={objectId} UserEntity → disappear fade");
+            // Debug.Log($"[DeleteObject] HANDLER id={objectId} UserEntity → disappear fade");
         }
         else
         {
             // Same as historical catch-all: anything else still must leave the world.
-            Debug.LogWarning(
-                $"[DeleteObject] HANDLER id={objectId} unexpected type={typeName} → RemoveObject");
+            // Debug.LogWarning(
+                // $"[DeleteObject] HANDLER id={objectId} unexpected type={typeName} → RemoveObject");
             RemoveObject(objectId);
         }
     }
@@ -567,7 +591,7 @@ public class World : MonoBehaviour, IWorldSpawnContext {
                 if(entity != null)
                 {
                     entity.transform.position = position;
-                    Debug.Log("UpdateObjectPosition not found obj. Name " + entity.name);
+                    // Debug.Log("UpdateObjectPosition not found obj. Name " + entity.name);
                 }
 
             }
@@ -662,8 +686,8 @@ public class World : MonoBehaviour, IWorldSpawnContext {
             if(_worldCombat != null)
             {
                 _worldCombat.StatusUpdate(e, attributes, id);
-                UnityChainLog.OnStatusUpdate(id, attributes);
-                UnityReplaySession.OnStatus(e, attributes);
+                // UnityChainLog.OnStatusUpdate(id, attributes);
+                // UnityReplaySession.OnStatus(e, attributes);
                 if (e.GetType() == typeof(PlayerEntity))
                 {
                     if (CharacterInfo != null)
@@ -740,6 +764,24 @@ public class World : MonoBehaviour, IWorldSpawnContext {
         }
     }
 
+    /// <summary>
+    /// Iterates remote players (UserEntity/CharInfo) + local PlayerEntity.
+    /// These move via L2PawnWalk and have their CharacterController disabled, so
+    /// physics queries (OverlapSphere/SphereCastAll) cannot discover them — use this
+    /// list instead for nameplates and other per-entity bookkeeping.
+    /// </summary>
+    public void ForEachUser(Action<Entity> action)
+    {
+        if (action == null)
+            return;
+
+        foreach (KeyValuePair<int, Entity> pair in _players)
+        {
+            if (pair.Value != null)
+                action(pair.Value);
+        }
+    }
+
 
 
     // Wait for entity to be fully loaded
@@ -756,7 +798,7 @@ public class World : MonoBehaviour, IWorldSpawnContext {
 
             lock (_objects) {
                 if (!_objects.TryGetValue(id, out entity)) {
-                    Debug.LogWarning($"GetEntityAsync - Entity {id} not found after retry");
+                    // Debug.LogWarning($"GetEntityAsync - Entity {id} not found after retry");
                     return null;
                 } else {
                    // Debug.LogWarning($"GetEntityAsync - Entity {id} found after retry");
@@ -774,7 +816,7 @@ public class World : MonoBehaviour, IWorldSpawnContext {
             try {
                 _eventProcessor.QueueEvent(() => action(entity));
             } catch (Exception ex) {
-                Debug.LogWarning($"Operation failed - Target {id} - Error {ex.Message}");
+                // Debug.LogWarning($"Operation failed - Target {id} - Error {ex.Message}");
             }
         }
     }
@@ -793,7 +835,7 @@ public class World : MonoBehaviour, IWorldSpawnContext {
             try {
                 _eventProcessor.QueueEvent(() => action(entity1, entity2));
             } catch (Exception ex) {
-                Debug.LogWarning($"Operation failed - Target {id1} or {id2} - Error {ex.Message}");
+                // Debug.LogWarning($"Operation failed - Target {id1} or {id2} - Error {ex.Message}");
             }
         }
     }

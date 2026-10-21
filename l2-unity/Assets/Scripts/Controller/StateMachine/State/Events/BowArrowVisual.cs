@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 /// <summary>
 /// CharInfo / UserEntity bow visual. Local player stays on <see cref="AbstractAttackEvents"/>.
@@ -14,9 +14,9 @@ public sealed class BowArrowVisual
 
         user.EquipArrow(WoodenArrowId);
         GameObject go = user.Gear != null ? user.Gear.GetGoEtcItem() : null;
-        Debug.Log(
-            $"[BOW_ARROW] LOAD id={(user.Identity != null ? user.Identity.Id : 0)} " +
-            $"nick={user.Nick} anim={animName} equipped={(go != null)}");
+        // Debug.Log(
+            // $"[BOW_ARROW] LOAD id={(user.Identity != null ? user.Identity.Id : 0)} " +
+            // $"nick={user.Nick} anim={animName} equipped={(go != null)}");
     }
 
     public void TryShoot(UserEntity user, string animName)
@@ -31,9 +31,9 @@ public sealed class BowArrowVisual
         Transform target = ResolveAimTarget(user);
         if (go == null || target == null)
         {
-            Debug.LogWarning(
-                $"[BOW_ARROW] SHOOT skip id={(user.Identity != null ? user.Identity.Id : 0)} " +
-                $"anim={animName} go={(go != null)} target={(target != null)}");
+            // Debug.LogWarning(
+                // $"[BOW_ARROW] SHOOT skip id={(user.Identity != null ? user.Identity.Id : 0)} " +
+                // $"anim={animName} go={(go != null)} target={(target != null)}");
             return;
         }
 
@@ -49,9 +49,9 @@ public sealed class BowArrowVisual
         settings.flytime = flyAccel;
         settings.lifetime = flyAccel;
 
-        Debug.Log(
-            $"[BOW_ARROW] SHOOT remote id={(user.Identity != null ? user.Identity.Id : 0)} " +
-            $"anim={animName} dist3d={dist3d:F3} flyAccel={flyAccel:F3}s");
+        // Debug.Log(
+            // $"[BOW_ARROW] SHOOT remote id={(user.Identity != null ? user.Identity.Id : 0)} " +
+            // $"anim={animName} dist3d={dist3d:F3} flyAccel={flyAccel:F3}s");
 
         if (ProjectileManager.Instance != null)
             ProjectileManager.Instance.LaunchProjectile(go, startPos, target, settings);

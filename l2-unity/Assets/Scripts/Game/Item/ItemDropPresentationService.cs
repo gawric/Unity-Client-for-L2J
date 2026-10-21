@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
@@ -373,7 +373,7 @@ public sealed class ItemDropPresentationService
     {
         if (effectId <= 0 || target == null)
         {
-            Debug.Log($"[ItemDropFx] effect stub ({label}) id={effectId} — assign in ItemDropPresentationIds");
+            // Debug.Log($"[ItemDropFx] effect stub ({label}) id={effectId} — assign in ItemDropPresentationIds");
             return;
         }
 
@@ -400,7 +400,7 @@ public sealed class ItemDropPresentationService
     {
         if (effectId <= 0)
         {
-            Debug.Log($"[ItemDropFx] effect stub ({label}) id={effectId} — assign in ItemDropPresentationIds");
+            // Debug.Log($"[ItemDropFx] effect stub ({label}) id={effectId} — assign in ItemDropPresentationIds");
             return;
         }
 

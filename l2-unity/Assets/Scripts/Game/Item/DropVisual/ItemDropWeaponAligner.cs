@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public sealed class ItemDropWeaponAligner
 {
@@ -79,7 +79,7 @@ public sealed class ItemDropWeaponAligner
         }
         if (current < 0.0001f)
         {
-            Debug.LogWarning($"[DropItemScale] SCALE skip itemId={itemId} current=0 src={currentSrc}");
+            // Debug.LogWarning($"[DropItemScale] SCALE skip itemId={itemId} current=0 src={currentSrc}");
             return;
         }
 
@@ -97,12 +97,12 @@ public sealed class ItemDropWeaponAligner
             visual.transform.localScale *= mul;
         }
 
-        Debug.Log(
-            $"[DropItemScale] SCALE itemId={itemId} prefab='{visual.name}' " +
-            $"current={current:F3}({currentSrc}) equipped={equipped:F3}({equippedSrc}) " +
-            $"default={defaultLen:F3} target={target:F3} skip={skip} mul={mul:F2} " +
-            $"scale {scaleBefore} → {visual.transform.localScale} " +
-            $"worldAxis={LongestMeshAxis(visual):F3}");
+        // Debug.Log(
+            // $"[DropItemScale] SCALE itemId={itemId} prefab='{visual.name}' " +
+            // $"current={current:F3}({currentSrc}) equipped={equipped:F3}({equippedSrc}) " +
+            // $"default={defaultLen:F3} target={target:F3} skip={skip} mul={mul:F2} " +
+            // $"scale {scaleBefore} → {visual.transform.localScale} " +
+            // $"worldAxis={LongestMeshAxis(visual):F3}");
     }
 
     public static void ScaleProp(GameObject visual, float targetMeters)

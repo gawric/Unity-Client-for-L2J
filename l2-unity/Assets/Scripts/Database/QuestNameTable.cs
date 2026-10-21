@@ -83,7 +83,7 @@ public class QuestNameTable
         }
         catch (Exception ex)
         {
-            Debug.LogError($"Failed to initialize QuestNameTable: {ex.Message}");
+            // Debug.LogError($"Failed to initialize QuestNameTable: {ex.Message}");
         }
     }
 
@@ -160,7 +160,7 @@ public class QuestNameTable
             foreach(QuestName name in entry.Value)
             {
                 //EntityName берем последнего из списка он и будет Клиентом в форме или источником
-                Debug.Log(" ID Номер quest " + entry.Key + " value " + name.Main_name + " entityName " + name.EntityName + " questType " + name.Repeat);
+                // Debug.Log(" ID Номер quest " + entry.Key + " value " + name.Main_name + " entityName " + name.EntityName + " questType " + name.Repeat);
             }
             
         }

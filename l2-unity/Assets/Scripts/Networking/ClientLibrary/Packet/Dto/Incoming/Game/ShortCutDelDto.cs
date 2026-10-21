@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public class ShortCutDelDto : IWireDto
 {
@@ -15,7 +15,7 @@ public class ShortCutDelDto : IWireDto
         int slot = world_slot % 12;
         int page = world_slot / 12;
 
-        Debug.Log("world_slot : " + world_slot + " slot : " + slot + " page : " + page);
+        // Debug.Log("world_slot : " + world_slot + " slot : " + slot + " page : " + page);
         
     }
 }

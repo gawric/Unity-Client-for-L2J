@@ -1,4 +1,4 @@
-using Unity.Mathematics;
+﻿using Unity.Mathematics;
 using UnityEngine;
 
 /// <summary>
@@ -98,8 +98,8 @@ public static class L2AppRand
                 uint fast = Advance(starts[s], n);
                 if (loop != fast)
                 {
-                    Debug.LogError(
-                        $"[L2AppRand] skip mismatch start={starts[s]} n={n} loop={loop} fast={fast}");
+                    // Debug.LogError(
+                        // $"[L2AppRand] skip mismatch start={starts[s]} n={n} loop={loop} fast={fast}");
                     return;
                 }
             }

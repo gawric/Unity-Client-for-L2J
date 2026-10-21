@@ -52,41 +52,41 @@ public abstract class AbstractGetCache
         
         if (armor == null)
         {
-            Debug.LogWarning("Given armor is null");
+            // Debug.LogWarning("Given armor is null");
             return null;
         }
 
   
         if (armor.Armorgrp == null || armor.Armorgrp.FirstModel == null)
         {
-            Debug.LogWarning($"Can't find armorgrp model list for armor {armor.Id}");
+            // Debug.LogWarning($"Can't find armorgrp model list for armor {armor.Id}");
             return null;
         }
 
         byte raceIndex = (byte)raceId;
         if (raceIndex >= armor.Armorgrp.FirstModel.Length)
         {
-            Debug.LogWarning($"Can't find armor model for {raceId} in armor {armor.Id}");
+            // Debug.LogWarning($"Can't find armor model for {raceId} in armor {armor.Id}");
             return null;
         }
 
         string model = armor.Armorgrp.FirstModel[raceIndex];
         if (string.IsNullOrEmpty(model))
         {
-            Debug.LogWarning($"Empty armor model for {raceId} in armor {armor.Id}");
+            // Debug.LogWarning($"Empty armor model for {raceId} in armor {armor.Id}");
             return null;
         }
 
         if (!_armors.TryGetValue(model, out var l2Armor))
         {
-            Debug.LogWarning($"Can't find armor model {model} in ModelTable");
+            // Debug.LogWarning($"Can't find armor model {model} in ModelTable");
             return null;
         }
 
 
         if (l2Armor.baseModel == null)
         {
-            Debug.LogWarning($"Can't find armor model {model} for {raceId} in ModelTable");
+            // Debug.LogWarning($"Can't find armor model {model} for {raceId} in ModelTable");
             return null;
         }
 
@@ -109,7 +109,7 @@ public abstract class AbstractGetCache
         var textureArray = armor.Armorgrp.FirstTexture;
         if (textureArray == null || textureArray.Length < RACE_COUNT || textureArray[(byte)raceId] == null)
         {
-            Debug.LogWarning($"Can't find armor texture for {raceId} in ModelTable");
+            // Debug.LogWarning($"Can't find armor texture for {raceId} in ModelTable");
             return null;
         }
         return textureArray[(byte)raceId];
@@ -136,7 +136,7 @@ public abstract class AbstractGetCache
 
         if (firstMaterial == null)
         {
-            Debug.LogWarning($"Can't find armor material for model: {textureName} in ModelTable");
+            // Debug.LogWarning($"Can't find armor material for model: {textureName} in ModelTable");
             return false;
         }
 
@@ -166,12 +166,12 @@ public abstract class AbstractGetCache
             Material material = Resources.Load<Material>(candidates[i]);
             if (material != null)
             {
-                Debug.Log($"Successfully loaded armor material at {candidates[i]}");
+                // Debug.Log($"Successfully loaded armor material at {candidates[i]}");
                 return material;
             }
         }
 
-        Debug.LogWarning($"Can't find armor material at {candidates[0]} (also tried {folder}.{file})");
+        // Debug.LogWarning($"Can't find armor material at {candidates[0]} (also tried {folder}.{file})");
         return null;
     }
 
@@ -208,7 +208,7 @@ public abstract class AbstractGetCache
         Weapon weapon = ItemTable.Instance.GetWeapon(itemId);
         if (weapon == null)
         {
-            Debug.LogWarning($"Can't find weapon {itemId} in ItemTable");
+            // Debug.LogWarning($"Can't find weapon {itemId} in ItemTable");
         }
 
         return GetWeapon(weapon.Weapongrp.Model);
@@ -219,7 +219,7 @@ public abstract class AbstractGetCache
         EtcItem etcItem = ItemTable.Instance.GetEtcItem(itemId);
         if (etcItem == null)
         {
-            Debug.LogWarning($"Can't find etcItem  {itemId} in ItemTable");
+            // Debug.LogWarning($"Can't find etcItem  {itemId} in ItemTable");
         }
 
         return GetEtcItem(etcItem.EtcItemgrp.Model);
@@ -229,14 +229,14 @@ public abstract class AbstractGetCache
     {
         if (!_weapons.ContainsKey(model))
         {
-            Debug.LogWarning($"Can't find weapon model {model} in ModelTable");
+            // Debug.LogWarning($"Can't find weapon model {model} in ModelTable");
             return null;
         }
 
         GameObject go = _weapons[model];
         if (go == null)
         {
-            Debug.LogWarning($"Can't find weapon model {model} in ModelTable");
+            // Debug.LogWarning($"Can't find weapon model {model} in ModelTable");
             return null;
         }
 
@@ -247,14 +247,14 @@ public abstract class AbstractGetCache
     {
         if (!_etcItems.ContainsKey(model))
         {
-            Debug.LogWarning($"Can't find weapon model {model} in ModelTable");
+            // Debug.LogWarning($"Can't find weapon model {model} in ModelTable");
             return null;
         }
 
         GameObject go = _etcItems[model];
         if (go == null)
         {
-            Debug.LogWarning($"Can't find weapon model {model} in ModelTable");
+            // Debug.LogWarning($"Can't find weapon model {model} in ModelTable");
             return null;
         }
 
@@ -350,7 +350,7 @@ public abstract class AbstractGetCache
 
         if (go == null)
         {
-            Debug.LogError($"Can't find container for race {raceId} and entity type {entityType}");
+            // Debug.LogError($"Can't find container for race {raceId} and entity type {entityType}");
         }
 
         return go;
@@ -359,7 +359,7 @@ public abstract class AbstractGetCache
     public GameObject GetFace(CharacterRaceAnimation raceId, byte face) {
         GameObject go = _faces[(byte)raceId, face];
         if (go == null) {
-            Debug.LogError($"Can't find face {face} for race {raceId} at index {raceId},{face}");
+            // Debug.LogError($"Can't find face {face} for race {raceId} at index {raceId},{face}");
         }
 
         return go;
@@ -376,7 +376,7 @@ public abstract class AbstractGetCache
 
         GameObject go = _hair[(byte)raceId, index];
         if (go == null) {
-            Debug.LogError($"Can't find hairstyle {hairStyle} haircolor {hairColor} for race {raceId} at index {raceId},{index}");
+            // Debug.LogError($"Can't find hairstyle {hairStyle} haircolor {hairColor} for race {raceId} at index {raceId},{index}");
         }
 
         return go;
@@ -401,7 +401,7 @@ public abstract class AbstractGetCache
         
         if (npc == null)
         {
-            Debug.LogWarning($"Can't find npc {meshname} model in ModelTable.");
+            // Debug.LogWarning($"Can't find npc {meshname} model in ModelTable.");
             return null;
         }
 

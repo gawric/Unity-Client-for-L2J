@@ -16,7 +16,7 @@ public class L2MapStaticMeshBuilder : MonoBehaviour
         string fileToProcess = EditorUtility.OpenFilePanel(title, directory, extension);
 
         if (!string.IsNullOrEmpty(fileToProcess)) {
-            Debug.Log("Selected file: " + fileToProcess);
+            // Debug.Log("Selected file: " + fileToProcess);
             L2JSONStaticMeshActorImporter meshActorParser = new L2JSONStaticMeshActorImporter();
             L2StaticMeshActor data = meshActorParser.GetL2StaticMeshActorFromFile(fileToProcess);
             GenerateStaticMeshes(data);
@@ -58,7 +58,7 @@ public class L2MapStaticMeshBuilder : MonoBehaviour
 
             instantiated.transform.parent = container.transform;
         } else {
-            Debug.LogError("Can't find StaticMesh FBX " + staticMesh.staticMesh + " at path " + meshPath);
+            // Debug.LogError("Can't find StaticMesh FBX " + staticMesh.staticMesh + " at path " + meshPath);
         }
     }
 }

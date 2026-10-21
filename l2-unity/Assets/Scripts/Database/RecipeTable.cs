@@ -55,7 +55,7 @@ public class RecipeTable
         }
         catch (Exception ex)
         {
-            Debug.LogError($"Failed to initialize QuestNameTable: {ex.Message}");
+            // Debug.LogError($"Failed to initialize QuestNameTable: {ex.Message}");
         }
     }
 
@@ -133,7 +133,7 @@ public class RecipeTable
     {
         if (index < 0 || index >= array.Length)
         {
-            Debug.LogWarning($"Index {index} is out of bounds for array of length {array.Length}");
+            // Debug.LogWarning($"Index {index} is out of bounds for array of length {array.Length}");
             return 0;
         }
 
@@ -143,7 +143,7 @@ public class RecipeTable
         }
         else
         {
-            Debug.LogWarning($"Failed to parse value '{array[index]}' to integer at index {index}");
+            // Debug.LogWarning($"Failed to parse value '{array[index]}' to integer at index {index}");
             return 0;
         }
 

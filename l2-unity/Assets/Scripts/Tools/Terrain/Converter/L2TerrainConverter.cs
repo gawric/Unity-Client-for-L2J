@@ -28,7 +28,7 @@ public class TerrainConverter : MonoBehaviour {
         string fileToProcess = EditorUtility.OpenFilePanel(title, directory, extension);
 
         if (!string.IsNullOrEmpty(fileToProcess)) {
-            Debug.Log("Selected file: " + fileToProcess);
+            // Debug.Log("Selected file: " + fileToProcess);
             string mapName = Path.GetFileNameWithoutExtension(fileToProcess);
             L2TerrainInfo terrainInfo = L2T3DInfoParser.LoadMetadata(mapName);
 
@@ -47,7 +47,7 @@ public class TerrainConverter : MonoBehaviour {
         string fileToProcess = EditorUtility.OpenFilePanel(title, directory, extension);
 
         if (!string.IsNullOrEmpty(fileToProcess)) {
-            Debug.Log("Selected file: " + fileToProcess);
+            // Debug.Log("Selected file: " + fileToProcess);
             string mapName = Path.GetFileNameWithoutExtension(fileToProcess);
             L2TerrainInfo terrainInfo = L2T3DInfoParser.LoadMetadata(mapName);
 
@@ -80,7 +80,7 @@ public class TerrainConverter : MonoBehaviour {
             map = Instantiate(map);
             terrainToConvert = map.GetComponent<Terrain>();
         } else {
-            Debug.LogWarning("Could not find map " + mapToConvert + " prefab.");
+            // Debug.LogWarning("Could not find map " + mapToConvert + " prefab.");
             return;
         }
 

@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public class MagicSkillUseDto : IWireDto
 {
@@ -52,10 +52,10 @@ public class MagicSkillUseDto : IWireDto
         _targetObjId = reader.ReadI();
 
         _skillId = reader.ReadI();
-        Debug.Log("MagicSkillUse->skillID " + _skillId);
+        // Debug.Log("MagicSkillUse->skillID " + _skillId);
         _skilllvl = reader.ReadI();
         _hittime = reader.ReadI();
-        Debug.Log("MagicSkillUse->hittime " + _hittime);
+        // Debug.Log("MagicSkillUse->hittime " + _hittime);
         _reusedelay = reader.ReadI();
 
         _aX = reader.ReadI();

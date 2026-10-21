@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections;
 using System.Globalization;
 using System.IO;
@@ -25,7 +25,7 @@ public static class L2YebisLiveCapture
     public static void CycleGradeStage()
     {
         _gradeStage = _gradeStage >= 4 ? 0 : _gradeStage + 1;
-        Debug.Log("[Yebis] F7 стадия " + _gradeStage + " " + GradeStageName(_gradeStage));
+        // Debug.Log("[Yebis] F7 стадия " + _gradeStage + " " + GradeStageName(_gradeStage));
     }
 
     public static string GradeStageName(int stage)
@@ -83,7 +83,7 @@ public static class L2YebisLiveCapture
         state.AppendLine("where=camera-color-before-combine");
         File.WriteAllText(Path.Combine(folder, "state.txt"), state.ToString(), Encoding.UTF8);
         File.WriteAllText(Path.Combine(Root, "latest.txt"), folder, Encoding.UTF8);
-        Debug.Log("[Yebis] live capture " + folder);
+        // Debug.Log("[Yebis] live capture " + folder);
         return folder;
     }
 
@@ -91,7 +91,7 @@ public static class L2YebisLiveCapture
     {
         if (L2YebisLiveCaptureKey.Host == null)
         {
-            Debug.LogWarning("[Yebis] нет объекта клавиши, кадр не прочитан");
+            // Debug.LogWarning("[Yebis] нет объекта клавиши, кадр не прочитан");
             return;
         }
 
@@ -106,7 +106,7 @@ public static class L2YebisLiveCapture
         SavePresented(folder, graded, "output", "unity-after-combine", "Выход combine, 8-битный");
         WriteProbe(folder, scene, graded);
         WriteTerrainColor0(folder, scene);
-        Debug.Log("[Yebis] live capture written " + folder);
+        // Debug.Log("[Yebis] live capture written " + folder);
     }
 
     static void WriteTerrainColor0(string folder, RenderTexture scene)
@@ -423,7 +423,7 @@ public static class L2YebisLiveCapture
         text.AppendLine("Ожидание записи этой стадии, байты " + ToByte(shown.x) + " " + ToByte(shown.y) + " " + ToByte(shown.z));
         text.AppendLine("Проект Gamma, формат камеры 8-битный: второй гаммы при записи в RT нет. Байт 255 значит, что значение стадии было выше 1.");
         File.WriteAllText(Path.Combine(folder, "probe.txt"), text.ToString(), Encoding.UTF8);
-        Debug.Log("[Yebis] probe A " + Fmt(a) + " B " + Fmt(b) + " C " + Fmt(beforePow) + " D " + Fmt(gradedValue) + " rt " + stored.r + " " + stored.g + " " + stored.b);
+        // Debug.Log("[Yebis] probe A " + Fmt(a) + " B " + Fmt(b) + " C " + Fmt(beforePow) + " D " + Fmt(gradedValue) + " rt " + stored.r + " " + stored.g + " " + stored.b);
     }
 
     static Color32 ReadOne(RenderTexture rt, int x, int y)
@@ -486,7 +486,7 @@ public static class L2YebisLiveCapture
     {
         if (rt == null)
         {
-            Debug.LogWarning("[Yebis] control rt null");
+            // Debug.LogWarning("[Yebis] control rt null");
             return;
         }
 
@@ -513,7 +513,7 @@ public static class L2YebisLiveCapture
             "pixel0=" + pixel.r + " " + pixel.g + " " + pixel.b + "\n" +
             "peak=" + peak + "\n",
             Encoding.UTF8);
-        Debug.Log("[Yebis] control " + rt.graphicsFormat + " " + rt.width + "x" + rt.height + " created=" + rt.IsCreated() + " pixel0=" + pixel.r + "," + pixel.g + "," + pixel.b + " peak=" + peak);
+        // Debug.Log("[Yebis] control " + rt.graphicsFormat + " " + rt.width + "x" + rt.height + " created=" + rt.IsCreated() + " pixel0=" + pixel.r + "," + pixel.g + "," + pixel.b + " peak=" + peak);
         UnityEngine.Object.Destroy(tex);
     }
 
@@ -521,7 +521,7 @@ public static class L2YebisLiveCapture
     {
         if (rt == null)
         {
-            Debug.LogWarning("[Yebis] " + name + " rt null");
+            // Debug.LogWarning("[Yebis] " + name + " rt null");
             return;
         }
 
@@ -529,7 +529,7 @@ public static class L2YebisLiveCapture
         request.WaitForCompletion();
         if (request.hasError)
         {
-            Debug.LogWarning("[Yebis] " + name + " float readback failed " + rt.graphicsFormat);
+            // Debug.LogWarning("[Yebis] " + name + " float readback failed " + rt.graphicsFormat);
             return;
         }
 
@@ -539,7 +539,7 @@ public static class L2YebisLiveCapture
         int count = width * height;
         if (data.Length < count * 4)
         {
-            Debug.LogWarning("[Yebis] " + name + " float buffer " + data.Length);
+            // Debug.LogWarning("[Yebis] " + name + " float buffer " + data.Length);
             return;
         }
 
@@ -617,7 +617,7 @@ public static class L2YebisLiveCapture
         text.AppendLine("верх y=[" + y1 + "," + height + ") медиана " + bands[2].MedianText());
         string statsName = name == "input" ? "input_stats.txt" : "output_stats.txt";
         File.WriteAllText(Path.Combine(folder, statsName), text.ToString(), Encoding.UTF8);
-        Debug.Log("[Yebis] " + name + " " + rt.graphicsFormat + " max=" + maxR.ToString("0.###") + "," + maxG.ToString("0.###") + "," + maxB.ToString("0.###") + " above1=" + above + " hash=" + hash.ToString("X16"));
+        // Debug.Log("[Yebis] " + name + " " + rt.graphicsFormat + " max=" + maxR.ToString("0.###") + "," + maxG.ToString("0.###") + "," + maxB.ToString("0.###") + " above1=" + above + " hash=" + hash.ToString("X16"));
     }
 
     static void HashFloat(ref ulong hash, float value)
@@ -634,7 +634,7 @@ public static class L2YebisLiveCapture
     {
         if (rt == null)
         {
-            Debug.LogWarning("[Yebis] " + name + " rt null");
+            // Debug.LogWarning("[Yebis] " + name + " rt null");
             return;
         }
 
@@ -708,14 +708,14 @@ public static class L2YebisLiveCapture
             "cameraFormat=R8G8B8A8_UNorm. Канал выше 1 в этом входе невозможен: текстура камеры 8-битная.\n" +
             "Если min и max равны 1 0 1, копия draw не легла поверх пурпурной метки.\n",
             Encoding.UTF8);
-        Debug.Log("[Yebis] " + name + " " + rt.graphicsFormat + " " + width + "x" + height + " peak=" + peak + " hash=" + hash.ToString("X16"));
+        // Debug.Log("[Yebis] " + name + " " + rt.graphicsFormat + " " + width + "x" + height + " peak=" + peak + " hash=" + hash.ToString("X16"));
     }
 
     public static void SaveFloat(string folder, AsyncGPUReadbackRequest request, int width, int height)
     {
         if (request.hasError || width <= 0 || height <= 0)
         {
-            Debug.LogWarning("[Yebis] live input readback failed");
+            // Debug.LogWarning("[Yebis] live input readback failed");
             return;
         }
 
@@ -723,7 +723,7 @@ public static class L2YebisLiveCapture
         int pixels = width * height;
         if (data.Length < pixels * 4)
         {
-            Debug.LogWarning("[Yebis] live input short " + data.Length);
+            // Debug.LogWarning("[Yebis] live input short " + data.Length);
             return;
         }
 
@@ -778,7 +778,7 @@ public static class L2YebisLiveCapture
     {
         if (request.hasError || width <= 0 || height <= 0)
         {
-            Debug.LogWarning("[Yebis] live output readback failed");
+            // Debug.LogWarning("[Yebis] live output readback failed");
             return;
         }
 
@@ -787,7 +787,7 @@ public static class L2YebisLiveCapture
         int stride = data.Length / Mathf.Max(pixels, 1);
         if (stride < 4)
         {
-            Debug.LogWarning("[Yebis] live output stride " + stride);
+            // Debug.LogWarning("[Yebis] live output stride " + stride);
             return;
         }
 
@@ -830,7 +830,7 @@ public static class L2YebisLiveCapture
         WriteMeta(folder, "output", width, height, 4, "R8G8B8A8", "R8G8B8A8", "unity-after-combine");
         WritePng(folder, "output.png", preview, width, height);
         WriteBands(Path.Combine(folder, "output_stats.txt"), "Выход combine, 8-битный", width, height, pixels, 0, 0, bands, true, atMax);
-        Debug.Log("[Yebis] live capture written " + folder);
+        // Debug.Log("[Yebis] live capture written " + folder);
     }
 
     static void WriteMeta(string folder, string name, int width, int height, int bpp, string formatName, string order, string where)

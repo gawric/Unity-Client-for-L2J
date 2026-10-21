@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 [IncomingGamePacket(GameServerPacketType.FriendList)]
 public sealed class FriendListIncoming : IncomingPacket<FriendListIncomingDto>
@@ -10,6 +10,6 @@ public sealed class FriendListIncoming : IncomingPacket<FriendListIncomingDto>
 
     public override void Apply(FriendListIncomingDto dto)
     {
-        Debug.Log("Friend List SUccess");
+        // Debug.Log("Friend List SUccess");
     }
 }

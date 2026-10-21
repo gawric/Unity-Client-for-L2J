@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Threading;
 using UnityEditorInternal;
 using UnityEngine;
@@ -40,7 +40,7 @@ public class NewPhysicalSkillsState : AbstractAttackEvents
                 }
                 break;
             case Event.CANCEL:
-                Debug.Log("NewPhysicalSkillsState Use Sate> Отмена скорее всего запрос пришел из ActionFaild");
+                // Debug.Log("NewPhysicalSkillsState Use Sate> Отмена скорее всего запрос пришел из ActionFaild");
 
                 break;
             case Event.APPLY_SELF_SKILL:
@@ -68,9 +68,9 @@ public class NewPhysicalSkillsState : AbstractAttackEvents
 
                 break;
             case Event.APPLY_SOULSHOT_CHARGED:
-                Debug.Log(
-                    $"[SS_CHARGE_SM] State.APPLY_SOULSHOT_CHARGED state={_stateMachine.State} " +
-                    $"intention={_stateMachine.Intention} running={_stateMachine.Player != null && _stateMachine.Player.Running}");
+                // Debug.Log(
+                    // $"[SS_CHARGE_SM] State.APPLY_SOULSHOT_CHARGED state={_stateMachine.State} " +
+                    // $"intention={_stateMachine.Intention} running={_stateMachine.Player != null && _stateMachine.Player.Running}");
                 _stateMachine.Player.IsSoulshotCharged = true;
                 WeaponChargeSkill.Play(
                     EffectManager.Instance,
@@ -81,9 +81,9 @@ public class NewPhysicalSkillsState : AbstractAttackEvents
 
             case Event.ARRIVED:
                 // Arrived while charged / physical-skills — locomotion finished, go IDLE.
-                Debug.Log(
-                    $"[SS_CHARGE_SM] State.ARRIVED while PHYSICAL_SKILLS → IDLE " +
-                    $"(arrived overrides charged)");
+                // Debug.Log(
+                    // $"[SS_CHARGE_SM] State.ARRIVED while PHYSICAL_SKILLS → IDLE " +
+                    // $"(arrived overrides charged)");
                 PlayerStateMachine.Instance.ChangeIntention(Intention.INTENTION_IDLE);
                 PlayerStateMachine.Instance.NotifyEvent(Event.ARRIVED);
                 break;

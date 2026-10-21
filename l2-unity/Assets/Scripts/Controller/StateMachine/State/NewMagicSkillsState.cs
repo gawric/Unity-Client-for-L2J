@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public class NewMagicSkillsState  : AbstractAttackEvents
 {
@@ -33,7 +33,7 @@ public class NewMagicSkillsState  : AbstractAttackEvents
                 SkillExecutor.Instance.ExecuteSkillOverride(useSkill.SkillGrp, entity, readyCombo, _events);
                 break;
             case Event.CANCEL:
-                Debug.Log("NewMagicSkillsState Use Sate> Отмена скорее всего запрос пришел из ActionFaild");
+                // Debug.Log("NewMagicSkillsState Use Sate> Отмена скорее всего запрос пришел из ActionFaild");
                 break;
             case Event.APPLY_SELF_SKILL:
 

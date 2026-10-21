@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -41,7 +41,16 @@ public sealed class WorldPacketApply
 
         Entity entity = _world.GetEntityNoLockSync(npcInfo.Identity.Id);
         if (entity == null)
+        {
+            if (SpawnFrameBudget.IsCancelled(npcInfo.Identity.Id))
+                return;
+            if (!SpawnFrameBudget.TryConsumeSpawn())
+            {
+                IncomingPacketActions.QueueWorldNextFrame(apply => apply.UpdateNpc(npcInfo));
+                return;
+            }
             _world.SpawnNpc(npcInfo.Identity, npcInfo.Status, npcInfo.Stats);
+        }
         else
             _world.UpdateNpc(entity, npcInfo);
     }
@@ -51,7 +60,7 @@ public sealed class WorldPacketApply
         StorageNpc storage = StorageNpc.getInstance();
         NpcInfoDto[] npcs = storage.CopyNpcs();
         CharInfoDto[] chars = storage.CopyChars();
-        Debug.Log("[WorldSpawn] FlushKnownlist npcs=" + npcs.Length + " chars=" + chars.Length);
+        // Debug.Log("[WorldSpawn] FlushKnownlist npcs=" + npcs.Length + " chars=" + chars.Length);
         for (int i = 0; i < npcs.Length; i++)
             UpdateNpc(npcs[i]);
         for (int i = 0; i < chars.Length; i++)
@@ -62,45 +71,50 @@ public sealed class WorldPacketApply
     {
         if (_world == null || info == null || info.Identity == null)
         {
-            GearFlowLog.Warn("UpdateUser abort world/info null");
+            // GearFlowLog.Warn("UpdateUser abort world/info null");
             return;
         }
         if (!IncomingPacketActions.IsWorldSpawnReady())
         {
-            GearFlowLog.Warn("UpdateUser abort world not ready id=" + info.Identity.Id +
-                " nick=" + info.Identity.Name + " " + GearFlowLog.Paperdoll(info.Appearance));
+            // GearFlowLog.Warn("UpdateUser abort world not ready id=" + info.Identity.Id +
+                // " nick=" + info.Identity.Name + " " + GearFlowLog.Paperdoll(info.Appearance));
             return;
         }
 
         PlayerEntity local = PlayerEntity.Instance;
         if (local != null && local.Identity != null && local.Identity.Id == info.Identity.Id)
         {
-            GearFlowLog.Info("UpdateUser SKIP local id=" + info.Identity.Id);
+            // GearFlowLog.Info("UpdateUser SKIP local id=" + info.Identity.Id);
             return;
         }
 
         Entity entity = _world.GetEntityNoLockSync(info.Identity.Id);
         if (entity == null)
         {
-            GearFlowLog.Info("UpdateUser SPAWN id=" + info.Identity.Id +
-                " nick=" + info.Identity.Name + " " + GearFlowLog.Paperdoll(info.Appearance));
+            if (SpawnFrameBudget.IsCancelled(info.Identity.Id))
+                return;
+            if (!SpawnFrameBudget.TryConsumeSpawn())
+            {
+                IncomingPacketActions.QueueWorldNextFrame(apply => apply.UpdateUser(info));
+                return;
+            }
             _world.SpawnUser(info);
             return;
         }
 
         if (entity is UserEntity)
         {
-            GearFlowLog.Info("UpdateUser APPLY UserEntity id=" + info.Identity.Id +
-                " nick=" + info.Identity.Name +
-                " type=" + entity.GetType().Name +
-                " have " + GearFlowLog.Paperdoll(entity) +
-                " want " + GearFlowLog.Paperdoll(info.Appearance));
+            // GearFlowLog.Info("UpdateUser APPLY UserEntity id=" + info.Identity.Id +
+                // " nick=" + info.Identity.Name +
+                // " type=" + entity.GetType().Name +
+                // " have " + GearFlowLog.Paperdoll(entity) +
+                // " want " + GearFlowLog.Paperdoll(info.Appearance));
             _world.UpdateUser(entity, info);
             return;
         }
 
-        GearFlowLog.Warn("UpdateUser SKIP not UserEntity id=" + info.Identity.Id +
-            " type=" + entity.GetType().Name);
+        // GearFlowLog.Warn("UpdateUser SKIP not UserEntity id=" + info.Identity.Id +
+            // " type=" + entity.GetType().Name);
     }
 
     public void MoveTo(int objId, Vector3 destination, Vector3 current, CharMoveToLocationDto dto)
@@ -109,15 +123,15 @@ public sealed class WorldPacketApply
         if (entity == null || string.Equals(entity.name, "Elpy"))
             return;
 
-        if (NpcCombatTrace.IsCombatNpc(entity))
-            NpcCombatTrace.Write(entity.IsDead() ? "MOVE_SKIP" : "MOVE", entity, null,
-                NpcCombatTrace.Place(entity) +
-                " dest=" + destination.x.ToString("F0") + "," + destination.y.ToString("F0") + "," + destination.z.ToString("F0"));
+        // if (NpcCombatTrace.IsCombatNpc(entity))
+            // NpcCombatTrace.Write(entity.IsDead() ? "MOVE_SKIP" : "MOVE", entity, null,
+                // NpcCombatTrace.Place(entity) +
+                // " dest=" + destination.x.ToString("F0") + "," + destination.y.ToString("F0") + "," + destination.z.ToString("F0"));
 
         EntityWorldApply apply;
         if (TryResolve(entity, out apply))
             apply.OnMoveTo(entity, destination, current, dto);
-        UnityReplaySession.OnMoveTo(entity, destination);
+        // UnityReplaySession.OnMoveTo(entity, destination);
     }
 
     public void StopMove(StopMoveDto dto)
@@ -130,13 +144,13 @@ public sealed class WorldPacketApply
         if (entity == null || !TryResolve(entity, out apply))
             return;
 
-        if (NpcCombatTrace.IsCombatNpc(entity))
-            NpcCombatTrace.Write("STOP", entity, null, NpcCombatTrace.Place(entity));
+        // if (NpcCombatTrace.IsCombatNpc(entity))
+            // NpcCombatTrace.Write("STOP", entity, null, NpcCombatTrace.Place(entity));
 
-        ReplayAttackTrace.LogStop(entity, dto);
+        // ReplayAttackTrace.LogStop(entity, dto);
         apply.OnStopMove(entity, dto);
-        UnityChainLog.OnStopMove(entity, dto);
-        UnityReplaySession.OnStopMove(entity, dto);
+        // UnityChainLog.OnStopMove(entity, dto);
+        // UnityReplaySession.OnStopMove(entity, dto);
     }
 
     public void MoveToPawn(MoveToPawnDto dto)
@@ -146,35 +160,35 @@ public sealed class WorldPacketApply
         if (entity == null || !TryResolve(entity, out apply))
             return;
 
-        if (NpcCombatTrace.IsCombatNpc(entity))
+        // if (NpcCombatTrace.IsCombatNpc(entity))
         {
             Entity pawn = GetEntity(dto.TarObjid);
-            NpcCombatTrace.Write(entity.IsDead() ? "PAWN_SKIP" : "PAWN", entity, pawn,
-                NpcCombatTrace.Place(entity) + " pawnId=" + dto.TarObjid + " distUu=" + dto.DistanceUu);
+            // NpcCombatTrace.Write(entity.IsDead() ? "PAWN_SKIP" : "PAWN", entity, pawn,
+                // NpcCombatTrace.Place(entity) + " pawnId=" + dto.TarObjid + " distUu=" + dto.DistanceUu);
         }
 
-        ReplayAttackTrace.LogPawn(entity, GetEntity(dto.TarObjid), dto.DistanceUu);
+        // ReplayAttackTrace.LogPawn(entity, GetEntity(dto.TarObjid), dto.DistanceUu);
         apply.OnMoveToPawn(entity, dto);
-        UnityChainLog.OnMoveToPawn(entity, dto);
-        UnityReplaySession.OnMoveToPawn(entity, dto);
+        // UnityChainLog.OnMoveToPawn(entity, dto);
+        // UnityReplaySession.OnMoveToPawn(entity, dto);
     }
 
     public void Die(DieDto dto)
     {
         Entity entity = GetEntity(dto.ObjectId);
-        ReplayAttackTrace.Write("DIE_PACKET", entity, null, "objectId=" + dto.ObjectId);
+        // ReplayAttackTrace.Write("DIE_PACKET", entity, null, "objectId=" + dto.ObjectId);
         EntityWorldApply apply;
         if (entity == null || !TryResolve(entity, out apply))
             return;
 
-        EntityActionCombatLog.LogIfWatch(entity,
-            "packet Die name=" + EntityActionCombatLog.NameOf(entity) +
-            " id=" + dto.ObjectId +
-            " dead=" + entity.IsDead() +
-            " type=" + entity.GetType().Name);
+        // EntityActionCombatLog.LogIfWatch(entity,
+            // "packet Die name=" + EntityActionCombatLog.NameOf(entity) +
+            // " id=" + dto.ObjectId +
+            // " dead=" + entity.IsDead() +
+            // " type=" + entity.GetType().Name);
         apply.OnDie(entity, dto);
-        UnityChainLog.OnDie(entity, dto);
-        UnityReplaySession.OnDie(entity);
+        // UnityChainLog.OnDie(entity, dto);
+        // UnityReplaySession.OnDie(entity);
     }
 
     public void Revive(ReviveDto dto)
@@ -197,30 +211,30 @@ public sealed class WorldPacketApply
 
         Entity target = _world.GetEntityNoLockSync(dto.TargetId);
         Entity attacker = _world.GetEntityNoLockSync(dto.AttackerObjId);
-        if (NpcCombatTrace.IsCombatNpc(attacker))
-            NpcCombatTrace.Write(attacker.IsDead() || target == null || target.IsDead() ? "ATTACK_SKIP" : "ATTACK",
-                attacker, target,
-                NpcCombatTrace.Place(attacker) + " damage=" + dto.Damage + " flags=" + dto.Flags);
-        ReplayAttackTrace.Write(
-            "ATTACK_PACKET",
-            attacker,
-            target,
-            "damage=" + dto.Damage + " flags=" + dto.Flags +
-            " attackerId=" + dto.AttackerObjId + " targetId=" + dto.TargetId);
-        ReplayAttackTrace.LogHit(attacker, target, dto);
-        EntityActionCombatLog.LogIfWatch(attacker, target,
-            "packet Attack attacker=" + EntityActionCombatLog.Describe(attacker) +
-            " target=" + EntityActionCombatLog.Describe(target) +
-            " attackerDead=" + (attacker != null && attacker.IsDead()) +
-            " targetDead=" + (target != null && target.IsDead()) +
-            " attackerAction=" + (attacker != null ? attacker.ActionSlot.Action.ToString() : "none"));
+        // if (NpcCombatTrace.IsCombatNpc(attacker))
+            // NpcCombatTrace.Write(attacker.IsDead() || target == null ? "ATTACK_SKIP" : "ATTACK",
+                // attacker, target,
+                // NpcCombatTrace.Place(attacker) + " damage=" + dto.Damage + " flags=" + dto.Flags);
+        // ReplayAttackTrace.Write(
+            // "ATTACK_PACKET",
+            // attacker,
+            // target,
+            // "damage=" + dto.Damage + " flags=" + dto.Flags +
+            // " attackerId=" + dto.AttackerObjId + " targetId=" + dto.TargetId);
+        // ReplayAttackTrace.LogHit(attacker, target, dto);
+        // EntityActionCombatLog.LogIfWatch(attacker, target,
+            // "packet Attack attacker=" + EntityActionCombatLog.Describe(attacker) +
+            // " target=" + EntityActionCombatLog.Describe(target) +
+            // " attackerDead=" + (attacker != null && attacker.IsDead()) +
+            // " targetDead=" + (target != null && target.IsDead()) +
+            // " attackerAction=" + (attacker != null ? attacker.ActionSlot.Action.ToString() : "none"));
         EntityWorldApply apply;
         if (attacker == null || !TryResolve(attacker, out apply))
             return;
 
-        UnityReplaySession.OnAttack(attacker, dto);
+        // UnityReplaySession.OnAttack(attacker, dto);
         apply.OnAttack(attacker, target, dto);
-        UnityChainLog.OnAttack(attacker, target, dto);
+        // UnityChainLog.OnAttack(attacker, target, dto);
     }
 
     public void AutoAttackStart(AutoAttackStartDto dto)
@@ -231,14 +245,14 @@ public sealed class WorldPacketApply
         EntityWorldApply apply;
         if (entity == null || !TryResolve(entity, out apply))
             return;
-        if (NpcCombatTrace.IsCombatNpc(entity))
-            NpcCombatTrace.Write("ATK_START", entity, null, NpcCombatTrace.Place(entity));
-        EntityActionCombatLog.LogIfWatch(entity,
-            "packet AutoAttackStart name=" + EntityActionCombatLog.NameOf(entity) +
-            " id=" + dto.EntityId);
+        // if (NpcCombatTrace.IsCombatNpc(entity))
+            // NpcCombatTrace.Write("ATK_START", entity, null, NpcCombatTrace.Place(entity));
+        // EntityActionCombatLog.LogIfWatch(entity,
+            // "packet AutoAttackStart name=" + EntityActionCombatLog.NameOf(entity) +
+            // " id=" + dto.EntityId);
         apply.OnAutoAttackStart(entity, dto);
-        UnityChainLog.OnAutoAttackStart(entity, dto);
-        UnityReplaySession.OnAttackStart(entity);
+        // UnityChainLog.OnAutoAttackStart(entity, dto);
+        // UnityReplaySession.OnAttackStart(entity);
     }
 
     public void AutoAttackStop(AutoAttackStopDto dto)
@@ -249,15 +263,15 @@ public sealed class WorldPacketApply
         EntityWorldApply apply;
         if (entity == null || !TryResolve(entity, out apply))
             return;
-        if (NpcCombatTrace.IsCombatNpc(entity))
-            NpcCombatTrace.Write("ATK_STOP", entity, null, NpcCombatTrace.Place(entity));
-        EntityActionCombatLog.LogIfWatch(entity,
-            "packet AutoAttackStop name=" + EntityActionCombatLog.NameOf(entity) +
-            " id=" + dto.EntityId +
-            " inCombat=" + entity.InCombat);
+        // if (NpcCombatTrace.IsCombatNpc(entity))
+            // NpcCombatTrace.Write("ATK_STOP", entity, null, NpcCombatTrace.Place(entity));
+        // EntityActionCombatLog.LogIfWatch(entity,
+            // "packet AutoAttackStop name=" + EntityActionCombatLog.NameOf(entity) +
+            // " id=" + dto.EntityId +
+            // " inCombat=" + entity.InCombat);
         apply.OnAutoAttackStop(entity, dto);
-        UnityChainLog.OnAutoAttackStop(entity, dto);
-        UnityReplaySession.OnAttackStop(entity);
+        // UnityChainLog.OnAutoAttackStop(entity, dto);
+        // UnityReplaySession.OnAttackStop(entity);
     }
 
     public void SocialAction(SocialActionDto dto)
@@ -265,10 +279,10 @@ public sealed class WorldPacketApply
         if (dto == null)
             return;
         Entity entity = GetEntity(dto.ObjectId);
-        EntityActionCombatLog.LogIfWatch(entity,
-            "packet Social IGNORE name=" + EntityActionCombatLog.NameOf(entity) +
-            " id=" + dto.ObjectId +
-            " actionId=" + dto.ActionId);
+        // EntityActionCombatLog.LogIfWatch(entity,
+            // "packet Social IGNORE name=" + EntityActionCombatLog.NameOf(entity) +
+            // " id=" + dto.ObjectId +
+            // " actionId=" + dto.ActionId);
     }
 
     public void ChangeWaitType(ChangeWaitTypeDto dto)
@@ -298,28 +312,81 @@ public sealed class WorldPacketApply
         if (dto == null)
             return;
 
+        if (dto.SkillId == 4247)
+        {
+            Entity logged = GetEntity(dto.AttackerObjId);
+            Debug.Log(
+                "[WINDSTRIKE] packet MagicSkillUse skill=4247 attacker=" + dto.AttackerObjId +
+                " target=" + dto.TargetId +
+                " hitMs=" + dto.HitTime +
+                " entity=" + (logged != null ? logged.name : "missing"));
+            CrasherSlideLog.Event(logged, "MagicSkillUse",
+                "skill=4247 hitMs=" + dto.HitTime + " target=" + dto.TargetId);
+        }
+
         Entity entity = GetEntity(dto.AttackerObjId);
         if (entity == null)
             entity = PlayerEntity.Instance;
 
         EntityWorldApply apply;
         if (entity == null || !TryResolve(entity, out apply))
+        {
+            if (dto.SkillId == 4247)
+            {
+                Debug.Log(
+                    "[WINDSTRIKE] resolve FAIL type=" +
+                    (entity != null ? entity.GetType().Name : "null"));
+            }
             return;
+        }
 
-        apply.OnMagicSkillUse(entity, dto);
-        UnityReplaySession.OnMagicSkillUse(entity, dto);
+        if (dto.SkillId == 4247)
+        {
+            Debug.Log(
+                "[WINDSTRIKE] resolve type=" + entity.GetType().Name +
+                " apply=" + apply.GetType().Name +
+                " dead=" + entity.IsDead() +
+                " id=" + (entity.Identity != null ? entity.Identity.Id.ToString() : "null"));
+        }
+
+        MagicSkillUseTrace.Begin(dto.SkillId);
+        try
+        {
+            apply.OnMagicSkillUse(entity, dto);
+            if (dto.SkillId == 4247)
+                Debug.Log("[WINDSTRIKE] OnMagicSkillUse returned");
+        }
+        catch (Exception ex)
+        {
+            if (dto.SkillId == 4247)
+                Debug.LogError("[WINDSTRIKE] OnMagicSkillUse exception " + ex);
+            throw;
+        }
+        finally
+        {
+            MagicSkillUseTrace.End();
+        }
+        // UnityReplaySession.OnMagicSkillUse(entity, dto);
     }
 
     public void MagicSkillLaunched(MagicSkillLaunchedDto dto)
     {
         if (dto == null)
             return;
+        if (dto.SkillId == 4247)
+        {
+            Entity logged = GetEntity(dto.ObjectId);
+            Debug.Log(
+                "[WINDSTRIKE] packet MagicSkillLaunched skill=4247 object=" + dto.ObjectId +
+                " entity=" + (logged != null ? logged.name : "missing"));
+            CrasherSlideLog.Event(logged, "MagicSkillLaunched", "skill=4247");
+        }
         Entity entity = GetEntity(dto.ObjectId);
         if (entity == null)
             entity = PlayerEntity.Instance;
         if (entity == null)
             return;
-        UnityReplaySession.OnMagicLaunched(entity, dto);
+        // UnityReplaySession.OnMagicLaunched(entity, dto);
     }
 
     public void ShowNpcHtml(NpcHtmlMessageDto dto)

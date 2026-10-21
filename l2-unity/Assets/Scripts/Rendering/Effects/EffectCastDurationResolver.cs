@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 /// <summary>
 /// Stationary emitter window from server HitTime vs asset defaultLifeTime.
@@ -68,19 +68,19 @@ public static class EffectCastDurationResolver
 
         if (serverHitOverridesSettings)
         {
-            Debug.LogWarning(
-                $"[EFFECT_LIFETIME_MISMATCH] {context} group='{groupName}' " +
-                $"serverHit={castHit:F3}s settingsDefaultLife={settingsLife:F3}s " +
-                $"resolvedDuration={resolvedDuration:F3}s — using server HitTime, not asset defaultLifeTime.");
+            // Debug.LogWarning(
+                // $"[EFFECT_LIFETIME_MISMATCH] {context} group='{groupName}' " +
+                // $"serverHit={castHit:F3}s settingsDefaultLife={settingsLife:F3}s " +
+                // $"resolvedDuration={resolvedDuration:F3}s — using server HitTime, not asset defaultLifeTime.");
             return;
         }
 
         if (Mathf.Abs(resolvedDuration - castHit) > 0.05f && Mathf.Abs(resolvedDuration - settingsLife) < 0.05f)
         {
-            Debug.LogWarning(
-                $"[EFFECT_LIFETIME_MISMATCH] {context} group='{groupName}' " +
-                $"resolvedDuration={resolvedDuration:F3}s differs from serverHit={castHit:F3}s " +
-                $"(settingsLife={settingsLife:F3}s).");
+            // Debug.LogWarning(
+                // $"[EFFECT_LIFETIME_MISMATCH] {context} group='{groupName}' " +
+                // $"resolvedDuration={resolvedDuration:F3}s differs from serverHit={castHit:F3}s " +
+                // $"(settingsLife={settingsLife:F3}s).");
         }
     }
 #endif

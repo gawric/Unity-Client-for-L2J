@@ -25,7 +25,7 @@ public class NameplatesManager : MonoBehaviour
     [SerializeField] private string _atlasResourcePath = "Data/UI/Font/L2Lobby/l2_lobby_font_atlas";
     [SerializeField] private string _csvResourcePath = "Data/UI/Font/L2Lobby/ul2font_ascii";
 
-    [SerializeField] public RaycastHit[] _entitiesInRange;
+    [SerializeField] public Collider[] _entitiesInRange;
 
     private readonly List<NameplatePaintItem> _paintList = new List<NameplatePaintItem>(64);
 
@@ -134,7 +134,7 @@ public class NameplatesManager : MonoBehaviour
         return _camera != null ? _camera : Camera.main;
     }
 
-    private void FixedUpdate()
+    private void Update()
     {
         if (_playerTransform == null)
         {
@@ -148,14 +148,22 @@ public class NameplatesManager : MonoBehaviour
             }
         }
 
-        _entitiesInRange = Physics.SphereCastAll(
+        _entitiesInRange = Physics.OverlapSphere(
             _playerTransform.position,
             _nameplateViewDistance,
-            transform.forward,
-            0f,
             _entityMask);
 
         _entryStore.Discover(_entitiesInRange, _defaultNameColor);
+
+        // Remote users (CharInfo/UserEntity) move via L2PawnWalk with their
+        // CharacterController disabled, so OverlapSphere cannot find them. Upsert
+        // every registered user directly from World so their nameplates stay visible
+        // even when not hovered. Distance cull still happens in RefreshVisibility.
+        if (World.Instance != null)
+        {
+            World.Instance.ForEachUser(user => _entryStore.UpsertEntry(user, _defaultNameColor));
+        }
+
         _entryStore.EnsureHoverAndTarget(_entityMask, _defaultNameColor);
 
         if (PlayerEntity.Instance != null)

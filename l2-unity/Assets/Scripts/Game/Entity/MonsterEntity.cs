@@ -142,7 +142,7 @@ public class MonsterEntity : NetworkEntity
     {
         if(_gear.GetType() != typeof(MonsterGear))
         {
-            Debug.LogWarning("MonsterEntity->AttachArrowToNearestBone: gear invalid cast !!!");
+            // Debug.LogWarning("MonsterEntity->AttachArrowToNearestBone: gear invalid cast !!!");
             return;
         }
 

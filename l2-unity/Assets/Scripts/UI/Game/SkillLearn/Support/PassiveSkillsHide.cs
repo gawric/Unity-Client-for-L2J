@@ -102,7 +102,7 @@ public class PassiveSkillsHide : AbstractSkills
         }
         else
         {
-            Debug.LogWarning("ActiveSkillsHide > not found root panels ");
+            // Debug.LogWarning("ActiveSkillsHide > not found root panels ");
         }
     }
 
@@ -117,7 +117,7 @@ public class PassiveSkillsHide : AbstractSkills
         }
         else
         {
-            Debug.LogWarning("ActiveSkillsHide > not found root panels ");
+            // Debug.LogWarning("ActiveSkillsHide > not found root panels ");
         }
     }
 

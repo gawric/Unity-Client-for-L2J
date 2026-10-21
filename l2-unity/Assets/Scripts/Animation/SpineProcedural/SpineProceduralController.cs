@@ -35,7 +35,7 @@ public class SpineProceduralController : MonoBehaviour
     {
         if (bone == null)
         {
-            Debug.LogWarning("SpineProceduralController>RemoveBoneMod не найдена кость ");
+            // Debug.LogWarning("SpineProceduralController>RemoveBoneMod не найдена кость ");
             return;
         }
 
@@ -74,7 +74,7 @@ public class SpineProceduralController : MonoBehaviour
                     Quaternion targetRotation = Quaternion.Euler(mod.RotationOffset);
         
                     Quaternion weightedRotation = Quaternion.Slerp(Quaternion.identity, targetRotation, mod.Weight);
-                    Debug.Log("SpineProceduralController: -> Use Rotate ");
+                    // Debug.Log("SpineProceduralController: -> Use Rotate ");
                     bone.localRotation *= weightedRotation;
                 }
             }
@@ -93,15 +93,15 @@ public class SpineProceduralController : MonoBehaviour
             if (_activeModifications.TryGetValue(bone, out BoneModification mod))
             {
 
-                Debug.Log("SpineProceduralController: -> stop rotate Weight 1 " + mod.Weight);
+                // Debug.Log("SpineProceduralController: -> stop rotate Weight 1 " + mod.Weight);
                 mod.Weight = Mathf.MoveTowards(mod.Weight, 0f, Time.deltaTime * fadeSpeed);
-                Debug.Log("SpineProceduralController: -> stop rotate Weight 2 " + mod.Weight);
+                // Debug.Log("SpineProceduralController: -> stop rotate Weight 2 " + mod.Weight);
 
                 if (mod.Weight <= 0)
                 {
                     _activeModifications.Remove(bone);
                     _bonesToRemove.RemoveAt(i);
-                    Debug.Log("SpineProceduralController: -> stop rotate УДАЛЕНИЕ " + "size _activeModifications " + _activeModifications.Count);
+                    // Debug.Log("SpineProceduralController: -> stop rotate УДАЛЕНИЕ " + "size _activeModifications " + _activeModifications.Count);
                 }
             }
             else
@@ -109,6 +109,6 @@ public class SpineProceduralController : MonoBehaviour
                 _bonesToRemove.RemoveAt(i);
             }
         }
-        Debug.Log("SpineProceduralController: -> stop rotate " + "size _activeModifications " + _activeModifications.Count);
+        // Debug.Log("SpineProceduralController: -> stop rotate " + "size _activeModifications " + _activeModifications.Count);
     }
 }

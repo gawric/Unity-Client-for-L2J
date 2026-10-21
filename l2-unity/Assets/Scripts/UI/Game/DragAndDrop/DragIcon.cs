@@ -90,7 +90,7 @@ public class DragIcon : L2PopupWindow
 
         if (contentId == null)
         {
-            Debug.LogError(contentId + " can't be found.");
+            // Debug.LogError(contentId + " can't be found.");
             return;
         }
 

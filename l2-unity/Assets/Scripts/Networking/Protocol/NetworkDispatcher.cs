@@ -1,4 +1,4 @@
-public sealed class NetworkDispatcher : INetworkDispatcher
+﻿public sealed class NetworkDispatcher : INetworkDispatcher
 {
     private readonly INetworkHandlers _handlers;
     private readonly PacketApplyQueue _applyQueue;
@@ -16,11 +16,11 @@ public sealed class NetworkDispatcher : INetworkDispatcher
 
         EventProcessor events = EventProcessor.Instance;
         int mainPending = events != null ? events.PendingCount : 0;
-        PacketLatencyLog.OnQueued(model, mainPending);
+        // PacketLatencyLog.OnQueued(model, mainPending);
         _applyQueue.QueueApply(() =>
         {
-            PacketLatencyLog.OnApply(model);
-            _handlers.Handle(model);
+            // PacketLatencyLog.OnApply(model);
+            PacketApplyLog.Time(model, () => _handlers.Handle(model));
         });
     }
 }

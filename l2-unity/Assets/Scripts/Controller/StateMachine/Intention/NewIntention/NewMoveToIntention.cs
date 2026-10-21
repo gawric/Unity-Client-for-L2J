@@ -1,4 +1,4 @@
-using System.IO;
+﻿using System.IO;
 using System.Security.Cryptography;
 using UnityEngine;
 
@@ -10,6 +10,9 @@ public class NewMoveToIntention : IntentionBase
 
     public override void Enter(object arg0)
     {
+        if (_stateMachine.State == PlayerState.DEAD)
+            return;
+
         //move engine //0.1 default distance
         if (arg0 != null)
         {
@@ -32,7 +35,11 @@ public class NewMoveToIntention : IntentionBase
             //Debug.Log("NewMoveToIntention> to dict " + distTest + " original " + distTest2);
 
             L2PawnRange.ClearIgnoredPawn(PlayerEntity.Instance);
-            if (dist <= 0.12f) return;
+            if (dist <= 0.12f)
+            {
+                StandIfSeated();
+                return;
+            }
 
             if (PlayerStateMachine.Instance.IsMoveToPawn) PlayerStateMachine.Instance.IsMoveToPawn = false;
 
@@ -51,7 +58,10 @@ public class NewMoveToIntention : IntentionBase
         if (_stateMachine.State == PlayerState.IDLE |
             _stateMachine.State == PlayerState.ATTACKING |
             _stateMachine.State == PlayerState.PHYSICAL_SKILLS |
-            _stateMachine.State == PlayerState.MAGIC_SKILLS)
+            _stateMachine.State == PlayerState.MAGIC_SKILLS |
+            _stateMachine.State == PlayerState.SITTING |
+            _stateMachine.State == PlayerState.SIT_WAIT |
+            _stateMachine.State == PlayerState.STANDING)
         {
             // Leaving combat/skills for locomotion — clear attack latch so WAIT_RETURN/ATK_WAIT don't stick.
             if (PlayerEntity.Instance != null)
@@ -59,9 +69,9 @@ public class NewMoveToIntention : IntentionBase
                 PlayerEntity.Instance.IsAttack = false;
             }
 
-            Debug.Log(
-                $"[SS_CHARGE_SM] MoveTo.StartAnimMoveTo beforeState={before} " +
-                $"player.Running={runningFlag} → ChangeState(WALKING) + MOVE_TO");
+            // Debug.Log(
+                // $"[SS_CHARGE_SM] MoveTo.StartAnimMoveTo beforeState={before} " +
+                // $"player.Running={runningFlag} → ChangeState(WALKING) + MOVE_TO");
 
             _stateMachine.ChangeState(PlayerState.WALKING);
             _stateMachine.NotifyEvent(Event.MOVE_TO);
@@ -71,20 +81,31 @@ public class NewMoveToIntention : IntentionBase
         {
             // Already locomoting — still re-fire MOVE_TO so RUN/WALK anim restarts
             // if ATK_WAIT / attack end left the animator on wait while state stayed RUNNING.
-            Debug.Log(
-                $"[SS_CHARGE_SM] MoveTo.StartAnimMoveTo beforeState={before} " +
-                $"player.Running={runningFlag} → keep state, re-Notify MOVE_TO (refresh anim)");
+            // Debug.Log(
+                // $"[SS_CHARGE_SM] MoveTo.StartAnimMoveTo beforeState={before} " +
+                // $"player.Running={runningFlag} → keep state, re-Notify MOVE_TO (refresh anim)");
 
             _stateMachine.NotifyEvent(Event.MOVE_TO);
         }
         else
         {
-            Debug.Log(
-                $"[SS_CHARGE_SM] MoveTo.StartAnimMoveTo beforeState={before} " +
-                $"player.Running={runningFlag} → NO anim refresh");
+            // Debug.Log(
+                // $"[SS_CHARGE_SM] MoveTo.StartAnimMoveTo beforeState={before} " +
+                // $"player.Running={runningFlag} → NO anim refresh");
         }
     }
 
+
+    void StandIfSeated()
+    {
+        if (_stateMachine.State != PlayerState.SITTING &&
+            _stateMachine.State != PlayerState.SIT_WAIT &&
+            _stateMachine.State != PlayerState.STANDING)
+            return;
+
+        _stateMachine.ChangeState(PlayerState.IDLE);
+        _stateMachine.NotifyEvent(Event.ARRIVED);
+    }
 
     public override void Exit() { }
     public override void Update()

@@ -46,11 +46,11 @@ public abstract class DefaultClient : MonoBehaviour
         _connected = false;
         if (_connecting)
         {
-            LobbyFlowLog.Warn(GetType().Name + ".Connect skipped — already connecting");
+            // LobbyFlowLog.Warn(GetType().Name + ".Connect skipped — already connecting");
             return;
         }
 
-        LobbyFlowLog.Info(GetType().Name + ".Connect start ip=" + _serverIp + " port=" + _serverPort);
+        // LobbyFlowLog.Info(GetType().Name + ".Connect start ip=" + _serverIp + " port=" + _serverPort);
         CreateAsyncClient();
         WhileConnecting();
 
@@ -61,13 +61,13 @@ public abstract class DefaultClient : MonoBehaviour
         }
         catch (Exception ex)
         {
-            LobbyFlowLog.Exception(GetType().Name + ".Connect Task.Run", ex);
+            // LobbyFlowLog.Exception(GetType().Name + ".Connect Task.Run", ex);
         }
 
         _connecting = false;
         EventProcessor events = Events;
-        LobbyFlowLog.Info(GetType().Name + ".Connect socketResult=" + connected +
-            " events=" + (events != null) + " manager=" + (IncomingPacketActions.Manager != null));
+        // LobbyFlowLog.Info(GetType().Name + ".Connect socketResult=" + connected +
+            // " events=" + (events != null) + " manager=" + (IncomingPacketActions.Manager != null));
 
         if (connected)
         {
@@ -75,13 +75,13 @@ public abstract class DefaultClient : MonoBehaviour
             {
                 events.QueueEvent(() =>
                 {
-                    LobbyFlowLog.Info(GetType().Name + ".OnConnectionSuccess (EventProcessor)");
+                    // LobbyFlowLog.Info(GetType().Name + ".OnConnectionSuccess (EventProcessor)");
                     OnConnectionSuccess();
                 });
             }
             else
             {
-                LobbyFlowLog.Warn(GetType().Name + ".Connect no EventProcessor — OnConnectionSuccess inline");
+                // LobbyFlowLog.Warn(GetType().Name + ".Connect no EventProcessor — OnConnectionSuccess inline");
                 OnConnectionSuccess();
             }
         }

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using UnityEngine;
 
 [IncomingGamePacket(GameServerPacketType.SystemMessage)]
@@ -12,7 +12,7 @@ public sealed class SystemMessageIncoming : IncomingWirePacket<SystemMessageDto>
         }
         catch (Exception ex)
         {
-            Debug.Log("GameServerPacketHandler.OnMessage: " + ex);
+            // Debug.Log("GameServerPacketHandler.OnMessage: " + ex);
         }
     }
 }

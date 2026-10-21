@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
 using UnityEngine;
@@ -106,13 +106,13 @@ public sealed class L2BitmapFont
         TextAsset csv = Resources.Load<TextAsset>(csvResourcePath);
         if (atlas == null)
         {
-            Debug.LogError($"[L2BitmapFont] Atlas not found at Resources/{atlasResourcePath}");
+            // Debug.LogError($"[L2BitmapFont] Atlas not found at Resources/{atlasResourcePath}");
             return null;
         }
 
         if (csv == null)
         {
-            Debug.LogError($"[L2BitmapFont] CSV not found at Resources/{csvResourcePath}");
+            // Debug.LogError($"[L2BitmapFont] CSV not found at Resources/{csvResourcePath}");
             return null;
         }
 

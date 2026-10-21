@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
@@ -41,7 +41,7 @@ public class FNManagerLight : MonoBehaviour
         {
             if (_debugLog)
             {
-                Debug.LogWarning($"{LOG_TAG} duplicate on '{name}' — Destroy(this), keep existing Instance");
+                // Debug.LogWarning($"{LOG_TAG} duplicate on '{name}' — Destroy(this), keep existing Instance");
             }
 
             Destroy(this);
@@ -53,9 +53,9 @@ public class FNManagerLight : MonoBehaviour
         EnsurePool();
         if (_debugLog)
         {
-            Debug.Log(
-                $"{LOG_TAG} Awake ok on '{name}' id={GetInstanceID()} " +
-                $"fallback intensity={_intensity:F2} range={_rangeMeters:F3}m duration={_durationSeconds:F3}s pool={_poolSize}");
+            // Debug.Log(
+                // $"{LOG_TAG} Awake ok on '{name}' id={GetInstanceID()} " +
+                // $"fallback intensity={_intensity:F2} range={_rangeMeters:F3}m duration={_durationSeconds:F3}s pool={_poolSize}");
         }
     }
 
@@ -66,7 +66,7 @@ public class FNManagerLight : MonoBehaviour
             return Instance;
         }
 
-        Debug.LogWarning($"{LOG_TAG} Instance was null — creating runtime GameObject");
+        // Debug.LogWarning($"{LOG_TAG} Instance was null — creating runtime GameObject");
         GameObject go = new GameObject(nameof(FNManagerLight));
         return go.AddComponent<FNManagerLight>();
     }
@@ -82,7 +82,7 @@ public class FNManagerLight : MonoBehaviour
         FlashSlot slot = AcquireSlot();
         if (slot == null || slot.Light == null)
         {
-            Debug.LogError($"{LOG_TAG} SpawnHitFlash FAILED — no pool slot / Light null");
+            // Debug.LogError($"{LOG_TAG} SpawnHitFlash FAILED — no pool slot / Light null");
             return;
         }
 
@@ -124,11 +124,11 @@ public class FNManagerLight : MonoBehaviour
         if (_debugLog)
         {
             string settingsName = settings != null ? settings.name : "<fallback>";
-            Debug.Log(
-                $"{LOG_TAG} SPAWN #{slot.SpawnId} settings={settingsName} type=Spot pos={worldPosition} dir={dir} " +
-                $"intensity={slot.Light.intensity:F2} range={slot.Light.range:F3}m " +
-                $"spotAngle={slot.Light.spotAngle:F0} duration={slot.Duration:F3}s " +
-                $"activeSlots={CountActive()}/{_slots.Count}");
+            // Debug.Log(
+                // $"{LOG_TAG} SPAWN #{slot.SpawnId} settings={settingsName} type=Spot pos={worldPosition} dir={dir} " +
+                // $"intensity={slot.Light.intensity:F2} range={slot.Light.range:F3}m " +
+                // $"spotAngle={slot.Light.spotAngle:F0} duration={slot.Duration:F3}s " +
+                // $"activeSlots={CountActive()}/{_slots.Count}");
         }
     }
 
@@ -163,7 +163,7 @@ public class FNManagerLight : MonoBehaviour
             {
                 if (_debugLog)
                 {
-                    Debug.Log($"{LOG_TAG} RELEASE #{slot.SpawnId} after {slot.Age:F3}s");
+                    // Debug.Log($"{LOG_TAG} RELEASE #{slot.SpawnId} after {slot.Age:F3}s");
                 }
 
                 ReleaseSlot(slot);

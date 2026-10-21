@@ -5,6 +5,7 @@ public sealed class CharMoveToLocationIncoming : IncomingWirePacket<CharMoveToLo
 {
     public override void Apply(CharMoveToLocationDto packet)
     {
-        IncomingPacketActions.QueueWorld(apply => apply.MoveTo(packet.ObjId, packet.NewPosition, packet.OldPosition, packet));
+        MoveCostLog.NoteMovePacket(packet != null ? packet.ObjId : 0);
+        MovementPacketLatest.PutMove(packet);
     }
 }

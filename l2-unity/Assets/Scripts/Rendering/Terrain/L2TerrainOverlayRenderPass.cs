@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 
@@ -33,7 +33,7 @@ public sealed class L2TerrainOverlayRenderPass : ScriptableRenderPass
             if (!_loggedSkip)
             {
                 _loggedSkip = true;
-                Debug.LogWarning("[L2TerrainLayerStack] overlay pass: camera color target is null");
+                // Debug.LogWarning("[L2TerrainLayerStack] overlay pass: camera color target is null");
             }
             return;
         }

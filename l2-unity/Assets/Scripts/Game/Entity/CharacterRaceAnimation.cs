@@ -61,10 +61,10 @@ public static class CharacterRaceAnimationParser {
         }
         catch (OverflowException)
         {
-            Debug.LogWarning($"Value {value} is too large for CharacterRaceAnimation enum");
+            // Debug.LogWarning($"Value {value} is too large for CharacterRaceAnimation enum");
         }
 
-        Debug.LogWarning($"Invalid CharacterRaceAnimation value: {value}");
+        // Debug.LogWarning($"Invalid CharacterRaceAnimation value: {value}");
         return CharacterRaceAnimation.FElf; // or some default value
     }
 

@@ -26,7 +26,7 @@ public class CreatorTradingWindowsWithTabs : AbstractCreator , ICreatorTradeTab
     {
         if(inventoryTabView == null)
         {
-            Debug.LogWarning("CreatorTradingWindows > CreateTradeTabs: Not Found inventoryTabView ");
+            // Debug.LogWarning("CreatorTradingWindows > CreateTradeTabs: Not Found inventoryTabView ");
             return;
         }
 

@@ -72,7 +72,7 @@ public abstract class AbstractCreator
         }
         else
         {
-            Debug.LogError("CreatorTradingWindows: Not Create Windows tabs!!!!");
+            // Debug.LogError("CreatorTradingWindows: Not Create Windows tabs!!!!");
         }
 
         if (_tabsTradeTabs.Length > 0)
@@ -129,7 +129,7 @@ public abstract class AbstractCreator
         }
         else
         {
-            Debug.LogError("CreatorTradingWindows: Not Create Windows tabs!!!!");
+            // Debug.LogError("CreatorTradingWindows: Not Create Windows tabs!!!!");
         }
 
         if (_tabsContentTabs.Length > 0)

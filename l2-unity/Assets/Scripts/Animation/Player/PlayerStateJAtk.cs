@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 /// <summary>
 /// Melee attack anim — linear rate over the FULL L2 attack cycle (timeAtk).
@@ -116,36 +116,36 @@ public class PlayerStateJAtk : StateMachineBehaviour
 
         // Client wall duration of the swing = server timeAtk (clip is rate-scaled to fit).
         // If clipLenMs >> serverTimeAtkMs, anim feels long only if rate is wrong; compare these.
-        Debug.Log(
-            $"[ATK_TIMING_CMP] Enter anim={parameterName} clip={clipName} " +
-            $"pAtkSpd={pAtkSpd:F1} serverTimeAtkMs={_fullCycleMs:F1} (500000/pAtkSpd) " +
-            $"serverHitMs={hitAtMs:F1} (timeAtk*{hitFraction:F2}) " +
-            $"clipLenMs={clipLenMs:F1} clipLenSec={timeAnimation:F3} " +
-            $"patkspd={_linearPatkSpd:F3} (=clipMs/serverMs) " +
-            $"clientWallCycleMs={_fullCycleMs:F1} " +
-            $"deltaClipVsServerMs={clipLenMs - _fullCycleMs:F1} " +
-            $"AttackShotSec={attackShotSec:F3} AttackShotNorm={attackShotNorm:F3} AttackShotWallMs~={attackShotWallMs:F1} " +
-            $"OnAnimationHitSec={onAnimHitSec:F3} OnAnimationHitNorm={onAnimHitNorm:F3} " +
-            $"epoch={_attackEpoch}");
+        // Debug.Log(
+            // $"[ATK_TIMING_CMP] Enter anim={parameterName} clip={clipName} " +
+            // $"pAtkSpd={pAtkSpd:F1} serverTimeAtkMs={_fullCycleMs:F1} (500000/pAtkSpd) " +
+            // $"serverHitMs={hitAtMs:F1} (timeAtk*{hitFraction:F2}) " +
+            // $"clipLenMs={clipLenMs:F1} clipLenSec={timeAnimation:F3} " +
+            // $"patkspd={_linearPatkSpd:F3} (=clipMs/serverMs) " +
+            // $"clientWallCycleMs={_fullCycleMs:F1} " +
+            // $"deltaClipVsServerMs={clipLenMs - _fullCycleMs:F1} " +
+            // $"AttackShotSec={attackShotSec:F3} AttackShotNorm={attackShotNorm:F3} AttackShotWallMs~={attackShotWallMs:F1} " +
+            // $"OnAnimationHitSec={onAnimHitSec:F3} OnAnimationHitNorm={onAnimHitNorm:F3} " +
+            // $"epoch={_attackEpoch}");
 
-        Debug.Log(
-            $"[ATK_HIT_CHAIN] 1b.JAtkEnter frame={Time.frameCount} t={Time.time:F3} anim={parameterName} " +
-            $"fullCycleMs={_fullCycleMs:F1} hitFraction={hitFraction:F3} hitAtMs~={hitAtMs:F1} " +
-            $"clipLenSec={timeAnimation:F3} AttackShotNorm={attackShotNorm:F3} " +
-            $"patkspd={_linearPatkSpd:F3} player={PlayerEntity.Instance?.RandomName}");
-        Debug.Log(
-            $"{JATK_TIMING_LOG} Enter LINEAR anim={parameterName} serverTimeAtkMs={_fullCycleMs:F1} " +
-            $"clipLenMs={clipLenMs:F1} patkspd={_linearPatkSpd:F3} AttackShotWallMs~={attackShotWallMs:F1} " +
-            $"player={PlayerEntity.Instance?.RandomName}");
-        UnityChainLog.OnJAtkEnter(PlayerEntity.Instance, parameterName, _fullCycleMs, hitAtMs, pAtkSpd, _linearPatkSpd, timeAnimation);
+        // Debug.Log(
+            // $"[ATK_HIT_CHAIN] 1b.JAtkEnter frame={Time.frameCount} t={Time.time:F3} anim={parameterName} " +
+            // $"fullCycleMs={_fullCycleMs:F1} hitFraction={hitFraction:F3} hitAtMs~={hitAtMs:F1} " +
+            // $"clipLenSec={timeAnimation:F3} AttackShotNorm={attackShotNorm:F3} " +
+            // $"patkspd={_linearPatkSpd:F3} player={PlayerEntity.Instance?.RandomName}");
+        // Debug.Log(
+            // $"{JATK_TIMING_LOG} Enter LINEAR anim={parameterName} serverTimeAtkMs={_fullCycleMs:F1} " +
+            // $"clipLenMs={clipLenMs:F1} patkspd={_linearPatkSpd:F3} AttackShotWallMs~={attackShotWallMs:F1} " +
+            // $"player={PlayerEntity.Instance?.RandomName}");
+        // UnityChainLog.OnJAtkEnter(PlayerEntity.Instance, parameterName, _fullCycleMs, hitAtMs, pAtkSpd, _linearPatkSpd, timeAnimation);
 
         if (IsDual(parameterName))
         {
-            Debug.Log(
-                $"{JATK_EARLY_LOG} Enter DUAL anim={parameterName} clip={clipName} " +
-                $"clipLenSec={timeAnimation:F3} serverCycleSec={_endTime:F3} " +
-                $"patkspd={_linearPatkSpd:F3} " +
-                $"note=wall_clock_ends_at_serverCycle_even_if_dual_clip_has_2_hits");
+            // Debug.Log(
+                // $"{JATK_EARLY_LOG} Enter DUAL anim={parameterName} clip={clipName} " +
+                // $"clipLenSec={timeAnimation:F3} serverCycleSec={_endTime:F3} " +
+                // $"patkspd={_linearPatkSpd:F3} " +
+                // $"note=wall_clock_ends_at_serverCycle_even_if_dual_clip_has_2_hits");
         }
 
         StopAnimationTrigger(animator, parameterName);
@@ -200,11 +200,11 @@ public class PlayerStateJAtk : StateMachineBehaviour
         _dieTargetLatched = true;
         float elapsedMs = TimeUtils.ConvertSecToMs(elapsedSec);
         bool isAttack = PlayerEntity.Instance != null && PlayerEntity.Instance.IsAttack;
-        Debug.Log(
-            $"{JATK_EARLY_LOG} DIE_TARGET_LATCH anim={parameterName} " +
-            $"wallElapsedMs={elapsedMs:F1}/{_fullCycleMs:F1} animNorm={_lastAnimNormalized:F3} " +
-            $"isAttack={isAttack} " +
-            $"note=SwitchToIdle_still_waits_for_wall_cycle_unless_external_CrossFade");
+        // Debug.Log(
+            // $"{JATK_EARLY_LOG} DIE_TARGET_LATCH anim={parameterName} " +
+            // $"wallElapsedMs={elapsedMs:F1}/{_fullCycleMs:F1} animNorm={_lastAnimNormalized:F3} " +
+            // $"isAttack={isAttack} " +
+            // $"note=SwitchToIdle_still_waits_for_wall_cycle_unless_external_CrossFade");
     }
 
     private void LogAnimMilestones(float elapsedSec)
@@ -224,10 +224,10 @@ public class PlayerStateJAtk : StateMachineBehaviour
         if (_lastAnimNormalized < animThreshold) return;
 
         _milestoneMask |= flag;
-        Debug.Log(
-            $"[ATK_HIT_CHAIN] AnimMilestone anim={parameterName} animNorm>={animThreshold:F2} " +
-            $"animNorm={_lastAnimNormalized:F3} wallElapsedMs={elapsedMs:F1} wallNorm={wallNorm:F3} " +
-            $"frame={Time.frameCount}");
+        // Debug.Log(
+            // $"[ATK_HIT_CHAIN] AnimMilestone anim={parameterName} animNorm>={animThreshold:F2} " +
+            // $"animNorm={_lastAnimNormalized:F3} wallElapsedMs={elapsedMs:F1} wallNorm={wallNorm:F3} " +
+            // $"frame={Time.frameCount}");
     }
 
     public override void OnStateExit(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
@@ -253,26 +253,26 @@ public class PlayerStateJAtk : StateMachineBehaviour
             ? "SwitchToIdle"
             : (earlyWallExit ? "EXTERNAL_interrupt_before_wall_cycle" : "EXTERNAL_or_blend_after_wall");
 
-        Debug.Log(
-            $"[ATK_TIMING_CMP] Exit anim={parameterName} epoch={_attackEpoch} " +
-            $"wallElapsedMs={elapsedMs:F1} expectedServerCycleMs={expectedMs:F1} " +
-            $"deltaMs={elapsedMs - expectedMs:F1} " +
-            $"earlyExit={earlyWallExit} swordHit={_isSwordHitLogged} " +
-            $"animNorm={_lastAnimNormalized:F3}");
-        Debug.Log(
-            $"{JATK_TIMING_LOG} Exit anim={parameterName} elapsedMs={elapsedMs:F1} " +
-            $"expectedMs={expectedMs:F1} swordHit={_isSwordHitLogged} epoch={_attackEpoch}");
-        UnityChainLog.OnJAtkExit(PlayerEntity.Instance, parameterName, expectedMs, elapsedMs, _lastAnimNormalized);
+        // Debug.Log(
+            // $"[ATK_TIMING_CMP] Exit anim={parameterName} epoch={_attackEpoch} " +
+            // $"wallElapsedMs={elapsedMs:F1} expectedServerCycleMs={expectedMs:F1} " +
+            // $"deltaMs={elapsedMs - expectedMs:F1} " +
+            // $"earlyExit={earlyWallExit} swordHit={_isSwordHitLogged} " +
+            // $"animNorm={_lastAnimNormalized:F3}");
+        // Debug.Log(
+            // $"{JATK_TIMING_LOG} Exit anim={parameterName} elapsedMs={elapsedMs:F1} " +
+            // $"expectedMs={expectedMs:F1} swordHit={_isSwordHitLogged} epoch={_attackEpoch}");
+        // UnityChainLog.OnJAtkExit(PlayerEntity.Instance, parameterName, expectedMs, elapsedMs, _lastAnimNormalized);
 
-        Debug.Log(
-            $"{JATK_EARLY_LOG} Exit anim={parameterName} cause={exitCause} " +
-            $"viaSwitchToIdle={_exitViaSwitchToIdle} earlyWallExit={earlyWallExit} " +
-            $"wallElapsedMs={elapsedMs:F1}/{expectedMs:F1} " +
-            $"animNormMod={_lastAnimNormalized:F3} animNormRaw={animNormRaw:F3} " +
-            $"clipLenSec={_clipLengthSec:F3} patkspd={_linearPatkSpd:F3} " +
-            $"dieTarget={dieTarget} dieLatched={_dieTargetLatched} isAttack={isAttack} " +
-            $"swordHit={_isSwordHitLogged} lastDeny='{_lastSwitchDenyReason}' " +
-            $"frame={Time.frameCount}");
+        // Debug.Log(
+            // $"{JATK_EARLY_LOG} Exit anim={parameterName} cause={exitCause} " +
+            // $"viaSwitchToIdle={_exitViaSwitchToIdle} earlyWallExit={earlyWallExit} " +
+            // $"wallElapsedMs={elapsedMs:F1}/{expectedMs:F1} " +
+            // $"animNormMod={_lastAnimNormalized:F3} animNormRaw={animNormRaw:F3} " +
+            // $"clipLenSec={_clipLengthSec:F3} patkspd={_linearPatkSpd:F3} " +
+            // $"dieTarget={dieTarget} dieLatched={_dieTargetLatched} isAttack={isAttack} " +
+            // $"swordHit={_isSwordHitLogged} lastDeny='{_lastSwitchDenyReason}' " +
+            // $"frame={Time.frameCount}");
 
         // Do not clear IsAttack here — next AttackDto packet may already own the combo.
     }
@@ -291,18 +291,18 @@ public class PlayerStateJAtk : StateMachineBehaviour
                 $"animNorm={_lastAnimNormalized:F3}";
             if (IsDual(parameterName))
             {
-                Debug.Log(
-                    $"{JATK_EARLY_LOG} SwitchToIdle DENY anim={parameterName} {_lastSwitchDenyReason}");
+                // Debug.Log(
+                    // $"{JATK_EARLY_LOG} SwitchToIdle DENY anim={parameterName} {_lastSwitchDenyReason}");
             }
             return;
         }
 
         float elapsedMs = TimeUtils.ConvertSecToMs(Time.time - _startTime);
-        Debug.Log(
-            $"{JATK_EARLY_LOG} SwitchToIdle FIRE anim={parameterName} " +
-            $"reason={(dieTarget ? "dieTarget" : "!isAttack")} " +
-            $"wallElapsedMs={elapsedMs:F1}/{_fullCycleMs:F1} animNorm={_lastAnimNormalized:F3} " +
-            $"clipLenSec={_clipLengthSec:F3}");
+        // Debug.Log(
+            // $"{JATK_EARLY_LOG} SwitchToIdle FIRE anim={parameterName} " +
+            // $"reason={(dieTarget ? "dieTarget" : "!isAttack")} " +
+            // $"wallElapsedMs={elapsedMs:F1}/{_fullCycleMs:F1} animNorm={_lastAnimNormalized:F3} " +
+            // $"clipLenSec={_clipLengthSec:F3}");
 
         if (PlayerEntity.Instance != null)
         {
@@ -315,9 +315,9 @@ public class PlayerStateJAtk : StateMachineBehaviour
         // A Move packet may already have started the walk. Do not pull that back into atkwait.
         if (PlayerStateMachine.Instance != null && PlayerStateMachine.Instance.ShouldKeepLocomotion())
         {
-            Debug.Log(
-                $"{JATK_EARLY_LOG} SwitchToIdle SKIP_LOCOMOTION anim={parameterName} " +
-                $"state={PlayerStateMachine.Instance.State} wallElapsedMs={elapsedMs:F1}/{_fullCycleMs:F1}");
+            // Debug.Log(
+                // $"{JATK_EARLY_LOG} SwitchToIdle SKIP_LOCOMOTION anim={parameterName} " +
+                // $"state={PlayerStateMachine.Instance.State} wallElapsedMs={elapsedMs:F1}/{_fullCycleMs:F1}");
             return;
         }
 
@@ -397,23 +397,23 @@ public class PlayerStateJAtk : StateMachineBehaviour
 
         string attackerName = attacker != null ? attacker.name : "null";
         string targetName = target != null ? target.name : "null";
-        Debug.Log(
-            $"[ATK_HIT_CHAIN] 5.JAtkSawHit anim={parameterName} frame={Time.frameCount} t={Time.time:F3} " +
-            $"wallElapsedMs={elapsedMs:F1}/{expectedMs:F1} wallNorm={wallNorm:F3} " +
-            $"animNorm={_lastAnimNormalized:F3} sameRoot={sameRoot} " +
-            $"attacker={attackerName} target={targetName} hitPoint={hitPointCollider}");
-        Debug.Log(
-            $"{JATK_TIMING_LOG} SwordHit anim={parameterName} elapsedMs={elapsedMs:F1} " +
-            $"expectedMs={expectedMs:F1} wallNorm={wallNorm:F3} animNorm={_lastAnimNormalized:F3} " +
-            $"sameRoot={sameRoot} attacker={attackerName} target={targetName} hitPoint={hitPointCollider}");
-        UnityChainLog.OnJAtkHit(PlayerEntity.Instance, parameterName, expectedMs, elapsedMs, _lastAnimNormalized, hitPointCollider);
+        // Debug.Log(
+            // $"[ATK_HIT_CHAIN] 5.JAtkSawHit anim={parameterName} frame={Time.frameCount} t={Time.time:F3} " +
+            // $"wallElapsedMs={elapsedMs:F1}/{expectedMs:F1} wallNorm={wallNorm:F3} " +
+            // $"animNorm={_lastAnimNormalized:F3} sameRoot={sameRoot} " +
+            // $"attacker={attackerName} target={targetName} hitPoint={hitPointCollider}");
+        // Debug.Log(
+            // $"{JATK_TIMING_LOG} SwordHit anim={parameterName} elapsedMs={elapsedMs:F1} " +
+            // $"expectedMs={expectedMs:F1} wallNorm={wallNorm:F3} animNorm={_lastAnimNormalized:F3} " +
+            // $"sameRoot={sameRoot} attacker={attackerName} target={targetName} hitPoint={hitPointCollider}");
+        // UnityChainLog.OnJAtkHit(PlayerEntity.Instance, parameterName, expectedMs, elapsedMs, _lastAnimNormalized, hitPointCollider);
 
         if (IsDual(parameterName))
         {
-            Debug.Log(
-                $"{JATK_EARLY_LOG} FirstSwordHit DUAL anim={parameterName} " +
-                $"wallElapsedMs={elapsedMs:F1}/{expectedMs:F1} animNorm={_lastAnimNormalized:F3} " +
-                $"target={targetName}");
+            // Debug.Log(
+                // $"{JATK_EARLY_LOG} FirstSwordHit DUAL anim={parameterName} " +
+                // $"wallElapsedMs={elapsedMs:F1}/{expectedMs:F1} animNorm={_lastAnimNormalized:F3} " +
+                // $"target={targetName}");
         }
     }
 

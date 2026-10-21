@@ -65,7 +65,7 @@ public class TextureUtils {
         Texture2D texture = AssetDatabase.LoadAssetAtPath<Texture2D>(path);
 
         if (texture == null) {
-            Debug.LogWarning("Can't load textue at path " + path);
+            // Debug.LogWarning("Can't load textue at path " + path);
         }
 
         return texture;

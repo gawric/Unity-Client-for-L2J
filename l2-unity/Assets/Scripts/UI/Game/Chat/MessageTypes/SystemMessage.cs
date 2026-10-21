@@ -74,7 +74,7 @@ public class SystemMessage
         }
         catch (Exception e)
         {
-            Debug.LogError($"Failed to get item name for ID {itemId}: {e.Message}");
+            // Debug.LogError($"Failed to get item name for ID {itemId}: {e.Message}");
             return "Unknown Item";
         }
     }
@@ -85,7 +85,7 @@ public class SystemMessage
         {
             if (skillData == null || skillData.Length < 2)
             {
-                Debug.LogError("Invalid skill data array");
+                // Debug.LogError("Invalid skill data array");
                 return "Unknown Skill";
             }
 
@@ -100,7 +100,7 @@ public class SystemMessage
         }
         catch (Exception e)
         {
-            Debug.LogError($"Failed to get skill name: {e.Message}");
+            // Debug.LogError($"Failed to get skill name: {e.Message}");
             return "Unknown Skill";
         }
     }

@@ -84,7 +84,7 @@ public class PlayerShortcuts : MonoBehaviour
 
     public void UseShortcut(Shortcut shortcut)
     {
-        Debug.LogWarning($"Use shortcut {shortcut.Page * MAXIMUM_SHORTCUTS_PER_BAR + shortcut.Slot}.");
+        // Debug.LogWarning($"Use shortcut {shortcut.Page * MAXIMUM_SHORTCUTS_PER_BAR + shortcut.Slot}.");
         switch (shortcut.Type)
         {
             case Shortcut.TYPE_ITEM:
@@ -132,7 +132,7 @@ public class PlayerShortcuts : MonoBehaviour
         }
 
         int slot = shortcut.Slot + shortcut.Page * MAXIMUM_SHORTCUTS_PER_BAR;
-        Debug.Log($"Register shortcut {shortcut.Id} at {slot}.");
+        // Debug.Log($"Register shortcut {shortcut.Id} at {slot}.");
 
         if (_shortcuts.TryAdd(slot, shortcut))
         {
@@ -140,7 +140,7 @@ public class PlayerShortcuts : MonoBehaviour
         }
         else
         {
-            Debug.LogError($"Can't add shotcut in slot {slot}.");
+            // Debug.LogError($"Can't add shotcut in slot {slot}.");
         }
 
     }
@@ -198,12 +198,12 @@ public class PlayerShortcuts : MonoBehaviour
 
         if (oldShortcut == null)
         {
-            Debug.LogError($"MoveShortcut. Old slot is null at {oldSlot}.");
+            // Debug.LogError($"MoveShortcut. Old slot is null at {oldSlot}.");
             return;
         }
 
 
-        Debug.Log("Event Reuqets Add ShrtCut 2 ");
+        // Debug.Log("Event Reuqets Add ShrtCut 2 ");
         GameClient game = Game;
         if (game != null)
             game.Send(new RequestShortCutRegCommand(oldShortcut.Type, newSlot, oldShortcut.Id, 0));
@@ -227,7 +227,7 @@ public class PlayerShortcuts : MonoBehaviour
     {
         if(locRemove) RemoveShotcutLocally(oldSlot);
 
-        Debug.Log("Нужно реализовать удаление shortcut");
+        // Debug.Log("Нужно реализовать удаление shortcut");
         //GameClient.Instance.ClientPacketHandler.RequestRemoveShortcut(oldSlot);
         GameClient game = Game;
         if (game != null)

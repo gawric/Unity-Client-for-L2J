@@ -69,14 +69,14 @@ public class SceneLoader : MonoBehaviour
         yield return WaitGameUiBuilt();
         SetGameHudVisible(false);
         SetSceneRootsActive(_gameScene, false, true);
-        Debug.Log("Game scene cached (inactive).");
+        // Debug.Log("Game scene cached (inactive).");
     }
 
     public void LoadSWMap()
     {
         if (IncomingPacketActions.Game == null || IncomingPacketActions.Game.PlayerInfo.Identity == null)
         {
-            Debug.LogError("LoadSWMap: no player xyz");
+            // Debug.LogError("LoadSWMap: no player xyz");
             return;
         }
 
@@ -100,7 +100,7 @@ public class SceneLoader : MonoBehaviour
         SetSceneRootsActive(_lobbyScene, false);
 
         string tile = VectorUtils.GetSwMapName(l2Pos);
-        Debug.Log("LoadSWMap tile='" + tile + "' xyz=(" + l2Pos.x + ", " + l2Pos.y + ", " + l2Pos.z + ")");
+        // Debug.Log("LoadSWMap tile='" + tile + "' xyz=(" + l2Pos.x + ", " + l2Pos.y + ", " + l2Pos.z + ")");
 
         if (Geodata.Instance != null)
         {
@@ -226,7 +226,7 @@ public class SceneLoader : MonoBehaviour
     private IEnumerator EventLoadSWMap(string tile)
     {
         _streamingBusy = true;
-        Debug.Log("EventLoadSWMap tile='" + tile + "'");
+        // Debug.Log("EventLoadSWMap tile='" + tile + "'");
         if (Geodata.Instance != null)
         {
             Geodata.Instance.LoadMaps(new List<string> { tile });
@@ -240,7 +240,7 @@ public class SceneLoader : MonoBehaviour
     private IEnumerator UnloadSWMap(string tile)
     {
         _streamingBusy = true;
-        Debug.Log("UnloadSWMap tile='" + tile + "'");
+        // Debug.Log("UnloadSWMap tile='" + tile + "'");
         SetSceneRootsActive(tile, false);
         UnloadScene(tile);
         _loadedTiles.Remove(tile);
@@ -253,15 +253,15 @@ public class SceneLoader : MonoBehaviour
         Scene existing = SceneManager.GetSceneByName(sceneName);
         if (existing.IsValid() && existing.isLoaded)
         {
-            Debug.Log("Skipping scene load " + sceneName);
+            // Debug.Log("Skipping scene load " + sceneName);
             yield break;
         }
 
-        Debug.Log("Loading scene " + sceneName);
+        // Debug.Log("Loading scene " + sceneName);
         AsyncOperation asyncLoad = SceneManager.LoadSceneAsync(sceneName, LoadSceneMode.Additive);
         if (asyncLoad == null)
         {
-            Debug.LogError("Failed to load scene " + sceneName);
+            // Debug.LogError("Failed to load scene " + sceneName);
             yield break;
         }
 
@@ -279,14 +279,14 @@ public class SceneLoader : MonoBehaviour
             L2GameUI ui = GetGameUi();
             if (ui != null && ui.AreWindowsReady())
             {
-                Debug.Log("Game UI windows ready.");
+                // Debug.Log("Game UI windows ready.");
                 yield break;
             }
 
             yield return null;
         }
 
-        Debug.LogWarning("Game UI windows were not ready before timeout.");
+        // Debug.LogWarning("Game UI windows were not ready before timeout.");
     }
 
     private void SetGameHudVisible(bool visible)
@@ -355,19 +355,19 @@ public class SceneLoader : MonoBehaviour
     {
         if (SceneManager.GetActiveScene().name != sceneName)
         {
-            Debug.Log("Switching to scene " + sceneName);
+            // Debug.Log("Switching to scene " + sceneName);
             AsyncOperation asyncLoad = SceneManager.LoadSceneAsync(sceneName);
             asyncLoad.completed += p;
         }
         else
         {
-            Debug.Log("Skipping scene switch " + sceneName);
+            // Debug.Log("Skipping scene switch " + sceneName);
         }
     }
 
     private void UnloadScene(string sceneName)
     {
-        Debug.Log("Unoading scene " + sceneName);
+        // Debug.Log("Unoading scene " + sceneName);
 
         if (!SceneManager.GetSceneByName(sceneName).IsValid())
         {

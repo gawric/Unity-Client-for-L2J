@@ -27,7 +27,7 @@ public class UserStateWaitAtk : UserStateAction {
 
         if (!_cancelAction) {
             if (!ShouldAtkWait()) {
-                Debug.Log("Wait now");
+                // Debug.Log("Wait now");
                 SetBool("wait_" + _weaponAnim, true);
             }
         }

@@ -54,7 +54,7 @@ public class L2WeaponChargeGroup : BaseEffectGroup, IWeaponEffect
            
            // Ограничиваем итоговое время жизни снизу нашим порогом minLifeTime
            adjustedLife = Mathf.Max(minLifeTime, _duration * _timeMultiplier);
-           Debug.Log($"_swordTip размер меча: {currentLength} , {_timeMultiplier} , {adjustedLife}");
+           // Debug.Log($"_swordTip размер меча: {currentLength} , {_timeMultiplier} , {adjustedLife}");
         }
     }
 
@@ -68,14 +68,14 @@ public class L2WeaponChargeGroup : BaseEffectGroup, IWeaponEffect
         }
         else if (component is VisualEffect vfx)
         {
-            Debug.Log($"VFX USE COMPONENT!: {_duration}");
+            // Debug.Log($"VFX USE COMPONENT!: {_duration}");
             
             // Защита от деления на ноль
             float safeDuration = Mathf.Max(0.001f, _duration);
             
             if (useFixedLifetime)
             {
-                Debug.Log($"_swordTip размер меча fx1: {_duration}");
+                // Debug.Log($"_swordTip размер меча fx1: {_duration}");
                 TrySetVfxFloat(vfx, "LifetimeRange", _duration);
                 TrySetVfxFloat(vfx, "_LifetimeRange", _duration);
                 vfx.Play();
@@ -102,7 +102,7 @@ public class L2WeaponChargeGroup : BaseEffectGroup, IWeaponEffect
                 TrySetVfxFloat(vfx, "ForwardOffset", forwardOffset);
                 TrySetVfxFloat(vfx, "LifetimeRange", adjustedLife);
                 TrySetVfxFloat(vfx, "_LifetimeRange", adjustedLife);
-                Debug.Log($"_swordTip размер меча fx2: {adjustedLife} , {forwardOffset}");
+                // Debug.Log($"_swordTip размер меча fx2: {adjustedLife} , {forwardOffset}");
                 vfx.Play();
             }
  
@@ -140,7 +140,7 @@ public class L2WeaponChargeGroup : BaseEffectGroup, IWeaponEffect
             _propBlock.SetFloat(SeedID, seed);
             _propBlock.SetVector(LifetimeRangeID, new Vector2(_duration, _duration));
             _propBlock.SetFloat(FadeoutStartTimeID, _duration * 0.7f);
-            Debug.Log($"ApplyMaterialsParams fixed: {now}, {seed}, {_duration}, {totalLife * 0.7f}");
+            // Debug.Log($"ApplyMaterialsParams fixed: {now}, {seed}, {_duration}, {totalLife * 0.7f}");
         }
         else
         {
@@ -148,7 +148,7 @@ public class L2WeaponChargeGroup : BaseEffectGroup, IWeaponEffect
             _propBlock.SetFloat(SeedID, seed);
             _propBlock.SetVector(LifetimeRangeID, new Vector2(adjustedLife, adjustedLife));
             _propBlock.SetFloat(FadeoutStartTimeID, totalLife * 0.7f);
-            Debug.Log($"ApplyMaterialsParams calc: {now}, {seed}, {adjustedLife}, {totalLife * 0.7f}");
+            // Debug.Log($"ApplyMaterialsParams calc: {now}, {seed}, {adjustedLife}, {totalLife * 0.7f}");
         }
 
 

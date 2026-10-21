@@ -9,7 +9,7 @@ public abstract class L2PopupWindow : L2Window
         Button closeButton = (Button)GetElementByClass(closeButtonClass);
         if (closeButton == null)
         {
-            Debug.LogWarning($"Cant find close button with className: {closeButtonClass}.");
+            // Debug.LogWarning($"Cant find close button with className: {closeButtonClass}.");
             return;
         }
 
@@ -28,7 +28,7 @@ public abstract class L2PopupWindow : L2Window
         Button closeButton = (Button)GetElementById(closeButtonName);
         if (closeButton == null)
         {
-            Debug.LogWarning($"Cant find close button with className: {closeButtonName}.");
+            // Debug.LogWarning($"Cant find close button with className: {closeButtonName}.");
             return;
         }
 
@@ -147,7 +147,7 @@ public abstract class L2PopupWindow : L2Window
         }
         catch (Exception ex)
         {
-            Debug.LogException(ex);
+            // Debug.LogException(ex);
         }
     }
     public void RefreshOpacity(float opacity)

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
@@ -55,7 +55,7 @@ public sealed class WeaponShotTable
         BaseEffect prefab = Resources.Load<BaseEffect>(resourcePath);
         if (prefab == null)
         {
-            Debug.LogWarning("WeaponShotTable: prefab not found for [" + section + "] at " + resourcePath);
+            // Debug.LogWarning("WeaponShotTable: prefab not found for [" + section + "] at " + resourcePath);
             return null;
         }
 
@@ -68,7 +68,7 @@ public sealed class WeaponShotTable
         string path = Path.Combine(Application.streamingAssetsPath, RelativePath);
         if (!File.Exists(path))
         {
-            Debug.LogWarning("WeaponShotTable: file not found: " + path);
+            // Debug.LogWarning("WeaponShotTable: file not found: " + path);
             return;
         }
 

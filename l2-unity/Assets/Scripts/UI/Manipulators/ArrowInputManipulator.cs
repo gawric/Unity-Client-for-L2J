@@ -74,7 +74,7 @@ public class ArrowInputManipulator : PointerManipulator
     {
         if (_values == null || _values.Length == 0)
         {
-            Debug.Log("You can't use the arrow , no character found");
+            // Debug.Log("You can't use the arrow , no character found");
             return;
         }
 
@@ -92,7 +92,7 @@ public class ArrowInputManipulator : PointerManipulator
     {
         if (_values == null || _values.Length == 0)
         {
-            Debug.Log("You can't use the arrow , no character found");
+            // Debug.Log("You can't use the arrow , no character found");
             return;
         }
 
@@ -110,7 +110,7 @@ public class ArrowInputManipulator : PointerManipulator
     {
         if (index < 0 || index >= _values.Length)
         {
-            Debug.LogWarning($"Trying to select wrong index [{index}] for arrow manipulator.");
+            // Debug.LogWarning($"Trying to select wrong index [{index}] for arrow manipulator.");
             return;
         }
 

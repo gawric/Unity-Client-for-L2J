@@ -50,7 +50,7 @@ public class ParseDetected : IParse
         }
         catch (Exception ex)
         {
-            Debug.LogWarning("HtmlMessage->ParseNode: error " + ex.ToString());
+            // Debug.LogWarning("HtmlMessage->ParseNode: error " + ex.ToString());
         }
     }
 

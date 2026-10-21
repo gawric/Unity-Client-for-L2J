@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public static class EntityActionVisual
 {
@@ -8,6 +8,7 @@ public static class EntityActionVisual
             return;
         if (entity.Identity.Id > 0)
         {
+            MagicGaitTrace.Event(entity, "CancelMove", null);
             MoveAllCharacters.Instance.CancelMove(entity.Identity.Id);
             MoveAllCharacters.Instance.CancelRotate(entity.Identity.Id);
         }
@@ -24,25 +25,29 @@ public static class EntityActionVisual
         nac.SetAnimatorSpeed(0f);
     }
 
-    public static void StartMove(Entity entity, bool walking)
+    public static void StartMove(Entity entity, bool walking, bool force = false)
     {
         if (entity is UserEntity userStart)
         {
-            Debug.Log(userStart.LogTag + " Visual.StartMove walking=" + walking +
-                " hasAnim=" + userStart.HasAnimator() +
-                " nac=" + (userStart.GetAnimatorController() != null));
-            PlayUserLocomotion(userStart, walking ? "walk" : "run");
+            // Debug.Log(userStart.LogTag + " Visual.StartMove walking=" + walking +
+                // " hasAnim=" + userStart.HasAnimator() +
+                // " nac=" + (userStart.GetAnimatorController() != null));
+            PlayUserLocomotion(userStart, walking ? "walk" : "run", null, force);
             return;
         }
 
         if (!CanPlayAnim(entity))
+        {
+            CrasherSlideLog.Event(entity, "StartMove-NOANIM", "walking=" + walking);
             return;
+        }
 
         if (entity is NpcEntity npc)
             npc.OnStartL2jMoving(walking);
         else if (entity is MonsterEntity monster && IncomingPacketActions.Animations != null)
         {
             string anim = walking ? AnimationNames.MONSTER_WALK.ToString() : AnimationNames.MONSTER_RUN.ToString();
+            CrasherSlideLog.Event(monster, "StartMove", "anim=" + anim + " force=" + force);
             IncomingPacketActions.Animations.PlayMonsterAnimation(monster.Identity.Id, anim);
         }
     }
@@ -63,7 +68,7 @@ public static class EntityActionVisual
     {
         if (entity is UserEntity userStop)
         {
-            Debug.Log(userStop.LogTag + " Visual.StopMove");
+            // Debug.Log(userStop.LogTag + " Visual.StopMove");
             PlayUserLocomotion(userStop, "wait");
             return;
         }
@@ -77,6 +82,7 @@ public static class EntityActionVisual
         {
             if (IncomingPacketActions.Animations != null && monster.Identity != null)
             {
+                CrasherSlideLog.Event(monster, "StopMove", "anim=wait");
                 IncomingPacketActions.Animations.PlayMonsterAnimation(
                     monster.Identity.Id,
                     AnimationNames.MONSTER_WAIT.ToString());
@@ -96,7 +102,10 @@ public static class EntityActionVisual
         }
 
         if (entity is MonsterEntity monster && IncomingPacketActions.Animations != null)
+        {
+            CrasherSlideLog.Event(monster, "PlayMelee", "anim=atk01");
             IncomingPacketActions.Animations.PlayMonsterAnimation(monster.Identity.Id, AnimationNames.MONSTER_ATK01.ToString());
+        }
     }
 
     public static void PlayPhysicalSkill(Entity entity, MagicSkillUseDto magic)
@@ -137,7 +146,12 @@ public static class EntityActionVisual
             return;
         UserEntity user = entity as UserEntity;
         if (user != null && user.IsAttackVisualPlaying())
+        {
+            MagicGaitTrace.Event(entity, "PlayStandWait-SKIP", "attackVis=true");
             return;
+        }
+        MagicGaitTrace.Event(entity, "PlayStandWait",
+            "inCombat=" + entity.InCombat + " → " + (entity.InCombat ? "atkwait" : "wait"));
         if (entity.InCombat)
             PlayCombatWait(entity);
         else
@@ -152,6 +166,7 @@ public static class EntityActionVisual
 
         if (entity is UserEntity user)
         {
+            MagicGaitTrace.Event(entity, "PlayCombatWait", "→atkwait");
             PlayUserLocomotion(user, "atkwait", fadeDuration);
             return;
         }
@@ -161,8 +176,7 @@ public static class EntityActionVisual
 
         if (entity is MonsterEntity monster && IncomingPacketActions.Animations != null && monster.Identity != null)
         {
-            EntityActionCombatLog.LogIfWatch(entity,
-                "Visual.PlayCombatWait " + EntityActionCombatLog.Describe(entity));
+            CrasherSlideLog.Event(monster, "PlayCombatWait", "anim=atkwait");
             IncomingPacketActions.Animations.PlayMonsterAnimation(monster.Identity.Id, "atkwait");
         }
     }
@@ -207,6 +221,7 @@ public static class EntityActionVisual
 
         if (waitType == WaitType.WT_START_FAKEDEATH)
         {
+            // WaitType 2 is not bDead. OnMoveTo stores it back to standing and walks.
             PlayUserDeath(user, false);
             return;
         }
@@ -249,29 +264,51 @@ public static class EntityActionVisual
     {
         if (user == null || user.IsDead())
             return;
+        // During an attack swing we must NOT override the stance back to a stand
+        // (wait/atkwait), but locomotion (run/walk) must still play so a chasing
+        // pawn keeps running toward its target instead of freezing mid-swing.
         if (!force && user.IsAttackVisualPlaying() && move != null &&
-            (move == "wait" || move == "atkwait" || move == "run" || move == "walk"))
+            (move == "wait" || move == "atkwait"))
             return;
 
         NetworkAnimationController nac = user.GetAnimatorController();
         Animator animator = nac != null ? nac.GetAnimator() : null;
         string suffix = user.WeaponAnim;
         string state = move + "_" + suffix;
-        Debug.Log(user.LogTag + " Visual.PlayUserLocomotion move=" + move +
-            " weapon=" + suffix + " state=" + state +
-            " fade=" + (fadeDuration.HasValue ? fadeDuration.Value.ToString("F2") : "default") +
-            " nac=" + (nac != null) +
-            " animator=" + (animator != null ? animator.name : "null") +
-            " controller=" + (animator != null && animator.runtimeAnimatorController != null
-                ? animator.runtimeAnimatorController.name : "null"));
+        // Debug.Log(user.LogTag + " Visual.PlayUserLocomotion move=" + move +
+            // " weapon=" + suffix + " state=" + state +
+            // " fade=" + (fadeDuration.HasValue ? fadeDuration.Value.ToString("F2") : "default") +
+            // " nac=" + (nac != null) +
+            // " animator=" + (animator != null ? animator.name : "null") +
+            // " controller=" + (animator != null && animator.runtimeAnimatorController != null
+                // ? animator.runtimeAnimatorController.name : "null"));
         if (nac == null)
             return;
 
         nac.SetAnimatorSpeed(1f);
         nac.SetPAtkSpeed(1f);
         float duration = fadeDuration ?? LocomotionCrossFadeSettings.ResolveDuration(state, nac);
-        bool played = PlayerLocomotionCrossFade.TryPlay(nac, state, duration);
-        Debug.Log(user.LogTag + " Visual.CrossFade state=" + state + " played=" + played);
+        bool already = PlayerLocomotionCrossFade.IsAlreadyPlaying(nac, state);
+        bool played;
+        if (force)
+        {
+            // Bypass IsAlreadyPlaying short-circuit: caller explicitly wants this
+            // state (re), even if the animator reports the clip as already active
+            // or <none> mid-transition (pickup->run race).
+            nac.CrossFadeInFixedTime(state, duration);
+            played = true;
+        }
+        else
+        {
+            played = PlayerLocomotionCrossFade.TryPlay(nac, state, duration);
+        }
+        MagicGaitTrace.Event(user, "PlayUserLocomotion",
+            "move=" + move +
+            " state=" + state +
+            " force=" + force +
+            " already=" + already +
+            " played=" + played +
+            " fade=" + duration.ToString("F3"));
     }
 
     static readonly string[] UserMeleeVariants = { "jatk01_", "jatk02_", "jatk03_" };
@@ -287,12 +324,12 @@ public static class EntityActionVisual
         bool clipLock = PlayerBasicAttackAnim.IsSwingPlaying(animator, 0.85f);
         if (visLock || clipLock)
         {
-            EntityActionCombatLog.LogCiPawn(user,
-                "Melee SKIP_RETRIGGER nick=" + EntityActionCombatLog.NameOf(user) +
-                " visLock=" + visLock +
-                " clipLock=" + clipLock +
-                " visLeft=" + user.AttackVisualLeftSec().ToString("F3") +
-                " " + EntityActionCombatLog.AnimDump(user));
+            // EntityActionCombatLog.LogCiPawn(user,
+                // "Melee SKIP_RETRIGGER nick=" + EntityActionCombatLog.NameOf(user) +
+                // " visLock=" + visLock +
+                // " clipLock=" + clipLock +
+                // " visLeft=" + user.AttackVisualLeftSec().ToString("F3") +
+                // " " + EntityActionCombatLog.AnimDump(user));
             return;
         }
 
@@ -307,7 +344,7 @@ public static class EntityActionVisual
         if (IncomingPacketActions.Animations != null)
         {
             IncomingPacketActions.Animations.PlayAnimationTrigger(user.Identity.Id, prefix);
-            Debug.Log(user.LogTag + " Visual.MeleeAttack state=" + state + " cycleMs=" + cycleMs);
+            // Debug.Log(user.LogTag + " Visual.MeleeAttack state=" + state + " cycleMs=" + cycleMs);
             return;
         }
 
@@ -316,7 +353,7 @@ public static class EntityActionVisual
             return;
 
         PlayerBasicAttackCrossFade.TryPlay(nac, state);
-        Debug.Log(user.LogTag + " Visual.MeleeAttack fallback state=" + state + " cycleMs=" + cycleMs);
+        // Debug.Log(user.LogTag + " Visual.MeleeAttack fallback state=" + state + " cycleMs=" + cycleMs);
     }
 
     static void PlayUserPhysicalSkill(UserEntity user, MagicSkillUseDto magic)
@@ -332,13 +369,13 @@ public static class EntityActionVisual
         if (basicJatk &&
             (user.IsAttackVisualPlaying() || PlayerBasicAttackAnim.IsSwingPlaying(animator, 0.85f)))
         {
-            EntityActionCombatLog.LogCiPawn(user,
-                "Skill SKIP_JATK nick=" + EntityActionCombatLog.NameOf(user) +
-                " skill=" + (magic != null ? magic.SkillId.ToString() : "-") +
-                " lvl=" + (magic != null ? magic.SkillLvl.ToString() : "-") +
-                " trigger=" + trigger +
-                " visLeft=" + user.AttackVisualLeftSec().ToString("F3") +
-                " " + EntityActionCombatLog.AnimDump(user));
+            // EntityActionCombatLog.LogCiPawn(user,
+                // "Skill SKIP_JATK nick=" + EntityActionCombatLog.NameOf(user) +
+                // " skill=" + (magic != null ? magic.SkillId.ToString() : "-") +
+                // " lvl=" + (magic != null ? magic.SkillLvl.ToString() : "-") +
+                // " trigger=" + trigger +
+                // " visLeft=" + user.AttackVisualLeftSec().ToString("F3") +
+                // " " + EntityActionCombatLog.AnimDump(user));
             return;
         }
 
@@ -356,8 +393,8 @@ public static class EntityActionVisual
         if (IncomingPacketActions.Animations != null)
         {
             IncomingPacketActions.Animations.PlayAnimationTrigger(objectId, trigger);
-            Debug.Log(user.LogTag + " Visual.PhysicalSkill trigger=" + trigger +
-                " state=" + state + " cycleMs=" + cycleMs);
+            // Debug.Log(user.LogTag + " Visual.PhysicalSkill trigger=" + trigger +
+                // " state=" + state + " cycleMs=" + cycleMs);
             return;
         }
 
@@ -404,7 +441,7 @@ public static class EntityActionVisual
         user.ClearAttackVisual();
         IncomingPacketActions.Animations.PlayExactAnimatorState(
             user.Identity.Id, PlayerDeathAnim.Death, alreadyCorpse);
-        Debug.Log(user.LogTag + " Visual.Death alreadyCorpse=" + alreadyCorpse);
+        // Debug.Log(user.LogTag + " Visual.Death alreadyCorpse=" + alreadyCorpse);
     }
 
     public static void PlayRevive(Entity entity)
@@ -418,7 +455,7 @@ public static class EntityActionVisual
         float duration = IncomingPacketActions.Animations.PlayExactAnimatorState(
             user.Identity.Id, PlayerDeathAnim.Rebirth);
         user.BeginAttackVisual(duration);
-        Debug.Log(user.LogTag + " Visual.Revive duration=" + duration);
+        // Debug.Log(user.LogTag + " Visual.Revive duration=" + duration);
     }
 
     static bool CanPlayAnim(Entity entity)
@@ -426,10 +463,6 @@ public static class EntityActionVisual
         if (entity != null && entity.HasAnimator())
             return true;
 
-        UserEntity user = entity as UserEntity;
-        if (user != null)
-            Debug.Log(user.LogTag + " skip anim, model only id=" +
-                (entity.Identity != null ? entity.Identity.Id : 0));
         return false;
     }
 

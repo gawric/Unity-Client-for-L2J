@@ -12,7 +12,7 @@ public class DataProviderDetailedInfo : AbstractDataFunction
 
             Label lvlLabel = container.Q<Label>("lvlLabel");
             VisualElement lvlGroup = container.Q<VisualElement>("GroupLevelRange");
-            Debug.Log("LevelRange " + quest.LevelRange());
+            // Debug.Log("LevelRange " + quest.LevelRange());
             AddElementIfNotEmpty(lvlGroup, lvlLabel, quest.LevelRange());
 
 

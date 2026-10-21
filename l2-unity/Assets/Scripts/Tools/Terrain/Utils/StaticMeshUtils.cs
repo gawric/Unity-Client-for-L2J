@@ -6,7 +6,7 @@ using UnityEngine;
 public class StaticMeshUtils {
 
     public static GameObject LoadMeshFromInfo(string info) {
-        Debug.Log(info);
+        // Debug.Log(info);
 
         string meshPath = GetMeshPath(info);
 

@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Text;
@@ -30,7 +30,7 @@ public class NpcDecoEffectsTable
         string dataPath = Path.Combine(Application.streamingAssetsPath, "Data/Meta/Npc_deco_effects.csv");
         if (!File.Exists(dataPath))
         {
-            Debug.LogWarning("File not found: " + dataPath);
+            // Debug.LogWarning("File not found: " + dataPath);
             _loaded = true;
             return;
         }
@@ -73,7 +73,7 @@ public class NpcDecoEffectsTable
         }
 
         _loaded = true;
-        Debug.Log("Successfully imported " + _byNpcId.Count + " npc deco effect(s)");
+        // Debug.Log("Successfully imported " + _byNpcId.Count + " npc deco effect(s)");
     }
 
     public bool TryGet(int npcId, out NpcDecoEffect deco)

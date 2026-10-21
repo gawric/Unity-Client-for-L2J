@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public sealed class PlayerSpawner
 {
@@ -33,11 +33,11 @@ public sealed class PlayerSpawner
         int playerClass = identity != null ? identity.PlayerClass : 0;
         CharacterRaceAnimation raceId = CharacterRaceAnimationParser.ResolveRaceAnimation(
             race, appearance, playerClass);
-        Debug.Log("PlayerSpawner body race=" + race +
-            " sex=" + (appearance != null ? appearance.Sex : -1) +
-            " playerClass=" + playerClass +
-            " baseClass=" + (appearance != null ? appearance.BaseClass : -1) +
-            " raceId=" + raceId);
+        // Debug.Log("PlayerSpawner body race=" + race +
+            // " sex=" + (appearance != null ? appearance.Sex : -1) +
+            // " playerClass=" + playerClass +
+            // " baseClass=" + (appearance != null ? appearance.BaseClass : -1) +
+            // " raceId=" + raceId);
 
         GameObject go = _characterBuilder.BuildCharacterBaseInterlude(raceId, appearance, identity.EntityType);
         if (go == null)
@@ -62,7 +62,7 @@ public sealed class PlayerSpawner
         PlayerController controller = go.GetComponent<PlayerController>();
         if (controller == null)
         {
-            Debug.LogError("PlayerSpawner: PlayerController missing on " + go.name);
+            // Debug.LogError("PlayerSpawner: PlayerController missing on " + go.name);
             UnityEngine.Object.Destroy(go);
             return null;
         }
@@ -109,8 +109,8 @@ public sealed class PlayerSpawner
             return;
 
         PlayerEntity player = (PlayerEntity)entity;
-        GearFlowLog.Info("PlayerSpawner.UpdateInfo " +
-            GearFlowLog.Entity(player) + " " + GearFlowLog.Paperdoll(player));
+        // GearFlowLog.Info("PlayerSpawner.UpdateInfo " +
+            // GearFlowLog.Entity(player) + " " + GearFlowLog.Paperdoll(player));
         PlayerStats statsIntr = userInfo.PlayerInfoInterlude.Stats;
         player.UpdateRunSpeed(statsIntr.RunRealSpeed);
         player.UpdateWalkSpeed(statsIntr.WalkRealSpeed);

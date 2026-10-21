@@ -33,9 +33,7 @@ public sealed class NpcWorldApply : EntityWorldApply
 
     public override void OnAttack(Entity attacker, Entity target, AttackDto dto)
     {
-        if (attacker == null || attacker.IsDead())
-            return;
-        if (target != null && target.IsDead())
+        if (attacker == null || attacker.IsDead() || attacker == target)
             return;
         _actions.Set(attacker, EntityActionKind.Attack, dto);
     }

@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 /// <summary>
 /// Thin V2 composite part. Shared spawn/follow/scale. Specialized subclasses own extra behavior.
@@ -266,12 +266,24 @@ public sealed class ShotProjectilePart : CompositePart
         }
 
         ParticleEmitterV2.SetEmissionWindow(instance, flytime, EmitterStopMode.Drain, skipFixedDuration: false);
+        if (instance != null && instance.name.IndexOf("el_wind_strike_fl", System.StringComparison.OrdinalIgnoreCase) >= 0)
+        {
+            string caster = context != null && context.CasterEntity != null
+                ? context.CasterEntity.name
+                : "none";
+            Debug.Log(
+                "[WINDORB] configure caster=" + caster +
+                " flytime=" + flytime.ToString("0.###") +
+                " target=" + (context != null && context.TargetTransform != null
+                    ? context.TargetTransform.name
+                    : "none"));
+        }
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-        Debug.Log(
-            "[ShotProjectilePart] '" + name + "' emit=ProjectileFlightTimeCalculator flytime=" +
-            flytime.ToString("0.###") + "s hideTime=0 drain-until-destroy emitters=" +
-            ParticleEmitterV2.InChildren(instance).Length);
+        // Debug.Log(
+            // "[ShotProjectilePart] '" + name + "' emit=ProjectileFlightTimeCalculator flytime=" +
+            // flytime.ToString("0.###") + "s hideTime=0 drain-until-destroy emitters=" +
+            // ParticleEmitterV2.InChildren(instance).Length);
 #endif
     }
 
@@ -354,6 +366,14 @@ public sealed class ShotProjectilePart : CompositePart
             impactType = impactType,
             speed = speed > 0.01f ? speed : 10f
         };
+        if (instance.name.IndexOf("el_wind_strike_fl", System.StringComparison.OrdinalIgnoreCase) >= 0)
+        {
+            string caster = context.CasterEntity != null ? context.CasterEntity.name : "none";
+            Debug.Log(
+                "[WINDORB] launch caster=" + caster +
+                " start=" + startPos +
+                " target=" + context.TargetTransform.name);
+        }
         ProjectileManager.Instance.LaunchProjectile(
             instance.gameObject,
             startPos,

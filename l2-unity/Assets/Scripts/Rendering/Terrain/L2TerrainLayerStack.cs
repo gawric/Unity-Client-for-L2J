@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.SceneManagement;
@@ -102,7 +102,7 @@ public sealed class L2TerrainLayerStack : MonoBehaviour
         if (!_loggedAttach)
         {
             _loggedAttach = true;
-            Debug.Log("[L2TerrainLayerStack] attach scan renderers=" + renderers.Length + " terrain=" + attached);
+            // Debug.Log("[L2TerrainLayerStack] attach scan renderers=" + renderers.Length + " terrain=" + attached);
         }
     }
 
@@ -358,7 +358,7 @@ public sealed class L2TerrainLayerStack : MonoBehaviour
         if (_loggedOnce)
             return;
         _loggedOnce = true;
-        Debug.Log("[L2TerrainLayerStack] " + msg);
+        // Debug.Log("[L2TerrainLayerStack] " + msg);
     }
 
     void ReleaseOverlays()

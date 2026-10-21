@@ -105,7 +105,7 @@ public class AbstractSkills
                 }
                 else
                 {
-                    Debug.Log("Not found slot for remove skill id " + skillId);
+                    // Debug.Log("Not found slot for remove skill id " + skillId);
                 }
 
                 _allSlots.Remove(skillId);
@@ -136,7 +136,7 @@ public class AbstractSkills
 
         foreach (VisualElement item in delete)
         {
-            Debug.Log("Delete box panel " + item.name);
+            // Debug.Log("Delete box panel " + item.name);
             boxPanel.Remove(item);
         }
     }
@@ -226,7 +226,7 @@ public class AbstractSkills
             }
             else
             {
-                Debug.Log("AddSkill dublication found " + skill.SkillID);
+                // Debug.Log("AddSkill dublication found " + skill.SkillID);
             }
 
         }
@@ -292,7 +292,7 @@ public class AbstractSkills
         }
         else
         {
-            Debug.Log("AbstractSkills->AddSlot: Dublication id slot");
+            // Debug.Log("AbstractSkills->AddSlot: Dublication id slot");
         }
 
     }
@@ -345,7 +345,7 @@ public class AbstractSkills
         }
         else
         {
-            Debug.LogWarning("ActiveSkillsHide > _templateBoxPanel is null, cannot set width");
+            // Debug.LogWarning("ActiveSkillsHide > _templateBoxPanel is null, cannot set width");
         }
     }
 

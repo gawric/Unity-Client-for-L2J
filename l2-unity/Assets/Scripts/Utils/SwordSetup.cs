@@ -31,19 +31,19 @@ public class SwordSetup : MonoBehaviour
         {
             minPoint = new Vector3(bounds.min.x, bounds.center.y, bounds.center.z);
             maxPoint = new Vector3(bounds.max.x, bounds.center.y, bounds.center.z);
-            Debug.Log("Определена ориентация: Горизонтально (X)");
+            // Debug.Log("Определена ориентация: Горизонтально (X)");
         }
         else if (sizeZ > sizeX && sizeZ > sizeY)
         {
             minPoint = new Vector3(bounds.center.x, bounds.center.y, bounds.min.z);
             maxPoint = new Vector3(bounds.center.x, bounds.center.y, bounds.max.z);
-            Debug.Log("Определена ориентация: Горизонтально (Z)");
+            // Debug.Log("Определена ориентация: Горизонтально (Z)");
         }
         else
         {
             minPoint = new Vector3(bounds.center.x, bounds.min.y, bounds.center.z);
             maxPoint = new Vector3(bounds.center.x, bounds.max.y, bounds.center.z);
-            Debug.Log("Определена ориентация: Вертикально (Y)");
+            // Debug.Log("Определена ориентация: Вертикально (Y)");
         }
 
         // Historical naming swap kept: GO "Sword_Tip" = hilt end, "Sword_Base" = tip end.

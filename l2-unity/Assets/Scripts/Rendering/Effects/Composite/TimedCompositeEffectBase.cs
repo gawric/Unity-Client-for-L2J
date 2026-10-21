@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -45,12 +45,12 @@ public abstract class TimedCompositeEffectBase : BaseEffect
         runtime.hideTime = Mathf.Min(runtime.hideTime, runtime.defaultLifeTime);
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-        Debug.Log(
-            $"{DebugPrefix} Runtime settings cloned. Source='{sourceSettings.name}' " +
-            $"timed={applyTimedLifetime} " +
-            $"hitTime={_castData.HitTime:F3}s animDur={_castData.SkillAnimationDuration:F3}s " +
-            $"tail={RuntimeLifeTimeTailSeconds:F3}s " +
-            $"lifeTime={runtime.defaultLifeTime:F3}s hideTime={runtime.hideTime:F3}s.");
+        // Debug.Log(
+            // $"{DebugPrefix} Runtime settings cloned. Source='{sourceSettings.name}' " +
+            // $"timed={applyTimedLifetime} " +
+            // $"hitTime={_castData.HitTime:F3}s animDur={_castData.SkillAnimationDuration:F3}s " +
+            // $"tail={RuntimeLifeTimeTailSeconds:F3}s " +
+            // $"lifeTime={runtime.defaultLifeTime:F3}s hideTime={runtime.hideTime:F3}s.");
 #endif
 
         return runtime;

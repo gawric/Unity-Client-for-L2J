@@ -29,7 +29,7 @@ public abstract class L2Window : MonoBehaviour
         VisualTreeAsset asset = Resources.Load<VisualTreeAsset>(assetPath);
         if (asset == null)
         {
-            Debug.LogError($"Could not load {assetPath} template.");
+            // Debug.LogError($"Could not load {assetPath} template.");
         }
 
         return asset;
@@ -109,7 +109,7 @@ public abstract class L2Window : MonoBehaviour
         }
         catch (Exception ex)
         {
-            Debug.LogException(ex);
+            // Debug.LogException(ex);
         }
  
     }
@@ -212,7 +212,7 @@ public abstract class L2Window : MonoBehaviour
         }
         catch (Exception ex)
         {
-            Debug.LogException(ex);
+            // Debug.LogException(ex);
         }
 
     }
@@ -232,7 +232,7 @@ public abstract class L2Window : MonoBehaviour
         }
         catch (Exception ex)
         {
-            Debug.LogException(ex);
+            // Debug.LogException(ex);
         }
 
     }
@@ -265,7 +265,7 @@ public abstract class L2Window : MonoBehaviour
         var btn = _windowEle.Q<VisualElement>(id);
         if (btn == null)
         {
-            Debug.LogError(id + " can't be found.");
+            // Debug.LogError(id + " can't be found.");
             return null;
         }
 
@@ -277,7 +277,7 @@ public abstract class L2Window : MonoBehaviour
         var btn = _windowEle.Q<VisualElement>(null, className);
         if (btn == null)
         {
-            Debug.LogError(className + " can't be found.");
+            // Debug.LogError(className + " can't be found.");
             return null;
         }
 

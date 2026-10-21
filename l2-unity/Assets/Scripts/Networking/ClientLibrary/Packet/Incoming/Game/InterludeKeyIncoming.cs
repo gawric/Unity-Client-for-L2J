@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 [IncomingGamePacket(GameServerPacketType.InterludeKeyPacket)]
 public sealed class InterludeKeyIncoming : IncomingWirePacket<InterludeKeyDto>
@@ -7,15 +7,15 @@ public sealed class InterludeKeyIncoming : IncomingWirePacket<InterludeKeyDto>
 
     protected override void OnParsed(InterludeKeyDto packet)
     {
-        LobbyFlowLog.Info(
-            "InterludeKey OnParsed authAllowed=" + packet.AuthAllowed +
-            " useBlowfish=" + packet.UseBlowfish + " serverId=" + packet.ServerId +
-            " alreadyDone=" + _keyAuthCompleted);
+        // LobbyFlowLog.Info(
+            // "InterludeKey OnParsed authAllowed=" + packet.AuthAllowed +
+            // " useBlowfish=" + packet.UseBlowfish + " serverId=" + packet.ServerId +
+            // " alreadyDone=" + _keyAuthCompleted);
 
         if (_keyAuthCompleted || !packet.AuthAllowed)
         {
-            if (!packet.AuthAllowed)
-                LobbyFlowLog.Warn("InterludeKey AuthAllowed=false — wait Apply to disconnect");
+            // if (!packet.AuthAllowed)
+                // LobbyFlowLog.Warn("InterludeKey AuthAllowed=false — wait Apply to disconnect");
             return;
         }
 
@@ -23,10 +23,10 @@ public sealed class InterludeKeyIncoming : IncomingWirePacket<InterludeKeyDto>
         {
             byte[] equalsKey = BlowFishStaticKey.GetCreateFullKeyBlowFish(packet.BlowFishKey);
             IncomingPacketActions.Game.EnableCrypt(equalsKey);
-            LobbyFlowLog.Info("InterludeKey crypt enabled");
+            // LobbyFlowLog.Info("InterludeKey crypt enabled");
         }
 
-        LobbyFlowLog.Info("TX AuthLogin account=" + IncomingPacketActions.Login.Account);
+        // LobbyFlowLog.Info("TX AuthLogin account=" + IncomingPacketActions.Login.Account);
         IncomingPacketActions.Game.Send(new AuthLoginCommand(
             IncomingPacketActions.Login.Account,
             IncomingPacketActions.Game.PlayKey1,
@@ -41,7 +41,7 @@ public sealed class InterludeKeyIncoming : IncomingWirePacket<InterludeKeyDto>
         if (packet.AuthAllowed)
             return;
 
-        LobbyFlowLog.Error("InterludeKey Apply REJECT — disconnect login+game");
+        // LobbyFlowLog.Error("InterludeKey Apply REJECT — disconnect login+game");
         IncomingPacketActions.Game.Disconnect();
         IncomingPacketActions.Login.Disconnect();
         _keyAuthCompleted = true;

@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
@@ -107,53 +107,56 @@ public class PlayerController : MonoBehaviour
             }
 
         }
+
+        StepLocalMove();
     }
- 
-    public void FixedUpdate()
+
+    void StepLocalMove()
     {
+        if (_controller == null || !_controller.enabled)
+            return;
+
         //Если мы не двигаемся но мы в состоянии MoveToPawnDto == true тогда мы следим за обьектом двинется он или нет если двинется мы подбегаем к нему
         //Если мы получим MoveToPawnDto == false мы останавливаем слежение
         RestartMoveElseMoveToPawnTrue(ref _isMove);
 
-        if (_isMove)
+        if (!_isMove)
+            return;
+
+        Vector3 characterPosition = VectorUtils.To2D(transform.position);
+        Vector3 targetPosition = VectorUtils.To2D(_movementTarget.GetTarget());
+
+        if(VectorUtils.Distance2D(characterPosition, targetPosition) > _movementTarget.GetDistance())
         {
-            Vector3 characterPosition = VectorUtils.To2D(transform.position);
-            Vector3 targetPosition = VectorUtils.To2D(_movementTarget.GetTarget());
 
-            if(VectorUtils.Distance2D(characterPosition, targetPosition) > _movementTarget.GetDistance())
-            {
+            _elapsedTime = Time.time;
+            _moveTimer += Time.deltaTime;
+            SwitchWalkToRun();
 
-                _elapsedTime = Time.time;
-                _moveTimer += Time.deltaTime;
-                SwitchWalkToRun();
+            float finalAngle = GetFinalAngle(targetPosition, characterPosition);
 
-                float finalAngle = GetFinalAngle(targetPosition, characterPosition);
+            float speed = GetMovementSpeed();
+            Vector3 newPosition = GetNewPosition(targetPosition, characterPosition, speed);
+            Vector3 newPositionPlusGravity = ApplyGravity(newPosition , _elapsedTime);
 
-                float speed = GetMovementSpeed();
-                Vector3 newPosition = GetNewPosition(targetPosition, characterPosition, speed);
-                Vector3 newPositionPlusGravity = ApplyGravity(newPosition , _elapsedTime);
+            Quaternion targetRotation = GetNewRotate(finalAngle);
+            float r_speed = _calcSpeed.GetSpeedRotate(_behindPlayer);
+            transform.rotation = Quaternion.Lerp(transform.rotation, targetRotation , r_speed);
 
-                Quaternion targetRotation = GetNewRotate(finalAngle);
-                float r_speed = _calcSpeed.GetSpeedRotate(_behindPlayer);
-                transform.rotation = Quaternion.Lerp(transform.rotation, targetRotation , r_speed);
-                
-                _controller.Move(newPositionPlusGravity * Time.deltaTime);
+            _controller.Move(newPositionPlusGravity * Time.deltaTime);
 
 
-                _isFirst = false;
-                _pp_sender.TickWhileMoving(transform.position, PlayerPositionSender.ToL2Heading(transform.eulerAngles.y), Time.deltaTime);
-            }
-            else
-            {
-                 //Debug.Log("IsMoveToPawn мы на месте " + VectorUtils.Distance2D(characterPosition, targetPosition));
-                 SetPositionServer(_movementTarget, targetPosition);
-                 NotifyEvent(PlayerStateMachine.Instance.State);
-                 StopMove();
+            _isFirst = false;
+            _pp_sender.TickWhileMoving(transform.position, PlayerPositionSender.ToL2Heading(transform.eulerAngles.y), Time.deltaTime);
+        }
+        else
+        {
+             //Debug.Log("IsMoveToPawn мы на месте " + VectorUtils.Distance2D(characterPosition, targetPosition));
+             SetPositionServer(_movementTarget, targetPosition);
+             NotifyEvent(PlayerStateMachine.Instance.State);
+             StopMove();
 
-               // Debug.Log("IsMoveToPawn запуск повтора т.е StopMove " + PlayerStateMachine.Instance.IsMoveToPawn + " state " + PlayerStateMachine.Instance.State);
-            }
-           
-
+           // Debug.Log("IsMoveToPawn запуск повтора т.е StopMove " + PlayerStateMachine.Instance.IsMoveToPawn + " state " + PlayerStateMachine.Instance.State);
         }
     }
 
@@ -174,7 +177,7 @@ public class PlayerController : MonoBehaviour
             float distance = VectorUtils.Distance2D(transform.position, targetPosition);
             if (distance > _movementTarget.GetDistance())
             {
-                Debug.Log("IsMoveToPawn запуск повтора т.е IsMoveToPawn " + PlayerStateMachine.Instance.IsMoveToPawn + " state " + PlayerStateMachine.Instance.State + " Distance " + distance);
+                // Debug.Log("IsMoveToPawn запуск повтора т.е IsMoveToPawn " + PlayerStateMachine.Instance.IsMoveToPawn + " state " + PlayerStateMachine.Instance.State + " Distance " + distance);
                 _isMove = true;
             }
         }
@@ -357,21 +360,21 @@ public class PlayerController : MonoBehaviour
         Entity target = world.GetEntityNoLockSync(moveToPawnPacket.TarObjid);
         if (target == null)
         {
-            ReplayAttackTrace.Write(
-                "MOVE_TO_PAWN_SKIP",
-                PlayerEntity.Instance,
-                null,
-                "targetId=" + moveToPawnPacket.TarObjid);
+            // ReplayAttackTrace.Write(
+                // "MOVE_TO_PAWN_SKIP",
+                // PlayerEntity.Instance,
+                // null,
+                // "targetId=" + moveToPawnPacket.TarObjid);
             return;
         }
 
-        ReplayAttackTrace.Write(
-            "MOVE_TO_PAWN",
-            PlayerEntity.Instance,
-            target,
-            "distanceUu=" + moveToPawnPacket.DistanceUu +
-            " distanceMeters=" + moveToPawnPacket.Distance.ToString("F3") +
-            " selectedTargetId=" + PlayerEntity.Instance.TargetId);
+        // ReplayAttackTrace.Write(
+            // "MOVE_TO_PAWN",
+            // PlayerEntity.Instance,
+            // target,
+            // "distanceUu=" + moveToPawnPacket.DistanceUu +
+            // " distanceMeters=" + moveToPawnPacket.Distance.ToString("F3") +
+            // " selectedTargetId=" + PlayerEntity.Instance.TargetId);
         ThinkMoveToPawn(new ModelMovePawn(PlayerEntity.Instance, target, moveToPawnPacket.Distance));
     }
 

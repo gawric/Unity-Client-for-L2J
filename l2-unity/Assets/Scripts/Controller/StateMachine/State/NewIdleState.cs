@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public class NewIdleState : StateBase
 {
@@ -73,14 +73,14 @@ public class NewIdleState : StateBase
         string swingState = null;
         float swingNorm = 0f;
         bool skipSwing = !fromCombatSmb && TryGetActiveCombatSwing(out swingState, out swingNorm);
-        WaitReturnLog.Handle(
-            "NewIdleState.HandleWaitReturn",
-            fromCombatSmb,
-            targetDead,
-            useAtkWait,
-            animation.ToString(),
-            skipSwing,
-            skipSwing ? swingState + " n=" + swingNorm.ToString("F2") : "-");
+        // WaitReturnLog.Handle(
+            // "NewIdleState.HandleWaitReturn",
+            // fromCombatSmb,
+            // targetDead,
+            // useAtkWait,
+            // animation.ToString(),
+            // skipSwing,
+            // skipSwing ? swingState + " n=" + swingNorm.ToString("F2") : "-");
         if (skipSwing)
             return;
 
@@ -209,7 +209,7 @@ public class NewIdleState : StateBase
                 return;
             }
 
-            WaitReturnLog.Play(objectId, animName);
+            // WaitReturnLog.Play(objectId, animName);
             IncomingPacketActions.Animations.PlayAnimation(objectId, animName, true);
         });
     }

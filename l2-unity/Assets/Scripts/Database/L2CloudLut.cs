@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using UnityEngine;
@@ -38,7 +38,7 @@ public static class L2CloudLut
         string dataPath = Path.Combine(Application.streamingAssetsPath, "Data/Meta", MetaFileName);
         if (!File.Exists(dataPath))
         {
-            Debug.LogWarning("[L2CloudLut] File not found: " + dataPath);
+            // Debug.LogWarning("[L2CloudLut] File not found: " + dataPath);
             return;
         }
 
@@ -73,7 +73,7 @@ public static class L2CloudLut
         }
 
         Samples.Sort((a, b) => a.tHours.CompareTo(b.tHours));
-        Debug.Log("[L2CloudLut] Loaded " + Samples.Count + " GetCloudColor keys from " + MetaFileName);
+        // Debug.Log("[L2CloudLut] Loaded " + Samples.Count + " GetCloudColor keys from " + MetaFileName);
     }
 
     public static Sample SampleAt(float worldHours)

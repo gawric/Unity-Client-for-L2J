@@ -41,7 +41,50 @@ public class Entity : MonoBehaviour {
     protected NetworkAnimationController _networkAnimationReceive;
     protected Gear _gear;
     public Gear Gear => _gear;
-    public bool Running { get { return _running; } set { _running = value; } }
+    public bool Running
+    {
+        get { return _running; }
+        set
+        {
+            bool changed = _running != value;
+            _running = value;
+            if (changed && this is UserEntity && GaitLog.Enabled)
+            {
+                GaitLog.Log(this, "running-set",
+                    "running=" + value +
+                    " identityRunning=" + (Identity != null ? Identity.IsRunning : false));
+            }
+        }
+    }
+
+    // Locomotion gait state (Interlude APawn.MoveTimer / bRunning) persisted on the
+    // actor rather than on the MovementData. MovementData is dropped on every
+    // OnFinish between move packets, which reset MoveTimer to 0 and re-triggered the
+    // 0.4s walk window each packet. Keep the timer/gait here so a running CharInfo
+    // stays running across consecutive MoveToLocation packets.
+    [System.NonSerialized] private float _locomotionTimer;
+    [System.NonSerialized] private string _locomotionGait;
+
+    public float LocomotionTimer
+    {
+        get { return _locomotionTimer; }
+        set
+        {
+            // [GAIT] detect who resets the timer (regression: gait keeps restarting).
+            if (_locomotionTimer > 0.05f && value <= 0.001f && GaitLog.Enabled)
+            {
+                GaitLog.Log(this, "timer-reset",
+                    "from=" + _locomotionTimer.ToString("F3") + " to=" + value.ToString("F3"));
+            }
+            _locomotionTimer = value;
+        }
+    }
+
+    public string LocomotionGait
+    {
+        get { return _locomotionGait; }
+        set { _locomotionGait = value; }
+    }
 
     public Transform GetWeaponTransform()
     {
@@ -187,7 +230,7 @@ public class Entity : MonoBehaviour {
     // Called when ApplyDamage packet is received 
     public void ApplyDamage(int damage, bool criticalHit) {
         if(_status.GetHp() <= 0) {
-            Debug.LogWarning("Trying to apply damage to a dead entity");
+            // Debug.LogWarning("Trying to apply damage to a dead entity");
             return;
         }
 
@@ -202,7 +245,7 @@ public class Entity : MonoBehaviour {
 
     protected virtual void EquipAllWeapons() {
         if(_gear == null) {
-            Debug.LogWarning("Gear script is not attached to entity");
+            // Debug.LogWarning("Gear script is not attached to entity");
             return;
         }
         _gear.SyncEquippedWeapons(_appearance.RHand, _appearance.LHand);
@@ -251,9 +294,8 @@ public class Entity : MonoBehaviour {
     public void UpdateNpcWalkSpd(float walkSpeed)
     {
         float scaled = StatsConverter.Instance.ConvertStat(Stat.SPEED, walkSpeed);
-        float anim_converted = UpdateAnimWalkSpeed(walkSpeed);
+        float anim_converted = NumberUtils.NpcLocomotionAnimRate();
         if (_networkAnimationReceive != null) _networkAnimationReceive.SetWalkSpeed(anim_converted);
-        //Debug.Log("Scaled speed NPC Walk " + anim_converted + " name walk speed " + name + " original speed " + walkSpeed);
         Stats.UnitySpeedWalking = scaled;
     }
 
@@ -261,9 +303,8 @@ public class Entity : MonoBehaviour {
     public void UpdateNpcRunningSpd(float runSpeed)
     {
         float scaled = StatsConverter.Instance.ConvertStat(Stat.SPEED, runSpeed);
-        float anim_converted = UpdateAnimRunSpeed(runSpeed);
+        float anim_converted = NumberUtils.NpcLocomotionAnimRate();
         if (_networkAnimationReceive != null) _networkAnimationReceive.SetRunSpeed(anim_converted);
-        //Debug.Log("Scaled speed NPC Run " + anim_converted + " name walk speed " + name);
         Stats.UnitySpeedRun = scaled;
 
     } 
@@ -362,14 +403,14 @@ public class Entity : MonoBehaviour {
     {
         if (_gear is not UserGear usergear)
         {
-            GearFlowLog.Warn("Unequip skip gear not UserGear " + GearFlowLog.Entity(this) +
-                " gear=" + (_gear != null ? _gear.GetType().Name : "null"));
+            // GearFlowLog.Warn("Unequip skip gear not UserGear " + GearFlowLog.Entity(this) +
+                // " gear=" + (_gear != null ? _gear.GetType().Name : "null"));
             return;
         }
 
-        GearFlowLog.Info("UnequipAndDetermineType " + GearFlowLog.Entity(this) +
-            " itemId=" + (item != null ? item.ItemId : 0) +
-            " cat=" + (item != null ? item.Category.ToString() : "null"));
+        // GearFlowLog.Info("UnequipAndDetermineType " + GearFlowLog.Entity(this) +
+            // " itemId=" + (item != null ? item.ItemId : 0) +
+            // " cat=" + (item != null ? item.Category.ToString() : "null"));
 
         switch (item.Category)
         {
@@ -384,7 +425,7 @@ public class Entity : MonoBehaviour {
                 break;
 
             default:
-                Debug.LogWarning($"Entity->UnEquipAndDetermineType->Unhandled item category: {item.Category}");
+                // Debug.LogWarning($"Entity->UnEquipAndDetermineType->Unhandled item category: {item.Category}");
                 break;
         }
 
@@ -394,15 +435,15 @@ public class Entity : MonoBehaviour {
     {
         if (_gear is not UserGear usergear)
         {
-            GearFlowLog.Warn("Equip skip gear not UserGear " + GearFlowLog.Entity(this) +
-                " gear=" + (_gear != null ? _gear.GetType().Name : "null"));
+            // GearFlowLog.Warn("Equip skip gear not UserGear " + GearFlowLog.Entity(this) +
+                // " gear=" + (_gear != null ? _gear.GetType().Name : "null"));
             return;
         }
 
-        GearFlowLog.Info("EquipAndDetermineType " + GearFlowLog.Entity(this) +
-            " itemId=" + (item != null ? item.ItemId : 0) +
-            " cat=" + (item != null ? item.Category.ToString() : "null") +
-            " body=" + (item != null ? item.BodyPart.ToString() : "null"));
+        // GearFlowLog.Info("EquipAndDetermineType " + GearFlowLog.Entity(this) +
+            // " itemId=" + (item != null ? item.ItemId : 0) +
+            // " cat=" + (item != null ? item.Category.ToString() : "null") +
+            // " body=" + (item != null ? item.BodyPart.ToString() : "null"));
 
         switch (item.Category)
         {
@@ -415,9 +456,9 @@ public class Entity : MonoBehaviour {
                 break;
 
             default:
-                GearFlowLog.Warn("EquipAndDetermineType unhandled cat=" + item.Category +
-                    " itemId=" + item.ItemId + " " + GearFlowLog.Entity(this));
-                Debug.LogWarning($"Entity->EquipAndDetermineType->Unhandled item category: {item.Category}");
+                // GearFlowLog.Warn("EquipAndDetermineType unhandled cat=" + item.Category +
+                    // " itemId=" + item.ItemId + " " + GearFlowLog.Entity(this));
+                // Debug.LogWarning($"Entity->EquipAndDetermineType->Unhandled item category: {item.Category}");
                 break;
         }
     }

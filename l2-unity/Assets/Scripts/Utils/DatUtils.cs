@@ -87,7 +87,7 @@ public class DatUtils {
             case "icon": // {[icon.armor_t02_u_i00];[None];[None];[None];[None]}
                 if(abstractgrp.ObjectId == 356)
                 {
-                    Debug.Log("");
+                    // Debug.Log("");
                 }
                 var allIcon = DatUtils.ParseOtherIcon(value);
                 abstractgrp.Icon = allIcon[0];

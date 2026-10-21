@@ -41,7 +41,7 @@ public class SkillNameTable
         _names = new Dictionary<int, Dictionary<int, SkillNameData>>();
         ReadActions();
         ReadNameInterlude();
-        Debug.Log("");
+        // Debug.Log("");
     }
 
     private void ReadActions()
@@ -51,7 +51,7 @@ public class SkillNameTable
 
         if (!File.Exists(dataPath))
         {
-            Debug.LogWarning("File not found: " + dataPath);
+            // Debug.LogWarning("File not found: " + dataPath);
             return;
         }
 
@@ -105,7 +105,7 @@ public class SkillNameTable
                 TryAdd(nameData);
             }
 
-            Debug.Log($"Successfully imported {_names.Count} actionName(s)");
+            // Debug.Log($"Successfully imported {_names.Count} actionName(s)");
         }
     }
 

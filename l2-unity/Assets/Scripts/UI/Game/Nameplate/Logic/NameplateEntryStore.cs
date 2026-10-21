@@ -13,7 +13,7 @@ public sealed class NameplateEntryStore
 
     private int _removeObjId;
 
-    public NameplateEntryStore(NameplateBubbleResolver resolver, int capacity = 64)
+    public NameplateEntryStore(NameplateBubbleResolver resolver, int capacity = 100)
     {
         _resolver = resolver;
         _entries = new Dictionary<int, NameplateEntry>(capacity);
@@ -38,7 +38,7 @@ public sealed class NameplateEntryStore
     }
 
     public void Discover(
-        RaycastHit[] hits,
+        Collider[] hits,
         Color defaultNameColor)
     {
         if (hits == null)
@@ -48,7 +48,13 @@ public sealed class NameplateEntryStore
 
         for (int i = 0; i < hits.Length; i++)
         {
-            Transform hitT = hits[i].transform;
+            Collider c = hits[i];
+            if (c == null)
+            {
+                continue;
+            }
+
+            Transform hitT = c.transform;
             if (hitT == null)
             {
                 continue;

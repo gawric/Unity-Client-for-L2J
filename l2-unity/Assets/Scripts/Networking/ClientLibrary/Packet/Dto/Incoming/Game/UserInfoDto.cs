@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public class UserInfoDto : IWireDto
 {
@@ -209,9 +209,9 @@ public class UserInfoDto : IWireDto
         _info.Stats.RunRealSpeed = GetRealSpeed(_info.Stats.BaseRunSpeed, (float)moveMultiplier);
         _info.Stats.PAtkRealSpeed = GetRealSpeed(_info.Stats.PAtkSpd, (float)attackSpeedMultiplier);
 
-        Debug.Log("BasePatakSpeed R " + _info.Stats.PAtkRealSpeed);
-        Debug.Log("BasePatakSpeed B" + _info.Stats.BasePAtkSpeed);
-        Debug.Log("BasePatakSpeed Spd" + attackSpeedMultiplier);
+        // Debug.Log("BasePatakSpeed R " + _info.Stats.PAtkRealSpeed);
+        // Debug.Log("BasePatakSpeed B" + _info.Stats.BasePAtkSpeed);
+        // Debug.Log("BasePatakSpeed Spd" + attackSpeedMultiplier);
 
 
         _info.Appearance.CollisionRadius = (float)reader.ReadD();

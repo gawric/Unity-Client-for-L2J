@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 /// <summary>
 /// Stick charge (soul_N_stick): parent to the weapon, Relative CS, local +X travel.
@@ -72,14 +72,14 @@ public sealed class WeaponTransientChargeBinder : MonoBehaviour, IEffectPrePlayC
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
             if (_debugLogs)
             {
-                Debug.Log(
-                    "[WeaponTransientChargeBinder] '" + name + "' emitter='" + group.name +
-                    "' extra=" + extraUu.ToString("0.###") +
-                    " overwrite=" + overwrite +
-                    " velX=(" + range.x.ToString("0.###") + "," +
-                    range.y.ToString("0.###") + ")" +
-                    " weapon='" + (weapon != null ? weapon.name : "null") + "'",
-                    this);
+                // Debug.Log(
+                    // "[WeaponTransientChargeBinder] '" + name + "' emitter='" + group.name +
+                    // "' extra=" + extraUu.ToString("0.###") +
+                    // " overwrite=" + overwrite +
+                    // " velX=(" + range.x.ToString("0.###") + "," +
+                    // range.y.ToString("0.###") + ")" +
+                    // " weapon='" + (weapon != null ? weapon.name : "null") + "'",
+                    // this);
             }
 #endif
         }

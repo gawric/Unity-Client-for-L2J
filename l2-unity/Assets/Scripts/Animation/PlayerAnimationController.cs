@@ -27,6 +27,7 @@ public class PlayerAnimationController : BaseAnimationController
 
     void OnDestroy()
     {
+        base.OnDestroy();
         _instance = null;
     }
 
@@ -42,7 +43,7 @@ public class PlayerAnimationController : BaseAnimationController
     {
         if (_animator.GetBool(name) != value)
         {
-            Debug.LogWarning($"Player Animatorr Cntoller: Set bool {name}={value}");
+            // Debug.LogWarning($"Player Animatorr Cntoller: Set bool {name}={value}");
 
             SetBool(name, value);
         }

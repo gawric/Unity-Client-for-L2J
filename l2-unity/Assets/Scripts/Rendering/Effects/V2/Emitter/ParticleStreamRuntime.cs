@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 /// <summary>
 /// One UC emitter stream: spawn and expire. Emission window and particle lifetime are independent.
@@ -55,6 +55,25 @@ public sealed class ParticleStreamRuntime
     public bool IsGpuDraw => _batch.Bound;
     public int SlotCount => _slots != null ? _slots.Count : 0;
     public int SpawnedTotal => _spawn.SpawnedTotal;
+
+    public int CountActive()
+    {
+        if (_active == null)
+        {
+            return 0;
+        }
+
+        int count = 0;
+        for (int i = 0; i < _active.Length; i++)
+        {
+            if (_active[i])
+            {
+                count++;
+            }
+        }
+
+        return count;
+    }
     public Material[] GpuMaterials => _simulation != null ? _simulation.GpuMaterials : null;
 
     public void Bind(ParticleGroupAuthoring authoring)
@@ -131,25 +150,25 @@ public sealed class ParticleStreamRuntime
         ApplyLifeStretchToGpuMaterials();
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
         _loggedFirstSpawn = false;
-        if (NpcDeco2911Trace.Matches(DebugName) || NpcDeco2911Trace.Matches(_host != null ? _host.name : null))
+        // if (NpcDeco2911Trace.Matches(DebugName) || NpcDeco2911Trace.Matches(_host != null ? _host.name : null))
         {
-            NpcDeco2911Trace.Log(
-                "Start gpu=" + gpu +
-                " slots=" + count +
-                " cps=" + _authoring.countPerSecond +
-                " max=" + _authoring.maxCount +
-                " hostOwned=" + _authoring.hostOwnedEmission +
-                " respawn=" + _authoring.respawnDeadParticles +
-                " life=" + _particleLifetime.ToString("0.###") +
-                " emitEnd=" +
-                (float.IsInfinity(_emissionEndsAt) ? "inf" : _emissionEndsAt.ToString("0.###")) +
-                (gpu
-                    ? " MeshRenderers DISABLED (GPU instancing draws them)"
-                    : " GO draw path"));
-            if (count <= 0)
-                NpcDeco2911Trace.Warn("Start SKIP — zero slots, nothing to spawn");
-            if (!gpu && _authoring.useGpuInstancing)
-                NpcDeco2911Trace.Warn("GPU bind FAILED, falling back to GameObject draw");
+            // NpcDeco2911Trace.Log(
+                // "Start gpu=" + gpu +
+                // " slots=" + count +
+                // " cps=" + _authoring.countPerSecond +
+                // " max=" + _authoring.maxCount +
+                // " hostOwned=" + _authoring.hostOwnedEmission +
+                // " respawn=" + _authoring.respawnDeadParticles +
+                // " life=" + _particleLifetime.ToString("0.###") +
+                // " emitEnd=" +
+                // (float.IsInfinity(_emissionEndsAt) ? "inf" : _emissionEndsAt.ToString("0.###")) +
+                // (gpu
+                    // ? " MeshRenderers DISABLED (GPU instancing draws them)"
+                    // : " GO draw path"));
+            // if (count <= 0)
+                // NpcDeco2911Trace.Warn("Start SKIP — zero slots, nothing to spawn");
+            // if (!gpu && _authoring.useGpuInstancing)
+                // NpcDeco2911Trace.Warn("GPU bind FAILED, falling back to GameObject draw");
         }
 #endif
     }
@@ -159,12 +178,12 @@ public sealed class ParticleStreamRuntime
         if (!_visible || _state == EmitterState.Idle || _state == EmitterState.Complete)
         {
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-            if (NpcDeco2911Trace.Matches(DebugName) && !_loggedFirstSpawn)
+            // if (NpcDeco2911Trace.Matches(DebugName) && !_loggedFirstSpawn)
             {
-                NpcDeco2911Trace.Warn(
-                    "Tick SKIP visible=" + _visible +
-                    " state=" + _state +
-                    " — no spawn/draw this frame");
+                // NpcDeco2911Trace.Warn(
+                    // "Tick SKIP visible=" + _visible +
+                    // " state=" + _state +
+                    // " — no spawn/draw this frame");
             }
 #endif
             return;
@@ -193,14 +212,14 @@ public sealed class ParticleStreamRuntime
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
                 if (_spawn.SpawnedTotal == 0)
                 {
-                    Debug.LogWarning(
-                        "[ParticleGroupV2] emission ended with ZERO spawns '" +
-                        (string.IsNullOrEmpty(DebugName) ? "?" : DebugName) +
-                        "' now=" + now.ToString("0.###") +
-                        " emitStart=" + _emissionStartedAt.ToString("0.###") +
-                        " emitEnd=" + _emissionEndsAt.ToString("0.###") +
-                        " slots=" + SlotCount +
-                        " delayLeft=" + Mathf.Max(0f, _emissionStartedAt - now).ToString("0.###"));
+                    // Debug.LogWarning(
+                        // "[ParticleGroupV2] emission ended with ZERO spawns '" +
+                        // (string.IsNullOrEmpty(DebugName) ? "?" : DebugName) +
+                        // "' now=" + now.ToString("0.###") +
+                        // " emitStart=" + _emissionStartedAt.ToString("0.###") +
+                        // " emitEnd=" + _emissionEndsAt.ToString("0.###") +
+                        // " slots=" + SlotCount +
+                        // " delayLeft=" + Mathf.Max(0f, _emissionStartedAt - now).ToString("0.###"));
                 }
 #endif
                 Stop(_authoring.instantKillAtCastEnd ? EmitterStopMode.Kill : EmitterStopMode.Drain);
@@ -301,16 +320,29 @@ public sealed class ParticleStreamRuntime
         }
 
         _warmupAgeAtSpawn = 0f;
+        if (WindOrbTrace.Matches(_host))
+        {
+            Debug.Log(
+                "[WINDORB] warmup emitter=" + DebugName +
+                " caster=" + WindOrbTrace.Caster(_host) +
+                " lifeCenter=" + lifeCenter.ToString("0.###") +
+                " particleLife=" + _particleLifetime.ToString("0.###") +
+                " relative=" + relative.ToString("0.###") +
+                " warmupTime=" + warmupTime.ToString("0.###") +
+                " ticks=" + ticks +
+                " spawned=" + _spawn.SpawnedTotal +
+                " active=" + CountActive());
+        }
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-        Debug.Log(
-            "[ParticleGroupV2] L2 warmup '" + (string.IsNullOrEmpty(DebugName) ? "?" : DebugName) +
-            "' lifeCenter=" + lifeCenter.ToString("0.###") +
-            " relative=" + relative.ToString("0.###") +
-            " warmupTime=" + warmupTime.ToString("0.###") +
-            " tps=" + ticksPerSec.ToString("0.###") +
-            " ticks=" + ticks +
-            " dt=" + warmupDelta.ToString("0.###") +
-            " spawned=" + _spawn.SpawnedTotal);
+        // Debug.Log(
+            // "[ParticleGroupV2] L2 warmup '" + (string.IsNullOrEmpty(DebugName) ? "?" : DebugName) +
+            // "' lifeCenter=" + lifeCenter.ToString("0.###") +
+            // " relative=" + relative.ToString("0.###") +
+            // " warmupTime=" + warmupTime.ToString("0.###") +
+            // " tps=" + ticksPerSec.ToString("0.###") +
+            // " ticks=" + ticks +
+            // " dt=" + warmupDelta.ToString("0.###") +
+            // " spawned=" + _spawn.SpawnedTotal);
 #endif
     }
 
@@ -420,35 +452,35 @@ public sealed class ParticleStreamRuntime
             _loggedFirstSpawn = true;
             float shaderAge = now - shaderStartTime;
             bool deadInShader = shaderAge >= _particleLifetime - 0.01f;
-            Debug.Log(
-                "[ParticleGroupV2] first spawn '" + (string.IsNullOrEmpty(DebugName) ? "?" : DebugName) +
-                "' slot=" + slot +
-                "/" + _slots.Count +
-                " gpu=" + _batch.Bound +
-                " now=" + now.ToString("0.###") +
-                " shaderStart=" + shaderStartTime.ToString("0.###") +
-                " shaderAge=" + shaderAge.ToString("0.###") +
-                " simLife=" + _particleLifetime.ToString("0.###") +
-                (deadInShader ? " DEAD_IN_SHADER_AT_SPAWN" : string.Empty));
+            // Debug.Log(
+                // "[ParticleGroupV2] first spawn '" + (string.IsNullOrEmpty(DebugName) ? "?" : DebugName) +
+                // "' slot=" + slot +
+                // "/" + _slots.Count +
+                // " gpu=" + _batch.Bound +
+                // " now=" + now.ToString("0.###") +
+                // " shaderStart=" + shaderStartTime.ToString("0.###") +
+                // " shaderAge=" + shaderAge.ToString("0.###") +
+                // " simLife=" + _particleLifetime.ToString("0.###") +
+                // (deadInShader ? " DEAD_IN_SHADER_AT_SPAWN" : string.Empty));
             ParticleGroupV2 compareHost = _host as ParticleGroupV2;
             if (compareHost != null && compareHost.CompareLogEnabled)
             {
-                ParticleGroupV2CompareLog.WriteSpawn(
-                    compareHost,
-                    slot,
-                    _slots.Count,
-                    now,
-                    shaderStartTime,
-                    _particleLifetime);
+                // ParticleGroupV2CompareLog.WriteSpawn(
+                    // compareHost,
+                    // slot,
+                    // _slots.Count,
+                    // now,
+                    // shaderStartTime,
+                    // _particleLifetime);
             }
 
-            if (NpcDeco2911Trace.Matches(DebugName))
+            // if (NpcDeco2911Trace.Matches(DebugName))
             {
-                NpcDeco2911Trace.Log(
-                    "FIRST SPAWN slot=" + slot +
-                    " gpu=" + _batch.Bound +
-                    " spawnedTotal=" + _spawn.SpawnedTotal +
-                    (deadInShader ? " DEAD_IN_SHADER_AT_SPAWN" : " alive"));
+                // NpcDeco2911Trace.Log(
+                    // "FIRST SPAWN slot=" + slot +
+                    // " gpu=" + _batch.Bound +
+                    // " spawnedTotal=" + _spawn.SpawnedTotal +
+                    // (deadInShader ? " DEAD_IN_SHADER_AT_SPAWN" : " alive"));
             }
         }
 #endif

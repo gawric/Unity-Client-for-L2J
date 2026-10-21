@@ -47,7 +47,7 @@ public class PooledEffect
         }
         else
         {
-            Debug.LogWarning($"[{_effectClass}] Reset callback missing.");
+            // Debug.LogWarning($"[{_effectClass}] Reset callback missing.");
         }
     }
 }

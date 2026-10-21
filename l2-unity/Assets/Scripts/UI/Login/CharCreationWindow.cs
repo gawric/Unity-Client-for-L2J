@@ -250,7 +250,7 @@ public class CharCreationWindow : L2Window {
     private void CreateButtonPressed()
     {
 
-        Debug.Log("event create button");
+        // Debug.Log("event create button");
 
         string class1 = classManipulator.Value;
         string sex = genderManipulator.Value;

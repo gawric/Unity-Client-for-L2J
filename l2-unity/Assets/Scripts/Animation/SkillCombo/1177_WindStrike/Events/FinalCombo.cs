@@ -22,8 +22,8 @@ public class FinalCombo : AbstractAnimCombo
 
         if (PlayerAnimationController.Instance.IsFinishAnimation(bothModel.GetCurrentAnimName()))
         {
-            Debug.Log("TimeToFly Normalized end " + elapsedTime);
-            Debug.Log(" Time Launch " + PlayerAnimationController.Instance.GetStateInfo().normalizedTime);
+            // Debug.Log("TimeToFly Normalized end " + elapsedTime);
+            // Debug.Log(" Time Launch " + PlayerAnimationController.Instance.GetStateInfo().normalizedTime);
              PlayerAnimationController.Instance.SetBool(bothModel.GetCurrentAnimName(), false);
 
             PlayerStateMachine.Instance.ChangeIntention(Intention.INTENTION_IDLE);

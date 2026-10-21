@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 /// <summary>
 /// Converts leftover Legacy ParticleGroup/ParticleSingle children to V2 stream drivers.
@@ -45,7 +45,7 @@ public static class ParticleStreamHijack
         driver.SurfaceNormal = group.SurfaceNormal;
         group.enabled = false;
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-        Debug.Log($"[CompositeEffectV2] Hijack group='{group.name}' rate={authoring.countPerSecond}/s max={authoring.maxCount}");
+        // Debug.Log($"[CompositeEffectV2] Hijack group='{group.name}' rate={authoring.countPerSecond}/s max={authoring.maxCount}");
 #endif
     }
 
@@ -63,7 +63,7 @@ public static class ParticleStreamHijack
         driver.SurfaceNormal = single.SurfaceNormal;
         single.enabled = false;
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-        Debug.Log($"[CompositeEffectV2] Hijack single='{single.name}' max={authoring.maxCount}");
+        // Debug.Log($"[CompositeEffectV2] Hijack single='{single.name}' max={authoring.maxCount}");
 #endif
     }
 

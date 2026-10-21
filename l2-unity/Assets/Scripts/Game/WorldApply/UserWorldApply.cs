@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public sealed class UserWorldApply : EntityWorldApply
 {
@@ -14,31 +14,33 @@ public sealed class UserWorldApply : EntityWorldApply
         if (entity == null || entity.IsDead())
             return;
 
-        bool holdIdle = EntityActionMachine.ShouldHoldCombatIdle(entity);
-        Entity pawn = EntityActionCombatLog.ResolvePawn(entity, destination);
-        EntityActionCombatLog.LogCiPawn(entity,
-            "MoveTo nick=" + EntityActionCombatLog.NameOf(entity) +
-            " action=" + entity.ActionSlot.Action +
-            " inCombat=" + entity.InCombat +
-            " holdIdle=" + holdIdle +
-            " distToDest=" + VectorUtils.Distance2D(entity.transform.position, destination).ToString("F2") +
-            " dest=" + EntityActionCombatLog.Vec(destination) +
-            " pawn=" + EntityActionCombatLog.Describe(pawn) +
-            " distToPawn=" + (pawn != null
-                ? VectorUtils.Distance2D(entity.transform.position, pawn.transform.position).ToString("F2")
-                : "-") +
-            " " + EntityActionCombatLog.ClassifyDest(destination, pawn) +
-            " APPLY");
-        EntityActionCombatLog.LogIfWatch(entity,
-            "User.MoveTo chase action=" + entity.ActionSlot.Action +
-            " inCombat=" + entity.InCombat);
-        EntityActionCombatLog.LogStep(entity,
-            "MOVE APPLY nick=" + EntityActionCombatLog.NameOf(entity) +
-            " distM=" + VectorUtils.Distance2D(entity.transform.position, destination).ToString("F2") +
-            " nowL2=" + EntityActionCombatLog.L2(entity.transform.position) +
-            " destL2=" + EntityActionCombatLog.L2(destination) +
-            " action=" + entity.ActionSlot.Action +
-            " inCombat=" + entity.InCombat);
+        // EntityPawnLookup.ResolvePawn scanned the whole world per packet for debug logs.
+        // Interlude AddMoveTo does not. Keep the scan out of the live move path.
+        // bool holdIdle = EntityActionMachine.ShouldHoldCombatIdle(entity);
+        // Entity pawn = EntityPawnLookup.ResolvePawn(entity, destination);
+        // EntityActionCombatLog.LogCiPawn(entity,
+            // "MoveTo nick=" + EntityActionCombatLog.NameOf(entity) +
+            // " action=" + entity.ActionSlot.Action +
+            // " inCombat=" + entity.InCombat +
+            // " holdIdle=" + holdIdle +
+            // " distToDest=" + VectorUtils.Distance2D(entity.transform.position, destination).ToString("F2") +
+            // " dest=" + EntityActionCombatLog.Vec(destination) +
+            // " pawn=" + EntityActionCombatLog.Describe(pawn) +
+            // " distToPawn=" + (pawn != null
+                // ? VectorUtils.Distance2D(entity.transform.position, pawn.transform.position).ToString("F2")
+                // : "-") +
+            // " " + EntityActionCombatLog.ClassifyDest(destination, pawn) +
+            // " APPLY");
+        // EntityActionCombatLog.LogIfWatch(entity,
+            // "User.MoveTo chase action=" + entity.ActionSlot.Action +
+            // " inCombat=" + entity.InCombat);
+        // EntityActionCombatLog.LogStep(entity,
+            // "MOVE APPLY nick=" + EntityActionCombatLog.NameOf(entity) +
+            // " distM=" + VectorUtils.Distance2D(entity.transform.position, destination).ToString("F2") +
+            // " nowL2=" + EntityActionCombatLog.L2(entity.transform.position) +
+            // " destL2=" + EntityActionCombatLog.L2(destination) +
+            // " action=" + entity.ActionSlot.Action +
+            // " inCombat=" + entity.InCombat);
         _actions.Set(entity, EntityActionKind.Move, dto);
     }
 
@@ -51,7 +53,7 @@ public sealed class UserWorldApply : EntityWorldApply
         {
             float toStop = VectorUtils.Distance2D(entity.transform.position, dto.StopPos);
             float toDest = VectorUtils.Distance2D(entity.transform.position, entity.ActionSlot.Destination);
-            Entity pawn = EntityActionCombatLog.PawnOf(entity);
+            Entity pawn = EntityPawnLookup.PawnOf(entity);
             float pawnDist = entity.ActionSlot.PawnDist;
             float nowToPawn = pawn != null
                 ? VectorUtils.Distance2D(entity.transform.position, pawn.transform.position)
@@ -71,43 +73,43 @@ public sealed class UserWorldApply : EntityWorldApply
             string skip = skipKeepChase ? " SKIP_POS_CHASE" : (skipKeepMove ? " SKIP_POS_MOVE" : " APPLY");
             bool moving = entity.Identity != null && MoveAllCharacters.Instance != null &&
                 MoveAllCharacters.Instance.IsMoving(entity.Identity.Id);
-            EntityActionCombatLog.LogStep(entity,
-                "STOP " + skip.Trim() + " nick=" + EntityActionCombatLog.NameOf(entity) +
-                " moving=" + moving +
-                " action=" + entity.ActionSlot.Action +
-                " inCombat=" + entity.InCombat +
-                " toStopM=" + toStop.ToString("F2") +
-                " toDestM=" + toDest.ToString("F2") +
-                " nowL2=" + EntityActionCombatLog.L2(entity.transform.position) +
-                " stopL2=" + EntityActionCombatLog.L2(dto.StopPos) +
-                " destL2=" + EntityActionCombatLog.L2(entity.ActionSlot.Destination));
-            EntityActionCombatLog.LogCiPawn(entity,
-                "StopMove nick=" + EntityActionCombatLog.NameOf(entity) +
-                " action=" + entity.ActionSlot.Action +
-                " inCombat=" + entity.InCombat +
-                " toStop=" + toStop.ToString("F2") +
-                " toDest=" + toDest.ToString("F2") +
-                " pawnDist=" + pawnDist.ToString("F2") +
-                " nowToPawn=" + nowToPawn.ToString("F2") +
-                " stop=" + EntityActionCombatLog.Vec(dto.StopPos) +
-                " dest=" + EntityActionCombatLog.Vec(entity.ActionSlot.Destination) +
-                " pawn=" + EntityActionCombatLog.Describe(pawn) +
-                " stopToPawn=" + (pawn != null
-                    ? VectorUtils.Distance2D(dto.StopPos, pawn.transform.position).ToString("F2")
-                    : "-") +
-                " destToPawn=" + (pawn != null
-                    ? VectorUtils.Distance2D(entity.ActionSlot.Destination, pawn.transform.position).ToString("F2")
-                    : "-") +
-                " " + EntityActionCombatLog.ClassifyDest(dto.StopPos, pawn) +
-                skip);
-            CharInfoMoveBudgetLog.Compare(entity, "STOP" + skip, pawn, dto.StopPos, true);
-            if (nowToPawn >= 2f && !skipPos)
-                EntityActionCombatLog.LogGap(entity, "StopMove APPLY_FAR", pawn,
-                    " toStop=" + toStop.ToString("F2") +
-                    " stop=" + EntityActionCombatLog.Vec(dto.StopPos) +
-                    " stopToPawn=" + (pawn != null
-                        ? VectorUtils.Distance2D(dto.StopPos, pawn.transform.position).ToString("F2")
-                        : "-"));
+            // EntityActionCombatLog.LogStep(entity,
+                // "STOP " + skip.Trim() + " nick=" + EntityActionCombatLog.NameOf(entity) +
+                // " moving=" + moving +
+                // " action=" + entity.ActionSlot.Action +
+                // " inCombat=" + entity.InCombat +
+                // " toStopM=" + toStop.ToString("F2") +
+                // " toDestM=" + toDest.ToString("F2") +
+                // " nowL2=" + EntityActionCombatLog.L2(entity.transform.position) +
+                // " stopL2=" + EntityActionCombatLog.L2(dto.StopPos) +
+                // " destL2=" + EntityActionCombatLog.L2(entity.ActionSlot.Destination));
+            // EntityActionCombatLog.LogCiPawn(entity,
+                // "StopMove nick=" + EntityActionCombatLog.NameOf(entity) +
+                // " action=" + entity.ActionSlot.Action +
+                // " inCombat=" + entity.InCombat +
+                // " toStop=" + toStop.ToString("F2") +
+                // " toDest=" + toDest.ToString("F2") +
+                // " pawnDist=" + pawnDist.ToString("F2") +
+                // " nowToPawn=" + nowToPawn.ToString("F2") +
+                // " stop=" + EntityActionCombatLog.Vec(dto.StopPos) +
+                // " dest=" + EntityActionCombatLog.Vec(entity.ActionSlot.Destination) +
+                // " pawn=" + EntityActionCombatLog.Describe(pawn) +
+                // " stopToPawn=" + (pawn != null
+                    // ? VectorUtils.Distance2D(dto.StopPos, pawn.transform.position).ToString("F2")
+                    // : "-") +
+                // " destToPawn=" + (pawn != null
+                    // ? VectorUtils.Distance2D(entity.ActionSlot.Destination, pawn.transform.position).ToString("F2")
+                    // : "-") +
+                // " " + EntityActionCombatLog.ClassifyDest(dto.StopPos, pawn) +
+                // skip);
+            // CharInfoMoveBudgetLog.Compare(entity, "STOP" + skip, pawn, dto.StopPos, true);
+            // if (nowToPawn >= 2f && !skipPos)
+                // EntityActionCombatLog.LogGap(entity, "StopMove APPLY_FAR", pawn,
+                    // " toStop=" + toStop.ToString("F2") +
+                    // " stop=" + EntityActionCombatLog.Vec(dto.StopPos) +
+                    // " stopToPawn=" + (pawn != null
+                        // ? VectorUtils.Distance2D(dto.StopPos, pawn.transform.position).ToString("F2")
+                        // : "-"));
             _actions.ApplyStop(entity, dto, skipPos);
             return;
         }
@@ -126,34 +128,34 @@ public sealed class UserWorldApply : EntityWorldApply
         float distNow = pawn != null ? VectorUtils.Distance2D(now, pawn.transform.position) : -1f;
         float distPkt = pawn != null ? VectorUtils.Distance2D(origin, pawn.transform.position) : -1f;
         float originNow = VectorUtils.Distance2D(origin, now);
-        EntityActionCombatLog.LogCiPawn(entity,
-            "MoveToPawn nick=" + EntityActionCombatLog.NameOf(entity) +
-            " action=" + entity.ActionSlot.Action +
-            " inCombat=" + entity.InCombat +
-            " distPkt=" + dto.Distance.ToString("F2") +
-            " distNow=" + distNow.ToString("F2") +
-            " distOriginToPawn=" + distPkt.ToString("F2") +
-            " originNow=" + originNow.ToString("F2") +
-            " origin=" + EntityActionCombatLog.Vec(origin) +
-            " now=" + EntityActionCombatLog.Vec(now) +
-            " pawn=" + EntityActionCombatLog.Describe(pawn) +
-            " pawnPos=" + (pawn != null ? EntityActionCombatLog.Vec(pawn.transform.position) : "-") +
-            " pawnDead=" + (pawn != null && pawn.IsDead()) +
-            " pawnMoving=" + EntityActionCombatLog.IsPawnMoving(pawn));
-        if (pawn == null || pawn.IsDead())
-            EntityActionCombatLog.LogGap(entity, "MoveToPawn PAWN_BAD", pawn,
-                " tarId=" + dto.TarObjid +
-                " originNow=" + originNow.ToString("F2") +
-                " distNow=" + distNow.ToString("F2"));
-        else if (originNow >= 2f || (distPkt < 2f && distNow >= 2f))
-            EntityActionCombatLog.LogGap(entity, "MoveToPawn ORIGIN_DESYNC", pawn,
-                " originNow=" + originNow.ToString("F2") +
-                " distPktToPawn=" + distPkt.ToString("F2") +
-                " distNow=" + distNow.ToString("F2") +
-                " origin=" + EntityActionCombatLog.Vec(origin));
-        EntityActionCombatLog.LogIfWatch(entity,
-            "User.MoveToPawn chase action=" + entity.ActionSlot.Action +
-            " inCombat=" + entity.InCombat);
+        // EntityActionCombatLog.LogCiPawn(entity,
+            // "MoveToPawn nick=" + EntityActionCombatLog.NameOf(entity) +
+            // " action=" + entity.ActionSlot.Action +
+            // " inCombat=" + entity.InCombat +
+            // " distPkt=" + dto.Distance.ToString("F2") +
+            // " distNow=" + distNow.ToString("F2") +
+            // " distOriginToPawn=" + distPkt.ToString("F2") +
+            // " originNow=" + originNow.ToString("F2") +
+            // " origin=" + EntityActionCombatLog.Vec(origin) +
+            // " now=" + EntityActionCombatLog.Vec(now) +
+            // " pawn=" + EntityActionCombatLog.Describe(pawn) +
+            // " pawnPos=" + (pawn != null ? EntityActionCombatLog.Vec(pawn.transform.position) : "-") +
+            // " pawnDead=" + (pawn != null && pawn.IsDead()) +
+            // " pawnMoving=" + EntityActionCombatLog.IsPawnMoving(pawn));
+        // if (pawn == null || pawn.IsDead())
+            // EntityActionCombatLog.LogGap(entity, "MoveToPawn PAWN_BAD", pawn,
+                // " tarId=" + dto.TarObjid +
+                // " originNow=" + originNow.ToString("F2") +
+                // " distNow=" + distNow.ToString("F2"));
+        // else if (originNow >= 2f || (distPkt < 2f && distNow >= 2f))
+            // EntityActionCombatLog.LogGap(entity, "MoveToPawn ORIGIN_DESYNC", pawn,
+                // " originNow=" + originNow.ToString("F2") +
+                // " distPktToPawn=" + distPkt.ToString("F2") +
+                // " distNow=" + distNow.ToString("F2") +
+                // " origin=" + EntityActionCombatLog.Vec(origin));
+        // EntityActionCombatLog.LogIfWatch(entity,
+            // "User.MoveToPawn chase action=" + entity.ActionSlot.Action +
+            // " inCombat=" + entity.InCombat);
         _actions.Set(entity, EntityActionKind.Move, dto);
     }
 
@@ -171,15 +173,8 @@ public sealed class UserWorldApply : EntityWorldApply
 
     public override void OnAttack(Entity attacker, Entity target, AttackDto dto)
     {
-        if (attacker == null || attacker.IsDead())
+        if (attacker == null || attacker.IsDead() || attacker == target)
             return;
-        if (target != null && target.IsDead())
-        {
-            EntityActionCombatLog.LogIfWatch(attacker, target,
-                "User.OnAttack skip dead target attacker=" + EntityActionCombatLog.NameOf(attacker) +
-                " target=" + EntityActionCombatLog.NameOf(target));
-            return;
-        }
         _actions.Set(attacker, EntityActionKind.Attack, dto);
     }
 
@@ -189,11 +184,11 @@ public sealed class UserWorldApply : EntityWorldApply
             return;
         if (EntityActionSkill.TryApplyWeaponCharge(entity, dto))
             return;
-        EntityActionCombatLog.LogCiPawn(entity,
-            "MagicSkillUse APPLY CharInfo nick=" + EntityActionCombatLog.NameOf(entity) +
-            " skill=" + (dto != null ? dto.SkillId.ToString() : "-") +
-            " lvl=" + (dto != null ? dto.SkillLvl.ToString() : "-") +
-            " hitTime=" + (dto != null ? dto.HitTime.ToString() : "-"));
+        // EntityActionCombatLog.LogCiPawn(entity,
+            // "MagicSkillUse APPLY CharInfo nick=" + EntityActionCombatLog.NameOf(entity) +
+            // " skill=" + (dto != null ? dto.SkillId.ToString() : "-") +
+            // " lvl=" + (dto != null ? dto.SkillLvl.ToString() : "-") +
+            // " hitTime=" + (dto != null ? dto.HitTime.ToString() : "-"));
         _actions.Set(entity, EntityActionKind.Skill, dto);
     }
 

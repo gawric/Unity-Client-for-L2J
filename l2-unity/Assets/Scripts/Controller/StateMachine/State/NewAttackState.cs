@@ -1,4 +1,4 @@
-
+﻿
 using UnityEngine;
 
 
@@ -26,13 +26,13 @@ public class NewAttackState : AbstractAttackEvents
         switch (evt)
         {
             case Event.READY_TO_ACT:
-                Debug.Log("Attack Sate to Intention> начало новой atk пришел запрос от сервера");
+                // Debug.Log("Attack Sate to Intention> начало новой atk пришел запрос от сервера");
                 Entity targetEntity = payload as Entity;
                 if (targetEntity == null && _stateMachine.Player != null)
                     targetEntity = _stateMachine.Player.GetTargetEntity();
-                if (targetEntity == null || targetEntity.IsDead())
+                if (targetEntity == null)
                 {
-                    // Stale AttackDto after DieDto/despawn — do not start another jatk.
+                    // Missing pawn. A dead pawn still plays the swing.
                     if (PlayerEntity.Instance != null)
                     {
                         PlayerEntity.Instance.IsAttack = false;
@@ -49,18 +49,18 @@ public class NewAttackState : AbstractAttackEvents
                 float attackDurationMs = AttackTimingHelper.ResolveServerLikeAttackDurationMs(_stateMachine.Player);
                 float hitFraction = AttackTimingHelper.ResolveHitFractionByWeapon(_stateMachine.Player);
                 float pAtkSpd = _stateMachine.Player.Stats != null ? _stateMachine.Player.Stats.BasePAtkSpeed : 0f;
-                ReplayAttackTrace.Write(
-                    "START_ANIMATION",
-                    _stateMachine.Player,
-                    targetEntity,
-                    "cycleMs=" + attackDurationMs.ToString("F1") +
-                    " hitFraction=" + hitFraction.ToString("F3"));
+                // ReplayAttackTrace.Write(
+                    // "START_ANIMATION",
+                    // _stateMachine.Player,
+                    // targetEntity,
+                    // "cycleMs=" + attackDurationMs.ToString("F1") +
+                    // " hitFraction=" + hitFraction.ToString("F3"));
 
-                Debug.Log(
-                    $"[ATK_TIMING_CMP] BeginAttack packet→serverCycle " +
-                    $"pAtkSpd={pAtkSpd:F1} serverTimeAtkMs={attackDurationMs:F1} " +
-                    $"(L2J 500000/pAtkSpd) serverHitMs={attackDurationMs * hitFraction:F1} " +
-                    $"hitFraction={hitFraction:F2} targetId={targetEntityId}");
+                // Debug.Log(
+                    // $"[ATK_TIMING_CMP] BeginAttack packet→serverCycle " +
+                    // $"pAtkSpd={pAtkSpd:F1} serverTimeAtkMs={attackDurationMs:F1} " +
+                    // $"(L2J 500000/pAtkSpd) serverHitMs={attackDurationMs * hitFraction:F1} " +
+                    // $"hitFraction={hitFraction:F2} targetId={targetEntityId}");
 
                 SwordCollisionService.Instance.BeginAttack(
                     _stateMachine.Player.Identity.Id,
@@ -81,7 +81,7 @@ public class NewAttackState : AbstractAttackEvents
             case Event.WAIT_RETURN:
                 // WhoDied while still ATTACKING: clear latch only. Pose returns at swing end
                 // (PlayerStateJAtk.SwitchToIdle). Forcing atkwait here cuts the finishing blow.
-                WaitReturnLog.Dump("NewAttackState.WAIT_RETURN latch-only");
+                // WaitReturnLog.Dump("NewAttackState.WAIT_RETURN latch-only");
                 if (PlayerEntity.Instance != null)
                 {
                     PlayerEntity.Instance.IsAttack = false;
@@ -89,7 +89,7 @@ public class NewAttackState : AbstractAttackEvents
                 }
                 break;
             case Event.CANCEL:
-                Debug.Log("Attack Sate to Intention> Отмена скорее всего запрос пришел из ActionFaild");
+                // Debug.Log("Attack Sate to Intention> Отмена скорее всего запрос пришел из ActionFaild");
                 PlayerStateMachine.Instance.ChangeIntention(Intention.INTENTION_IDLE);
                 PlayerStateMachine.Instance.NotifyEvent(Event.WAIT_RETURN);
                 PlayerEntity.Instance.LastAtkAnimation = null;

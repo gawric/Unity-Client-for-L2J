@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 /// <summary>
 /// L2 _Hold math, cast-end fade, and composite loop override state.
@@ -150,30 +150,30 @@ public class L2ShaderHoldController
         {
             float fadeMul = ComputeCastEndFadeMul(in timeline);
             float holdReleaseMul = ComputeCastEndHoldReleaseMul(in settings, in timeline);
-            ParticleSingleLifetimeDebug.LogCastEndFadeAlpha(
-                debugGroupName,
-                in timeline,
-                holdLogMat,
-                holdValue,
-                _baseEmitterAlpha,
-                fadeMul,
-                holdReleaseMul);
+            // ParticleSingleLifetimeDebug.LogCastEndFadeAlpha(
+                // debugGroupName,
+                // in timeline,
+                // holdLogMat,
+                // holdValue,
+                // _baseEmitterAlpha,
+                // fadeMul,
+                // holdReleaseMul);
         }
 
-        ParticleSingleLifetimeDebug.TryLogHoldReleaseTransition(
-            debugGroupName,
-            in settings,
-            in timeline,
-            holdValue,
-            holdLogMat,
-            spawnedAt,
-            baseShaderLifetime,
-            timeline.SlotDuration,
-            _hasRuntimeLoopOverride,
-            _runtimeLoopOverrideValue,
-            _castEndFadeRequested,
-            ref _loggedReleaseStart,
-            ref _loggedReleaseResume);
+        // ParticleSingleLifetimeDebug.TryLogHoldReleaseTransition(
+            // debugGroupName,
+            // in settings,
+            // in timeline,
+            // holdValue,
+            // holdLogMat,
+            // spawnedAt,
+            // baseShaderLifetime,
+            // timeline.SlotDuration,
+            // _hasRuntimeLoopOverride,
+            // _runtimeLoopOverrideValue,
+            // _castEndFadeRequested,
+            // ref _loggedReleaseStart,
+            // ref _loggedReleaseResume);
 
         return TryCompleteCastEndFade(materials, in settings, in timeline, holdValue, debugGroupName, spawnedAt, baseShaderLifetime);
     }
@@ -235,20 +235,20 @@ public class L2ShaderHoldController
             return false;
         }
 
-        ParticleSingleLifetimeDebug.EnsureHoldReleaseResumeLogged(
-            debugGroupName,
-            in settings,
-            in timeline,
-            holdValue,
-            fadeMul,
-            materials,
-            spawnedAt: spawnedAt,
-            baseShaderLifetime: baseShaderLifetime,
-            slotDuration: timeline.SlotDuration,
-            ref _loggedReleaseResume);
+        // ParticleSingleLifetimeDebug.EnsureHoldReleaseResumeLogged(
+            // debugGroupName,
+            // in settings,
+            // in timeline,
+            // holdValue,
+            // fadeMul,
+            // materials,
+            // spawnedAt: spawnedAt,
+            // baseShaderLifetime: baseShaderLifetime,
+            // slotDuration: timeline.SlotDuration,
+            // ref _loggedReleaseResume);
 
-        ParticleSingleLifetimeDebug.LogHoldReleaseDone(debugGroupName, in timeline);
-        ParticleSingleLifetimeDebug.ResetCastEndFadeAlphaLog(debugGroupName);
+        // ParticleSingleLifetimeDebug.LogHoldReleaseDone(debugGroupName, in timeline);
+        // ParticleSingleLifetimeDebug.ResetCastEndFadeAlphaLog(debugGroupName);
         CompleteImmediateStop();
         return true;
     }

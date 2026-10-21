@@ -117,7 +117,7 @@ public abstract class AbstractSkillbar
         {
             if (_barSlots[i].Position == _page * PlayerShortcuts.MAXIMUM_SHORTCUTS_PER_BAR + slot)
             {
-                Debug.Log($"Found slot at index {i} with slot {slot}.");
+                // Debug.Log($"Found slot at index {i} with slot {slot}.");
                 _barSlots[i].AssignShortcut(shortcut);
                 break;
             }
@@ -142,7 +142,7 @@ public abstract class AbstractSkillbar
         {
             if (_barSlots[i].Position == slot)
             {
-                Debug.Log($"Succesfully deleted slot {slot}.");
+                // Debug.Log($"Succesfully deleted slot {slot}.");
                 _barSlots.Remove(_barSlots[i]);
                 break;
             }

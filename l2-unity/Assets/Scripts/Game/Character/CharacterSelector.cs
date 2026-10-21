@@ -101,9 +101,9 @@ public class CharacterSelector : MonoBehaviour
         GameObject pawnObject = CharacterCreator.Instance.CreatePawnInterlude(info.CharacterRaceAnimation, info.Appreance);
         if (pawnObject == null)
         {
-            LobbyFlowLog.Error(
-                "lobby pawn null slot=" + id + " name=" + info.Name +
-                " raceAnim=" + info.CharacterRaceAnimation + " — skip (would NRE and freeze char select)");
+            // LobbyFlowLog.Error(
+                // "lobby pawn null slot=" + id + " name=" + info.Name +
+                // " raceAnim=" + info.CharacterRaceAnimation + " — skip (would NRE and freeze char select)");
             return;
         }
 
@@ -112,7 +112,7 @@ public class CharacterSelector : MonoBehaviour
         string name = info.Name;
         CharacterCreator.Instance.PlacePawn(pawnObject, _pawnData[id], name, _container);
         _characterGameObjects.Add(pawnObject);
-        LobbyFlowLog.Info("lobby pawn spawned slot=" + id + " name=" + name);
+        // LobbyFlowLog.Info("lobby pawn spawned slot=" + id + " name=" + name);
     }
 
     Bounds GetMaxBounds(GameObject parent)
@@ -178,7 +178,7 @@ public class CharacterSelector : MonoBehaviour
     public void ConfirmSelection()
      {
         if (SelectedSlot == -1) {
-            Debug.LogWarning("Please select a character");
+            // Debug.LogWarning("Please select a character");
             return;
         }
         IncomingPacketActions.Game.Send(new CharacterSelectCommand(SelectedSlot));
@@ -189,11 +189,11 @@ public class CharacterSelector : MonoBehaviour
     {
           if (SelectedSlot == -1)
           {
-                Debug.LogWarning("Please select a character");
+                // Debug.LogWarning("Please select a character");
                 return;
             }
             IncomingPacketActions.Game.Send(new CharacterDeleteCommand(SelectedSlot));
-            Debug.LogWarning("Requesting delete character , slot: " + SelectedSlot);
+            // Debug.LogWarning("Requesting delete character , slot: " + SelectedSlot);
     }
 
 

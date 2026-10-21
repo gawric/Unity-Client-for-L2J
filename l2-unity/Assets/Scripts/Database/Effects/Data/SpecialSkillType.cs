@@ -39,13 +39,13 @@ public static class WeaponChargeSkill
     {
         int effectId = EffectId(skillId);
         Transform target = weapon != null ? weapon : fallback;
-        Debug.Log(
-            "[WEAPON_SHOT] skillId=" + skillId +
-            " effectId=" + effectId +
-            " spirit=" + IsSpirit(skillId) +
-            " weapon=" + (weapon != null ? weapon.name : "null") +
-            " target=" + (target != null ? target.name : "null") +
-            " effects=" + (effects != null));
+        // Debug.Log(
+            // "[WEAPON_SHOT] skillId=" + skillId +
+            // " effectId=" + effectId +
+            // " spirit=" + IsSpirit(skillId) +
+            // " weapon=" + (weapon != null ? weapon.name : "null") +
+            // " target=" + (target != null ? target.name : "null") +
+            // " effects=" + (effects != null));
         if (effects == null || effectId <= 0 || target == null)
             return;
 

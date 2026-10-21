@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Text;
 using UnityEngine;
 
@@ -65,7 +65,7 @@ public sealed class PacketReader
     {
         if (_data == null || _iterator + 2 > _data.Length)
         {
-            Debug.LogError("Not enough bytes available to read short value");
+            // Debug.LogError("Not enough bytes available to read short value");
             return 0;
         }
 
@@ -144,7 +144,7 @@ public sealed class PacketReader
         }
         catch (Exception)
         {
-            Debug.Log("Serverpacket пришла пустая строка !!!");
+            // Debug.Log("Serverpacket пришла пустая строка !!!");
             return "";
         }
 

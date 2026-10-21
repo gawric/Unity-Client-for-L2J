@@ -14,7 +14,7 @@ public class GeodataExporter {
                 binWriter.Write((short)Mathf.Round(entry.Key.z));
                 writeCount++;
             }
-            Debug.Log("Exported " + writeCount + " nodes.");
+            // Debug.Log("Exported " + writeCount + " nodes.");
         }      
     }
 }

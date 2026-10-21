@@ -38,9 +38,9 @@ public class PlayerStateSpAtkBow : StateMachineBehaviour
         _endTime = Mathf.Max(0.01f, cycleMs / 1000f);
         _linearSpeed = AttackTimingHelper.ComputeLinearPAtkSpeed(clipLength, cycleMs);
         AnimationManager.Instance.SetPAtkSpeed(objectId, _linearSpeed);
-        Debug.Log(
-            $"[PATKSPD] SpAtkBow objectId={objectId} anim={parameterName} " +
-            $"sptimeatk={serverTimeMs} cycleMs={cycleMs:F1} clipSec={clipLength:F3} patkspd={_linearSpeed:F3}");
+        // Debug.Log(
+            // $"[PATKSPD] SpAtkBow objectId={objectId} anim={parameterName} " +
+            // $"sptimeatk={serverTimeMs} cycleMs={cycleMs:F1} clipSec={clipLength:F3} patkspd={_linearSpeed:F3}");
     }
 
     public override void OnStateUpdate(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -77,7 +77,7 @@ public sealed class OrbitalTrailVelocityProvider : MonoBehaviour
             {
                 int rendererCount = binding.targetRenderers != null ? binding.targetRenderers.Length : 0;
                 string sourceName = binding.velocitySource != null ? binding.velocitySource.name : "null";
-                Debug.Log($"[OrbitalTrailVelocityProvider] Enabled binding='{binding.name}' tail='{binding.tailRoot.name}' source={sourceName} renderers={rendererCount}", this);
+                // Debug.Log($"[OrbitalTrailVelocityProvider] Enabled binding='{binding.name}' tail='{binding.tailRoot.name}' source={sourceName} renderers={rendererCount}", this);
             }
         }
     }
@@ -139,7 +139,7 @@ public sealed class OrbitalTrailVelocityProvider : MonoBehaviour
         if (_debugLogs && !binding.loggedFirstVelocity && shaderVelocity.sqrMagnitude > 0.000001f)
         {
             binding.loggedFirstVelocity = true;
-            Debug.Log($"[OrbitalTrailVelocityProvider] binding='{binding.name}' raw={rawVelocity:F4} shader={shaderVelocity:F4}", this);
+            // Debug.Log($"[OrbitalTrailVelocityProvider] binding='{binding.name}' raw={rawVelocity:F4} shader={shaderVelocity:F4}", this);
         }
 
         ApplyVelocityToMaterials(ResolveBindingMaterials(binding), binding, shaderVelocity);

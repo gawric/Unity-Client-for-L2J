@@ -19,6 +19,8 @@ public class BaseAnimationController : AnimationEventsBase, IAnimationController
     private const string BASE_MOTION_MAGIC_SHOOT = "FDarkElf_m001_b.ao_MagicShot_A_FDarkElf";
 
     private AnimatorOverrideController _overrideController;
+    private CastClipPlayable _castPlayable;
+    private bool _castIdleSkip;
 
     // Дубли OnAnimationShoot на одном кадре (два ивента на клипе / два слоя) — в подписчики уходит один раз.
     private int _lastDuplicateShootFrame = int.MinValue;
@@ -61,6 +63,80 @@ public class BaseAnimationController : AnimationEventsBase, IAnimationController
             _animator.Rebind();
             _animator.Update(0f);
         }
+
+        _castIdleSkip = GetComponent<UserEntity>() != null;
+        if (_castIdleSkip)
+        {
+            _animator.cullingMode = AnimatorCullingMode.CullCompletely;
+            _castPlayable?.Dispose();
+            _castPlayable = null;
+            return;
+        }
+
+        _castPlayable ??= new CastClipPlayable();
+        _castPlayable.Bind(this, _animator);
+    }
+
+    void EnsureCastPlayable()
+    {
+        if (!_castIdleSkip || _castPlayable != null)
+            return;
+        if (!TryGetAnimator())
+            return;
+        _castPlayable = new CastClipPlayable();
+        _castPlayable.Bind(this, _animator);
+    }
+
+    void Update()
+    {
+        if (_castPlayable == null || !_castPlayable.IsActive)
+            return;
+        _castPlayable.Tick();
+    }
+
+    protected void OnDestroy()
+    {
+        _castPlayable?.Dispose();
+        _castPlayable = null;
+    }
+
+    /// <summary>
+    /// Play this race's cast clip without writing the override slot.
+    /// Returns false when the race clip is missing, so the caller keeps the animator state.
+    /// </summary>
+    public bool TryPlayCastPhase(string overrideAnimName, string phaseTriggerName)
+    {
+        EnsureCastPlayable();
+        if (_castPlayable == null)
+        {
+            return false;
+        }
+
+        return _castPlayable.TryPlay(overrideAnimName, phaseTriggerName);
+    }
+
+    public void StopCastClip()
+    {
+        if (_castPlayable != null && _castPlayable.IsActive)
+        {
+            Entity e = EntityActionSkill.ResolveEntity(
+                _animator != null ? _animator.GetInteger(AnimatorUtils.OBJECT_ID) : 0);
+            MagicGaitTrace.Event(e, "StopCastClip", "wasActive=true");
+        }
+        _castPlayable?.Stop();
+    }
+
+    public bool IsCastClipActive => _castPlayable != null && _castPlayable.IsActive;
+
+    public bool TryPlayLongHold(string endOverrideName, string shotOverrideName)
+    {
+        EnsureCastPlayable();
+        if (_castPlayable == null)
+        {
+            return false;
+        }
+
+        return _castPlayable.TryPlayLongHold(endOverrideName, shotOverrideName);
     }
 
   
@@ -71,23 +147,23 @@ public class BaseAnimationController : AnimationEventsBase, IAnimationController
     {
         if (!TryGetAnimator())
             return;
-        Debug.Log("SetRun speed test " + value);
-        _animator.SetFloat("run_speed", value);
+        // Debug.Log("SetRun speed test " + value);
+        DriveFloat("run_speed", value);
     }
 
     public void SetWalkSpeed(float value)
     {
         if (!TryGetAnimator())
             return;
-        Debug.Log("SetWalk speed test " + value);
-        _animator.SetFloat("walk_speed", value);
+        // Debug.Log("SetWalk speed test " + value);
+        DriveFloat("walk_speed", value);
     }
 
     public void SetWalkSpeedLobby(float value)
     {
         if (!TryGetAnimator())
             return;
-        _animator.SetFloat("walk_speed", value);
+        DriveFloat("walk_speed", value);
     }
 
 
@@ -107,7 +183,7 @@ public class BaseAnimationController : AnimationEventsBase, IAnimationController
             return;
         float newAtkSpd = clipLength * 1000f / _pAtkSpd;
         //Debug.Log("PATACK speed set " + newAtkSpd);
-        _animator.SetFloat("patkspd", newAtkSpd);
+        DriveFloat("patkspd", newAtkSpd);
     }
 
     public void UpdateAnimatorAtkSpeedL2j(float timeAtk , float clipLength)
@@ -115,7 +191,7 @@ public class BaseAnimationController : AnimationEventsBase, IAnimationController
         if (!TryGetAnimator())
             return;
         float newAtkSpd = clipLength * 1000f / timeAtk;
-        _animator.SetFloat("patkspd", newAtkSpd);
+        DriveFloat("patkspd", newAtkSpd);
     }
 
     public void SetPAtkSpeed(float newAtkSpd)
@@ -123,7 +199,7 @@ public class BaseAnimationController : AnimationEventsBase, IAnimationController
         if (!TryGetAnimator())
             return;
         //Debug.Log("PATACK speed set 2 " + newAtkSpd);
-        _animator.SetFloat("patkspd", newAtkSpd);
+        DriveFloat("patkspd", newAtkSpd);
     }
 
 
@@ -133,14 +209,14 @@ public class BaseAnimationController : AnimationEventsBase, IAnimationController
             return;
         //TODO: update for cast animation
         float newMAtkSpd = _spAtk01ClipLength / value;
-        _animator.SetFloat("matkspd", newMAtkSpd);
+        DriveFloat("matkspd", newMAtkSpd);
     }
 
     public void SetCastSpeed(float value)
     {
         if (!TryGetAnimator())
             return;
-        _animator.SetFloat("cast_speed", value);
+        DriveFloat("cast_speed", value);
     }
     public float GetNormalizedTimeOffsetSpeed()
     {
@@ -154,7 +230,7 @@ public class BaseAnimationController : AnimationEventsBase, IAnimationController
     {
         if (!TryGetAnimator())
             return;
-        _animator.SetFloat("shot_speed", value);
+        DriveFloat("shot_speed", value);
     }
 
     // Set all animation variables to false
@@ -167,7 +243,7 @@ public class BaseAnimationController : AnimationEventsBase, IAnimationController
             AnimatorControllerParameter anim = _animator.parameters[i];
             if (anim.type == AnimatorControllerParameterType.Bool)
             {
-                _animator.SetBool(anim.name, false);
+                DriveBool(anim.name, false);
             }
         }
     }
@@ -177,21 +253,21 @@ public class BaseAnimationController : AnimationEventsBase, IAnimationController
     {
         if (!TryGetAnimator())
             return;
-        _animator.SetTrigger(name);
+        DriveTrigger(name);
     }
 
     public void ResetAnimationTrigger(string name)
     {
         if (!TryGetAnimator())
             return;
-        _animator.ResetTrigger(name);
+        DriveResetTrigger(name);
     }
 
     public void ToggleAnimationCrossFade(string name , float duration)
     {
         if (!TryGetAnimator())
             return;
-        _animator.CrossFade(name, duration, 0);
+        DriveCrossFade(name, duration, 0);
     }
 
     public void CrossFadeInFixedTime(string stateName, float fixedDuration, int layer = 0)
@@ -201,13 +277,11 @@ public class BaseAnimationController : AnimationEventsBase, IAnimationController
             return;
         }
 
-        int objectId = _animator.GetInteger(AnimatorUtils.OBJECT_ID);
         int hash = Animator.StringToHash(stateName);
-        bool hasState = _animator.HasState(layer, hash);
-        _animator.CrossFadeInFixedTime(stateName, fixedDuration, layer);
+        DriveCrossFadeInFixedTime(stateName, hash, fixedDuration, layer, 0f);
         _lastAnimationVariableName = stateName;
-        Debug.Log(
-            $"[ANIM_CROSSFADE] id={objectId} go={name} state={stateName} hasState={hasState} fixedDuration={fixedDuration:F3}s layer={layer}");
+        // Debug.Log(
+            // $"[ANIM_CROSSFADE] id={objectId} go={name} state={stateName} hasState={hasState} fixedDuration={fixedDuration:F3}s layer={layer}");
     }
 
     public void CrossFadeRestartInFixedTime(string stateName, float fixedDuration, int layer = 0)
@@ -215,18 +289,59 @@ public class BaseAnimationController : AnimationEventsBase, IAnimationController
         if (!TryGetAnimator() || string.IsNullOrEmpty(stateName))
             return;
 
-        int objectId = _animator.GetInteger(AnimatorUtils.OBJECT_ID);
-        float normBefore = _animator.GetCurrentAnimatorStateInfo(layer).normalizedTime;
-        bool inTransition = _animator.IsInTransition(layer);
         // fixedTimeOffset is seconds from the start of the destination clip, not normalized time.
-        _animator.CrossFadeInFixedTime(stateName, fixedDuration, layer, 0f);
+        DriveCrossFadeInFixedTime(stateName, Animator.StringToHash(stateName), fixedDuration, layer, 0f);
         _lastAnimationVariableName = stateName;
-        Debug.Log(
-            $"[ANIM_RESTART] id={objectId} go={name} state={stateName} fixedDuration={fixedDuration:F3}s " +
-            $"normBefore={normBefore:F3} inTransition={inTransition} layer={layer}");
+        // Debug.Log(
+            // $"[ANIM_RESTART] id={objectId} go={name} state={stateName} fixedDuration={fixedDuration:F3}s " +
+            // $"normBefore={normBefore:F3} inTransition={inTransition} layer={layer}");
     }
 
     public Animator GetAnimator() => _animator;
+
+    // The cast graph owns the mesh. These writes update that controller playable
+    // in place; they do not create a graph.
+    void DriveFloat(string paramName, float value)
+    {
+        _animator.SetFloat(paramName, value);
+        _castPlayable?.SetFloat(paramName, value);
+    }
+
+    void DriveBool(string paramName, bool value)
+    {
+        _animator.SetBool(paramName, value);
+        _castPlayable?.SetBool(paramName, value);
+    }
+
+    void DriveInt(string paramName, int value)
+    {
+        _animator.SetInteger(paramName, value);
+        _castPlayable?.SetInteger(paramName, value);
+    }
+
+    void DriveTrigger(string paramName)
+    {
+        _animator.SetTrigger(paramName);
+        _castPlayable?.SetTrigger(paramName);
+    }
+
+    void DriveResetTrigger(string paramName)
+    {
+        _animator.ResetTrigger(paramName);
+        _castPlayable?.ResetTrigger(paramName);
+    }
+
+    void DriveCrossFade(string stateName, float duration, int layer)
+    {
+        _animator.CrossFade(stateName, duration, layer);
+        _castPlayable?.CrossFade(Animator.StringToHash(stateName), duration, layer);
+    }
+
+    void DriveCrossFadeInFixedTime(string stateName, int stateHash, float fixedDuration, int layer, float fixedTimeOffset)
+    {
+        _animator.CrossFadeInFixedTime(stateName, fixedDuration, layer, fixedTimeOffset);
+        _castPlayable?.CrossFadeInFixedTime(stateHash, fixedDuration, layer, fixedTimeOffset);
+    }
 
     public void SetBool(string name, bool value , string entityName = "")
     {
@@ -238,7 +353,7 @@ public class BaseAnimationController : AnimationEventsBase, IAnimationController
             _lastAnimationVariableName = name;
         }
 
-        _animator.SetBool(name, value);
+        DriveBool(name, value);
     }
 
     public void SetBoolDisabledOther(string nameAnim  , bool value, string[] disableds)
@@ -246,7 +361,7 @@ public class BaseAnimationController : AnimationEventsBase, IAnimationController
         if (!TryGetAnimator())
             return;
         DisabledOtherAnim(disableds);
-        _animator.SetBool(nameAnim, value);
+        DriveBool(nameAnim, value);
     }
 
     private void DisabledOtherAnim(string[] disableds)
@@ -255,7 +370,7 @@ public class BaseAnimationController : AnimationEventsBase, IAnimationController
             return;
         foreach (string name in disableds)
         {
-            _animator.SetBool(name, false);
+            DriveBool(name, false);
         }
     }
 
@@ -320,16 +435,16 @@ public class BaseAnimationController : AnimationEventsBase, IAnimationController
             switch (anim.type)
             {
                 case AnimatorControllerParameterType.Float:
-                    _animator.SetFloat(anim.name, value);
+                    DriveFloat(anim.name, value);
                     break;
                 case AnimatorControllerParameterType.Int:
-                    _animator.SetInteger(anim.name, (int)value);
+                    DriveInt(anim.name, (int)value);
                     break;
                 case AnimatorControllerParameterType.Bool:
                     SetBool(anim.name, value == 1f);
                     break;
                 case AnimatorControllerParameterType.Trigger:
-                    _animator.SetTrigger(anim.name);
+                    DriveTrigger(anim.name);
                     break;
             }
         }
@@ -362,7 +477,7 @@ public class BaseAnimationController : AnimationEventsBase, IAnimationController
     {
         if (!TryGetAnimator())
             return;
-        _animator.SetFloat(name, value);
+        DriveFloat(name, value);
     }
 
     public float GetFloat(string name)
@@ -376,7 +491,7 @@ public class BaseAnimationController : AnimationEventsBase, IAnimationController
     {
         if (!TryGetAnimator())
             return;
-        _animator.SetInteger(name, value);
+        DriveInt(name, value);
     }
 
     public int GetInt(string name)
@@ -391,6 +506,7 @@ public class BaseAnimationController : AnimationEventsBase, IAnimationController
         if (!TryGetAnimator())
             return;
         _animator.speed = value;
+        _castPlayable?.SetControllerSpeed(value);
     }
 
     public void SetEnabled(bool value)
@@ -410,11 +526,11 @@ public class BaseAnimationController : AnimationEventsBase, IAnimationController
         if (HasClip(animName))
         {
             _overrideController[animName] = clip;
-            Debug.Log("BaseAnimationController>ReplaceAnimClip clip orig   " + animName + " replace name " + clip.name);
+            // Debug.Log("BaseAnimationController>ReplaceAnimClip clip orig   " + animName + " replace name " + clip.name);
         }
         else
         {
-            Debug.LogWarning("BaseAnimationController>ReplaceAnimClip not found replace anim  " + animName);
+            // Debug.LogWarning("BaseAnimationController>ReplaceAnimClip not found replace anim  " + animName);
         }
 
     }

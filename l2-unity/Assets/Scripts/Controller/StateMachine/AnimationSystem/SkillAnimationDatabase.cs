@@ -32,11 +32,11 @@ public class SkillAnimationDatabase
                 _clip = Resources.Load<AnimationClip>(_path);
                 if (_clip != null)
                 {
-                    Debug.Log($"SkillAnimationDatabase> Загрузился ролик анимации  в кэш имя {_name} его путь {_path}");
+                    // Debug.Log($"SkillAnimationDatabase> Загрузился ролик анимации  в кэш имя {_name} его путь {_path}");
                 }
                 else
                 {
-                    Debug.LogWarning($"SkillAnimationDatabase> Не смогли загрузить в кэщ {_name} его путь {_path}");
+                    // Debug.LogWarning($"SkillAnimationDatabase> Не смогли загрузить в кэщ {_name} его путь {_path}");
                 }
 
             }

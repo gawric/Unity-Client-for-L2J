@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 
@@ -27,7 +27,7 @@ public sealed class MobSkillAnimgrpTable
             "Data/Meta/MobSkillAnimgrp_Interlude.txt");
         if (!File.Exists(dataPath))
         {
-            Debug.LogWarning("File not found: " + dataPath);
+            // Debug.LogWarning("File not found: " + dataPath);
             return;
         }
 
@@ -68,7 +68,7 @@ public sealed class MobSkillAnimgrpTable
             }
         }
 
-        Debug.Log($"Successfully imported {_sequences.Count} mob skill animation(s)");
+        // Debug.Log($"Successfully imported {_sequences.Count} mob skill animation(s)");
     }
 
     public bool TryGetSequence(int npcId, int skillId, out string sequence)

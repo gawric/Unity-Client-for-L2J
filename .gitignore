@@ -81,5 +81,8 @@ l2-unity/UserSettings/
 # FMOD Studio crash reports
 *.dmp
 
+# Unity Profile Analyzer capture dumps
+l2-unity/ProfileAnalyzer/*.pdata
+
 # Rider
 .idea/

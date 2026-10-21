@@ -27,7 +27,7 @@ public class AttackAction : L2Action
 
     public override void UseAction()
     {
-        Debug.Log("Use attack action.");
+        // Debug.Log("Use attack action.");
 
         if (IncomingPacketActions.Targets.HasTarget())
         {
@@ -40,7 +40,7 @@ public class AttackAction : L2Action
                     Entity entity = target.GetEntity();
                     if (entity is MonsterEntity)
                     {
-                        Debug.Log("Trying To Attack");
+                        // Debug.Log("Trying To Attack");
                         // Melee attack intent (hotkey) — red while closing distance.
                         IncomingPacketActions.Targets.SetAttackTarget();
                     }

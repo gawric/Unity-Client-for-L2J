@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public sealed class InitDto : IWireDto
 {
@@ -21,7 +21,7 @@ public sealed class InitDto : IWireDto
         SessionId = reader.ReadI();
         Protocol = reader.ReadI();
         PublicKey = reader.ReadB(128);
-        Debug.Log("InitPacket Publick KEY: " + StringUtils.ByteArrayToString(PublicKey));
+        // Debug.Log("InitPacket Publick KEY: " + StringUtils.ByteArrayToString(PublicKey));
         Gg1 = reader.ReadI();
         Gg2 = reader.ReadI();
         Gg3 = reader.ReadI();

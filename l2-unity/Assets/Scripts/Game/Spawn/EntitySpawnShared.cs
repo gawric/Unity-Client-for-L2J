@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using UnityEngine;
 
 public static class EntitySpawnShared
@@ -22,22 +22,22 @@ public static class EntitySpawnShared
         NpcName npcName = npcNames.GetNpcName(identity.NpcId);
         if (npcName == null || npcgrp == null)
         {
-            Debug.LogError("Npc " + identity.NpcId + " could not be loaded correctly.");
+            // Debug.LogError("Npc " + identity.NpcId + " could not be loaded correctly.");
             return false;
         }
 
         GameObject prefab = models.GetNpc(npcgrp.Mesh);
         if (prefab == null)
         {
-            Debug.LogWarning(
-                "NPC Not Found Nps!!!!! Need add server ID " + identity.Id + " Npc Id " + identity.NpcId);
+            // Debug.LogWarning(
+                // "NPC Not Found Nps!!!!! Need add server ID " + identity.Id + " Npc Id " + identity.NpcId);
             return false;
         }
 
         identity.EntityType = ResolveEntityType(prefab, npcgrp.ClassName);
         if (identity.NpcId == 31760)
         {
-            Debug.Log("SpawnNpc>>> Spawn 31760 p5");
+            // Debug.Log("SpawnNpc>>> Spawn 31760 p5");
             identity.EntityType = EntityType.NPC;
         }
 
@@ -289,6 +289,8 @@ public static class EntitySpawnShared
             animator.Play(waitHash, 0, 0f);
             animator.Update(0f);
         }
+
+        CrowdAnimTest.Apply(controller);
     }
 
     static void SeedNpcHpFromGrp(Entity npc, Npcgrp npcgrp)

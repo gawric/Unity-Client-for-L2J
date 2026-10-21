@@ -79,7 +79,7 @@ public static class AnimationDataCache
             }
         }
 
-        Debug.LogWarning($"[AnimCache] Event '{eventName}' не найден в клипе {clip.name}");
+        // Debug.LogWarning($"[AnimCache] Event '{eventName}' не найден в клипе {clip.name}");
         return 0f;
     }
 
@@ -120,7 +120,7 @@ public static class AnimationDataCache
             }
         }
 
-        Debug.LogWarning($"[AnimCache] Event '{eventName}' не найден в клипе {clip.name}");
+        // Debug.LogWarning($"[AnimCache] Event '{eventName}' не найден в клипе {clip.name}");
         return 0f;
     }
 

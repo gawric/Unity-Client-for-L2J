@@ -11,7 +11,7 @@ public class WalkRunAction : L2Action
         {
             return;
         }
-        Debug.Log("Нужно создать пакет доя обработки RequestActionUse WalkRun");
+        // Debug.Log("Нужно создать пакет доя обработки RequestActionUse WalkRun");
         //GameClient.Instance.ClientPacketHandler.RequestActionUse((int)ActionType.WalkRun);
     }
 }

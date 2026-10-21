@@ -44,7 +44,7 @@ public class SkinnedMeshSync : MonoBehaviour {
         
         if (!gameObject.activeInHierarchy)
         {
-            Debug.LogWarning("Cannot add object: GameObject is inactive");
+            // Debug.LogWarning("Cannot add object: GameObject is inactive");
             return;
         }
 
@@ -67,7 +67,7 @@ public class SkinnedMeshSync : MonoBehaviour {
         {
             if (!gameObject.activeInHierarchy)
             {
-                Debug.LogWarning("Cannot process objects: GameObject is inactive");
+                // Debug.LogWarning("Cannot process objects: GameObject is inactive");
                 break;
             }
 
@@ -99,13 +99,13 @@ public class SkinnedMeshSync : MonoBehaviour {
             }
             else
             {
-                Debug.LogWarning("Не удалось дождаться изменения количества дочерних объектов");
+                // Debug.LogWarning("Не удалось дождаться изменения количества дочерних объектов");
                 ShowRenderers(newObject);
             }
         }
         else
         {
-            Debug.LogWarning("Достигнут лимит дочерних объектов (8). Невозможно добавить новый объект.");
+            // Debug.LogWarning("Достигнут лимит дочерних объектов (8). Невозможно добавить новый объект.");
             yield return false;
         }
     }
@@ -163,15 +163,15 @@ public class SkinnedMeshSync : MonoBehaviour {
     {
         if (transform.parent.childCount == 0)
         {
-            Debug.Log("No children found");
+            // Debug.Log("No children found");
             return;
         }
 
-        Debug.Log($"Found {transform.parent.childCount} children:");
+        // Debug.Log($"Found {transform.parent.childCount} children:");
         for (int i = 0; i < transform.parent.childCount; i++)
         {
             Transform child = transform.parent.GetChild(i);
-            Debug.Log($"[{i}] {child.name}");
+            // Debug.Log($"[{i}] {child.name}");
         }
     }
 

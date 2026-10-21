@@ -1,4 +1,4 @@
-#if UNITY_EDITOR
+﻿#if UNITY_EDITOR
 using System.Collections.Generic;
 using System.IO;
 using UnityEditor;
@@ -31,7 +31,7 @@ public static class L2InstancedPropBaker
         GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
         if (prefab == null)
         {
-            Debug.LogError("L2InstancedPropBaker: missing " + prefabPath);
+            // Debug.LogError("L2InstancedPropBaker: missing " + prefabPath);
             return;
         }
 
@@ -58,14 +58,14 @@ public static class L2InstancedPropBaker
         PrefabUtility.SaveAsPrefabAsset(instance, prefabPath);
         Object.DestroyImmediate(instance);
         AssetDatabase.SaveAssets();
-        Debug.Log(
-            "L2InstancedPropBaker: " +
-            prefabPath +
-            " is now instanced (" +
-            set.instanceCount +
-            " props, " +
-            set.batches.Length +
-            " batches).");
+        // Debug.Log(
+            // "L2InstancedPropBaker: " +
+            // prefabPath +
+            // " is now instanced (" +
+            // set.instanceCount +
+            // " props, " +
+            // set.batches.Length +
+            // " batches).");
     }
 
     public static L2InstancedPropSet ReplaceHierarchyWithInstances(
@@ -169,7 +169,7 @@ public static class L2InstancedPropBaker
     {
         if (root == null)
         {
-            Debug.LogError("L2InstancedPropBaker: root is null");
+            // Debug.LogError("L2InstancedPropBaker: root is null");
             return null;
         }
 
@@ -214,7 +214,7 @@ public static class L2InstancedPropBaker
 
         if (groups.Count == 0)
         {
-            Debug.LogError("L2InstancedPropBaker: no mesh renderers under " + root.name);
+            // Debug.LogError("L2InstancedPropBaker: no mesh renderers under " + root.name);
             return null;
         }
 
@@ -245,14 +245,14 @@ public static class L2InstancedPropBaker
         set.instanceCount = total;
         EditorUtility.SetDirty(set);
         AssetDatabase.SaveAssets();
-        Debug.Log(
-            "L2InstancedPropBaker: baked " +
-            total +
-            " instances / " +
-            batches.Length +
-            " batches → " +
-            assetPath +
-            (skipped > 0 ? " (skipped " + skipped + ")" : string.Empty));
+        // Debug.Log(
+            // "L2InstancedPropBaker: baked " +
+            // total +
+            // " instances / " +
+            // batches.Length +
+            // " batches → " +
+            // assetPath +
+            // (skipped > 0 ? " (skipped " + skipped + ")" : string.Empty));
         return set;
     }
 }

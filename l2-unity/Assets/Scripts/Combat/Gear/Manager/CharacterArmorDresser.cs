@@ -22,13 +22,13 @@ public class CharacterArmorDresser : AbstractArmorDresser
     {
         if (armor == null || armorPiece == null)
         {
-            Debug.LogWarning("Invalid armor data provided");
+            // Debug.LogWarning("Invalid armor data provided");
             return;
         }
 
         if (IsArmorEquipped(armor, slot))
         {
-            Debug.Log($"Armor {armor.Id} is already equipped in slot {slot}");
+            // Debug.Log($"Armor {armor.Id} is already equipped in slot {slot}");
             return;
         }
 
@@ -67,7 +67,7 @@ public class CharacterArmorDresser : AbstractArmorDresser
     {
         if (armor == null || armorPiece == null)
         {
-            Debug.LogWarning("Usergear->SetFullArmor: Invalid armor data provided");
+            // Debug.LogWarning("Usergear->SetFullArmor: Invalid armor data provided");
             return;
         }
 
@@ -166,7 +166,7 @@ public class CharacterArmorDresser : AbstractArmorDresser
                     break;
 
             default:
-                Debug.LogWarning($"UnequipArmorPiece: Slot {slotArmor} is not supported for unequipping");
+                // Debug.LogWarning($"UnequipArmorPiece: Slot {slotArmor} is not supported for unequipping");
                 break;
         }
 
@@ -218,8 +218,8 @@ public class CharacterArmorDresser : AbstractArmorDresser
         var mainPartChest = GetMainArmorPart(ItemSlot.chest);
         var mainPartLegs = GetMainArmorPart(ItemSlot.legs);
 
-        Debug.Log("Destroy test 1 chest " + " slot " + slot + " data " + mainPartChest.ToString() + " go " + GetGameObject(slot, mainPartChest));
-        Debug.Log("Destroy test 2 legs " + " slot " + slot + " data " + mainPartLegs.ToString() + "go " + GetGameObject(slot, mainPartLegs));
+        // Debug.Log("Destroy test 1 chest " + " slot " + slot + " data " + mainPartChest.ToString() + " go " + GetGameObject(slot, mainPartChest));
+        // Debug.Log("Destroy test 2 legs " + " slot " + slot + " data " + mainPartLegs.ToString() + "go " + GetGameObject(slot, mainPartLegs));
         Destroy(GetGameObject(slot, mainPartChest));
         Destroy(GetGameObject(slot, mainPartLegs));
 
@@ -265,15 +265,15 @@ public class CharacterArmorDresser : AbstractArmorDresser
 
         if (ArmorDresserModel.ArmorPart.Unknow == mainPart)
         {
-            Debug.LogWarning($"CharacterArmorDresser: EquipNewArmor-> Unknown armor part detected for slot {slot}. Armor will not be equipped.");
+            // Debug.LogWarning($"CharacterArmorDresser: EquipNewArmor-> Unknown armor part detected for slot {slot}. Armor will not be equipped.");
             return;
         }
-        Debug.Log("EquipNewArmor destroy " + GetGameObject(slot, mainPart));
-        GearFlowLog.Info("ArmorDresser EquipNewArmor slot=" + slot +
-            " part=" + mainPart +
-            " armorId=" + (armor != null ? armor.Id : 0) +
-            " mesh=" + (armorPiece != null ? armorPiece.name : "null") +
-            " container=" + (_containerTransform != null ? _containerTransform.name : "null"));
+        // Debug.Log("EquipNewArmor destroy " + GetGameObject(slot, mainPart));
+        // GearFlowLog.Info("ArmorDresser EquipNewArmor slot=" + slot +
+            // " part=" + mainPart +
+            // " armorId=" + (armor != null ? armor.Id : 0) +
+            // " mesh=" + (armorPiece != null ? armorPiece.name : "null") +
+            // " container=" + (_containerTransform != null ? _containerTransform.name : "null"));
         if(isDelete) Destroy(GetGameObject(slot, mainPart));
         SetParent(armorPiece);
 
@@ -284,11 +284,11 @@ public class CharacterArmorDresser : AbstractArmorDresser
     private void EquipNewArmorFullPlate(Armor armor, GameObject armorPiece , ItemSlot slotFullPlater, ItemSlot insideFullPlate)
     {
         var mainPart = GetMainArmorPart(insideFullPlate);
-        GearFlowLog.Info("ArmorDresser EquipNewArmorFullPlate slot=" + slotFullPlater +
-            " part=" + mainPart +
-            " armorId=" + (armor != null ? armor.Id : 0) +
-            " mesh=" + (armorPiece != null ? armorPiece.name : "null") +
-            " container=" + (_containerTransform != null ? _containerTransform.name : "null"));
+        // GearFlowLog.Info("ArmorDresser EquipNewArmorFullPlate slot=" + slotFullPlater +
+            // " part=" + mainPart +
+            // " armorId=" + (armor != null ? armor.Id : 0) +
+            // " mesh=" + (armorPiece != null ? armorPiece.name : "null") +
+            // " container=" + (_containerTransform != null ? _containerTransform.name : "null"));
         Destroy(GetGameObject(slotFullPlater, mainPart));
 
         SetParent(armorPiece);
@@ -305,7 +305,7 @@ public class CharacterArmorDresser : AbstractArmorDresser
         }
         else
         {
-            Debug.LogWarning("CharacterArmorDresser->SetParent: GameObject its null");
+            // Debug.LogWarning("CharacterArmorDresser->SetParent: GameObject its null");
         }
 
     }

@@ -19,36 +19,62 @@ public class EffectManager : MonoBehaviour
 
     public void PlayEffect(int id, Transform target, MagicCastData castData = null)
     {
-        var data = database.effects.Find(e => e.id == id);
-        BaseEffect prefab = ResolvePrefab(data, target);
+        bool windstrike = id == 4247;
+        if (windstrike)
+        {
+            Debug.Log(
+                "[WINDSTRIKE] EffectManager database=" + (database != null) +
+                " list=" + (database != null && database.effects != null) +
+                " container=" + (_activeEffectsContainer != null) +
+                " target=" + (target != null ? target.name : "null"));
+        }
+
+        EffectDatabase.EffectData data;
+        using (MagicSkillUseTrace.Measure("effect.find"))
+            data = database != null && database.effects != null
+                ? database.effects.Find(e => e.id == id)
+                : null;
+        BaseEffect prefab;
+        using (MagicSkillUseTrace.Measure("effect.prefab"))
+            prefab = ResolvePrefab(data, target);
 
         if (data == null || prefab == null || _activeEffectsContainer == null || target == null)
         {
-            Debug.LogWarning(
-                "[WEAPON_SHOT] PlayEffect failed id=" + id +
-                " data=" + (data != null) +
-                " useWeaponShot=" + (data != null && data.useWeaponShot) +
-                " spiritShot=" + (data != null && data.spiritShot) +
-                " prefab=" + (prefab != null ? prefab.name : "null") +
-                " container=" + (_activeEffectsContainer != null) +
-                " target=" + (target != null ? target.name : "null"));
+            if (windstrike)
+            {
+                Debug.Log(
+                    "[WINDSTRIKE] EffectManager abort data=" + (data != null) +
+                    " prefab=" + (prefab != null ? prefab.name : "null") +
+                    " container=" + (_activeEffectsContainer != null) +
+                    " target=" + (target != null));
+            }
             return;
         }
 
-        Debug.Log(
-            $"[HOME_SPAWN] EffectManager.PlayEffect id={id} prefab='{prefab.name}' " +
-            $"target='{target.name}' targetPos={target.position} " +
-            $"castTargetId={(castData != null ? castData.TargetObjectId : 0)}");
+        if (windstrike)
+            Debug.Log("[WINDSTRIKE] EffectManager spawn prefab=" + prefab.name);
 
-        BaseEffect instance = Instantiate(prefab, target.position, target.rotation, target);
-        InjectSpawned(instance);
+        // Debug.Log(
+            // $"[HOME_SPAWN] EffectManager.PlayEffect id={id} prefab='{prefab.name}' " +
+            // $"target='{target.name}' targetPos={target.position} " +
+            // $"castTargetId={(castData != null ? castData.TargetObjectId : 0)}");
+
+        BaseEffect instance;
+        using (MagicSkillUseTrace.Measure("effect.instantiate"))
+            instance = Instantiate(prefab, target.position, target.rotation, target);
+        using (MagicSkillUseTrace.Measure("effect.inject"))
+            InjectSpawned(instance);
 
         instance.gameObject.SetActive(true);
-        instance.Setup(data.settings, castData, target);
+        using (MagicSkillUseTrace.Measure("effect.setup"))
+            instance.Setup(data.settings, castData, target);
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-        EffectDoublePlayLog.TrackManagerPlay(id, prefab != null ? prefab.name : "null");
+        // EffectDoublePlayLog.TrackManagerPlay(id, prefab != null ? prefab.name : "null");
 #endif
-        instance.Play();
+        using (MagicSkillUseTrace.Measure("effect.play"))
+            instance.Play();
+        if (windstrike)
+            Debug.Log("[WINDSTRIKE] EffectManager.Play returned instance=" + instance.name);
     }
 
     static BaseEffect ResolvePrefab(EffectDatabase.EffectData data, Transform target)
@@ -82,7 +108,7 @@ public class EffectManager : MonoBehaviour
     {
         if (entity == null)
         {
-            Debug.LogWarning($"[SKILL_ANIM_FX] PlayEffectSyncedToSkillAnimation entity is null effectId={effectId}");
+            // Debug.LogWarning($"[SKILL_ANIM_FX] PlayEffectSyncedToSkillAnimation entity is null effectId={effectId}");
             return;
         }
 
@@ -105,18 +131,18 @@ public class EffectManager : MonoBehaviour
 
     public void PlayerImpactEffect(int id, Vector3 point, Vector3 impactDirection, MagicCastData castData = null)
     {
-        Debug.Log(
-            $"[HIT_FX] 7.EffectManager.PlayerImpactEffect ENTER frame={Time.frameCount} t={Time.time:F3} " +
-            $"effectId={id} point={point} dir={impactDirection}");
+        // Debug.Log(
+            // $"[HIT_FX] 7.EffectManager.PlayerImpactEffect ENTER frame={Time.frameCount} t={Time.time:F3} " +
+            // $"effectId={id} point={point} dir={impactDirection}");
 
         var data = database != null ? database.effects.Find(e => e.id == id) : null;
 
         if (data == null || data.prefab == null || _activeEffectsContainer == null)
         {
-            Debug.LogWarning(
-                $"[HIT_FX] 7.EffectManager SKIP Play failed effectId={id} " +
-                $"dataNull={data == null} prefabNull={data == null || data.prefab == null} " +
-                $"containerNull={_activeEffectsContainer == null}");
+            // Debug.LogWarning(
+                // $"[HIT_FX] 7.EffectManager SKIP Play failed effectId={id} " +
+                // $"dataNull={data == null} prefabNull={data == null || data.prefab == null} " +
+                // $"containerNull={_activeEffectsContainer == null}");
             return;
         }
 
@@ -161,13 +187,13 @@ public class EffectManager : MonoBehaviour
         }
 
         float angDirVsPlayerToHit = AngleFlatDeg(dir, playerToHit);
-        Debug.Log(
-            $"{IMPACT_DEBUG_TAG} PlayerImpactEffect spawn#{_impactSpawnCounter} effectId={id} " +
-            $"point={point} dirIn={impactDirection} dirResolved={dir} " +
-            $"emitterRight(+X travel)={emitterRight} emitterFwd={emitterFwd} " +
-            $"playerToHit={playerToHit} playerFwd={playerFwd} angDirVsPlayerToHit={angDirVsPlayerToHit:F1} " +
-            $"yawOffset={IMPACT_HIT_DIRECTION_YAW_OFFSET_DEGREES} " +
-            $"countNearPointWindow={state.count} windowSec={IMPACT_WINDOW_SEC:F2}");
+        // Debug.Log(
+            // $"{IMPACT_DEBUG_TAG} PlayerImpactEffect spawn#{_impactSpawnCounter} effectId={id} " +
+            // $"point={point} dirIn={impactDirection} dirResolved={dir} " +
+            // $"emitterRight(+X travel)={emitterRight} emitterFwd={emitterFwd} " +
+            // $"playerToHit={playerToHit} playerFwd={playerFwd} angDirVsPlayerToHit={angDirVsPlayerToHit:F1} " +
+            // $"yawOffset={IMPACT_HIT_DIRECTION_YAW_OFFSET_DEGREES} " +
+            // $"countNearPointWindow={state.count} windowSec={IMPACT_WINDOW_SEC:F2}");
 
         instance.gameObject.SetActive(true);
         instance.Setup(data.settings, castData, dummy.transform);
@@ -179,12 +205,12 @@ public class EffectManager : MonoBehaviour
         }
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-        EffectDoublePlayLog.TrackManagerPlay(id, data.prefab != null ? data.prefab.name : "null");
+        // EffectDoublePlayLog.TrackManagerPlay(id, data.prefab != null ? data.prefab.name : "null");
 #endif
         instance.Play();
-        Debug.Log(
-            $"[HIT_FX] 7.EffectManager PLAY OK spawn#{_impactSpawnCounter} effectId={id} " +
-            $"prefab={data.prefab.name} point={point}");
+        // Debug.Log(
+            // $"[HIT_FX] 7.EffectManager PLAY OK spawn#{_impactSpawnCounter} effectId={id} " +
+            // $"prefab={data.prefab.name} point={point}");
     }
 
     private static Vector3 hitPointFlat(Vector3 v)

@@ -44,15 +44,15 @@ public class AbstractMeshManager : MonoBehaviour
                     return goEtcItem;
 
                 default:
-                    Debug.LogWarning("Unknown equipment category");
+                    // Debug.LogWarning("Unknown equipment category");
                     return null;
             }
         } catch (System.Exception ex) {
             int failedId = itemIds != null && itemIds.Length > 0 ? itemIds[0] : 0;
-            GearFlowLog.Info("LoadMesh failed id=" + failedId + " category=" + category + " " + ex.Message);
-            Debug.LogWarning(
-                $"AbstractMeshManager-> LoadMesh не смогли загрузить нужную Mesh !!! ArmorID {failedId} Type {category} error print: ->\n" +
-                ex.ToString());
+            // GearFlowLog.Info("LoadMesh failed id=" + failedId + " category=" + category + " " + ex.Message);
+            // Debug.LogWarning(
+                // $"AbstractMeshManager-> LoadMesh не смогли загрузить нужную Mesh !!! ArmorID {failedId} Type {category} error print: ->\n" +
+                // ex.ToString());
             return null;
         }
     }
@@ -98,14 +98,14 @@ public class AbstractMeshManager : MonoBehaviour
     {
         if (weapon == null)
         {
-            Debug.LogWarning($"Could find weapon {weaponId}");
+            // Debug.LogWarning($"Could find weapon {weaponId}");
             return null;
         }
 
         GameObject weaponPrefab = ModelTable.Instance.GetWeaponById(weaponId);
         if (weaponPrefab == null)
         {
-            Debug.LogWarning($"Could load prefab for {weaponId}");
+            // Debug.LogWarning($"Could load prefab for {weaponId}");
             return null;
         }
 
@@ -116,14 +116,14 @@ public class AbstractMeshManager : MonoBehaviour
     {
         if (etcItem == null)
         {
-            Debug.LogWarning($"Could find etc item {etcItem}");
+            // Debug.LogWarning($"Could find etc item {etcItem}");
             return null;
         }
 
         GameObject weaponPrefab = ModelTable.Instance.GetEtcById(etcId);
         if (weaponPrefab == null)
         {
-            Debug.LogWarning($"Could load prefab for {etcId}");
+            // Debug.LogWarning($"Could load prefab for {etcId}");
             return null;
         }
 
@@ -138,7 +138,7 @@ public class AbstractMeshManager : MonoBehaviour
 
         if (armorPiece == null)
         {
-            Debug.LogWarning($"MeshManager->Can't find armor {armor.Id} for race {raceId}");
+            // Debug.LogWarning($"MeshManager->Can't find armor {armor.Id} for race {raceId}");
             return null ;
         }
 
@@ -164,7 +164,7 @@ public class AbstractMeshManager : MonoBehaviour
     {
         if (go == null)
         {
-            Debug.LogError("Gear: Not Create GameObject " + weaponType);
+            // Debug.LogError("Gear: Not Create GameObject " + weaponType);
             return;
         }
 
@@ -249,14 +249,14 @@ public class AbstractMeshManager : MonoBehaviour
         GameObject mesh = GetOrCreate(baseArmorModel, ObjectType.Armor);
         if (mesh == null)
         {
-            Debug.LogWarning("UserGear-> Failed to create armor model copy");
+            // Debug.LogWarning("UserGear-> Failed to create armor model copy");
             return null;
         }
 
         SkinnedMeshRenderer renderer = mesh.GetComponentInChildren<SkinnedMeshRenderer>();
         if (renderer == null)
         {
-            Debug.LogWarning("UserGear-> No SkinnedMeshRenderer found in the armor model");
+            // Debug.LogWarning("UserGear-> No SkinnedMeshRenderer found in the armor model");
             return null;
         }
 

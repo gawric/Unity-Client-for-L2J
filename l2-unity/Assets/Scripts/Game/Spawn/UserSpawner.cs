@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using UnityEngine;
 
 public sealed class UserSpawner
@@ -35,16 +35,16 @@ public sealed class UserSpawner
         int baseBefore = appearance != null ? appearance.BaseClass : -1;
         CharacterRaceAnimation raceId = CharacterRaceAnimationParser.ResolveRaceAnimation(
             race, appearance, playerClass);
-        Debug.Log("[CHARINFO_CLASS] SPAWN nick=" + identity.Name +
-            " id=" + identity.Id +
-            " race=" + race +
-            " sex=" + (appearance != null ? appearance.Sex : -1) +
-            " classFirst=" + info.PacketClassFirst +
-            " classSecond=" + info.PacketClassSecond +
-            " playerClass=" + playerClass +
-            " baseBefore=" + baseBefore +
-            " baseAfter=" + (appearance != null ? appearance.BaseClass : -1) +
-            " raceId=" + raceId);
+        // Debug.Log("[CHARINFO_CLASS] SPAWN nick=" + identity.Name +
+            // " id=" + identity.Id +
+            // " race=" + race +
+            // " sex=" + (appearance != null ? appearance.Sex : -1) +
+            // " classFirst=" + info.PacketClassFirst +
+            // " classSecond=" + info.PacketClassSecond +
+            // " playerClass=" + playerClass +
+            // " baseBefore=" + baseBefore +
+            // " baseAfter=" + (appearance != null ? appearance.BaseClass : -1) +
+            // " raceId=" + raceId);
 
         CharacterBuilder builder = _characterBuilder != null ? _characterBuilder : CharacterBuilder.Instance;
         if (builder == null)
@@ -59,10 +59,13 @@ public sealed class UserSpawner
         UserEntity user = go.GetComponent<UserEntity>();
         if (user == null)
         {
-            UnityEngine.Object.Destroy(go);
+            IPoolManager pool = ObjectPoolManager.Instance;
+            if (pool == null || !pool.ReturnToPool(ObjectType.User, go))
+                UnityEngine.Object.Destroy(go);
             return null;
         }
 
+        ResetRuntime(user);
         user.Status = info.Status;
         user.Identity = identity;
         user.Stats = info.Stats;
@@ -71,13 +74,13 @@ public sealed class UserSpawner
         user.RaceId = raceId;
         user.Running = appearance.Running;
         user.SetDead(info.AlikeDead);
-        Debug.Log("[EntityAction:User] nick=" + identity.Name +
-            " spawn hp=" + user.Status.GetHp() +
-            " maxHp=" + user.Stats.MaxHp +
-            " deadFlag=" + user.GetDead() +
-            " isDead=" + user.IsDead() +
-            " alikeDead=" + info.AlikeDead +
-            " cp=" + (user.Status is PlayerStatus ps ? ps.Cp : 0));
+        // Debug.Log("[EntityAction:User] nick=" + identity.Name +
+            // " spawn hp=" + user.Status.GetHp() +
+            // " maxHp=" + user.Stats.MaxHp +
+            // " deadFlag=" + user.GetDead() +
+            // " isDead=" + user.IsDead() +
+            // " alikeDead=" + info.AlikeDead +
+            // " cp=" + (user.Status is PlayerStatus ps ? ps.Cp : 0));
 
         PlayerController playerController = go.GetComponent<PlayerController>();
         if (playerController != null)
@@ -102,6 +105,11 @@ public sealed class UserSpawner
             animation.Initialize();
 
         user.Initialize();
+        // Fade swaps in material instances. Snapshot must include armor/weapons equipped above,
+        // otherwise a pooled body comes back with those pieces still at alpha 0.
+        PooledInstance pooled = go.GetComponent<PooledInstance>();
+        if (pooled != null)
+            pooled.RecaptureSharedMaterials();
 
         if (animation != null)
             EntitySpawnShared.RegisterAnimation(world, identity.Id, animation, user);
@@ -117,13 +125,14 @@ public sealed class UserSpawner
             " WalkReal=" + info.Stats.WalkRealSpeed +
             " BaseRun=" + info.Stats.BaseRunSpeed +
             " BaseWalk=" + info.Stats.BaseWalkingSpeed);
-        CharInfoSpeedLog.LogPacket(user, "OnCharInfo spawn");
+        // CharInfoSpeedLog.LogPacket(user, "OnCharInfo spawn");
 
         world.RegisterUser(user);
         if (info.AlikeDead || user.IsDead())
             EntityActionVisual.PlayDeath(user, true);
         else if (_appearFade != null)
             _appearFade.Begin(user);
+        CrowdAnimTest.Apply(user);
         return user;
     }
 
@@ -143,11 +152,11 @@ public sealed class UserSpawner
         user.Identity.IsRunning = identity.IsRunning;
         user.Identity.ClanId = identity.ClanId;
 
-        GearFlowLog.Info("UserSpawner.UpdateInfo BEFORE nick=" + user.Nick +
-            " id=" + (user.Identity != null ? user.Identity.Id : 0) +
-            " " + GearFlowLog.Paperdoll(user));
-        GearFlowLog.Info("UserSpawner.UpdateInfo PACKET nick=" + identity.Name +
-            " id=" + identity.Id + " " + GearFlowLog.Paperdoll(info.Appearance));
+        // GearFlowLog.Info("UserSpawner.UpdateInfo BEFORE nick=" + user.Nick +
+            // " id=" + (user.Identity != null ? user.Identity.Id : 0) +
+            // " " + GearFlowLog.Paperdoll(user));
+        // GearFlowLog.Info("UserSpawner.UpdateInfo PACKET nick=" + identity.Name +
+            // " id=" + identity.Id + " " + GearFlowLog.Paperdoll(info.Appearance));
 
         bool wasCorpse = user.GetDead();
         user.Status = info.Status;
@@ -162,10 +171,10 @@ public sealed class UserSpawner
         user.UpdateMAtkSpeed((int)info.Stats.MAtkSpd);
         user.LogSpeed("update CharInfo RunReal=" + info.Stats.RunRealSpeed +
             " WalkReal=" + info.Stats.WalkRealSpeed);
-        CharInfoSpeedLog.LogPacket(user, "OnCharInfo update");
-        CharInfoSpeedLog.LogSnap(user, identity.Position, "CharInfo UpdateInfo");
-        CharInfoMoveBudgetLog.Compare(user, "CHARINFO", EntityActionCombatLog.PawnOf(user), identity.Position, true);
-        GearFlowLog.Info("UserSpawner.RefreshVisuals nick=" + user.Nick);
+        // CharInfoSpeedLog.LogPacket(user, "OnCharInfo update");
+        // CharInfoSpeedLog.LogSnap(user, identity.Position, "CharInfo UpdateInfo");
+        // CharInfoMoveBudgetLog.Compare(user, "CHARINFO", EntityPawnLookup.PawnOf(user), identity.Position, true);
+        // GearFlowLog.Info("UserSpawner.RefreshVisuals nick=" + user.Nick);
         if (_appearFade != null && info.AlikeDead && user.Identity != null)
             _appearFade.Cancel(user.Identity.Id);
 
@@ -180,29 +189,29 @@ public sealed class UserSpawner
         {
             Vector3 fromL2 = VectorUtils.ConvertPosUnityToL2j(user.transform.position);
             Vector3 toL2 = VectorUtils.ConvertPosUnityToL2j(identity.Position);
-            Debug.Log("[MOVE_SNAP] CHARINFO nick=" + user.Nick +
-                " snapM=" + snap2d.ToString("F2") +
-                " skipM=" + skipM.ToString("F2") +
-                " fromL2=" + fromL2.x.ToString("F0") + "," + fromL2.y.ToString("F0") + "," + fromL2.z.ToString("F0") +
-                " toL2=" + toL2.x.ToString("F0") + "," + toL2.y.ToString("F0") + "," + toL2.z.ToString("F0"));
+            // Debug.Log("[MOVE_SNAP] CHARINFO nick=" + user.Nick +
+                // " snapM=" + snap2d.ToString("F2") +
+                // " skipM=" + skipM.ToString("F2") +
+                // " fromL2=" + fromL2.x.ToString("F0") + "," + fromL2.y.ToString("F0") + "," + fromL2.z.ToString("F0") +
+                // " toL2=" + toL2.x.ToString("F0") + "," + toL2.y.ToString("F0") + "," + toL2.z.ToString("F0"));
             EntitySpawnShared.ApplyGroundedTransform(user.gameObject, identity.Position, identity.Heading);
             EntitySpawnShared.ReapplyGroundAfterActivate(user.gameObject, user.Identity);
         }
         else
         {
             _pawnYaw.RequestYaw(user.transform, identity.Heading.eulerAngles.y, L2PawnYaw.RotationRateYaw);
-            Debug.Log("[CI_MOVE] CHARINFO SKIP_SNAP nick=" + user.Nick +
-                " snap2d=" + snap2d.ToString("F3") +
-                " skipM=" + skipM.ToString("F2") +
-                " (AdjustPawnLocation <= 200 UU)");
+            // Debug.Log("[CI_MOVE] CHARINFO SKIP_SNAP nick=" + user.Nick +
+                // " snap2d=" + snap2d.ToString("F3") +
+                // " skipM=" + skipM.ToString("F2") +
+                // " (AdjustPawnLocation <= 200 UU)");
         }
 
         if (info.AlikeDead)
         {
-            EntityActionCombatLog.LogIfWatch(user,
-                "CharInfo dead nick=" + user.Nick +
-                " wasCorpse=" + wasCorpse +
-                " alikeDead=" + info.AlikeDead);
+            // EntityActionCombatLog.LogIfWatch(user,
+                // "CharInfo dead nick=" + user.Nick +
+                // " wasCorpse=" + wasCorpse +
+                // " alikeDead=" + info.AlikeDead);
             if (wasCorpse)
                 return;
             if (EntityActionMachine.Instance != null)
@@ -212,5 +221,17 @@ public sealed class UserSpawner
         }
         else if (wasCorpse && EntityActionMachine.Instance != null)
             EntityActionMachine.Instance.Revive(user);
+    }
+
+    static void ResetRuntime(UserEntity user)
+    {
+        if (user == null)
+            return;
+
+        EntitySpawnShared.ResetNpcRuntimeForSpawn(user);
+        user.ClearAttackVisual();
+        NetworkAnimationController animation = user.GetAnimatorController();
+        if (animation != null)
+            animation.enabled = true;
     }
 }

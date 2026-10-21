@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using UnityEngine;
@@ -65,7 +65,7 @@ public sealed class L2NameplateScreenBatch : IDisposable
 
         if (shader == null)
         {
-            Debug.LogError($"[L2NameplateScreenBatch] Shader '{ShaderName}' not found.");
+            // Debug.LogError($"[L2NameplateScreenBatch] Shader '{ShaderName}' not found.");
             return;
         }
 

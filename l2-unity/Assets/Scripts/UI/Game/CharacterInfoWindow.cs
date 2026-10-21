@@ -153,7 +153,7 @@ public class CharacterInfoWindow : L2PopupWindow
         PlayerEntity player = PlayerEntity.Instance;
 
         if (player == null) {
-            Debug.LogWarning("Player entity is null, can't update character window");
+            // Debug.LogWarning("Player entity is null, can't update character window");
             return;
         }
 

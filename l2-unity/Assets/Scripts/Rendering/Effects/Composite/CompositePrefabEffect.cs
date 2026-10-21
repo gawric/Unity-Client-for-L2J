@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -98,7 +98,7 @@ public class CompositePrefabEffect : TimedCompositeEffectBase
 
         if (_parts == null || _parts.Length == 0)
         {
-            Debug.LogWarning("CompositePrefabEffect: no parts configured.");
+            // Debug.LogWarning("CompositePrefabEffect: no parts configured.");
             return;
         }
 
@@ -108,9 +108,9 @@ public class CompositePrefabEffect : TimedCompositeEffectBase
         _lastShootStack = null;
         _playStartedAt = Time.time;
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-        Debug.Log(
-            $"{DebugPrefix} Play started at={_playStartedAt:F3}s hit={(_castData != null ? _castData.HitTime : -1f):F3}s " +
-            $"flight={(_castData != null ? _castData.FlightTime : -1f):F3}s serverShoot={(_castData != null ? _castData.serverTimeToShoot : -1f):F3}s.");
+        // Debug.Log(
+            // $"{DebugPrefix} Play started at={_playStartedAt:F3}s hit={(_castData != null ? _castData.HitTime : -1f):F3}s " +
+            // $"flight={(_castData != null ? _castData.FlightTime : -1f):F3}s serverShoot={(_castData != null ? _castData.serverTimeToShoot : -1f):F3}s.");
 #endif
 
         CompositePartScheduler.Queue(
@@ -131,7 +131,7 @@ public class CompositePrefabEffect : TimedCompositeEffectBase
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
         else
         {
-            Debug.Log($"{DebugPrefix} SkipDestroyCompositeByLifetime=true — корень композита не будет уничтожен по lifetime (дочерние объекты остаются в сцене).");
+            // Debug.Log($"{DebugPrefix} SkipDestroyCompositeByLifetime=true — корень композита не будет уничтожен по lifetime (дочерние объекты остаются в сцене).");
         }
 #endif
     }
@@ -168,7 +168,7 @@ public class CompositePrefabEffect : TimedCompositeEffectBase
 
         if (!EffectLightPlacement.TryResolve(_context, _lightSettings, out Vector3 lightPoint, out Vector3 lightDir))
         {
-            Debug.LogWarning($"{DebugPrefix} useLight=true but light placement failed (settings={_lightSettings.name}).");
+            // Debug.LogWarning($"{DebugPrefix} useLight=true but light placement failed (settings={_lightSettings.name}).");
             return;
         }
 
@@ -184,11 +184,11 @@ public class CompositePrefabEffect : TimedCompositeEffectBase
         }
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-        if (_spawnedPartInstances.ContainsKey(part))
-            EffectDoublePlayLog.Note(
-                "Composite.SpawnPart",
-                this,
-                $"part='{part.name}' already spawned instance='{_spawnedPartInstances[part]}'");
+        // if (_spawnedPartInstances.ContainsKey(part))
+            // EffectDoublePlayLog.Note(
+                // "Composite.SpawnPart",
+                // this,
+                // $"part='{part.name}' already spawned instance='{_spawnedPartInstances[part]}'");
 #endif
 
         _context = CompositeEffectUtilities.RebuildPreservingHit(_context, _owner, _castData);
@@ -255,7 +255,7 @@ public class CompositePrefabEffect : TimedCompositeEffectBase
             return true;
         }
 
-        Debug.LogWarning($"CompositePrefabEffect: settings are null for part {part.name}.");
+        // Debug.LogWarning($"CompositePrefabEffect: settings are null for part {part.name}.");
         return false;
     }
 
@@ -286,15 +286,15 @@ public class CompositePrefabEffect : TimedCompositeEffectBase
     void ProcessShootEvent(string channel)
     {
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-        if (_lastShootAt > 0f && _pendingAnimationShootParts.Count > 0)
-            EffectDoublePlayLog.Repeat(
-                $"Composite.ShootEvent first={_lastShootChannel} this={channel}",
-                this,
-                _lastShootAt,
-                _lastShootStack);
+        // if (_lastShootAt > 0f && _pendingAnimationShootParts.Count > 0)
+            // EffectDoublePlayLog.Repeat(
+                // $"Composite.ShootEvent first={_lastShootChannel} this={channel}",
+                // this,
+                // _lastShootAt,
+                // _lastShootStack);
         _lastShootChannel = channel;
         _lastShootAt = Time.time;
-        _lastShootStack = EffectDoublePlayLog.CaptureStack();
+        // _lastShootStack = EffectDoublePlayLog.CaptureStack();
 #endif
         SpawnPendingAnimationShootParts();
 
@@ -302,16 +302,16 @@ public class CompositePrefabEffect : TimedCompositeEffectBase
         if (_castData != null)
         {
             float globalSinceCast = Time.time - _castData.StartTime;
-            Debug.Log(
-                "[MAGIC_PROJECTILE_SYNC] ShootEvent " +
-                $"channel={channel} globalSinceCast={globalSinceCast:F3}s hit={_castData.HitTime:F3}s " +
-                $"flight={_castData.FlightTime:F3}s serverShoot={_castData.serverTimeToShoot:F3}s " +
-                $"deltaGlobalToShoot={globalSinceCast - _castData.serverTimeToShoot:F3}s " +
-                $"deltaGlobalToHit={globalSinceCast - _castData.HitTime:F3}s sincePlayStarted={Time.time - _playStartedAt:F3}s");
+            // Debug.Log(
+                // "[MAGIC_PROJECTILE_SYNC] ShootEvent " +
+                // $"channel={channel} globalSinceCast={globalSinceCast:F3}s hit={_castData.HitTime:F3}s " +
+                // $"flight={_castData.FlightTime:F3}s serverShoot={_castData.serverTimeToShoot:F3}s " +
+                // $"deltaGlobalToShoot={globalSinceCast - _castData.serverTimeToShoot:F3}s " +
+                // $"deltaGlobalToHit={globalSinceCast - _castData.HitTime:F3}s sincePlayStarted={Time.time - _playStartedAt:F3}s");
         }
         else
         {
-            Debug.Log($"[MAGIC_PROJECTILE_SYNC] ShootEvent channel={channel} castData=null sincePlayStarted={Time.time - _playStartedAt:F3}s");
+            // Debug.Log($"[MAGIC_PROJECTILE_SYNC] ShootEvent channel={channel} castData=null sincePlayStarted={Time.time - _playStartedAt:F3}s");
         }
 #endif
         CompositeProjectileLaunchHelper.RevealOnShootParts(_parts, _spawnedPartInstances);
@@ -501,7 +501,7 @@ public class CompositePrefabEffect : TimedCompositeEffectBase
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
         else
         {
-            Debug.Log($"{DebugPrefix} Shoot fallback catch-up: event time already passed by {-remaining:F3}s.");
+            // Debug.Log($"{DebugPrefix} Shoot fallback catch-up: event time already passed by {-remaining:F3}s.");
         }
 #endif
 
@@ -544,10 +544,10 @@ public class CompositePrefabEffect : TimedCompositeEffectBase
     void LogSpawnedPart(CompositePrefabPart part, EffectSettings partSettings, Transform setupOwner)
     {
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-        Debug.Log(
-            $"{DebugPrefix} Spawned part='{part.name}' point={part.attachmentPoint} " +
-            $"follow={part.followResolvedTransform} hitTime={(_castData != null ? _castData.HitTime : -1f):F3}s " +
-            $"lifeTime={partSettings.defaultLifeTime:F3}s scale={part.scale:F2} offset={part.positionOffset} owner='{(setupOwner != null ? setupOwner.name : "null")}'.");
+        // Debug.Log(
+            // $"{DebugPrefix} Spawned part='{part.name}' point={part.attachmentPoint} " +
+            // $"follow={part.followResolvedTransform} hitTime={(_castData != null ? _castData.HitTime : -1f):F3}s " +
+            // $"lifeTime={partSettings.defaultLifeTime:F3}s scale={part.scale:F2} offset={part.positionOffset} owner='{(setupOwner != null ? setupOwner.name : "null")}'.");
 #endif
     }
 

@@ -21,7 +21,7 @@ public class RotationService : MonoBehaviour , IRotation
         if (direction == Vector3.zero)
         {
             onComplete?.Invoke();
-            Debug.Log("RotationService: Rotating exit 1 " + targetPoint);
+            // Debug.Log("RotationService: Rotating exit 1 " + targetPoint);
             return;
         }
 
@@ -33,11 +33,11 @@ public class RotationService : MonoBehaviour , IRotation
         {
             actor.rotation = targetRotation; // Доворачиваем точно
             onComplete?.Invoke();
-            Debug.Log("RotationService: Rotating exit 2 " + targetPoint);
+            // Debug.Log("RotationService: Rotating exit 2 " + targetPoint);
         }
         else
         {
-            Debug.Log("RotationService: Rotating towards " + targetPoint);
+            // Debug.Log("RotationService: Rotating towards " + targetPoint);
             actor.rotation = Quaternion.Slerp(actor.rotation, targetRotation, Time.deltaTime * speed);
         }
     }

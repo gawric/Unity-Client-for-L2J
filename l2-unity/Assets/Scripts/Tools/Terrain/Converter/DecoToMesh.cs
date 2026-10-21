@@ -9,7 +9,7 @@ public class DecoToMesh {
         decoLayerBase.isStatic = true;
 
         for(int i = 0; i < decoLayers.Count; i++) {
-            Debug.Log($"Generating decolayer {i}, {decoLayers[i].densityMap.name} : {decoLayers[i].staticMesh.name}");
+            // Debug.Log($"Generating decolayer {i}, {decoLayers[i].densityMap.name} : {decoLayers[i].staticMesh.name}");
             Texture2D decoAlphamap = TextureUtils.RotateTexture(decoLayers[i].densityMap);
             decoAlphamap = TextureUtils.FlipTextureVertically(decoAlphamap);
 
@@ -120,8 +120,8 @@ public class DecoToMesh {
                 }           
             }
 
-            Debug.Log($"Deco count for layer {i} : {decoCount}");
-            Debug.Log($"Alpha count for layer {i} : {alphaCount}");
+            // Debug.Log($"Deco count for layer {i} : {decoCount}");
+            // Debug.Log($"Alpha count for layer {i} : {alphaCount}");
         }
 
         return decoLayerBase;

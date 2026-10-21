@@ -15,7 +15,11 @@ public class ButtonQuest
     public void RegisterButtonCloseWindow(VisualElement rootWindows, string buttonId)
     {
         var btn = rootWindows.Q<Button>(className: buttonId);
-        if (btn == null) { Debug.LogError(buttonId + " can't be found."); return; }
+        if (btn == null)
+        {
+            // Debug.LogError(buttonId + " can't be found.");
+            return;
+        }
         btn.RegisterCallback<MouseUpEvent>(evt => _quest.HideWindow(), TrickleDown.TrickleDown);
     }
 
@@ -24,7 +28,7 @@ public class ButtonQuest
 
         if (contentId == null | headerId == null)
         {
-            Debug.LogError(contentId + " can't be found.");
+            // Debug.LogError(contentId + " can't be found.");
             return;
         }
 

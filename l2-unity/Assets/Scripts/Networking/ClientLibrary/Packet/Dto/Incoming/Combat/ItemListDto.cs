@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -88,7 +88,7 @@ public class ItemListDto : IWireDto
     {
         foreach (var (key, val) in items)  // раскладываем объект на свойства
         {
-            Console.WriteLine($"key: {key}  value item id: {val.ItemId} value: {val.Count}");
+            // Console.WriteLine($"key: {key}  value item id: {val.ItemId} value: {val.Count}");
         }
     }
 

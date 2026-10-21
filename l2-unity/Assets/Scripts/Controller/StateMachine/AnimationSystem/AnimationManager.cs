@@ -29,10 +29,10 @@ public class AnimationManager : BaseAnimationManager , IAnimationManager
     /// </summary>
     public static void LogAnimationShootFromAnimator(int objectId, string decision, string eventArg, string animatorDetail)
     {
-        Debug.Log(
-            "[ANIM_SHOOT_EVENT] " + decision +
-            $" objectId={objectId} eventArg='{eventArg}' {animatorDetail} " +
-            $"now={Time.time:F3}s frame={Time.frameCount}");
+        // Debug.Log(
+            // "[ANIM_SHOOT_EVENT] " + decision +
+            // $" objectId={objectId} eventArg='{eventArg}' {animatorDetail} " +
+            // $"now={Time.time:F3}s frame={Time.frameCount}");
     }
 #endif
 
@@ -96,9 +96,9 @@ public class AnimationManager : BaseAnimationManager , IAnimationManager
             if (PlayerLocomotionCrossFade.ShouldSkip(controller, locoStateName, GetCurrentAnimationName(objectId)))
             {
                 SetRecentName(objectId, locoStateName);
-                Debug.Log(
-                    $"AnimationManager> skip crossfade {family} player {entity.name} " +
-                    $"state={locoStateName} reason=already_playing");
+                // Debug.Log(
+                    // $"AnimationManager> skip crossfade {family} player {entity.name} " +
+                    // $"state={locoStateName} reason=already_playing");
                 return;
             }
 
@@ -112,9 +112,9 @@ public class AnimationManager : BaseAnimationManager , IAnimationManager
             }
             float fadeDuration = LocomotionCrossFadeSettings.ResolveDuration(locoStateName, controller);
             PlayerLocomotionCrossFade.TryPlay(controller, locoStateName, fadeDuration);
-            Debug.Log(
-                $"AnimationManager> start crossfade {family} player {entity.name} " +
-                $"state={locoStateName} duration={fadeDuration:F3}s");
+            // Debug.Log(
+                // $"AnimationManager> start crossfade {family} player {entity.name} " +
+                // $"state={locoStateName} duration={fadeDuration:F3}s");
             return;
         }
 
@@ -122,7 +122,7 @@ public class AnimationManager : BaseAnimationManager , IAnimationManager
         SetRecentName(objectId , finalAnimName);
    
         controller.SetBool(finalAnimName, true, entity.name);
-        Debug.Log($"AnimationManager> start bool name player  {entity.name} animation {finalAnimName}");
+        // Debug.Log($"AnimationManager> start bool name player  {entity.name} animation {finalAnimName}");
     }
 
     /// <summary>
@@ -140,17 +140,17 @@ public class AnimationManager : BaseAnimationManager , IAnimationManager
 
         if (!PlayerLocomotionAnim.TryResolve(stateOrPrefixWithWeapon, out string stateName, out PlayerLocomotionFamily family))
         {
-            Debug.LogWarning(
-                $"AnimationManager> lobby locomotion unresolved '{stateOrPrefixWithWeapon}'");
+            // Debug.LogWarning(
+                // $"AnimationManager> lobby locomotion unresolved '{stateOrPrefixWithWeapon}'");
             return;
         }
 
         // Always play — lobby has no recent-name cache; force pose on place / walk stop.
         float fadeDuration = LocomotionCrossFadeSettings.ResolveDuration(stateName, controller);
         controller.CrossFadeInFixedTime(stateName, fadeDuration);
-        Debug.Log(
-            $"AnimationManager> start crossfade lobby {family} state={stateName} " +
-            $"duration={fadeDuration:F3}s");
+        // Debug.Log(
+            // $"AnimationManager> start crossfade lobby {family} state={stateName} " +
+            // $"duration={fadeDuration:F3}s");
     }
 
     /// <summary>
@@ -173,7 +173,7 @@ public class AnimationManager : BaseAnimationManager , IAnimationManager
         // Dual jatk often still mid-clip when wall cycle ends — longer blend softens the cut.
         float duration = LocomotionCrossFadeSettings.ResolveDuration(atkWaitStateName, controller);
         controller.CrossFadeInFixedTime(atkWaitStateName, duration);
-        WaitReturnLog.Play(objectId, atkWaitStateName);
+        // WaitReturnLog.Play(objectId, atkWaitStateName);
     }
 
     public void PlayAnimationTrigger(int objectId, string animationName)
@@ -192,7 +192,7 @@ public class AnimationManager : BaseAnimationManager , IAnimationManager
 
         controller.ToggleAnimationTrigger(triggerName);
         SetRecentName(objectId, triggerName);
-        Debug.Log($"AnimationManager> start trigger name player  {(entity != null ? entity.name : objectId.ToString())} animation {triggerName}");
+        // Debug.Log($"AnimationManager> start trigger name player  {(entity != null ? entity.name : objectId.ToString())} animation {triggerName}");
     }
 
     /// <summary>
@@ -222,9 +222,9 @@ public class AnimationManager : BaseAnimationManager , IAnimationManager
         SetRecentName(objectId, stateName);
         float fade = LocomotionCrossFadeSettings.FixedDuration;
         PlayerBasicAttackCrossFade.TryPlay(controller, stateName, fade);
-        Debug.Log(
-            $"AnimationManager> start crossfade {family} player {entity.name} " +
-            $"state={stateName} duration={fade:F3}s");
+        // Debug.Log(
+            // $"AnimationManager> start crossfade {family} player {entity.name} " +
+            // $"state={stateName} duration={fade:F3}s");
         return true;
     }
 
@@ -248,14 +248,14 @@ public class AnimationManager : BaseAnimationManager , IAnimationManager
 
         EnsureAwaitSubscribed(objectId, model);
 
-        Debug.Log($"[AnimAwait] START objectId={objectId} trigger='{triggerName}' mode=default now={Time.time:F3}");
+        // Debug.Log($"[AnimAwait] START objectId={objectId} trigger='{triggerName}' mode=default now={Time.time:F3}");
         PlayerAnimationTrigger(objectId, triggerName);
 
         bool completed = await tcs.Task;
         FinishOverrideAwait(objectId, tcs, expectedFinishName, completed);
-        Debug.Log(
-            $"[AnimAwait] {(completed ? "END" : "CANCELLED")} objectId={objectId} trigger='{triggerName}' " +
-            $"mode=default elapsed={Time.time - startedAt:F3}s now={Time.time:F3}");
+        // Debug.Log(
+            // $"[AnimAwait] {(completed ? "END" : "CANCELLED")} objectId={objectId} trigger='{triggerName}' " +
+            // $"mode=default elapsed={Time.time - startedAt:F3}s now={Time.time:F3}");
         return completed;
     }
 
@@ -265,9 +265,9 @@ public class AnimationManager : BaseAnimationManager , IAnimationManager
         string expectedFinishName = SkillAnimationDatabase.ResolveOverrideCompletionEventName(triggerName);
         if (_tcsMap.TryGetValue(objectId, out var oldTcs))
         {
-            Debug.Log(
-                $"[AnimAwait] SUPERSEDE objectId={objectId} newTrigger='{triggerName}' " +
-                $"override='{overrideAnimationName}' (prev await → false, no WAIT_RETURN)");
+            // Debug.Log(
+                // $"[AnimAwait] SUPERSEDE objectId={objectId} newTrigger='{triggerName}' " +
+                // $"override='{overrideAnimationName}' (prev await → false, no WAIT_RETURN)");
             oldTcs.TrySetResult(false);
         }
 
@@ -275,30 +275,45 @@ public class AnimationManager : BaseAnimationManager , IAnimationManager
         _tcsMap[objectId] = tcs;
         _expectedFinishNameByObjectId[objectId] = expectedFinishName;
         AnimationModel model = GetModel(objectId);
-        //Root Animator FDarkElf
-        string animName = SkillAnimationDatabase.GetAnimationClipName(triggerName, "FDarkElf");
+        BaseAnimationController castBody = model.GetController() as BaseAnimationController;
+        bool playedOnGraph = false;
+        if (castBody != null)
+        {
+            using (MagicSkillUseTrace.Measure("anim.playable"))
+                playedOnGraph = castBody.TryPlayCastPhase(overrideAnimationName, triggerName);
+        }
 
-        model.GetController().ReplaceAnimClip(animName , overrideAnimationName);
+        if (!playedOnGraph)
+        {
+            //Root Animator FDarkElf
+            string animName = SkillAnimationDatabase.GetAnimationClipName(triggerName, "FDarkElf");
+            using (MagicSkillUseTrace.Measure("anim.replaceClip"))
+                model.GetController().ReplaceAnimClip(animName, overrideAnimationName);
+        }
 
         EnsureAwaitSubscribed(objectId, model);
 
-        Debug.Log(
-            $"[AnimAwait] START objectId={objectId} trigger='{triggerName}' override='{overrideAnimationName}' " +
-            $"expectedFinish='{expectedFinishName}' mode=override now={Time.time:F3}");
+        // Debug.Log(
+            // $"[AnimAwait] START objectId={objectId} trigger='{triggerName}' override='{overrideAnimationName}' " +
+            // $"expectedFinish='{expectedFinishName}' mode=override now={Time.time:F3}");
 
         _ = WarnIfAwaitStuck(objectId, triggerName, expectedFinishName, startedAt);
 
-        PlayerAnimationTrigger(objectId, triggerName , false);
+        if (!playedOnGraph)
+        {
+            using (MagicSkillUseTrace.Measure("anim.trigger"))
+                PlayerAnimationTrigger(objectId, triggerName, false);
+        }
 
         bool completed = await tcs.Task;
         FinishOverrideAwait(objectId, tcs, expectedFinishName, completed);
-        Debug.Log(
-            $"[AnimAwait] {(completed ? "END" : "CANCELLED")} objectId={objectId} trigger='{triggerName}' " +
-            $"override='{overrideAnimationName}' mode=override elapsed={Time.time - startedAt:F3}s now={Time.time:F3}");
+        // Debug.Log(
+            // $"[AnimAwait] {(completed ? "END" : "CANCELLED")} objectId={objectId} trigger='{triggerName}' " +
+            // $"override='{overrideAnimationName}' mode=override elapsed={Time.time - startedAt:F3}s now={Time.time:F3}");
         return completed;
     }
 
-    public async Task AsyncPlayLongCastLoopPhase(int objectId, string triggerName, string overrideAnimationName)
+    public async Task AsyncPlayLongCastLoopPhase(int objectId, string triggerName, string overrideAnimationName, string shotOverrideAnimationName)
     {
         float startedAt = Time.time;
         string expectedFinishName = string.IsNullOrWhiteSpace(overrideAnimationName)
@@ -306,24 +321,40 @@ public class AnimationManager : BaseAnimationManager , IAnimationManager
             : overrideAnimationName.Trim();
 
         AnimationModel model = GetModel(objectId);
-        string animName = SkillAnimationDatabase.GetAnimationClipName(triggerName, "FDarkElf");
-        model.GetController().ReplaceAnimClip(animName, overrideAnimationName);
+        BaseAnimationController castBody = model.GetController() as BaseAnimationController;
+        TaskCompletionSource<bool> loopTcs = LongCastCoordinator.RegisterLoopPhase(objectId);
+        bool heldOnGraph = false;
+        if (castBody != null)
+        {
+            using (MagicSkillUseTrace.Measure("anim.playable"))
+                heldOnGraph = castBody.TryPlayLongHold(overrideAnimationName, shotOverrideAnimationName);
+        }
+
+        if (!heldOnGraph)
+        {
+            castBody?.StopCastClip();
+            string animName = SkillAnimationDatabase.GetAnimationClipName(triggerName, "FDarkElf");
+            using (MagicSkillUseTrace.Measure("anim.replaceClip"))
+                model.GetController().ReplaceAnimClip(animName, overrideAnimationName);
+        }
+
         EnsureAwaitSubscribed(objectId, model);
 
-        TaskCompletionSource<bool> loopTcs = LongCastCoordinator.RegisterLoopPhase(objectId);
+        // Debug.Log(
+            // $"[AnimAwait] START objectId={objectId} trigger='{triggerName}' override='{overrideAnimationName}' " +
+            // $"mode=long_loop now={Time.time:F3}");
 
-        Debug.Log(
-            $"[AnimAwait] START objectId={objectId} trigger='{triggerName}' override='{overrideAnimationName}' " +
-            $"mode=long_loop now={Time.time:F3}");
-
-        ResetLongCastTriggers(GetPlayerController(objectId));
-        PlayerAnimationTrigger(objectId, triggerName, false);
+        if (!heldOnGraph)
+        {
+            ResetLongCastTriggers(GetPlayerController(objectId));
+            PlayerAnimationTrigger(objectId, triggerName, false);
+        }
 
         await loopTcs.Task;
 
-        Debug.Log(
-            $"[AnimAwait] END objectId={objectId} trigger='{triggerName}' mode=long_loop " +
-            $"elapsed={Time.time - startedAt:F3}s now={Time.time:F3}");
+        // Debug.Log(
+            // $"[AnimAwait] END objectId={objectId} trigger='{triggerName}' mode=long_loop " +
+            // $"elapsed={Time.time - startedAt:F3}s now={Time.time:F3}");
     }
 
     public async Task<bool> AsyncAwaitOverrideAnimationFinish(int objectId, string expectedFinishNameOrTrigger)
@@ -346,17 +377,17 @@ public class AnimationManager : BaseAnimationManager , IAnimationManager
         AnimationModel model = GetModel(objectId);
         EnsureAwaitSubscribed(objectId, model);
 
-        Debug.Log(
-            $"[AnimAwait] START objectId={objectId} expectedFinish='{sanitizedExpected}' mode=await_finish now={Time.time:F3}");
+        // Debug.Log(
+            // $"[AnimAwait] START objectId={objectId} expectedFinish='{sanitizedExpected}' mode=await_finish now={Time.time:F3}");
 
         _ = WarnIfAwaitStuck(objectId, "await_finish", sanitizedExpected, startedAt);
 
         bool completed = await tcs.Task;
         FinishOverrideAwait(objectId, tcs, sanitizedExpected, completed);
 
-        Debug.Log(
-            $"[AnimAwait] {(completed ? "END" : "CANCELLED")} objectId={objectId} expectedFinish='{sanitizedExpected}' " +
-            $"mode=await_finish elapsed={Time.time - startedAt:F3}s now={Time.time:F3}");
+        // Debug.Log(
+            // $"[AnimAwait] {(completed ? "END" : "CANCELLED")} objectId={objectId} expectedFinish='{sanitizedExpected}' " +
+            // $"mode=await_finish elapsed={Time.time - startedAt:F3}s now={Time.time:F3}");
         return completed;
     }
 
@@ -395,9 +426,9 @@ public class AnimationManager : BaseAnimationManager , IAnimationManager
         if (_expectedFinishNameByObjectId.TryGetValue(objectId, out string currentExpected) &&
             string.Equals(currentExpected, expectedFinishName, StringComparison.Ordinal))
         {
-            Debug.LogWarning(
-                $"[AnimAwait] STUCK? objectId={objectId} trigger='{triggerName}' expectedFinish='{expectedFinishName}' " +
-                $"elapsed={Time.time - startedAt:F3}s action=waiting_for_OnAnimationFinished");
+            // Debug.LogWarning(
+                // $"[AnimAwait] STUCK? objectId={objectId} trigger='{triggerName}' expectedFinish='{expectedFinishName}' " +
+                // $"elapsed={Time.time - startedAt:F3}s action=waiting_for_OnAnimationFinished");
         }
     }
 
@@ -424,22 +455,23 @@ public class AnimationManager : BaseAnimationManager , IAnimationManager
     /// </summary>
     public void NotifyMagicPhaseFinished(int objectId, string phaseName)
     {
+        MagicGaitTrace.EventId(objectId, "NotifyMagicPhaseFinished", "phase=" + phaseName);
         TryCompleteAwaitFromPhaseFinish(objectId, phaseName, "smb_phase");
     }
 
     private bool TryCompleteAwaitFromPhaseFinish(int objectId, string name, string source)
     {
-        Debug.Log(
-            $"[AnimFinishedEvent] objectId={objectId} finishedName='{name}' source={source} now={Time.time:F3}");
+        // Debug.Log(
+            // $"[AnimFinishedEvent] objectId={objectId} finishedName='{name}' source={source} now={Time.time:F3}");
 
         // SpAtk / jatk / Cast / MagicShot awaits are completed by SMB NotifyMagicPhaseFinished.
         // Early clip OnAnimationComplete must not finish the skill runner mid-dual.
         if (string.Equals(source, "clip_complete", StringComparison.Ordinal) &&
             IsSmbOwnedCombatOrMagicPhase(name))
         {
-            Debug.Log(
-                $"[AnimFinishedEvent] IGNORE clip_complete objectId={objectId} finishedName='{name}' " +
-                $"(SMB owns phase finish)");
+            // Debug.Log(
+                // $"[AnimFinishedEvent] IGNORE clip_complete objectId={objectId} finishedName='{name}' " +
+                // $"(SMB owns phase finish)");
             return false;
         }
 
@@ -448,18 +480,18 @@ public class AnimationManager : BaseAnimationManager , IAnimationManager
             if (string.Equals(source, "clip_complete", StringComparison.Ordinal) &&
                 IsSmbOwnedCombatOrMagicPhase(expectedName))
             {
-                Debug.Log(
-                    $"[AnimFinishedEvent] IGNORE clip_complete objectId={objectId} " +
-                    $"finishedName='{name}' expected='{expectedName}' (SMB owns phase finish)");
+                // Debug.Log(
+                    // $"[AnimFinishedEvent] IGNORE clip_complete objectId={objectId} " +
+                    // $"finishedName='{name}' expected='{expectedName}' (SMB owns phase finish)");
                 return false;
             }
 
             if (!string.Equals(name, expectedName, StringComparison.Ordinal) &&
                 !string.Equals(SkillAnimationDatabase.ResolveOverrideCompletionEventName(name), expectedName, StringComparison.Ordinal))
             {
-                Debug.Log(
-                    $"[AnimFinishedEvent] IGNORE objectId={objectId} finishedName='{name}' expected='{expectedName}' " +
-                    $"source={source} now={Time.time:F3}");
+                // Debug.Log(
+                    // $"[AnimFinishedEvent] IGNORE objectId={objectId} finishedName='{name}' expected='{expectedName}' " +
+                    // $"source={source} now={Time.time:F3}");
                 return false;
             }
         }
@@ -505,11 +537,11 @@ public class AnimationManager : BaseAnimationManager , IAnimationManager
             MagicCastData castData = entity != null ? entity.GetMagicCastData() : null;
             if (!MagicShotCoordinator.TryStartShot(objectId, castData, SHOT_SOURCE_RUNNER, out string coordinatorMessage))
             {
-                Debug.Log($"{coordinatorMessage} trigger='{animationName}' action=skip");
+                // Debug.Log($"{coordinatorMessage} trigger='{animationName}' action=skip");
                 return;
             }
 
-            Debug.Log($"{coordinatorMessage} trigger='{animationName}' action=run");
+            // Debug.Log($"{coordinatorMessage} trigger='{animationName}' action=run");
         }
 
         if (IsMagicCastTrigger(animationName))
@@ -532,7 +564,7 @@ public class AnimationManager : BaseAnimationManager , IAnimationManager
         controller.ToggleAnimationTrigger(animationName);
         SetRecentName(objectId, animationName);
 
-        Debug.Log($"AnimationManager> start Async AnimationTrigger(  {entity} animation  {animationName}");
+        // Debug.Log($"AnimationManager> start Async AnimationTrigger(  {entity} animation  {animationName}");
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
         if (IsMagicShotTrigger(animationName) && entity != null)
@@ -541,10 +573,10 @@ public class AnimationManager : BaseAnimationManager , IAnimationManager
             if (cd != null)
             {
                 float globalSinceCast = Time.time - cd.StartTime;
-                Debug.Log(
-                    "[MAGIC_PROJECTILE_SYNC] AnimatorTriggerMagicShot " +
-                    $"globalSinceCast={globalSinceCast:F3}s serverShoot={cd.serverTimeToShoot:F3}s " +
-                    $"deltaToShoot={globalSinceCast - cd.serverTimeToShoot:F3}s trigger={animationName}");
+                // Debug.Log(
+                    // "[MAGIC_PROJECTILE_SYNC] AnimatorTriggerMagicShot " +
+                    // $"globalSinceCast={globalSinceCast:F3}s serverShoot={cd.serverTimeToShoot:F3}s " +
+                    // $"deltaToShoot={globalSinceCast - cd.serverTimeToShoot:F3}s trigger={animationName}");
             }
         }
 #endif
@@ -608,8 +640,8 @@ public class AnimationManager : BaseAnimationManager , IAnimationManager
         IAnimationController controller = GetMonsterController(objectId);
         if (controller == null)
         {
-            Debug.LogWarning(
-                $"[ANIM] PlayMonster MISS id={objectId} request='{animationName}' reason=no_controller");
+            // Debug.LogWarning(
+                // $"[ANIM] PlayMonster MISS id={objectId} request='{animationName}' reason=no_controller");
             return;
         }
 
@@ -617,16 +649,22 @@ public class AnimationManager : BaseAnimationManager , IAnimationManager
         {
             SetMonsterRecentName(objectId, stateName);
             float duration = fixedDuration ?? LocomotionCrossFadeSettings.ResolveDuration(stateName, controller);
-            Debug.Log(
-                $"[ANIM] PlayMonster id={objectId} request='{animationName}' resolved='{stateName}' family={family} duration={duration:F3}s");
-            MonsterCrossFade.TryPlay(controller, stateName, family, duration);
+            bool already = PlayerLocomotionCrossFade.IsAlreadyPlaying(controller, stateName);
+            bool played = MonsterCrossFade.TryPlay(controller, stateName, family, duration);
+            CrasherSlideLog.EventId(objectId, "PlayMonster",
+                "request=" + animationName +
+                " state=" + stateName +
+                " family=" + family +
+                " already=" + already +
+                " played=" + played +
+                " fade=" + duration.ToString("F3"));
             return;
         }
 
         SetMonsterRecentName(objectId, animationName);
         float rawDuration = fixedDuration ?? LocomotionCrossFadeSettings.ResolveDuration(animationName, controller);
-        Debug.Log(
-            $"[ANIM] PlayMonster RAW id={objectId} request='{animationName}' duration={rawDuration:F3}s");
+        // Debug.Log(
+            // $"[ANIM] PlayMonster RAW id={objectId} request='{animationName}' duration={rawDuration:F3}s");
         MonsterCrossFade.TryPlayRaw(controller, animationName, rawDuration);
     }
    
@@ -644,7 +682,7 @@ public class AnimationManager : BaseAnimationManager , IAnimationManager
         }
         else
         {
-            Debug.LogWarning($"AnimationManager->StopMonsterCurrentAnimation: Не критическая ошибка - animator not found for monster {objectId}. Animation: {animationName}");
+            // Debug.LogWarning($"AnimationManager->StopMonsterCurrentAnimation: Не критическая ошибка - animator not found for monster {objectId}. Animation: {animationName}");
         }
     }
 
@@ -662,12 +700,12 @@ public class AnimationManager : BaseAnimationManager , IAnimationManager
         IAnimationController controller = GetRegisteredController(objectId);
         if (controller == null)
         {
-            Debug.LogWarning($"[AnimSpeed] reset skipped objectId={objectId} reason=no_controller");
+            // Debug.LogWarning($"[AnimSpeed] reset skipped objectId={objectId} reason=no_controller");
             return;
         }
 
         controller.SetAnimatorSpeed(speed);
-        Debug.Log($"[AnimSpeed] reset objectId={objectId} speed={speed:F3}");
+        // Debug.Log($"[AnimSpeed] reset objectId={objectId} speed={speed:F3}");
     }
 
     public void SetPAtkSpeed(int objectId, float patkspd)
@@ -694,10 +732,10 @@ public class AnimationManager : BaseAnimationManager , IAnimationManager
         float linear = AttackTimingHelper.ComputeLinearPAtkSpeed(clipSec, cycleMs);
         controller.SetPAtkSpeed(linear);
 
-        Debug.Log(
-            $"[PATKSPD] ApplyLinear objectId={objectId} entity={entity?.name} anim={animName} " +
-            $"pAtkSpd={AttackTimingHelper.ResolvePAtkSpd(entity):F1} cycleMs={cycleMs:F1} " +
-            $"clipSec={clipSec:F3} patkspd={linear:F3}");
+        // Debug.Log(
+            // $"[PATKSPD] ApplyLinear objectId={objectId} entity={entity?.name} anim={animName} " +
+            // $"pAtkSpd={AttackTimingHelper.ResolvePAtkSpd(entity):F1} cycleMs={cycleMs:F1} " +
+            // $"clipSec={clipSec:F3} patkspd={linear:F3}");
         return linear;
     }
 
@@ -800,12 +838,15 @@ public class AnimationManager : BaseAnimationManager , IAnimationManager
 
         float[] durations = new float[cycle.Length];
 
-        for(int i=0; i< cycle.Length; i++)
+        using (MagicSkillUseTrace.Measure("anim.clipLookup"))
         {
-            AnimationClip clip = SkillAnimationDatabase.GetOverrideClip(cycle[i], controller.GetAnimatorName());
-            if(clip != null)
+            for(int i=0; i< cycle.Length; i++)
             {
-                durations[i] = clip.length;
+                AnimationClip clip = SkillAnimationDatabase.GetOverrideClip(cycle[i], controller.GetAnimatorName());
+                if(clip != null)
+                {
+                    durations[i] = clip.length;
+                }
             }
         }
 

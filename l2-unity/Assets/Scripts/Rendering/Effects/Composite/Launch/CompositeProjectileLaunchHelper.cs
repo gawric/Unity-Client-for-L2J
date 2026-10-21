@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using System.Collections.Generic;
 
 public static class CompositeProjectileLaunchHelper
@@ -12,7 +12,7 @@ public static class CompositeProjectileLaunchHelper
 
         SetVisualsVisible(spawned.transform, false);
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-        Debug.Log($"{debugPrefix} HidePartUntilShoot part='{part.name}' launchMode=OnAnimationShoot.");
+        // Debug.Log($"{debugPrefix} HidePartUntilShoot part='{part.name}' launchMode=OnAnimationShoot.");
 #endif
     }
 
@@ -140,9 +140,9 @@ public static class CompositeProjectileLaunchHelper
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
         float now = Time.time;
         float elapsed = playStartedAt > 0f ? now - playStartedAt : -1f;
-        Debug.Log(
-            $"{debugPrefix} LaunchPartAsProjectile part='{part.name}' at={now:F3}s elapsed={elapsed:F3}s " +
-            $"start={startPos} target='{targetTransform.name}' impactType={GetImpactType(part)}.");
+        // Debug.Log(
+            // $"{debugPrefix} LaunchPartAsProjectile part='{part.name}' at={now:F3}s elapsed={elapsed:F3}s " +
+            // $"start={startPos} target='{targetTransform.name}' impactType={GetImpactType(part)}.");
 #endif
         return true;
     }

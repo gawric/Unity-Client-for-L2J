@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 public class SellListDto : IWireDto
@@ -42,7 +42,7 @@ public class SellListDto : IWireDto
 
             _listProduct.Add(new Product(itemType1, objId, count, itemType2, isEquip, bodyPart, enchant, price, itemId));
         }
-        Debug.Log("");
+        // Debug.Log("");
 
     }
 

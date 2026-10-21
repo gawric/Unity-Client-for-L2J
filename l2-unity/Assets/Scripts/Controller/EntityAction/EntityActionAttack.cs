@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public sealed class EntityActionAttack : IEntityActionProcess
 {
@@ -27,48 +27,50 @@ public sealed class EntityActionAttack : IEntityActionProcess
             Entity target = IncomingPacketActions.GameWorld != null
                 ? IncomingPacketActions.GameWorld.GetEntityNoLockSync(attack.TargetId)
                 : null;
-            if (target == null || target.IsDead())
+            if (target == null || target == entity)
             {
-                EntityActionCombatLog.LogIfWatch(entity, target,
-                    "Attack.Enter SKIP swing attacker=" + EntityActionCombatLog.NameOf(entity) +
-                    " target=" + EntityActionCombatLog.NameOf(target) +
-                    " targetNull=" + (target == null) +
-                    " targetDead=" + (target != null && target.IsDead()));
+                // EntityActionCombatLog.LogIfWatch(entity, target,
+                    // "Attack.Enter SKIP swing attacker=" + EntityActionCombatLog.NameOf(entity) +
+                    // " target=" + EntityActionCombatLog.NameOf(target) +
+                    // " targetNull=" + (target == null));
                 return;
             }
 
             entity.InCombat = true;
             entity.AttackTarget = target.transform;
             entity.ActionSlot.Target = target;
-            CharInfoMoveBudgetLog.Compare(entity, "ATK", target, attack.AttackerPos, true);
+            // CharInfoMoveBudgetLog.Compare(entity, "ATK", target, attack.AttackerPos, true);
             L2PawnRange.TrySnapUserToPacket(entity, attack.AttackerPos, "Attack pos");
             _pawnYaw.RequestLook(entity.transform, target.transform.position, L2PawnYaw.RotationRateYaw);
             if (entity is MonsterEntity && IncomingPacketActions.Moves != null)
                 IncomingPacketActions.Moves.AddRotate(entity.Identity.Id, new RotateData(target, entity));
-            EntityActionCombatLog.Watch(entity);
-            EntityActionCombatLog.LogCiPawn(entity,
-                "Attack.Enter nick=" + EntityActionCombatLog.NameOf(entity) +
-                " target=" + EntityActionCombatLog.Describe(target) +
-                " dist2d=" + VectorUtils.Distance2D(entity.transform.position, target.transform.position).ToString("F2") +
-                " now=" + EntityActionCombatLog.Vec(entity.transform.position) +
-                " pawnPos=" + EntityActionCombatLog.Vec(target.transform.position) +
-                " dest=" + EntityActionCombatLog.Vec(entity.ActionSlot.Destination) +
-                " destToPawn=" + VectorUtils.Distance2D(entity.ActionSlot.Destination, target.transform.position).ToString("F2") +
-                " " + EntityActionCombatLog.ClassifyDest(entity.transform.position, target) +
-                EntityActionCombatLog.AttackDump(entity, target));
-            EntityActionCombatLog.LogIfWatch(entity, target,
-                "Attack.Enter PLAY atk01 attacker=" + EntityActionCombatLog.Describe(entity) +
-                " target=" + EntityActionCombatLog.Describe(target));
-            CharInfoSpeedLog.LogAttack(entity, target);
+            // EntityActionCombatLog.Watch(entity);
+            // EntityActionCombatLog.LogCiPawn(entity,
+                // "Attack.Enter nick=" + EntityActionCombatLog.NameOf(entity) +
+                // " target=" + EntityActionCombatLog.Describe(target) +
+                // " dist2d=" + VectorUtils.Distance2D(entity.transform.position, target.transform.position).ToString("F2") +
+                // " now=" + EntityActionCombatLog.Vec(entity.transform.position) +
+                // " pawnPos=" + EntityActionCombatLog.Vec(target.transform.position) +
+                // " dest=" + EntityActionCombatLog.Vec(entity.ActionSlot.Destination) +
+                // " destToPawn=" + VectorUtils.Distance2D(entity.ActionSlot.Destination, target.transform.position).ToString("F2") +
+                // " " + EntityActionCombatLog.ClassifyDest(entity.transform.position, target) +
+                // EntityActionCombatLog.AttackDump(entity, target));
+            // EntityActionCombatLog.LogIfWatch(entity, target,
+                // "Attack.Enter PLAY atk01 attacker=" + EntityActionCombatLog.Describe(entity) +
+                // " target=" + EntityActionCombatLog.Describe(target));
+            // CharInfoSpeedLog.LogAttack(entity, target);
             float atkDist = VectorUtils.Distance2D(entity.transform.position, target.transform.position);
-            if (atkDist >= 2f)
-                EntityActionCombatLog.LogGap(entity, "Attack FAR", target,
-                    " dist2d=" + atkDist.ToString("F2") +
-                    " pktAtk=" + EntityActionCombatLog.Vec(attack.AttackerPos) +
-                    " pktAtkToPawn=" + VectorUtils.Distance2D(attack.AttackerPos, target.transform.position).ToString("F2") +
-                    " pktAtkToNow=" + VectorUtils.Distance2D(attack.AttackerPos, entity.transform.position).ToString("F2"));
+            // if (atkDist >= 2f)
+                // EntityActionCombatLog.LogGap(entity, "Attack FAR", target,
+                    // " dist2d=" + atkDist.ToString("F2") +
+                    // " pktAtk=" + EntityActionCombatLog.Vec(attack.AttackerPos) +
+                    // " pktAtkToPawn=" + VectorUtils.Distance2D(attack.AttackerPos, target.transform.position).ToString("F2") +
+                    // " pktAtkToNow=" + VectorUtils.Distance2D(attack.AttackerPos, entity.transform.position).ToString("F2"));
             entity.ActionSlot.AttackSwingId++;
             EntityActionVisual.PlayMeleeAttack(entity);
+            CrasherSlideLog.Event(entity, "Attack.Enter",
+                "target=" + (target.Identity != null ? target.Identity.Name : "?") +
+                " dist=" + atkDist.ToString("F2"));
             if (HitManager.Instance != null)
                 HitManager.Instance.ArmRemoteMeleeHit(entity, target, attack);
         }
@@ -95,6 +97,8 @@ public sealed class EntityActionAttack : IEntityActionProcess
             target = entity.AttackTarget.GetComponent<Entity>();
         if (target != null && target.IsDead())
         {
+            if ((entity is MonsterEntity || entity is NpcEntity) && entity.HasAnimator())
+                return;
             if (EntityActionMachine.Instance != null)
                 EntityActionMachine.Instance.CancelAttackKeepStance(entity);
             return;
@@ -103,9 +107,9 @@ public sealed class EntityActionAttack : IEntityActionProcess
         if (user == null || !user.ShouldReturnFromAttack())
             return;
 
-        EntityActionCombatLog.LogCiPawn(entity,
-            "Attack.Tick→Idle nick=" + EntityActionCombatLog.NameOf(entity) +
-            EntityActionCombatLog.IdleFromSwingDump(entity));
+        // EntityActionCombatLog.LogCiPawn(entity,
+            // "Attack.Tick→Idle nick=" + EntityActionCombatLog.NameOf(entity) +
+            // EntityActionCombatLog.IdleFromSwingDump(entity));
         user.ClearAttackVisual();
         if (EntityActionMachine.Instance != null)
             EntityActionMachine.Instance.Set(entity, EntityActionKind.Idle, null);

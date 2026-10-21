@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public class NewMagicAttackIntention : IntentionBase
 {
@@ -11,7 +11,7 @@ public class NewMagicAttackIntention : IntentionBase
         if (arg0.GetType() == typeof(MagicSkillUseDto))
         {
             MagicSkillUseDto useSkill = (MagicSkillUseDto)arg0;
-            Debug.Log("NewMagicAttackIntention > use " + useSkill.SkillId);
+            // Debug.Log("NewMagicAttackIntention > use " + useSkill.SkillId);
             if (SetupDurationHelper.IsUsePotion(useSkill))
             {
                 SetupDurationHelper.FinishPotionUse(_stateMachine, _stateMachine.Player, useSkill);

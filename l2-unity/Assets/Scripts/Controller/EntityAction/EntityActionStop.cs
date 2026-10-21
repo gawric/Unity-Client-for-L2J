@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public sealed class EntityActionStop : IEntityActionProcess
 {
@@ -42,11 +42,11 @@ public sealed class EntityActionStop : IEntityActionProcess
             entity.ActionSlot.Destination = entity.transform.position;
         }
 
-        EntityActionCombatLog.LogStep(entity,
-            "STOP LOCO nick=" + EntityActionCombatLog.NameOf(entity) +
-            " wasMoving=" + wasMoving +
-            " nowL2=" + EntityActionCombatLog.L2(entity.transform.position) +
-            " destL2=" + EntityActionCombatLog.L2(destBefore));
+        // EntityActionCombatLog.LogStep(entity,
+            // "STOP LOCO nick=" + EntityActionCombatLog.NameOf(entity) +
+            // " wasMoving=" + wasMoving +
+            // " nowL2=" + EntityActionCombatLog.L2(entity.transform.position) +
+            // " destL2=" + EntityActionCombatLog.L2(destBefore));
     }
 
     public static void TryCorrectPosition(Entity entity, StopMoveDto dto, L2PawnRange pawnRange, bool skipCorrection)
@@ -59,37 +59,37 @@ public sealed class EntityActionStop : IEntityActionProcess
         float skipM = pawnRange != null
             ? pawnRange.AdjustSkipMeters()
             : VectorUtils.ConvertL2UuToMeters(L2PawnRange.AdjustSkipUu);
-        Entity pawn = EntityActionCombatLog.PawnOf(entity);
+        Entity pawn = EntityPawnLookup.PawnOf(entity);
         bool skipSnap = skipCorrection || snapD <= skipM;
         string reason = skipCorrection ? " SKIP_WEIRD" : (skipSnap ? " SKIP_SNAP" : " SNAP");
-        EntityActionCombatLog.LogCiPawn(entity,
-            "Stop.Pos nick=" + EntityActionCombatLog.NameOf(entity) +
-            " snapD=" + snapD.ToString("F2") +
-            " skipM=" + skipM.ToString("F2") +
-            " stop=" + EntityActionCombatLog.Vec(stop) +
-            " now=" + EntityActionCombatLog.Vec(entity.transform.position) +
-            " pawn=" + EntityActionCombatLog.Describe(pawn) +
-            reason);
+        // EntityActionCombatLog.LogCiPawn(entity,
+            // "Stop.Pos nick=" + EntityActionCombatLog.NameOf(entity) +
+            // " snapD=" + snapD.ToString("F2") +
+            // " skipM=" + skipM.ToString("F2") +
+            // " stop=" + EntityActionCombatLog.Vec(stop) +
+            // " now=" + EntityActionCombatLog.Vec(entity.transform.position) +
+            // " pawn=" + EntityActionCombatLog.Describe(pawn) +
+            // reason);
         if (skipSnap)
         {
             if (snapD >= 0.4f)
             {
                 Vector3 nowL2 = VectorUtils.ConvertPosUnityToL2j(entity.transform.position);
                 Vector3 stopL2 = VectorUtils.ConvertPosUnityToL2j(stop);
-                Debug.Log("[MOVE_SNAP] STOP SKIP nick=" + EntityActionCombatLog.NameOf(entity) +
-                    " snapM=" + snapD.ToString("F2") +
-                    " skipM=" + skipM.ToString("F2") +
-                    " nowL2=" + nowL2.x.ToString("F0") + "," + nowL2.y.ToString("F0") + "," + nowL2.z.ToString("F0") +
-                    " stopL2=" + stopL2.x.ToString("F0") + "," + stopL2.y.ToString("F0") + "," + stopL2.z.ToString("F0"));
+                // Debug.Log("[MOVE_SNAP] STOP SKIP nick=" + EntityActionCombatLog.NameOf(entity) +
+                    // " snapM=" + snapD.ToString("F2") +
+                    // " skipM=" + skipM.ToString("F2") +
+                    // " nowL2=" + nowL2.x.ToString("F0") + "," + nowL2.y.ToString("F0") + "," + nowL2.z.ToString("F0") +
+                    // " stopL2=" + stopL2.x.ToString("F0") + "," + stopL2.y.ToString("F0") + "," + stopL2.z.ToString("F0"));
             }
             return;
         }
 
         if (WouldOverlap(entity, stop))
         {
-            EntityActionCombatLog.LogGap(entity, "Stop SKIP_OVERLAP", pawn,
-                " snapD=" + snapD.ToString("F2") +
-                " stop=" + EntityActionCombatLog.Vec(stop));
+            // EntityActionCombatLog.LogGap(entity, "Stop SKIP_OVERLAP", pawn,
+                // " snapD=" + snapD.ToString("F2") +
+                // " stop=" + EntityActionCombatLog.Vec(stop));
             return;
         }
 
@@ -100,12 +100,12 @@ public sealed class EntityActionStop : IEntityActionProcess
             Vector3 nowL2 = VectorUtils.ConvertPosUnityToL2j(entity.transform.position);
             Vector3 stopL2 = VectorUtils.ConvertPosUnityToL2j(stop);
             Vector3 destL2 = VectorUtils.ConvertPosUnityToL2j(dest);
-            Debug.Log("[MOVE_SNAP] STOP nick=" + EntityActionCombatLog.NameOf(entity) +
-                " snapM=" + snapD.ToString("F2") +
-                " stopToDestM=" + stopToDest.ToString("F2") +
-                " nowL2=" + nowL2.x.ToString("F0") + "," + nowL2.y.ToString("F0") + "," + nowL2.z.ToString("F0") +
-                " stopL2=" + stopL2.x.ToString("F0") + "," + stopL2.y.ToString("F0") + "," + stopL2.z.ToString("F0") +
-                " destL2=" + destL2.x.ToString("F0") + "," + destL2.y.ToString("F0") + "," + destL2.z.ToString("F0"));
+            // Debug.Log("[MOVE_SNAP] STOP nick=" + EntityActionCombatLog.NameOf(entity) +
+                // " snapM=" + snapD.ToString("F2") +
+                // " stopToDestM=" + stopToDest.ToString("F2") +
+                // " nowL2=" + nowL2.x.ToString("F0") + "," + nowL2.y.ToString("F0") + "," + nowL2.z.ToString("F0") +
+                // " stopL2=" + stopL2.x.ToString("F0") + "," + stopL2.y.ToString("F0") + "," + stopL2.z.ToString("F0") +
+                // " destL2=" + destL2.x.ToString("F0") + "," + destL2.y.ToString("F0") + "," + destL2.z.ToString("F0"));
         }
 
         entity.Identity.Position = stop;

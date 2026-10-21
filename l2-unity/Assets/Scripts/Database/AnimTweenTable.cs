@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -43,7 +43,7 @@ public sealed class AnimTweenTable
         string dataPath = Path.Combine(Application.streamingAssetsPath, RelativePath);
         if (!File.Exists(dataPath))
         {
-            Debug.LogWarning("File not found: " + dataPath);
+            // Debug.LogWarning("File not found: " + dataPath);
             return;
         }
 
@@ -79,7 +79,7 @@ public sealed class AnimTweenTable
             }
         }
 
-        Debug.Log("Successfully imported " + _byMeshSequence.Count + " animation tween(s)");
+        // Debug.Log("Successfully imported " + _byMeshSequence.Count + " animation tween(s)");
     }
 
     public bool TryGetTween(string sequence, out float seconds)

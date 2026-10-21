@@ -28,12 +28,12 @@ public class MusicAreaTrigger : MonoBehaviour
     }
 
     private void OnTriggerEnter(Collider other) {
-        Debug.Log("Enter area:" + transform.name);
+        // Debug.Log("Enter area:" + transform.name);
         PlayMusic();
     }
 
     private void OnTriggerExit(Collider other) {
-        Debug.Log("Exit area:" + transform.name);
+        // Debug.Log("Exit area:" + transform.name);
         MusicManager.Instance.ResetPriority();
         MusicManager.Instance.StopMusic(_enterEvent);
         if (_loopCoroutine != null) {

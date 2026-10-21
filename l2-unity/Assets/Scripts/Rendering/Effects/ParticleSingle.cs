@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.Rendering;
 
 public class ParticleSingle : EffectPart
@@ -93,15 +93,15 @@ public class ParticleSingle : EffectPart
         bool shouldLoopContinuously = _lifetime.ShouldLoopContinuously(_forceContinuousSpawning);
         if (_lifetime.IsSlotExpired(now, _preserveShaderTimeInContinuousLoop))
         {
-            ParticleSingleLifetimeDebug.LogSlotOff(BuildDebugSnapshot(now), now);
+            // ParticleSingleLifetimeDebug.LogSlotOff(BuildDebugSnapshot(now), now);
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-            DocExtractorParticleSnapshotLogger.OnSlotOff(this);
-            DropAdenaDestroyLog.Event(
-                "SLOT_EXPIRED",
-                this,
-                $"spawnedAt={_lifetime.SpawnedAt:F3}s duration={_lifetime.Duration:F3}s " +
-                $"age={(now - _lifetime.SpawnedAt):F3}s maxCount={_maxCount} spawned={_lifetime.SpawnedCount}",
-                includeStack: true);
+            // DocExtractorParticleSnapshotLogger.OnSlotOff(this);
+            // DropAdenaDestroyLog.Event(
+                // "SLOT_EXPIRED",
+                // this,
+                // $"spawnedAt={_lifetime.SpawnedAt:F3}s duration={_lifetime.Duration:F3}s " +
+                // $"age={(now - _lifetime.SpawnedAt):F3}s maxCount={_maxCount} spawned={_lifetime.SpawnedCount}",
+                // includeStack: true);
 #endif
             SetActive(false, "slot_expired");
             _lifetime.Active = false;
@@ -111,7 +111,7 @@ public class ParticleSingle : EffectPart
         {
             if (_lifetime.SpawnedCount >= _maxCount && !shouldLoopContinuously)
             {
-                ParticleSingleLifetimeDebug.LogStopMax(BuildDebugSnapshot(now), now);
+                // ParticleSingleLifetimeDebug.LogStopMax(BuildDebugSnapshot(now), now);
                 _lifetime.Stopped = true;
                 return;
             }
@@ -135,26 +135,26 @@ public class ParticleSingle : EffectPart
         {
             UpdateOwnerWorldPos();
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-            DocExtractorParticleSnapshotLogger.OnFixedUpdateTick(this, now, ResolveRenderer());
+            // DocExtractorParticleSnapshotLogger.OnFixedUpdateTick(this, now, ResolveRenderer());
 #endif
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-            if (ParticleSingleLifetimeDebug.ShouldTrace(name, _owner, transform)
-                && _lifetime.Active
-                && !_loggedHalfSecondCheckpoint
-                && now - _lifetime.SpawnedAt >= 0.45f)
+            // if (ParticleSingleLifetimeDebug.ShouldTrace(name, _owner, transform)
+                // && _lifetime.Active
+                // && !_loggedHalfSecondCheckpoint
+                // && now - _lifetime.SpawnedAt >= 0.45f)
             {
                 _loggedHalfSecondCheckpoint = true;
                 Renderer checkRenderer = ResolveRenderer();
                 Material checkMat = checkRenderer != null && checkRenderer.materials != null && checkRenderer.materials.Length > 0
                     ? checkRenderer.materials[0]
                     : null;
-                ParticleSingleLifetimeDebug.LogCheck500ms(BuildDebugSnapshot(now), now, checkRenderer, checkMat);
+                // ParticleSingleLifetimeDebug.LogCheck500ms(BuildDebugSnapshot(now), now, checkRenderer, checkMat);
             }
 
-            if (ParticleSingleLifetimeDebug.ShouldTrace(name, _owner, transform) && now - _lastShaderFadeDiagLog >= 0.25f)
+            // if (ParticleSingleLifetimeDebug.ShouldTrace(name, _owner, transform) && now - _lastShaderFadeDiagLog >= 0.25f)
             {
                 _lastShaderFadeDiagLog = now;
-                ParticleSingleLifetimeDebug.LogTick(BuildDebugSnapshot(now), now);
+                // ParticleSingleLifetimeDebug.LogTick(BuildDebugSnapshot(now), now);
             }
 
             if (L2FxQuadSizeDiagnostic.ShouldTrace(name, _owner, transform)
@@ -261,16 +261,16 @@ public class ParticleSingle : EffectPart
         _duration = _lifetime.Duration;
 
         SetActive(false, "playpart_reset");
-        ParticleSingleLifetimeDebug.LogPlay(BuildDebugSnapshot(now));
+        // ParticleSingleLifetimeDebug.LogPlay(BuildDebugSnapshot(now));
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-        DropAdenaDestroyLog.Event(
-            "PLAY_PART",
-            this,
-            $"duration={_duration:F3}s materialLife={materialLifetime:F3}s " +
-            $"slotDuration={slotDuration:F3}s delay={ReadMaxInitialDelay(slotRenderer):F3}s " +
-            $"fixed={_hasFixedDuration} maxCount={_maxCount}",
-            includeStack: false);
-        DocExtractorParticleSnapshotLogger.OnPlayPart(this);
+        // DropAdenaDestroyLog.Event(
+            // "PLAY_PART",
+            // this,
+            // $"duration={_duration:F3}s materialLife={materialLifetime:F3}s " +
+            // $"slotDuration={slotDuration:F3}s delay={ReadMaxInitialDelay(slotRenderer):F3}s " +
+            // $"fixed={_hasFixedDuration} maxCount={_maxCount}",
+            // includeStack: false);
+        // DocExtractorParticleSnapshotLogger.OnPlayPart(this);
 #endif
     }
 
@@ -278,17 +278,12 @@ public class ParticleSingle : EffectPart
     {
         _settings = s;
         _castData = c;
-        float durationBefore = _duration;
         _lifetime.ResolveDurationFromSetup(
             ref _duration,
             _hasFixedDuration,
             _settings,
             _castData,
-            out float legacyHitDuration);
-
-        ParticleSingleDebugSnapshot snap = BuildDebugSnapshot(Now());
-        snap.LegacyHitDuration = legacyHitDuration;
-        ParticleSingleLifetimeDebug.LogSetup(snap, durationBefore);
+            out _);
         _lifetime.Duration = _duration;
     }
 
@@ -304,13 +299,13 @@ public class ParticleSingle : EffectPart
         Material stopMat = stopRenderer != null && stopRenderer.materials != null && stopRenderer.materials.Length > 0
             ? stopRenderer.materials[0]
             : null;
-        ParticleSingleLifetimeDebug.LogStopPart(BuildDebugSnapshot(now), now, stopRenderer, stopMat);
+        // ParticleSingleLifetimeDebug.LogStopPart(BuildDebugSnapshot(now), now, stopRenderer, stopMat);
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-        DropAdenaDestroyLog.Event(
-            "STOP_PART",
-            this,
-            $"duration={_duration:F3}s spawnedAt={_lifetime.SpawnedAt:F3}s active={_lifetime.Active}",
-            includeStack: true);
+        // DropAdenaDestroyLog.Event(
+            // "STOP_PART",
+            // this,
+            // $"duration={_duration:F3}s spawnedAt={_lifetime.SpawnedAt:F3}s active={_lifetime.Active}",
+            // includeStack: true);
 #endif
 
         _lifetime.RuntimeContinuousLoop = false;
@@ -323,16 +318,16 @@ public class ParticleSingle : EffectPart
         {
             EffectShaderLifetimeHelper.FreezeShaderLoopWithoutExpiry(transform);
             ApplyCompositeShaderHoldToAllRuntimeMaterials(now);
-            ParticleSingleLifetimeDebug.LogHoldReleaseDefer(name, timeline, holdSettings);
+            // ParticleSingleLifetimeDebug.LogHoldReleaseDefer(name, timeline, holdSettings);
             return;
         }
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
         if (holdSettings.ShaderHold > 1e-4f && holdSettings.ReleaseByCastProgress)
         {
-            Debug.LogWarning(
-                $"[PARTICLE_SINGLE_STOPPART_NO_DEFER] group='{name}' hold={holdSettings.ShaderHold:F3} " +
-                "cast-end fade defer не сработал — мгновенная остановка.");
+            // Debug.LogWarning(
+                // $"[PARTICLE_SINGLE_STOPPART_NO_DEFER] group='{name}' hold={holdSettings.ShaderHold:F3} " +
+                // "cast-end fade defer не сработал — мгновенная остановка.");
         }
 #endif
 
@@ -369,12 +364,12 @@ public class ParticleSingle : EffectPart
     void OnDestroy()
     {
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-        DropAdenaDestroyLog.Event(
-            "PARTICLE_SINGLE_ON_DESTROY",
-            this,
-            $"duration={_duration:F3}s spawnedAt={_lifetime.SpawnedAt:F3}s " +
-            $"active={_lifetime.Active} stopped={_lifetime.Stopped} spawnedCount={_lifetime.SpawnedCount}",
-            includeStack: true);
+        // DropAdenaDestroyLog.Event(
+            // "PARTICLE_SINGLE_ON_DESTROY",
+            // this,
+            // $"duration={_duration:F3}s spawnedAt={_lifetime.SpawnedAt:F3}s " +
+            // $"active={_lifetime.Active} stopped={_lifetime.Stopped} spawnedCount={_lifetime.SpawnedCount}",
+            // includeStack: true);
 #endif
     }
 
@@ -444,19 +439,19 @@ public class ParticleSingle : EffectPart
                 _holdController.CaptureBaseEmitterAlpha(new[] { runtimeMat });
             }
 
-            ParticleSingleLifetimeDebug.LogSpawn(
-                BuildDebugSnapshot(now),
-                i,
-                now,
-                shaderStartTime,
-                _relativeWarmupTime,
-                seed,
-                holdValue,
-                _releaseShaderHoldByCastProgress,
-                _shaderHoldReleaseStartNormalized,
-                _smoothShaderHoldRelease,
-                renderer,
-                runtimeMat);
+            // ParticleSingleLifetimeDebug.LogSpawn(
+                // BuildDebugSnapshot(now),
+                // i,
+                // now,
+                // shaderStartTime,
+                // _relativeWarmupTime,
+                // seed,
+                // holdValue,
+                // _releaseShaderHoldByCastProgress,
+                // _shaderHoldReleaseStartNormalized,
+                // _smoothShaderHoldRelease,
+                // renderer,
+                // runtimeMat);
             if (L2FxQuadSizeDiagnostic.ShouldTrace(name, _owner, transform))
             {
                 L2FxQuadSizeDiagnostic.Log(name, renderer, now, runtimeMat);
@@ -464,12 +459,12 @@ public class ParticleSingle : EffectPart
         }
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-        DocExtractorParticleSnapshotLogger.OnParticleActivated(
-            this,
-            renderer,
-            now,
-            shaderStartTime,
-            seed);
+        // DocExtractorParticleSnapshotLogger.OnParticleActivated(
+            // this,
+            // renderer,
+            // now,
+            // shaderStartTime,
+            // seed);
 #endif
     }
 
@@ -488,21 +483,21 @@ public class ParticleSingle : EffectPart
         Renderer renderer = ResolveRenderer();
         if (renderer == null)
         {
-            ParticleSingleLifetimeDebug.LogSetActive(BuildDebugSnapshot(Now()), value, reason, null, false);
+            // ParticleSingleLifetimeDebug.LogSetActive(BuildDebugSnapshot(Now()), value, reason, null, false);
             return;
         }
 
         bool wasActive = renderer.gameObject.activeSelf;
         renderer.gameObject.SetActive(value);
-        ParticleSingleLifetimeDebug.LogSetActive(BuildDebugSnapshot(Now()), value, reason, renderer, wasActive);
+        // ParticleSingleLifetimeDebug.LogSetActive(BuildDebugSnapshot(Now()), value, reason, renderer, wasActive);
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
         if (!value)
         {
-            DropAdenaDestroyLog.Event(
-                "SET_ACTIVE_FALSE",
-                this,
-                $"reason={reason} slot='{renderer.name}' wasActive={wasActive}",
-                includeStack: true);
+            // DropAdenaDestroyLog.Event(
+                // "SET_ACTIVE_FALSE",
+                // this,
+                // $"reason={reason} slot='{renderer.name}' wasActive={wasActive}",
+                // includeStack: true);
         }
 #endif
     }
@@ -568,36 +563,8 @@ public class ParticleSingle : EffectPart
         };
     }
 
-    private ParticleSingleDebugSnapshot BuildDebugSnapshot(float now)
-    {
-        return new ParticleSingleDebugSnapshot
-        {
-            GroupName = name,
-            Transform = transform,
-            Owner = _owner,
-            Renderer = ResolveRenderer(),
-            Now = now,
-            LastEnable = _lifetime.LastEnable,
-            SpawnedAt = _lifetime.SpawnedAt,
-            Duration = _duration,
-            BaseShaderLifetime = _lifetime.BaseShaderLifetime,
-            HasFixedDuration = _hasFixedDuration,
-            PreserveShaderTime = _preserveShaderTimeInContinuousLoop,
-            ForceContinuousSpawning = _forceContinuousSpawning,
-            RuntimeContinuousLoop = _lifetime.RuntimeContinuousLoop,
-            HasLoopOverride = _holdController.HasRuntimeLoopOverride,
-            LoopOverrideValue = _holdController.RuntimeLoopOverrideValue,
-            Active = _lifetime.Active,
-            Stopped = _lifetime.Stopped,
-            SpawnedCount = _lifetime.SpawnedCount,
-            MaxCount = _maxCount,
-            CountPerSecond = _countPerSecond,
-            StartDelay = _startDelay,
-            ShouldLoopContinuously = _lifetime.ShouldLoopContinuously(_forceContinuousSpawning),
-            Settings = _settings,
-            CastData = _castData
-        };
-    }
+    // Debug snapshot lived in ParticleSingleLifetimeDebug, which was moved out.
+    // private ParticleSingleDebugSnapshot BuildDebugSnapshot(float now) { ... }
 
     private float Now() => Application.isPlaying ? Time.time : Time.realtimeSinceStartup;
 

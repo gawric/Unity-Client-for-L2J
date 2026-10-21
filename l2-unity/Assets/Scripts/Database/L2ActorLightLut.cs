@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using UnityEngine;
@@ -46,13 +46,13 @@ public static class L2ActorLightLut
         string dataPath = Path.Combine(Application.streamingAssetsPath, "Data/Meta", MetaFileName);
         if (!File.Exists(dataPath))
         {
-            Debug.LogWarning("[L2ActorLightLut] File not found: " + dataPath);
+            // Debug.LogWarning("[L2ActorLightLut] File not found: " + dataPath);
             return;
         }
 
         LoadCsv(File.ReadAllText(dataPath));
-        if (Samples.Count >= 2)
-            Debug.Log("[L2ActorLightLut] Loaded " + Samples.Count + " keys from " + MetaFileName);
+        //if (Samples.Count >= 2)
+        //    Debug.Log("[L2ActorLightLut] Loaded " + Samples.Count + " keys from " + MetaFileName);
     }
 
     public static void LoadCsv(string csvText)

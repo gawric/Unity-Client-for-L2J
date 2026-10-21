@@ -15,7 +15,7 @@ public abstract class AbstractPoolManager : MonoBehaviour
         {
             if (pool.prefab == null)
             {
-                Debug.LogWarning($"Prefab for tag {pool.tag} is not set!");
+                // Debug.LogWarning($"Prefab for tag {pool.tag} is not set!");
                 continue;
             }
 
@@ -45,12 +45,12 @@ public abstract class AbstractPoolManager : MonoBehaviour
     {
         if (maxSize <= 0)
         {
-            Debug.LogWarning($"Лимит пула для {type} должен быть больше 0!");
+            // Debug.LogWarning($"Лимит пула для {type} должен быть больше 0!");
             return;
         }
 
         objectTypePoolLimits[type] = maxSize;
-        Debug.Log($"Установлен лимит пула для {type} равный {maxSize}");
+        // Debug.Log($"Установлен лимит пула для {type} равный {maxSize}");
     }
 
     protected void ValidateAndCreateDictionary(ObjectType tag, GameObject prefab)
@@ -74,7 +74,7 @@ public abstract class AbstractPoolManager : MonoBehaviour
     {
         if (!poolDictionary.ContainsKey(tag))
         {
-            Debug.LogWarning($"Pool with tag {tag} doesn't exist.");
+            // Debug.LogWarning($"Pool with tag {tag} doesn't exist.");
             return false;
         }
 
@@ -110,7 +110,7 @@ public abstract class AbstractPoolManager : MonoBehaviour
             }
         }
 
-        Debug.LogWarning($"Could not find matching prefab for object {objectToReturn.name} in pool {tag}");
+        // Debug.LogWarning($"Could not find matching prefab for object {objectToReturn.name} in pool {tag}");
         return false;
     }
 
@@ -121,7 +121,7 @@ public abstract class AbstractPoolManager : MonoBehaviour
 
         PooledInstance pooled = objectToReturn.GetComponent<PooledInstance>();
         if (pooled != null &&
-            (pooled.Type == ObjectType.Npc || pooled.Type == ObjectType.Monster))
+            (pooled.Type == ObjectType.Npc || pooled.Type == ObjectType.Monster || pooled.Type == ObjectType.User))
         {
             // L2 character meshes often ship with non-1 scale — don't flatten them.
             objectToReturn.transform.localScale = pooled.OriginalLocalScale;
@@ -180,7 +180,7 @@ public abstract class AbstractPoolManager : MonoBehaviour
 
         pooled.Type = tag;
         pooled.SourcePrefab = sourcePrefab;
-        if (tag == ObjectType.Npc || tag == ObjectType.Monster)
+        if (tag == ObjectType.Npc || tag == ObjectType.Monster || tag == ObjectType.User)
         {
             pooled.CaptureSharedMaterials();
         }

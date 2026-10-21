@@ -1,4 +1,4 @@
-using System.Globalization;
+﻿using System.Globalization;
 using UnityEngine;
 using UnityEngine.Rendering;
 
@@ -272,23 +272,23 @@ public class L2CelestialDiscs : MonoBehaviour
         if (periodic || jump || fallbackFlip || visFlip)
         {
             string tag = jump ? "JUMP " : (fallbackFlip ? "FLIP " : (visFlip ? "VIS  " : "     "));
-            Debug.Log(string.Format(CultureInfo.InvariantCulture,
-                "[L2Sky] {0}{1} {2} h={3:00.000} {4} vis={5} src={6} i={7}-{8} u={9:0.00} phase={10} " +
-                "angΔ={11:0.00}° dh={12:0.0000}h locVsDir={13:0.0}° " +
-                "lutEl={14:0.0} dirEl={15:0.0} locEl={16:0.0} placeEl={17:0.0} az={18:0.0} " +
-                "visS={19:0.00} draw={20:0.00} locY={21:0.00} locMag={22:0.00} tiny={23} yNeg={24} fb={25} " +
-                "loc=({26:0.00},{27:0.00},{28:0.00}) dir=({29:0.00},{30:0.00},{31:0.00}) " +
-                "place=({32:0.00},{33:0.00},{34:0.00}) pos=({35:0.00},{36:0.00},{37:0.00}) dist={38:0.00}",
-                tag, body, FormatClock(hours), hours, visible ? "ON" : "OFF", visible, source,
-                sample.sampleA, sample.sampleB, sample.lerpU, sample.phase,
-                angDelta, hoursDelta, locVsDir,
-                lutElevDeg, dirElev, locElev, placeElev, placeAzim,
-                visScale, drawScale, lutOffset.y, locMag, locTiny, locYNeg, fallback,
-                lutOffset.x, lutOffset.y, lutOffset.z,
-                lutDir.x, lutDir.y, lutDir.z,
-                placeDir.x, placeDir.y, placeDir.z,
-                pos.x, pos.y, pos.z,
-                Vector3.Distance(pos, camPos)));
+            // Debug.Log(string.Format(CultureInfo.InvariantCulture,
+                // "[L2Sky] {0}{1} {2} h={3:00.000} {4} vis={5} src={6} i={7}-{8} u={9:0.00} phase={10} " +
+                // "angΔ={11:0.00}° dh={12:0.0000}h locVsDir={13:0.0}° " +
+                // "lutEl={14:0.0} dirEl={15:0.0} locEl={16:0.0} placeEl={17:0.0} az={18:0.0} " +
+                // "visS={19:0.00} draw={20:0.00} locY={21:0.00} locMag={22:0.00} tiny={23} yNeg={24} fb={25} " +
+                // "loc=({26:0.00},{27:0.00},{28:0.00}) dir=({29:0.00},{30:0.00},{31:0.00}) " +
+                // "place=({32:0.00},{33:0.00},{34:0.00}) pos=({35:0.00},{36:0.00},{37:0.00}) dist={38:0.00}",
+                // tag, body, FormatClock(hours), hours, visible ? "ON" : "OFF", visible, source,
+                // sample.sampleA, sample.sampleB, sample.lerpU, sample.phase,
+                // angDelta, hoursDelta, locVsDir,
+                // lutElevDeg, dirElev, locElev, placeElev, placeAzim,
+                // visScale, drawScale, lutOffset.y, locMag, locTiny, locYNeg, fallback,
+                // lutOffset.x, lutOffset.y, lutOffset.z,
+                // lutDir.x, lutDir.y, lutDir.z,
+                // placeDir.x, placeDir.y, placeDir.z,
+                // pos.x, pos.y, pos.z,
+                // Vector3.Distance(pos, camPos)));
         }
 
         track.hasLast = true;

@@ -12,6 +12,13 @@ public class MovementTarget
         _isRunning = isRunning;
     }
 
+    public void Set(object objectPoint, float distance, bool isRunning)
+    {
+        _objectPoint = objectPoint;
+        _distance = distance;
+        _isRunning = isRunning;
+    }
+
     public MovementTarget(Entity entity, float distance)
     {
         _objectPoint = entity.transform;
@@ -39,17 +46,26 @@ public class MovementTarget
         return transform != null ? transform.GetComponent<Entity>() : null;
     }
 
-    public Vector3 GetTarget()
+    public bool TryGetTarget(out Vector3 target)
     {
+        target = Vector3.zero;
         switch (_objectPoint)
         {
             case Transform transform:
-                return transform.position;
+                if (transform == null)
+                    return false;
+                target = transform.position;
+                return true;
             case Vector3 vector:
-                return vector;
+                target = vector;
+                return true;
             default:
-                Debug.LogError("MovementTarget->GetTarget: Invalid object type");
-                return Vector3.zero;
+                return false;
         }
+    }
+
+    public Vector3 GetTarget()
+    {
+        return TryGetTarget(out Vector3 target) ? target : Vector3.zero;
     }
 }

@@ -71,7 +71,7 @@ public class Geodata : MonoBehaviour {
                 origin = GeodataImporter.LoadMapOrigin(mapId, _nodeSize);
                 _mapsOrigin.Add(mapId, origin);
             } catch(Exception e) {
-                Debug.LogError(e.Message);
+                // Debug.LogError(e.Message);
                 continue;
             }
 
@@ -254,7 +254,7 @@ public class Geodata : MonoBehaviour {
 
         Node[,,] nodes;
         if(!_geodata.TryGetValue(mapId, out nodes)) {
-            Debug.LogWarning("Can't draw gizmos for map " + mapId);
+            // Debug.LogWarning("Can't draw gizmos for map " + mapId);
             return;
         }
 

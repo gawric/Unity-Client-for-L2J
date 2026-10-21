@@ -58,57 +58,57 @@ public class StatusWindow : L2Window
 
         _nameLabel = (Label)GetElementById("PlayerNameText");
         if(_nameLabel == null) {
-            Debug.LogError("Status window PlayerNameText is null.");
+            // Debug.LogError("Status window PlayerNameText is null.");
         }
 
         _levelLabel = (Label)GetElementById("LevelText");
         if(_levelLabel == null) {
-            Debug.LogError("Status window LevelText is null.");
+            // Debug.LogError("Status window LevelText is null.");
         }
 
         _CPTextLabel = (Label)GetElementById("CPText");
         if(_CPTextLabel == null) {
-            Debug.LogError("Status window CPText is null.");
+            // Debug.LogError("Status window CPText is null.");
         }
 
         _HPTextLabel = (Label)GetElementById("HPText");
         if(_HPTextLabel == null) {
-            Debug.LogError("Status window Hp text is null.");
+            // Debug.LogError("Status window Hp text is null.");
         }
 
         _MPTextLabel = (Label)GetElementById("MPText");
         if(_MPTextLabel == null) {
-            Debug.LogError("Status window MPText is null.");
+            // Debug.LogError("Status window MPText is null.");
         }
 
         _CPBarBG = GetElementById("CPBarBG");
         if(_CPBarBG == null) {
-            Debug.LogError("Status window CPBarBG is null");
+            // Debug.LogError("Status window CPBarBG is null");
         }
 
         _CPBar = GetElementById("CPBar");
         if(_CPBar == null) {
-            Debug.LogError("Status window CPBar is null");
+            // Debug.LogError("Status window CPBar is null");
         }
 
         _HPBar = GetElementById("HPBar");
         if(_HPBar == null) {
-            Debug.LogError("Status window HPBar is null");
+            // Debug.LogError("Status window HPBar is null");
         }
 
         _HPBarBG = GetElementById("HPBarBG");
         if(_HPBarBG == null) {
-            Debug.LogError("Status window HPBarBG is null");
+            // Debug.LogError("Status window HPBarBG is null");
         }
 
         _MPBarBG = GetElementById("MPBarBG");
         if(_MPBarBG == null) {
-            Debug.LogError("Status window MPBarBG is null");
+            // Debug.LogError("Status window MPBarBG is null");
         }
 
         _MPBar = GetElementById("MPBar");
         if(_MPBar == null) {
-            Debug.LogError("Status windowar MPBar is null");
+            // Debug.LogError("Status windowar MPBar is null");
         }
     }
 
@@ -160,7 +160,7 @@ public class StatusWindow : L2Window
         }
 
         if(!(PlayerEntity.Instance.Status is PlayerStatus)) {
-            Debug.LogWarning("Player status is not of type playerstatus");
+            // Debug.LogWarning("Player status is not of type playerstatus");
             return;
         }
 

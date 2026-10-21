@@ -37,7 +37,7 @@ public class ArmorgrpTable {
         _armorgrps = new Dictionary<int, Armorgrp>();
         string dataPath = Path.Combine(Application.streamingAssetsPath, "Data/Meta/Armorgrp_Classic.txt");
         if (!File.Exists(dataPath)) {
-            Debug.LogWarning("File not found: " + dataPath);
+            // Debug.LogWarning("File not found: " + dataPath);
             return;
         }
 
@@ -240,7 +240,7 @@ public class ArmorgrpTable {
                 _armorgrps.TryAdd(armorgrp.ObjectId, armorgrp);
             }
 
-            Debug.Log($"Successfully imported {_armorgrps.Count} armorgrp(s)");
+            // Debug.Log($"Successfully imported {_armorgrps.Count} armorgrp(s)");
         }
     }
     //329 PDef

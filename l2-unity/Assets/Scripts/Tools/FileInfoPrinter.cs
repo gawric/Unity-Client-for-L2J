@@ -20,7 +20,7 @@ public class FileInfoPrinter {
             }
         }
 
-        Debug.Log(stringBuilder.ToString());
+        // Debug.Log(stringBuilder.ToString());
     }
 }
 #endif

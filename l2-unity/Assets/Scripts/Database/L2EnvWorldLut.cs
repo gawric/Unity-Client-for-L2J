@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -102,7 +102,7 @@ public static class L2EnvWorldLut
             LoadSweepCsv(File.ReadAllText(sweepPath));
             if (SweepKeys.Count >= 2)
             {
-                Debug.Log("[L2EnvWorldLut] Loaded " + SweepKeys.Count + " GetTerrainAmbient keys from " + SweepLutFileName);
+                // Debug.Log("[L2EnvWorldLut] Loaded " + SweepKeys.Count + " GetTerrainAmbient keys from " + SweepLutFileName);
                 LoadIntensityLut();
                 return;
             }
@@ -111,7 +111,7 @@ public static class L2EnvWorldLut
         string dataPath = Path.Combine(Application.streamingAssetsPath, "Data/Meta", MetaFileName);
         if (!File.Exists(dataPath))
         {
-            Debug.LogWarning("[L2EnvWorldLut] File not found: " + dataPath);
+            // Debug.LogWarning("[L2EnvWorldLut] File not found: " + dataPath);
             LoadIntensityLut();
             return;
         }
@@ -126,7 +126,7 @@ public static class L2EnvWorldLut
         string path = Path.Combine(Application.streamingAssetsPath, "Data/Meta", IntensityLutFileName);
         if (!File.Exists(path))
         {
-            Debug.LogWarning("[L2EnvWorldLut] Intensity LUT missing (" + IntensityLutFileName + "), using I=" + DefaultTerrainIntensity01.ToString("0.###"));
+            // Debug.LogWarning("[L2EnvWorldLut] Intensity LUT missing (" + IntensityLutFileName + "), using I=" + DefaultTerrainIntensity01.ToString("0.###"));
             return;
         }
 
@@ -147,8 +147,8 @@ public static class L2EnvWorldLut
         }
 
         TerrainIntensity.Sort((a, b) => a.tHours.CompareTo(b.tHours));
-        if (TerrainIntensity.Count >= 2)
-            Debug.Log("[L2EnvWorldLut] Loaded " + TerrainIntensity.Count + " intensity keys from " + IntensityLutFileName);
+        //if (TerrainIntensity.Count >= 2)
+            //Debug.Log("[L2EnvWorldLut] Loaded " + TerrainIntensity.Count + " intensity keys from " + IntensityLutFileName);
     }
 
     public static void LoadSweepCsv(string csvText)
@@ -817,7 +817,7 @@ public static class L2EnvWorldLut
         string path = Path.Combine(Application.streamingAssetsPath, "Data/Meta", fileName);
         if (!File.Exists(path))
         {
-            Debug.LogWarning("[L2EnvWorldLut] Intensity grid missing (" + fileName + ")");
+            // Debug.LogWarning("[L2EnvWorldLut] Intensity grid missing (" + fileName + ")");
             return;
         }
 
@@ -848,7 +848,7 @@ public static class L2EnvWorldLut
         }
 
         IntensitySlices.Sort((x, y) => x.tHours.CompareTo(y.tHours));
-        Debug.Log("[L2EnvWorldLut] Loaded " + IntensitySlices.Count + " intensity slices from " + fileName);
+        // Debug.Log("[L2EnvWorldLut] Loaded " + IntensitySlices.Count + " intensity slices from " + fileName);
     }
 
     static void EnsureNeighborGrids()
@@ -870,7 +870,7 @@ public static class L2EnvWorldLut
         string path = Path.Combine(Application.streamingAssetsPath, "Data/Meta", fileName);
         if (!File.Exists(path))
         {
-            Debug.LogWarning("[L2EnvWorldLut] Intensity grid missing (" + fileName + ")");
+            // Debug.LogWarning("[L2EnvWorldLut] Intensity grid missing (" + fileName + ")");
             return false;
         }
 
@@ -901,7 +901,7 @@ public static class L2EnvWorldLut
         }
 
         destination.Sort((x, y) => x.tHours.CompareTo(y.tHours));
-        Debug.Log("[L2EnvWorldLut] Loaded " + destination.Count + " intensity slices from " + fileName);
+        // Debug.Log("[L2EnvWorldLut] Loaded " + destination.Count + " intensity slices from " + fileName);
         return destination.Count > 0;
     }
 

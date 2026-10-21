@@ -19,7 +19,7 @@ public class StartCombo : AbstractAnimCombo
         else
         {
             //Debug.Log("Elapsed time to end start event " + _elapsedTime);
-            Debug.Log("Start TIME Stop " + elapsedTime);
+            // Debug.Log("Start TIME Stop " + elapsedTime);
             return 0;
         }
     }
@@ -50,13 +50,13 @@ public class StartCombo : AbstractAnimCombo
         {
             if (sizeAnim2 < T2_new)
             {
-                Debug.Log("time travel anim2 " + sizeAnim2);
+                // Debug.Log("time travel anim2 " + sizeAnim2);
                 float plusAnim1 = Math.Abs(sizeAnim2 - T2_new);
 
                 float newAnim2 = sizeAnim2;
                 float newAnim1 = T1_new + plusAnim1;
 
-                Debug.Log("time travel anim1 " + newAnim1);
+                // Debug.Log("time travel anim1 " + newAnim1);
                 float anim1_2 = newAnim2 + newAnim1;
                 //float anim3 = _hitTimeSec - anim1_2;
                 float anim3 = ConvertHitTimeToSec(bothModel.GetHitTime()) - anim1_2;
@@ -100,7 +100,7 @@ public class StartCombo : AbstractAnimCombo
             // float new_time_ofset = _hitTimeSec + offset;
             // float speed = t1_new_0 / new_time_ofset;
             //compressionFactor1 = t1_1 / T1_new;
-            Debug.Log("");
+            // Debug.Log("");
         }
 
         // compressionFactor = T_ALL / T_ALL2;
@@ -118,6 +118,6 @@ public class StartCombo : AbstractAnimCombo
         float compression = bothModel.GetCompressionByIndex(0);
         PlayerAnimationController.Instance.SetCastSpeed(bothModel.GetCompressionByIndex(0));
         PlayerAnimationController.Instance.SetBool(bothModel.GetCurrentAnimName(), true);
-        Debug.Log("Start TIM FIRST " + elapsedTime);
+        // Debug.Log("Start TIM FIRST " + elapsedTime);
     }
 }

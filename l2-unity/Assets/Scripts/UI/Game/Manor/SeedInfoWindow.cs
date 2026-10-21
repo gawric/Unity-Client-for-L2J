@@ -310,21 +310,21 @@ public class SeedInfoWindow : L2PopupWindow
         switch (indexTab)
         {
             case 0:
-                Debug.Log("Event index 0 ");
+                // Debug.Log("Event index 0 ");
                 HtmlWindow.Instance.UseActionCommand(commandTab0);
                 _creatorTable.SetSelectRow(-1);
                 _creatorWindow.RefreshDataColumns(_defaultColumns0);
                 AddContent0Footer(_creatorWindow, _footerContainer);
                 break;
             case 1:
-                Debug.Log("Event index 1 ");
+                // Debug.Log("Event index 1 ");
                 HtmlWindow.Instance.UseActionCommand(commandTab1);
                 _creatorTable.SetSelectRow(-1);
                 _creatorWindow.RefreshDataColumns(_defaultColumns1);
                 AddContent1Footer(_creatorWindow, _footerContainer);
                 break;
             case 2:
-                Debug.Log("Event index 2 ");
+                // Debug.Log("Event index 2 ");
                 HtmlWindow.Instance.UseActionCommand(commandTab2);
                 _creatorTable.SetSelectRow(-1);
                 _creatorWindow.RefreshDataColumns(_defaultColumns2);
@@ -336,12 +336,12 @@ public class SeedInfoWindow : L2PopupWindow
 
     public void OnClickButtonSeed(ClickEvent evt)
     {
-        Debug.Log("OnClickButtonSeed 1");
+        // Debug.Log("OnClickButtonSeed 1");
     }
 
     public void OnClickButtonHarvest(ClickEvent evt)
     {
-        Debug.Log("OnClickButtonHarvest 1");
+        // Debug.Log("OnClickButtonHarvest 1");
     }
 
     public void OnClickAllButton1(ClickEvent evt)

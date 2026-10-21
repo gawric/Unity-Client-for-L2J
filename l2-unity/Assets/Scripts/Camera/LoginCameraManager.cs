@@ -82,7 +82,7 @@ public class LoginCameraManager : MonoBehaviour
 
         if (cameras.TryGetValue(camera, out Camera obj))
          {
-            Debug.Log(camera + " camera enabled.");
+            // Debug.Log(camera + " camera enabled.");
             obj.enabled = true;
             _activeCamera = obj;
 
@@ -123,7 +123,7 @@ public class LoginCameraManager : MonoBehaviour
 
     public void DisableMainCamera() {
         if (Camera.main != null) {
-            Debug.Log("Disabling camera " + Camera.main.transform);
+            // Debug.Log("Disabling camera " + Camera.main.transform);
             Camera.main.enabled = false;
         } else if(_activeCamera != null) {
             _activeCamera.enabled = false;

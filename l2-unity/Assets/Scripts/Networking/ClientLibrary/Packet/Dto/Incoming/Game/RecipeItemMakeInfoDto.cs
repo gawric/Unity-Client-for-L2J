@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -60,7 +60,7 @@ public class RecipeItemMakeInfoDto : IWireDto
         }
         catch (Exception ex)
         {
-            Debug.LogError($"[RecipeItemMakeInfo] Parse error: {ex.Message}");
+            // Debug.LogError($"[RecipeItemMakeInfo] Parse error: {ex.Message}");
             _recipeId = -1;
             _isDwarven = -1;
             _currentMp = 0;

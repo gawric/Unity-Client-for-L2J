@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -121,8 +121,8 @@ public static class L2ActorLightCapture
         string path = Path.Combine(folder, "constants.txt");
         File.WriteAllText(path, text.ToString(), Encoding.UTF8);
         File.WriteAllText(Path.Combine(Root, "latest.txt"), folder, Encoding.UTF8);
-        Debug.Log("[ActorLight] запись сделана " + path + " t=" + Num(hours) +
-            " c251=" + Num(half.r) + " c250=" + Num(c250.r) + " " + katerina);
+        // Debug.Log("[ActorLight] запись сделана " + path + " t=" + Num(hours) +
+            // " c251=" + Num(half.r) + " c250=" + Num(c250.r) + " " + katerina);
     }
 
     const int KaterinaNpcId = 30004;

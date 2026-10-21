@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using VContainer;
 
@@ -101,10 +101,10 @@ public sealed class CombatFacingService : MonoBehaviour
     {
         if (objectId == 0 || actor == null || target == null || actor == target)
         {
-            Debug.Log(
-                $"{LogPrefix} Begin REJECTED objectId={objectId} " +
-                $"actor={(actor != null ? actor.name : "null")} " +
-                $"target={(target != null ? target.name : "null")} count={_entries.Count}");
+            // Debug.Log(
+                // $"{LogPrefix} Begin REJECTED objectId={objectId} " +
+                // $"actor={(actor != null ? actor.name : "null")} " +
+                // $"target={(target != null ? target.name : "null")} count={_entries.Count}");
             EndFollow(objectId, "begin-rejected");
             return;
         }
@@ -118,10 +118,10 @@ public sealed class CombatFacingService : MonoBehaviour
             Rate = headingUnitsPerSecond > 0 ? headingUnitsPerSecond : L2PawnYaw.RotationRateYaw
         };
 
-        Debug.Log(
-            $"{LogPrefix} Begin ACCEPTED objectId={objectId} " +
-            $"actor={actor.name} target={target.name} " +
-            $"replaced={replaced} count={_entries.Count}");
+        // Debug.Log(
+            // $"{LogPrefix} Begin ACCEPTED objectId={objectId} " +
+            // $"actor={actor.name} target={target.name} " +
+            // $"replaced={replaced} count={_entries.Count}");
     }
 
     public void EndFollow(int objectId)
@@ -141,7 +141,7 @@ public sealed class CombatFacingService : MonoBehaviour
             return;
         }
 
-        Debug.Log($"{LogPrefix} End REMOVED objectId={objectId} reason={reason} count={_entries.Count}");
+        // Debug.Log($"{LogPrefix} End REMOVED objectId={objectId} reason={reason} count={_entries.Count}");
     }
 
     /// <summary>End follow for local player (convenience for current call sites).</summary>
@@ -158,7 +158,7 @@ public sealed class CombatFacingService : MonoBehaviour
     {
         int before = _entries.Count;
         _entries.Clear();
-        Debug.Log($"{LogPrefix} End ALL cleared before={before} count=0");
+        // Debug.Log($"{LogPrefix} End ALL cleared before={before} count=0");
     }
 
     private void Update()
@@ -213,8 +213,8 @@ public sealed class CombatFacingService : MonoBehaviour
             int rid = _removeIds[i];
             if (_entries.Remove(rid))
             {
-                Debug.Log(
-                    $"{LogPrefix} End REMOVED objectId={rid} reason=null-actor-or-target count={_entries.Count}");
+                // Debug.Log(
+                    // $"{LogPrefix} End REMOVED objectId={rid} reason=null-actor-or-target count={_entries.Count}");
             }
         }
     }
@@ -248,9 +248,9 @@ public sealed class CombatFacingService : MonoBehaviour
         if (now - entry.LastTurnLogTime >= TurnLogIntervalSeconds)
         {
             entry.LastTurnLogTime = now;
-            Debug.Log(
-                $"{LogPrefix} Turn objectId={objectId} " +
-                $"actor={actor.name} target={target.name} angle={angle:F1} count={_entries.Count}");
+            // Debug.Log(
+                // $"{LogPrefix} Turn objectId={objectId} " +
+                // $"actor={actor.name} target={target.name} angle={angle:F1} count={_entries.Count}");
         }
     }
 

@@ -51,7 +51,7 @@ public class L2ClickableSlot : L2Slot
     private VisualElement slotFrame;
     public void SetSelected()
     {
-        Debug.Log($"Slot {_position} {Id}selected.");
+        // Debug.Log($"Slot {_position} {Id}selected.");
 
         if (slotFrame == null) slotFrame = _slotElement.Q(className: "slot-frame");
 
@@ -86,7 +86,7 @@ public class L2ClickableSlot : L2Slot
 
     public void UnSelect()
     {
-        Debug.Log($"Slot {_position} unselected.");
+        // Debug.Log($"Slot {_position} unselected.");
         if(slotFrame == null ) slotFrame = _slotElement.Q(className: "slot-frame");
 
         if (slotFrame != null)

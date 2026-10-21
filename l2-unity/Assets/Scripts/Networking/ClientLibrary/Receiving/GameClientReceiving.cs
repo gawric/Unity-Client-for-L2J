@@ -19,7 +19,7 @@ public class GameClientReceiving
 
     public Task StartReceiving(Socket socket, System.Threading.CancellationToken token)
     {
-        Debug.Log("Start receiving GameClient");
+        // Debug.Log("Start receiving GameClient");
         return Task.Run(() => Receiving(socket, token), token);
     }
 
@@ -48,19 +48,19 @@ public class GameClientReceiving
         }
         catch (ObjectDisposedException)
         {
-            LobbyFlowLog.Warn("Game RX stopped — socket disposed");
+            // LobbyFlowLog.Warn("Game RX stopped — socket disposed");
         }
         catch (IOException ex)
         {
-            LobbyFlowLog.Warn("Game RX IOException: " + ex.Message);
+            // LobbyFlowLog.Warn("Game RX IOException: " + ex.Message);
         }
         catch (SocketException ex)
         {
-            LobbyFlowLog.Warn("Game RX SocketException: " + ex.Message);
+            // LobbyFlowLog.Warn("Game RX SocketException: " + ex.Message);
         }
         catch (Exception e)
         {
-            LobbyFlowLog.Exception("Game RX", e);
+            // LobbyFlowLog.Exception("Game RX", e);
         }
     }
 

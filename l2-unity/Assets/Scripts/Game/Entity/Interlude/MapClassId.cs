@@ -63,7 +63,7 @@ public class MapClassId
             return CharacterRace.Dwarf;
         }
 
-        Debug.Log("Critical error: Not Found Race!!!");
+        // Debug.Log("Critical error: Not Found Race!!!");
         return 0;
     }
     public static CharacterRace GetCharacterRace(int serverClassId)

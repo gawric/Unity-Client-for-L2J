@@ -1,11 +1,18 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System;
 using UnityEngine;
 using VContainer;
-using static UnityEngine.GraphicsBuffer;
 
 public class TargetManager : MonoBehaviour
 {
+    // L2 UNetworkHandler GetNextObject type ids.
+    public const int KindAllPawns = 0;
+    public const int KindItem = 1;
+    public const int KindEnemy = 2;
+    public const int KindFriend = 3;
+    public const int KindParty = 4;
+    public const int KindNpc = 5;
+    public const int KindCreature = 6;
+
     [Inject] GameClient _gameClient;
     private TargetData _target = null;
     private TargetData _attackTarget = null;
@@ -13,11 +20,20 @@ public class TargetManager : MonoBehaviour
 
     [SerializeField] private float _maximumTargetDistance = 15f;
     [SerializeField] private LayerMask _entityMask;
-    private LayerMask _areaMask = 8192;
-    [SerializeField] private RaycastHit[] _entitiesInRange;
-    [SerializeField] private List<Transform> _visibleEntities;
-    [SerializeField] private int _nextTargetIndex;
     private string defaultHexColor = "#ffffff";
+
+    private int _cycleKind = int.MinValue;
+    private float _cycleLastDistance;
+    private int _cycleLastObjectId = -1;
+
+    private Action<Entity> _considerCandidate;
+    private int _scanKind;
+    private int _scanSelfId;
+    private int _scanExcludeId;
+    private float _scanMinDistance;
+    private float _scanBestDistance;
+    private Vector3 _scanOrigin;
+    private Entity _scanBest;
 
     public TargetData Target { get { return _target; } }
     public TargetData AttackTarget { get { return _attackTarget; } }
@@ -30,6 +46,7 @@ public class TargetManager : MonoBehaviour
         if (_instance == null)
         {
             _instance = this;
+            _considerCandidate = ConsiderCandidate;
         }
         else
         {
@@ -53,140 +70,208 @@ public class TargetManager : MonoBehaviour
         _entityMask = mask;
     }
 
-    private void FixedUpdate()
+    void Update()
     {
-        if (_playerTransform == null)
+        if (PlayerEntity.Instance == null || !HasTarget())
         {
-            if (PlayerEntity.Instance != null && PlayerEntity.Instance.transform != null)
-            {
-                _playerTransform = PlayerEntity.Instance.transform;
-            }
-            else
-            {
-                return;
-            }
-        }
-
-        VerifyNextTargetIndex();
-
-        _entitiesInRange = Physics.SphereCastAll(_playerTransform.position, _maximumTargetDistance, transform.forward, 0, _entityMask);
-        _visibleEntities = GetVisibleEntities();
-    }
-
-    private List<Transform> GetVisibleEntities()
-    {
-        List<Transform> visibleEntities = new List<Transform>();
-
-        for (int i = 0; i < _entitiesInRange.Length; i++)
-        {
-            Transform entity = _entitiesInRange[i].transform;
-            if (IsTransformVisible(entity))
-            {
-                visibleEntities.Add(entity);
-            }
-        }
-
-        visibleEntities = visibleEntities
-            .OrderBy(obj => Vector3.Distance(_playerTransform.position, obj.position))
-            .ToList();
-
-        return visibleEntities;
-    }
-
-    private bool IsTransformVisible(Transform target)
-    {
-        bool isTooFar = Vector3.Distance(_playerTransform.position, target.position) > _maximumTargetDistance;
-        if (isTooFar)
-        {
-            return false;
-        }
-
-        return CameraController.Instance.IsObjectVisible(target);
-    }
-
-    private void VerifyNextTargetIndex()
-    {
-        // Is the next target out of bounds
-        if (_nextTargetIndex >= _visibleEntities.Count)
-        {
-            _nextTargetIndex = 0;
             return;
         }
 
-        // Is our target visible
-        if (HasTarget() && !IsTransformVisible(_target.Data.ObjectTransform))
+        PlayerController player = PlayerController.Instance;
+        if (player == null)
         {
-            _nextTargetIndex = 0;
             return;
         }
 
-        // Did my next target index change?
-        if (HasTarget())
-        {
-            for (int i = 0; i < _visibleEntities.Count; i++)
-            {
-                if (_visibleEntities[i] == _target.Data.ObjectTransform)
-                {
-                    if (i != _nextTargetIndex)
-                    {
-                        _nextTargetIndex = 0;
-                    }
-                }
-            }
-
-            return;
-        }
+        _target.Distance = VectorUtils.Distance2D(
+            player.transform.position,
+            _target.Data.ObjectTransform.position);
     }
 
-    private int GetNextTargetIndex()
+    private bool TryResolvePlayerTransform()
     {
-        int index = _nextTargetIndex;
-
-        if (index >= _visibleEntities.Count)
+        if (_playerTransform != null)
         {
-            index = 0;
+            return true;
         }
 
-        if (HasTarget() && _visibleEntities[index] == _target.Data.ObjectTransform)
+        if (PlayerEntity.Instance != null && PlayerEntity.Instance.transform != null)
         {
-            index++;
+            _playerTransform = PlayerEntity.Instance.transform;
+            return true;
         }
 
-        if (index >= _visibleEntities.Count)
-        {
-            index = 0;
-        }
-
-        return index;
+        return false;
     }
 
     public void NextTarget()
     {
-        _nextTargetIndex = GetNextTargetIndex();
+        NextTarget(KindAllPawns);
+    }
 
-        SetTarget(new ObjectData(_visibleEntities[_nextTargetIndex].gameObject) , defaultHexColor);
+    public void NextTarget(int kind)
+    {
+        if (PlayerEntity.Instance == null || PlayerEntity.Instance.Identity == null)
+        {
+            return;
+        }
+
+        if (!TryResolvePlayerTransform())
+        {
+            return;
+        }
+
+        World world = IncomingPacketActions.GameWorld;
+        if (world == null)
+        {
+            return;
+        }
+
+        if (kind != _cycleKind)
+        {
+            _cycleKind = kind;
+            _cycleLastDistance = 0f;
+            _cycleLastObjectId = -1;
+        }
+        else if (_cycleLastObjectId > 0)
+        {
+            Entity last = world.GetEntityNoLockSync(_cycleLastObjectId);
+            if (last != null && last.transform != null)
+            {
+                _cycleLastDistance = VectorUtils.Distance2D(_playerTransform.position, last.transform.position);
+            }
+            else
+            {
+                _cycleLastDistance = 0f;
+                _cycleLastObjectId = -1;
+            }
+        }
+
+        Entity next = GetNextObject(world, kind, _maximumTargetDistance, _cycleLastDistance, _cycleLastObjectId);
+        if (next == null)
+        {
+            next = GetNextObject(world, kind, _maximumTargetDistance, 0f, _cycleLastObjectId);
+        }
+
+        if (next == null)
+        {
+            next = GetNextObject(world, kind, _maximumTargetDistance, 0f, -1);
+        }
+
+        if (next == null || next.Identity == null || next.transform == null)
+        {
+            return;
+        }
+
+        _cycleLastObjectId = next.Identity.Id;
+        _cycleLastDistance = VectorUtils.Distance2D(_playerTransform.position, next.transform.position);
+
+        SetTarget(new ObjectData(next.gameObject), defaultHexColor);
+        SendAction(next);
     }
 
     public void NextTargetById(int id , string hexColor)
     {
-        var _entitiesInRange = Physics.SphereCastAll(_playerTransform.position, 50f, transform.forward, 0, _areaMask);
+        World world = IncomingPacketActions.GameWorld;
+        Entity found = world != null ? world.GetEntityNoLockSync(id) : null;
+        if (found == null &&
+            PlayerEntity.Instance != null &&
+            PlayerEntity.Instance.Identity != null &&
+            PlayerEntity.Instance.Identity.Id == id)
+        {
+            found = PlayerEntity.Instance;
+        }
 
-        foreach (var entity in _entitiesInRange)
-        { 
-            if(entity.transform.parent != null)
-            {
-                var _entity = entity.transform.parent.GetComponent<Entity>();
+        if (found == null)
+        {
+            return;
+        }
 
-                if(_entity != null & _entity.Identity.Id == id)
-                {
-                    var _targetData = new ObjectData(entity.transform.parent.gameObject);
-                    SetTarget(_targetData , hexColor);
-                }
-            }
-        } 
+        SetTarget(new ObjectData(found.gameObject), hexColor);
     }
 
-   
+    private Entity GetNextObject(World world, int kind, float radius, float minDistanceExclusive, int excludeId)
+    {
+        _scanKind = kind;
+        _scanSelfId = PlayerEntity.Instance.Identity.Id;
+        _scanExcludeId = excludeId;
+        _scanMinDistance = minDistanceExclusive;
+        _scanBestDistance = radius;
+        _scanOrigin = _playerTransform.position;
+        _scanBest = null;
+        world.ForEachEntity(_considerCandidate);
+        return _scanBest;
+    }
+
+    private void ConsiderCandidate(Entity entity)
+    {
+        if (entity == null || entity.Identity == null || entity.transform == null)
+        {
+            return;
+        }
+
+        int id = entity.Identity.Id;
+        if (id == _scanSelfId || id == _scanExcludeId)
+        {
+            return;
+        }
+
+        if (!MatchesKind(_scanKind, entity))
+        {
+            return;
+        }
+
+        if (entity.IsDead())
+        {
+            return;
+        }
+
+        float dist = VectorUtils.Distance2D(_scanOrigin, entity.transform.position);
+        if (dist <= _scanMinDistance || dist >= _scanBestDistance)
+        {
+            return;
+        }
+
+        _scanBest = entity;
+        _scanBestDistance = dist;
+    }
+
+    private static bool MatchesKind(int kind, Entity entity)
+    {
+        switch (kind)
+        {
+            case KindItem:
+                return entity is ItemEntity;
+            case KindNpc:
+                return entity is NpcEntity;
+            case KindCreature:
+                return entity is MonsterEntity;
+            case KindEnemy:
+            case KindFriend:
+            case KindParty:
+                return entity is UserEntity;
+            default:
+                return entity is UserEntity || entity is NpcEntity || entity is MonsterEntity;
+        }
+    }
+
+    private void SendAction(Entity entity)
+    {
+        if (entity == null || entity.Identity == null)
+        {
+            return;
+        }
+
+        GameClient game = _gameClient != null ? _gameClient : IncomingPacketActions.Game;
+        if (game == null)
+        {
+            return;
+        }
+
+        var l2jpos = entity.Identity.GetL2jPos();
+        game.Send(new ClickActionCommand(
+            entity.Identity.Id, (int)l2jpos.x, (int)l2jpos.y, (int)l2jpos.z, 0));
+    }
 
     public void SetTarget(ObjectData target , string hexColor)
     {
@@ -276,28 +361,6 @@ public class TargetManager : MonoBehaviour
 
             _target = null;
             _attackTarget = null;
-        }
-    }
-
-    void Update()
-    {
-        if (PlayerEntity.Instance == null)
-        {
-            return;
-        }
-
-        if (HasTarget())
-        {
-            PlayerController player = PlayerController.Instance;
-            if (player == null)
-                return;
-            _target.Distance = Vector3.Distance(
-                player.transform.position,
-                _target.Data.ObjectTransform.position);
-        }
-        else
-        {
-            ClearTarget();
         }
     }
 }

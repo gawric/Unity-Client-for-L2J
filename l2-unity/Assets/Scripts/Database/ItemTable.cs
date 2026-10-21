@@ -121,7 +121,7 @@ public class ItemTable
 
             if(kvp.Key == 356)
             {
-                Debug.Log("");
+                // Debug.Log("");
             }
 
             Armorgrp armorgrp = kvp.Value;
@@ -139,7 +139,7 @@ public class ItemTable
         {
             if (kvp.Key == 7832)
             {
-                Debug.Log("");
+                // Debug.Log("");
             }
 
             if (_etcItems.ContainsKey(kvp.Key))

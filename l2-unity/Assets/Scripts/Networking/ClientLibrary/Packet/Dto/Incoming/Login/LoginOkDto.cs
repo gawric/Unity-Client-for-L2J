@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public sealed class LoginOkDto : IWireDto
 {
@@ -9,7 +9,7 @@ public sealed class LoginOkDto : IWireDto
     {
         SessionKey1 = reader.ReadI();
         SessionKey2 = reader.ReadI();
-        Debug.Log("session key 1 " + SessionKey1);
-        Debug.Log("session key 2 " + SessionKey2);
+        // Debug.Log("session key 1 " + SessionKey1);
+        // Debug.Log("session key 2 " + SessionKey2);
     }
 }

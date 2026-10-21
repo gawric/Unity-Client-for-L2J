@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 /// <summary>
 /// Builds <see cref="MagicCastData"/> for melee skill FX that match SpAtk wall-clock duration
@@ -18,9 +18,9 @@ public static class SkillAnimationCastDataBuilder
 
         if (entity == null || hitTimeMs <= 0)
         {
-            Debug.LogWarning(
-                $"[SKILL_ANIM_FX] CAST_DATA skip entity/hit invalid " +
-                $"entityNull={entity == null} hitMs={hitTimeMs}");
+            // Debug.LogWarning(
+                // $"[SKILL_ANIM_FX] CAST_DATA skip entity/hit invalid " +
+                // $"entityNull={entity == null} hitMs={hitTimeMs}");
             return castData;
         }
 
@@ -46,9 +46,9 @@ public static class SkillAnimationCastDataBuilder
 
         if (animator == null)
         {
-            Debug.LogWarning(
-                $"[SKILL_ANIM_FX] CAST_DATA no Animator objectId={entity.Identity.Id} " +
-                $"entityAnimatorNull={entity.Animator == null}");
+            // Debug.LogWarning(
+                // $"[SKILL_ANIM_FX] CAST_DATA no Animator objectId={entity.Identity.Id} " +
+                // $"entityAnimatorNull={entity.Animator == null}");
             return castData;
         }
 
@@ -77,9 +77,9 @@ public static class SkillAnimationCastDataBuilder
         }
         else
         {
-            Debug.LogWarning(
-                $"[SKILL_ANIM_FX] CAST_DATA could not estimate SpAtk wall duration spatk='{spatkName}' " +
-                $"hitMs={hitTimeMs} — FX will fall back to HitTime/settings lifetime.");
+            // Debug.LogWarning(
+                // $"[SKILL_ANIM_FX] CAST_DATA could not estimate SpAtk wall duration spatk='{spatkName}' " +
+                // $"hitMs={hitTimeMs} — FX will fall back to HitTime/settings lifetime.");
         }
 
         return castData;

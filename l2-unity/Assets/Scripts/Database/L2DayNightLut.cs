@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using UnityEngine;
@@ -51,7 +51,7 @@ public static class L2DayNightLut
         string dataPath = Path.Combine(Application.streamingAssetsPath, "Data/Meta", MetaFileName);
         if (!File.Exists(dataPath))
         {
-            Debug.LogWarning("[L2DayNightLut] File not found: " + dataPath + " — using DayNightCycle fallback colors.");
+            // Debug.LogWarning("[L2DayNightLut] File not found: " + dataPath + " — using DayNightCycle fallback colors.");
             return;
         }
 

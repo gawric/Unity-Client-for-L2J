@@ -27,7 +27,7 @@ public class SkillSlot : L2DraggableSlot
     {
         if (!_isPassive)
         {
-            Debug.Log("Handle Left Click");
+            // Debug.Log("Handle Left Click");
             EventLeftClick?.Invoke(_position);
             PlayerActions.Instance.UseSkill(_id);
         }
@@ -138,7 +138,7 @@ public class SkillSlot : L2DraggableSlot
         }
         else
         {
-            Debug.LogWarning($"AssignSkill: icon '{skill.Icon}' not found for skill id={skill.Id}");
+            // Debug.LogWarning($"AssignSkill: icon '{skill.Icon}' not found for skill id={skill.Id}");
         }
     }
 
@@ -160,7 +160,7 @@ public class SkillSlot : L2DraggableSlot
 
     public void OnClickLeftEvent(int position)
     {
-        Debug.Log("Click Event Skill Slot");
+        // Debug.Log("Click Event Skill Slot");
     }
 
 

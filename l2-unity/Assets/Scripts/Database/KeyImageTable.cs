@@ -41,7 +41,7 @@ public class KeyImageTable
             return result;
         }
 
-        Debug.LogWarning($"Missing icon: {name}.");
+        // Debug.LogWarning($"Missing icon: {name}.");
 
         return null;
     }

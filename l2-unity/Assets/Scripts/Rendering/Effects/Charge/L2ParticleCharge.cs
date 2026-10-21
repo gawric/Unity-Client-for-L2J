@@ -38,7 +38,7 @@ public class L2ParticleCharge : BaseEffect
 
     public override void SetProgress(float normalizedTime)
     {
-        Debug.Log("L2ParticleCharge>SetProgress: не реализовано");
+        // Debug.Log("L2ParticleCharge>SetProgress: не реализовано");
         //foreach (var group in _particleGroups)
            // group.SetProgress(normalizedTime);
     }

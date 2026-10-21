@@ -35,7 +35,7 @@ public class HtmlWindow : L2PopupWindow
     {
         if (Input.GetKeyDown(KeyCode.B) && CanSend(1100))
         {
-            Debug.Log("Requesting : ShowBoard");
+            // Debug.Log("Requesting : ShowBoard");
             IncomingPacketActions.Game.Send(new RequestShowBoardCommand());
         }
     }
@@ -65,7 +65,7 @@ public class HtmlWindow : L2PopupWindow
 
         if (_content == null)
         {
-            Debug.LogError("HtmlWindow: content element not found.");
+            // Debug.LogError("HtmlWindow: content element not found.");
             return;
         }
 
@@ -163,7 +163,7 @@ public class HtmlWindow : L2PopupWindow
     {
         if (_windowEle == null)
         {
-            Debug.LogError("HtmlWindow: _windowEle is null.");
+            // Debug.LogError("HtmlWindow: _windowEle is null.");
             return;
         }
 
@@ -175,7 +175,7 @@ public class HtmlWindow : L2PopupWindow
             if (_mouseOverDetection != null)
                 _mouseOverDetection.Disable();
 
-            Debug.Log("Community board closed with B");
+            // Debug.Log("Community board closed with B");
             return;
         }
 
@@ -189,7 +189,7 @@ public class HtmlWindow : L2PopupWindow
 
         BringToFront();
 
-        Debug.Log("Community board opened with B");
+        // Debug.Log("Community board opened with B");
     }
 
     private void ApplyNormalWindowMode()

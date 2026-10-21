@@ -36,7 +36,7 @@ public class NpcgrpTable {
         _npcgrps = new Dictionary<int, Npcgrp>();
         string dataPath = Path.Combine(Application.streamingAssetsPath, "Data/Meta/Npcgrp_Classic.txt");
         if (!File.Exists(dataPath)) {
-            Debug.LogWarning("File not found: " + dataPath);
+            // Debug.LogWarning("File not found: " + dataPath);
             return;
         }
 
@@ -123,7 +123,7 @@ public class NpcgrpTable {
                 _npcgrps.TryAdd(npcgrp.NpcId, npcgrp);
             }
 
-            Debug.Log($"Successfully imported {_npcgrps.Count} npcgrp(s)");
+            // Debug.Log($"Successfully imported {_npcgrps.Count} npcgrp(s)");
         }
     }
 
@@ -132,7 +132,7 @@ public class NpcgrpTable {
         _npcgrps.TryGetValue(id, out npcgrp);
 
         if(npcgrp == null) {
-            Debug.LogWarning($"Npcgrp not found for id [{id}]");
+            // Debug.LogWarning($"Npcgrp not found for id [{id}]");
         }
 
         return npcgrp;

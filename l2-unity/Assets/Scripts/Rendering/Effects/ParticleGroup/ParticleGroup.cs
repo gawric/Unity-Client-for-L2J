@@ -1,4 +1,4 @@
-using Unity.Jobs;
+﻿using Unity.Jobs;
 using UnityEngine;
 
 /// <summary>
@@ -187,12 +187,12 @@ public class ParticleGroup : EffectPart
             return;
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-        if (!_playback.Stopped)
-            EffectDoublePlayLog.Repeat(
-                "ParticleGroup.PlayPart",
-                this,
-                _playback.LastEnable,
-                _playback.FirstPlayStack);
+        // if (!_playback.Stopped)
+            // EffectDoublePlayLog.Repeat(
+                // "ParticleGroup.PlayPart",
+                // this,
+                // _playback.LastEnable,
+                // _playback.FirstPlayStack);
 #endif
         ParticleGroupJobPump.Remove(this);
         _simulation.CompleteExpire();
@@ -221,8 +221,8 @@ public class ParticleGroup : EffectPart
         _playback.BaseShaderLifetime = Mathf.Max(0.01f, Renderers.ReadLifetimeMax(_duration));
         _playback.Begin(Now(), _countPerSecond, _hasFixedDuration, _duration);
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-        _playback.FirstPlayStack = EffectDoublePlayLog.CaptureStack();
-        DocExtractorDropAdenaCoinLogger.OnPlayPart(this);
+        // _playback.FirstPlayStack = EffectDoublePlayLog.CaptureStack();
+        // DocExtractorDropAdenaCoinLogger.OnPlayPart(this);
 #endif
         Renderers.HideAll();
     }
@@ -284,12 +284,12 @@ public class ParticleGroup : EffectPart
         {
             _playback.SpawnedCount += _maxCount;
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-            DocExtractorDropAdenaCoinLogger.OnBurst(
-                this,
-                _playback.MeshRandBase,
-                _maxCount,
-                now,
-                now - _relativeWarmupTime);
+            // DocExtractorDropAdenaCoinLogger.OnBurst(
+                // this,
+                // _playback.MeshRandBase,
+                // _maxCount,
+                // now,
+                // now - _relativeWarmupTime);
 #endif
             return;
         }
@@ -344,12 +344,12 @@ public class ParticleGroup : EffectPart
             _playback.MeshRandBase,
             _playback.SpriteRandBase);
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-        DocExtractorDropAdenaCoinLogger.OnSlot(
-            this,
-            slot,
-            _playback.MeshRandBase,
-            now,
-            shaderStartTime);
+        // DocExtractorDropAdenaCoinLogger.OnSlot(
+            // this,
+            // slot,
+            // _playback.MeshRandBase,
+            // now,
+            // shaderStartTime);
 #endif
         _playback.AdvanceIndex(Renderers.Count);
     }
@@ -377,12 +377,12 @@ public class ParticleGroup : EffectPart
             _isParticleActive,
             _particleSpawnTimes);
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-        DocExtractorDropAdenaCoinLogger.OnSlot(
-            this,
-            slot,
-            _playback.MeshRandBase,
-            now,
-            shaderStartTime);
+        // DocExtractorDropAdenaCoinLogger.OnSlot(
+            // this,
+            // slot,
+            // _playback.MeshRandBase,
+            // now,
+            // shaderStartTime);
 #endif
         _playback.AdvanceIndex(Renderers.Count);
     }

@@ -1,4 +1,4 @@
-using L2_login;
+﻿using L2_login;
 using UnityEngine;
 
 public sealed class InterludeProtocol : IProtocol
@@ -78,25 +78,25 @@ public sealed class InterludeProtocol : IProtocol
         byte opcode = raw[0];
         if (!_packets.IsGameOpcode(opcode))
         {
-            LobbyFlowLog.Warn(
-                "unknown game opcode 0x" + opcode.ToString("X2") +
-                " name=" + LobbyFlowLog.OpcodeName(opcode) +
-                " len=" + raw.Length + " crypt=" + cryptEnabled);
+            // LobbyFlowLog.Warn(
+                // "unknown game opcode 0x" + opcode.ToString("X2") +
+                // " name=" + LobbyFlowLog.OpcodeName(opcode) +
+                // " len=" + raw.Length + " crypt=" + cryptEnabled);
             return false;
         }
 
         bool parsed = _packets.TryParseGame(new ItemServer(raw), out model);
         if (!parsed)
         {
-            LobbyFlowLog.Warn(
-                "TryParseGame returned false opcode=0x" + opcode.ToString("X2") +
-                " " + LobbyFlowLog.OpcodeName(opcode) + " len=" + raw.Length);
+            // LobbyFlowLog.Warn(
+                // "TryParseGame returned false opcode=0x" + opcode.ToString("X2") +
+                // " " + LobbyFlowLog.OpcodeName(opcode) + " len=" + raw.Length);
         }
         else
         {
-            LobbyFlowLog.Info(
-                "parsed opcode=0x" + opcode.ToString("X2") + " " + LobbyFlowLog.OpcodeName(opcode) +
-                " dto=" + model.GetType().Name + " len=" + raw.Length);
+            // LobbyFlowLog.Info(
+                // "parsed opcode=0x" + opcode.ToString("X2") + " " + LobbyFlowLog.OpcodeName(opcode) +
+                // " dto=" + model.GetType().Name + " len=" + raw.Length);
         }
 
         return parsed;
@@ -120,13 +120,13 @@ public sealed class InterludeProtocol : IProtocol
             {
                 if (!NewCrypt.decXORPass(raw))
                 {
-                    Debug.LogError("Packet XOR could not be decoded.");
+                    // Debug.LogError("Packet XOR could not be decoded.");
                     return false;
                 }
             }
             else if (!NewCrypt.verifyChecksum(raw))
             {
-                Debug.LogError("Packet checksum is wrong. Ignoring packet... length " + raw.Length);
+                // Debug.LogError("Packet checksum is wrong. Ignoring packet... length " + raw.Length);
                 return false;
             }
         }

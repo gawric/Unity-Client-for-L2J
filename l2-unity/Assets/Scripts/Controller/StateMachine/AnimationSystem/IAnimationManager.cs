@@ -16,7 +16,7 @@ public interface IAnimationManager
     Task<bool> AsyncPlayAnimationTrigger(int objectId, string animationName);
     /// <returns>true = clip finished; false = superseded by a newer cast (do not IDLE/WAIT_RETURN).</returns>
     Task<bool> AsyncPlayAnimationRaceOverrides(int objectId, string tiggerName , string overrideAnimationName);
-    Task AsyncPlayLongCastLoopPhase(int objectId, string triggerName, string overrideAnimationName);
+    Task AsyncPlayLongCastLoopPhase(int objectId, string triggerName, string overrideAnimationName, string shotOverrideAnimationName);
     /// <returns>true = finish event received; false = superseded by a newer cast.</returns>
     Task<bool> AsyncAwaitOverrideAnimationFinish(int objectId, string expectedFinishName);
 

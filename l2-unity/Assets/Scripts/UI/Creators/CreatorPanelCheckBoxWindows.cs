@@ -43,7 +43,7 @@ public class CreatePanelCheckBoxWindows : ICreatorPanelCheckBox
 
             if (twoPanel == null)
             {
-                Debug.LogError("CreatePanelCheckBoxWindows-> Not Found Template");
+                // Debug.LogError("CreatePanelCheckBoxWindows-> Not Found Template");
                 return;
             }
 
@@ -95,7 +95,7 @@ public class CreatePanelCheckBoxWindows : ICreatorPanelCheckBox
         }
         else
         {
-            Debug.LogError("CreatePanelCheckBoxWindows-> Not Found Panel");
+            // Debug.LogError("CreatePanelCheckBoxWindows-> Not Found Panel");
             return null;
         }
 
@@ -144,7 +144,7 @@ public class CreatePanelCheckBoxWindows : ICreatorPanelCheckBox
 
             if (setting.IsHeader())
             {
-                Debug.Log("Detected Header " + setting.GetName());
+                // Debug.Log("Detected Header " + setting.GetName());
                 continue;
             }
 

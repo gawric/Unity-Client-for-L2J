@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 [IncomingGamePacket(GameServerPacketType.TeleportToLocation)]
 public sealed class TeleportToLocationIncoming : IncomingWirePacket<TeleportToLocationDto>
@@ -7,7 +7,7 @@ public sealed class TeleportToLocationIncoming : IncomingWirePacket<TeleportToLo
     {
         IncomingPacketActions.Queue(() =>
         {
-            UnityChainLog.OnTeleport(packet.TarObjId, packet.X, packet.Y, packet.Z);
+            // UnityChainLog.OnTeleport(packet.TarObjId, packet.X, packet.Y, packet.Z);
             IncomingPacketActions.GameWorld.TeleportTo(packet.TarObjId, packet.TeleportPos);
         });
     }

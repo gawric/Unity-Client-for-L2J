@@ -46,7 +46,7 @@ public class PlayerLoopDebugger : MonoBehaviour
     {
         if (shader == null)
         {
-            Debug.LogWarning("Shader to disable is not assigned.");
+            // Debug.LogWarning("Shader to disable is not assigned.");
             return;
         }
 
@@ -63,7 +63,7 @@ public class PlayerLoopDebugger : MonoBehaviour
                     // Отключаем шейдер, заменяя его на Unlit/Texture или другой материал
                     material.shader = Shader.Find("Unlit/Texture");
                     // Или можно использовать: material.shader = Shader.Find("Standard");
-                    Debug.Log($"Shader {shader.name} disabled on {renderer.gameObject.name}");
+                    // Debug.Log($"Shader {shader.name} disabled on {renderer.gameObject.name}");
                 }
             }
         }

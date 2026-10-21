@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Threading;
@@ -56,7 +56,7 @@ public class IncomingGameQueue : IDisposable
         catch (InvalidOperationException){}
         catch (Exception ex)
         {
-            UnityEngine.Debug.LogError("IncomingGameQueue->AddItem " + ex);
+            // UnityEngine.Debug.LogError("IncomingGameQueue->AddItem " + ex);
         }
     }
 
@@ -154,11 +154,11 @@ public class IncomingGameQueue : IDisposable
                     catch
                     {
                     }
-                    PacketLatencyLog.SetIncomingRemain(remain);
+                    // PacketLatencyLog.SetIncomingRemain(remain);
                     handler.Handle(item);
                 }
                 catch (Exception ex){
-                    UnityEngine.Debug.LogError("IncomingGameQueue->Handle " + ex);
+                    // UnityEngine.Debug.LogError("IncomingGameQueue->Handle " + ex);
                 }
             }
         }

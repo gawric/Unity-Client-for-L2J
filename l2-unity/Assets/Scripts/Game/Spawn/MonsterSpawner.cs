@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public sealed class MonsterSpawner
 {
@@ -27,10 +27,10 @@ public sealed class MonsterSpawner
         MonsterEntity npc = EntitySpawnShared.FindOnPrefab<MonsterEntity>(npcGo);
         if (npc == null)
         {
-            Debug.LogError(
-                "MonsterSpawner: MonsterEntity missing on " + npcGo.name +
-                " prefab=" + (request.Prefab != null ? request.Prefab.name : "null") +
-                " npcId=" + identity.NpcId);
+            // Debug.LogError(
+                // "MonsterSpawner: MonsterEntity missing on " + npcGo.name +
+                // " prefab=" + (request.Prefab != null ? request.Prefab.name : "null") +
+                // " npcId=" + identity.NpcId);
             UnityEngine.Object.Destroy(npcGo);
             return null;
         }
@@ -48,7 +48,7 @@ public sealed class MonsterSpawner
 
         InitMonster(npc, npcGo, world);
         _deco.Start(npc);
-        CharInfoSpeedLog.LogNpcPacket(npc, "OnNpcInfo spawn");
+        // CharInfoSpeedLog.LogNpcPacket(npc, "OnNpcInfo spawn");
         world.RegisterNpc(npc);
         return npc;
     }
@@ -63,7 +63,7 @@ public sealed class MonsterSpawner
         monster.UpdateNpcRunningSpd(npcInfo.Stats.RunRealSpeed);
         monster.UpdateNpcWalkSpd(npcInfo.Stats.WalkRealSpeed);
         monster.Running = npcInfo.Identity.IsRunning;
-        CharInfoSpeedLog.LogNpcPacket(monster, "OnNpcInfo update");
+        // CharInfoSpeedLog.LogNpcPacket(monster, "OnNpcInfo update");
     }
 
     private static void InitMonster(Entity npc, GameObject npcGo, IWorldSpawnContext world)
@@ -72,7 +72,7 @@ public sealed class MonsterSpawner
             EntitySpawnShared.FindOnPrefab<NetworkAnimationController>(npcGo);
         if (animationController == null)
         {
-            Debug.LogError("MonsterSpawner: NetworkAnimationController missing on " + npcGo.name);
+            // Debug.LogError("MonsterSpawner: NetworkAnimationController missing on " + npcGo.name);
             return;
         }
         EntitySpawnShared.InitializeNpcAnimation(animationController);

@@ -62,7 +62,7 @@ public class SkillgrpTable
         string dataPath = Path.Combine(Application.streamingAssetsPath, "Data/Meta/Skillgrp_Classic.txt");
         if (!File.Exists(dataPath))
         {
-            Debug.LogWarning("File not found: " + dataPath);
+            // Debug.LogWarning("File not found: " + dataPath);
             return;
         }
 
@@ -173,7 +173,7 @@ public class SkillgrpTable
                 TryAdd(skillGrp);
             }
             
-            Debug.Log($"Successfully imported {_skills.Count} skills(s)");
+            // Debug.Log($"Successfully imported {_skills.Count} skills(s)");
         }
 
     }
@@ -222,7 +222,7 @@ public class SkillgrpTable
 
         if (!File.Exists(dataPath))
         {
-            Debug.LogWarning("File not found: " + dataPath);
+            // Debug.LogWarning("File not found: " + dataPath);
         }
 
         using (StreamReader reader = new StreamReader(dataPath))

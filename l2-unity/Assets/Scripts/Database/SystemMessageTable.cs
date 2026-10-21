@@ -25,7 +25,7 @@ public class SystemMessageTable {
         _systemMessages = new Dictionary<int, SystemMessageDat>();
         string dataPath = Path.Combine(Application.streamingAssetsPath, "Data/Meta/SystemMsg_Classic-eu.txt");
         if (!File.Exists(dataPath)) {
-            Debug.LogWarning("File not found: " + dataPath);
+            // Debug.LogWarning("File not found: " + dataPath);
             return;
         }
 
@@ -71,7 +71,7 @@ public class SystemMessageTable {
                 _systemMessages.TryAdd(systemMessage.Id, systemMessage);
             }
 
-            Debug.Log($"Successfully imported {_systemMessages.Count} system message(s)");
+            // Debug.Log($"Successfully imported {_systemMessages.Count} system message(s)");
         }
     }
 

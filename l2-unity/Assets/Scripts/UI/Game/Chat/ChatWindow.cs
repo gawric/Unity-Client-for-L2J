@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -104,13 +104,13 @@ public class ChatWindow : L2Window
         VisualElement tabHeaderContainer = _chatTabView.Q<VisualElement>("tab-header-container");
         if (tabHeaderContainer == null)
         {
-            Debug.LogError("tab-header-container is null");
+            // Debug.LogError("tab-header-container is null");
         }
         VisualElement tabContainer = _chatTabView.Q<VisualElement>("tab-content-container");
 
         if (tabContainer == null)
         {
-            Debug.LogError("tab-content-container");
+            // Debug.LogError("tab-content-container");
         }
 
         for (int i = 0; i < _tabs.Count; i++)
@@ -154,7 +154,7 @@ public class ChatWindow : L2Window
 
             _activeTab = switchTo;
 
-            Debug.Log("switching to: " + _activeTab.TabName);
+            // Debug.Log("switching to: " + _activeTab.TabName);
             return true;
         }
 
@@ -203,7 +203,7 @@ public class ChatWindow : L2Window
                         string gmCommand = text.Substring(2);
                         string command = prefix + gmCommand;
                         IncomingPacketActions.Game.Send(new RequestBypassToServerCommand(command));
-                        Debug.Log("ChatWindow: requested admin command :" + command);
+                        // Debug.Log("ChatWindow: requested admin command :" + command);
                     }
                     else
                     {
@@ -211,7 +211,7 @@ public class ChatWindow : L2Window
                         if (commands != null)
                         {
                             IncomingPacketActions.Game.Send(new RequestUserCommandCommand(commands.Id));
-                            Debug.Log("ChatWindow: requested player command :" + commands  + " id: " + commands.Id);
+                            // Debug.Log("ChatWindow: requested player command :" + commands  + " id: " + commands.Id);
                         }
                         else
                         {
@@ -293,7 +293,7 @@ public class ChatWindow : L2Window
                 string message = text.Substring(spaceIndex + 1);
 
                 IncomingPacketActions.Game.Send(new RequestSay2Command(ChatTypes.GetById(2), message, targetName));
-                Debug.Log("whisper chat: sending to :" + targetName + " message: " + message);
+                // Debug.Log("whisper chat: sending to :" + targetName + " message: " + message);
             }
             else
             {
@@ -302,7 +302,7 @@ public class ChatWindow : L2Window
         }
         else
         {
-            Debug.Log("SendChatMessage : Incorrect data for tab :" + tab.TabId);
+            // Debug.Log("SendChatMessage : Incorrect data for tab :" + tab.TabId);
         }
     }
 
@@ -311,7 +311,7 @@ public class ChatWindow : L2Window
     {
         ChatType messageType = (ChatType)data._data.Type;
 
-        Debug.Log("Creature Say: Received:" + data.ToString() + " Type: " + messageType + " ChatTypeId: " + data._data.Type);
+        // Debug.Log("Creature Say: Received:" + data.ToString() + " Type: " + messageType + " ChatTypeId: " + data._data.Type);
 
         bool isAnnounce = messageType == ChatType.ANNOUNCEMENT || messageType == ChatType.CRITICAL_ANNOUNCE;
         for (int i = 0; i < _tabs.Count; i++)

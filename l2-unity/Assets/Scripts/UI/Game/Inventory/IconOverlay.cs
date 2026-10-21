@@ -49,7 +49,7 @@ namespace Assets.Scripts.UI
             }
             if (_overlayTemplate == null)
             {
-                UnityEngine.Debug.LogError("Could not load status window template.");
+                // UnityEngine.Debug.LogError("Could not load status window template.");
             }
         }
 

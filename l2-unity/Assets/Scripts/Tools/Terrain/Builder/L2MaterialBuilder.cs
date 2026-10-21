@@ -25,7 +25,7 @@ public class L2MaterialBuilder {
 
             string ignorePath = Path.Combine(Path.GetDirectoryName(materialPath), ".ignore");
             if (File.Exists(ignorePath)) {
-                Debug.Log("Ignoring folder");
+                // Debug.Log("Ignoring folder");
                 continue;
             }
 
@@ -71,7 +71,7 @@ public class L2MaterialBuilder {
                             texRef = texRef.Substring(0, texRef.Length - 1);
                             string[] texRefEntries = texRef.Split('.');
                             textureName = texRefEntries[texRefEntries.Length - 1];
-                            Debug.Log("Texture: " + textureName);
+                            // Debug.Log("Texture: " + textureName);
                         }
                     } else if (key.StartsWith("SpecularityMask")) {
                         if (value.StartsWith("Texture")) {
@@ -80,11 +80,11 @@ public class L2MaterialBuilder {
                             string[] texRefEntries = texRef.Split('.');
                             specularTextureName = texRefEntries[texRefEntries.Length - 1];
                             isSpecular = true;
-                            Debug.Log("Specular texture: " + specularTextureName);
+                            // Debug.Log("Specular texture: " + specularTextureName);
                         }
                     } else if (key.StartsWith("Opacity")) {
                         if (value.StartsWith("Texture")) {
-                            Debug.LogWarning("Transparent: " + textureName);
+                            // Debug.LogWarning("Transparent: " + textureName);
                             isTransparent = true;
                         }
                     } else if (key.StartsWith("TwoSided")) {
@@ -93,9 +93,9 @@ public class L2MaterialBuilder {
                         if(!isTransparent) {
                             isTransparent = (value == "true");
                         }
-                        Debug.Log("AlphaTest:" + value);
+                        // Debug.Log("AlphaTest:" + value);
                     } else if (key.StartsWith("OutputBlending")) {
-                        Debug.Log("OutputBlending:");
+                        // Debug.Log("OutputBlending:");
                         if (value.StartsWith("OB_Brighten")) {
                             isUnlit = true;
                         } else if (value.StartsWith("OB_Masked")) {
@@ -127,7 +127,7 @@ public class L2MaterialBuilder {
                 if (!isTransparent && !overwrite) {
                     continue;
                 }
-                Debug.LogWarning("Delete " + texture);
+                // Debug.LogWarning("Delete " + texture);
                 AssetDatabase.DeleteAsset(materialPath);
             }
 
@@ -158,12 +158,12 @@ public class L2MaterialBuilder {
         material.SetInt("_HueVariationKwToggle", 0);
         material.SetFloat("_AlphaClipThreshold", 0.5f);
         material.SetFloat("_Glossiness", 0f);
-        Debug.Log($"_AlphaClip: {material.GetFloat("_AlphaClip")}");
-        Debug.Log($"_WindQuality: {material.GetInt("_WindQuality")}");
-        Debug.Log($"EFFECT_EXTRA_TEX: {material.GetInt("EFFECT_EXTRA_TEX")}");
-        Debug.Log($"_NormalMapKwToggle: {material.GetInt("_NormalMapKwToggle")}");
-        Debug.Log($"_HueVariationKwToggle: {material.GetInt("_HueVariationKwToggle")}");
-        Debug.Log($"_AlphaClipThreshold: {material.GetFloat("_AlphaClipThreshold")}");
+        // Debug.Log($"_AlphaClip: {material.GetFloat("_AlphaClip")}");
+        // Debug.Log($"_WindQuality: {material.GetInt("_WindQuality")}");
+        // Debug.Log($"EFFECT_EXTRA_TEX: {material.GetInt("EFFECT_EXTRA_TEX")}");
+        // Debug.Log($"_NormalMapKwToggle: {material.GetInt("_NormalMapKwToggle")}");
+        // Debug.Log($"_HueVariationKwToggle: {material.GetInt("_HueVariationKwToggle")}");
+        // Debug.Log($"_AlphaClipThreshold: {material.GetFloat("_AlphaClipThreshold")}");
 
         return material;
     }
@@ -213,12 +213,12 @@ public class L2MaterialBuilder {
 
             string ignorePath = Path.Combine(Path.GetDirectoryName(texturePath), ".ignore");
             if(File.Exists(ignorePath)) {
-                Debug.Log("Ignoring folder");
+                // Debug.Log("Ignoring folder");
                 continue;
             }
 
             if(materialPath.EndsWith("_ori.mat") || materialPath.EndsWith("_sp.mat")) {
-                Debug.Log("Skipping materials with props");
+                // Debug.Log("Skipping materials with props");
                 continue;
             }
 

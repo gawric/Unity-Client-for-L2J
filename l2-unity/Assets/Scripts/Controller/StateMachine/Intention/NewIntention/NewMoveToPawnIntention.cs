@@ -14,17 +14,24 @@ public class NewMoveToPawnIntention : IntentionBase
         if (arg0 != null)
         {
             
+            if (_stateMachine.State == PlayerState.DEAD)
+                return;
+
             ModelMovePawn model = (ModelMovePawn)arg0;
+            if (model.TarEntity() == null)
+                return;
+
             Vector3 tarPosition = model.TarEntity().transform.position;
             Vector3 sourPosition = model.SourObj();
             float distance = VectorUtils.Distance2D(sourPosition, tarPosition);
 
-            // Packet Dist is the weapon-range offset only (sword 40 UU). Collision radii are not in it.
-            Debug.Log("NewMoveToPawnIntention > dist " + distance + " stopDist " + model.Distance());
+            // APawn::ReachedDestination on a pawn goal replaces CollisionRadius with
+            // MoveToPawnAdjust and then adds DestinationOffset. The packet distance is that adjust.
+            // Debug.Log("NewMoveToPawnIntention > dist " + distance + " stopDist " + model.Distance());
 
             if (distance > model.Distance())
             {
-                // Packet Dist is the stand ring. The pawn capsule must not stop the player outside it.
+                // Stop ring is the packet distance. ReachedDestination does not add collision radii for a pawn goal.
                 L2PawnRange.IgnorePawnCollision(PlayerEntity.Instance, model.TarEntity());
                 PlayerStateMachine.Instance.IsMoveToPawn = true;
                 bool running = PlayerEntity.Instance != null && PlayerEntity.Instance.Running;
@@ -34,6 +41,13 @@ public class NewMoveToPawnIntention : IntentionBase
             else
             {
                 L2PawnRange.ClearIgnoredPawn(PlayerEntity.Instance);
+                if (_stateMachine.State == PlayerState.SITTING ||
+                    _stateMachine.State == PlayerState.SIT_WAIT ||
+                    _stateMachine.State == PlayerState.STANDING)
+                {
+                    _stateMachine.ChangeState(PlayerState.IDLE);
+                    _stateMachine.NotifyEvent(Event.ARRIVED);
+                }
             }
 
         }
@@ -44,7 +58,10 @@ public class NewMoveToPawnIntention : IntentionBase
         if (_stateMachine.State == PlayerState.IDLE ||
             _stateMachine.State == PlayerState.ATTACKING ||
             _stateMachine.State == PlayerState.PHYSICAL_SKILLS ||
-            _stateMachine.State == PlayerState.MAGIC_SKILLS)
+            _stateMachine.State == PlayerState.MAGIC_SKILLS ||
+            _stateMachine.State == PlayerState.SITTING ||
+            _stateMachine.State == PlayerState.SIT_WAIT ||
+            _stateMachine.State == PlayerState.STANDING)
         {
             if (PlayerEntity.Instance != null)
                 PlayerEntity.Instance.IsAttack = false;

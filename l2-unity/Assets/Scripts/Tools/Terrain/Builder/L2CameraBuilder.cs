@@ -18,7 +18,7 @@ public class L2CameraBuilder {
         string fileToProcess = EditorUtility.OpenFilePanel(title, directory, extension);
 
         if (!string.IsNullOrEmpty(fileToProcess)) {
-            Debug.Log("Selected file: " + fileToProcess);
+            // Debug.Log("Selected file: " + fileToProcess);
             List<L2InterpolationPoint> interpolationPoints = L2T3DInfoParser.ParseCameraInfo(fileToProcess);
 
             GameObject container = new GameObject("Cameras");

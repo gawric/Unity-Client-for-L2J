@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -18,34 +18,56 @@ public sealed class EntityActionSkill : IEntityActionProcess
 
     public void Enter(Entity entity, object payload)
     {
+        MagicSkillUseDto earlyMagic = payload as MagicSkillUseDto;
+        bool windstrike = earlyMagic != null && earlyMagic.SkillId == 4247;
+        if (windstrike)
+        {
+            Debug.Log(
+                "[WINDSTRIKE] Skill.Enter type=" + (entity != null ? entity.GetType().Name : "null") +
+                " dead=" + (entity != null && entity.IsDead()) +
+                " identity=" + (entity != null && entity.Identity != null));
+        }
+
         if (entity == null || entity.IsDead() || entity.Identity == null)
             return;
 
-        MagicSkillUseDto magic = payload as MagicSkillUseDto;
+        MagicSkillUseDto magic = earlyMagic;
         if (magic == null)
             return;
 
         if (TryApplyWeaponCharge(entity, magic))
+        {
+            if (windstrike)
+                Debug.Log("[WINDSTRIKE] Skill.Enter stopped at weapon-charge");
             return;
+        }
 
         if (SetupDurationHelper.IsUsePotion(magic))
         {
+            if (windstrike)
+                Debug.Log("[WINDSTRIKE] Skill.Enter potion");
             PlaySkillEffect(entity, magic);
             return;
         }
 
         bool wasMoving = entity.Identity != null && MoveAllCharacters.Instance != null &&
             MoveAllCharacters.Instance.IsMoving(entity.Identity.Id);
-        if (IsWorldNpcOrMonster(entity))
-            MobSkillLog.Begin(entity, magic.SkillId, wasMoving);
-        bool keepMove = IsWorldNpcOrMonster(entity);
-        EntityActionCombatLog.LogStep(entity,
-            "SKILL CANCEL_MOVE nick=" + EntityActionCombatLog.NameOf(entity) +
-            " skill=" + magic.SkillId +
+        MagicGaitTrace.Event(entity, "Skill.Enter",
+            "skill=" + magic.SkillId +
+            " isMagic=" + IsMagicSkill(magic) +
+            " hitTime=" + magic.HitTime +
             " wasMoving=" + wasMoving +
-            " keepMove=" + keepMove +
-            " nowL2=" + EntityActionCombatLog.L2(entity.transform.position) +
-            " destL2=" + EntityActionCombatLog.L2(entity.ActionSlot.Destination));
+            " target=" + magic.TargetId);
+        // if (IsWorldNpcOrMonster(entity))
+            // MobSkillLog.Begin(entity, magic.SkillId, wasMoving);
+        bool keepMove = IsWorldNpcOrMonster(entity);
+        // EntityActionCombatLog.LogStep(entity,
+            // "SKILL CANCEL_MOVE nick=" + EntityActionCombatLog.NameOf(entity) +
+            // " skill=" + magic.SkillId +
+            // " wasMoving=" + wasMoving +
+            // " keepMove=" + keepMove +
+            // " nowL2=" + EntityActionCombatLog.L2(entity.transform.position) +
+            // " destL2=" + EntityActionCombatLog.L2(entity.ActionSlot.Destination));
         if (!keepMove)
             EntityActionVisual.CancelMove(entity);
 
@@ -56,11 +78,23 @@ public sealed class EntityActionSkill : IEntityActionProcess
 
         if (!selfCast && target != null && target.IsDead())
         {
-            EntityActionCombatLog.LogCiPawn(entity,
-                "Skill SKIP deadTarget nick=" + EntityActionCombatLog.NameOf(entity) +
-                " skill=" + magic.SkillId +
-                " target=" + EntityActionCombatLog.Describe(target));
+            if (windstrike)
+            {
+                Debug.Log(
+                    "[WINDSTRIKE] Skill.Enter stopped dead target=" +
+                    (target.Identity != null ? target.Identity.Id.ToString() : target.name));
+            }
             return;
+        }
+
+        if (windstrike)
+        {
+            Debug.Log(
+                "[WINDSTRIKE] Skill.Enter continue monster=" + IsWorldNpcOrMonster(entity) +
+                " self=" + selfCast +
+                " target=" + (target != null ? target.name : "null") +
+                " anim='" + (magic.SkillGrp != null ? magic.SkillGrp.Animation : "skillgrp-null") +
+                "' isMagic=" + IsMagicSkill(magic));
         }
 
         if (!IsWorldNpcOrMonster(entity))
@@ -73,27 +107,44 @@ public sealed class EntityActionSkill : IEntityActionProcess
         BeginFacing(entity, magic, target, selfCast);
         BeginVisualLock(entity, magic);
 
-        EntityActionCombatLog.LogCiPawn(entity,
-            "Skill.Enter nick=" + EntityActionCombatLog.NameOf(entity) +
-            " skill=" + magic.SkillId +
-            " lvl=" + magic.SkillLvl +
-            " magic=" + (magic.SkillGrp != null ? magic.SkillGrp.IsMagic.ToString() : "-") +
-            " hitTime=" + magic.HitTime +
-            " self=" + selfCast +
-            " target=" + EntityActionCombatLog.Describe(target));
+        // EntityActionCombatLog.LogCiPawn(entity,
+            // "Skill.Enter nick=" + EntityActionCombatLog.NameOf(entity) +
+            // " skill=" + magic.SkillId +
+            // " lvl=" + magic.SkillLvl +
+            // " magic=" + (magic.SkillGrp != null ? magic.SkillGrp.IsMagic.ToString() : "-") +
+            // " hitTime=" + magic.HitTime +
+            // " self=" + selfCast +
+            // " target=" + EntityActionCombatLog.Describe(target));
 
         if (IncomingPacketActions.Animations != null && entity.Identity != null && magic.HitTime > 0)
             IncomingPacketActions.Animations.SetSpTimeAtk(entity.Identity.Id, magic.HitTime);
 
-        if (TryPlayNoneAnimWorldPawnEffect(entity, magic))
-            return;
+        try
+        {
+            if (TryPlayNoneAnimWorldPawnEffect(entity, magic))
+            {
+                if (windstrike)
+                    Debug.Log("[WINDSTRIKE] branch=none-anim");
+                return;
+            }
 
-        if (selfCast)
-            ExecuteSelfSkill(entity, magic);
-        else if (IsMagicSkill(magic))
-            ExecuteMagicSkill(entity, magic, target);
-        else
-            ExecutePhysicalSkill(entity, magic);
+            string branch = selfCast ? "self" : IsMagicSkill(magic) ? "magic" : "physical";
+            if (windstrike)
+                Debug.Log("[WINDSTRIKE] branch=" + branch);
+
+            if (selfCast)
+                ExecuteSelfSkill(entity, magic);
+            else if (IsMagicSkill(magic))
+                ExecuteMagicSkill(entity, magic, target);
+            else
+                ExecutePhysicalSkill(entity, magic);
+        }
+        catch (Exception ex)
+        {
+            if (windstrike)
+                Debug.LogError("[WINDSTRIKE] Skill.Enter exception " + ex);
+            throw;
+        }
     }
 
     public void Tick(Entity entity)
@@ -110,6 +161,7 @@ public sealed class EntityActionSkill : IEntityActionProcess
             target = entity.AttackTarget.GetComponent<Entity>();
         if (target != null && target != entity && target.IsDead())
         {
+            MagicGaitTrace.Event(entity, "Skill.Tick-deadTarget→CancelAttackKeepStance", null);
             if (EntityActionMachine.Instance != null)
                 EntityActionMachine.Instance.CancelAttackKeepStance(entity);
             return;
@@ -118,6 +170,8 @@ public sealed class EntityActionSkill : IEntityActionProcess
         if (user == null || !user.ShouldReturnFromAttack())
             return;
 
+        MagicGaitTrace.Event(entity, "Skill.Tick→Idle",
+            "visExpired ClearAttackVisual → Set Idle");
         user.ClearAttackVisual();
         if (entity.Identity != null)
             CombatFacingService.Instance?.EndFollow(entity.Identity.Id, "skill-tick");
@@ -137,9 +191,9 @@ public sealed class EntityActionSkill : IEntityActionProcess
             entity.GetWeaponTransform(),
             entity.transform);
 
-        EntityActionCombatLog.LogCiPawn(entity,
-            "Skill CHARGE nick=" + EntityActionCombatLog.NameOf(entity) +
-            " skill=" + magic.SkillId);
+        // EntityActionCombatLog.LogCiPawn(entity,
+            // "Skill CHARGE nick=" + EntityActionCombatLog.NameOf(entity) +
+            // " skill=" + magic.SkillId);
         return true;
     }
 
@@ -193,6 +247,14 @@ public sealed class EntityActionSkill : IEntityActionProcess
         bool moving = entity.Identity != null && MoveAllCharacters.Instance != null &&
             MoveAllCharacters.Instance.IsMoving(entity.Identity.Id);
         bool moveAction = entity.ActionSlot != null && entity.ActionSlot.Action == EntityActionKind.Move;
+
+        MagicGaitTrace.BeginPostShotWatch(entity);
+        MagicGaitTrace.Event(entity, "FinishRemoteCast",
+            "moving=" + moving + " moveAction=" + moveAction +
+            " → " + (moving || moveAction
+                ? (moving ? "ReplayUserGait" : "KEEP action=Move")
+                : "Set Idle"));
+
         if (moving || moveAction)
         {
             if (moving)
@@ -201,10 +263,6 @@ public sealed class EntityActionSkill : IEntityActionProcess
                 if (move != null)
                     move.ReplayUserGait();
             }
-            EntityActionCombatLog.LogStep(entity,
-                "SHOT KEEP_GAIT nick=" + EntityActionCombatLog.NameOf(entity) +
-                " moving=" + moving +
-                " action=" + (entity.ActionSlot != null ? entity.ActionSlot.Action.ToString() : "-"));
             return;
         }
 
@@ -288,22 +346,29 @@ public sealed class EntityActionSkill : IEntityActionProcess
     {
         AnimationCombo combo = GetCombo(magic);
         string raceName = entity.RaceId.ToString();
+        if (magic.SkillId == 4247)
+        {
+            Debug.Log(
+                "[WINDSTRIKE] ExecuteMagic combo=" + (combo != null) +
+                " executor=" + (SkillExecutor.Instance != null) +
+                " skillGrp=" + (magic.SkillGrp != null) +
+                " race=" + raceName);
+        }
         if (combo == null || SkillExecutor.Instance == null || magic.SkillGrp == null)
         {
-            Debug.Log("[MAGIC_SHOT_LOG] SKIP override nick=" + EntityActionCombatLog.NameOf(entity) +
-                " skill=" + magic.SkillId +
-                " raceId=" + raceName +
-                " combo=" + (combo != null) +
-                " skillGrp=" + (magic.SkillGrp != null) +
-                " executor=" + (SkillExecutor.Instance != null));
+            MagicGaitTrace.Event(entity, "ExecuteMagic-FALLBACK-phys",
+                "skill=" + magic.SkillId + " race=" + raceName +
+                " combo=" + (combo != null) + " skillGrp=" + (magic.SkillGrp != null));
             PlaySkillEffect(entity, magic);
             EntityActionVisual.PlayPhysicalSkill(entity, magic);
             return;
         }
-        Debug.Log("[MAGIC_SHOT_LOG] CAST override nick=" + EntityActionCombatLog.NameOf(entity) +
-            " skill=" + magic.SkillId +
-            " raceId=" + raceName +
-            " hitTime=" + magic.HitTime);
+        MagicGaitTrace.Event(entity, "ExecuteMagic-override",
+            "skill=" + magic.SkillId + " race=" + raceName + " hitTime=" + magic.HitTime);
+        // Debug.Log("[MAGIC_SHOT_LOG] CAST override nick=" + EntityActionCombatLog.NameOf(entity) +
+            // " skill=" + magic.SkillId +
+            // " raceId=" + raceName +
+            // " hitTime=" + magic.HitTime);
 
         int objectId = entity.Identity.Id;
         string[] orderedCycle = SetupDurationHelper.BuildOrderedCycleForOverrideTiming(combo.GetAnimCycle());
@@ -371,14 +436,45 @@ public sealed class EntityActionSkill : IEntityActionProcess
 
     static void PlaySkillEffect(Entity entity, MagicSkillUseDto magic)
     {
+        bool windstrike = magic != null && magic.SkillId == 4247;
         EffectManager effects = IncomingPacketActions.Effects;
         if (effects == null || entity == null || magic == null)
+        {
+            if (windstrike)
+            {
+                Debug.Log(
+                    "[WINDSTRIKE] PlaySkillEffect abort effects=" + (effects != null) +
+                    " entity=" + (entity != null) +
+                    " magic=" + (magic != null));
+            }
             return;
-        effects.PlayEffect(magic.SkillId, entity.transform, entity.GetMagicCastData());
+        }
+
+        MagicCastData cast = entity.GetMagicCastData();
+        if (windstrike)
+        {
+            Debug.Log(
+                "[WINDSTRIKE] PlaySkillEffect id=4247 cast=" + (cast != null) +
+                " immediate=" + (cast != null && cast.SpawnShotVisualsImmediately) +
+                " targetId=" + (cast != null ? cast.TargetObjectId : 0));
+        }
+        effects.PlayEffect(magic.SkillId, entity.transform, cast);
+        if (windstrike)
+            Debug.Log("[WINDSTRIKE] PlaySkillEffect returned");
     }
 
     static bool TryPlayNoneAnimWorldPawnEffect(Entity entity, MagicSkillUseDto magic)
     {
+        bool windstrikeGate = magic != null && magic.SkillId == 4247;
+        if (windstrikeGate)
+        {
+            Debug.Log(
+                "[WINDSTRIKE] TryPlay monster=" + IsWorldNpcOrMonster(entity) +
+                " anim='" + (magic.SkillGrp != null ? magic.SkillGrp.Animation : "skillgrp-null") +
+                "' none=" + IsSkillAnimationNone(magic) +
+                " npcId=" + (entity.Identity != null ? entity.Identity.NpcId : 0));
+        }
+
         if (!IsWorldNpcOrMonster(entity) || !IsSkillAnimationNone(magic))
             return false;
 
@@ -404,22 +500,32 @@ public sealed class EntityActionSkill : IEntityActionProcess
         if (hasNpcOverride)
             sequence = ResolvePlayableNpcSkillSequence(entity, sequence);
 
+        if (hasNpcOverride)
+            EntityActionVisual.CancelMove(entity);
+
         if (cast != null)
             cast.SpawnShotVisualsImmediately = !hasNpcOverride;
 
-        EntityActionCombatLog.LogCiPawn(entity,
-            "Skill NONE_ANIM FX nick=" + EntityActionCombatLog.NameOf(entity) +
-            " skill=" + magic.SkillId +
-            " npcId=" + npcId +
-            " override=" + (hasNpcOverride ? sequence : "-") +
-            " anim=" + (magic.SkillGrp != null ? magic.SkillGrp.Animation : "-"));
         PlaySkillEffect(entity, magic);
+        if (magic.SkillId == 4247)
+        {
+            Debug.Log(
+                "[WINDSTRIKE] play effect 1177 skill=4247 seq=" +
+                (hasNpcOverride ? sequence : "none") +
+                " immediate=" + (cast != null && cast.SpawnShotVisualsImmediately) +
+                " hitMs=" + magic.HitTime +
+                " npc=" + npcId);
+            CrasherSlideLog.Event(entity, "WindstrikePlay",
+                "seq=" + (hasNpcOverride ? sequence : "none") +
+                " immediate=" + (cast != null && cast.SpawnShotVisualsImmediately) +
+                " hitMs=" + magic.HitTime);
+        }
 
         if (hasNpcOverride &&
             IncomingPacketActions.Animations != null &&
             entity.Identity != null)
         {
-            MobSkillLog.Play(entity, sequence);
+            // MobSkillLog.Play(entity, sequence);
             IncomingPacketActions.Animations.PlayMonsterAnimation(
                 entity.Identity.Id, sequence);
         }
@@ -452,11 +558,11 @@ public sealed class EntityActionSkill : IEntityActionProcess
         if (!animator.HasState(0, Animator.StringToHash(fallback)))
             return sequence;
 
-        Debug.LogWarning(
-            "[MOBSKILL] Missing animation state nick=" + EntityActionCombatLog.NameOf(entity) +
-            " npcId=" + (entity.Identity != null ? entity.Identity.NpcId : 0) +
-            " requested=" + sequence +
-            " fallback=" + fallback);
+        // Debug.LogWarning(
+            // "[MOBSKILL] Missing animation state nick=" + EntityActionCombatLog.NameOf(entity) +
+            // " npcId=" + (entity.Identity != null ? entity.Identity.NpcId : 0) +
+            // " requested=" + sequence +
+            // " fallback=" + fallback);
         return fallback;
     }
 
@@ -524,132 +630,3 @@ public sealed class EntityActionSkill : IEntityActionProcess
 
 }
 
-public static class MobSkillLog
-{
-    const string Key = "MOBSKILL";
-
-    sealed class Trace
-    {
-        public int skillId;
-        public string before = "-";
-        public bool wasMoving;
-        public string seq = "-";
-        public float clip = -1f;
-        public float meleeMs = -1f;
-        public float patkspd = -1f;
-        public string request = "-";
-        public bool clipEnded;
-        public bool stuck;
-    }
-
-    static readonly Dictionary<int, Trace> _traces = new Dictionary<int, Trace>();
-
-    public static void Begin(Entity entity, int skillId, bool wasMoving)
-    {
-        Trace trace = Get(entity);
-        trace.skillId = skillId;
-        trace.before = EntityActionSkill.AnimatorStateName(AnimatorOf(entity));
-        trace.wasMoving = wasMoving;
-        trace.seq = "-";
-        trace.clip = -1f;
-        trace.meleeMs = -1f;
-        trace.patkspd = -1f;
-        trace.request = "-";
-        trace.clipEnded = false;
-        trace.stuck = false;
-        Write(entity, trace, "start");
-    }
-
-    public static void Play(Entity entity, string sequence)
-    {
-        Trace trace = Get(entity);
-        trace.seq = string.IsNullOrEmpty(sequence) ? "-" : sequence;
-    }
-
-    public static void Enter(Entity entity, float clipLength, float meleeTimeMs, float patkspd)
-    {
-        Trace trace = Get(entity);
-        trace.clip = clipLength;
-        trace.meleeMs = meleeTimeMs;
-        trace.patkspd = patkspd;
-        Write(entity, trace, "enter");
-    }
-
-    public static void ClipEnd(Entity entity)
-    {
-        Get(entity).clipEnded = true;
-    }
-
-    public static string CurrentLocomotion(Entity entity)
-    {
-        bool moving = entity != null &&
-            entity.Identity != null &&
-            MoveAllCharacters.Instance != null &&
-            MoveAllCharacters.Instance.IsMoving(entity.Identity.Id);
-        if (!moving)
-            return "wait";
-
-        return entity.Running ? "run" : "walk";
-    }
-
-    public static void Done(Entity entity, string request)
-    {
-        Trace trace = Get(entity);
-        trace.request = request;
-        Write(entity, trace, "done");
-    }
-
-    public static void Stuck(Entity entity)
-    {
-        Trace trace = Get(entity);
-        trace.stuck = true;
-        Write(entity, trace, "stuck");
-    }
-
-    static Trace Get(Entity entity)
-    {
-        int id = entity != null && entity.Identity != null ? entity.Identity.Id : 0;
-        Trace trace;
-        if (!_traces.TryGetValue(id, out trace))
-        {
-            trace = new Trace();
-            _traces[id] = trace;
-        }
-
-        return trace;
-    }
-
-    static void Write(Entity entity, Trace trace, string phase)
-    {
-        Animator animator = AnimatorOf(entity);
-        bool moving = entity != null && entity.Identity != null &&
-            MoveAllCharacters.Instance != null &&
-            MoveAllCharacters.Instance.IsMoving(entity.Identity.Id);
-        float norm = animator != null ? animator.GetCurrentAnimatorStateInfo(0).normalizedTime : -1f;
-        Debug.Log(
-            Key +
-            " phase=" + phase +
-            " nick=" + EntityActionCombatLog.NameOf(entity) +
-            " skill=" + trace.skillId +
-            " before=" + trace.before +
-            " wasMoving=" + trace.wasMoving +
-            " seq=" + trace.seq +
-            " clip=" + trace.clip.ToString("F3") +
-            " meleeMs=" + trace.meleeMs.ToString("F0") +
-            " patkspd=" + trace.patkspd.ToString("F3") +
-            " now=" + EntityActionSkill.AnimatorStateName(animator) +
-            " norm=" + norm.ToString("F3") +
-            " moving=" + moving +
-            " inCombat=" + (entity != null && entity.InCombat) +
-            " request=" + trace.request +
-            " clipEnded=" + trace.clipEnded +
-            " stuck=" + trace.stuck);
-    }
-
-    static Animator AnimatorOf(Entity entity)
-    {
-        if (entity == null || entity.GetAnimatorController() == null)
-            return null;
-        return entity.GetAnimatorController().GetAnimator();
-    }
-}

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -171,7 +171,7 @@ public class EnchantWindow : L2PopupWindow
         }
         else
         {
-            Debug.LogWarning("EnchantWindows error not add dropItems");
+            // Debug.LogWarning("EnchantWindows error not add dropItems");
         }
     }
 

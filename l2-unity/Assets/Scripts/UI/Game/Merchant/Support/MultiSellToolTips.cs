@@ -157,7 +157,7 @@ public class MultiSellToolTips
                 if (item.name.Equals("phisAtkText"))
                 {
                     item.style.marginTop = -2;
-                    Debug.Log("phisAtkText -2 enabled");
+                    // Debug.Log("phisAtkText -2 enabled");
                 }
                 else
                 {

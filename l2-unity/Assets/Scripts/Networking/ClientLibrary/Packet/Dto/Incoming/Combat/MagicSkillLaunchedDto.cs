@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using UnityEngine;
 
 public class MagicSkillLaunchedDto : IWireDto
@@ -26,6 +26,6 @@ public class MagicSkillLaunchedDto : IWireDto
         {
             _targetArray[i] = reader.ReadI();
         }
-        Debug.Log("");
+        // Debug.Log("");
     }
 }

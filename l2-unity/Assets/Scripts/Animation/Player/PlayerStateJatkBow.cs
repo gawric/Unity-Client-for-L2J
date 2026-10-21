@@ -52,22 +52,22 @@ public class PlayerStateJatkBow : StateMachineBehaviour
         if (AnimationManager.Instance != null)
             AnimationManager.Instance.SetPAtkSpeed(objectId, 0f);
 
-        ReplayAttackTrace.Write(
-            "BOW_CLIP_ENTER",
-            entity,
-            entity != null ? entity.GetTargetEntity() : null,
-            "clipLength=" + clipLength.ToString("F3") +
-            " shootAt=" + eventTimeInClip.ToString("F3") +
-            " sourceFps=30.000" +
-            " unityFps=" + unityClipFps.ToString("F3") +
-            " animRate=" + clientAnimRate.ToString("F6") +
-            " atkMul=" + attackMultiplier.ToString("F6") +
-            " playRate=" + clientPlayRate.ToString("F6") +
-            " tween=" + _tweenSeconds.ToString("F6") +
-            " R=" + _releaseAt.ToString("F3") +
-            " motionSpeed=" + _motionSpeed.ToString("F6") +
-            " endAt=" + _endTime.ToString("F3") +
-            " parameter=" + parameterName);
+        // ReplayAttackTrace.Write(
+            // "BOW_CLIP_ENTER",
+            // entity,
+            // entity != null ? entity.GetTargetEntity() : null,
+            // "clipLength=" + clipLength.ToString("F3") +
+            // " shootAt=" + eventTimeInClip.ToString("F3") +
+            // " sourceFps=30.000" +
+            // " unityFps=" + unityClipFps.ToString("F3") +
+            // " animRate=" + clientAnimRate.ToString("F6") +
+            // " atkMul=" + attackMultiplier.ToString("F6") +
+            // " playRate=" + clientPlayRate.ToString("F6") +
+            // " tween=" + _tweenSeconds.ToString("F6") +
+            // " R=" + _releaseAt.ToString("F3") +
+            // " motionSpeed=" + _motionSpeed.ToString("F6") +
+            // " endAt=" + _endTime.ToString("F3") +
+            // " parameter=" + parameterName);
 
         if (AnimatorUtils.IsLocalPlayerAnimator(animator))
             StopAnimationTrigger(animator, parameterName);
@@ -104,13 +104,13 @@ public class PlayerStateJatkBow : StateMachineBehaviour
             return;
 
         _isSwitchIdle = true;
-        ReplayAttackTrace.Write(
-            "BOW_SWITCH_IDLE",
-            PlayerEntity.Instance,
-            PlayerEntity.Instance != null ? PlayerEntity.Instance.GetTargetEntity() : null,
-            "elapsed=" + (Time.time - _startTime).ToString("F3") +
-            " endAt=" + _endTime.ToString("F3") +
-            " releaseAt=" + _releaseAt.ToString("F3"));
+        // ReplayAttackTrace.Write(
+            // "BOW_SWITCH_IDLE",
+            // PlayerEntity.Instance,
+            // PlayerEntity.Instance != null ? PlayerEntity.Instance.GetTargetEntity() : null,
+            // "elapsed=" + (Time.time - _startTime).ToString("F3") +
+            // " endAt=" + _endTime.ToString("F3") +
+            // " releaseAt=" + _releaseAt.ToString("F3"));
         if (PlayerEntity.Instance != null)
             PlayerEntity.Instance.IsAttack = false;
         if (PlayerStateMachine.Instance != null && PlayerStateMachine.Instance.ShouldKeepLocomotion())

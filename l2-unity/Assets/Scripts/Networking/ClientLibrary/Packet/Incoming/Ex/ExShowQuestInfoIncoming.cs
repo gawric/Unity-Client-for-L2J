@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 [IncomingExPacket(GameExServerPacketType.ExShowQuestInfo)]
 public sealed class ExShowQuestInfoIncoming : IncomingWirePacket<ExShowQuestInfoDto>
@@ -8,6 +8,6 @@ public sealed class ExShowQuestInfoIncoming : IncomingWirePacket<ExShowQuestInfo
         if (IncomingPacketActions.GameWorld != null)
             IncomingPacketActions.Queue(() => IncomingPacketActions.QuestList.ShowWindow());
 
-        Debug.Log("Event Open ExShowQuestInfo Info");
+        // Debug.Log("Event Open ExShowQuestInfo Info");
     }
 }

@@ -290,7 +290,7 @@ public class CharSelectWindow : L2Window {
 
     private void DeletePressed()
     {
-        Debug.Log("DeletePressed");
+        // Debug.Log("DeletePressed");
         IncomingPacketActions.Characters.TryToDeleteCharacter();
     }
 }

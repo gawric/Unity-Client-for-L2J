@@ -29,7 +29,7 @@ public abstract class AbstractTab
         }
         else
         {
-            Debug.LogError("TradeTab > RefreshTabContainerClass Not Found _tabContainer or _tabHeader");
+            // Debug.LogError("TradeTab > RefreshTabContainerClass Not Found _tabContainer or _tabHeader");
         }
 
     }
@@ -43,7 +43,7 @@ public abstract class AbstractTab
         }
         else
         {
-            Debug.LogError("TradeTab > RefreshTabContainerClass Not Found _tabContainer or _tabHeader");
+            // Debug.LogError("TradeTab > RefreshTabContainerClass Not Found _tabContainer or _tabHeader");
         }
 
     }

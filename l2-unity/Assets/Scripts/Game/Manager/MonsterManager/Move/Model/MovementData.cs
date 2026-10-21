@@ -3,6 +3,8 @@
 public class MovementData
 {
     private Entity _entity;
+    private Transform _transform;
+    private L2PawnYawDrive _yawDrive;
     private MovementTarget _movementTarget;
 
     private float _verticalVelocity = 0;
@@ -24,15 +26,41 @@ public class MovementData
     const float LocomotionCheckDelay = 0.4f;
     const float LocomotionCheckRadius = 50f;
 
+    // Port of Interlude ULevel::ToFloor / APawn::processLanded ground settle
+    // (TraceCallers.h / TraceBodies.h, flags 0x086 / 0x297). The pawn drops a
+    // capsule (CollisionRadius, CollisionRadius, CollisionHeight) straight down
+    // and its centre rests CollisionHeight above the hit surface.
+    const float GroundCastStartAbove = 20f;   // dbl_1F3F9A8 (20.0) spawn-probe lift
+    const float GroundCastMaxFall = 300f;      // matches GroundSnapHelper.DefaultMaxDistance
+
     // Interlude MoveTimer. A new click while still moving keeps this value.
-    private float _moveTimer;
+    // Persisted on Entity.LocomotionTimer so the walk->run timer survives
+    // MovementData teardown (OnFinish between move packets) instead of resetting
+    // to 0 and replaying the 0.4s walk window every packet.
+    private float _moveTimer
+    {
+        get { return _entity != null ? _entity.LocomotionTimer : 0f; }
+        set { if (_entity != null) _entity.LocomotionTimer = value; }
+    }
+
+    // Local per-MovementData animation cache. NOT persisted on Entity: it must
+    // reset with each MovementData so a fresh move always re-plays the locomotion
+    // clip (StartMove) instead of being suppressed by a stale cached gait.
     private string _gaitAnim;
+    private float _lastForceGaitAt;
+
+    // [GAIT] diagnostics: per-entity log throttle + normalizedTime delta.
+    [System.NonSerialized] static readonly System.Collections.Generic.Dictionary<int, float> _syncPrevLogAt =
+        new System.Collections.Generic.Dictionary<int, float>();
+    [System.NonSerialized] static readonly System.Collections.Generic.Dictionary<int, float> _syncPrevNorm =
+        new System.Collections.Generic.Dictionary<int, float>();
 
     readonly L2PawnYaw _pawnYaw;
 
     public MovementData(Entity mEntity , MovementTarget movementTarget, L2PawnYaw pawnYaw)
     {
         _entity = mEntity;
+        _transform = mEntity != null ? mEntity.transform : null;
         _movementTarget = movementTarget;
         _pawnYaw = pawnYaw;
         _isMove = true;
@@ -54,8 +82,36 @@ public class MovementData
     {
         if (prev == null || !IsPlayerPawn(_entity))
             return;
+        // Persist only the walk->run timer. Do NOT copy _gaitAnim: it is a
+        // per-MovementData animation cache. Copying it makes SyncUserGait think the
+        // clip is already playing and skip StartMove, so point->pawn transitions
+        // (and other fresh moves) never re-trigger the run/walk animation.
         _moveTimer = prev._moveTimer;
-        _gaitAnim = prev._gaitAnim;
+    }
+
+    /// <summary>
+    /// Interlude AddMoveTo: overwrite Destination on the same move, keep timer/gait.
+    /// </summary>
+    public void RetargetPoint(Vector3 destination, bool running)
+    {
+        _isMove = true;
+        if (_movementTarget == null)
+            _movementTarget = new MovementTarget(destination, 0.1f, running);
+        else
+            _movementTarget.Set(destination, 0.1f, running);
+    }
+
+    /// <summary>
+    /// Same as RetargetPoint but for MoveToPawn chase packets: keep the existing
+    /// MovementData (and its gait cache) instead of tearing it down every packet.
+    /// </summary>
+    public void RetargetPawn(Transform pawn, float stopDistance, bool running)
+    {
+        _isMove = true;
+        if (_movementTarget == null)
+            _movementTarget = new MovementTarget(pawn, stopDistance, running);
+        else
+            _movementTarget.Set(pawn, stopDistance, running);
     }
 
     public Entity GetEntity()
@@ -91,7 +147,9 @@ public class MovementData
 
     public Transform GetTransform()
     {
-        return _entity.transform;
+        if (_transform == null && _entity != null)
+            _transform = _entity.transform;
+        return _transform;
     }
 
     public float GetDistance()
@@ -129,12 +187,12 @@ public class MovementData
         if (!staleLocomotion)
             return true;
 
-        Debug.Log(
-            "[MOVE_ANIM_RECONCILE] nick=" + EntityActionCombatLog.NameOf(_entity) +
-            " objectId=" + (_entity.Identity != null ? _entity.Identity.Id : 0) +
-            " action=" + action +
-            " state=" + (state.IsName("run") ? "run" : "walk") +
-            " moving=false -> idle");
+        // Debug.Log(
+            // "[MOVE_ANIM_RECONCILE] nick=" + EntityActionCombatLog.NameOf(_entity) +
+            // " objectId=" + (_entity.Identity != null ? _entity.Identity.Id : 0) +
+            // " action=" + action +
+            // " state=" + (state.IsName("run") ? "run" : "walk") +
+            // " moving=false -> idle");
 
         if (action == EntityActionKind.Move && EntityActionMachine.Instance != null)
             EntityActionMachine.Instance.Set(_entity, EntityActionKind.Idle, null);
@@ -178,16 +236,199 @@ public class MovementData
             return;
         bool walking = IsWalkGait();
         string anim = walking ? "walk" : "run";
+
+        // Heal leftover CullCompletely from older spawns (freezes mid-run when
+        // briefly off-camera). New spawns already use CullUpdateTransforms.
+        UserEntity userForCull = _entity as UserEntity;
+        if (userForCull != null)
+        {
+            NetworkAnimationController nacCull = userForCull.GetAnimatorController();
+            Animator anmCull = nacCull != null ? nacCull.GetAnimator() : null;
+            if (anmCull != null && anmCull.cullingMode == AnimatorCullingMode.CullCompletely)
+                anmCull.cullingMode = AnimatorCullingMode.CullUpdateTransforms;
+        }
+
+        // [GAIT] diagnostics — per-entity throttle so concurrent CharInfo don't
+        // starve each other of sync lines (global throttle hid MMagic freezes).
+        int entityId = _entity.Identity != null ? _entity.Identity.Id : 0;
+        float lastLogAt;
+        _syncPrevLogAt.TryGetValue(entityId, out lastLogAt);
+        if (_entity is UserEntity && GaitLog.Enabled &&
+            Time.time - lastLogAt >= 0.25f)
+        {
+            _syncPrevLogAt[entityId] = Time.time;
+            UserEntity ue = _entity as UserEntity;
+            string clip = "?";
+            string stateWant = anim + "_" + ue.WeaponAnim;
+            float animSpeed = 0f;
+            float runSpeed = 0f;
+            float walkSpeed = 0f;
+            float normTime = 0f;
+            float normDelta = 0f;
+            bool inTrans = false;
+            bool already = false;
+            string cull = "?";
+            NetworkAnimationController nac = ue.GetAnimatorController();
+            Animator anm = nac != null ? nac.GetAnimator() : null;
+            if (anm != null)
+            {
+                AnimatorClipInfo[] clips = anm.GetCurrentAnimatorClipInfo(0);
+                clip = clips != null && clips.Length > 0 && clips[0].clip != null
+                    ? clips[0].clip.name : "<none>";
+                animSpeed = anm.speed;
+                runSpeed = anm.GetFloat("run_speed");
+                walkSpeed = anm.GetFloat("walk_speed");
+                AnimatorStateInfo st = anm.GetCurrentAnimatorStateInfo(0);
+                normTime = st.normalizedTime;
+                inTrans = anm.IsInTransition(0);
+                already = PlayerLocomotionCrossFade.IsAlreadyPlaying(anm, stateWant);
+                cull = anm.cullingMode.ToString();
+                if (_syncPrevNorm.TryGetValue(entityId, out float prev))
+                    normDelta = normTime - prev;
+                _syncPrevNorm[entityId] = normTime;
+            }
+            GaitLog.Log(
+                _entity, "sync",
+                "anim=" + anim +
+                " cached=" + (_gaitAnim ?? "none") +
+                " want=" + stateWant +
+                " clip=" + clip +
+                " already=" + already +
+                " inTrans=" + inTrans +
+                " cull=" + cull +
+                " animSpeed=" + animSpeed.ToString("F2") +
+                " runSpeed=" + runSpeed.ToString("F3") +
+                " walkSpeed=" + walkSpeed.ToString("F3") +
+                " normT=" + normTime.ToString("F3") +
+                " normD=" + normDelta.ToString("F3") +
+                " running=" + _entity.Running +
+                " moveTimer=" + _moveTimer.ToString("F3") +
+                " inCombat=" + _entity.InCombat +
+                " attackVis=" + ue.IsAttackVisualPlaying());
+            MagicGaitTrace.SyncTick(_entity,
+                "anim=" + anim +
+                " cached=" + (_gaitAnim ?? "none") +
+                " moveTimer=" + _moveTimer.ToString("F3") +
+                " offGait=" + IsAnimatorOffGait(anim));
+        }
+
+        if (_entity is UserEntity && _gaitAnim != anim && GaitLog.Enabled)
+        {
+            GaitLog.Log(
+                _entity, "transition",
+                "from=" + (_gaitAnim ?? "none") +
+                " to=" + anim +
+                " running=" + _entity.Running +
+                " identityRunning=" + (_entity.Identity != null ? _entity.Identity.IsRunning : false) +
+                " moveTimer=" + _moveTimer.ToString("F3"));
+            MagicGaitTrace.Event(_entity, "gait-transition",
+                "from=" + (_gaitAnim ?? "none") + " to=" + anim);
+        }
+
         if (_gaitAnim == anim)
+        {
+            // Reconcile: something (PlayCombatWait/PlayStandWait/Idle.Enter/
+            // Pickup/presentation) may have swapped the animator to a non-locomotion
+            // state (atkwait/wait/jatk/pickup) while _gaitAnim still caches run/walk.
+            // In that case the pawn keeps translating (MoveToPoint still steps it)
+            // but the animator is frozen in a stance. Detect the actual state and replay.
+            if (IsAnimatorOffGait(anim))
+            {
+                // Cooldown so a wait→run CrossFade cannot be ForceReplay'd every
+                // frame (that restarts the fade and freezes MMagic mid-stride).
+                if (Time.time - _lastForceGaitAt >= 0.35f)
+                {
+                    _lastForceGaitAt = Time.time;
+                    _gaitAnim = anim;
+                    MagicGaitTrace.Event(_entity, "FORCE-GAIT", "to=" + anim + " reason=OffGait");
+                    EntityActionVisual.StartMove(_entity, walking, force: true);
+                    if (GaitLog.Enabled)
+                        GaitLog.Log(_entity, "force-gait", "to=" + anim);
+                }
+                else
+                {
+                    MagicGaitTrace.Decision(_entity, "force-gait-COOLDOWN",
+                        "to=" + anim + " left=" + (0.35f - (Time.time - _lastForceGaitAt)).ToString("F2"));
+                }
+            }
             return;
+        }
         _gaitAnim = anim;
+        MagicGaitTrace.Decision(_entity, "StartMove", "walking=" + walking + " force=false");
         EntityActionVisual.StartMove(_entity, walking);
+    }
+
+    // True when the cached gait says walk/run but the animator is NOT in (and not
+    // fading into) that locomotion state. IMPORTANT: check IsAlreadyPlaying FIRST.
+    // During a healthy wait→run CrossFade the current clip is still wait_*, but
+    // next=run; treating that as OffGait ForceReplay every frame restarts the fade
+    // forever ("half step then freeze") — especially visible on MMagic MoveToPawn
+    // after NotifyArrived PlayStandWait.
+    bool IsAnimatorOffGait(string wantedGait)
+    {
+        UserEntity ue = _entity as UserEntity;
+        if (ue == null)
+            return false;
+        NetworkAnimationController nac = ue.GetAnimatorController();
+        Animator anm = nac != null ? nac.GetAnimator() : null;
+        if (anm == null)
+            return false;
+
+        string state = wantedGait + "_" + ue.WeaponAnim;
+        if (PlayerLocomotionCrossFade.IsAlreadyPlaying(anm, state))
+            return false;
+
+        AnimatorClipInfo[] clips = anm.GetCurrentAnimatorClipInfo(0);
+        string clipName = clips != null && clips.Length > 0 && clips[0].clip != null
+            ? clips[0].clip.name
+            : null;
+
+        // Stuck on a non-locomotion clip with no fade into the wanted gait.
+        if (!string.IsNullOrEmpty(clipName))
+        {
+            bool isWantedLocomotion =
+                clipName.IndexOf(".ao_" + wantedGait + "_", System.StringComparison.OrdinalIgnoreCase) >= 0 ||
+                clipName.IndexOf("_" + wantedGait + "_", System.StringComparison.OrdinalIgnoreCase) >= 0;
+            if (isWantedLocomotion)
+                return false;
+            if (clipName.IndexOf(".ao_wait_", System.StringComparison.OrdinalIgnoreCase) >= 0 ||
+                clipName.IndexOf(".ao_atkwait_", System.StringComparison.OrdinalIgnoreCase) >= 0 ||
+                clipName.IndexOf(".ao_Wait_", System.StringComparison.OrdinalIgnoreCase) >= 0 ||
+                clipName.IndexOf("jatk", System.StringComparison.OrdinalIgnoreCase) >= 0 ||
+                clipName.IndexOf("PicItem", System.StringComparison.OrdinalIgnoreCase) >= 0 ||
+                clipName.IndexOf("pickup", System.StringComparison.OrdinalIgnoreCase) >= 0 ||
+                clipName.IndexOf("MagicShot", System.StringComparison.OrdinalIgnoreCase) >= 0 ||
+                clipName.IndexOf("CastLong", System.StringComparison.OrdinalIgnoreCase) >= 0 ||
+                clipName.IndexOf("CastMid", System.StringComparison.OrdinalIgnoreCase) >= 0 ||
+                clipName.IndexOf("CastEnd", System.StringComparison.OrdinalIgnoreCase) >= 0)
+            {
+                return true;
+            }
+        }
+
+        return true;
     }
 
     public void ReplayUserGait()
     {
+        MagicGaitTrace.Decision(_entity, "ReplayUserGait", "cached→null then Sync");
         _gaitAnim = null;
+        // Safe, non-forcing replay used on frequent retargets (move-point packets).
+        // SyncUserGait will re-play only if the animator is not already in the gait
+        // state, so this does not restart the run clip every packet.
         SyncUserGait();
+    }
+
+    // One-shot forcing replay: guarantees the locomotion clip (re)starts even if
+    // the controller/animator reports it as already active or is mid-transition.
+    // Used after a direct animator write (e.g. pickup / a no-exit pickup state)
+    // which can otherwise leave the pawn frozen while it still translates.
+    public void ForceReplayUserGait()
+    {
+        bool walking = IsWalkGait();
+        _gaitAnim = walking ? "walk" : "run";
+        MagicGaitTrace.Event(_entity, "ForceReplayUserGait", "walking=" + walking);
+        EntityActionVisual.StartMove(_entity, walking, force: true);
     }
 
     public void SpeedAccum2d(float dist2d)
@@ -236,19 +477,119 @@ public class MovementData
         return _spdTripDist2d;
     }
 
+    public void StepCharInfo(Vector3 destination, float speed)
+    {
+        Transform t = GetTransform();
+        if (t == null)
+            return;
+
+        Vector3 location = t.position;
+        Vector3 look = destination - location;
+        look.y = 0f;
+        bool moved = L2PawnWalk.TryStep(location, destination, speed, Time.deltaTime, out Vector3 stepped);
+        if (!moved)
+            stepped = location;
+
+        // Interlude physWalking keeps Velocity.Z == 0 while grounded, then
+        // processLanded / ToFloor settle the pawn onto the floor under it. We
+        // reproduce that split: XY move first, then gravity + a downward capsule
+        // probe to snap Y. Without this CharInfo players float / spawn underground.
+        stepped = ApplyCharInfoGravityAndGround(stepped, Time.deltaTime);
+
+        LookAlong(t, look);
+
+        Quaternion rot = t.rotation;
+        bool rotated = _yawDrive != null && _yawDrive.TryConsumeStep(Time.deltaTime, out rot);
+        if (moved && rotated)
+            t.SetPositionAndRotation(stepped, rot);
+        else if (moved)
+            t.position = stepped;
+        else if (rotated)
+            t.rotation = rot;
+
+        CheckLocomotionAnimation();
+    }
+
+    /// <summary>
+    /// Port of Interlude APawn::physWalking (planar velocity + gravity) and
+    /// ULevel::ToFloor / APawn::processLanded (0x086 / 0x297 downward capsule
+    /// probe). Applies gravity to _verticalVelocity, then rests the pawn on the
+    /// floor. Y is written as the surface height exactly (hit.point.y), matching
+    /// GroundSnapHelper / spawn / NetworkTransformReceive so the pawn does not
+    /// bounce between two different ground conventions.
+    /// </summary>
+    private Vector3 ApplyCharInfoGravityAndGround(Vector3 position, float deltaTime)
+    {
+        float radius = _entity != null ? _entity.GetCollissionRadius() : 0f;
+        if (radius <= 0.001f)
+            radius = 0.05f;
+
+        LayerMask mask = GroundSnapHelper.ResolveGroundMask(null);
+
+        // Downward capsule probe starting above the pawn (Interlude ToFloor starts
+        // at Location.Z - CollisionHeight, but we probe a safe distance above to
+        // catch a pawn that ended up under the terrain surface).
+        Vector3 origin = new Vector3(position.x, position.y + GroundCastStartAbove, position.z);
+        bool hitFloor = Physics.SphereCast(
+            origin, radius, Vector3.down, out RaycastHit hit,
+            GroundCastStartAbove + GroundCastMaxFall,
+            mask, QueryTriggerInteraction.Ignore);
+
+        float targetY;
+        if (hitFloor)
+        {
+            // Land on the surface. The project-wide ground convention is
+            // transform.position.y == hit.point.y (see GroundSnapHelper), so we do
+            // not add a capsule half-height here — otherwise the pawn lifts ~30-40cm
+            // above the ground each frame vs. its spawn height.
+            targetY = hit.point.y;
+            _verticalVelocity = 0f;
+        }
+        else
+        {
+            // No floor below: keep falling (Interlude physFalling branch).
+            _verticalVelocity -= _gravity * deltaTime;
+            targetY = position.y + _verticalVelocity * deltaTime;
+        }
+
+        return new Vector3(position.x, targetY, position.z);
+    }
+
     public void Move(Vector3 direction , float speed)
     {
         Vector3 lookDir = new Vector3(direction.x, 0f, direction.z);
+        if (L2PawnWalk.IsCharInfoPawn(_entity))
+        {
+            if (_movementTarget != null && _movementTarget.TryGetTarget(out Vector3 dest))
+                StepCharInfo(dest, speed);
+            return;
+        }
+
         direction = ApplyGravity(direction);
         CharacterMove(_entity, direction, speed);
+        CrasherSlideLog.Sync(_entity);
         CheckLocomotionAnimation();
-        if (lookDir.sqrMagnitude > 0.0001f)
+        LookAlong(GetTransform(), lookDir);
+    }
+
+    void LookAlong(Transform t, Vector3 lookDir)
+    {
+        if (t == null || _pawnYaw == null)
+            return;
+        int id = _entity.Identity != null ? _entity.Identity.Id : 0;
+        if (id != 0 && CombatFacingService.Instance != null && CombatFacingService.Instance.HasFollow(id))
         {
-            int id = _entity.Identity != null ? _entity.Identity.Id : 0;
-            if (id == 0 || CombatFacingService.Instance == null || !CombatFacingService.Instance.HasFollow(id))
-                if (_pawnYaw != null)
-                    _pawnYaw.RequestLook(_entity.transform, _entity.transform.position + lookDir, L2PawnYaw.RotationRateYaw);
+            // CombatFacingService.ApplyYaw owns this rotation. A stale drive would
+            // overwrite it from StepCharInfo when this Update runs later.
+            if (_yawDrive != null)
+                _yawDrive.Stop();
+            return;
         }
+        if (lookDir.sqrMagnitude <= 0.0001f)
+            return;
+        if (_yawDrive == null)
+            _yawDrive = _pawnYaw.EnsureDrive(t);
+        _pawnYaw.RequestLook(_yawDrive, t, t.position + lookDir, L2PawnYaw.RotationRateYaw);
     }
 
     private void CheckLocomotionAnimation()
@@ -289,23 +630,23 @@ public class MovementData
              animator.IsInTransition(0) && next.IsName(expected));
         float moved = VectorUtils.Distance2D(_locomotionCheckStart, _entity.transform.position);
 
-        Debug.Log(
-            "MONSTER_WALK result=" + (playingExpected ? "OK" : "MISS") +
-            " nick=" + EntityActionCombatLog.NameOf(_entity) +
-            " objectId=" + (_entity.Identity != null ? _entity.Identity.Id : 0) +
-            " expected=" + expected +
-            " actual=" + EntityActionSkill.AnimatorStateName(animator) +
-            " action=" + (_entity.ActionSlot != null ? _entity.ActionSlot.Action.ToString() : "-") +
-            " moving=" + _isMove +
-            " running=" + _entity.Running +
-            " moved=" + moved.ToString("F3") +
-            " distance=" + distanceToPlayer.ToString("F1") +
-            " animator=" + (animator != null) +
-            " enabled=" + (animator != null && animator.enabled) +
-            " speed=" + (animator != null ? animator.speed.ToString("F3") : "-") +
-            " walkBool=" + (animator != null ? animator.GetBool("walk").ToString() : "-") +
-            " runBool=" + (animator != null ? animator.GetBool("run").ToString() : "-") +
-            " hasState=" + (animator != null && animator.HasState(0, Animator.StringToHash(expected))));
+        // Debug.Log(
+            // "MONSTER_WALK result=" + (playingExpected ? "OK" : "MISS") +
+            // " nick=" + EntityActionCombatLog.NameOf(_entity) +
+            // " objectId=" + (_entity.Identity != null ? _entity.Identity.Id : 0) +
+            // " expected=" + expected +
+            // " actual=" + EntityActionSkill.AnimatorStateName(animator) +
+            // " action=" + (_entity.ActionSlot != null ? _entity.ActionSlot.Action.ToString() : "-") +
+            // " moving=" + _isMove +
+            // " running=" + _entity.Running +
+            // " moved=" + moved.ToString("F3") +
+            // " distance=" + distanceToPlayer.ToString("F1") +
+            // " animator=" + (animator != null) +
+            // " enabled=" + (animator != null && animator.enabled) +
+            // " speed=" + (animator != null ? animator.speed.ToString("F3") : "-") +
+            // " walkBool=" + (animator != null ? animator.GetBool("walk").ToString() : "-") +
+            // " runBool=" + (animator != null ? animator.GetBool("run").ToString() : "-") +
+            // " hasState=" + (animator != null && animator.HasState(0, Animator.StringToHash(expected))));
     }
 
     private void CharacterMove(Entity entity , Vector3 direction , float speed)
@@ -356,6 +697,8 @@ public class MovementData
 
     public void OnFinish(Vector3 target)
     {
+        CrasherSlideLog.Event(_entity, "OnFinish",
+            "actorTarget=" + (_movementTarget != null && _movementTarget.IsActorTarget()));
         _isMove = false;
         Vector3 dest;
         if (_movementTarget.IsActorTarget())
@@ -369,32 +712,6 @@ public class MovementData
             dest = new Vector3(target.x, _entity.transform.position.y, target.z);
         }
         dest = GroundSnapHelper.SnapToGroundOrKeep(dest);
-        Entity pawn = EntityActionCombatLog.PawnOf(_entity);
-        EntityActionCombatLog.LogCiPawn(_entity,
-            "Move.Finish nick=" + EntityActionCombatLog.NameOf(_entity) +
-            " actorTarget=" + _movementTarget.IsActorTarget() +
-            " finishDest=" + EntityActionCombatLog.Vec(dest) +
-            " now=" + EntityActionCombatLog.Vec(_entity.transform.position) +
-            " pawn=" + EntityActionCombatLog.Describe(pawn) +
-            " nowToPawn=" + (pawn != null
-                ? VectorUtils.Distance2D(_entity.transform.position, pawn.transform.position).ToString("F2")
-                : "-") +
-            " finishToPawn=" + (pawn != null
-                ? VectorUtils.Distance2D(dest, pawn.transform.position).ToString("F2")
-                : "-") +
-            " " + EntityActionCombatLog.ClassifyDest(dest, pawn) +
-            EntityActionCombatLog.ChaseDump(_entity, pawn));
-        CharInfoSpeedLog.LogTripEnd(this, "Move.Finish");
-        float finishD = VectorUtils.Distance2D(_entity.transform.position, dest);
-        if (finishD >= 0.4f)
-        {
-            Vector3 nowL2 = VectorUtils.ConvertPosUnityToL2j(_entity.transform.position);
-            Vector3 destL2 = VectorUtils.ConvertPosUnityToL2j(dest);
-            Debug.Log("[MOVE_SNAP] FINISH nick=" + EntityActionCombatLog.NameOf(_entity) +
-                " snapM=" + finishD.ToString("F2") +
-                " nowL2=" + nowL2.x.ToString("F0") + "," + nowL2.y.ToString("F0") + "," + nowL2.z.ToString("F0") +
-                " destL2=" + destL2.x.ToString("F0") + "," + destL2.y.ToString("F0") + "," + destL2.z.ToString("F0"));
-        }
         if (_entity is UserEntity)
             EntitySpawnShared.ApplyGroundedTransform(_entity.gameObject, dest, _entity.transform.rotation);
         else

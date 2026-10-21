@@ -48,7 +48,7 @@ public class GeodataGenerator : MonoBehaviour {
 		GenerateGeodata();
 		s.Stop();
 
-		Debug.Log("Built the geodata with " + terrain.Keys.Count + " node(s) in " + s.ElapsedMilliseconds + "ms");
+		// Debug.Log("Built the geodata with " + terrain.Keys.Count + " node(s) in " + s.ElapsedMilliseconds + "ms");
 
 		if(export) {
 			GeodataExporter.Export(exportPath, terrain);
@@ -60,7 +60,7 @@ public class GeodataGenerator : MonoBehaviour {
 		if(enableCustomGeneratedTerrainOrigin) {
 			roundedTerrainPos = VectorUtils.FloorToNearest(customGeneratedTerrainOrigin, nodeSize);
         }
-		Debug.Log(roundedTerrainPos);
+		// Debug.Log(roundedTerrainPos);
 		for (int x = 0; x < scaledTerrainWidth; x++) {
 			for (int z = 0; z < scaledTerrainWidth; z++) {
 

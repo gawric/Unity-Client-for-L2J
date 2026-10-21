@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
 /// <summary>
@@ -49,7 +49,7 @@ public static class L2FxQuadSizeDiagnostic
             return false;
         }
 
-        return ParticleSingleLifetimeDebug.ShouldTrace(groupName, owner, groupTransform);
+        return false;
     }
 
     public static QuadSizeSnapshot Compute(string groupName, Renderer renderer, float now, Material runtimeMat = null)
@@ -154,16 +154,16 @@ public static class L2FxQuadSizeDiagnostic
         float seed = mat.HasProperty("_Seed") ? mat.GetFloat("_Seed") : 0f;
         float repeats = mat.HasProperty("_SizeScaleRepeats") ? mat.GetFloat("_SizeScaleRepeats") : 0f;
 
-        Debug.Log(
-            $"[L2FX_QUAD_SIZE] group='{groupName}' mat='{mat.name}' now={now:F3}s frame={Time.frameCount}\n" +
-            $"  path={s.sizeScalePath}  ageNorm={s.ageNorm:F4}  scaleT=frac((1+repeats)*age)={s.scaleT:F4}  repeats={repeats:F2}\n" +
-            $"  runtime: _StartTime={startTime:F3} _Seed={seed:F3} delay={s.initialDelaySec:F4}s lifetime={s.lifetimeSec:F4}s ageSec={s.ageSec:F4}s\n" +
-            $"  StartSize midUU={s.startSizeMidUU:F4}  sizeMul={s.sizeMul:F4}  sizeUU={s.sizeUU:F4}\n" +
-            $"  vertex OS: sizeM=sizeUU/52.5*K = {s.sizeMetersVertex:F6}m  K={s.worldCalibrationK:F3}\n" +
-            $"  world: quadSpan=({s.quadSpan.x:F3},{s.quadSpan.y:F3}) lossyScale=({s.lossyScale.x:F4},{s.lossyScale.y:F4})\n" +
-            $"  FINAL diameter(m): width={s.finalWidthM:F6}  height={s.finalHeightM:F6}\n" +
-            $"  previewLoop={s.loopPreview} flipbook=frame{s.flipbookFrameA}->frame{s.flipbookFrameB} blend={s.flipbookBlend:F4}\n" +
-            $"  formula: finalWidth = midUU * sizeMul / 52.5 * K * quadSpan.x * abs(lossyScale.x)");
+        // Debug.Log(
+            // $"[L2FX_QUAD_SIZE] group='{groupName}' mat='{mat.name}' now={now:F3}s frame={Time.frameCount}\n" +
+            // $"  path={s.sizeScalePath}  ageNorm={s.ageNorm:F4}  scaleT=frac((1+repeats)*age)={s.scaleT:F4}  repeats={repeats:F2}\n" +
+            // $"  runtime: _StartTime={startTime:F3} _Seed={seed:F3} delay={s.initialDelaySec:F4}s lifetime={s.lifetimeSec:F4}s ageSec={s.ageSec:F4}s\n" +
+            // $"  StartSize midUU={s.startSizeMidUU:F4}  sizeMul={s.sizeMul:F4}  sizeUU={s.sizeUU:F4}\n" +
+            // $"  vertex OS: sizeM=sizeUU/52.5*K = {s.sizeMetersVertex:F6}m  K={s.worldCalibrationK:F3}\n" +
+            // $"  world: quadSpan=({s.quadSpan.x:F3},{s.quadSpan.y:F3}) lossyScale=({s.lossyScale.x:F4},{s.lossyScale.y:F4})\n" +
+            // $"  FINAL diameter(m): width={s.finalWidthM:F6}  height={s.finalHeightM:F6}\n" +
+            // $"  previewLoop={s.loopPreview} flipbook=frame{s.flipbookFrameA}->frame{s.flipbookFrameB} blend={s.flipbookBlend:F4}\n" +
+            // $"  formula: finalWidth = midUU * sizeMul / 52.5 * K * quadSpan.x * abs(lossyScale.x)");
     }
 
     private static void ResolveFlipbookFrames(

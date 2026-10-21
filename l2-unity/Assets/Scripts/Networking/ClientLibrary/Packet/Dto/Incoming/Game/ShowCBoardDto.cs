@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 /**
  * @author AbsolutePower
@@ -35,7 +35,7 @@ public class ShowCBoardDto : IWireDto
 
         if (split.Length < 2)
         {
-            Debug.LogError("ShowCBoard invalid data");
+            // Debug.LogError("ShowCBoard invalid data");
             return;
         }
 
@@ -48,19 +48,19 @@ public class ShowCBoardDto : IWireDto
                 _html101 = html;
                 _html102 = "";
                 _html103 = "";
-                Debug.Log("Received CBoard 101");
+                // Debug.Log("Received CBoard 101");
                 break;
             case "102":
                 _html102 = html;
-                Debug.Log("Received CBoard 102");
+                // Debug.Log("Received CBoard 102");
                 break;
             case "103":
                 _html103 = html;
-                Debug.Log("Received CBoard 103");
+                // Debug.Log("Received CBoard 103");
                 break;
         }
 
-        Debug.Log("CBoard Part: " + id + " size: " + html.Length);
+        // Debug.Log("CBoard Part: " + id + " size: " + html.Length);
 
         if (id == "103" || (id == "102" && string.IsNullOrEmpty(_html103)) || (id == "101" && string.IsNullOrEmpty(_html102)))
             ReadyToOpen = true;

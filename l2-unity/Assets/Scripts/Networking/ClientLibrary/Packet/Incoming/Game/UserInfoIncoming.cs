@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 [IncomingGamePacket(GameServerPacketType.UserInfo)]
 public sealed class UserInfoIncoming : IncomingWirePacket<UserInfoDto>
@@ -16,8 +16,8 @@ public sealed class UserInfoIncoming : IncomingWirePacket<UserInfoDto>
         int uid = userInfo != null && userInfo.PlayerInfoInterlude.Identity != null
             ? userInfo.PlayerInfoInterlude.Identity.Id
             : 0;
-        GearFlowLog.Info("UserInfo RECV id=" + uid + " " + GearFlowLog.Paperdoll(app) +
-            " local=" + (PlayerEntity.Instance != null ? GearFlowLog.Entity(PlayerEntity.Instance) : "PlayerEntity=null"));
+        // GearFlowLog.Info("UserInfo RECV id=" + uid + " " + GearFlowLog.Paperdoll(app) +
+            // " local=" + (PlayerEntity.Instance != null ? GearFlowLog.Entity(PlayerEntity.Instance) : "PlayerEntity=null"));
         IncomingPacketActions.Queue(() =>
         {
             if (IncomingPacketActions.GameWorld != null)

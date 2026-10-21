@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public class PledgeStatusChangedDto : IWireDto
 {
@@ -30,6 +30,6 @@ public class PledgeStatusChangedDto : IWireDto
         int unk1 = reader.ReadI();
         int unk2 = reader.ReadI();
 
-        Debug.Log("PledgeStatusChanged _leaderId " + _leaderId + " _clanId " + _clanId);
+        // Debug.Log("PledgeStatusChanged _leaderId " + _leaderId + " _clanId " + _clanId);
     }
 }

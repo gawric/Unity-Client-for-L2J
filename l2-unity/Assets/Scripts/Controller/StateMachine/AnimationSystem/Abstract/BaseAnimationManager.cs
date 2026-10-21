@@ -131,9 +131,9 @@ public abstract class BaseAnimationManager
             SetRecentName(objectId, bareState);
             controller.SetAnimatorSpeed(1f);
             controller.CrossFadeInFixedTime(bareState, LocomotionCrossFadeSettings.FixedDuration);
-            Debug.Log(
-                $"AnimationManager> start crossfade {bareState} player objectId={objectId} " +
-                $"duration={LocomotionCrossFadeSettings.FixedDuration:F3}s");
+            // Debug.Log(
+                // $"AnimationManager> start crossfade {bareState} player objectId={objectId} " +
+                // $"duration={LocomotionCrossFadeSettings.FixedDuration:F3}s");
             return;
         }
 
@@ -189,7 +189,7 @@ public abstract class BaseAnimationManager
         }
         else
         {
-            Debug.Log("AnimationManager>StopCurrentAnimation: Non-critical error stopping bool animation");
+            // Debug.Log("AnimationManager>StopCurrentAnimation: Non-critical error stopping bool animation");
         }
     }
 
@@ -202,7 +202,7 @@ public abstract class BaseAnimationManager
 
             if (arrAnim[0] != null && controllerAnimator.GetBool(arrAnim[0]))
             {
-                Debug.Log($"MonsterAnimation> Stopping previous animation {arrAnim[0]} for monster/object {objectId}");
+                // Debug.Log($"MonsterAnimation> Stopping previous animation {arrAnim[0]} for monster/object {objectId}");
                 controllerAnimator.SetBool(arrAnim[0], false);
             }
         }

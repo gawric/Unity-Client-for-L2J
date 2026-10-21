@@ -1,4 +1,4 @@
-using UnityEditor;
+﻿using UnityEditor;
 using UnityEngine;
 
 /// <summary>
@@ -25,9 +25,9 @@ public static class L2TerrainColor0Check
         if (slotA != 7 || slotB != 0 || wrapped != 130)
         {
             ok = false;
-            Debug.LogError(
-                "[L2] hour 1 pair " + slotA + "→" + slotB +
-                " alpha " + alpha.ToString("0.###") + " byte " + wrapped + ", expected 7→0 and 130");
+            // Debug.LogError(
+                // "[L2] hour 1 pair " + slotA + "→" + slotB +
+                // " alpha " + alpha.ToString("0.###") + " byte " + wrapped + ", expected 7→0 and 130");
         }
 
         L2TerrainSunIntensity.SlotPair(17f, 8, out slotA, out slotB, out alpha);
@@ -35,7 +35,7 @@ public static class L2TerrainColor0Check
         if (evening != 203)
         {
             ok = false;
-            Debug.LogError("[L2] hour 17 lerp byte " + evening + ", expected 203");
+            // Debug.LogError("[L2] hour 17 lerp byte " + evening + ", expected 203");
         }
 
         if (ok)
@@ -48,7 +48,7 @@ public static class L2TerrainColor0Check
             intensity, HsvX, HsvY, HsvZ, AmbientR, AmbientG, AmbientB, out int gotR, out int gotG, out int gotB);
         if (gotR == r && gotG == g && gotB == b)
             return true;
-        Debug.LogError("[L2] " + label + " got " + gotR + "," + gotG + "," + gotB + " expected " + r + "," + g + "," + b);
+        // Debug.LogError("[L2] " + label + " got " + gotR + "," + gotG + "," + gotB + " expected " + r + "," + g + "," + b);
         return false;
     }
 }

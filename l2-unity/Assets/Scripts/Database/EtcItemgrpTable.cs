@@ -37,7 +37,7 @@ public class EtcItemgrpTable {
         _etcItemGrps = new Dictionary<int, EtcItemgrp>();
         string dataPath = Path.Combine(Application.streamingAssetsPath, "Data/Meta/EtcItemgrp_Classic.txt");
         if (!File.Exists(dataPath)) {
-            Debug.LogWarning("File not found: " + dataPath);
+            // Debug.LogWarning("File not found: " + dataPath);
             return;
         }
 
@@ -61,7 +61,7 @@ public class EtcItemgrpTable {
                     }
                     if(etcItemgrp.ObjectId == 17)
                     {
-                        Debug.Log("");
+                        // Debug.Log("");
                     }
                     switch (key) {
                         case "etcitem_type": 
@@ -87,7 +87,7 @@ public class EtcItemgrpTable {
                 _etcItemGrps.TryAdd(etcItemgrp.ObjectId, etcItemgrp);
             }
 
-            Debug.Log($"Successfully imported {_etcItemGrps.Count} etcItemgrp(s)");
+            // Debug.Log($"Successfully imported {_etcItemGrps.Count} etcItemgrp(s)");
         }
     }
 
@@ -107,7 +107,7 @@ public class EtcItemgrpTable {
         string dataPath = Path.Combine(Application.streamingAssetsPath, "Data/Meta/EtcItemgrp_interlude.txt");
         if (!File.Exists(dataPath))
         {
-            Debug.LogWarning("File not found: " + dataPath);
+            // Debug.LogWarning("File not found: " + dataPath);
             return;
         }
 

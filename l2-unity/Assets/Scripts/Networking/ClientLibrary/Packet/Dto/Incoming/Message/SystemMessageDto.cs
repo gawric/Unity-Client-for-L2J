@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using System;
 using static SMParam;
 
@@ -56,7 +56,7 @@ public class SystemMessageDto : IWireDto
         }
         catch (Exception e)
         {
-            Debug.LogError(e);
+            // Debug.LogError(e);
         }
     }
 }

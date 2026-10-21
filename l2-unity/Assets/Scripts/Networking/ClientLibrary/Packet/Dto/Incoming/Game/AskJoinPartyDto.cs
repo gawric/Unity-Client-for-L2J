@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using UnityEngine;
 
 public class AskJoinPartyDto : IWireDto
@@ -25,7 +25,7 @@ public class AskJoinPartyDto : IWireDto
         }
         catch (Exception ex)
         {
-            Debug.LogError($"[AskJoinParty] Parse error: {ex.Message}");
+            // Debug.LogError($"[AskJoinParty] Parse error: {ex.Message}");
             _requestorName = string.Empty;
             _partyDistributionType = PartyDistributionType.FindersKeepers;
         }

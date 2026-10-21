@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using UnityEngine;
 
 /// <summary>
@@ -83,9 +83,9 @@ public sealed class EffectPrefabStaggeredDrift : MonoBehaviour
         {
             if (_debugLog)
             {
-                Debug.LogWarning(
-                    $"{LogTag} '{name}' Restart: no targets (children={transform.childCount}, assigned={(_targets != null ? _targets.Length : 0)}, includeInactive={_includeInactiveChildren}) — keeping previous list.",
-                    this);
+                // Debug.LogWarning(
+                    // $"{LogTag} '{name}' Restart: no targets (children={transform.childCount}, assigned={(_targets != null ? _targets.Length : 0)}, includeInactive={_includeInactiveChildren}) — keeping previous list.",
+                    // this);
             }
             return;
         }
@@ -147,10 +147,10 @@ public sealed class EffectPrefabStaggeredDrift : MonoBehaviour
 
         if (_debugLog)
         {
-            Debug.Log(
-                $"{LogTag} '{name}' Restart: targets={count} speed={_speedMetersPerSecond:F3}m/s space={_driftSpace} " +
-                $"lossyScale={transform.lossyScale} active={gameObject.activeInHierarchy} frame={Time.frameCount}.",
-                this);
+            // Debug.Log(
+                // $"{LogTag} '{name}' Restart: targets={count} speed={_speedMetersPerSecond:F3}m/s space={_driftSpace} " +
+                // $"lossyScale={transform.lossyScale} active={gameObject.activeInHierarchy} frame={Time.frameCount}.",
+                // this);
         }
     }
 
@@ -289,7 +289,7 @@ public sealed class EffectPrefabStaggeredDrift : MonoBehaviour
         int count = _resolvedTargets != null ? _resolvedTargets.Length : 0;
         if (count == 0)
         {
-            Debug.Log($"{LogTag} '{name}' {phase}: no targets elapsed={elapsed:F3}s frame={Time.frameCount}.", this);
+            // Debug.Log($"{LogTag} '{name}' {phase}: no targets elapsed={elapsed:F3}s frame={Time.frameCount}.", this);
             return;
         }
 
@@ -302,13 +302,13 @@ public sealed class EffectPrefabStaggeredDrift : MonoBehaviour
             ? _initialWorldPositions[0]
             : Vector3.zero;
 
-        Debug.Log(
-            $"{LogTag} '{name}' {phase}: elapsed={elapsed:F3}s targets={count} drift0={d0:F4}m " +
-            $"t0='{(t0 != null ? t0.name : "null")}' active={(t0 != null && t0.gameObject.activeSelf)} " +
-            $"local={FormatV(t0 != null ? t0.localPosition : Vector3.zero)} initLocal={FormatV(initLocal)} " +
-            $"world={FormatV(t0 != null ? t0.position : Vector3.zero)} initWorld={FormatV(initWorld)} " +
-            $"parentScale={FormatV(transform.lossyScale)} speed={_speedMetersPerSecond:F3} space={_driftSpace} frame={Time.frameCount}.",
-            this);
+        // Debug.Log(
+            // $"{LogTag} '{name}' {phase}: elapsed={elapsed:F3}s targets={count} drift0={d0:F4}m " +
+            // $"t0='{(t0 != null ? t0.name : "null")}' active={(t0 != null && t0.gameObject.activeSelf)} " +
+            // $"local={FormatV(t0 != null ? t0.localPosition : Vector3.zero)} initLocal={FormatV(initLocal)} " +
+            // $"world={FormatV(t0 != null ? t0.position : Vector3.zero)} initWorld={FormatV(initWorld)} " +
+            // $"parentScale={FormatV(transform.lossyScale)} speed={_speedMetersPerSecond:F3} space={_driftSpace} frame={Time.frameCount}.",
+            // this);
     }
 
     private static string FormatV(Vector3 v) => $"({v.x:F3},{v.y:F3},{v.z:F3})";

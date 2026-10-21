@@ -1,4 +1,4 @@
-
+﻿
 using UnityEngine;
 
 
@@ -52,7 +52,7 @@ public class MoveToPawnDto : IWireDto
         _objPos =  VectorUtils.ConvertPosToUnity(new Vector3(_x, _y, _z));
         //_targetPos = VectorUtils.ConvertPosToUnity(new Vector3(_tx, _ty, _tz));
 
-        Debug.Log("");
+        // Debug.Log("");
 
 
     }

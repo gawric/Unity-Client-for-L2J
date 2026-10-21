@@ -108,27 +108,27 @@ public class Gear : AbstractMeshManager
         ErrorPrint(weapon, weaponId);
 
         if (weaponId == 0 | weapon == null) {
-            GearFlowLog.Warn("EquipWeapon abort id=" + weaponId +
-                " owner=" + _ownerId + " nullWeapon=" + (weapon == null));
+            // GearFlowLog.Warn("EquipWeapon abort id=" + weaponId +
+                // " owner=" + _ownerId + " nullWeapon=" + (weapon == null));
             return;
         }
 
         if (IsWeaponEquipped(weaponId, leftSlot)) {
-            GearFlowLog.Info("EquipWeapon SKIP already equipped id=" + weaponId +
-                " left=" + leftSlot + " owner=" + _ownerId);
+            // GearFlowLog.Info("EquipWeapon SKIP already equipped id=" + weaponId +
+                // " left=" + leftSlot + " owner=" + _ownerId);
             return;
         }
 
-        GearFlowLog.Info("EquipWeapon APPLY id=" + weaponId +
-            " left=" + leftSlot + " owner=" + _ownerId +
-            " type=" + (weapon.Weapongrp != null ? weapon.Weapongrp.WeaponType.ToString() : "null"));
+        // GearFlowLog.Info("EquipWeapon APPLY id=" + weaponId +
+            // " left=" + leftSlot + " owner=" + _ownerId +
+            // " type=" + (weapon.Weapongrp != null ? weapon.Weapongrp.WeaponType.ToString() : "null"));
 
         ClearHandsForNewWeapon(leftSlot, false);
 
         GameObject weaponPrefab = (GameObject)LoadMesh(EquipmentCategory.Weapon, weaponId);
         if (weaponPrefab == null)
         {
-            GearFlowLog.Warn("EquipWeapon mesh null id=" + weaponId + " owner=" + _ownerId);
+            // GearFlowLog.Warn("EquipWeapon mesh null id=" + weaponId + " owner=" + _ownerId);
             return;
         }
 
@@ -258,7 +258,7 @@ public class Gear : AbstractMeshManager
     {
         if (weapon == null)
         {
-            Debug.LogWarning("Gear->EquipWeapon: Not Found item in database id " + weaponId);
+            // Debug.LogWarning("Gear->EquipWeapon: Not Found item in database id " + weaponId);
         }
 
     }
@@ -376,18 +376,18 @@ public class Gear : AbstractMeshManager
         {
             if (this is UserGear || rHandId != 0 || lHandId != 0)
             {
-                GearFlowLog.Info("SyncWeapons SKIP same owner=" + _ownerId +
-                    " have R=" + haveRight + " L=" + haveLeft + " S=" + haveShield +
-                    " packet R=" + rHandId + " L=" + lHandId);
+                // GearFlowLog.Info("SyncWeapons SKIP same owner=" + _ownerId +
+                    // " have R=" + haveRight + " L=" + haveLeft + " S=" + haveShield +
+                    // " packet R=" + rHandId + " L=" + lHandId);
             }
             return;
         }
 
-        GearFlowLog.Info("SyncWeapons APPLY owner=" + _ownerId +
-            " have R=" + haveRight + " L=" + haveLeft + " S=" + haveShield +
-            " want R=" + wantRight + " L=" + wantLeft + " S=" + wantShield +
-            " packet R=" + rHandId + " L=" + lHandId +
-            " dual=" + dual + " bow=" + bow + " lShield=" + lShield);
+        // GearFlowLog.Info("SyncWeapons APPLY owner=" + _ownerId +
+            // " have R=" + haveRight + " L=" + haveLeft + " S=" + haveShield +
+            // " want R=" + wantRight + " L=" + wantLeft + " S=" + wantShield +
+            // " packet R=" + rHandId + " L=" + lHandId +
+            // " dual=" + dual + " bow=" + bow + " lShield=" + lShield);
 
         ClearAllHandEquipment();
 
@@ -581,7 +581,7 @@ public class Gear : AbstractMeshManager
                 _lastWeaponAnim = _weaponAnim;
                 UpdateWeaponType(WeaponType.hand);
                 OnUnequipAnimationRefresh?.Invoke("");
-                Debug.Log("Destroy request item id 3 " + weaponId);
+                // Debug.Log("Destroy request item id 3 " + weaponId);
             }
         }
     }
@@ -739,7 +739,8 @@ public class Gear : AbstractMeshManager
 
     public Vector3 GetPositionRightHand()
     {
-        return GetRightHandBone().position;
+        Transform hand = GetRightHandBone();
+        return hand != null ? hand.position : transform.position;
     }
 
     public GameObject GetGoEtcItem()

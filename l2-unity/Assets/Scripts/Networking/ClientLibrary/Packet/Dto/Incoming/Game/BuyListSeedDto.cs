@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.ProBuilder;
 
@@ -19,7 +19,7 @@ public class BuyListSeedDto : IWireDto
         _money = reader.ReadI();
         _manorId = reader.ReadI();
         int size = reader.ReadSh();
-        Debug.Log("");
+        // Debug.Log("");
 
         for (int i = 0; i < size; i++)
         {

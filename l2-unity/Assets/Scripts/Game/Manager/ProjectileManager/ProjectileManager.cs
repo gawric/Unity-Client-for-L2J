@@ -47,7 +47,7 @@ public class ProjectileManager : AbstractProjectile, IProjectileManager
     {
         if (readyProjectile == null)
         {
-            Debug.LogError("Ready projectile cannot be null!");
+            // Debug.LogError("Ready projectile cannot be null!");
             return -1;
         }
         HIT_OFFSET = offset;
@@ -77,19 +77,19 @@ public class ProjectileManager : AbstractProjectile, IProjectileManager
             float settingsFly = settings != null ? settings.flytime : -1f;
             float flyIfDist1500 =
                 ProjectileFlightTimeCalculator.CalculateL2ArrowFlightTimeIfConstantSpeed(distance);
-            Debug.Log(
-                $"[BOW_ARROW] LAUNCH id={projectileId} dist3d={distance:F3} " +
-                $"accel={speed:F3} avgSpeed={requiredSpeed:F3} flySec={flightTime:F3} " +
-                $"settingsFly={settingsFly:F3} flyIfDist1500={flyIfDist1500:F3} " +
-                $"start={startPos} aim={adjustedTarget} uuAccel=3000 path=(t/T)^2");
+            // Debug.Log(
+                // $"[BOW_ARROW] LAUNCH id={projectileId} dist3d={distance:F3} " +
+                // $"accel={speed:F3} avgSpeed={requiredSpeed:F3} flySec={flightTime:F3} " +
+                // $"settingsFly={settingsFly:F3} flyIfDist1500={flyIfDist1500:F3} " +
+                // $"start={startPos} aim={adjustedTarget} uuAccel=3000 path=(t/T)^2");
         }
         else
         {
-            Debug.Log(
-                $"[MAGIC_PROJ] LAUNCH id={projectileId} dist3d={distance:F3} " +
-                $"accel={speed:F3} avgSpeed={requiredSpeed:F3} flySec={flightTime:F3} " +
-                $"impact={(settings != null ? settings.impactType.ToString() : "null")} " +
-                $"uuAccel=3000 path=(t/T)^2 uu→unity=/52.5");
+            // Debug.Log(
+                // $"[MAGIC_PROJ] LAUNCH id={projectileId} dist3d={distance:F3} " +
+                // $"accel={speed:F3} avgSpeed={requiredSpeed:F3} flySec={flightTime:F3} " +
+                // $"impact={(settings != null ? settings.impactType.ToString() : "null")} " +
+                // $"uuAccel=3000 path=(t/T)^2 uu→unity=/52.5");
         }
 
         ProjectileData projectileData = CreateData(projectileId, distance, readyProjectile, startPos, target,
@@ -108,10 +108,10 @@ public class ProjectileManager : AbstractProjectile, IProjectileManager
                 ArrowAnimatorLaunchCompensationSeconds,
                 Mathf.Max(0f, flightTime - 0.01f));
             projectileData.startTime -= launchCompensation;
-            Debug.Log(
-                $"[BOW_ARROW] LAUNCH_COMPENSATION id={projectileId} " +
-                $"compSec={launchCompensation:F3} nominalFlySec={flightTime:F3} " +
-                $"visibleFlySec={Mathf.Max(0f, flightTime - launchCompensation):F3}");
+            // Debug.Log(
+                // $"[BOW_ARROW] LAUNCH_COMPENSATION id={projectileId} " +
+                // $"compSec={launchCompensation:F3} nominalFlySec={flightTime:F3} " +
+                // $"visibleFlySec={Mathf.Max(0f, flightTime - launchCompensation):F3}");
         }
         projectileData.lastPosition = Vector3.zero;
         AttachCastTimingSnapshot(projectileData);
@@ -161,12 +161,12 @@ public class ProjectileManager : AbstractProjectile, IProjectileManager
         projectile.projectileLaunchGlobalFromCast = Time.time - castData.StartTime;
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-        Debug.Log(
-            $"{MagicProjectileSyncTag} LAUNCH id={projectile.id} impactType={projectile.impactType} " +
-            $"launchGlobalFromCast={projectile.projectileLaunchGlobalFromCast:F3}s " +
-            $"serverShoot={projectile.castServerShootSnapshot:F3}s serverHit={projectile.castServerHitSnapshot:F3}s " +
-            $"deltaLaunchToShoot={projectile.projectileLaunchGlobalFromCast - projectile.castServerShootSnapshot:F3}s " +
-            $"configuredFly={projectile.flytime:F3}s distance={projectile.distance:F3}m.");
+        // Debug.Log(
+            // $"{MagicProjectileSyncTag} LAUNCH id={projectile.id} impactType={projectile.impactType} " +
+            // $"launchGlobalFromCast={projectile.projectileLaunchGlobalFromCast:F3}s " +
+            // $"serverShoot={projectile.castServerShootSnapshot:F3}s serverHit={projectile.castServerHitSnapshot:F3}s " +
+            // $"deltaLaunchToShoot={projectile.projectileLaunchGlobalFromCast - projectile.castServerShootSnapshot:F3}s " +
+            // $"configuredFly={projectile.flytime:F3}s distance={projectile.distance:F3}m.");
 #endif
     }
 
@@ -205,15 +205,15 @@ public class ProjectileManager : AbstractProjectile, IProjectileManager
             }
             catch (InvalidCastException ex)
             {
-                Debug.LogError($"Error updating projectile {projectileId}: {ex.Message}");
+                // Debug.LogError($"Error updating projectile {projectileId}: {ex.Message}");
                 projectilesToRemove.Add(projectileId);
             }
             catch (MissingReferenceException ex)
             {
-                Debug.LogError(
-                    $"[ProjectileUpdateException] MissingReference id={projectileId} " +
-                    $"prefabNull={(projectile?.prefab == null)} transformNull={(projectile?.transform == null)} " +
-                    $"targetNull={(projectile?.targetTransform == null)} msg={ex.Message}");
+                // Debug.LogError(
+                    // $"[ProjectileUpdateException] MissingReference id={projectileId} " +
+                    // $"prefabNull={(projectile?.prefab == null)} transformNull={(projectile?.transform == null)} " +
+                    // $"targetNull={(projectile?.targetTransform == null)} msg={ex.Message}");
                 projectilesToRemove.Add(projectileId);
             }
 
@@ -238,9 +238,9 @@ public class ProjectileManager : AbstractProjectile, IProjectileManager
         if (!projectile.isActive) return false;
         if (projectile.transform == null)
         {
-            Debug.LogWarning(
-                $"[ProjectileUpdate] destroyed transform id={projectile.id} prefabNull={(projectile.prefab == null)} " +
-                $"targetNull={(projectile.targetTransform == null)} impactType={projectile.impactType} now={Time.time:F3}");
+            // Debug.LogWarning(
+                // $"[ProjectileUpdate] destroyed transform id={projectile.id} prefabNull={(projectile.prefab == null)} " +
+                // $"targetNull={(projectile.targetTransform == null)} impactType={projectile.impactType} now={Time.time:F3}");
             return false;
         }
 
@@ -282,15 +282,15 @@ public class ProjectileManager : AbstractProjectile, IProjectileManager
             {
                 bool hasSubscribers = OnHitEffectProjectile != null;
                 float gs = projectile.castStartTimeSnapshot > 0f ? Time.time - projectile.castStartTimeSnapshot : -1f;
-                Debug.Log(
-                    $"{PROJECTILE_TIMER_LOG} EffectOnlyTimeHit id={projectile.id} " +
-                    $"elapsedSec={(Time.time - projectile.startTime):F3} flyTimeSec={projectile.flytime:F3} " +
-                    $"eventSubscribers={hasSubscribers} hitPoint={projectile.hitPoint}");
-                Debug.Log(
-                    $"{MagicProjectileSyncTag} EFFECT_ONLY_HIT_FIRE id={projectile.id} " +
-                    $"globalSinceCast={gs:F3}s serverHit={projectile.castServerHitSnapshot:F3}s " +
-                    $"deltaToServerHit={(gs >= 0f ? gs - projectile.castServerHitSnapshot : -1f):F3}s " +
-                    $"elapsedSinceLaunch={(Time.time - projectile.startTime):F3}s");
+                // Debug.Log(
+                    // $"{PROJECTILE_TIMER_LOG} EffectOnlyTimeHit id={projectile.id} " +
+                    // $"elapsedSec={(Time.time - projectile.startTime):F3} flyTimeSec={projectile.flytime:F3} " +
+                    // $"eventSubscribers={hasSubscribers} hitPoint={projectile.hitPoint}");
+                // Debug.Log(
+                    // $"{MagicProjectileSyncTag} EFFECT_ONLY_HIT_FIRE id={projectile.id} " +
+                    // $"globalSinceCast={gs:F3}s serverHit={projectile.castServerHitSnapshot:F3}s " +
+                    // $"deltaToServerHit={(gs >= 0f ? gs - projectile.castServerHitSnapshot : -1f):F3}s " +
+                    // $"elapsedSinceLaunch={(Time.time - projectile.startTime):F3}s");
 
                 // The client removes NSkillProjectile before spawning the target
                 // effect. Destroy() is deferred until the end of Unity's frame,
@@ -310,10 +310,10 @@ public class ProjectileManager : AbstractProjectile, IProjectileManager
             else
             {
                 // Bow: Soulshot / shoot impact on Hit Time, then stick arrow.
-                Debug.Log(
-                    $"{PROJECTILE_TIMER_LOG} ArrowStickTimeHit id={projectile.id} " +
-                    $"elapsedSec={elapsed:F3} flyTimeSec={projectile.flytime:F3} " +
-                    $"hitPoint={projectile.hitPoint}");
+                // Debug.Log(
+                    // $"{PROJECTILE_TIMER_LOG} ArrowStickTimeHit id={projectile.id} " +
+                    // $"elapsedSec={elapsed:F3} flyTimeSec={projectile.flytime:F3} " +
+                    // $"hitPoint={projectile.hitPoint}");
 
                 OnHitMonster?.Invoke(
                     projectile.prefab,
@@ -386,20 +386,20 @@ public class ProjectileManager : AbstractProjectile, IProjectileManager
         float projectileElapsed = Time.time - projectile.startTime;
         if (projectile.castStartTimeSnapshot <= 0f)
         {
-        Debug.Log(
-            $"{MagicProjectileSyncTag} IMPACT id={projectile.id} impactType={projectile.impactType} " +
-            $"globalSinceCastStart=-1 castSnapshot=null flytime={projectile.flytime:F3}s elapsed={projectileElapsed:F3}s.");
+        // Debug.Log(
+            // $"{MagicProjectileSyncTag} IMPACT id={projectile.id} impactType={projectile.impactType} " +
+            // $"globalSinceCastStart=-1 castSnapshot=null flytime={projectile.flytime:F3}s elapsed={projectileElapsed:F3}s.");
             return;
         }
 
         float globalSinceCastStart = Time.time - projectile.castStartTimeSnapshot;
-        Debug.Log(
-            $"{MagicProjectileSyncTag} IMPACT id={projectile.id} impactType={projectile.impactType} " +
-            $"launchGlobalFromCast={projectile.projectileLaunchGlobalFromCast:F3}s " +
-            $"globalSinceCastStart={globalSinceCastStart:F3}s serverShoot={projectile.castServerShootSnapshot:F3}s serverHit={projectile.castServerHitSnapshot:F3}s " +
-            $"deltaLaunchToShoot={projectile.projectileLaunchGlobalFromCast - projectile.castServerShootSnapshot:F3}s " +
-            $"deltaToServerHit={globalSinceCastStart - projectile.castServerHitSnapshot:F3}s " +
-            $"configuredFly={projectile.flytime:F3}s elapsedSinceLaunch={projectileElapsed:F3}s.");
+        // Debug.Log(
+            // $"{MagicProjectileSyncTag} IMPACT id={projectile.id} impactType={projectile.impactType} " +
+            // $"launchGlobalFromCast={projectile.projectileLaunchGlobalFromCast:F3}s " +
+            // $"globalSinceCastStart={globalSinceCastStart:F3}s serverShoot={projectile.castServerShootSnapshot:F3}s serverHit={projectile.castServerHitSnapshot:F3}s " +
+            // $"deltaLaunchToShoot={projectile.projectileLaunchGlobalFromCast - projectile.castServerShootSnapshot:F3}s " +
+            // $"deltaToServerHit={globalSinceCastStart - projectile.castServerHitSnapshot:F3}s " +
+            // $"configuredFly={projectile.flytime:F3}s elapsedSinceLaunch={projectileElapsed:F3}s.");
 #endif
     }
 
@@ -413,17 +413,17 @@ public class ProjectileManager : AbstractProjectile, IProjectileManager
             : null;
         if (caster == null || caster.Identity == null)
         {
-            Debug.Log("[MAGIC_SHOT_LOG] SKIP session shot attackerId=" + projectile.attackerEntityId +
-                " casterNull=" + (caster == null));
+            // Debug.Log("[MAGIC_SHOT_LOG] SKIP session shot attackerId=" + projectile.attackerEntityId +
+                // " casterNull=" + (caster == null));
             return;
         }
-        Debug.Log("[MAGIC_SHOT_LOG] SESSION shot nick=" + caster.Identity.Name +
-            " id=" + caster.Identity.Id +
-            " attackerId=" + projectile.attackerEntityId);
-        UnityReplaySession.OnMagicShot(
-            caster,
-            target,
-            VectorUtils.ConvertPosUnityToL2j(projectile.startPosition));
+        // Debug.Log("[MAGIC_SHOT_LOG] SESSION shot nick=" + caster.Identity.Name +
+            // " id=" + caster.Identity.Id +
+            // " attackerId=" + projectile.attackerEntityId);
+        // UnityReplaySession.OnMagicShot(
+            // caster,
+            // target,
+            // VectorUtils.ConvertPosUnityToL2j(projectile.startPosition));
     }
 
     static void LogReplayMagicHit(ProjectileData projectile)
@@ -439,16 +439,16 @@ public class ProjectileManager : AbstractProjectile, IProjectileManager
             hit = projectile.targetPosition;
         if (caster == null || caster.Identity == null)
         {
-            Debug.Log("[MAGIC_SHOT_LOG] SKIP session hit attackerId=" + projectile.attackerEntityId +
-                " casterNull=" + (caster == null));
+            // Debug.Log("[MAGIC_SHOT_LOG] SKIP session hit attackerId=" + projectile.attackerEntityId +
+                // " casterNull=" + (caster == null));
             return;
         }
-        Debug.Log("[MAGIC_SHOT_LOG] SESSION hit nick=" + caster.Identity.Name +
-            " id=" + caster.Identity.Id);
-        UnityReplaySession.OnMagicHit(
-            caster,
-            target,
-            VectorUtils.ConvertPosUnityToL2j(hit));
+        // Debug.Log("[MAGIC_SHOT_LOG] SESSION hit nick=" + caster.Identity.Name +
+            // " id=" + caster.Identity.Id);
+        // UnityReplaySession.OnMagicHit(
+            // caster,
+            // target,
+            // VectorUtils.ConvertPosUnityToL2j(hit));
     }
 
     static Entity ResolveReplayEntity(int objectId)

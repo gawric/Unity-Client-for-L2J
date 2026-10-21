@@ -62,7 +62,7 @@ public class PledgePowerCheckBoxInstaller
     {
         if (elements == null)
         {
-            Debug.Log($"Create default elements (Checked: {defaultChecked}, Disabled: {defaultDisabled})");
+            // Debug.Log($"Create default elements (Checked: {defaultChecked}, Disabled: {defaultDisabled})");
             model.LeftCheckBoxes = new List<List<SettingCheckBox>>();
             model.RightCheckBoxes = new List<List<SettingCheckBox>>();
             var headers = CreateHeaders();

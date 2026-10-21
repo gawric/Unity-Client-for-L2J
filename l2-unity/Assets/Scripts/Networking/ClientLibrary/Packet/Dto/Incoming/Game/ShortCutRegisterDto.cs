@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -27,7 +27,7 @@ public class ShortCutRegisterDto : IWireDto
             int unk1 = reader.ReadB();
             int characterType = reader.ReadI();
             shortcut = new Shortcut(slot, page, Shortcut.TYPE_SKILL, skillId, skilLevel);
-            Debug.Log("ShortCutRegister : не реализовано принятия shortcutskill");
+            // Debug.Log("ShortCutRegister : не реализовано принятия shortcutskill");
         }
         else if (type == Shortcut.TYPE_ACTION)
         {

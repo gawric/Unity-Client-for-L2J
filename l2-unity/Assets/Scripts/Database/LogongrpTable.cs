@@ -27,7 +27,7 @@ public class LogongrpTable {
         LogonGrps = new List<Logongrp>();
         string dataPath = Path.Combine(Application.streamingAssetsPath, "Data/Meta/Logongrp.txt");
         if (!File.Exists(dataPath)) {
-            Debug.LogWarning("File not found: " + dataPath);
+            // Debug.LogWarning("File not found: " + dataPath);
             return;
         }
 
@@ -77,7 +77,7 @@ public class LogongrpTable {
                 LogonGrps.Add(logongrp);
             }
 
-            Debug.Log($"Successfully imported {LogonGrps.Count} logongrp(s)");
+            // Debug.Log($"Successfully imported {LogonGrps.Count} logongrp(s)");
         }
     }
 }

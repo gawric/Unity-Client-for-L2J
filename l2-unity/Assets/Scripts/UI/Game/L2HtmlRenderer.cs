@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
@@ -1574,7 +1574,7 @@ public sealed class L2HtmlRenderer
         }
 
         MissingTextureCache.Add(path);
-        Debug.LogWarning("L2HtmlRenderer: texture not found in Resources: " + path);
+        // Debug.LogWarning("L2HtmlRenderer: texture not found in Resources: " + path);
         return null;
     }
 

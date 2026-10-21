@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 /// <summary>
 /// CrossFade policy for Monster_Basic states.
@@ -36,8 +36,8 @@ public static class MonsterCrossFade
             bool hasState = animator.HasState(0, hash);
             animator.Play(stateName, 0, 0f);
             animator.Update(0f);
-            Debug.Log(
-                $"[ANIM_PLAY] id={objectId} snap state={stateName} hasState={hasState}");
+            // Debug.Log(
+                // $"[ANIM_PLAY] id={objectId} snap state={stateName} hasState={hasState}");
             return true;
         }
 

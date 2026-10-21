@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -89,7 +89,7 @@ public class TradeWindow : L2PopupWindow
         Button closeButton = (Button)GetElementByClass(closeButtonClass);
         if (closeButton == null)
         {
-            Debug.LogWarning($"Cant find close button with className: {closeButtonClass}.");
+            // Debug.LogWarning($"Cant find close button with className: {closeButtonClass}.");
             return;
         }
 
@@ -171,7 +171,7 @@ public class TradeWindow : L2PopupWindow
         }
         else
         {
-            Debug.LogWarning("No empty slots available in exchange window");
+            // Debug.LogWarning("No empty slots available in exchange window");
         }
     }
 
@@ -308,7 +308,7 @@ public class TradeWindow : L2PopupWindow
             }
             else
             {
-                Debug.LogWarning($"Item data is null for item {item.ItemId}.");
+                // Debug.LogWarning($"Item data is null for item {item.ItemId}.");
                 _id = 0;
                 _name = "Unknown";
                 _description = "Unknown item.";

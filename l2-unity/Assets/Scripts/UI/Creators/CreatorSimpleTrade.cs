@@ -33,7 +33,7 @@ public class CreatorSimpleTrade : AbstractTabCreator, ICreatorSimpleTrade
         }
         else
         {
-             Debug.LogError("CreatorSimpleTrade>CreateSlots : Element Container Tab is null");
+             // Debug.LogError("CreatorSimpleTrade>CreateSlots : Element Container Tab is null");
         }
 
     }

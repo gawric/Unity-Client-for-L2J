@@ -84,6 +84,8 @@ public class DayNightCycle : MonoBehaviour
     L2StarDome _starDome;
     L2CloudSimple _cloudSimple;
     L2CloudMyst _cloudMyst;
+    bool _skyReady;
+    float _appliedHours;
 
     void OnEnable()
     {
@@ -153,6 +155,14 @@ public class DayNightCycle : MonoBehaviour
             {
                 return;
             }
+
+            float hours = _clock.WorldHours;
+            if (_skyReady && Mathf.Abs(hours - _appliedHours) < 0.0001f)
+            {
+                L2ActorPointLights.Push();
+                return;
+            }
+
             if (_useL2Celestial)
             {
                 L2CelestialLut.EnsureLoaded();
@@ -238,10 +248,13 @@ public class DayNightCycle : MonoBehaviour
             {
                 UpdateMainLightTexture();
             }
+
+            _appliedHours = _clock.WorldHours;
+            _skyReady = true;
         }
         catch (Exception e)
         {
-            Debug.LogException(e);
+            // Debug.LogException(e);
         }
 
     }
@@ -258,7 +271,7 @@ public class DayNightCycle : MonoBehaviour
             ConfigureFlatSkyDome(displaySky);
         }
 
-        L2FxSkyDebug.LogLut(_clock != null ? _clock.WorldHours : -1f, sample, _skyboxMaterial);
+        // L2FxSkyDebug.LogLut(_clock != null ? _clock.WorldHours : -1f, sample, _skyboxMaterial);
 
         _mainLight.color = sample.sun;
 

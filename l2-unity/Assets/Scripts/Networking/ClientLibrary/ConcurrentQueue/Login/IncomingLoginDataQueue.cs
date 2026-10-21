@@ -49,7 +49,7 @@ public class IncomingLoginDataQueue : IDisposable
         }
         catch (Exception ex)
         {
-            Debug.LogError("IncomingLoginDataQueue->AddItem " + ex);
+            // Debug.LogError("IncomingLoginDataQueue->AddItem " + ex);
         }
     }
 
@@ -159,7 +159,7 @@ public class IncomingLoginDataQueue : IDisposable
                 }
                 catch (Exception ex)
                 {
-                    Debug.LogError("IncomingLoginDataQueue->Handle " + ex);
+                    // Debug.LogError("IncomingLoginDataQueue->Handle " + ex);
                 }
             }
         }

@@ -42,7 +42,7 @@ public class RSACrypt
 
     public void UnscrambledRSAKey(byte[] rsaKey)
     {
-        Debug.Log($"Scrambled RSA: {StringUtils.ByteArrayToString(rsaKey)}");
+        // Debug.Log($"Scrambled RSA: {StringUtils.ByteArrayToString(rsaKey)}");
 
         for (int i = 0; i < 0x40; i++)
             rsaKey[0x40 + i] = (byte)(rsaKey[0x40 + i] ^ rsaKey[i]);
@@ -60,7 +60,7 @@ public class RSACrypt
             rsaKey[0x4d + i] = temp;
         }
 
-        Debug.Log($"Unscrambled RSA {rsaKey.Length} : {StringUtils.ByteArrayToString(rsaKey)}");
+        // Debug.Log($"Unscrambled RSA {rsaKey.Length} : {StringUtils.ByteArrayToString(rsaKey)}");
     }
 
     public static RsaKeyParameters LoadPublicKey(byte[] modBytes)

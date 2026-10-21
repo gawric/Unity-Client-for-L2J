@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
@@ -56,7 +56,7 @@ public abstract class PacketAutoRegistry
     {
         if (map.ContainsKey(key))
         {
-            Debug.LogError("Duplicate " + kind + " for " + owner.Name);
+            // Debug.LogError("Duplicate " + kind + " for " + owner.Name);
             return false;
         }
 

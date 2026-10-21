@@ -24,7 +24,7 @@ public class L2JSONBrushImporter : AssetImporter {
         string fileToProcess = EditorUtility.OpenFilePanel(title, directory, extension);
 
         if(!string.IsNullOrEmpty(fileToProcess)) {
-            Debug.Log("Selected file: " + fileToProcess);
+            // Debug.Log("Selected file: " + fileToProcess);
             List<string> files = ProcessDataFile(dataFolder, fileToProcess);
             ImportFiles(dataFolder, files, overwrite);
         }
@@ -41,7 +41,7 @@ public class L2JSONBrushImporter : AssetImporter {
                         if(!string.IsNullOrEmpty(brush.model.poly.polyData[i].texture)) {
                             string textureName = brush.model.poly.polyData[i].texture;
                             if(textureName.Contains("Shaders")) {
-                                Debug.Log("Skipping shaders " + textureName);
+                                // Debug.Log("Skipping shaders " + textureName);
                                 continue;
                             }
 
@@ -57,7 +57,7 @@ public class L2JSONBrushImporter : AssetImporter {
         }
 
         files = files.Distinct().ToList();
-        Debug.LogWarning("Total files to import: " + files.Count);
+        // Debug.LogWarning("Total files to import: " + files.Count);
 
         return files;
     }
@@ -69,7 +69,7 @@ public class L2JSONBrushImporter : AssetImporter {
             return brushes.data;
 
         } catch(IOException e) {
-            Debug.LogError("An error occurred: " + e.Message);
+            // Debug.LogError("An error occurred: " + e.Message);
         }
 
         return null;

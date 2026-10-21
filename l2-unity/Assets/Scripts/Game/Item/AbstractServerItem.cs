@@ -83,7 +83,7 @@ public abstract class AbstractServerItem
 
         if (armor != null)
         {
-            Debug.Log("Body part test > " + armor.BodyPart);
+            // Debug.Log("Body part test > " + armor.BodyPart);
             if (armor.BodyPart == ItemSlot.legs)
             {
                 if (armor.ArmorType == ArmorType.light) return "Lower Body / Light";

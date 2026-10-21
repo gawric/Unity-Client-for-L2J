@@ -6,11 +6,11 @@ public class MonsterStateAtkWait : MonsterStateBase
     {
         LoadComponents(animator);
         int id = animator.GetInteger(AnimatorUtils.OBJECT_ID);
-        Debug.Log(
-            "[ANIM] AtkWait ENTER id=" + id +
-            " name=" + EntityActionCombatLog.NameOf(_entity) +
-            " inCombat=" + (_entity != null && _entity.InCombat) +
-            " action=" + (_entity != null ? _entity.ActionSlot.Action.ToString() : "none"));
+        // Debug.Log(
+            // "[ANIM] AtkWait ENTER id=" + id +
+            // " name=" + EntityActionCombatLog.NameOf(_entity) +
+            // " inCombat=" + (_entity != null && _entity.InCombat) +
+            // " action=" + (_entity != null ? _entity.ActionSlot.Action.ToString() : "none"));
     }
 
     override public void OnStateUpdate(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
@@ -20,6 +20,6 @@ public class MonsterStateAtkWait : MonsterStateBase
     override public void OnStateExit(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
         int id = animator.GetInteger(AnimatorUtils.OBJECT_ID);
-        Debug.Log("[ANIM] AtkWait EXIT id=" + id);
+        // Debug.Log("[ANIM] AtkWait EXIT id=" + id);
     }
 }

@@ -5,6 +5,7 @@ public sealed class MoveToPawnIncoming : IncomingWirePacket<MoveToPawnDto>
 {
     public override void Apply(MoveToPawnDto packet)
     {
-        IncomingPacketActions.ApplyWorld(apply => apply.MoveToPawn(packet));
+        MoveCostLog.NotePawnPacket(packet != null ? packet.ObjId : 0);
+        MovementPacketLatest.PutPawn(packet);
     }
 }

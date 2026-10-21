@@ -32,7 +32,7 @@ public class ItemNameTable {
         _itemNames = new Dictionary<int, ItemName>();
         string dataPath = Path.Combine(Application.streamingAssetsPath, "Data/Meta/ItemName_Classic-eu.txt");
         if (!File.Exists(dataPath)) {
-            Debug.LogWarning("File not found: " + dataPath);
+            // Debug.LogWarning("File not found: " + dataPath);
             return;
         }
 
@@ -87,7 +87,7 @@ public class ItemNameTable {
                 _itemNames.TryAdd(itemName.Id, itemName);
             }
 
-            Debug.Log($"Successfully imported {_itemNames.Count} itemNames(s)");
+            // Debug.Log($"Successfully imported {_itemNames.Count} itemNames(s)");
         }
     }
 
@@ -169,7 +169,7 @@ public class ItemNameTable {
         }
         catch (Exception ex)
         {
-            Debug.LogError("ItemNametable error parce itemName " + ex.Message);
+            // Debug.LogError("ItemNametable error parce itemName " + ex.Message);
         }
         
 

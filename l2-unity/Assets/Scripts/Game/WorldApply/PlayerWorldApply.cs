@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public sealed class PlayerWorldApply : EntityWorldApply
 {
@@ -13,12 +13,15 @@ public sealed class PlayerWorldApply : EntityWorldApply
 
     public override void OnMoveTo(Entity entity, Vector3 destination, Vector3 current, CharMoveToLocationDto dto)
     {
-        ReplayAttackTrace.Write(
-            "PLAYER_MOVE",
-            entity,
-            entity != null ? entity.GetTargetEntity() : null,
-            "state=" + (PlayerStateMachine.Instance != null ? PlayerStateMachine.Instance.State.ToString() : "none") +
-            " destination=" + destination);
+        if (entity != null && entity.IsDead())
+            return;
+
+        // ReplayAttackTrace.Write(
+            // "PLAYER_MOVE",
+            // entity,
+            // entity != null ? entity.GetTargetEntity() : null,
+            // "state=" + (PlayerStateMachine.Instance != null ? PlayerStateMachine.Instance.State.ToString() : "none") +
+            // " destination=" + destination);
         if (PlayerStateMachine.Instance != null)
             PlayerStateMachine.Instance.ChangeIntention(Intention.INTENTION_MOVE_TO, dto);
     }
@@ -34,6 +37,9 @@ public sealed class PlayerWorldApply : EntityWorldApply
 
     public override void OnMoveToPawn(Entity entity, MoveToPawnDto dto)
     {
+        if (entity != null && entity.IsDead())
+            return;
+
         PlayerController controller = entity.GetComponent<PlayerController>();
         if (controller != null)
             controller.InitMoveToPawn(dto);
@@ -60,10 +66,10 @@ public sealed class PlayerWorldApply : EntityWorldApply
 
     public override void OnAttack(Entity attacker, Entity target, AttackDto dto)
     {
-        if (attacker == null || target == null)
+        if (attacker == null || target == null || attacker == target)
             return;
 
-        if (attacker.IsDead() || target.IsDead())
+        if (attacker.IsDead())
             return;
 
         if (PlayerStateMachine.Instance != null)

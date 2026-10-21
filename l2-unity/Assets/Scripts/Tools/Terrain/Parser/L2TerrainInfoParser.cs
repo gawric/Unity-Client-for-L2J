@@ -8,7 +8,7 @@ public class L2TerrainInfoParser {
     public static L2TerrainInfo ParseTerrainInfo0(string mapID) {
         string dataPath = "Assets/Data/Maps/Meta/" + mapID + "/TerrainInfo0.txt";
         if (!File.Exists(dataPath)) {
-            Debug.LogWarning("File not found: " + dataPath);
+            // Debug.LogWarning("File not found: " + dataPath);
             return null;
         }
 
@@ -68,7 +68,7 @@ public class L2TerrainInfoParser {
         string[] valueParts = valueString.Split(',');
 
         if (valueParts.Length < 4) {
-            Debug.LogError("Invalid layer line: " + line);
+            // Debug.LogError("Invalid layer line: " + line);
             return null;
         }
 
@@ -182,7 +182,7 @@ public class L2TerrainInfoParser {
             return sounds.data;
 
         } catch (IOException e) {
-            Debug.LogError("An error occurred: " + e.Message);
+            // Debug.LogError("An error occurred: " + e.Message);
         }
 
         return null;

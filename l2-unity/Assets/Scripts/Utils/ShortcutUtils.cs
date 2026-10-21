@@ -17,7 +17,7 @@ public class ShortcutUtils
                 case Shortcut.TYPE_ITEM:
                     return PlayerInventory.Instance.FindByAllInventory(data.Id);
                 default:
-                    Debug.LogWarning($"SimpleToolTipData:> DetectedType:  Unsupported shortcut type: {data.Type}");
+                    // Debug.LogWarning($"SimpleToolTipData:> DetectedType:  Unsupported shortcut type: {data.Type}");
                     return null;
             }
         }

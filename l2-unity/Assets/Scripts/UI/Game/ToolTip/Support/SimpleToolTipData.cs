@@ -57,7 +57,7 @@ public class SimpleToolTipData : AbstractSimpleToolTip , IDataTips
                 break;
 
             default:
-                Debug.LogWarning($"Unsupported data type: {data?.GetType().Name}");
+                // Debug.LogWarning($"Unsupported data type: {data?.GetType().Name}");
                 break;
         }
     }

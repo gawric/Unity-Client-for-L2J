@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public class PlayerOverriddenLongAtk : StateMachineBehaviour
 {
@@ -91,9 +91,9 @@ public class PlayerOverriddenLongAtk : StateMachineBehaviour
             {
                 _eventLogged = true;
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-                Debug.Log(
-                    $"[LONG_CAST_FIRE] global={globalElapsed:F3}s " +
-                    $"delta={(globalElapsed - _castData.ShotTriggerGlobalOffset):F4}s");
+                // Debug.Log(
+                    // $"[LONG_CAST_FIRE] global={globalElapsed:F3}s " +
+                    // $"delta={(globalElapsed - _castData.ShotTriggerGlobalOffset):F4}s");
 #endif
             }
         }
@@ -126,12 +126,12 @@ public class PlayerOverriddenLongAtk : StateMachineBehaviour
         if (shouldDiag)
         {
             _lastExitDiagLogTime = localElapsed;
-            Debug.Log(
-                $"{LongExitLogTag} CHECK phase={currentPhase} state={parameterName} " +
-                $"local={localElapsed:F3}s global={globalElapsed:F3}s " +
-                $"norm={stateInfo.normalizedTime:F3} (need>={PhaseDoneNormalizedTime:F2}) normDone={normDone} " +
-                $"speed={animator.speed:F3} clipLen={_clipLengthAtEnter:F3} wallNeed={wallNeed:F3}s wallDone={wallDone} " +
-                $"alreadyFinished={_phaseFinished} gateWillFire={phaseDone}");
+            // Debug.Log(
+                // $"{LongExitLogTag} CHECK phase={currentPhase} state={parameterName} " +
+                // $"local={localElapsed:F3}s global={globalElapsed:F3}s " +
+                // $"norm={stateInfo.normalizedTime:F3} (need>={PhaseDoneNormalizedTime:F2}) normDone={normDone} " +
+                // $"speed={animator.speed:F3} clipLen={_clipLengthAtEnter:F3} wallNeed={wallNeed:F3}s wallDone={wallDone} " +
+                // $"alreadyFinished={_phaseFinished} gateWillFire={phaseDone}");
         }
 
         if (!phaseDone)
@@ -141,9 +141,9 @@ public class PlayerOverriddenLongAtk : StateMachineBehaviour
 
         _phaseFinished = true;
         int objectId = animator.GetInteger(AnimatorUtils.OBJECT_ID);
-        Debug.Log(
-            $"{LongExitLogTag} PHASE_DONE phase={currentPhase} state={parameterName} " +
-            $"local={localElapsed:F3}s norm={stateInfo.normalizedTime:F3} wallDone={wallDone} → NotifyMagicPhaseFinished");
+        // Debug.Log(
+            // $"{LongExitLogTag} PHASE_DONE phase={currentPhase} state={parameterName} " +
+            // $"local={localElapsed:F3}s norm={stateInfo.normalizedTime:F3} wallDone={wallDone} → NotifyMagicPhaseFinished");
 
         if (AnimationManager.Instance != null)
         {
@@ -178,7 +178,7 @@ public class PlayerOverriddenLongAtk : StateMachineBehaviour
             // Толкаем триггер перехода в финальную анимацию выстрела
             animator.SetTrigger(TriggerMagicShotLong);
 
-            Debug.Log($"[LONG_CAST_SHOT] {coordinatorMessage} global={globalElapsed:F3}s target={_castData.ShotTriggerGlobalOffset:F3}s");
+            // Debug.Log($"[LONG_CAST_SHOT] {coordinatorMessage} global={globalElapsed:F3}s target={_castData.ShotTriggerGlobalOffset:F3}s");
         }
 
         // Unblocks AsyncPlayLongCastLoopPhase (runner already awaiting MagicShotLong finish).
@@ -194,9 +194,9 @@ public class PlayerOverriddenLongAtk : StateMachineBehaviour
 
         _isSwitchIdle = true;
         float localElapsed = Time.time - _stateEnterTime;
-        Debug.Log(
-            $"{LongExitLogTag} SwitchToIdle FIRE state={parameterName} local={localElapsed:F3}s " +
-            $"→ INTENTION_IDLE + WAIT_RETURN");
+        // Debug.Log(
+            // $"{LongExitLogTag} SwitchToIdle FIRE state={parameterName} local={localElapsed:F3}s " +
+            // $"→ INTENTION_IDLE + WAIT_RETURN");
 
         if (!EntityActionSkill.IsLocalPlayer(_objectId))
         {
@@ -211,9 +211,9 @@ public class PlayerOverriddenLongAtk : StateMachineBehaviour
 
         if (PlayerStateMachine.Instance != null && PlayerStateMachine.Instance.ShouldKeepLocomotion())
         {
-            Debug.Log(
-                $"{LongExitLogTag} SwitchToIdle SKIP_LOCOMOTION state={parameterName} " +
-                $"sm={PlayerStateMachine.Instance.State} intention={PlayerStateMachine.Instance.Intention}");
+            // Debug.Log(
+                // $"{LongExitLogTag} SwitchToIdle SKIP_LOCOMOTION state={parameterName} " +
+                // $"sm={PlayerStateMachine.Instance.State} intention={PlayerStateMachine.Instance.Intention}");
             return;
         }
 
@@ -236,10 +236,10 @@ public class PlayerOverriddenLongAtk : StateMachineBehaviour
             ? "loop→shot@ShotTriggerGlobalOffset"
             : $"wall|norm>={PhaseDoneNormalizedTime:F2}→NotifyPhase" +
               (currentPhase == CastPhase.FinalShotPhase ? "+SwitchToIdle" : "");
-        Debug.Log(
-            $"[LONG_CAST_ENTER] phase={currentPhase} state={parameterName} " +
-            $"globalSinceStart={globalSinceCastStart:F3}s " +
-            $"shotOffset={(_castData != null ? _castData.ShotTriggerGlobalOffset.ToString("F3") : "null")}s " +
-            $"clipLen={_clipLengthAtEnter:F3} exitGate={exitGate}");
+        // Debug.Log(
+            // $"[LONG_CAST_ENTER] phase={currentPhase} state={parameterName} " +
+            // $"globalSinceStart={globalSinceCastStart:F3}s " +
+            // $"shotOffset={(_castData != null ? _castData.ShotTriggerGlobalOffset.ToString("F3") : "null")}s " +
+            // $"clipLen={_clipLengthAtEnter:F3} exitGate={exitGate}");
     }
 }

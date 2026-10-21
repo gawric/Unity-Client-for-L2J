@@ -178,7 +178,7 @@ public class InventoryTab : L2Tab
         }
         else
         {
-            Debug.Log("Shift element number null " + i_slot1);
+            // Debug.Log("Shift element number null " + i_slot1);
         }
     }
 
@@ -212,7 +212,7 @@ public class InventoryTab : L2Tab
                 }
                 else
                 {
-                    Debug.Log("ADD And Rmove Count Not ADD ObjectID " + item.ObjectId);
+                    // Debug.Log("ADD And Rmove Count Not ADD ObjectID " + item.ObjectId);
                 }
           
             }

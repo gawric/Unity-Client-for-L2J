@@ -28,6 +28,7 @@ public class MoveAllCharacters : MonoBehaviour, IMoveAllCharacters
             _removeListRotate = new List<int>();
             _stoppedMoveData = new Dictionary<int, MovementData>();
             _reconciledStoppedMoves = new List<int>();
+            CrowdAnimTest.EnsureTimeCap();
 
         }
         else
@@ -38,6 +39,9 @@ public class MoveAllCharacters : MonoBehaviour, IMoveAllCharacters
 
     void Update()
     {
+        CrowdAnimTest.EnsureTimeCap();
+        StepMoves();
+
         if (_rotateDict.Count == 0) return;
 
         foreach (KeyValuePair<int, RotateData> kvp in _rotateDict)
@@ -143,24 +147,34 @@ public class MoveAllCharacters : MonoBehaviour, IMoveAllCharacters
         return _moveDict.TryGetValue(objId, out data) ? data : null;
     }
 
-    void FixedUpdate()
+    void StepMoves()
     {
         ReconcileStoppedMoves();
-        if (_moveDict.Count == 0) return;
+        if (_moveDict.Count == 0)
+        {
+            MoveCostLog.NoteStep(0, 0, 0);
+            MoveCostLog.EndFrame();
+            return;
+        }
 
+        long start = System.Diagnostics.Stopwatch.GetTimestamp();
+        int moving = 0;
         foreach (KeyValuePair<int, MovementData> kvp in _moveDict)
         {
             MovementData data = kvp.Value;
             bool isMove = data.IsMove();
-            MovementTarget _movementTarget = data.GetMovementTarget();
+            MovementTarget movementTarget = data.GetMovementTarget();
 
             if (isMove == true | data.IsEntity())
             {
-                Vector3 target = _movementTarget.GetTarget();
+                if (movementTarget == null || !movementTarget.TryGetTarget(out Vector3 target))
+                {
+                    _removeListMove.Add(kvp.Key);
+                    continue;
+                }
 
-                if (target == null)
-                    return;
-
+                if (isMove)
+                    moving++;
                 MoveToPoint(kvp.Key, target, data);
             }
             else
@@ -172,70 +186,75 @@ public class MoveAllCharacters : MonoBehaviour, IMoveAllCharacters
         }
 
         RemoveFinishKeyMove();
-
-        //Debug.Log("MoveAllCharacters FixedUpdate Size " + _moveDict.Count);
+        double ms = (System.Diagnostics.Stopwatch.GetTimestamp() - start) * 1000.0 / System.Diagnostics.Stopwatch.Frequency;
+        MoveCostLog.NoteStep(moving, moving, ms);
+        MoveCostLog.EndFrame();
     }
 
     private void MoveToPoint(int key, Vector3 target, MovementData data)
     {
-
-        if (target != null)
+        if (!data.IsEntity())
         {
-            float stopDistance = data.GetDistance();
-            bool isMove = data.IsMove();
-
-            if (!data.IsEntity()) {
-                _removeListMove.Add(key);
-                return;
-            }
-
-            Transform transform = data.GetTransform();
-            if (data.IsOwnerDead())
-            {
-                data.SetIsMove(false);
-                _removeListMove.Add(key);
-                data.SetLastPosition(transform.position);
-                return;
-            }
-            Vector3 before = transform.position;
-            if (!isMove)
-            {
-                _removeListMove.Add(key);
-                data.SetLastPosition(before);
-                return;
-            }
-
-            float distance = VectorUtils.Distance2D(before, target);
-
-            if (distance >= stopDistance)
-            {
-                var gravityOffTransform = new Vector3(transform.position.x, 0, transform.position.z);
-                var gravityOffTarget = new Vector3(target.x, 0, target.z);
-
-                Vector3 point = gravityOffTarget - gravityOffTransform;
-                Vector3 direction = point.normalized;
-
-                if (isMove && point.sqrMagnitude > 0.0001f)
-                {
-                    data.AdvanceMoveTimer();
-                    data.SyncUserGait();
-                    float speed = data.GetSpeed();
-                    data.Move(direction, speed);
-                }
-                else if (!isMove)
-                {
-                    _removeListMove.Add(key);
-                }
-            }
-            else
-            {
-                data.OnFinish(target);
-                _removeListMove.Add(key);
-            }
-
- 
-            data.SetLastPosition(transform.position);
+            _removeListMove.Add(key);
+            return;
         }
+
+        Transform transform = data.GetTransform();
+        if (transform == null)
+        {
+            _removeListMove.Add(key);
+            return;
+        }
+
+        if (data.IsOwnerDead())
+        {
+            data.SetIsMove(false);
+            _removeListMove.Add(key);
+            data.SetLastPosition(transform.position);
+            return;
+        }
+
+        Vector3 before = transform.position;
+        if (!data.IsMove())
+        {
+            _removeListMove.Add(key);
+            data.SetLastPosition(before);
+            return;
+        }
+
+        float stopDistance = data.GetDistance();
+        float dx = target.x - before.x;
+        float dz = target.z - before.z;
+        float distSq = dx * dx + dz * dz;
+        if (distSq < stopDistance * stopDistance)
+        {
+            data.OnFinish(target);
+            _removeListMove.Add(key);
+            data.SetLastPosition(transform.position);
+            return;
+        }
+
+        if (distSq <= 0.0001f)
+        {
+            data.SetLastPosition(transform.position);
+            return;
+        }
+
+        data.AdvanceMoveTimer();
+        data.SyncUserGait();
+        float speed = data.GetSpeed();
+        if (L2PawnWalk.IsCharInfoPawn(data.GetEntity()))
+            data.StepCharInfo(target, speed);
+        else
+        {
+            Vector3 direction = new Vector3(dx, 0f, dz);
+            float dist = Mathf.Sqrt(distSq);
+            direction.x /= dist;
+            direction.z /= dist;
+            data.Move(direction, speed);
+        }
+
+        data.SetLastPosition(transform.position);
     }
 
     private void TurnTowardsAttacker(Vector3 attackerPosition, Transform mTranform)

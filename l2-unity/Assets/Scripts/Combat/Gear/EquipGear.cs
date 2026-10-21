@@ -163,12 +163,12 @@ public class EquipGear : AbstractEquip
             }
             else
             {
-                Debug.LogError("GearSlots reInitialize not found assigned slots " + slot);
+                // Debug.LogError("GearSlots reInitialize not found assigned slots " + slot);
             }
         }
         else
         {
-            Debug.LogError("Can't equip item, assigned slot is " + slot);
+            // Debug.LogError("Can't equip item, assigned slot is " + slot);
         }
     }
 
@@ -223,12 +223,12 @@ public class EquipGear : AbstractEquip
                     }
                     else
                     {
-                        Debug.LogError("GearSlots reInitialize not found assigned slots " + slot);
+                        // Debug.LogError("GearSlots reInitialize not found assigned slots " + slot);
                     }
                 }
                 else
                 {
-                    Debug.LogError("Can't equip item, assigned slot is " + slot);
+                    // Debug.LogError("Can't equip item, assigned slot is " + slot);
                 }
                 break;
         }

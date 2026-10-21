@@ -22,7 +22,7 @@ namespace HtmlAgilityPack
 
         public override void Write(string Message, string Category)
         {
-            Console.Write("T:" + Category + ": " + Message);
+            // Console.Write("T:" + Category + ": " + Message);
         }
 
         public override void WriteLine(string Message)

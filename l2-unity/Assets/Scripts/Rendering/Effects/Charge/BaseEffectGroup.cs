@@ -90,14 +90,14 @@ public abstract class BaseEffectGroup : EffectPart
 
             float seed = UnityEngine.Random.Range(-100f, 100f);
 
-            Debug.Log($"ActivateParticle: {_particleIndex}");
+            // Debug.Log($"ActivateParticle: {_particleIndex}");
             _effectInstances[_particleIndex].Activate(now, seed, ApplyShaderParams);
 
             _particleIndex++;
         }
         catch(IndexOutOfRangeException ex)
         {
-            Debug.LogWarning("BaseEffectGroup>ActivateParticle: ошибка не смогли активировать частицу " + ex.Message);
+            // Debug.LogWarning("BaseEffectGroup>ActivateParticle: ошибка не смогли активировать частицу " + ex.Message);
         }
 
     }

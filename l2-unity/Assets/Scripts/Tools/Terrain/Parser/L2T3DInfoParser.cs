@@ -11,7 +11,7 @@ public class L2T3DInfoParser {
     public static L2TerrainInfo LoadMetadata(string mapName) {
         t3dPath = StaticMeshUtils.GetT3DPath(mapName);
         if (!File.Exists(t3dPath)) {
-            Debug.Log("No t3d for map " + mapName + " at path " + t3dPath);
+            // Debug.Log("No t3d for map " + mapName + " at path " + t3dPath);
             return null;
         }
 
@@ -36,7 +36,7 @@ public class L2T3DInfoParser {
 
         string path = t3dPath;
         if (givenpath != null && givenpath.Length != 0) {
-            Debug.LogWarning("Reading staticmeshactors from file " + givenpath);
+            // Debug.LogWarning("Reading staticmeshactors from file " + givenpath);
             path = givenpath;
         }
 
@@ -76,7 +76,7 @@ public class L2T3DInfoParser {
             }
         }
 
-        Debug.Log($"Loaded {terrainInfo.staticMeshes.Count} staticmeshes data.");
+        // Debug.Log($"Loaded {terrainInfo.staticMeshes.Count} staticmeshes data.");
     }
 
     public static void ParseTerrainInfo(string mapName) {
@@ -115,8 +115,8 @@ public class L2T3DInfoParser {
             }
         }
 
-        Debug.Log($"Loaded {terrainInfo.uvLayers.Count} uv layers data.");
-        Debug.Log($"Loaded {terrainInfo.decoLayers.Count} deco layers data.");
+        // Debug.Log($"Loaded {terrainInfo.uvLayers.Count} uv layers data.");
+        // Debug.Log($"Loaded {terrainInfo.decoLayers.Count} deco layers data.");
     }
 
     public static List<Brush> ParseBrushInfo(string t3dPath) {
@@ -139,7 +139,7 @@ public class L2T3DInfoParser {
                     brush.polyFlags = L2MetaDataUtils.ParsePolyFlags(0);
 
                     List<PolyData> polydatas = new List<PolyData>();
-                    Debug.Log("New Brush " + brush.name);
+                    // Debug.Log("New Brush " + brush.name);
 
                     int polyIndex = 0;
                     while ((line = reader.ReadLine()) != null && !line.Contains("End Actor")) {
@@ -188,7 +188,7 @@ public class L2T3DInfoParser {
                                 }
                             }
 
-                            Debug.Log("Poly Verticle count " + vertices.Count);
+                            // Debug.Log("Poly Verticle count " + vertices.Count);
 
                             polydata.vertices = vertices.ToArray();
 
@@ -203,15 +203,15 @@ public class L2T3DInfoParser {
                         }
                     }
 
-                    Debug.Log(brush);
-                    Debug.Log(brush.model.poly);
-                    Debug.Log("Brush poly count " + brush.model.poly.polyCount);
+                    // Debug.Log(brush);
+                    // Debug.Log(brush.model.poly);
+                    // Debug.Log("Brush poly count " + brush.model.poly.polyCount);
                     terrainInfo.brushes.Add(brush);
                 }
             }
         }
 
-        Debug.Log($"Loaded {terrainInfo.brushes.Count} brushe(s).");
+        // Debug.Log($"Loaded {terrainInfo.brushes.Count} brushe(s).");
 
         return terrainInfo.brushes;
     }
@@ -246,7 +246,7 @@ public class L2T3DInfoParser {
             }
         }
 
-        Debug.Log($"Loaded {terrainInfo.interpolationPoints.Count} interpolation points.");
+        // Debug.Log($"Loaded {terrainInfo.interpolationPoints.Count} interpolation points.");
 
         return terrainInfo.interpolationPoints;
     }
@@ -271,7 +271,7 @@ public class L2T3DInfoParser {
 
                         if (line.StartsWith("AmbientRandom=")) {
                             ambientSound.ambientRandom = L2MetaDataUtils.ParseIntFromInfo(line);
-                            Debug.Log(ambientSound.ambientRandom);
+                            // Debug.Log(ambientSound.ambientRandom);
                         } else if (line.StartsWith("AmbientSoundStartTime=")) {
                             ambientSound.ambientSoundStartTime = L2MetaDataUtils.ParseFloatFromInfo(line);
                         } else if (line.StartsWith("AmbientSound=")) {
@@ -303,7 +303,7 @@ public class L2T3DInfoParser {
             }
         }
 
-        Debug.Log($"Loaded {terrainInfo.ambientSounds.Count} ambientsound(s).");
+        // Debug.Log($"Loaded {terrainInfo.ambientSounds.Count} ambientsound(s).");
 
         return terrainInfo.ambientSounds;
     }

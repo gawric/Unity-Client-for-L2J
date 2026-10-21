@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public class NewAttackIntention : IntentionBase
 {
@@ -19,7 +19,7 @@ public class NewAttackIntention : IntentionBase
 
         if (arg0.GetType() == typeof(AttackDto))
         {
-            Debug.Log("NewAttackIntention > State " + PlayerStateMachine.Instance.State);
+            // Debug.Log("NewAttackIntention > State " + PlayerStateMachine.Instance.State);
             AttackDto myModel = (AttackDto)arg0;
             int targetId = myModel.TargetId;
 
@@ -28,12 +28,12 @@ public class NewAttackIntention : IntentionBase
             if (targetEntity != null)
             {
                 SelectPacketTarget(targetEntity);
-                ReplayAttackTrace.Write(
-                    "TARGET_SELECTED",
-                    PlayerEntity.Instance,
-                    targetEntity,
-                    "playerTarget=" +
-                    (PlayerEntity.Instance != null && PlayerEntity.Instance.Target != null));
+                // ReplayAttackTrace.Write(
+                    // "TARGET_SELECTED",
+                    // PlayerEntity.Instance,
+                    // targetEntity,
+                    // "playerTarget=" +
+                    // (PlayerEntity.Instance != null && PlayerEntity.Instance.Target != null));
 
                 // Bow: live follow until OnAnimationShoot. Melee: one-shot snapshot only.
                 if (CombatFacingService.IsPlayerUsingBow(PlayerEntity.Instance))
@@ -60,25 +60,28 @@ public class NewAttackIntention : IntentionBase
 
             // Attack carries visual damage only. The official client changes health from
             // StatusUpdate and enters death only from Die; it doesn't predict death here.
+            if (HitManager.Instance != null)
+                HitManager.Instance.RememberLocalAttack(myModel);
+
             PlayerEntity.Instance.IsAttack = true;
             if (IncomingPacketActions.Targets != null)
                 IncomingPacketActions.Targets.SetAttackTarget();
             PlayerEntity.Instance.SetSelfHit(playerHit);
             // AttackDto packet SS flag — recharge every swing (otherwise only first Hit shows SoulShot).
             PlayerEntity.Instance.IsSoulshotCharged = playerHit.hasSoulshot();
-            Debug.Log(
-                $"[ATK_HIT_CHAIN] 0.AttackPacket ss={playerHit.hasSoulshot()} miss={playerHit.isMiss()} " +
-                $"crit={playerHit.isCrit()} dmg={playerHit.Damage}");
+            // Debug.Log(
+                // $"[ATK_HIT_CHAIN] 0.AttackPacket ss={playerHit.hasSoulshot()} miss={playerHit.isMiss()} " +
+                // $"crit={playerHit.isCrit()} dmg={playerHit.Damage}");
 
             if (_stateMachine.State != PlayerState.ATTACKING)
             {
                 _stateMachine.ChangeState(PlayerState.ATTACKING);
             }
-            ReplayAttackTrace.Write(
-                "READY_TO_ACT",
-                PlayerEntity.Instance,
-                targetEntity,
-                "damage=" + playerHit.Damage);
+            // ReplayAttackTrace.Write(
+                // "READY_TO_ACT",
+                // PlayerEntity.Instance,
+                // targetEntity,
+                // "damage=" + playerHit.Damage);
             _stateMachine.NotifyEvent(Event.READY_TO_ACT, targetEntity);
 
         }

@@ -14,7 +14,7 @@ public abstract class AssetImporter {
                 path = Path.Combine(inputFolder, split[1], "Texture", split[2]);
 
                 if(!File.Exists(path)) {
-                    Debug.LogError("File " + path + " doesn't exist.");
+                    // Debug.LogError("File " + path + " doesn't exist.");
                     continue;
                 }
             }
@@ -23,13 +23,13 @@ public abstract class AssetImporter {
             string destination = null;
             if(Path.GetExtension(path).ToLower() == ".fbx") {
                 destination = Path.Combine("Assets", "Resources", "Data", "StaticMeshes", relativePath);
-                Debug.Log(destination);
+                // Debug.Log(destination);
             } else if(Path.GetExtension(path).ToLower() == ".png") {
                 destination = Path.Combine("Assets", "Resources", "Data", "Textures", relativePath);
-                Debug.Log(destination);
+                // Debug.Log(destination);
             } else if(Path.GetExtension(path).ToLower() == ".txt") {
                 destination = Path.Combine("Assets", "Resources", "Data", "Textures", relativePath);
-                Debug.Log(destination);
+                // Debug.Log(destination);
             }
 
             if(destination != null) {
@@ -40,7 +40,7 @@ public abstract class AssetImporter {
                 try {
                     File.Copy(path, destination, overwrite);
                 } catch(IOException e) {
-                    Debug.LogWarning(destination + " already exists or " + e.Message);
+                    // Debug.LogWarning(destination + " already exists or " + e.Message);
                 }
 
             }
@@ -56,12 +56,12 @@ public abstract class AssetImporter {
                     return file;
                 }
             } else {
-                Debug.Log("File not found in the specified directory.");
+                // Debug.Log("File not found in the specified directory.");
             }
         } catch(DirectoryNotFoundException e) {
-            Debug.Log("Directory not found: " + e.Message);
+            // Debug.Log("Directory not found: " + e.Message);
         } catch(Exception ex) {
-            Debug.LogError("An error occurred: " + ex.Message);
+            // Debug.LogError("An error occurred: " + ex.Message);
         }
 
         return null;

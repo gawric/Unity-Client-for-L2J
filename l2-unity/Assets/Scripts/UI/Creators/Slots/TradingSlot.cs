@@ -33,7 +33,7 @@ public class TradingSlot : L2DraggableSlot
         }
         else
         {
-            Debug.LogWarning("TradingSlot> AssignItem: Не критическая ошибка не смогли найти TradingSlotModel>SlotElement");
+            // Debug.LogWarning("TradingSlot> AssignItem: Не критическая ошибка не смогли найти TradingSlotModel>SlotElement");
         }
     }
 
@@ -126,14 +126,14 @@ public class TradingSlot : L2DraggableSlot
 
     protected override void HandleRightClick()
     {
-        Debug.Log("Click Right TradingSLot");
+        // Debug.Log("Click Right TradingSLot");
     }
 
     protected override void HandleMiddleClick()
     {
         if (!_empty)
         {
-            Debug.Log("Click Middle TradingSLot");
+            // Debug.Log("Click Middle TradingSLot");
         }
     }
 }

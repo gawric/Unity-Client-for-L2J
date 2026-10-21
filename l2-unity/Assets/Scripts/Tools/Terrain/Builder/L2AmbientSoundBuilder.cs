@@ -19,7 +19,7 @@ public class L2AmbientSoundBuilder : MonoBehaviour
         string fileToProcess = EditorUtility.OpenFilePanel(title, directory, extension);
 
         if (!string.IsNullOrEmpty(fileToProcess)) {
-            Debug.Log("Selected file: " + fileToProcess);
+            // Debug.Log("Selected file: " + fileToProcess);
             AmbientSound[] sounds = L2TerrainInfoParser.ParseAmbientSoundFile(fileToProcess);
             BuildAmbientSounds(sounds);
         }
@@ -34,7 +34,7 @@ public class L2AmbientSoundBuilder : MonoBehaviour
         string fileToProcess = EditorUtility.OpenFilePanel(title, directory, extension);
 
         if (!string.IsNullOrEmpty(fileToProcess)) {
-            Debug.Log("Selected file: " + fileToProcess);
+            // Debug.Log("Selected file: " + fileToProcess);
             AmbientSound[] sounds = L2T3DInfoParser.ParseAmbientSounds(fileToProcess).ToArray();
             BuildAmbientSounds(sounds);
         }
@@ -44,13 +44,13 @@ public class L2AmbientSoundBuilder : MonoBehaviour
         GameObject container = new GameObject("AmbientSounds");
 
         foreach (AmbientSound ambientSound in sounds) {
-            Debug.Log(ambientSound);
+            // Debug.Log(ambientSound);
 
             GameObject soundObject = BuildAmbientSoundGameObject(ambientSound);
             soundObject.transform.parent = container.transform;
         }
 
-        Debug.Log($"Need to {sounds.Length} load ambient sounds.");
+        // Debug.Log($"Need to {sounds.Length} load ambient sounds.");
     }
 
     private static GameObject BuildAmbientSoundGameObject(AmbientSound ambientSound) {

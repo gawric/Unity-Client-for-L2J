@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public sealed class GGAuthDto : IWireDto
 {
@@ -11,6 +11,6 @@ public sealed class GGAuthDto : IWireDto
         reader.ReadI();
         reader.ReadI();
         reader.ReadI();
-        Debug.Log("GGAuth response " + Response);
+        // Debug.Log("GGAuth response " + Response);
     }
 }

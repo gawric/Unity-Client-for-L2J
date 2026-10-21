@@ -141,7 +141,7 @@ public class ModelTable : AbstractCache
             success++;
         }
 
-        Debug.Log("Successfully loaded " + success + "/" + items.Count + " " + label + " model(s).");
+        // Debug.Log("Successfully loaded " + success + "/" + items.Count + " " + label + " model(s).");
         return cache;
     }
 
@@ -161,7 +161,7 @@ public class ModelTable : AbstractCache
                 string model = grp.FirstModel[race];
                 if (string.IsNullOrEmpty(model))
                 {
-                    Debug.LogWarning("Model string is null for race " + (CharacterRaceAnimation)race + " in armor " + pair.Key);
+                    // Debug.LogWarning("Model string is null for race " + (CharacterRaceAnimation)race + " in armor " + pair.Key);
                     continue;
                 }
 
@@ -173,8 +173,8 @@ public class ModelTable : AbstractCache
             }
         }
 
-        Debug.Log("Successfully loaded " + _armors.Count + " armor model(s).");
-        Debug.Log("Successfully loaded " + materialCount + " armor material(s).");
+        // Debug.Log("Successfully loaded " + _armors.Count + " armor model(s).");
+        // Debug.Log("Successfully loaded " + materialCount + " armor material(s).");
     }
 
     private L2Armor GetOrCreateArmor(string model, List<string> extraModels)
@@ -207,7 +207,7 @@ public class ModelTable : AbstractCache
         if (NeedsExtraArmorModels(l2Armor, grp.AllModels[raceIndex], grp.BodyPart))
         {
             l2Armor.allModels = LoadAllArmorModels(grp.AllModels[raceIndex]);
-            Debug.Log("Reloading all models for " + l2Armor.baseModel.name + ", loading " + l2Armor.allModels.Length + " models");
+            // Debug.Log("Reloading all models for " + l2Armor.baseModel.name + ", loading " + l2Armor.allModels.Length + " models");
         }
 
         Material material = LoadArmorMaterial(texture);
@@ -249,6 +249,6 @@ public class ModelTable : AbstractCache
             success++;
         }
 
-        Debug.Log("Loaded " + success + " npc model(s).");
+        // Debug.Log("Loaded " + success + " npc model(s).");
     }
 }

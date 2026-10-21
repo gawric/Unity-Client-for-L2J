@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
@@ -48,6 +48,10 @@ public sealed class ParticleGroupV2 : EffectPart, IParticleEmitterV2
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
     bool _loggedHiddenTick;
 #endif
+    bool _windFlightTrace;
+    string _windCaster;
+    float _windPlayAt;
+    int _windTraceStage;
 
     public bool CompareLogEnabled => _compareLogEnabled;
     public bool IsGpuDraw => _runtime != null && _runtime.IsGpuDraw;
@@ -178,11 +182,11 @@ public sealed class ParticleGroupV2 : EffectPart, IParticleEmitterV2
         if (!isActiveAndEnabled)
         {
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-            Debug.LogWarning(
-                "[ParticleGroupV2] Play SKIP inactive '" + name +
-                "' path=" + GetHierarchyPath() +
-                " goActive=" + gameObject.activeInHierarchy +
-                " enabled=" + enabled);
+            // Debug.LogWarning(
+                // "[ParticleGroupV2] Play SKIP inactive '" + name +
+                // "' path=" + GetHierarchyPath() +
+                // " goActive=" + gameObject.activeInHierarchy +
+                // " enabled=" + enabled);
 #endif
             return;
         }
@@ -210,51 +214,73 @@ public sealed class ParticleGroupV2 : EffectPart, IParticleEmitterV2
             ? float.PositiveInfinity
             : Mathf.Max(_emissionWindow, particleLife);
         runtime.Start(now, emitWindow, particleLife);
+        if (WindOrbTrace.Matches(this))
+        {
+            _windFlightTrace = true;
+            _windCaster = WindOrbTrace.Caster(this);
+            _windPlayAt = Time.time;
+            _windTraceStage = 0;
+            Debug.Log(
+                "[WINDORB] play caster=" + _windCaster +
+                " emitter=" + name +
+                " warmup=" + _relativeWarmupTime.ToString("0.###") +
+                " authored=" + authoredLife.ToString("0.###") +
+                " particleLife=" + particleLife.ToString("0.###") +
+                " window=" + _emissionWindow.ToString("0.###") +
+                " emitWindow=" + (float.IsInfinity(emitWindow) ? "inf" : emitWindow.ToString("0.###")) +
+                " respawn=" + authoring.respawnDeadParticles +
+                " max=" + _maxCount +
+                " cps=" + _countPerSecond.ToString("0.###") +
+                " gpu=" + runtime.IsGpuDraw +
+                " slots=" + runtime.SlotCount +
+                " visible=" + _streamVisible +
+                " hostOwned=" + _hostOwnedEmission);
+        }
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
         _loggedHiddenTick = false;
         int slotCount = runtime.SlotCount;
         float warmupFrac = Mathf.Max(0f, _relativeWarmupTime);
-        Debug.Log(
-            "[ParticleGroupV2] Play START '" + name +
-            "' path=" + GetHierarchyPath() +
-            " visible=" + _streamVisible +
-            " gpu=" + runtime.IsGpuDraw +
-            " slots=" + slotCount +
-            " cps=" + _countPerSecond +
-            " max=" + _maxCount +
-            " burst=" + _isBurstSpawning +
-            " hasFixedDuration=" + _hasFixedDuration +
-            " externalWindow=" + _hasExternalEmissionWindow +
-            " instantKill=" + _instantKillAtCastEnd +
-            " window=" + _emissionWindow.ToString("0.###") +
-            " duration=" + _duration.ToString("0.###") +
-            " shaderLife=" + particleLife.ToString("0.###") +
-            " authoredLife=" + authoredLife.ToString("0.###") +
-            " stretch=" + authoring.stretchParticleLifeToWindow +
-            " respawn=" + authoring.respawnDeadParticles +
-            " warmupFrac=" + warmupFrac.ToString("0.###") +
-            " warmupTicks=" + _warmupTicksPerSecond.ToString("0.###") +
-            " now=" + now.ToString("0.###"));
+        // Debug.Log(
+            // "[ParticleGroupV2] Play START '" + name +
+            // "' path=" + GetHierarchyPath() +
+            // " visible=" + _streamVisible +
+            // " gpu=" + runtime.IsGpuDraw +
+            // " slots=" + slotCount +
+            // " cps=" + _countPerSecond +
+            // " max=" + _maxCount +
+            // " burst=" + _isBurstSpawning +
+            // " hasFixedDuration=" + _hasFixedDuration +
+            // " externalWindow=" + _hasExternalEmissionWindow +
+            // " instantKill=" + _instantKillAtCastEnd +
+            // " window=" + _emissionWindow.ToString("0.###") +
+            // " duration=" + _duration.ToString("0.###") +
+            // " shaderLife=" + particleLife.ToString("0.###") +
+            // " authoredLife=" + authoredLife.ToString("0.###") +
+            // " stretch=" + authoring.stretchParticleLifeToWindow +
+            // " respawn=" + authoring.respawnDeadParticles +
+            // " warmupFrac=" + warmupFrac.ToString("0.###") +
+            // " warmupTicks=" + _warmupTicksPerSecond.ToString("0.###") +
+            // " now=" + now.ToString("0.###"));
         if (_compareLogEnabled)
         {
-            ParticleGroupV2CompareLog.WritePlay(
-                this,
-                authoring,
-                runtime.GpuMaterials != null && runtime.GpuMaterials.Length > 0
-                    ? runtime.GpuMaterials[0]
-                    : ResolveSlotRenderer() != null
-                        ? ResolveSlotRenderer().sharedMaterial
-                        : null);
+            // ParticleGroupV2CompareLog.WritePlay(
+                // this,
+                // authoring,
+                // runtime.GpuMaterials != null && runtime.GpuMaterials.Length > 0
+                    // ? runtime.GpuMaterials[0]
+                    // : ResolveSlotRenderer() != null
+                        // ? ResolveSlotRenderer().sharedMaterial
+                        // : null);
         }
 
-        if (NpcDeco2911Trace.Matches(name))
+        // if (NpcDeco2911Trace.Matches(name))
         {
-            NpcDeco2911Trace.Log(
-                "PlayPart hostOwned=" + _hostOwnedEmission +
-                " streamVisible=" + _streamVisible +
-                " gpuAfterStart=" + runtime.IsGpuDraw +
-                " spawnedTotal=" + runtime.SpawnedTotal);
-            NpcDeco2911Trace.DumpGroup(this);
+            // NpcDeco2911Trace.Log(
+                // "PlayPart hostOwned=" + _hostOwnedEmission +
+                // " streamVisible=" + _streamVisible +
+                // " gpuAfterStart=" + runtime.IsGpuDraw +
+                // " spawnedTotal=" + runtime.SpawnedTotal);
+            // NpcDeco2911Trace.DumpGroup(this);
         }
 #endif
     }
@@ -269,7 +295,7 @@ public sealed class ParticleGroupV2 : EffectPart, IParticleEmitterV2
         _runtime.Stop(_runtime.InstantKillAtCastEnd ? EmitterStopMode.Kill : EmitterStopMode.Drain);
     }
 
-    void FixedUpdate()
+    void Update()
     {
         if (!_streamVisible)
         {
@@ -277,15 +303,47 @@ public sealed class ParticleGroupV2 : EffectPart, IParticleEmitterV2
             if (!_loggedHiddenTick && _runtime != null)
             {
                 _loggedHiddenTick = true;
-                Debug.LogWarning(
-                    "[ParticleGroupV2] Tick SKIP hidden '" + name +
-                    "' — streamVisible=false, particles will not spawn/draw.");
+                // Debug.LogWarning(
+                    // "[ParticleGroupV2] Tick SKIP hidden '" + name +
+                    // "' — streamVisible=false, particles will not spawn/draw.");
             }
 #endif
+            TraceWindOrb();
             return;
         }
 
         _runtime?.Tick(Now());
+        TraceWindOrb();
+    }
+
+    void TraceWindOrb()
+    {
+        if (!_windFlightTrace || _runtime == null || _windTraceStage >= 2)
+        {
+            return;
+        }
+
+        float age = Time.time - _windPlayAt;
+        if (_windTraceStage == 0)
+        {
+            _windTraceStage = 1;
+        }
+        else if (age < 0.2f)
+        {
+            return;
+        }
+        else
+        {
+            _windTraceStage = 2;
+        }
+
+        Debug.Log(
+            "[WINDORB] t=" + age.ToString("0.###") +
+            " caster=" + _windCaster +
+            " emitter=" + name +
+            " active=" + _runtime.CountActive() +
+            " spawned=" + _runtime.SpawnedTotal +
+            " parent=" + (transform.parent != null ? transform.parent.name : "none"));
     }
 
     void LateUpdate()
@@ -515,4 +573,40 @@ public sealed class ParticleGroupV2 : EffectPart, IParticleEmitterV2
         return path;
     }
 #endif
+}
+
+static class WindOrbTrace
+{
+    public static bool Matches(Component component)
+    {
+        Transform current = component != null ? component.transform : null;
+        while (current != null)
+        {
+            if (current.name.IndexOf("el_wind_strike_fl", System.StringComparison.OrdinalIgnoreCase) >= 0)
+            {
+                return true;
+            }
+
+            current = current.parent;
+        }
+
+        return false;
+    }
+
+    public static string Caster(Component component)
+    {
+        Transform current = component != null ? component.transform : null;
+        while (current != null)
+        {
+            Entity entity = current.GetComponent<Entity>();
+            if (entity != null)
+            {
+                return entity.name;
+            }
+
+            current = current.parent;
+        }
+
+        return "detached";
+    }
 }

@@ -21,20 +21,20 @@ public class GameServerPacketHandler : ServerPacketHandler
             if (!_protocol.TryParseGame(item.Data, item.CryptEnabled, out model))
             {
                 byte raw0 = len > 0 ? item.Data[0] : (byte)0;
-                LobbyFlowLog.Warn(
-                    "Game RX DROP len=" + len + " crypt=" + item.CryptEnabled +
-                    " raw0=0x" + raw0.ToString("X2") + " — TryParseGame failed (unknown opcode or decrypt)");
+                // LobbyFlowLog.Warn(
+                    // "Game RX DROP len=" + len + " crypt=" + item.CryptEnabled +
+                    // " raw0=0x" + raw0.ToString("X2") + " — TryParseGame failed (unknown opcode or decrypt)");
                 return;
             }
         }
         catch (Exception ex)
         {
-            LobbyFlowLog.Exception("Game RX parse len=" + len + " crypt=" + item.CryptEnabled, ex);
+            // LobbyFlowLog.Exception("Game RX parse len=" + len + " crypt=" + item.CryptEnabled, ex);
             return;
         }
 
-        LobbyFlowLog.Info("Game RX OK " + model.GetType().Name + " len=" + len + " crypt=" + item.CryptEnabled + " → Apply");
-        PacketLatencyLog.OnParsed(model, item.RecvTick, item.QueueAhead);
+        // LobbyFlowLog.Info("Game RX OK " + model.GetType().Name + " len=" + len + " crypt=" + item.CryptEnabled + " → Apply");
+        // PacketLatencyLog.OnParsed(model, item.RecvTick, item.QueueAhead);
         _dispatcher.Dispatch(model);
     }
 }

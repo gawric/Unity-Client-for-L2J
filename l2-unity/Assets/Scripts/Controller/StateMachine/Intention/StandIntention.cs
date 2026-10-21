@@ -8,7 +8,7 @@ public class StandIntention : IntentionBase
 
     public override void Enter(object arg0)
     {
-        Debug.Log("");
+        // Debug.Log("");
         //if (!_stateMachine.WaitingForServerReply)
         //{
           //  _stateMachine.SetWaitingForServerReply(true);

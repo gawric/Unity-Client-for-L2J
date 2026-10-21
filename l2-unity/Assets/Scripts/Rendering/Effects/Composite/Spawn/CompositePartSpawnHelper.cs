@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public static class CompositePartSpawnHelper
 {
@@ -38,7 +38,7 @@ public static class CompositePartSpawnHelper
             return true;
         }
 
-        Debug.LogWarning($"CompositePrefabEffect: could not resolve point {part.attachmentPoint} for part {part.name}.");
+        // Debug.LogWarning($"CompositePrefabEffect: could not resolve point {part.attachmentPoint} for part {part.name}.");
         return false;
     }
 

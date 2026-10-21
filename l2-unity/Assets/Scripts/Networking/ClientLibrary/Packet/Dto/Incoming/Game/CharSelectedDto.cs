@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 
 public class CharSelectedDto : IWireDto
@@ -32,7 +32,7 @@ public class CharSelectedDto : IWireDto
 
 
         _info.Identity.Name = reader.ReadOtherS();
-        Debug.Log("CharSelected: Name " + _info.Identity.Name);
+        // Debug.Log("CharSelected: Name " + _info.Identity.Name);
         _info.Identity.Id = reader.ReadI();
         _info.Identity.Title = reader.ReadOtherS();
         int sessionId = reader.ReadI();
@@ -100,6 +100,6 @@ public class CharSelectedDto : IWireDto
         int empty13 = reader.ReadI();
         int empty14 = reader.ReadI();
 
-        Debug.Log("");
+        // Debug.Log("");
     }
 }

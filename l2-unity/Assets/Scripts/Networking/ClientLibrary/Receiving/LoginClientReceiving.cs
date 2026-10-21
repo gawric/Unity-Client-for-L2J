@@ -19,7 +19,7 @@ public class LoginClientReceiving
 
     public Task StartReceiving(Socket socket, System.Threading.CancellationToken token)
     {
-        Debug.Log("Start receiving LoginClient");
+        // Debug.Log("Start receiving LoginClient");
         return Task.Run(() => Receiving(socket, token), token);
     }
 
@@ -62,7 +62,7 @@ public class LoginClientReceiving
         }
         catch (Exception e)
         {
-            Debug.LogException(e);
+            // Debug.LogException(e);
         }
     }
 }

@@ -104,7 +104,11 @@ public abstract class AbstractDataFunction
         }
         else
         {
-            if (groupElement == null) { Debug.LogWarning(" ToolTipDataProvider: Не критическая ошибка мы не нашли элемент tooltips "); return; }
+            if (groupElement == null)
+            {
+                // Debug.LogWarning(" ToolTipDataProvider: Не критическая ошибка мы не нашли элемент tooltips ");
+                return;
+            }
             groupElement.style.display = DisplayStyle.None;
             labelData.text = "";
         }
@@ -119,7 +123,11 @@ public abstract class AbstractDataFunction
         }
         else
         {
-            if (groupElement == null) { Debug.LogWarning(" ToolTipDataProvider: Не критическая ошибка мы не нашли элемент tooltips "); return; }
+            if (groupElement == null)
+            {
+                // Debug.LogWarning(" ToolTipDataProvider: Не критическая ошибка мы не нашли элемент tooltips ");
+                return;
+            }
             groupElement.style.display = DisplayStyle.None;
             labelData.text = "";
         }
@@ -134,7 +142,11 @@ public abstract class AbstractDataFunction
         }
         else
         {
-            if (groupElement == null) { Debug.LogWarning(" ToolTipDataProvider: Не критическая ошибка мы не нашли элемент tooltips "); return; }
+            if (groupElement == null)
+            {
+                // Debug.LogWarning(" ToolTipDataProvider: Не критическая ошибка мы не нашли элемент tooltips ");
+                return;
+            }
             groupElement.style.visibility = Visibility.Hidden;
             labelData.text = "";
         }

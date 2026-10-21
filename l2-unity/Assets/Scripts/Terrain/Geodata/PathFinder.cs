@@ -28,7 +28,7 @@ public class PathFinder
         try {
             _foundPath = SearchByClosest(_startPosition, _endPosition);
         } catch (Exception e) {
-            Debug.LogWarning("Error while finding path: " + e.Message);
+            // Debug.LogWarning("Error while finding path: " + e.Message);
         }
 
         jobDone = true;
@@ -61,7 +61,7 @@ public class PathFinder
                 nodesToVisit.RemoveAt(0);
             } catch (Exception) {
                 // No Path found
-                Debug.Log($"No path found - {start.center} to {end.center}.");
+                // Debug.Log($"No path found - {start.center} to {end.center}.");
                 return null;
             }
 
@@ -164,7 +164,7 @@ public class PathFinder
                         returnList[i++] = node;
                     }
                 } catch(Exception) {
-                    Debug.Log("Node neighbor could not be found.");
+                    // Debug.Log("Node neighbor could not be found.");
                 }
             }
         }

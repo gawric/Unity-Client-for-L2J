@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -636,7 +636,7 @@ public sealed class HomeProjectileTrailVelocityProvider : MonoBehaviour
 
         if (_debugLogs && velocity.sqrMagnitude > 0.000001f)
         {
-            Debug.Log($"[HomeProjectileTrailVelocityProvider] binding='{binding.name}' velocity={velocity:F4}", this);
+            // Debug.Log($"[HomeProjectileTrailVelocityProvider] binding='{binding.name}' velocity={velocity:F4}", this);
         }
 
         if (binding.targetRenderers == null)

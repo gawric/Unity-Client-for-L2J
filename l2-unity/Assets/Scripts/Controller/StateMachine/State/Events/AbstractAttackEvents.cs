@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public abstract class AbstractAttackEvents : StateBase
 {
@@ -176,11 +176,11 @@ public abstract class AbstractAttackEvents : StateBase
     {
         // Bow / magic: release aim-follow at projectile launch (not during flight).
         CombatFacingService.Instance?.EndFollow(ResolveFacingObjectId(), "shoot");
-        ReplayAttackTrace.Write(
-            "SHOOT_EVENT",
-            PlayerEntity.Instance,
-            PlayerEntity.Instance != null ? PlayerEntity.Instance.GetTargetEntity() : null,
-            "anim=" + animName);
+        // ReplayAttackTrace.Write(
+            // "SHOOT_EVENT",
+            // PlayerEntity.Instance,
+            // PlayerEntity.Instance != null ? PlayerEntity.Instance.GetTargetEntity() : null,
+            // "anim=" + animName);
 
         foreach (Animation special in _specialsBows)
         {
@@ -190,10 +190,10 @@ public abstract class AbstractAttackEvents : StateBase
                 if (special.Type == TypesAnimation.BowAttack)
                 {
                     Entity attacker = PlayerEntity.Instance;
-                    UnityReplaySession.OnBowShot(
-                        attacker,
-                        attacker != null ? attacker.GetTargetEntity() : null,
-                        attacker != null ? attacker.GetPositionRightHand() : Vector3.zero);
+                    // UnityReplaySession.OnBowShot(
+                        // attacker,
+                        // attacker != null ? attacker.GetTargetEntity() : null,
+                        // attacker != null ? attacker.GetPositionRightHand() : Vector3.zero);
                     // SpAtk01_bow / jatk*_bow: same ArrowStick path. Ensure wooden arrow exists
                     // if LoadArrow notify was skipped (state exited early before equip).
                     if (PlayerEntity.Instance.GetGoEtcItem() == null)
@@ -208,9 +208,9 @@ public abstract class AbstractAttackEvents : StateBase
                         go == null ||
                         target == null)
                     {
-                        Debug.LogError(
-                            $"NewAttackState->CallBackStartShoot: missing arrow/target anim={animName} " +
-                            $"go={(go != null)} target={(target != null)}");
+                        // Debug.LogError(
+                            // $"NewAttackState->CallBackStartShoot: missing arrow/target anim={animName} " +
+                            // $"go={(go != null)} target={(target != null)}");
                         return;
                     }
 
@@ -228,10 +228,10 @@ public abstract class AbstractAttackEvents : StateBase
                     settings.lifetime = flyAccel;
 
                     bool isSpAtkBow = animName.IndexOf("SpAtk", System.StringComparison.OrdinalIgnoreCase) >= 0;
-                    Debug.Log(
-                        $"[BOW_ARROW] SHOOT anim={animName} spAtkBow={isSpAtkBow} " +
-                        $"dist3d={dist3d:F3} flyAccel={flyAccel:F3}s avgSpeed={avgSpeed:F3} " +
-                        $"uuAccel=3000 path=(t/T)^2 (compare vs decompile ANSkillProjectileTick.log)");
+                    // Debug.Log(
+                        // $"[BOW_ARROW] SHOOT anim={animName} spAtkBow={isSpAtkBow} " +
+                        // $"dist3d={dist3d:F3} flyAccel={flyAccel:F3}s avgSpeed={avgSpeed:F3} " +
+                        // $"uuAccel=3000 path=(t/T)^2 (compare vs decompile ANSkillProjectileTick.log)");
 
                     ProjectileManager.Instance.LaunchProjectile(go, startPos, target, settings);
                     break;
@@ -255,24 +255,24 @@ public abstract class AbstractAttackEvents : StateBase
     {
         if (!IsMeleeAttackShotAnim(animName))
         {
-            Debug.Log(
-                $"[HIT_FX] 2.CallBackAttackShot SKIP not-melee-attack-shot frame={Time.frameCount} anim={animName}");
+            // Debug.Log(
+                // $"[HIT_FX] 2.CallBackAttackShot SKIP not-melee-attack-shot frame={Time.frameCount} anim={animName}");
             return;
         }
 
         PlayerEntity player = _stateMachine != null ? _stateMachine.Player : null;
         if (player == null || SwordCollisionService.Instance == null)
         {
-            Debug.LogWarning(
-                $"[HIT_FX] 2.CallBackAttackShot SKIP playerNull={player == null} " +
-                $"swordSvcNull={SwordCollisionService.Instance == null} anim={animName}");
+            // Debug.LogWarning(
+                // $"[HIT_FX] 2.CallBackAttackShot SKIP playerNull={player == null} " +
+                // $"swordSvcNull={SwordCollisionService.Instance == null} anim={animName}");
             return;
         }
 
         Transform[] swordBasePoints = player.GetSwordBasePoints();
         if (swordBasePoints == null || swordBasePoints.Length <= 1)
         {
-            Debug.LogWarning($"[HIT_FX] 2.CallBackAttackShot SKIP no sword points anim={animName}");
+            // Debug.LogWarning($"[HIT_FX] 2.CallBackAttackShot SKIP no sword points anim={animName}");
             return;
         }
 
@@ -285,16 +285,19 @@ public abstract class AbstractAttackEvents : StateBase
 
         if (target == null)
         {
-            Debug.LogWarning(
-                $"[HIT_FX] 2.CallBackAttackShot SKIP target=null anim={animName} " +
-                $"attackerId={attackerEntityId} targetEntityId={targetEntityId}");
+            // Debug.LogWarning(
+                // $"[HIT_FX] 2.CallBackAttackShot SKIP target=null anim={animName} " +
+                // $"attackerId={attackerEntityId} targetEntityId={targetEntityId}");
             return;
         }
 
-        Debug.Log(
-            $"[HIT_FX] 2.CallBackAttackShot OK frame={Time.frameCount} t={Time.time:F3} " +
-            $"anim={animName} attackerId={attackerEntityId} targetId={targetEntityId} " +
-            $"target={target.name} → EmitHitFromAttackShot");
+        // Debug.Log(
+            // $"[HIT_FX] 2.CallBackAttackShot OK frame={Time.frameCount} t={Time.time:F3} " +
+            // $"anim={animName} attackerId={attackerEntityId} targetId={targetEntityId} " +
+            // $"target={target.name} → EmitHitFromAttackShot");
+
+        if (HitManager.Instance != null)
+            HitManager.Instance.FireRememberedExtraHits(player);
 
         if (SwordCollisionService.Instance != null &&
             attackerEntityId > 0 &&
@@ -302,10 +305,10 @@ public abstract class AbstractAttackEvents : StateBase
         {
             float serverCycleMs = AttackTimingHelper.ResolveServerLikeAttackDurationMs(player);
             float serverHitMs = AttackTimingHelper.ResolveServerLikeHitMs(player);
-            Debug.Log(
-                $"[ATK_TIMING_CMP] AttackShot fire anim={animName} " +
-                $"serverTimeAtkMs={serverCycleMs:F1} serverHitMs={serverHitMs:F1} " +
-                $"(compare with Enter AttackShotWallMs and Exit wallElapsedMs)");
+            // Debug.Log(
+                // $"[ATK_TIMING_CMP] AttackShot fire anim={animName} " +
+                // $"serverTimeAtkMs={serverCycleMs:F1} serverHitMs={serverHitMs:F1} " +
+                // $"(compare with Enter AttackShotWallMs and Exit wallElapsedMs)");
         }
 
         SwordCollisionService.Instance.EmitHitFromAttackShot(
@@ -352,7 +355,7 @@ public abstract class AbstractAttackEvents : StateBase
         }
         else
         {
-            Debug.LogWarning($"[ATK_HIT_CHAIN] RegisterSword SKIP — no sword points on player");
+            // Debug.LogWarning($"[ATK_HIT_CHAIN] RegisterSword SKIP — no sword points on player");
         }
     }
 
@@ -363,11 +366,11 @@ public abstract class AbstractAttackEvents : StateBase
         string targetName = target != null ? target.name : "null";
         Entity entity = PlayerEntity.Instance != null ? PlayerEntity.Instance.GetTargetEntity() : null;
 
-        Debug.Log(
-            $"[HIT_FX] 5.OnHitColliderMonster frame={Time.frameCount} t={Time.time:F3} " +
-            $"attacker={attackerName} target={targetName} " +
-            $"playerTarget={(entity != null ? entity.name : "null")} " +
-            $"isMonster={entity is MonsterEntity} point={hitPointCollider}");
+        // Debug.Log(
+            // $"[HIT_FX] 5.OnHitColliderMonster frame={Time.frameCount} t={Time.time:F3} " +
+            // $"attacker={attackerName} target={targetName} " +
+            // $"playerTarget={(entity != null ? entity.name : "null")} " +
+            // $"isMonster={entity is MonsterEntity} point={hitPointCollider}");
 
         if (entity is MonsterEntity)
         {
@@ -378,19 +381,19 @@ public abstract class AbstractAttackEvents : StateBase
 
             if (missed)
             {
-                Debug.Log(
-                    $"[HIT_FX] 5.OnHitColliderMonster SKIP HitIsMissed=true " +
-                    $"monster={monster.name} — EffectManager NOT called");
+                // Debug.Log(
+                    // $"[HIT_FX] 5.OnHitColliderMonster SKIP HitIsMissed=true " +
+                    // $"monster={monster.name} — EffectManager NOT called");
             }
             else if (HitManager.Instance == null)
             {
-                Debug.LogWarning("[HIT_FX] 5.OnHitColliderMonster SKIP HitManager.Instance=null");
+                // Debug.LogWarning("[HIT_FX] 5.OnHitColliderMonster SKIP HitManager.Instance=null");
             }
             else
             {
-                Debug.Log(
-                    $"[HIT_FX] 5.OnHitColliderMonster → HitManager.HandleHitCollider " +
-                    $"monster={monster.name}");
+                // Debug.Log(
+                    // $"[HIT_FX] 5.OnHitColliderMonster → HitManager.HandleHitCollider " +
+                    // $"monster={monster.name}");
                 HitManager.Instance.HandleHitCollider(
                     PlayerEntity.Instance,
                     attacker,
@@ -403,9 +406,9 @@ public abstract class AbstractAttackEvents : StateBase
         }
         else
         {
-            Debug.Log(
-                $"[HIT_FX] 5.OnHitColliderMonster SKIP not MonsterEntity " +
-                $"type={(entity != null ? entity.GetType().Name : "null")}");
+            // Debug.Log(
+                // $"[HIT_FX] 5.OnHitColliderMonster SKIP not MonsterEntity " +
+                // $"type={(entity != null ? entity.GetType().Name : "null")}");
         }
     }
 
@@ -413,6 +416,6 @@ public abstract class AbstractAttackEvents : StateBase
     {
         string prefabName = prefab != null ? prefab.name : "null";
         string targetName = target != null ? target.name : "null";
-        Debug.Log($"{PROJECTILE_CHAIN_LOG} OnHitEffectProjectile prefab={prefabName} target={targetName} attackerId={attackerEntityId} point={hitPointCollider} dir={hitDirection}");
+        // Debug.Log($"{PROJECTILE_CHAIN_LOG} OnHitEffectProjectile prefab={prefabName} target={targetName} attackerId={attackerEntityId} point={hitPointCollider} dir={hitDirection}");
     }
 }

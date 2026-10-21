@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 using VContainer;
@@ -83,11 +83,11 @@ public class SwordCollisionService : MonoBehaviour
 
         string attackerName = attacker != null ? attacker.name : "null";
         string targetName = target != null ? target.name : "null";
-        Debug.Log(
-            $"{CHAIN_LOG} 1.BeginAttack EVENT_BASED entityId={entityId} epoch={epoch} frame={Time.frameCount} t={Time.time:F3} " +
-            $"attacker={attackerName} target={targetName} durationMs={normalizedDurationMs:F1} " +
-            $"(melee Hit waits for AttackShot anim event; DurationMs kept for jAtk cycle / logs)");
-        Debug.Log($"{TIMER_LOG} BeginAttack entityId={entityId} attacker={attackerName} target={targetName} durationMs={normalizedDurationMs:F1} hitFraction={normalizedHitFraction:F2}");
+        // Debug.Log(
+            // $"{CHAIN_LOG} 1.BeginAttack EVENT_BASED entityId={entityId} epoch={epoch} frame={Time.frameCount} t={Time.time:F3} " +
+            // $"attacker={attackerName} target={targetName} durationMs={normalizedDurationMs:F1} " +
+            // $"(melee Hit waits for AttackShot anim event; DurationMs kept for jAtk cycle / logs)");
+        // Debug.Log($"{TIMER_LOG} BeginAttack entityId={entityId} attacker={attackerName} target={targetName} durationMs={normalizedDurationMs:F1} hitFraction={normalizedHitFraction:F2}");
         return epoch;
     }
 
@@ -116,9 +116,9 @@ public class SwordCollisionService : MonoBehaviour
         if (!_attackContextsByEntityId.TryGetValue(entityId, out AttackTimingContext context)) return;
         if (epoch > 0 && context.Epoch != epoch)
         {
-            Debug.Log(
-                $"{CHAIN_LOG} EndAttack SKIP entityId={entityId} exitEpoch={epoch} liveEpoch={context.Epoch} " +
-                $"(older swing must not clear newer BeginAttack)");
+            // Debug.Log(
+                // $"{CHAIN_LOG} EndAttack SKIP entityId={entityId} exitEpoch={epoch} liveEpoch={context.Epoch} " +
+                // $"(older swing must not clear newer BeginAttack)");
             return;
         }
 
@@ -139,10 +139,10 @@ public class SwordCollisionService : MonoBehaviour
     {
         if (attackerEntityId <= 0 || swordBase == null || swordTip == null || target == null)
         {
-            Debug.Log(
-                $"[HIT_FX] 3.EmitHitFromAttackShot SKIP bad args " +
-                $"attackerId={attackerEntityId} baseNull={swordBase == null} " +
-                $"tipNull={swordTip == null} targetNull={target == null}");
+            // Debug.Log(
+                // $"[HIT_FX] 3.EmitHitFromAttackShot SKIP bad args " +
+                // $"attackerId={attackerEntityId} baseNull={swordBase == null} " +
+                // $"tipNull={swordTip == null} targetNull={target == null}");
             return;
         }
 
@@ -153,9 +153,9 @@ public class SwordCollisionService : MonoBehaviour
         {
             if (ctx.AttackShotFired)
             {
-                Debug.Log(
-                    $"[HIT_FX] 3.EmitHitFromAttackShot SKIP already fired " +
-                    $"epoch={ctx.Epoch} attackerId={attackerEntityId}");
+                // Debug.Log(
+                    // $"[HIT_FX] 3.EmitHitFromAttackShot SKIP already fired " +
+                    // $"epoch={ctx.Epoch} attackerId={attackerEntityId}");
                 return;
             }
 
@@ -171,10 +171,10 @@ public class SwordCollisionService : MonoBehaviour
         else
         {
             // BeginAttack missing/cleared (EndAttack race) — still play Hit FX from anim event.
-            Debug.Log(
-                $"[HIT_FX] 3.EmitHitFromAttackShot NO_CONTEXT still emit " +
-                $"attackerId={attackerEntityId} targetId={targetEntityId} " +
-                $"(BeginAttack absent — AttackShot drives FX)");
+            // Debug.Log(
+                // $"[HIT_FX] 3.EmitHitFromAttackShot NO_CONTEXT still emit " +
+                // $"attackerId={attackerEntityId} targetId={targetEntityId} " +
+                // $"(BeginAttack absent — AttackShot drives FX)");
         }
 
         ResetHitRegistry(swordBase);
@@ -182,9 +182,9 @@ public class SwordCollisionService : MonoBehaviour
         var timed = new TimedSwordHit(tracked, attackerEntityId, resolvedTargetId, Time.time, Time.time);
         EmitTimedHit(timed);
 
-        Debug.Log(
-            $"[HIT_FX] 3.EmitHitFromAttackShot OK frame={Time.frameCount} t={Time.time:F3} " +
-            $"attackerId={attackerEntityId} epoch={epoch} sword={swordBase.name} target={target.name}");
+        // Debug.Log(
+            // $"[HIT_FX] 3.EmitHitFromAttackShot OK frame={Time.frameCount} t={Time.time:F3} " +
+            // $"attackerId={attackerEntityId} epoch={epoch} sword={swordBase.name} target={target.name}");
     }
 
     private void Awake()
@@ -196,7 +196,7 @@ public class SwordCollisionService : MonoBehaviour
 
     public void RegisterSword(Transform swordBase, Transform swordTip, Transform target, float extraRange)
     {
-        Debug.LogWarning($"{TIMER_LOG} RegisterSword without entity ids is deprecated. Use RegisterSwordByEntityId.");
+        // Debug.LogWarning($"{TIMER_LOG} RegisterSword without entity ids is deprecated. Use RegisterSwordByEntityId.");
         RegisterSwordByEntityId(0, 0, swordBase, swordTip, target, extraRange);
     }
 
@@ -205,7 +205,7 @@ public class SwordCollisionService : MonoBehaviour
         if (swordBase == null || swordTip == null) return;
         if (target == null)
         {
-            Debug.LogWarning("SwordCollisionService: RegisterSword target is null");
+            // Debug.LogWarning("SwordCollisionService: RegisterSword target is null");
             return;
         }
 
@@ -220,9 +220,9 @@ public class SwordCollisionService : MonoBehaviour
         // ResetHitRegistry(swordBase);
         // CreateTimedHit(attackerEntityId, targetEntityId, swordBase, swordTip, target, extraRange);
 
-        Debug.LogWarning(
-            $"{CHAIN_LOG} RegisterSwordByEntityId ignored (melee Hit is AttackShot-only). " +
-            $"attackerId={attackerEntityId} sword={swordBase.name}");
+        // Debug.LogWarning(
+            // $"{CHAIN_LOG} RegisterSwordByEntityId ignored (melee Hit is AttackShot-only). " +
+            // $"attackerId={attackerEntityId} sword={swordBase.name}");
     }
 
     public void ResetHitRegistry(Transform swordBase)
@@ -302,9 +302,9 @@ public class SwordCollisionService : MonoBehaviour
         int targetId = targetAnchor.GetInstanceID();
         if (!RegisterHit(swordBase, targetId))
         {
-            Debug.Log(
-                $"[HIT_FX] 4.EmitTimedHit SKIP RegisterHit duplicate " +
-                $"sword={swordBase.name} target={targetAnchor.name}");
+            // Debug.Log(
+                // $"[HIT_FX] 4.EmitTimedHit SKIP RegisterHit duplicate " +
+                // $"sword={swordBase.name} target={targetAnchor.name}");
             return;
         }
 
@@ -312,9 +312,9 @@ public class SwordCollisionService : MonoBehaviour
         Vector3 hitDirection = VectorUtils.CalcHitDirection(hitPoint, swordBase.position);
 
         int listeners = OnHitCollider != null ? OnHitCollider.GetInvocationList().Length : 0;
-        Debug.Log(
-            $"[HIT_FX] 4.EmitTimedHit → OnHitCollider listeners={listeners} " +
-            $"attacker={attackerAnchor.name} target={targetAnchor.name} hitPoint={hitPoint}");
+        // Debug.Log(
+            // $"[HIT_FX] 4.EmitTimedHit → OnHitCollider listeners={listeners} " +
+            // $"attacker={attackerAnchor.name} target={targetAnchor.name} hitPoint={hitPoint}");
 
         OnHitCollider?.Invoke(attackerAnchor, targetAnchor, hitPoint, hitDirection);
 
@@ -327,10 +327,10 @@ public class SwordCollisionService : MonoBehaviour
             sinceBeginMs = (now - ctx.StartTimeSec) * 1000f;
         }
 
-        Debug.Log(
-            $"[HIT_FX] 4.EmitTimedHit DONE frame={Time.frameCount} t={now:F3} " +
-            $"sinceBeginMs={sinceBeginMs:F1} sinceRegisterMs={sinceRegisterMs:F1}");
-        Debug.Log($"{TIMER_LOG} Hit attacker={attackerAnchor.name} target={targetAnchor.name} elapsedMs={sinceRegisterMs:F1} hitPoint={hitPoint}");
+        // Debug.Log(
+            // $"[HIT_FX] 4.EmitTimedHit DONE frame={Time.frameCount} t={now:F3} " +
+            // $"sinceBeginMs={sinceBeginMs:F1} sinceRegisterMs={sinceRegisterMs:F1}");
+        // Debug.Log($"{TIMER_LOG} Hit attacker={attackerAnchor.name} target={targetAnchor.name} elapsedMs={sinceRegisterMs:F1} hitPoint={hitPoint}");
     }
 
     private Entity GetEntityById(int entityId)

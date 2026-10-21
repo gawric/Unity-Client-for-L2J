@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.Experimental.Rendering;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
@@ -231,7 +231,7 @@ public sealed class L2YebisPostRenderPass : ScriptableRenderPass
             {
                 if (_captureScene == null || _captureScene.rt == null || _captureGrade == null || _captureGrade.rt == null || _captureControl == null || _captureControl.rt == null)
                 {
-                    Debug.LogWarning("[Yebis] свои RT для снимка ещё не созданы");
+                    // Debug.LogWarning("[Yebis] свои RT для снимка ещё не созданы");
                 }
                 else
                 {
@@ -248,13 +248,13 @@ public sealed class L2YebisPostRenderPass : ScriptableRenderPass
                     cmd.SetRenderTarget(_captureGrade.nameID);
                     cmd.ClearRenderTarget(false, true, new Color(1f, 0f, 1f, 1f));
                     string sceneCopy = CopyCapture(cmd, cameraColor, _captureScene);
-                    Debug.Log(
-                        "[Yebis] перед combine " + _captureScene.rt.width + "x" + _captureScene.rt.height +
-                        " cameraFormat=" + cameraFormat +
-                        " copyFormat=" + _captureScene.rt.graphicsFormat +
-                        " created=" + _captureScene.rt.IsCreated() +
-                        " how=" + sceneCopy +
-                        " src=" + RtSize(cameraColor));
+                    // Debug.Log(
+                        // "[Yebis] перед combine " + _captureScene.rt.width + "x" + _captureScene.rt.height +
+                        // " cameraFormat=" + cameraFormat +
+                        // " copyFormat=" + _captureScene.rt.graphicsFormat +
+                        // " created=" + _captureScene.rt.IsCreated() +
+                        // " how=" + sceneCopy +
+                        // " src=" + RtSize(cameraColor));
                 }
             }
 
@@ -315,7 +315,7 @@ public sealed class L2YebisPostRenderPass : ScriptableRenderPass
             CoreUtils.SetRenderTarget(cmd, cameraColor, ClearFlag.None, Color.clear);
             if (captureFolder != null && _captureScene != null && _captureScene.rt != null && _captureGrade != null && _captureGrade.rt != null && _captureControl != null && _captureControl.rt != null)
             {
-                Debug.Log("[Yebis] ReadAfterFrame после записи своих RT, не временных целей URP");
+                // Debug.Log("[Yebis] ReadAfterFrame после записи своих RT, не временных целей URP");
                 L2YebisLiveCapture.ReadAfterFrame(captureFolder, _captureScene.rt, _captureGrade.rt, _captureControl.rt);
             }
             L2NameplateOverlayQueue.Flush(cmd);
@@ -471,11 +471,11 @@ public sealed class L2YebisPostRenderPass : ScriptableRenderPass
         {
             cmd.SetRenderTarget(_captureControl.nameID);
             cmd.CopyTexture(src, 0, 0, dst, 0, 0);
-            Debug.Log("[Yebis] CopyTexture " + src.width + "x" + src.height + " " + src.graphicsFormat);
+            // Debug.Log("[Yebis] CopyTexture " + src.width + "x" + src.height + " " + src.graphicsFormat);
             return "CopyTexture";
         }
 
-        Debug.LogWarning("[Yebis] CopyTexture пропущен src=" + RtSize(source) + " dst=" + RtSize(destination));
+        // Debug.LogWarning("[Yebis] CopyTexture пропущен src=" + RtSize(source) + " dst=" + RtSize(destination));
         BlitFull(cmd, source, destination, PassCopy);
         return "Blit";
     }
@@ -525,13 +525,13 @@ public sealed class L2YebisPostRenderPass : ScriptableRenderPass
             return;
 
         Vector4 camScale = SourceScale(cameraColor);
-        Debug.Log(
-            $"[Yebis] f={_execFrame} debug={_settings.yebisDebugMode} mix={_settings.yebisContrastMix:F2} " +
-            $"camRt={(cameraColor != null && cameraColor.rt != null)} useScaling={(cameraColor != null && cameraColor.useScaling)} " +
-            $"camScale=({camScale.x:F3},{camScale.y:F3}) " +
-            $"luma0={RtInfo(_luma0)} luma1={RtInfo(_luma1)} luma2={RtInfo(_luma2)} " +
-            $"adapted={RtInfo(_adapted)} prev={RtInfo(_adaptedPrev)} " +
-            $"adaptLerp={Mathf.Clamp01(_settings.yebisAdaptationSensitivity * 0.16f):F3} seeded={_adaptedSeeded}");
+        // Debug.Log(
+            // $"[Yebis] f={_execFrame} debug={_settings.yebisDebugMode} mix={_settings.yebisContrastMix:F2} " +
+            // $"camRt={(cameraColor != null && cameraColor.rt != null)} useScaling={(cameraColor != null && cameraColor.useScaling)} " +
+            // $"camScale=({camScale.x:F3},{camScale.y:F3}) " +
+            // $"luma0={RtInfo(_luma0)} luma1={RtInfo(_luma1)} luma2={RtInfo(_luma2)} " +
+            // $"adapted={RtInfo(_adapted)} prev={RtInfo(_adaptedPrev)} " +
+            // $"adaptLerp={Mathf.Clamp01(_settings.yebisAdaptationSensitivity * 0.16f):F3} seeded={_adaptedSeeded}");
 
         QueueReadback(cmd, _luma0, "luma0");
         QueueReadback(cmd, _luma1, "luma1");
@@ -553,7 +553,7 @@ public sealed class L2YebisPostRenderPass : ScriptableRenderPass
     {
         if (handle == null || handle.rt == null)
         {
-            Debug.Log($"[Yebis] {tag} skip rt=null f={_execFrame}");
+            // Debug.Log($"[Yebis] {tag} skip rt=null f={_execFrame}");
             return;
         }
 
@@ -576,7 +576,7 @@ public sealed class L2YebisPostRenderPass : ScriptableRenderPass
             int stride = pixels > 0 ? bytes.Length / pixels : 0;
             if (stride < 1 || bytes.Length < 4)
             {
-                Debug.Log($"[Yebis] {tag} f={frame} bytes={bytes.Length} {width}x{height}");
+                //Debug.Log($"[Yebis] {tag} f={frame} bytes={bytes.Length} {width}x{height}");
                 return;
             }
 
@@ -591,9 +591,9 @@ public sealed class L2YebisPostRenderPass : ScriptableRenderPass
             for (int i = 0; i < n; i++)
                 sum += bytes[i * stride];
             float avg = sum / (n * 255f);
-            Debug.Log(
-                $"[Yebis] {tag} f={frame} {width}x{height} stride={stride} " +
-                $"p0=({r0},{g0},{b0},{a0}) midR={rMid} avgR={avg:F3}");
+            //Debug.Log(
+             //   $"[Yebis] {tag} f={frame} {width}x{height} stride={stride} " +
+            //    $"p0=({r0},{g0},{b0},{a0}) midR={rMid} avgR={avg:F3}");
         });
     }
 }

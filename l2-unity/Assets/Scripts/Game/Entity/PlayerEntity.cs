@@ -65,9 +65,9 @@ public class PlayerEntity : Entity
 
     public void RefreshVisuals()
     {
-        GearFlowLog.Info("PlayerEntity.RefreshVisuals " + GearFlowLog.Entity(this) +
-            " " + GearFlowLog.Paperdoll(this) +
-            " gear=" + (_gear != null ? _gear.GetType().Name : "null"));
+        // GearFlowLog.Info("PlayerEntity.RefreshVisuals " + GearFlowLog.Entity(this) +
+            // " " + GearFlowLog.Paperdoll(this) +
+            // " gear=" + (_gear != null ? _gear.GetType().Name : "null"));
         EquipAllWeapons();
         EquipAllArmors();
     }
@@ -83,13 +83,13 @@ public class PlayerEntity : Entity
         UserGear gear = _gear as UserGear;
         if (appearance == null || gear == null)
         {
-            GearFlowLog.Warn("PlayerEntity.EquipAllArmors abort " + GearFlowLog.Entity(this) +
-                " appearance=" + (appearance != null) + " gear=" + (_gear != null ? _gear.GetType().Name : "null"));
+            // GearFlowLog.Warn("PlayerEntity.EquipAllArmors abort " + GearFlowLog.Entity(this) +
+                // " appearance=" + (appearance != null) + " gear=" + (_gear != null ? _gear.GetType().Name : "null"));
             return;
         }
 
-        GearFlowLog.Info("PlayerEntity.EquipAllArmors " + GearFlowLog.Entity(this) +
-            " " + GearFlowLog.Paperdoll(appearance));
+        // GearFlowLog.Info("PlayerEntity.EquipAllArmors " + GearFlowLog.Entity(this) +
+            // " " + GearFlowLog.Paperdoll(appearance));
         gear.SyncEquippedArmor(appearance);
     }
 
@@ -240,7 +240,7 @@ public class PlayerEntity : Entity
         }
         catch(Exception ex)
         {
-            Debug.LogError("");
+            // Debug.LogError("");
         }
 
 
@@ -255,7 +255,7 @@ public class PlayerEntity : Entity
         }
         catch (Exception ex)
         {
-            Debug.LogError("");
+            // Debug.LogError("");
         }
 
     }

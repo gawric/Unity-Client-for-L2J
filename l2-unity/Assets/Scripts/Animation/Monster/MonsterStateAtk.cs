@@ -36,11 +36,11 @@ public class MonsterStateAtk : MonsterStateBase
         float timeAnimation = clipInfos[0].clip.length;
         RecreateAnimationCurve(_animationCurve, _endTime, timeAnimation);
 
-        Debug.Log("Calc Time Monster Atk>>> All Time Animation " + timeAnimation + " timeAtk " + timeAtk);
+        // Debug.Log("Calc Time Monster Atk>>> All Time Animation " + timeAnimation + " timeAtk " + timeAtk);
         _networkAnimationController.UpdateAnimatorAtkSpeedL2j(timeAtk, timeAnimation);
         if (_entity != null && _entity.ActionSlot.Action == EntityActionKind.Skill)
         {
-            MobSkillLog.Enter(_entity, timeAnimation, timeAtk, animator.GetFloat("patkspd"));
+            // MobSkillLog.Enter(_entity, timeAnimation, timeAtk, animator.GetFloat("patkspd"));
         }
         StopAnimationTrigger(animator, parameterName);
     }
@@ -75,7 +75,7 @@ public class MonsterStateAtk : MonsterStateBase
         if (!_loggedSkillHold && stateInfo.normalizedTime >= 1f)
         {
             _loggedSkillHold = true;
-            MobSkillLog.ClipEnd(_entity);
+            // MobSkillLog.ClipEnd(_entity);
         }
 
         if (_isSwitchIdle || stateInfo.normalizedTime < 1f || _entity.IsDead())
@@ -86,17 +86,17 @@ public class MonsterStateAtk : MonsterStateBase
                 stateInfo.normalizedTime >= 1.05f)
             {
                 _loggedSkillStuck = true;
-                MobSkillLog.Stuck(_entity);
+                // MobSkillLog.Stuck(_entity);
             }
             return true;
         }
         if (EntityActionMachine.Instance == null)
             return true;
 
-        string restore = MobSkillLog.CurrentLocomotion(_entity);
+        string restore = (_entity.Identity != null && MoveAllCharacters.Instance != null && MoveAllCharacters.Instance.IsMoving(_entity.Identity.Id)) ? (_entity.Running ? "run" : "walk") : "wait";
         _isSwitchIdle = true;
         EntityActionMachine.Instance.Set(_entity, EntityActionKind.Idle, restore);
-        MobSkillLog.Done(_entity, restore);
+        // MobSkillLog.Done(_entity, restore);
         return true;
     }
 

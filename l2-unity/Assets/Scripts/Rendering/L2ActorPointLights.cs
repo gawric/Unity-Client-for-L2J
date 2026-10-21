@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
 using UnityEngine;
@@ -18,6 +18,7 @@ public static class L2ActorPointLights
 
     static readonly List<L2ActorLocalLight> Lights = new List<L2ActorLocalLight>(32);
     static readonly List<ActorGroup> Groups = new List<ActorGroup>(32);
+    static readonly Dictionary<int, ActorGroup> GroupsByRoot = new Dictionary<int, ActorGroup>(64);
     static readonly int[] Chosen = new int[Max];
 
     static readonly Vector4[] GlobalPos = new Vector4[Max];
@@ -30,6 +31,8 @@ public static class L2ActorPointLights
 
     static float _nextRefresh = -1f;
     static float _nextLog = -1f;
+    static bool _rewriteActors;
+    const float MoveEpsilonSqr = 0.25f;
 
     // Captured indoor fire, monster search 20260929_165643.
     static readonly Vector3 ClientC227 = new Vector3(0.130504623f, 0.105057523f, 0.0745209977f);
@@ -56,7 +59,16 @@ public static class L2ActorPointLights
             ActorGroup group = Groups[g];
             if (group.Root == null)
                 continue;
-            Fill(group.Origin, group.Pos, group.Color, group.Atten);
+
+            Vector3 actorOrigin = group.Root.position;
+            bool moved = (actorOrigin - group.AppliedOrigin).sqrMagnitude >= MoveEpsilonSqr;
+            if (!_rewriteActors && group.Applied && !moved && (group.AppliedChosen > 0 || !NearLight(actorOrigin)))
+                continue;
+
+            int chosen = Fill(actorOrigin, group.Pos, group.Color, group.Atten);
+            if (!_rewriteActors && group.Applied && !moved && chosen == group.AppliedChosen)
+                continue;
+
             for (int r = 0; r < group.Renderers.Count; r++)
             {
                 Renderer renderer = group.Renderers[r];
@@ -68,12 +80,18 @@ public static class L2ActorPointLights
                 group.Block.SetVectorArray(AttenId, group.Atten);
                 renderer.SetPropertyBlock(group.Block);
             }
+
+            group.Applied = true;
+            group.AppliedChosen = chosen;
+            group.AppliedOrigin = actorOrigin;
         }
+
+        _rewriteActors = false;
 
         if (Time.unscaledTime >= _nextLog)
         {
             _nextLog = Time.unscaledTime + 2f;
-            Debug.Log(NearestReport());
+            // Debug.Log(NearestReport());
         }
     }
 
@@ -113,7 +131,7 @@ public static class L2ActorPointLights
         return chosen;
     }
 
-    static void Fill(Vector3 origin, Vector4[] pos, Vector4[] color, Vector4[] atten)
+    static int Fill(Vector3 origin, Vector4[] pos, Vector4[] color, Vector4[] atten)
     {
         int chosen = Select(origin);
 
@@ -134,6 +152,23 @@ public static class L2ActorPointLights
             color[i] = new Vector4(c.r, c.g, c.b, 1f);
             atten[i] = new Vector4(light.constantAttenuation, light.linearAttenuation, light.radius, 0f);
         }
+
+        return chosen;
+    }
+
+    static bool NearLight(Vector3 origin)
+    {
+        for (int i = 0; i < Lights.Count; i++)
+        {
+            L2ActorLocalLight light = Lights[i];
+            if (!Usable(light))
+                continue;
+            float reach = light.radius + 0.5f;
+            if ((light.WorldPosition - origin).sqrMagnitude <= reach * reach)
+                return true;
+        }
+
+        return false;
     }
 
     static bool Usable(L2ActorLocalLight light)
@@ -153,6 +188,7 @@ public static class L2ActorPointLights
 
     static void Refresh()
     {
+        int previousLights = Lights.Count;
         Lights.Clear();
         L2ActorLocalLight[] found = Object.FindObjectsByType<L2ActorLocalLight>(
             FindObjectsInactive.Exclude, FindObjectsSortMode.None);
@@ -162,40 +198,63 @@ public static class L2ActorPointLights
                 Lights.Add(found[i]);
         }
 
-        Groups.Clear();
-        SkinnedMeshRenderer[] skinned = Object.FindObjectsByType<SkinnedMeshRenderer>(
-            FindObjectsInactive.Exclude, FindObjectsSortMode.None);
-        for (int i = 0; i < skinned.Length; i++)
+        if (Lights.Count != previousLights)
+            _rewriteActors = true;
+
+        PruneActors();
+        AdoptActors();
+    }
+
+    static void PruneActors()
+    {
+        for (int i = Groups.Count - 1; i >= 0; i--)
         {
-            SkinnedMeshRenderer renderer = skinned[i];
-            if (!IsActor(renderer))
+            ActorGroup group = Groups[i];
+            if (group.Root != null)
                 continue;
-            Transform root = RootOf(renderer);
-            ActorGroup group = null;
-            for (int g = 0; g < Groups.Count; g++)
-            {
-                if (Groups[g].Root == root)
-                {
-                    group = Groups[g];
-                    break;
-                }
-            }
-
-            if (group == null)
-            {
-                group = new ActorGroup();
-                group.Root = root;
-                Groups.Add(group);
-            }
-
-            group.Renderers.Add(renderer);
+            GroupsByRoot.Remove(group.RootId);
+            Groups.RemoveAt(i);
         }
     }
 
-    static Transform RootOf(Renderer renderer)
+    static void AdoptActors()
     {
-        Animator animator = renderer.GetComponentInParent<Animator>();
-        return animator != null ? animator.transform : renderer.transform;
+        Animator[] animators = Object.FindObjectsByType<Animator>(
+            FindObjectsInactive.Exclude, FindObjectsSortMode.None);
+        for (int i = 0; i < animators.Length; i++)
+        {
+            Animator animator = animators[i];
+            if (animator == null)
+                continue;
+            Transform root = animator.transform;
+            int rootId = root.GetInstanceID();
+            if (GroupsByRoot.ContainsKey(rootId))
+                continue;
+            if (animator.GetComponentInParent<Animator>() != animator)
+                continue;
+
+            SkinnedMeshRenderer[] skinned = animator.GetComponentsInChildren<SkinnedMeshRenderer>(false);
+            ActorGroup group = null;
+            for (int s = 0; s < skinned.Length; s++)
+            {
+                SkinnedMeshRenderer renderer = skinned[s];
+                if (!IsActor(renderer))
+                    continue;
+                if (group == null)
+                {
+                    group = new ActorGroup();
+                    group.Root = root;
+                    group.RootId = rootId;
+                }
+
+                group.Renderers.Add(renderer);
+            }
+
+            if (group == null)
+                continue;
+            GroupsByRoot.Add(rootId, group);
+            Groups.Add(group);
+        }
     }
 
     static bool IsActor(Renderer renderer)
@@ -369,6 +428,10 @@ public static class L2ActorPointLights
     sealed class ActorGroup
     {
         public Transform Root;
+        public int RootId;
+        public bool Applied;
+        public int AppliedChosen;
+        public Vector3 AppliedOrigin;
         public readonly List<Renderer> Renderers = new List<Renderer>(4);
         public readonly MaterialPropertyBlock Block = new MaterialPropertyBlock();
         public readonly Vector4[] Pos = new Vector4[Max];

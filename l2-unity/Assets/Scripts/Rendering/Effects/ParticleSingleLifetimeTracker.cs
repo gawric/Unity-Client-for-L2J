@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 /// <summary>
 /// Spawn timing, slot duration, and continuous-loop state for ParticleSingle.
@@ -81,12 +81,12 @@ public class ParticleSingleLifetimeTracker
     {
         if (renderer == null || renderer.sharedMaterials == null)
         {
-            ParticleSingleLifetimeDebug.LogLifetimeFallback(
-                groupName,
-                owner,
-                transform,
-                fallback,
-                "no_renderer_or_materials rendererNull=" + (renderer == null));
+            // ParticleSingleLifetimeDebug.LogLifetimeFallback(
+                // groupName,
+                // owner,
+                // transform,
+                // fallback,
+                // "no_renderer_or_materials rendererNull=" + (renderer == null));
             return fallback;
         }
 
@@ -96,25 +96,25 @@ public class ParticleSingleLifetimeTracker
             if (mat != null && mat.HasProperty(L2MaterialPropertyCopier.LifetimeRangeId))
             {
                 float lifetime = mat.GetVector(L2MaterialPropertyCopier.LifetimeRangeId).y;
-                ParticleSingleLifetimeDebug.LogLifetimeFallback(
-                    groupName,
-                    owner,
-                    transform,
-                    fallback,
-                    string.Empty,
-                    mat.name,
-                    i,
-                    lifetime);
+                // ParticleSingleLifetimeDebug.LogLifetimeFallback(
+                    // groupName,
+                    // owner,
+                    // transform,
+                    // fallback,
+                    // string.Empty,
+                    // mat.name,
+                    // i,
+                    // lifetime);
                 return lifetime;
             }
         }
 
-        ParticleSingleLifetimeDebug.LogLifetimeFallback(
-            groupName,
-            owner,
-            transform,
-            0.5f,
-            "no _LifetimeRange on shared materials — this matches ~500ms shader fade if used as slot duration.");
+        // ParticleSingleLifetimeDebug.LogLifetimeFallback(
+            // groupName,
+            // owner,
+            // transform,
+            // 0.5f,
+            // "no _LifetimeRange on shared materials — this matches ~500ms shader fade if used as slot duration.");
         return 0.5f;
     }
 }

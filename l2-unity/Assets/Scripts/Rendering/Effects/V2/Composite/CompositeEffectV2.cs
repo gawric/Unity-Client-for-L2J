@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -34,6 +34,12 @@ public class CompositeEffectV2 : CompositePrefabEffect
     bool _v2DirectShootObserved;
 
     protected override string DebugPrefix => "[CompositeEffectV2]";
+
+    bool TraceCrasherWind()
+    {
+        return _owner != null &&
+               _owner.name.IndexOf("Crasher", System.StringComparison.OrdinalIgnoreCase) >= 0;
+    }
 
     protected override bool UseLegacyLifetimeHacks => false;
 
@@ -75,7 +81,8 @@ public class CompositeEffectV2 : CompositePrefabEffect
     {
         if (!HasSpawnableV2Parts)
         {
-            Debug.LogWarning("CompositeEffectV2: no V2 parts configured.");
+            if (TraceCrasherWind())
+                Debug.Log("[WINDSTRIKE] Composite no V2 parts");
             return;
         }
 
@@ -83,14 +90,24 @@ public class CompositeEffectV2 : CompositePrefabEffect
         RefreshV2Context();
         LogHomeSpawnPlay();
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-        Debug.Log(
-            $"{DebugPrefix} Play started at={_playStartedAt:F3}s hit={(_castData != null ? _castData.HitTime : -1f):F3}s " +
-            $"flight={(_castData != null ? _castData.FlightTime : -1f):F3}s serverShoot={(_castData != null ? _castData.serverTimeToShoot : -1f):F3}s.");
+        // Debug.Log(
+            // $"{DebugPrefix} Play started at={_playStartedAt:F3}s hit={(_castData != null ? _castData.HitTime : -1f):F3}s " +
+            // $"flight={(_castData != null ? _castData.FlightTime : -1f):F3}s serverShoot={(_castData != null ? _castData.serverTimeToShoot : -1f):F3}s.");
 #endif
 
         QueueV2Parts();
+        if (TraceCrasherWind())
+        {
+            Debug.Log(
+                "[WINDSTRIKE] Composite queued shoot=" + _pendingAnimationShoot.Count +
+                " delayed=" + _pendingDelayed.Count +
+                " spawned=" + _spawned.Count +
+                " immediate=" + (_castData != null && _castData.SpawnShotVisualsImmediately));
+        }
         if (_castData != null && _castData.SpawnShotVisualsImmediately)
             SpawnPendingAnimationShootParts();
+        if (TraceCrasherWind())
+            Debug.Log("[WINDSTRIKE] Composite after shoot spawned=" + _spawned.Count);
         StartV2PendingRoutineIfNeeded();
         StartV2ShootWatchdogIfNeeded();
         if (!SkipDestroyCompositeByLifetime)
@@ -206,14 +223,16 @@ public class CompositeEffectV2 : CompositePrefabEffect
             if (part.spawnTiming == CompositePartSpawnTiming.OnAnimationShoot)
             {
                 _pendingAnimationShoot.Add(part);
+                if (TraceCrasherWind())
+                    Debug.Log("[WINDSTRIKE] Composite queue shoot part=" + part.name);
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-                if (V2TaSpawnLog.Matches(part))
+                // if (V2TaSpawnLog.Matches(part))
                 {
-                    V2TaSpawnLog.Info(
-                        "QUEUE shoot part='" + part.name +
-                        "' hit=" + (_castData != null ? _castData.HitTime.ToString("0.###") : "-") +
-                        "s shoot=" + (_castData != null ? _castData.serverTimeToShoot.ToString("0.###") : "-") +
-                        "s wantsShoot=" + part.WantsAnimationShoot);
+                    // V2TaSpawnLog.Info(
+                        // "QUEUE shoot part='" + part.name +
+                        // "' hit=" + (_castData != null ? _castData.HitTime.ToString("0.###") : "-") +
+                        // "s shoot=" + (_castData != null ? _castData.serverTimeToShoot.ToString("0.###") : "-") +
+                        // "s wantsShoot=" + part.WantsAnimationShoot);
                 }
 #endif
                 continue;
@@ -223,6 +242,8 @@ public class CompositeEffectV2 : CompositePrefabEffect
             delay += Mathf.Max(0f, part.spawnDelaySeconds);
             if (delay <= 0f)
             {
+                if (TraceCrasherWind())
+                    Debug.Log("[WINDSTRIKE] Composite spawn now part=" + part.name);
                 SpawnV2Part(part);
                 continue;
             }
@@ -234,25 +255,25 @@ public class CompositeEffectV2 : CompositePrefabEffect
                 SpawnAtTime = spawnAt
             });
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-            if (V2TaSpawnLog.Matches(part))
+            // if (V2TaSpawnLog.Matches(part))
             {
                 float compositeLife = _rootRuntimeSettings != null
                     ? _rootRuntimeSettings.defaultLifeTime
                     : (_settings != null ? _settings.defaultLifeTime : -1f);
                 float destroyAt = Time.time + Mathf.Max(0f, compositeLife);
-                V2TaSpawnLog.Warn(
-                    "QUEUE delayed part='" + part.name + "' type=" + part.GetType().Name +
-                    " timing=" + part.spawnTiming +
-                    " delay=" + delay.ToString("0.###") +
-                    "s spawnAt=" + spawnAt.ToString("F3") +
-                    " compositeLife=" + compositeLife.ToString("0.###") +
-                    "s destroyAt=" + destroyAt.ToString("F3") +
-                    " hit=" + (_castData != null ? _castData.HitTime.ToString("0.###") : "-") +
-                    "s shoot=" + (_castData != null ? _castData.serverTimeToShoot.ToString("0.###") : "-") +
-                    "s outlives=" + part.OutlivesComposite +
-                    (destroyAt <= spawnAt + 0.02f
-                        ? " RACE: composite dies at/before delayed spawn"
-                        : string.Empty));
+                // V2TaSpawnLog.Warn(
+                    // "QUEUE delayed part='" + part.name + "' type=" + part.GetType().Name +
+                    // " timing=" + part.spawnTiming +
+                    // " delay=" + delay.ToString("0.###") +
+                    // "s spawnAt=" + spawnAt.ToString("F3") +
+                    // " compositeLife=" + compositeLife.ToString("0.###") +
+                    // "s destroyAt=" + destroyAt.ToString("F3") +
+                    // " hit=" + (_castData != null ? _castData.HitTime.ToString("0.###") : "-") +
+                    // "s shoot=" + (_castData != null ? _castData.serverTimeToShoot.ToString("0.###") : "-") +
+                    // "s outlives=" + part.OutlivesComposite +
+                    // (destroyAt <= spawnAt + 0.02f
+                        // ? " RACE: composite dies at/before delayed spawn"
+                        // : string.Empty));
             }
 #endif
         }
@@ -268,11 +289,11 @@ public class CompositeEffectV2 : CompositePrefabEffect
         if (_spawned.ContainsKey(part))
         {
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-            if (V2TaSpawnLog.Matches(part))
+            // if (V2TaSpawnLog.Matches(part))
             {
-                V2TaSpawnLog.Warn(
-                    "SPAWN SKIP already spawned part='" + part.name +
-                    "' frame=" + Time.frameCount + " t=" + Time.time.ToString("F3"));
+                // V2TaSpawnLog.Warn(
+                    // "SPAWN SKIP already spawned part='" + part.name +
+                    // "' frame=" + Time.frameCount + " t=" + Time.time.ToString("F3"));
             }
 #endif
             return;
@@ -282,21 +303,30 @@ public class CompositeEffectV2 : CompositePrefabEffect
         EnsureHitPointFromTarget();
         if (!part.TryResolveSpawn(_v2Resolver, _context, out Transform followTransform, out Vector3 worldPosition))
         {
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
-            if (V2TaSpawnLog.Matches(part))
+            if (TraceCrasherWind())
             {
-                V2TaSpawnLog.Warn(
-                    "RESOLVE FAIL part='" + part.name +
-                    "' attach=" + part.spawnAttachmentPoint +
+                Debug.Log(
+                    "[WINDSTRIKE] Composite resolve FAIL part=" + part.name +
+                    " attach=" + part.spawnAttachmentPoint +
                     " target=" + (_context != null && _context.TargetTransform != null
                         ? _context.TargetTransform.name
                         : "null"));
             }
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            // if (V2TaSpawnLog.Matches(part))
+            {
+                // V2TaSpawnLog.Warn(
+                    // "RESOLVE FAIL part='" + part.name +
+                    // "' attach=" + part.spawnAttachmentPoint +
+                    // " target=" + (_context != null && _context.TargetTransform != null
+                        // ? _context.TargetTransform.name
+                        // : "null"));
+            }
 #endif
-            Debug.LogWarning(
-                $"[HOME_SPAWN] resolve FAILED part='{part.name}' type={part.GetType().Name} " +
-                $"placement={(part.placement != null ? part.placement.GetType().Name : "null")}");
-            Debug.LogWarning($"{DebugPrefix} could not resolve placement for part {part.name}.");
+            // Debug.LogWarning(
+                // $"[HOME_SPAWN] resolve FAILED part='{part.name}' type={part.GetType().Name} " +
+                // $"placement={(part.placement != null ? part.placement.GetType().Name : "null")}");
+            // Debug.LogWarning($"{DebugPrefix} could not resolve placement for part {part.name}.");
             return;
         }
 
@@ -307,6 +337,8 @@ public class CompositeEffectV2 : CompositePrefabEffect
         Quaternion rotation = ResolveV2SpawnRotation(part, followTransform);
         BaseEffect instance = Instantiate(part.prefab, spawnPosition, rotation);
         instance.gameObject.SetActive(true);
+        if (TraceCrasherWind())
+            Debug.Log("[WINDSTRIKE] Composite spawned part=" + part.name + " pos=" + instance.transform.position);
         Vector3 afterInstantiate = instance.transform.position;
         CompositePartSpawnHelper.AttachIfFollow(part.follow, followTransform, instance.transform, worldPosition);
         Vector3 afterAttach = instance.transform.position;
@@ -320,7 +352,7 @@ public class CompositeEffectV2 : CompositePrefabEffect
             applyTimedLifetime: part.UsesCastHitLifetime);
         if (partSettings == null)
         {
-            Debug.LogWarning($"{DebugPrefix} settings are null for part {part.name}.");
+            // Debug.LogWarning($"{DebugPrefix} settings are null for part {part.name}.");
             Destroy(instance.gameObject);
             return;
         }
@@ -337,26 +369,26 @@ public class CompositeEffectV2 : CompositePrefabEffect
         instance.Play();
         _spawned[part] = instance;
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-        if (V2TaSpawnLog.Matches(part))
+        // if (V2TaSpawnLog.Matches(part))
         {
-            V2TaSpawnLog.Info(
-                "SPAWNED part='" + part.name + "' type=" + part.GetType().Name +
-                " timing=" + part.spawnTiming +
-                " attach=" + part.spawnAttachmentPoint +
-                " follow=" + part.follow +
-                " parent='" + (instance.transform.parent != null ? instance.transform.parent.name : "null") +
-                "' goActive=" + instance.gameObject.activeInHierarchy +
-                " authoredLife=" + instance.IsLifetimeOwnedByAuthoredStreams +
-                " sincePlay=" + (Time.time - _playStartedAt).ToString("0.###") +
-                "s frame=" + Time.frameCount);
+            // V2TaSpawnLog.Info(
+                // "SPAWNED part='" + part.name + "' type=" + part.GetType().Name +
+                // " timing=" + part.spawnTiming +
+                // " attach=" + part.spawnAttachmentPoint +
+                // " follow=" + part.follow +
+                // " parent='" + (instance.transform.parent != null ? instance.transform.parent.name : "null") +
+                // "' goActive=" + instance.gameObject.activeInHierarchy +
+                // " authoredLife=" + instance.IsLifetimeOwnedByAuthoredStreams +
+                // " sincePlay=" + (Time.time - _playStartedAt).ToString("0.###") +
+                // "s frame=" + Time.frameCount);
         }
 #endif
         TryLaunchImmediate(part, instance);
         RaiseStartSpawnAndMaybeSpawnLight();
         LogHomeSpawnPart(part, followTransform, worldPosition, spawnPosition, afterInstantiate, afterAttach, instance, setupOwner);
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-        Debug.Log(
-            $"{DebugPrefix} Spawned {part.Describe()} owner='{(setupOwner != null ? setupOwner.name : "null")}'.");
+        // Debug.Log(
+            // $"{DebugPrefix} Spawned {part.Describe()} owner='{(setupOwner != null ? setupOwner.name : "null")}'.");
 #endif
     }
 
@@ -365,13 +397,13 @@ public class CompositeEffectV2 : CompositePrefabEffect
         Transform target = _context != null ? _context.TargetTransform : null;
         Transform caster = _context != null ? _context.CasterTransform : _owner;
         int partCount = _v2Parts != null ? _v2Parts.Length : 0;
-        Debug.Log(
-            $"[HOME_SPAWN] PlayV2 composite='{name}' v2Parts={partCount} " +
-            $"legacy={ShouldUseLegacyPartPipeline} followSelfParent='{(transform.parent != null ? transform.parent.name : "null")}' " +
-            $"compositePos={transform.position} caster='{(caster != null ? caster.name : "null")}' " +
-            $"casterPos={(caster != null ? caster.position.ToString("F3") : "-")} " +
-            $"target='{(target != null ? target.name : "null")}' " +
-            $"targetPos={(target != null ? target.position.ToString("F3") : "-")}");
+        // Debug.Log(
+            // $"[HOME_SPAWN] PlayV2 composite='{name}' v2Parts={partCount} " +
+            // $"legacy={ShouldUseLegacyPartPipeline} followSelfParent='{(transform.parent != null ? transform.parent.name : "null")}' " +
+            // $"compositePos={transform.position} caster='{(caster != null ? caster.name : "null")}' " +
+            // $"casterPos={(caster != null ? caster.position.ToString("F3") : "-")} " +
+            // $"target='{(target != null ? target.name : "null")}' " +
+            // $"targetPos={(target != null ? target.position.ToString("F3") : "-")}");
         if (_v2Parts == null)
         {
             return;
@@ -382,15 +414,15 @@ public class CompositeEffectV2 : CompositePrefabEffect
             CompositePart p = _v2Parts[i];
             if (p == null)
             {
-                Debug.Log($"[HOME_SPAWN]   part[{i}]=null");
+                // Debug.Log($"[HOME_SPAWN]   part[{i}]=null");
                 continue;
             }
 
-            Debug.Log(
-                $"[HOME_SPAWN]   part[{i}] name='{p.name}' type={p.GetType().Name} " +
-                $"placement={(p.placement != null ? p.placement.GetType().Name : "null")} " +
-                $"spawnPoint={p.spawnAttachmentPoint} " +
-                $"timing={p.spawnTiming} follow={p.follow} prefab='{(p.prefab != null ? p.prefab.name : "null")}'");
+            // Debug.Log(
+                // $"[HOME_SPAWN]   part[{i}] name='{p.name}' type={p.GetType().Name} " +
+                // $"placement={(p.placement != null ? p.placement.GetType().Name : "null")} " +
+                // $"spawnPoint={p.spawnAttachmentPoint} " +
+                // $"timing={p.spawnTiming} follow={p.follow} prefab='{(p.prefab != null ? p.prefab.name : "null")}'");
         }
     }
 
@@ -424,17 +456,17 @@ public class CompositeEffectV2 : CompositePrefabEffect
         float dYResolved = worldPosition.y - targetPos.y;
         float dYGo = instance != null ? instance.transform.position.y - targetPos.y : 0f;
 
-        Debug.LogWarning(
-            $"[HOME_SPAWN] SPAWN part='{part.name}' spawnPoint={spawnPoint} type={part.GetType().Name} " +
-            $"placement={placementName} follow={part.follow} " +
-            $"followTf='{(followTransform != null ? followTransform.name : "null")}' " +
-            $"setupOwner='{(setupOwner != null ? setupOwner.name : "null")}'\n" +
-            $"  targetPos={targetPos:F3} resolvedWorld={worldPosition:F3} spawnPos={spawnPosition:F3}\n" +
-            $"  afterInstantiate={afterInstantiate:F3} afterAttach={afterAttach:F3} " +
-            $"goPos={(instance != null ? instance.transform.position.ToString("F3") : "-")} " +
-            $"parent='{(instance != null && instance.transform.parent != null ? instance.transform.parent.name : "null")}'\n" +
-            $"  rendererCenter={rendererPos:F3} " +
-            $"dY_go-target={dYGo:F3} dY_resolved-target={dYResolved:F3}");
+        // Debug.LogWarning(
+            // $"[HOME_SPAWN] SPAWN part='{part.name}' spawnPoint={spawnPoint} type={part.GetType().Name} " +
+            // $"placement={placementName} follow={part.follow} " +
+            // $"followTf='{(followTransform != null ? followTransform.name : "null")}' " +
+            // $"setupOwner='{(setupOwner != null ? setupOwner.name : "null")}'\n" +
+            // $"  targetPos={targetPos:F3} resolvedWorld={worldPosition:F3} spawnPos={spawnPosition:F3}\n" +
+            // $"  afterInstantiate={afterInstantiate:F3} afterAttach={afterAttach:F3} " +
+            // $"goPos={(instance != null ? instance.transform.position.ToString("F3") : "-")} " +
+            // $"parent='{(instance != null && instance.transform.parent != null ? instance.transform.parent.name : "null")}'\n" +
+            // $"  rendererCenter={rendererPos:F3} " +
+            // $"dY_go-target={dYGo:F3} dY_resolved-target={dYResolved:F3}");
 
         Debug.DrawLine(targetPos, worldPosition, Color.magenta, 8f);
         Debug.DrawRay(worldPosition, Vector3.up * 0.4f, Color.cyan, 8f);
@@ -586,11 +618,11 @@ public class CompositeEffectV2 : CompositePrefabEffect
         if (_context?.CasterEntity?.Identity == null || IncomingPacketActions.Animations == null)
         {
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-            V2TaSpawnLog.Warn(
-                "SHOOT SUBSCRIBE FAIL composite='" + name +
-                "' caster=" + (_context?.CasterEntity != null ? "ok" : "null") +
-                " animations=" + (IncomingPacketActions.Animations != null ? "ok" : "null") +
-                " — waiting for serverTimeToShoot fallback");
+            // V2TaSpawnLog.Warn(
+                // "SHOOT SUBSCRIBE FAIL composite='" + name +
+                // "' caster=" + (_context?.CasterEntity != null ? "ok" : "null") +
+                // " animations=" + (IncomingPacketActions.Animations != null ? "ok" : "null") +
+                // " — waiting for serverTimeToShoot fallback");
 #endif
             return;
         }
@@ -602,9 +634,9 @@ public class CompositeEffectV2 : CompositePrefabEffect
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
             if (_v2AnimationEvents == null)
             {
-                V2TaSpawnLog.Warn(
-                    "SHOOT SUBSCRIBE FAIL composite='" + name +
-                    "' GetAnimationEvents(" + casterId + ")=null — fallback at serverTimeToShoot");
+                // V2TaSpawnLog.Warn(
+                    // "SHOOT SUBSCRIBE FAIL composite='" + name +
+                    // "' GetAnimationEvents(" + casterId + ")=null — fallback at serverTimeToShoot");
             }
 #endif
             _v2SubscribedShoot = true;
@@ -693,9 +725,9 @@ public class CompositeEffectV2 : CompositePrefabEffect
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
         float fromCast = _castData != null ? Time.time - _castData.StartTime : -1f;
         float expected = _castData != null ? _castData.AnimationShotAtSeconds : -1f;
-        Debug.Log(
-            $"{DebugPrefix} [MAGIC_SHOOT_SOURCE] source=AnimationEvent " +
-            $"fromCast={fromCast:F3}s expected={expected:F3}s delta={fromCast - expected:F3}s.");
+        // Debug.Log(
+            // $"{DebugPrefix} [MAGIC_SHOOT_SOURCE] source=AnimationEvent " +
+            // $"fromCast={fromCast:F3}s expected={expected:F3}s delta={fromCast - expected:F3}s.");
 #endif
         ProcessV2Shoot("direct");
     }
@@ -707,12 +739,12 @@ public class CompositeEffectV2 : CompositePrefabEffect
         if (_castData != null)
         {
             float globalSinceCast = Time.time - _castData.StartTime;
-            Debug.Log(
-                "[MAGIC_PROJECTILE_SYNC] ShootEvent " +
-                $"channel={channel} globalSinceCast={globalSinceCast:F3}s hit={_castData.HitTime:F3}s " +
-                $"flight={_castData.FlightTime:F3}s serverShoot={_castData.serverTimeToShoot:F3}s " +
-                $"deltaGlobalToShoot={globalSinceCast - _castData.serverTimeToShoot:F3}s " +
-                $"deltaGlobalToHit={globalSinceCast - _castData.HitTime:F3}s sincePlayStarted={Time.time - _playStartedAt:F3}s");
+            // Debug.Log(
+                // "[MAGIC_PROJECTILE_SYNC] ShootEvent " +
+                // $"channel={channel} globalSinceCast={globalSinceCast:F3}s hit={_castData.HitTime:F3}s " +
+                // $"flight={_castData.FlightTime:F3}s serverShoot={_castData.serverTimeToShoot:F3}s " +
+                // $"deltaGlobalToShoot={globalSinceCast - _castData.serverTimeToShoot:F3}s " +
+                // $"deltaGlobalToHit={globalSinceCast - _castData.HitTime:F3}s sincePlayStarted={Time.time - _playStartedAt:F3}s");
         }
 #endif
         foreach (KeyValuePair<CompositePart, BaseEffect> pair in _spawned)
@@ -736,17 +768,17 @@ public class CompositeEffectV2 : CompositePrefabEffect
             return;
         }
 
-        Debug.Log($"[HOME_SPAWN] AnimationShoot spawning {_pendingAnimationShoot.Count} part(s)");
+        // Debug.Log($"[HOME_SPAWN] AnimationShoot spawning {_pendingAnimationShoot.Count} part(s)");
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
         for (int logI = 0; logI < _pendingAnimationShoot.Count; logI++)
         {
             CompositePart shootPart = _pendingAnimationShoot[logI];
-            if (V2TaSpawnLog.Matches(shootPart))
+            // if (V2TaSpawnLog.Matches(shootPart))
             {
-                V2TaSpawnLog.Info(
-                    "SHOOT QUEUE part='" + shootPart.name +
-                    "' sincePlay=" + (Time.time - _playStartedAt).ToString("0.###") +
-                    "s channel pending count=" + _pendingAnimationShoot.Count);
+                // V2TaSpawnLog.Info(
+                    // "SHOOT QUEUE part='" + shootPart.name +
+                    // "' sincePlay=" + (Time.time - _playStartedAt).ToString("0.###") +
+                    // "s channel pending count=" + _pendingAnimationShoot.Count);
             }
         }
 #endif
@@ -851,9 +883,9 @@ public class CompositeEffectV2 : CompositePrefabEffect
         EnsureHitPointFromTarget();
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-        Debug.Log(
-            $"{DebugPrefix} HitTime fallback spawn {_pendingHitCollider.Count} impact part(s) " +
-            $"(projectile event did not fire before composite HitTime).");
+        // Debug.Log(
+            // $"{DebugPrefix} HitTime fallback spawn {_pendingHitCollider.Count} impact part(s) " +
+            // $"(projectile event did not fire before composite HitTime).");
 #endif
 
         for (int i = 0; i < _pendingHitCollider.Count; i++)
@@ -886,14 +918,14 @@ public class CompositeEffectV2 : CompositePrefabEffect
             }
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-            if (V2TaSpawnLog.Matches(pending.Part))
+            // if (V2TaSpawnLog.Matches(pending.Part))
             {
-                V2TaSpawnLog.Warn(
-                    "FLUSH ON DESTROY part='" + pending.Part.name +
-                    "' was scheduled spawnAt=" + pending.SpawnAtTime.ToString("F3") +
-                    " now=" + Time.time.ToString("F3") +
-                    " remaining=" + (pending.SpawnAtTime - Time.time).ToString("0.###") +
-                    "s — composite died before delayed spawn");
+                // V2TaSpawnLog.Warn(
+                    // "FLUSH ON DESTROY part='" + pending.Part.name +
+                    // "' was scheduled spawnAt=" + pending.SpawnAtTime.ToString("F3") +
+                    // " now=" + Time.time.ToString("F3") +
+                    // " remaining=" + (pending.SpawnAtTime - Time.time).ToString("0.###") +
+                    // "s — composite died before delayed spawn");
             }
 #endif
             SpawnV2Part(pending.Part);
@@ -907,7 +939,7 @@ public class CompositeEffectV2 : CompositePrefabEffect
         int delayedTa = 0;
         for (int i = 0; i < _pendingDelayed.Count; i++)
         {
-            if (_pendingDelayed[i] != null && V2TaSpawnLog.Matches(_pendingDelayed[i].Part))
+            // if (_pendingDelayed[i] != null && V2TaSpawnLog.Matches(_pendingDelayed[i].Part))
             {
                 delayedTa++;
             }
@@ -916,7 +948,7 @@ public class CompositeEffectV2 : CompositePrefabEffect
         int shootTa = 0;
         for (int i = 0; i < _pendingAnimationShoot.Count; i++)
         {
-            if (V2TaSpawnLog.Matches(_pendingAnimationShoot[i]))
+            // if (V2TaSpawnLog.Matches(_pendingAnimationShoot[i]))
             {
                 shootTa++;
             }
@@ -927,14 +959,14 @@ public class CompositeEffectV2 : CompositePrefabEffect
             return;
         }
 
-        V2TaSpawnLog.Warn(
-            "DESTROY " + stage +
-            " composite='" + name +
-            "' delayedTa=" + delayedTa +
-            " shootPendingTa=" + shootTa +
-            " spawned=" + _spawned.Count +
-            " sincePlay=" + (Time.time - _playStartedAt).ToString("0.###") +
-            "s frame=" + Time.frameCount);
+        // V2TaSpawnLog.Warn(
+            // "DESTROY " + stage +
+            // " composite='" + name +
+            // "' delayedTa=" + delayedTa +
+            // " shootPendingTa=" + shootTa +
+            // " spawned=" + _spawned.Count +
+            // " sincePlay=" + (Time.time - _playStartedAt).ToString("0.###") +
+            // "s frame=" + Time.frameCount);
     }
 #endif
 
@@ -982,14 +1014,14 @@ public class CompositeEffectV2 : CompositePrefabEffect
                 if (now >= pending.SpawnAtTime)
                 {
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-                    if (V2TaSpawnLog.Matches(pending.Part))
+                    // if (V2TaSpawnLog.Matches(pending.Part))
                     {
-                        V2TaSpawnLog.Info(
-                            "DELAY DUE part='" + pending.Part.name +
-                            "' spawnAt=" + pending.SpawnAtTime.ToString("F3") +
-                            " now=" + now.ToString("F3") +
-                            " late=" + (now - pending.SpawnAtTime).ToString("0.###") +
-                            "s frame=" + Time.frameCount);
+                        // V2TaSpawnLog.Info(
+                            // "DELAY DUE part='" + pending.Part.name +
+                            // "' spawnAt=" + pending.SpawnAtTime.ToString("F3") +
+                            // " now=" + now.ToString("F3") +
+                            // " late=" + (now - pending.SpawnAtTime).ToString("0.###") +
+                            // "s frame=" + Time.frameCount);
                     }
 #endif
                     SpawnV2Part(pending.Part);
@@ -1049,11 +1081,11 @@ public class CompositeEffectV2 : CompositePrefabEffect
             $"pending={_pendingAnimationShoot.Count} launched={_launchedProjectiles.Count}.";
         if (_v2DirectShootObserved)
         {
-            Debug.Log(message);
+            // Debug.Log(message);
         }
         else
         {
-            Debug.LogWarning(message + " AnimationEvent was not received; projectile was NOT launched.");
+            // Debug.LogWarning(message + " AnimationEvent was not received; projectile was NOT launched.");
         }
 #endif
         _v2ShootWatchdogRoutine = null;

@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 /// <summary>
 /// Builds the ground-drop visual: prefab, materials, click sphere, DropItem layer.
@@ -78,9 +78,9 @@ public sealed class ItemDropVisualService
         else
         {
             Abstractgrp grp = _grp.ResolveGrp(itemId);
-            Debug.LogWarning(
-                $"[DropItemMesh] NO_VISUAL itemId={itemId} dropModel='{grp?.DropModel ?? "null"}' " +
-                $"equipModel='{_grp.ResolveEquipModel(grp) ?? "null"}'; item remains collider-only.");
+            // Debug.LogWarning(
+                // $"[DropItemMesh] NO_VISUAL itemId={itemId} dropModel='{grp?.DropModel ?? "null"}' " +
+                // $"equipModel='{_grp.ResolveEquipModel(grp) ?? "null"}'; item remains collider-only.");
         }
 
         _clickArea.Refresh(entity);

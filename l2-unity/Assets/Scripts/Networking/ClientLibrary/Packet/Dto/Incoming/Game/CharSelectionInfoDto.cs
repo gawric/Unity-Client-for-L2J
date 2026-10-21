@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -19,7 +19,7 @@ public class CharSelectionInfoDto : IWireDto
     public void ReadFrom(PacketReader reader)
     {
         int size = reader.ReadI();
-        Debug.Log("size " + size);
+        // Debug.Log("size " + size);
         for (int i = 0; i < size; i++)
         {
             CharSelectInfoPackage character = new CharSelectInfoPackage();

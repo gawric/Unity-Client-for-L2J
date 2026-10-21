@@ -27,7 +27,7 @@ public class NpcNameTable {
         _npcNames = new Dictionary<int, NpcName>();
         string dataPath = Path.Combine(Application.streamingAssetsPath, "Data/Meta/NpcName_Classic-eu.txt");
         if (!File.Exists(dataPath)) {
-            Debug.LogWarning("File not found: " + dataPath);
+            // Debug.LogWarning("File not found: " + dataPath);
             return;
         }
 
@@ -66,7 +66,7 @@ public class NpcNameTable {
                 _npcNames.TryAdd(npcName.Id, npcName);
             }
 
-            Debug.Log($"Successfully imported {_npcNames.Count} npcName(s)");
+            // Debug.Log($"Successfully imported {_npcNames.Count} npcName(s)");
         }
     }
 
@@ -75,7 +75,7 @@ public class NpcNameTable {
         _npcNames.TryGetValue(id, out npcName);
 
         if (npcName == null) {
-            Debug.LogWarning($"NpcName not found for id [{id}]");
+            // Debug.LogWarning($"NpcName not found for id [{id}]");
         }
 
         return npcName;

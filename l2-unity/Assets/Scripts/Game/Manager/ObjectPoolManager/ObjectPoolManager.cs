@@ -43,21 +43,51 @@ public class ObjectPoolManager : AbstractPoolManager, IPoolManager
         SetPoolLimit(ObjectType.Npc, 32);
         // Same headroom as Npc/guards; can tune later.
         SetPoolLimit(ObjectType.Monster, 32);
+        // Idle UserEntity bodies per race prefab. Live players are not this cap.
+        SetPoolLimit(ObjectType.User, 24);
         SetupPoolHierarchy(pools, poolParent);
-        Debug.Log($"Создание пула объектов успешно. Размер: {poolDictionary.Count}");
+        PrewarmUserContainers();
+        // Debug.Log($"Создание пула объектов успешно. Размер: {poolDictionary.Count}");
+    }
+
+    static readonly CharacterRaceAnimation[] UserPrewarmRaces =
+    {
+        CharacterRaceAnimation.MFighter,
+        CharacterRaceAnimation.FFighter,
+        CharacterRaceAnimation.MMagic,
+        CharacterRaceAnimation.FMagic,
+        CharacterRaceAnimation.MElf,
+        CharacterRaceAnimation.FElf,
+        CharacterRaceAnimation.MDarkElf,
+        CharacterRaceAnimation.FDarkElf
+    };
+
+    void PrewarmUserContainers()
+    {
+        ModelTable models = ModelTable.Instance;
+        if (models == null)
+            return;
+
+        const int idlePerRace = 4;
+        for (int i = 0; i < UserPrewarmRaces.Length; i++)
+        {
+            GameObject prefab = models.GetContainer(UserPrewarmRaces[i], EntityType.User);
+            if (prefab != null)
+                AddPrefabToPool(ObjectType.User, prefab, idlePerRace);
+        }
     }
 
     public void AddPrefabToPool(ObjectType tag, GameObject prefab, int count = 2)
     {
         if (prefab == null)
         {
-            Debug.LogWarning("Префаб не может быть null!");
+            // Debug.LogWarning("Префаб не может быть null!");
             return;
         }
 
         if (count <= 0)
         {
-            Debug.LogWarning("Количество должно быть больше 0!");
+            // Debug.LogWarning("Количество должно быть больше 0!");
             return;
         }
 
@@ -79,9 +109,9 @@ public class ObjectPoolManager : AbstractPoolManager, IPoolManager
 
         if (objectsToAdd <= 0)
         {
-            Debug.Log(
-                $"Пул для {prefab.name} достиг максимального размера ({currentLimit}). " +
-                $"Невозможно добавить {count} объектов.");
+            // Debug.Log(
+                // $"Пул для {prefab.name} достиг максимального размера ({currentLimit}). " +
+                // $"Невозможно добавить {count} объектов.");
             return;
         }
 
@@ -98,16 +128,16 @@ public class ObjectPoolManager : AbstractPoolManager, IPoolManager
             Plus1Create(prefab);
         }
 
-        Debug.Log(
-            $"[ObjectPool] Add {objectsToAdd} → {tag}/{prefab.name} " +
-            $"queue={prefabPool.Count}/{currentLimit} created={GetCreateCount(prefab)}");
+        // Debug.Log(
+            // $"[ObjectPool] Add {objectsToAdd} → {tag}/{prefab.name} " +
+            // $"queue={prefabPool.Count}/{currentLimit} created={GetCreateCount(prefab)}");
     }
 
     public GameObject SpawnFromPool(ObjectType tag, GameObject specificPrefab = null)
     {
         if (!poolDictionary.ContainsKey(tag))
         {
-            Debug.LogWarning($"Пул с тегом {tag} не существует.");
+            // Debug.LogWarning($"Пул с тегом {tag} не существует.");
             return null;
         }
 
@@ -116,7 +146,7 @@ public class ObjectPoolManager : AbstractPoolManager, IPoolManager
 
         if (!prefabPools.ContainsKey(prefab))
         {
-            Debug.LogWarning($"Префаб не найден в пуле {tag}");
+            // Debug.LogWarning($"Префаб не найден в пуле {tag}");
             return null;
         }
 
@@ -130,17 +160,17 @@ public class ObjectPoolManager : AbstractPoolManager, IPoolManager
             GameObject newObj = CopyObject(tag, prefab, parentTag, poolParent);
             newObj.SetActive(false);
             Plus1Create(prefab);
-            Debug.Log(
-                $"[ObjectPool] Spawn GREW {tag}/{prefab.name} " +
-                $"queue=0/{objectTypePoolLimits[tag]} created={GetCreateCount(prefab)}");
+            // Debug.Log(
+                // $"[ObjectPool] Spawn GREW {tag}/{prefab.name} " +
+                // $"queue=0/{objectTypePoolLimits[tag]} created={GetCreateCount(prefab)}");
             return newObj;
         }
 
         GameObject objectToSpawn = objectPool.Dequeue();
         EnsurePooledMeta(objectToSpawn, tag, prefab);
-        Debug.Log(
-            $"[ObjectPool] Spawn REUSED {tag}/{prefab.name} " +
-            $"queue={objectPool.Count}/{objectTypePoolLimits[tag]}");
+        // Debug.Log(
+            // $"[ObjectPool] Spawn REUSED {tag}/{prefab.name} " +
+            // $"queue={objectPool.Count}/{objectTypePoolLimits[tag]}");
         return objectToSpawn;
     }
 
@@ -148,32 +178,32 @@ public class ObjectPoolManager : AbstractPoolManager, IPoolManager
     {
         if (objectToReturn == null)
         {
-            Debug.LogWarning($"[ObjectPool] Return REJECT tag={tag} go=null");
+            // Debug.LogWarning($"[ObjectPool] Return REJECT tag={tag} go=null");
             return false;
         }
 
         if (!ValidatePool(tag))
         {
-            Debug.LogWarning($"[ObjectPool] Return REJECT id-go={objectToReturn.name} no pool tag={tag}");
+            // Debug.LogWarning($"[ObjectPool] Return REJECT id-go={objectToReturn.name} no pool tag={tag}");
             return false;
         }
 
         if (!FindMatchingPrefab(tag, objectToReturn, out GameObject prefab))
         {
-            Debug.LogWarning(
-                $"[ObjectPool] Return REJECT FindMatchingPrefab FAIL go={objectToReturn.name} tag={tag}");
+            // Debug.LogWarning(
+                // $"[ObjectPool] Return REJECT FindMatchingPrefab FAIL go={objectToReturn.name} tag={tag}");
             return false;
         }
 
         if (_maxSizePool <= 0)
         {
-            Debug.LogWarning($"[ObjectPool] Return REJECT maxSizePool<=0 go={objectToReturn.name}");
+            // Debug.LogWarning($"[ObjectPool] Return REJECT maxSizePool<=0 go={objectToReturn.name}");
             return false;
         }
 
         if (!PrepareObjectForReturn(objectToReturn, tag))
         {
-            Debug.LogWarning($"[ObjectPool] Return REJECT Prepare FAIL go={objectToReturn.name}");
+            // Debug.LogWarning($"[ObjectPool] Return REJECT Prepare FAIL go={objectToReturn.name}");
             return false;
         }
 
@@ -193,7 +223,7 @@ public class ObjectPoolManager : AbstractPoolManager, IPoolManager
 
         PooledInstance pooled = objectToReturn.GetComponent<PooledInstance>();
         if (pooled != null &&
-            (tag == ObjectType.Npc || tag == ObjectType.Monster))
+            (tag == ObjectType.Npc || tag == ObjectType.Monster || tag == ObjectType.User))
         {
             // DeadManager fades via material instances — restore shared mats for next spawn.
             pooled.RestoreSharedMaterials();
@@ -210,18 +240,18 @@ public class ObjectPoolManager : AbstractPoolManager, IPoolManager
 
         if (objectPool.Count >= currentLimit)
         {
-            Debug.LogWarning(
-                $"[ObjectPool] Return DROP(destroy) {tag}/{objectToReturn.name} " +
-                $"queueFull={objectPool.Count}/{currentLimit}");
+            // Debug.LogWarning(
+                // $"[ObjectPool] Return DROP(destroy) {tag}/{objectToReturn.name} " +
+                // $"queueFull={objectPool.Count}/{currentLimit}");
             Minus1Create(prefab);
             Destroy(objectToReturn);
         }
         else
         {
             objectPool.Enqueue(objectToReturn);
-            Debug.Log(
-                $"[ObjectPool] Return OK {tag}/{prefab.name} " +
-                $"queue={objectPool.Count}/{currentLimit}");
+            // Debug.Log(
+                // $"[ObjectPool] Return OK {tag}/{prefab.name} " +
+                // $"queue={objectPool.Count}/{currentLimit}");
         }
 
         return true;
@@ -237,5 +267,7 @@ public enum ObjectType
     /// <summary>Whole city NPC prefab.</summary>
     Npc,
     /// <summary>Whole monster prefab (leave-range + post-death corpse cleanup).</summary>
-    Monster
+    Monster,
+    /// <summary>Remote player body (CharInfo UserEntity).</summary>
+    User
 }

@@ -12,6 +12,7 @@ public class PlayerStateSpAtk : StateMachineBehaviour
     private float _linearPatkSpd = 1f;
     private bool _isSwitchIdle;
     private bool _hitExecuted;
+    private bool _applyingEnterPose;
 
     public string motionName;
     public string eventStartHitName; // "hit_start"
@@ -137,7 +138,14 @@ public class PlayerStateSpAtk : StateMachineBehaviour
             _serverHitTime = Mathf.Max(MinServerHitSeconds, cycleMs / 2000f);
         }
 
-        animator.Update(0);
+        // The cast playable graph owns this Animator. Update from OnStateEnter
+        // evaluates the graph and enters this state again.
+        if (!_applyingEnterPose)
+        {
+            _applyingEnterPose = true;
+            animator.Update(0f);
+            _applyingEnterPose = false;
+        }
     }
 
     public override void OnStateUpdate(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)

@@ -139,25 +139,25 @@ public class GameManager : MonoBehaviour {
 
     public void OnLoginServerAuthAllowed() {
         GameState = GameState.READING_LICENSE;
-        LobbyFlowLog.Info("state=READING_LICENSE show license");
+        // LobbyFlowLog.Info("state=READING_LICENSE show license");
 
         IncomingPacketActions.LoginUi.ShowLicenseWindow();
     }
 
     public void OnLoginServerPlayOk() {
         GameState = GameState.READY_TO_CONNECT;
-        LobbyFlowLog.Info("state=READY_TO_CONNECT");
+        // LobbyFlowLog.Info("state=READY_TO_CONNECT");
     }
 
     public void OnConnectingToGameServer() {
         GameState = GameState.CONNECTING_TO_GAMESERVER;
-        LobbyFlowLog.Info("state=CONNECTING_TO_GAMESERVER");
+        // LobbyFlowLog.Info("state=CONNECTING_TO_GAMESERVER");
     }
 
     public void OnReceivedServerList(byte lastServer, List<ServerData> serverData, Dictionary<int, int> charsOnServers) {
         GameState = GameState.SERVER_LIST;
         int count = serverData != null ? serverData.Count : 0;
-        LobbyFlowLog.Info("state=SERVER_LIST lastServer=" + lastServer + " servers=" + count);
+        // LobbyFlowLog.Info("state=SERVER_LIST lastServer=" + lastServer + " servers=" + count);
 
         IncomingPacketActions.LoginUi.ShowServerSelectWindow();
 
@@ -167,7 +167,7 @@ public class GameManager : MonoBehaviour {
     public void OnAuthAllowed()
     {
         GameState = GameState.CHAR_SELECT;
-        LobbyFlowLog.Info("state=CHAR_SELECT switch camera + show window");
+        // LobbyFlowLog.Info("state=CHAR_SELECT switch camera + show window");
         IncomingPacketActions.LoginCamera.SwitchCamera("CharSelect");
 
         IncomingPacketActions.LoginUi.ShowCharSelectWindow();
@@ -238,13 +238,13 @@ public class GameManager : MonoBehaviour {
     }
 
     public void OnGameserverSelected() {
-        Debug.Log("Gameserver selected, connecting...");
+        // Debug.Log("Gameserver selected, connecting...");
 
         //GameClient.Instance.Connect();
     }
 
     public void OnStartingGame() {
-        Debug.Log("On Starting game");
+        // Debug.Log("On Starting game");
         //L2LoginUI.Instance.StartLoading();
     }
 

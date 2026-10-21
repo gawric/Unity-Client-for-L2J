@@ -37,15 +37,15 @@ public class GeodataImporter
             try {
                 //data = GetGeodataBinaryForMap(_mapId);
             } catch(Exception e) {
-                Debug.LogWarning(e.Message);
+                // Debug.LogWarning(e.Message);
             }
 
             if(data != null) {
-                Debug.Log("WARNING GEODATA Disabled....................");
+                // Debug.Log("WARNING GEODATA Disabled....................");
                // _mapNodes = LoadMapGeodata(data, _origin, _nodeSize);
             }
         } catch(Exception e) {
-            Debug.LogWarning("Error while finding path: " + e.Message);
+            // Debug.LogWarning("Error while finding path: " + e.Message);
         }
 
         _jobDone = true;
@@ -101,7 +101,7 @@ public class GeodataImporter
         using (BinaryReader reader = new BinaryReader(new MemoryStream(data))) {
             while(reader.BaseStream.Position < reader.BaseStream.Length) {
                 if(DateTimeOffset.Now.ToUnixTimeMilliseconds() - _startTime > _timeout) {
-                    Debug.LogWarning($"Geodata import timeout. Imported nodes: {count}.");
+                    // Debug.LogWarning($"Geodata import timeout. Imported nodes: {count}.");
                     return null;
                 }
                 short x = reader.ReadInt16();
@@ -130,7 +130,7 @@ public class GeodataImporter
         }
 
         long elapsed = (DateTimeOffset.Now.ToUnixTimeMilliseconds() - startLoadingTime);
-        Debug.Log($"Imported {count}/{nodesToImport} nodes in {elapsed}ms.");
+        // Debug.Log($"Imported {count}/{nodesToImport} nodes in {elapsed}ms.");
 
         return nodes;
     }

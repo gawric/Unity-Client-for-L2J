@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using UnityEngine;
 
 public class NewPhysicalSkillsIntention : IntentionBase
@@ -21,15 +21,15 @@ public class NewPhysicalSkillsIntention : IntentionBase
                 PlayerState prevState = _stateMachine.State;
                 Intention prevIntention = _stateMachine.Intention;
                 ApplySoulshotCharge(useSkill);
-                Debug.Log(
-                    $"{SS_SM_LOG} Intention backup charge skillId={useSkill.SkillId} " +
-                    $"keepState={prevState} intentionNow={_stateMachine.Intention} " +
-                    $"(prefer GameServerPacketHandler.ApplyWeaponChargeShot)");
+                // Debug.Log(
+                    // $"{SS_SM_LOG} Intention backup charge skillId={useSkill.SkillId} " +
+                    // $"keepState={prevState} intentionNow={_stateMachine.Intention} " +
+                    // $"(prefer GameServerPacketHandler.ApplyWeaponChargeShot)");
                 return;
             }
 
 
-            Debug.Log("NewPhysicalSkillsIntention > use " + useSkill.SkillId);
+            // Debug.Log("NewPhysicalSkillsIntention > use " + useSkill.SkillId);
             if (SetupDurationHelper.IsUsePotion(useSkill))
             {
                 SetupDurationHelper.FinishPotionUse(_stateMachine, _stateMachine.Player, useSkill);
@@ -71,9 +71,9 @@ public class NewPhysicalSkillsIntention : IntentionBase
             _stateMachine.Player.GetWeaponTransform(),
             _stateMachine.Player.transform);
 
-        Debug.Log(
-            $"{SS_SM_LOG} ApplySoulshotCharge skillId={useSkill.SkillId} " +
-            $"state={_stateMachine.State} IsSoulshotCharged=True");
+        // Debug.Log(
+            // $"{SS_SM_LOG} ApplySoulshotCharge skillId={useSkill.SkillId} " +
+            // $"state={_stateMachine.State} IsSoulshotCharged=True");
     }
 
     private void IfUseSelf(int objectId , MagicSkillUseDto useSkill)

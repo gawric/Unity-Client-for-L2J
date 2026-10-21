@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using UnityEngine;
@@ -37,7 +37,7 @@ public static class L2HazeLut
         string dataPath = Path.Combine(Application.streamingAssetsPath, "Data/Meta", MetaFileName);
         if (!File.Exists(dataPath))
         {
-            Debug.LogWarning("[L2HazeLut] File not found: " + dataPath);
+            // Debug.LogWarning("[L2HazeLut] File not found: " + dataPath);
             return;
         }
 
@@ -76,7 +76,7 @@ public static class L2HazeLut
         }
 
         Samples.Sort((a, b) => a.tHours.CompareTo(b.tHours));
-        Debug.Log("[L2HazeLut] Loaded " + Samples.Count + " GetHazeColor keys from " + MetaFileName);
+        // Debug.Log("[L2HazeLut] Loaded " + Samples.Count + " GetHazeColor keys from " + MetaFileName);
     }
 
     public static Color SampleAt(float worldHours)

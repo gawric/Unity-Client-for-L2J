@@ -1,4 +1,4 @@
-using NUnit.Framework;
+﻿using NUnit.Framework;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -118,7 +118,7 @@ public class BufferPanel : L2Window
         }
         else
         {
-            Debug.LogWarning("Buffpanel > AddDataCellToTime: Не критическая ошибка, мы не нашли skill id при попытке обновить herb effect!!!! skillID " + skillId + " level " + skillLevel);
+            // Debug.LogWarning("Buffpanel > AddDataCellToTime: Не критическая ошибка, мы не нашли skill id при попытке обновить herb effect!!!! skillID " + skillId + " level " + skillLevel);
         }
 
 

@@ -152,25 +152,30 @@ public class VectorUtils : MonoBehaviour {
 
     public static Vector3 GetCollision(Vector3 attacker, Transform target)
     {
-        // Get target's collision height
-        float particleHeight = target.GetComponent<Entity>().Appearance.CollisionHeight * 1.25f;
+        // UserInfo stores raw L2 half-height (~24). npcgrp is already /52.5.
+        // 24 * 1.25 was aiming the bolt ~30m above the player.
+        float particleHeight = AimHeightMeters(target);
 
-        // Calculate distance to target
         float distanceToAttacker = Vector3.Distance(attacker, target.position);
 
-        // If target is very close, aim for the center
-        if (distanceToAttacker < 5.0f) // Adjust this threshold as needed
+        if (distanceToAttacker < 5.0f)
         {
-            // Just return the center of the target at the collision height
             return target.position + Vector3.up * particleHeight;
         }
 
-        // For normal distances, use the original calculation
         var heading = attacker - target.position;
         float angle = Vector3.Angle(heading, target.forward);
-        float particleHeight1 = target.GetComponent<Entity>().Appearance.CollisionHeight * 1.25f;
         Vector3 direction = Quaternion.Euler(0, angle, 0) * target.forward;
-        return target.position + direction * 0.15f + Vector3.up * particleHeight1;
+        return target.position + direction * 0.15f + Vector3.up * particleHeight;
+    }
+
+    static float AimHeightMeters(Transform target)
+    {
+        Entity entity = target != null ? target.GetComponent<Entity>() : null;
+        float raw = entity != null && entity.Appearance != null
+            ? entity.Appearance.CollisionHeight
+            : 0f;
+        return L2NameplateAnchor.CollisionHeightToUnityMeters(raw) * 1.25f;
     }
 
 

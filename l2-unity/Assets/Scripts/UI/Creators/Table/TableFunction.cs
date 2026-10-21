@@ -180,14 +180,14 @@ public class TableFunction
     {
         if (columnsList == null || columnsList.Count == 0 || newRowData == null)
         {
-            Debug.LogError("Invalid input parameters");
+            // Debug.LogError("Invalid input parameters");
             return;
         }
 
         int rowIndex = FindRowIndex(rowName, columnsList[0].ListData);
         if (rowIndex == -1)
         {
-            Debug.LogError($"Row with name '{rowName}' not found");
+            // Debug.LogError($"Row with name '{rowName}' not found");
             return;
         }
 

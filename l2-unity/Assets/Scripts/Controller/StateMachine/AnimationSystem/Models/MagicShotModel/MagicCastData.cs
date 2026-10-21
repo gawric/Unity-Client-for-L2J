@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public class MagicCastData
 {
@@ -131,10 +131,10 @@ public class MagicCastData
         ShotTriggerGlobalOffset = Mathf.Max(0f, HitTime - DurShot);
         AdjustedShootWindowSeconds = ShotTriggerGlobalOffset;
 
-        Debug.Log(
-            $"[LongCastData] hit={HitTime:F3}s shotTriggerAt={ShotTriggerGlobalOffset:F3}s " +
-            $"clips[mid={DurMid:F3},end={DurEnd:F3},shot={DurShot:F3},shotEvt={durShotToEvent:F3}] " +
-            $"loopEndSec≈{Mathf.Max(0f, ShotTriggerGlobalOffset - DurMid):F3}");
+        // Debug.Log(
+            // $"[LongCastData] hit={HitTime:F3}s shotTriggerAt={ShotTriggerGlobalOffset:F3}s " +
+            // $"clips[mid={DurMid:F3},end={DurEnd:F3},shot={DurShot:F3},shotEvt={durShotToEvent:F3}] " +
+            // $"loopEndSec≈{Mathf.Max(0f, ShotTriggerGlobalOffset - DurMid):F3}");
     }
 
     public void Setup(float serverHitMs, float flyMs, float[] clipsDurations, float shotEventTime, int targetObjectId = 0, int castStyle = 1, bool mixCombo = false)
@@ -151,9 +151,9 @@ public class MagicCastData
         PhaseWallShotSeconds = 0f;
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-        Debug.Log(
-            $"[MagicCastData] serverHitMs={serverHitMs:F1}ms hitTime={HitTime:F3}s " +
-            $"flyMs={flyMs:F1}ms flightTime={FlightTime:F3}s shotEventTime={shotEventTime:F3}s");
+        // Debug.Log(
+            // $"[MagicCastData] serverHitMs={serverHitMs:F1}ms hitTime={HitTime:F3}s " +
+            // $"flyMs={flyMs:F1}ms flightTime={FlightTime:F3}s shotEventTime={shotEventTime:F3}s");
 #endif
 
         serverTimeToShoot = Mathf.Max(0.01f, HitTime - FlightTime);
@@ -296,28 +296,28 @@ public class MagicCastData
         float wallNotify = durShotToEvent / Mathf.Max(SpeedShot, 0.0001f);
 
         string wallPenaltyDisabledLabel = MagicCastWallPenaltyDisabledForTesting ? "YES" : "NO";
-        Debug.Log(
-            $"[CAST_WALL_PENALTY] DISABLED={wallPenaltyDisabledLabel} offsetMs={(MagicCastWallPenaltyDisabledForTesting ? CastShootWindowFixedOffsetSeconds : 0f) * 1000f:F0} " +
-            $"penaltyMs={AnimatorWallPenaltySeconds * 1000f:F2} curveT={penaltyT:F3} tLin={penaltyTLinear:F3} " +
-            $"hitSec={HitTime:F3} winNomSec={serverTimeToShoot:F3} winAdjSec={AdjustedShootWindowSeconds:F3} " +
-            $"timelineSec={timelineDuration:F3} scaleNoPenalty={timingScaleWithoutWallPenalty:F4} scaleApplied={timingScale:F4} " +
-            $"deltaScale={(timingScale - timingScaleWithoutWallPenalty):F4} " +
-            $"speedMid={SpeedMid:F3} speedEnd={SpeedEnd:F3} speedShot={SpeedShot:F3} " +
-            $"clips[mid={durMid:F3},end={durEnd:F3},shot={durShot:F3},shotEvt={durShotToEvent:F3}] " +
-            $"windows[first={firstWindow:F3},second={secondWindow:F3},clipShareFirst={twoClipFirstShare:F3},clipShareSecond={twoClipSecondShare:F3}] " +
-            $"castEndHoldSec={TwoClipCastEndHoldSeconds:F3} animPlayBudget={twoClipAnimPlayBudget:F3} " +
-            $"castEndPhaseTotal={castEndPhaseTotalSec:F3} pctOfHit[hold={holdPctOfHit:F1},castPlay={castEndPlayPctOfHit:F1},shotPlay={magicShotPlayPctOfHit:F1}] " +
-            $"path={(isTwoClipCastPath ? "two_clip_castend_magicshot" : "default_three_phase")} " +
-            $"walls[mid={wallMid:F3},end={wallEnd:F3},notify={wallNotify:F3}]");
+        // Debug.Log(
+            // $"[CAST_WALL_PENALTY] DISABLED={wallPenaltyDisabledLabel} offsetMs={(MagicCastWallPenaltyDisabledForTesting ? CastShootWindowFixedOffsetSeconds : 0f) * 1000f:F0} " +
+            // $"penaltyMs={AnimatorWallPenaltySeconds * 1000f:F2} curveT={penaltyT:F3} tLin={penaltyTLinear:F3} " +
+            // $"hitSec={HitTime:F3} winNomSec={serverTimeToShoot:F3} winAdjSec={AdjustedShootWindowSeconds:F3} " +
+            // $"timelineSec={timelineDuration:F3} scaleNoPenalty={timingScaleWithoutWallPenalty:F4} scaleApplied={timingScale:F4} " +
+            // $"deltaScale={(timingScale - timingScaleWithoutWallPenalty):F4} " +
+            // $"speedMid={SpeedMid:F3} speedEnd={SpeedEnd:F3} speedShot={SpeedShot:F3} " +
+            // $"clips[mid={durMid:F3},end={durEnd:F3},shot={durShot:F3},shotEvt={durShotToEvent:F3}] " +
+            // $"windows[first={firstWindow:F3},second={secondWindow:F3},clipShareFirst={twoClipFirstShare:F3},clipShareSecond={twoClipSecondShare:F3}] " +
+            // $"castEndHoldSec={TwoClipCastEndHoldSeconds:F3} animPlayBudget={twoClipAnimPlayBudget:F3} " +
+            // $"castEndPhaseTotal={castEndPhaseTotalSec:F3} pctOfHit[hold={holdPctOfHit:F1},castPlay={castEndPlayPctOfHit:F1},shotPlay={magicShotPlayPctOfHit:F1}] " +
+            // $"path={(isTwoClipCastPath ? "two_clip_castend_magicshot" : "default_three_phase")} " +
+            // $"walls[mid={wallMid:F3},end={wallEnd:F3},notify={wallNotify:F3}]");
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-        Debug.Log(
-            $"[CastTimingSetup] hit={HitTime:F3}s flight={FlightTime:F3}s " +
-            $"shootTargetNominal={serverTimeToShoot:F3}s wallPenalty={AnimatorWallPenaltySeconds:F3}s " +
-            $"(curveT={penaltyT:F3} tLin={penaltyTLinear:F3}) adjustedShootWin={AdjustedShootWindowSeconds:F3}s " +
-            $"durMid={durMid:F3}s durEnd={durEnd:F3}s durShotToEvent={durShotToEvent:F3}s shotEventResolved={this.shotEventTime:F3}s " +
-            $"timelineDuration={timelineDuration:F3}s timingScale={timingScale:F3} " +
-            $"speedMid={SpeedMid:F3} speedEnd={SpeedEnd:F3} speedShot={SpeedShot:F3}");
+        // Debug.Log(
+            // $"[CastTimingSetup] hit={HitTime:F3}s flight={FlightTime:F3}s " +
+            // $"shootTargetNominal={serverTimeToShoot:F3}s wallPenalty={AnimatorWallPenaltySeconds:F3}s " +
+            // $"(curveT={penaltyT:F3} tLin={penaltyTLinear:F3}) adjustedShootWin={AdjustedShootWindowSeconds:F3}s " +
+            // $"durMid={durMid:F3}s durEnd={durEnd:F3}s durShotToEvent={durShotToEvent:F3}s shotEventResolved={this.shotEventTime:F3}s " +
+            // $"timelineDuration={timelineDuration:F3}s timingScale={timingScale:F3} " +
+            // $"speedMid={SpeedMid:F3} speedEnd={SpeedEnd:F3} speedShot={SpeedShot:F3}");
 #endif
     }
 
@@ -399,11 +399,11 @@ public class MagicCastData
         float eventWall = shotEventClipTime > 0f ? shotEventClipTime / Mathf.Max(shotSpeed, 0.0001f) : 0f;
         AnimationShotAtSeconds = beforeShot + eventWall;
 
-        Debug.Log(
-            $"[SkillTiming] style={castStyle} pad={pad:F2} filler={filler} rescale={(rescale ? 1 : 0)} " +
-            $"hit={HitTime:F3} untilNotify={untilNotify:F4} " +
-            $"play=[{play0:F4},{play1:F4},{play2:F4}] " +
-            $"speed=[{SpeedMid:F3},{SpeedEnd:F3},{SpeedShot:F3}] shotAt={AnimationShotAtSeconds:F3}");
+        // Debug.Log(
+            // $"[SkillTiming] style={castStyle} pad={pad:F2} filler={filler} rescale={(rescale ? 1 : 0)} " +
+            // $"hit={HitTime:F3} untilNotify={untilNotify:F4} " +
+            // $"play=[{play0:F4},{play1:F4},{play2:F4}] " +
+            // $"speed=[{SpeedMid:F3},{SpeedEnd:F3},{SpeedShot:F3}] shotAt={AnimationShotAtSeconds:F3}");
     }
 
     public float GetPhaseEndWallSeconds(int stateIndex)

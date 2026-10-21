@@ -58,16 +58,16 @@ public class GameClient : DefaultClient {
 
     protected override void OnConnectionSuccess() {
         base.OnConnectionSuccess();
-        LobbyFlowLog.Info("GameClient.OnConnectionSuccess — send ProtocolVersion");
+        // LobbyFlowLog.Info("GameClient.OnConnectionSuccess — send ProtocolVersion");
 
         GameManager manager = IncomingPacketActions.Manager;
         if (manager != null)
             manager.IsSwitchingServer = false;
-        else
-            LobbyFlowLog.Error("GameClient.OnConnectionSuccess Manager is null");
+        // else
+            // LobbyFlowLog.Error("GameClient.OnConnectionSuccess Manager is null");
 
         int protocol = manager != null ? manager.ProtocolVersion : 746;
-        LobbyFlowLog.Info("TX ProtocolVersion=" + protocol + " crypt=" + IsCryptEnabled());
+        // LobbyFlowLog.Info("TX ProtocolVersion=" + protocol + " crypt=" + IsCryptEnabled());
         SendPlain(new ProtocolVersionCommand(protocol));
     }
 

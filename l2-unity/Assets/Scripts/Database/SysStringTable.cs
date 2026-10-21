@@ -32,7 +32,7 @@ public class SysStringTable
         string dataPath = Path.Combine(Application.streamingAssetsPath, "Data/Meta/SysString_Classic-eu.txt");
         if (!File.Exists(dataPath))
         {
-            Debug.LogWarning("File not found: " + dataPath);
+            // Debug.LogWarning("File not found: " + dataPath);
             return;
         }
 
@@ -73,7 +73,7 @@ public class SysStringTable
                 }
             }
 
-            Debug.Log($"Successfully imported {_strings.Count} SysString_Classic(s)");
+            // Debug.Log($"Successfully imported {_strings.Count} SysString_Classic(s)");
         }
 
     }

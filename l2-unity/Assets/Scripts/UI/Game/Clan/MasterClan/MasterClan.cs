@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -222,7 +222,7 @@ public class MasterClan
 
         if (string.IsNullOrEmpty(select_text))
         {
-            Debug.LogWarning("Input string is null or empty");
+            // Debug.LogWarning("Input string is null or empty");
             return;
         }
 
@@ -231,14 +231,14 @@ public class MasterClan
 
         if (row_text.Length < 2)
         {
-            Debug.LogWarning($"Invalid input format. Expected at least 2 parts separated by '___', but got {row_text.Length} parts");
+            // Debug.LogWarning($"Invalid input format. Expected at least 2 parts separated by '___', but got {row_text.Length} parts");
             return;
         }
 
 
         if (string.IsNullOrEmpty(row_text[1]))
         {
-            Debug.LogWarning("Second part of the split string is empty");
+            // Debug.LogWarning("Second part of the split string is empty");
             return;
         }
 

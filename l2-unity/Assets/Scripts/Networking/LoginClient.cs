@@ -84,7 +84,7 @@ public class LoginClient : DefaultClient {
         if (Network != null && Network.Protocol != null)
             Network.Protocol.SetLoginBlowfishKey(blowfishKey);
 
-        Debug.Log("Blowfish key set.");
+        // Debug.Log("Blowfish key set.");
     }
 
     public void SetRSAKey(byte[] rsaKey) {
@@ -125,7 +125,7 @@ public class LoginClient : DefaultClient {
     protected override void OnConnectionSuccess() {
         base.OnConnectionSuccess();
 
-        Debug.Log("Connected to LoginServer");
+        // Debug.Log("Connected to LoginServer");
 
         IncomingPacketActions.Manager.OnLoginServerConnected();
     }
@@ -135,7 +135,7 @@ public class LoginClient : DefaultClient {
     }
 
     public override void OnAuthAllowed() {
-        Debug.Log("Authed to LoginServer");
+        // Debug.Log("Authed to LoginServer");
         IncomingPacketActions.Manager.OnLoginServerAuthAllowed();
     }
 
@@ -163,6 +163,6 @@ public class LoginClient : DefaultClient {
             Network.IncomingLogin.Stop();
             Network.SendLogin.Stop();
         }
-        Debug.Log("Disconnected from LoginServer.");
+        // Debug.Log("Disconnected from LoginServer.");
     }
 }

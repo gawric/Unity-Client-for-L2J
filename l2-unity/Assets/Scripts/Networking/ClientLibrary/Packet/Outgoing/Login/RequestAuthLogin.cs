@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Text;
 using UnityEngine;
 
@@ -44,12 +44,12 @@ public sealed class RequestAuthLogin : OutgoingWirePacket<RequestAuthLoginDto>
         byte[] passwordBytes = Encoding.UTF8.GetBytes(password ?? string.Empty);
         if (accountBytes.Length > MaxAccountBytes)
         {
-            Debug.LogWarning("Account name too long: " + accountBytes.Length + " bytes (max " + MaxAccountBytes + ").");
+            // Debug.LogWarning("Account name too long: " + accountBytes.Length + " bytes (max " + MaxAccountBytes + ").");
             return false;
         }
         if (passwordBytes.Length > MaxPasswordBytes)
         {
-            Debug.LogWarning("Password too long: " + passwordBytes.Length + " bytes (max " + MaxPasswordBytes + ").");
+            // Debug.LogWarning("Password too long: " + passwordBytes.Length + " bytes (max " + MaxPasswordBytes + ").");
             return false;
         }
         return true;

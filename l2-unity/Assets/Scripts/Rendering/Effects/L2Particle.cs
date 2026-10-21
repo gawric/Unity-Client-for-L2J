@@ -89,10 +89,10 @@ public class L2Particle : BaseEffect, IRegisteredBillboard
         float lived = Time.time - _playStartedAt;
         if (lived < 0.25f)
         {
-            V2TaSpawnLog.Warn(
-                "AUTH STREAMS COMPLETE TOO FAST effect='" + name +
-                "' lived=" + lived.ToString("0.###") +
-                "s — destroying GO before burst is visible");
+            // V2TaSpawnLog.Warn(
+                // "AUTH STREAMS COMPLETE TOO FAST effect='" + name +
+                // "' lived=" + lived.ToString("0.###") +
+                // "s — destroying GO before burst is visible");
         }
 #endif
         Destroy(gameObject);
@@ -115,14 +115,14 @@ public class L2Particle : BaseEffect, IRegisteredBillboard
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
         if (ShouldTraceLifetime())
         {
-            Debug.Log(
-                $"[TA_LIFETIME_SETUP] effect='{name}' now={Time.time:F3}s " +
-                $"settingsLife={(_settings != null ? _settings.defaultLifeTime : -1f):F3}s " +
-                $"hideTime={(_settings != null ? _settings.hideTime : -1f):F3}s " +
-                $"castStart={(_castData != null ? _castData.StartTime : -1f):F3}s " +
-                $"castHit={(_castData != null ? _castData.HitTime : -1f):F3}s " +
-                $"castFlight={(_castData != null ? _castData.FlightTime : -1f):F3}s " +
-                $"owner='{(_owner != null ? _owner.name : "null")}'.");
+            // Debug.Log(
+                // $"[TA_LIFETIME_SETUP] effect='{name}' now={Time.time:F3}s " +
+                // $"settingsLife={(_settings != null ? _settings.defaultLifeTime : -1f):F3}s " +
+                // $"hideTime={(_settings != null ? _settings.hideTime : -1f):F3}s " +
+                // $"castStart={(_castData != null ? _castData.StartTime : -1f):F3}s " +
+                // $"castHit={(_castData != null ? _castData.HitTime : -1f):F3}s " +
+                // $"castFlight={(_castData != null ? _castData.FlightTime : -1f):F3}s " +
+                // $"owner='{(_owner != null ? _owner.name : "null")}'.");
         }
 #endif
 
@@ -137,9 +137,9 @@ public class L2Particle : BaseEffect, IRegisteredBillboard
     public override void Play()
     {
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-        if (_playStartedAt > 0f && Time.time - _playStartedAt < 8f)
-            EffectDoublePlayLog.Repeat("L2Particle.Play", this, _playStartedAt, _firstPlayStack);
-        _firstPlayStack = EffectDoublePlayLog.CaptureStack();
+        // if (_playStartedAt > 0f && Time.time - _playStartedAt < 8f)
+            // EffectDoublePlayLog.Repeat("L2Particle.Play", this, _playStartedAt, _firstPlayStack);
+        // _firstPlayStack = EffectDoublePlayLog.CaptureStack();
 #endif
         _playStartedAt = Time.time;
         ResetTimer();
@@ -155,18 +155,18 @@ public class L2Particle : BaseEffect, IRegisteredBillboard
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
         if (_skipScheduledDestroyForDebug)
         {
-            Debug.Log($"[L2Particle] SkipScheduledDestroyForDebug: '{name}' — DestoryEffect не вызывается.");
+            // Debug.Log($"[L2Particle] SkipScheduledDestroyForDebug: '{name}' — DestoryEffect не вызывается.");
         }
 
         if (ShouldTraceLifetime())
         {
-            Debug.Log(
-                $"[L2Particle] FX_PLAY effect='{name}' playAt={_playStartedAt:F3}s " +
-                $"scheduledLife={(_settings != null ? _settings.defaultLifeTime : -1f):F3}s " +
-                $"scheduledHide={(_settings != null ? _settings.hideTime : -1f):F3}s " +
-                $"settingsAsset='{(_settings != null ? _settings.name : "null")}' " +
-                $"shaderLife={BuildShaderLifetimeRangesSnapshot()} " +
-                $"skipDestroy={_skipScheduledDestroyForDebug}.");
+            // Debug.Log(
+                // $"[L2Particle] FX_PLAY effect='{name}' playAt={_playStartedAt:F3}s " +
+                // $"scheduledLife={(_settings != null ? _settings.defaultLifeTime : -1f):F3}s " +
+                // $"scheduledHide={(_settings != null ? _settings.hideTime : -1f):F3}s " +
+                // $"settingsAsset='{(_settings != null ? _settings.name : "null")}' " +
+                // $"shaderLife={BuildShaderLifetimeRangesSnapshot()} " +
+                // $"skipDestroy={_skipScheduledDestroyForDebug}.");
         }
 #endif
     }
@@ -174,8 +174,8 @@ public class L2Particle : BaseEffect, IRegisteredBillboard
     public void ResetTimer()
     {
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-        if (_playStartedAt > 0f && Time.time - _playStartedAt > 0.02f && Time.time - _playStartedAt < 8f)
-            EffectDoublePlayLog.Repeat("L2Particle.ResetTimer", this, _playStartedAt, _firstPlayStack);
+        // if (_playStartedAt > 0f && Time.time - _playStartedAt > 0.02f && Time.time - _playStartedAt < 8f)
+            // EffectDoublePlayLog.Repeat("L2Particle.ResetTimer", this, _playStartedAt, _firstPlayStack);
 #endif
         RefreshParticleGroups();
         L2FxAlphaBlendDrawOrder.Apply(this);
@@ -192,7 +192,7 @@ public class L2Particle : BaseEffect, IRegisteredBillboard
 
             if(_settings == null)
             {
-                Debug.Log("L2Particle>ResetTimer _settings is null");
+                // Debug.Log("L2Particle>ResetTimer _settings is null");
                 return ;
             }
             
@@ -261,19 +261,19 @@ public class L2Particle : BaseEffect, IRegisteredBillboard
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
         float now = Time.time;
         float elapsed = _playStartedAt > 0f ? now - _playStartedAt : -1f;
-        DropAdenaDestroyLog.Event(
-            "L2PARTICLE_ON_DESTROY",
-            this,
-            $"wallLived={elapsed:F3}s configuredLife={(_settings != null ? _settings.defaultLifeTime : -1f):F3}s " +
-            $"castHit={(_castData != null ? _castData.HitTime : -1f):F3}s " +
-            $"settings='{(_settings != null ? _settings.name : "null")}'",
-            includeStack: true);
+        // DropAdenaDestroyLog.Event(
+            // "L2PARTICLE_ON_DESTROY",
+            // this,
+            // $"wallLived={elapsed:F3}s configuredLife={(_settings != null ? _settings.defaultLifeTime : -1f):F3}s " +
+            // $"castHit={(_castData != null ? _castData.HitTime : -1f):F3}s " +
+            // $"settings='{(_settings != null ? _settings.name : "null")}'",
+            // includeStack: true);
         if (ShouldTraceLifetime())
         {
-            Debug.Log(
-                $"[L2Particle] FX_DESTROY effect='{name}' now={now:F3}s " +
-                $"wallLived={elapsed:F3}s configuredLife={(_settings != null ? _settings.defaultLifeTime : -1f):F3}s " +
-                $"castHit={(_castData != null ? _castData.HitTime : -1f):F3}s.");
+            // Debug.Log(
+                // $"[L2Particle] FX_DESTROY effect='{name}' now={now:F3}s " +
+                // $"wallLived={elapsed:F3}s configuredLife={(_settings != null ? _settings.defaultLifeTime : -1f):F3}s " +
+                // $"castHit={(_castData != null ? _castData.HitTime : -1f):F3}s.");
         }
 #endif
         base.OnDestroy();

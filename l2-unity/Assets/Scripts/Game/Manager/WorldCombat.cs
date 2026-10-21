@@ -121,28 +121,10 @@ public class WorldCombat : MonoBehaviour {
                 case AttributeType.CUR_HP:
                     if (status != null)
                         status.SetHp(attribute.value);
-                    ReplayAttackTrace.Write(
-                        "STATUS_CUR_HP",
-                        null,
-                        entity,
-                        "hp=" + attribute.value +
-                        " max=" + (stats != null ? stats.MaxHp.ToString() : "?"));
-                    UserEntity hpUser = entity as UserEntity;
-                    if (hpUser != null)
-                        Debug.Log(hpUser.LogTag + " StatusUpdate CUR_HP=" + attribute.value +
-                            " isDead=" + hpUser.IsDead());
                     break;
                 case AttributeType.MAX_HP:
                     if (stats != null)
                         stats.MaxHp = attribute.value;
-                    ReplayAttackTrace.Write(
-                        "STATUS_MAX_HP",
-                        null,
-                        entity,
-                        "max=" + attribute.value);
-                    UserEntity maxHpUser = entity as UserEntity;
-                    if (maxHpUser != null)
-                        Debug.Log(maxHpUser.LogTag + " StatusUpdate MAX_HP=" + attribute.value);
                     break;
                 case AttributeType.CUR_MP:
                     status.SetMp(attribute.value);

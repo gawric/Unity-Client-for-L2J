@@ -5,6 +5,7 @@ public sealed class StopMoveIncoming : IncomingWirePacket<StopMoveDto>
 {
     public override void Apply(StopMoveDto packet)
     {
-        IncomingPacketActions.ApplyWorld(apply => apply.StopMove(packet));
+        MoveCostLog.NoteStopPacket(packet != null ? packet.ObjId : 0);
+        MovementPacketLatest.PutStop(packet);
     }
 }

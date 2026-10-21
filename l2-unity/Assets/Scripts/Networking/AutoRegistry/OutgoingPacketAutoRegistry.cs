@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
@@ -24,15 +24,15 @@ public sealed class OutgoingPacketAutoRegistry : PacketAutoRegistry, IOutgoingPa
         Type commandType = attr.CommandType;
         if (commandType == null)
         {
-            Debug.LogError("OutgoingCommandPacket on " + type.Name + " has no command type.");
+            // Debug.LogError("OutgoingCommandPacket on " + type.Name + " has no command type.");
             return;
         }
 
         Func<INetworkCommand, IOutgoingPacket> factory = BuildFactory(type, commandType);
         if (factory == null)
         {
-            Debug.LogError("OutgoingPacketAutoRegistry: " + type.Name +
-                " needs ctor(" + commandType.Name + ") or a parameterless ctor.");
+            // Debug.LogError("OutgoingPacketAutoRegistry: " + type.Name +
+                // " needs ctor(" + commandType.Name + ") or a parameterless ctor.");
             return;
         }
 
@@ -47,7 +47,7 @@ public sealed class OutgoingPacketAutoRegistry : PacketAutoRegistry, IOutgoingPa
         Func<INetworkCommand, IOutgoingPacket> factory;
         if (!_map.TryGetValue(command.GetType(), out factory))
         {
-            Debug.LogError("OutgoingPacketAutoRegistry: no packet for " + command.GetType().Name);
+            // Debug.LogError("OutgoingPacketAutoRegistry: no packet for " + command.GetType().Name);
             return null;
         }
 

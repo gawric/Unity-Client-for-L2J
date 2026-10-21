@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using VContainer;
 
@@ -73,26 +73,26 @@ public class PositionValidationController : MonoBehaviour
 
                         if (distance > 0.15f && distance < _trigger)
                         {
-                            EntityActionCombatLog.LogCiPawn(entity,
-                                "VL StartWalk nick=" + EntityActionCombatLog.NameOf(entity) +
-                                " d=" + distance.ToString("F2") +
-                                " action=" + entity.ActionSlot.Action +
-                                " pos=" + EntityActionCombatLog.Vec(activePosition) +
-                                " vl=" + EntityActionCombatLog.Vec(newPosition) +
-                                " pawn=" + EntityActionCombatLog.Describe(EntityActionCombatLog.PawnOf(entity)));
+                            // EntityActionCombatLog.LogCiPawn(entity,
+                                // "VL StartWalk nick=" + EntityActionCombatLog.NameOf(entity) +
+                                // " d=" + distance.ToString("F2") +
+                                // " action=" + entity.ActionSlot.Action +
+                                // " pos=" + EntityActionCombatLog.Vec(activePosition) +
+                                // " vl=" + EntityActionCombatLog.Vec(newPosition) +
+                                // " pawn=" + EntityActionCombatLog.Describe(EntityPawnLookup.PawnOf(entity)));
                             StartWalk(entity, newPosition);
                         }
                         else if (distance > _trigger)
                         {
-                            EntityActionCombatLog.LogCiPawn(entity,
-                                "VL JUMP nick=" + EntityActionCombatLog.NameOf(entity) +
-                                " d=" + distance.ToString("F2") +
-                                " action=" + entity.ActionSlot.Action +
-                                " type=" + entity.GetType().Name +
-                                " pos=" + EntityActionCombatLog.Vec(activePosition) +
-                                " vl=" + EntityActionCombatLog.Vec(newPosition) +
-                                " pawn=" + EntityActionCombatLog.Describe(EntityActionCombatLog.PawnOf(entity)) +
-                                " " + EntityActionCombatLog.ClassifyDest(newPosition, EntityActionCombatLog.PawnOf(entity)));
+                            // EntityActionCombatLog.LogCiPawn(entity,
+                                // "VL JUMP nick=" + EntityActionCombatLog.NameOf(entity) +
+                                // " d=" + distance.ToString("F2") +
+                                // " action=" + entity.ActionSlot.Action +
+                                // " type=" + entity.GetType().Name +
+                                // " pos=" + EntityActionCombatLog.Vec(activePosition) +
+                                // " vl=" + EntityActionCombatLog.Vec(newPosition) +
+                                // " pawn=" + EntityActionCombatLog.Describe(EntityPawnLookup.PawnOf(entity)) +
+                                // " " + EntityActionCombatLog.ClassifyDest(newPosition, EntityPawnLookup.PawnOf(entity)));
                             Jump(entity, newPosition);
                         }
 
@@ -114,7 +114,7 @@ public class PositionValidationController : MonoBehaviour
         }
         catch (System.Exception e)
         {
-            Debug.LogError(e);
+            // Debug.LogError(e);
         }
        
     }
@@ -153,9 +153,9 @@ public class PositionValidationController : MonoBehaviour
         }
         else if (entity is UserEntity)
         {
-            EntityActionCombatLog.LogCiPawn(entity,
-                "VL JUMP UserEntity NO_HANDLER nick=" + EntityActionCombatLog.NameOf(entity) +
-                " dest=" + EntityActionCombatLog.Vec(newPosition));
+            // EntityActionCombatLog.LogCiPawn(entity,
+                // "VL JUMP UserEntity NO_HANDLER nick=" + EntityActionCombatLog.NameOf(entity) +
+                // " dest=" + EntityActionCombatLog.Vec(newPosition));
         }
     }
 
@@ -212,9 +212,9 @@ public class PositionValidationController : MonoBehaviour
         }
         else if (entity is UserEntity)
         {
-            EntityActionCombatLog.LogCiPawn(entity,
-                "VL StartWalk UserEntity NO_HANDLER nick=" + EntityActionCombatLog.NameOf(entity) +
-                " dest=" + EntityActionCombatLog.Vec(newPosition));
+            // EntityActionCombatLog.LogCiPawn(entity,
+                // "VL StartWalk UserEntity NO_HANDLER nick=" + EntityActionCombatLog.NameOf(entity) +
+                // " dest=" + EntityActionCombatLog.Vec(newPosition));
         }
 
     }

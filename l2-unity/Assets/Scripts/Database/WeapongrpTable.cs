@@ -40,7 +40,7 @@ public class WeapongrpTable {
 
         string dataPath = Path.Combine(Application.streamingAssetsPath, "Data/Meta/Weapongrp_Classic.txt");
         if (!File.Exists(dataPath)) {
-            Debug.LogWarning("File not found: " + dataPath);
+            // Debug.LogWarning("File not found: " + dataPath);
             return;
         }
 
@@ -139,7 +139,7 @@ public class WeapongrpTable {
                 
             }
 
-            Debug.Log($"Successfully imported {_weaponGrps.Count} weapongrps(s)");
+            // Debug.Log($"Successfully imported {_weaponGrps.Count} weapongrps(s)");
         }
     }
 

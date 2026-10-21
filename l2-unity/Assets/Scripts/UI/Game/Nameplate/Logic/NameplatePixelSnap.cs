@@ -10,7 +10,7 @@ public sealed class NameplatePixelSnap
 
     public float HysteresisPx { get; set; } = 0.75f;
 
-    public NameplatePixelSnap(int capacity = 64)
+    public NameplatePixelSnap(int capacity = 100)
     {
         _snapPixels = new Dictionary<int, Vector2>(capacity);
     }

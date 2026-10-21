@@ -250,7 +250,7 @@ public class DealerWindow : L2PopupWindow
     private void UseSuccessInParentWindow(DealerWindow _dealerWindow, string value, List<Product> listServer)
     {
          _dealerWindow.RefreshOpacity(1);
-        Debug.Log("Move value 1 " + value);
+        // Debug.Log("Move value 1 " + value);
          _dealerWindow.MoveРЎellElseQuantitySelected(_type, listServer, _position, int.Parse(value));
     }
 
@@ -454,7 +454,7 @@ public class DealerWindow : L2PopupWindow
                     SystemMessageWindow.Instance.ShowWindowDialogYesOrNot("The try-on state lasts only 5 seconds. When the character's state changes, it can be canceled.");
                     break;
                 case ProductType.BUY_SEED:
-                    Debug.LogWarning("РќРµ СЂРµР°Р»РёР·РѕРІР°РЅ РїР°РєРµС‚ РѕС‚РїСЂР°РІРєР° BUY_SEED ");
+                    // Debug.LogWarning("РќРµ СЂРµР°Р»РёР·РѕРІР°РЅ РїР°РєРµС‚ РѕС‚РїСЂР°РІРєР° BUY_SEED ");
                     break;
             }
         }
@@ -476,7 +476,7 @@ public class DealerWindow : L2PopupWindow
                     SendServer(new RequestPackageSendCommand(playerObjectId , _listSell));
                     break;
                 case ProductType.BUY_SEED:
-                    Debug.LogWarning("РќРµ СЂРµР°Р»РёР·РѕРІР°РЅ РїР°РєРµС‚ РѕС‚РїСЂР°РІРєР° BUY_SEED ");
+                    // Debug.LogWarning("РќРµ СЂРµР°Р»РёР·РѕРІР°РЅ РїР°РєРµС‚ РѕС‚РїСЂР°РІРєР° BUY_SEED ");
                     break;
             }
         }

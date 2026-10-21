@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using UnityEngine;
 
 public class AutoAttackStopDto : IWireDto {
@@ -10,7 +10,7 @@ public class AutoAttackStopDto : IWireDto {
         try {
             EntityId = reader.ReadI();
         } catch (Exception e) {
-            Debug.LogError(e);
+            // Debug.LogError(e);
         }
     }
 }

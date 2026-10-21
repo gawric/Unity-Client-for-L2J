@@ -14,6 +14,12 @@ public sealed class PooledInstance : MonoBehaviour
     private Renderer[] _renderers;
     private Material[][] _sharedMaterials;
 
+    public void RecaptureSharedMaterials()
+    {
+        _sharedMaterials = null;
+        CaptureSharedMaterials();
+    }
+
     public void CaptureSharedMaterials()
     {
         if (_sharedMaterials != null)

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -69,7 +69,7 @@ public sealed class L2StaticMeshSunMaskRuntime : MonoBehaviour
         _installed = true;
         if (!LoadSunMasks)
         {
-            Debug.Log("[L2StaticMeshSunMask] load paused");
+            // Debug.Log("[L2StaticMeshSunMask] load paused");
             return;
         }
         SceneManager.sceneLoaded += OnSceneLoaded;
@@ -238,18 +238,18 @@ public sealed class L2StaticMeshSunMaskRuntime : MonoBehaviour
 
         InstallCombinedStreams(combinedStreams);
 
-        Debug.Log("[L2StaticMeshSunMask] " + scene.name + ": applied " + applied +
-            " of " + data.actors.Length +
-            " missingName=" + missingMeshName +
-            " positionMismatch=" + positionMismatch +
-            " vertexMismatch=" + vertexMismatch +
-            " zeroMaskSunFallback=0" +
-            " sunMaskDebug=" + (ShowSunMaskDebug ? "1" : "0") +
-            "; bridge=" + bridgeStatus + "." +
-            (mismatchExamples.Count > 0
-                ? Environment.NewLine + "Mismatch examples: " +
-                    string.Join(" | ", mismatchExamples)
-                : ""));
+        // Debug.Log("[L2StaticMeshSunMask] " + scene.name + ": applied " + applied +
+            // " of " + data.actors.Length +
+            // " missingName=" + missingMeshName +
+            // " positionMismatch=" + positionMismatch +
+            // " vertexMismatch=" + vertexMismatch +
+            // " zeroMaskSunFallback=0" +
+            // " sunMaskDebug=" + (ShowSunMaskDebug ? "1" : "0") +
+            // "; bridge=" + bridgeStatus + "." +
+            // (mismatchExamples.Count > 0
+                // ? Environment.NewLine + "Mismatch examples: " +
+                    // string.Join(" | ", mismatchExamples)
+                // : ""));
     }
 
     void Initialize(MeshFilter filter, byte[] visibility)

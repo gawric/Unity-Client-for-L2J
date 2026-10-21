@@ -102,7 +102,7 @@ public class LobbyNameplatesManager : MonoBehaviour
             if (_font != null && !_loggedReady)
             {
                 _loggedReady = true;
-                Debug.Log($"[LobbyNameplates] Font ready atlas={_font.AtlasWidth}x{_font.AtlasHeight} (screen-space batch)");
+                // Debug.Log($"[LobbyNameplates] Font ready atlas={_font.AtlasWidth}x{_font.AtlasHeight} (screen-space batch)");
             }
         }
 

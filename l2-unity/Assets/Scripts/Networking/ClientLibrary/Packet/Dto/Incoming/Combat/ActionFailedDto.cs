@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using UnityEngine;
 
 public class ActionFailedDto : IWireDto
@@ -16,7 +16,7 @@ public class ActionFailedDto : IWireDto
         }
         catch (Exception e)
         {
-            Debug.LogError(e);
+            // Debug.LogError(e);
         }
     }
 }

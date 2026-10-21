@@ -25,7 +25,7 @@ public class NpcAnimationAudioHandler : CharacterAnimationAudioHandler
             }
 
             if (string.IsNullOrEmpty(_npcClassName)) {
-                Debug.LogWarning("AnimationAudioHandler could not load npc class name");
+                // Debug.LogWarning("AnimationAudioHandler could not load npc class name");
                 this.enabled = false;
             }
         }

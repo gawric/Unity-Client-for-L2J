@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using UnityEngine;
 
 /// <summary>
@@ -77,9 +77,9 @@ public static class PlayerLocomotionCrossFade
             !string.IsNullOrEmpty(recentAnimationName) &&
             string.Equals(recentAnimationName, stateName, StringComparison.Ordinal))
         {
-            Debug.Log(
-                $"[ANIM_CROSSFADE] stale_recent_ignored recent={recentAnimationName} " +
-                $"want={stateName} (animator not in that state — will CrossFade)");
+            // Debug.Log(
+                // $"[ANIM_CROSSFADE] stale_recent_ignored recent={recentAnimationName} " +
+                // $"want={stateName} (animator not in that state — will CrossFade)");
         }
 
         return animPlaying;
@@ -97,7 +97,7 @@ public static class PlayerLocomotionCrossFade
 
         if (IsAlreadyPlaying(controller, stateName))
         {
-            Debug.Log($"[ANIM_CROSSFADE] SKIP already playing state={stateName}");
+            // Debug.Log($"[ANIM_CROSSFADE] SKIP already playing state={stateName}");
             return false;
         }
 

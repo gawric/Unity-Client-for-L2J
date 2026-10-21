@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.Experimental.Rendering;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
@@ -311,19 +311,19 @@ public sealed class L2FxCompositorRenderPass : ScriptableRenderPass
         if (celestialMask != 0)
             DrawFxLayer(context, ref renderingData, cmd, colorTarget, cameraDepth, celestialMask);
 
-        L2FxSkyDebug.LogCpuAndEnqueueGpu(
-            cmd,
-            path,
-            WantCelestial(),
-            _settings != null && _settings.includeSkyInBoost,
-            false,
-            "camera skybox (UNORM DrawSkybox was empty)",
-            encodedScene,
-            colorTarget,
-            renderingData.cameraData.camera,
-            gain,
-            start,
-            full);
+        // L2FxSkyDebug.LogCpuAndEnqueueGpu(
+            // cmd,
+            // path,
+            // WantCelestial(),
+            // _settings != null && _settings.includeSkyInBoost,
+            // false,
+            // "camera skybox (UNORM DrawSkybox was empty)",
+            // encodedScene,
+            // colorTarget,
+            // renderingData.cameraData.camera,
+            // gain,
+            // start,
+            // full);
         Shader.SetGlobalFloat(FxGainId, gain);
     }
 

@@ -55,9 +55,9 @@ public class L2TerrainGenerator {
         terrain.terrainData = AssetDatabase.LoadAssetAtPath<TerrainData>(savePath);
 
         if (generationData.generateUVLayers) {
-            Debug.Log(terrainInfo.mapName);
-            Debug.Log(terrainData);
-            Debug.Log(terrainInfo);
+            // Debug.Log(terrainInfo.mapName);
+            // Debug.Log(terrainData);
+            // Debug.Log(terrainInfo);
             GenerateUVLayers(terrainInfo.mapName, terrainData, terrainInfo);
         }
 
@@ -74,7 +74,7 @@ public class L2TerrainGenerator {
         float tz = terrainInfo.generatedSectorCounter * terrainInfo.terrainScale.x;
         terrainData.size = new Vector3(tx, ty, tz) * ueToUnityUnitScale * L2TerrainGeneratorTool.MAP_SCALE;
 
-        Debug.Log("TerrainData Size:" + terrainData.size);
+        // Debug.Log("TerrainData Size:" + terrainData.size);
 
         var uxHalfTerrainWidthAdjustment = (float)tx * 0.5f;
         var uyHalfTerrainWidthAdjustment = (float)ty * 0.5F;

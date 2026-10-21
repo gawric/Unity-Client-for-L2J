@@ -124,7 +124,7 @@ public class InventoryWindow : L2PopupWindow
         Button closeButton = (Button)GetElementByClass(closeButtonClass);
         if (closeButton == null)
         {
-            Debug.LogWarning($"Cant find close button with className: {closeButtonClass}.");
+            // Debug.LogWarning($"Cant find close button with className: {closeButtonClass}.");
             return;
         }
 
@@ -237,13 +237,13 @@ public class InventoryWindow : L2PopupWindow
         VisualElement tabHeaderContainer = _inventoryTabView.Q<VisualElement>("tab-header-container");
         if (tabHeaderContainer == null)
         {
-            Debug.LogError("tab-header-container is null");
+            // Debug.LogError("tab-header-container is null");
         }
         VisualElement tabContainer = _inventoryTabView.Q<VisualElement>("tab-content-container");
 
         if (tabContainer == null)
         {
-            Debug.LogError("tab-content-container");
+            // Debug.LogError("tab-content-container");
         }
 
         for (int i = _tabs.Count - 1; i >= 0; i--)

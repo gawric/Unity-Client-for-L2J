@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public sealed class MonsterWorldApply : EntityWorldApply
 {
@@ -13,11 +13,11 @@ public sealed class MonsterWorldApply : EntityWorldApply
     {
         if (entity == null || entity.IsDead())
             return;
-        EntityActionCombatLog.LogIfWatch(entity,
-            "Monster.MoveTo chase action=" + entity.ActionSlot.Action +
-            " inCombat=" + entity.InCombat);
+        // EntityActionCombatLog.LogIfWatch(entity,
+            // "Monster.MoveTo chase action=" + entity.ActionSlot.Action +
+            // " inCombat=" + entity.InCombat);
         DebugLineDraw.ShowDrawLineDebug(dto.ObjId, destination, current, Color.red);
-        _actions.Set(entity, EntityActionKind.Move, destination);
+        _actions.Set(entity, EntityActionKind.Move, dto);
     }
 
     public override void OnStopMove(Entity entity, StopMoveDto dto)
@@ -29,9 +29,9 @@ public sealed class MonsterWorldApply : EntityWorldApply
     {
         if (entity == null || entity.IsDead())
             return;
-        EntityActionCombatLog.LogIfWatch(entity,
-            "Monster.MoveToPawn chase action=" + entity.ActionSlot.Action +
-            " inCombat=" + entity.InCombat);
+        // EntityActionCombatLog.LogIfWatch(entity,
+            // "Monster.MoveToPawn chase action=" + entity.ActionSlot.Action +
+            // " inCombat=" + entity.InCombat);
         _actions.Set(entity, EntityActionKind.Move, dto);
     }
 
@@ -45,12 +45,12 @@ public sealed class MonsterWorldApply : EntityWorldApply
             player.IsAttack = false;
 
         bool localInCombat = LocalPlayerInCombatWith(player, targetMatch);
-        WaitReturnLog.Dump(
-            "MonsterWorldApply.OnDie targetMatch=" + targetMatch +
-            " localInCombat=" + localInCombat +
-            " skipWaitReturn=" + !localInCombat,
-            entity,
-            dto);
+        // WaitReturnLog.Dump(
+            // "MonsterWorldApply.OnDie targetMatch=" + targetMatch +
+            // " localInCombat=" + localInCombat +
+            // " skipWaitReturn=" + !localInCombat,
+            // entity,
+            // dto);
         if (localInCombat && PlayerStateMachine.Instance != null)
             PlayerStateMachine.Instance.OnWaitReturn();
     }
@@ -73,25 +73,31 @@ public sealed class MonsterWorldApply : EntityWorldApply
 
     public override void OnAttack(Entity attacker, Entity target, AttackDto dto)
     {
-        if (attacker == null || attacker.IsDead())
+        if (attacker == null || attacker.IsDead() || target == null || attacker == target)
             return;
-        if (target == null || target.IsDead())
-        {
-            EntityActionCombatLog.LogIfWatch(attacker, target,
-                "Monster.OnAttack skip dead target attacker=" + EntityActionCombatLog.NameOf(attacker) +
-                " target=" + EntityActionCombatLog.NameOf(target));
-            return;
-        }
 
         _actions.Set(attacker, EntityActionKind.Attack, dto);
     }
 
     public override void OnMagicSkillUse(Entity entity, MagicSkillUseDto dto)
     {
+        bool windstrike = dto != null && dto.SkillId == 4247;
+        if (windstrike)
+        {
+            Debug.Log(
+                "[WINDSTRIKE] Monster.OnMagicSkillUse dead=" + (entity != null && entity.IsDead()) +
+                " actions=" + (_actions != null));
+        }
         if (entity == null || entity.IsDead())
             return;
         if (EntityActionSkill.TryApplyWeaponCharge(entity, dto))
+        {
+            if (windstrike)
+                Debug.Log("[WINDSTRIKE] Monster.OnMagicSkillUse stopped at weapon-charge");
             return;
+        }
+        if (windstrike)
+            Debug.Log("[WINDSTRIKE] Monster.OnMagicSkillUse Set Skill");
         _actions.Set(entity, EntityActionKind.Skill, dto);
     }
 

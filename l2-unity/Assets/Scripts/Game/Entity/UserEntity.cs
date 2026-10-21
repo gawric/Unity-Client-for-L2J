@@ -33,10 +33,10 @@ public class UserEntity : NetworkEntity
 
     public void RefreshVisuals()
     {
-        GearFlowLog.Info("UserEntity.RefreshVisuals nick=" + Nick +
-            " id=" + (Identity != null ? Identity.Id : 0) +
-            " " + GearFlowLog.Paperdoll(this) +
-            " gear=" + (_gear != null ? _gear.GetType().Name : "null"));
+        // GearFlowLog.Info("UserEntity.RefreshVisuals nick=" + Nick +
+            // " id=" + (Identity != null ? Identity.Id : 0) +
+            // " " + GearFlowLog.Paperdoll(this) +
+            // " gear=" + (_gear != null ? _gear.GetType().Name : "null"));
         EquipAllWeapons();
         EquipAllArmors();
     }
@@ -62,10 +62,10 @@ public class UserEntity : NetworkEntity
         if (Stats != null)
             Stats.UnitySpeedRun = converted;
         float anim = ApplyAnimRunSpeed(speed);
-        Debug.Log(LogTag + " UpdateRunSpeed id=" +
-            (Identity != null ? Identity.Id : 0) +
-            " l2=" + speed + " unity=" + converted +
-            " anim=" + anim);
+        // Debug.Log(LogTag + " UpdateRunSpeed id=" +
+            // (Identity != null ? Identity.Id : 0) +
+            // " l2=" + speed + " unity=" + converted +
+            // " anim=" + anim);
         return converted;
     }
 
@@ -121,8 +121,8 @@ public class UserEntity : NetworkEntity
             " moveSpeed=" + move;
         if (move <= 0.001f)
             Debug.LogWarning(msg);
-        else
-            Debug.Log(msg);
+        // else
+            // Debug.Log(msg);
     }
 
     public string WeaponAnim
@@ -163,7 +163,9 @@ public class UserEntity : NetworkEntity
 
     public void BeginAttackVisual(float durationSec)
     {
-        _attackVisualUntil = Time.time + Mathf.Max(0.1f, durationSec);
+        float d = Mathf.Max(0.1f, durationSec);
+        _attackVisualUntil = Time.time + d;
+        MagicGaitTrace.Event(this, "BeginAttackVisual", "dur=" + d.ToString("F3"));
     }
 
     public float AttackVisualLeftSec()
@@ -185,6 +187,8 @@ public class UserEntity : NetworkEntity
 
     public void ClearAttackVisual()
     {
+        if (_attackVisualUntil > 0f)
+            MagicGaitTrace.Event(this, "ClearAttackVisual", null);
         _attackVisualUntil = 0f;
     }
 
@@ -200,13 +204,13 @@ public class UserEntity : NetworkEntity
         UserGear gear = _gear as UserGear;
         if (appearance == null || gear == null)
         {
-            GearFlowLog.Warn("UserEntity.EquipAllArmors abort " + GearFlowLog.Entity(this) +
-                " appearance=" + (appearance != null) + " gear=" + (_gear != null ? _gear.GetType().Name : "null"));
+            // GearFlowLog.Warn("UserEntity.EquipAllArmors abort " + GearFlowLog.Entity(this) +
+                // " appearance=" + (appearance != null) + " gear=" + (_gear != null ? _gear.GetType().Name : "null"));
             return;
         }
 
-        GearFlowLog.Info("UserEntity.EquipAllArmors " + GearFlowLog.Entity(this) +
-            " " + GearFlowLog.Paperdoll(appearance));
+        // GearFlowLog.Info("UserEntity.EquipAllArmors " + GearFlowLog.Entity(this) +
+            // " " + GearFlowLog.Paperdoll(appearance));
         gear.SyncEquippedArmor(appearance);
     }
 

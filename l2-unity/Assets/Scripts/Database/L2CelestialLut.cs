@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using UnityEngine;
@@ -50,7 +50,7 @@ public static class L2CelestialLut
         string dataPath = Path.Combine(Application.streamingAssetsPath, "Data/Meta", MetaFileName);
         if (!File.Exists(dataPath))
         {
-            Debug.LogWarning("[L2CelestialLut] File not found: " + dataPath);
+            // Debug.LogWarning("[L2CelestialLut] File not found: " + dataPath);
             return;
         }
 

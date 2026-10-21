@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public sealed class EntityActionIdle : IEntityActionProcess
 {
@@ -12,14 +12,14 @@ public sealed class EntityActionIdle : IEntityActionProcess
         if (!string.IsNullOrEmpty(restore) &&
             (entity is MonsterEntity || entity is NpcEntity))
         {
+            CrasherSlideLog.Event(entity, "Idle.Restore", "state=" + restore);
             EntityActionVisual.RestoreLocomotion(entity, restore);
             return;
         }
-        EntityActionCombatLog.LogCiPawn(entity,
-            "Idle.Enter PlayStandWait nick=" + EntityActionCombatLog.NameOf(entity) +
-            " inCombat=" + entity.InCombat +
-            " " + EntityActionCombatLog.AnimDump(entity) +
-            " " + EntityActionCombatLog.VisualDump(entity));
+        MagicGaitTrace.Event(entity, "Idle.Enter→PlayStandWait",
+            "inCombat=" + entity.InCombat + " payload=" + (restore ?? "-"));
+        CrasherSlideLog.Event(entity, "Idle.Enter",
+            "inCombat=" + entity.InCombat + " → " + (entity.InCombat ? "atkwait" : "wait"));
         EntityActionVisual.PlayStandWait(entity);
     }
 

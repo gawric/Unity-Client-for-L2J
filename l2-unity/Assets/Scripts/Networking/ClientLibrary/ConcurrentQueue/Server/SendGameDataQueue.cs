@@ -54,7 +54,7 @@ public class SendGameDataQueue : IDisposable
         }
         catch (Exception ex)
         {
-            Debug.LogError("SendGameDataQueue->AddItem " + ex);
+            // Debug.LogError("SendGameDataQueue->AddItem " + ex);
         }
     }
 
@@ -163,16 +163,16 @@ public class SendGameDataQueue : IDisposable
                     IOutgoingPacket packet = _protocol.EncodeGame(item.Command, item.Encrypt);
                     if (packet == null)
                     {
-                        LobbyFlowLog.Warn("TX EncodeGame returned null command=" + item.Command.GetType().Name);
+                        // LobbyFlowLog.Warn("TX EncodeGame returned null command=" + item.Command.GetType().Name);
                         continue;
                     }
 
-                    LobbyFlowLog.Info("TX " + item.Command.GetType().Name + " encrypt=" + item.Encrypt + " opcode=0x" + packet.GetPacketType().ToString("X2"));
+                    // LobbyFlowLog.Info("TX " + item.Command.GetType().Name + " encrypt=" + item.Encrypt + " opcode=0x" + packet.GetPacketType().ToString("X2"));
                     ((GameClientPacketHandler)handler).SendPacket(packet);
                 }
                 catch (Exception ex)
                 {
-                    Debug.LogError("SendGameDataQueue->Send " + ex);
+                    // Debug.LogError("SendGameDataQueue->Send " + ex);
                 }
             }
         }

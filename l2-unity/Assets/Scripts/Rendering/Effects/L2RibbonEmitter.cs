@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
@@ -441,7 +441,7 @@ public sealed class L2RibbonEmitter : EffectPart
             return;
         }
 
-        Debug.Log($"[L2RibbonEmitter] {name} {message}", this);
+        // Debug.Log($"[L2RibbonEmitter] {name} {message}", this);
     }
 
     private void EnsureMesh()

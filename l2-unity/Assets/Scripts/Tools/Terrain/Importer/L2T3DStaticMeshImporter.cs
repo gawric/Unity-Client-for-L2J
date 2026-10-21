@@ -22,7 +22,7 @@ public class L2T3DStaticMeshImporter : AssetImporter {
         string fileToProcess = EditorUtility.OpenFilePanel(title, directory, extension);
 
         if(!string.IsNullOrEmpty(fileToProcess)) {
-            Debug.Log("Selected file: " + fileToProcess);
+            // Debug.Log("Selected file: " + fileToProcess);
             L2TerrainInfo terrainInfo = L2T3DInfoParser.LoadStaticMeshInfo(fileToProcess);
             List<string> files = ProcessStaticMeshInfo(dataFolder, terrainInfo.staticMeshes);
             //List<string> files = ProcessDataFile(dataFolder, fileToProcess);
@@ -47,14 +47,14 @@ public class L2T3DStaticMeshImporter : AssetImporter {
 
             if (!File.Exists(staticMeshPath)) {
                 missingMeshCount++;
-                Debug.LogWarning("Mesh missing:" + staticMeshPath);
+                // Debug.LogWarning("Mesh missing:" + staticMeshPath);
             } else {
                 staticMeshCount++;
                 files.Add(staticMeshPath);
                 string textureInfoPath = Path.Combine(dataFolder, folder, "StaticMesh", file + ".props.txt");
                 if (!File.Exists(textureInfoPath)) {
                     missingTextureInfoCount++;
-                    Debug.LogWarning("Texture info missing:" + textureInfoPath);
+                    // Debug.LogWarning("Texture info missing:" + textureInfoPath);
                 } else {
                     List<string> textures = ParseTextureInfo(dataFolder, textureInfoPath);
                     textureInfoCount+= textures.Count;
@@ -69,12 +69,12 @@ public class L2T3DStaticMeshImporter : AssetImporter {
 
         //files.ForEach((f) => Debug.Log(f)); 
 
-        Debug.Log($"{staticMeshCount} staticmesh(es) FBX will be imported.");
-        Debug.Log($"{missingMeshCount} missing staticmesh(es) FBX.");
-        Debug.Log($"{textureInfoCount} texture(s) will be imported.");
-        Debug.Log($"{missingTextureInfoCount} missing staticmesh(es) textureinfo.");
+        // Debug.Log($"{staticMeshCount} staticmesh(es) FBX will be imported.");
+        // Debug.Log($"{missingMeshCount} missing staticmesh(es) FBX.");
+        // Debug.Log($"{textureInfoCount} texture(s) will be imported.");
+        // Debug.Log($"{missingTextureInfoCount} missing staticmesh(es) textureinfo.");
 
-        Debug.LogWarning($"{files.Count} distinct files(s) will be imported.");
+        // Debug.LogWarning($"{files.Count} distinct files(s) will be imported.");
 
         return files;
     }
@@ -140,7 +140,7 @@ public class L2T3DStaticMeshImporter : AssetImporter {
                     texturePath = FixPath(baseFolder, name + ".png", false);
                     if(!File.Exists(texturePath)) {
                         missingTexturesCount++;
-                        Debug.LogWarning("Could find not texture at " + texturePath);
+                        // Debug.LogWarning("Could find not texture at " + texturePath);
                         continue;
                     }
                 }
@@ -182,7 +182,7 @@ public class L2T3DStaticMeshImporter : AssetImporter {
                             if (File.Exists(texturePath)) {
                                 filesToExport.Add(texturePath);
                             } else {
-                                Debug.LogError("Could not find texture at " + texturePath + " props file: " + materialInfoProps);
+                                // Debug.LogError("Could not find texture at " + texturePath + " props file: " + materialInfoProps);
                             }
                         }
                     }
@@ -190,7 +190,7 @@ public class L2T3DStaticMeshImporter : AssetImporter {
             }
         }
 
-        Debug.Log($"Found {filesToExport.Count} texture(s) for props file {path}.");
+        // Debug.Log($"Found {filesToExport.Count} texture(s) for props file {path}.");
 
         return filesToExport;
     }
@@ -244,7 +244,7 @@ public class L2T3DStaticMeshImporter : AssetImporter {
             //Debug.LogWarning("Searched and found " + searchedFile);
 
             if (searchedFile == null && shader) {
-                Debug.LogWarning("Could not find material props at path " + pathToTest);
+                // Debug.LogWarning("Could not find material props at path " + pathToTest);
             }
 
             pathToTest = searchedFile;

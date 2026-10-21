@@ -25,7 +25,7 @@ public class CreateIntentionPlayer
             case Intention.INTENTION_PHYSICAL_SKILLS_ATTACK:
                 return new NewPhysicalSkillsIntention(_stateMachine);
             default:
-                Debug.LogError("CreateIntentionPlayer> Invalid Intention Request " + currentState);
+                // Debug.LogError("CreateIntentionPlayer> Invalid Intention Request " + currentState);
                 throw new ArgumentException("Invalid Intention");
         }
     }

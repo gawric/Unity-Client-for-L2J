@@ -44,7 +44,7 @@ public class ActionNameTable
         string dataPath = Path.Combine(Application.streamingAssetsPath, "Data/Meta/ActionName_Classic-eu.txt");
         if (!File.Exists(dataPath))
         {
-            Debug.LogWarning("File not found: " + dataPath);
+            // Debug.LogWarning("File not found: " + dataPath);
             return;
         }
 
@@ -92,7 +92,7 @@ public class ActionNameTable
                 }
             }
 
-            Debug.Log($"Successfully imported {_actions.Count} actionName(s)");
+            // Debug.Log($"Successfully imported {_actions.Count} actionName(s)");
         }
     }
 

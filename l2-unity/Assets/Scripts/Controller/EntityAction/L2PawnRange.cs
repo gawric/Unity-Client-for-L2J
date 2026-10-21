@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using UnityEngine;
 
 /// <summary>
@@ -60,7 +60,7 @@ public sealed class L2PawnRange
     {
         if (entity == null)
             return false;
-        Entity pawn = EntityActionCombatLog.PawnOf(entity);
+        Entity pawn = EntityPawnLookup.PawnOf(entity);
         float dist = entity.ActionSlot.PawnDist;
         if (pawn == null || dist <= 0.01f)
             return false;
@@ -87,25 +87,28 @@ public sealed class L2PawnRange
         mover.ActionSlot.CollisionPawn = null;
     }
 
+    /// <summary>
+    /// UGameEngine::AdjustPawnLocation. 3D skip is 200 UU; this uses the same 2D gate.
+    /// The viewport pawn is not FarMoved. Every other pawn is.
+    /// </summary>
     public static bool TrySnapUserToPacket(Entity entity, Vector3 packetPos, string reason)
     {
-        UserEntity user = entity as UserEntity;
-        if (user == null)
+        if (entity == null || entity is PlayerEntity)
             return false;
 
-        float d = VectorUtils.Distance2D(user.transform.position, packetPos);
+        float d = VectorUtils.Distance2D(entity.transform.position, packetPos);
         if (d <= VectorUtils.ConvertL2UuToMeters(AdjustSkipUu))
             return false;
 
-        Vector3 from = user.transform.position;
+        Vector3 from = entity.transform.position;
         Vector3 grounded = GroundSnapHelper.SnapToGroundOrKeep(packetPos);
-        if (user.Identity != null)
-            user.Identity.Position = grounded;
-        EntitySpawnShared.ApplyGroundedTransform(user.gameObject, grounded, user.transform.rotation);
-        EntityActionCombatLog.LogGap(user, "SNAP " + reason, EntityActionCombatLog.PawnOf(user),
-            " snapD=" + d.ToString("F2") +
-            " from=" + EntityActionCombatLog.Vec(from) +
-            " to=" + EntityActionCombatLog.Vec(grounded));
+        if (entity.Identity != null)
+            entity.Identity.Position = grounded;
+        EntitySpawnShared.ApplyGroundedTransform(entity.gameObject, grounded, entity.transform.rotation);
+        // EntityActionCombatLog.LogGap(entity, "SNAP " + reason, EntityPawnLookup.PawnOf(entity),
+            // " snapD=" + d.ToString("F2") +
+            // " from=" + EntityActionCombatLog.Vec(from) +
+            // " to=" + EntityActionCombatLog.Vec(grounded));
         return true;
     }
 

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -198,7 +198,7 @@ public class PlayerInventory : MonoBehaviour
             }
             catch (Exception ex)
             {
-                Debug.LogError("PlayerInventory Errors: " + ex.StackTrace);
+                // Debug.LogError("PlayerInventory Errors: " + ex.StackTrace);
             }
         }
         
@@ -451,7 +451,7 @@ public class PlayerInventory : MonoBehaviour
         //}
 
         //InventoryWindow.Instance.SelectSlot(toSlot);
-        Debug.Log("пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ");
+        // Debug.Log("пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ");
         //GameClient.Instance.ClientPacketHandler.UpdateInventoryOrder(orders);
     }
 
@@ -522,7 +522,7 @@ public class PlayerInventory : MonoBehaviour
     {
         if (!_playerInventory.TryGetValue(objectId, out item))
         {
-            Debug.Log("Item not found");
+            // Debug.Log("Item not found");
             return false;
         }
         return true;
@@ -569,7 +569,7 @@ public class PlayerInventory : MonoBehaviour
         }
         else
         {
-            Debug.Log("Destroy item not found delete " + objectId);
+            // Debug.Log("Destroy item not found delete " + objectId);
         }
     }
 
@@ -581,7 +581,7 @@ public class PlayerInventory : MonoBehaviour
     {
         if (!_playerInventory.ContainsKey(objectId))
         {
-            Debug.Log("Drop item not found " + objectId);
+            // Debug.Log("Drop item not found " + objectId);
             return;
         }
 
@@ -593,7 +593,7 @@ public class PlayerInventory : MonoBehaviour
         Vector3 dropPos = dropWorldPos ?? player.position + player.forward * 0.6f;
 
         Vector3 l2 = VectorUtils.ConvertPosUnityToL2j(dropPos);
-        Debug.Log($"DropItem obj={objectId} qty={quantity} world={dropPos} l2=({(int)l2.x},{(int)l2.y},{(int)l2.z})");
+        // Debug.Log($"DropItem obj={objectId} qty={quantity} world={dropPos} l2=({(int)l2.x},{(int)l2.y},{(int)l2.z})");
         game.Send(new RequestDropItemCommand(
             objectId,
             quantity,

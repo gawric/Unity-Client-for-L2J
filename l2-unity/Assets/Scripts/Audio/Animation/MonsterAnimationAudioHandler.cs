@@ -19,7 +19,7 @@ public class MonsterAnimationAudioHandler : BaseAnimationAudioHandler
         }
 
         if (string.IsNullOrEmpty(_monsterName)) {
-            Debug.LogWarning("AnimationAudioHandler could not load monster name name");
+            // Debug.LogWarning("AnimationAudioHandler could not load monster name name");
             this.enabled = false;
         }
     }

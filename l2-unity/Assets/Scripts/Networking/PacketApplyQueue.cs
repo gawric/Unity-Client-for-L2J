@@ -20,6 +20,15 @@ public sealed class PacketApplyQueue
             return;
         }
 
+        QueueNextFrame(action);
+    }
+
+    /// <summary>
+    /// Always enqueue for the next EventProcessor batch. Does not run inline
+    /// during QueueApply (needed to defer CharInfo spawn without looping).
+    /// </summary>
+    public void QueueNextFrame(Action action)
+    {
         EventProcessor processor = _events != null ? _events : EventProcessor.Instance;
         if (processor != null)
             processor.QueueEvent(action);

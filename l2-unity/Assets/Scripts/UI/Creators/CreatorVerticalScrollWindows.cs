@@ -27,7 +27,7 @@ public class CreatorVerticalScrollWindows : ICreatorVerticalScroll
 
         if(_scrollView == null & templateItems == null)
         {
-            Debug.LogError("CreatorHorizontalWindows> Not found ScrollView in content element");
+            // Debug.LogError("CreatorHorizontalWindows> Not found ScrollView in content element");
         }
 
         _content = _scrollView.contentContainer;
@@ -70,7 +70,7 @@ public class CreatorVerticalScrollWindows : ICreatorVerticalScroll
                         _dataProvider.AddRewardItem(questData.NameReward, questData.DecReward, questData.Icon, slotElement);
                         break;
                     default:
-                        Debug.LogWarning($"Unknown model type: {model?.GetType().Name}");
+                        // Debug.LogWarning($"Unknown model type: {model?.GetType().Name}");
                         break;
                 }
 

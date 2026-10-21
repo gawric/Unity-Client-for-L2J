@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -106,11 +106,11 @@ public sealed class IncomingPacketAutoRegistry : PacketAutoRegistry, IIncomingPa
         IIncomingPacketBinding binding;
         if (!_byModel.TryGetValue(model.GetType(), out binding))
         {
-            Debug.LogWarning("No incoming handler for " + model.GetType().Name);
+            // Debug.LogWarning("No incoming handler for " + model.GetType().Name);
             return;
         }
 
         binding.ApplyModel(model);
-        LobbyFlowLog.Info("Handle Apply done " + model.GetType().Name);
+        // LobbyFlowLog.Info("Handle Apply done " + model.GetType().Name);
     }
 }

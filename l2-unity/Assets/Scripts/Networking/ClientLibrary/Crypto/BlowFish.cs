@@ -276,17 +276,17 @@ namespace L2_login
         {
             if (workingKey == null)
             {
-                Debug.LogError("Blowfish not initialised");
+                // Debug.LogError("Blowfish not initialised");
                 //throw new IllegalStateException("Blowfish not initialised");
             }
             if ((inOff + BLOCK_SIZE) > in_b.Length)
             {
-                Debug.LogError("input buffer too short");
+                // Debug.LogError("input buffer too short");
                 //throw new IOException("input buffer too short");
             }
             if ((outOff + BLOCK_SIZE) > out_b.Length)
             {
-                Debug.LogError("output buffer too short");
+                // Debug.LogError("output buffer too short");
                 //throw new IOException("output buffer too short");
             }
             if (encrypting)

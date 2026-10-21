@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public sealed class NpcSpawner
 {
@@ -29,10 +29,10 @@ public sealed class NpcSpawner
         NpcEntity npc = EntitySpawnShared.FindOnPrefab<NpcEntity>(npcGo);
         if (npc == null)
         {
-            Debug.LogError(
-                "NpcSpawner: NpcEntity missing on " + npcGo.name +
-                " prefab=" + (request.Prefab != null ? request.Prefab.name : "null") +
-                " npcId=" + identity.NpcId);
+            // Debug.LogError(
+                // "NpcSpawner: NpcEntity missing on " + npcGo.name +
+                // " prefab=" + (request.Prefab != null ? request.Prefab.name : "null") +
+                // " npcId=" + identity.NpcId);
             UnityEngine.Object.Destroy(npcGo);
             return null;
         }
@@ -62,7 +62,7 @@ public sealed class NpcSpawner
             EntitySpawnShared.FindOnPrefab<NetworkAnimationController>(npcGo);
         if (animationController == null)
         {
-            Debug.LogError("NpcSpawner: NetworkAnimationController missing on " + npcGo.name);
+            // Debug.LogError("NpcSpawner: NetworkAnimationController missing on " + npcGo.name);
             return;
         }
         EntitySpawnShared.InitializeNpcAnimation(animationController);

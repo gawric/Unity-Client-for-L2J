@@ -55,11 +55,11 @@ public abstract class AbstractCache : AbstractGetCache
         GameObject armorPiece = (GameObject)Resources.Load(modelPath);
         if (armorPiece == null)
         {
-            Debug.LogWarning($"Can't find armor model at {modelPath}");
+            // Debug.LogWarning($"Can't find armor model at {modelPath}");
         }
         else
         {
-            Debug.Log($"Successfully loaded armor model at {modelPath}");
+            // Debug.Log($"Successfully loaded armor model at {modelPath}");
         }
 
         return armorPiece;
@@ -117,9 +117,9 @@ public abstract class AbstractCache : AbstractGetCache
     protected GameObject LoadWeaponModel(string model)
     {
         GameObject weapon = LoadUkxPrefab(model);
-        Debug.Log(weapon != null
-            ? $"Successfully loaded weapon {model} model."
-            : $"Can't find weapon model {model}");
+        // Debug.Log(weapon != null
+            // ? $"Successfully loaded weapon {model} model."
+            // : $"Can't find weapon model {model}");
         return weapon;
     }
 

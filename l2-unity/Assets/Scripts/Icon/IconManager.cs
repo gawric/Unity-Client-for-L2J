@@ -54,7 +54,7 @@ public class IconManager
         {
             if(armor.Id == 1146)
             {
-                Debug.Log("");
+                // Debug.Log("");
             }
             Texture2D icon = LoadTextureByName(armor.Icon);
             _icons.Add(armor.Id, icon);
@@ -170,7 +170,7 @@ public class IconManager
             return result;
         }
 
-        Debug.LogWarning($"Missing icon: {name}.");
+        // Debug.LogWarning($"Missing icon: {name}.");
 
         return _noImageIcon;
     }
@@ -185,7 +185,7 @@ public class IconManager
             return result;
         }
 
-        Debug.LogWarning($"Missing texture: {href}.");
+        // Debug.LogWarning($"Missing texture: {href}.");
 
         return _noImageIcon;
     }

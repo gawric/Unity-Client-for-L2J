@@ -28,7 +28,7 @@ public class L2JSONAmbientSoundImporter : AssetImporter {
         string fileToProcess = EditorUtility.OpenFilePanel(title, directory, extension);
 
         if(!string.IsNullOrEmpty(fileToProcess)) {
-            Debug.Log("Selected file: " + fileToProcess);
+            // Debug.Log("Selected file: " + fileToProcess);
             AmbientSound[] sounds = L2TerrainInfoParser.ParseAmbientSoundFile(fileToProcess);
             ImportAmbientSoundFiles(sounds, dataFolder);
         }
@@ -44,7 +44,7 @@ public class L2JSONAmbientSoundImporter : AssetImporter {
         string fileToProcess = EditorUtility.OpenFilePanel(title, directory, extension);
 
         if (!string.IsNullOrEmpty(fileToProcess)) {
-            Debug.Log("Selected file: " + fileToProcess);
+            // Debug.Log("Selected file: " + fileToProcess);
 
             List<AmbientSound> sounds = L2T3DInfoParser.ParseAmbientSounds(fileToProcess);
             ImportAmbientSoundFiles(sounds.ToArray(), dataFolder);
@@ -54,20 +54,20 @@ public class L2JSONAmbientSoundImporter : AssetImporter {
     private static void ImportAmbientSoundFiles(AmbientSound[] sounds, string dataFolder) {
         List<string> soundNames = new List<string>();
         foreach(AmbientSound sound in sounds) {
-            Debug.Log(sound);
-            Debug.Log(sound.ambientSoundName);
+            // Debug.Log(sound);
+            // Debug.Log(sound.ambientSoundName);
             string[] parts = sound.ambientSoundName.Split(".");
             soundNames.Add(parts[0].Trim() + "." + parts[2].Trim());
         }
 
         soundNames = soundNames.Distinct().ToList();
         foreach(string soundname in soundNames) {
-            Debug.Log(soundname);
+            // Debug.Log(soundname);
             string[] parts = soundname.Split(".");
             string fileToCopy = Path.Combine(dataFolder, parts[0], "Sound", parts[1] + ".wav");
-            Debug.Log(fileToCopy);
+            // Debug.Log(fileToCopy);
             if(!File.Exists(fileToCopy)) {
-                Debug.LogError($"File missing at {fileToCopy}");
+                // Debug.LogError($"File missing at {fileToCopy}");
             } else {
                 string outputFolder = Path.Combine(scriptExportFolder, parts[0]);
                 string outputFile = Path.Combine(outputFolder, parts[1] + ".wav");
@@ -77,9 +77,9 @@ public class L2JSONAmbientSoundImporter : AssetImporter {
                 File.Copy(fileToCopy, outputFile, true);
             }
         }
-        Debug.LogWarning($"Need to {soundNames.Count} load ambient sounds.");
+        // Debug.LogWarning($"Need to {soundNames.Count} load ambient sounds.");
 
-        Debug.LogWarning($"Ambient {soundNames.Count} sound files individually copied into folder {scriptExportFolder}");
+        // Debug.LogWarning($"Ambient {soundNames.Count} sound files individually copied into folder {scriptExportFolder}");
     }
 
 }

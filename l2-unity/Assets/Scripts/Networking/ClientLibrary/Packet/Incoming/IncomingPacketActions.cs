@@ -360,6 +360,17 @@ public static class IncomingPacketActions
         Queue(() => ApplyWorld(apply));
     }
 
+    public static void QueueWorldNextFrame(Action<WorldPacketApply> apply)
+    {
+        if (apply == null)
+            return;
+        Action action = () => ApplyWorld(apply);
+        if (_applyQueue != null)
+            _applyQueue.QueueNextFrame(action);
+        else
+            Queue(action);
+    }
+
     public static void ApplyMessage(Action<MessagePacketApply> apply)
     {
         if (MessageApply != null && apply != null)

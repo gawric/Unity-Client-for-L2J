@@ -37,7 +37,7 @@ public class TooltipManipulator : PointerManipulator
         }
         else
         {
-            Debug.Log("TooltipManipulator: PointerInHandler не критическая ошибка!");
+            // Debug.Log("TooltipManipulator: PointerInHandler не критическая ошибка!");
         }
 
     }
@@ -57,7 +57,7 @@ public class TooltipManipulator : PointerManipulator
         }
         else
         {
-            Debug.Log("TooltipManipulator: PointerOutHandler не критическая ошибка!");
+            // Debug.Log("TooltipManipulator: PointerOutHandler не критическая ошибка!");
         }
      
     }
@@ -77,7 +77,7 @@ public class TooltipManipulator : PointerManipulator
             }
             else
             {
-                Debug.Log("TooltipManipulator: Clear не критическая ошибка!");
+                // Debug.Log("TooltipManipulator: Clear не критическая ошибка!");
             }
             
         }

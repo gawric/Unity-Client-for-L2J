@@ -54,7 +54,7 @@ public class SendLoginDataQueue : IDisposable
         }
         catch (Exception ex)
         {
-            Debug.LogError("SendLoginDataQueue->AddItem " + ex);
+            // Debug.LogError("SendLoginDataQueue->AddItem " + ex);
         }
     }
 
@@ -168,7 +168,7 @@ public class SendLoginDataQueue : IDisposable
                 }
                 catch (Exception ex)
                 {
-                    Debug.LogError("SendLoginDataQueue->Send " + ex);
+                    // Debug.LogError("SendLoginDataQueue->Send " + ex);
                 }
             }
         }
