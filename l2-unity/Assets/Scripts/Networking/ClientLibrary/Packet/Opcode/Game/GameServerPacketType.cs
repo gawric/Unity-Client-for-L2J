@@ -72,6 +72,8 @@
     AcquireSkillInfo = 0x8B,
     TutorialShowHtml = 0xA0,
     MyTargetSelected = 0xA6,
+    PetInfo = 0xB1,
+    PetDelete = 0xB6,
     SkillCoolTime = 0xC1,
     PackageToList = 0xC2,
     PackageSendableList = 0xC3,

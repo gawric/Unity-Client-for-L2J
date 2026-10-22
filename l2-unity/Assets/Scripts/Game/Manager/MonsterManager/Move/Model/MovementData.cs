@@ -567,7 +567,6 @@ public class MovementData
 
         direction = ApplyGravity(direction);
         CharacterMove(_entity, direction, speed);
-        CrasherSlideLog.Sync(_entity);
         CheckLocomotionAnimation();
         LookAlong(GetTransform(), lookDir);
     }
@@ -697,8 +696,6 @@ public class MovementData
 
     public void OnFinish(Vector3 target)
     {
-        CrasherSlideLog.Event(_entity, "OnFinish",
-            "actorTarget=" + (_movementTarget != null && _movementTarget.IsActorTarget()));
         _isMove = false;
         Vector3 dest;
         if (_movementTarget.IsActorTarget())

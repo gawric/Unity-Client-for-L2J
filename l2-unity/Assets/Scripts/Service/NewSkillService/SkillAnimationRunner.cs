@@ -16,6 +16,9 @@ public class SkillAnimationRunner
     private const string CAST_TRIGGER_SHOT_LONG = "MagicShotLong";
     private const string NONE_ANIMATION_NAME = "none";
 
+    /// <summary>Wolf Collar 2046: log why the cast clips do not start.</summary>
+    public static bool Trace;
+
    public async Task StartRun(string[] cycle , int objectId , IAnimationManager animationManager , Action onComplete = null)
     {
         if (cycle == null)
@@ -80,7 +83,24 @@ public class SkillAnimationRunner
         }
 
         string[] triggerPlan = BuildTriggerPlan(validAnimations.Count);
-        // Debug.Log($"[SkillRunOverride] PLAN objectId={objectId} validCount={validAnimations.Count} triggers={string.Join("->", triggerPlan)}");
+        if (Trace)
+        {
+            Debug.Log(
+                "[SUMMON_ANIM] plan objectId=" + objectId +
+                " valid=" + string.Join(",", validAnimations) +
+                " triggers=" + string.Join(",", triggerPlan) +
+                " animations=" + (animationManager != null));
+        }
+
+        if (animationManager == null)
+        {
+            if (Trace)
+            {
+                Debug.Log("[SUMMON_ANIM] abort animations=null objectId=" + objectId);
+                Trace = false;
+            }
+            return;
+        }
 
         for (int logicalIndex = 0; logicalIndex < validAnimations.Count; logicalIndex++)
         {
@@ -97,8 +117,18 @@ public class SkillAnimationRunner
                 // $"[SkillRunOverride] BEFORE await logicalIdx={logicalIndex} trigger='{triggerName}' override='{overrideAnimName}' " +
                 // $"sinceChainStart={Time.time - chainStartTime:F3}s objectId={objectId}");
             bool phaseOk = await animationManager.AsyncPlayAnimationRaceOverrides(objectId, triggerName, overrideAnimName);
+            if (Trace)
+            {
+                Debug.Log(
+                    "[SUMMON_ANIM] phase objectId=" + objectId +
+                    " trigger=" + triggerName +
+                    " override=" + overrideAnimName +
+                    " ok=" + phaseOk);
+            }
             if (!phaseOk)
             {
+                if (Trace)
+                    Trace = false;
                 // Debug.Log(
                     // $"[SkillRunOverride] ABORT superseded objectId={objectId} logicalIdx={logicalIndex} " +
                     // $"trigger='{triggerName}' sinceChainStart={Time.time - chainStartTime:F3}s " +
@@ -116,7 +146,11 @@ public class SkillAnimationRunner
             }
         }
 
-        // Debug.Log($"[SkillRunOverride] COMPLETE sinceChainStart={Time.time - chainStartTime:F3}s objectId={objectId}");
+        if (Trace)
+        {
+            Debug.Log("[SUMMON_ANIM] chain complete objectId=" + objectId);
+            Trace = false;
+        }
         onComplete?.Invoke();
     }
 

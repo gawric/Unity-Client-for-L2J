@@ -31,6 +31,7 @@ public class GameManager : MonoBehaviour {
     [Inject] SkillgrpTable _skillGrps;
     [Inject] MobSkillAnimgrpTable _mobSkillAnimGrps;
     [Inject] AnimTweenTable _animTweens;
+    [Inject] EnterEventTable _enterEvents;
     [Inject] ModelTable _models;
     [Inject] LogongrpTable _logonGrps;
     [Inject] SystemMessageTable _systemMessages;
@@ -100,6 +101,7 @@ public class GameManager : MonoBehaviour {
         Table(_skillGrps, SkillgrpTable.Instance).Initialize();
         Table(_mobSkillAnimGrps, MobSkillAnimgrpTable.Instance).Initialize();
         Table(_animTweens, AnimTweenTable.Instance).Initialize();
+        Table(_enterEvents, EnterEventTable.Instance).Initialize();
         Table(_models, ModelTable.Instance).Initialize();
         Table(_logonGrps, LogongrpTable.Instance).Initialize();
         Table(_systemMessages, SystemMessageTable.Instance).Initialize();

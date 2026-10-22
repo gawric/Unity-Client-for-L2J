@@ -6,10 +6,13 @@ using UnityEngine;
 public class SkillAnimationDatabase
 {
     private static readonly Dictionary<string, SkillClips> _raceCacheMMagic = new Dictionary<string, SkillClips>();
+    private static readonly Dictionary<string, SkillClips> _raceCacheMFighter = new Dictionary<string, SkillClips>();
     private static readonly Dictionary<string, SkillClips> _raceCacheFDarkElf = new Dictionary<string, SkillClips>();
     private const string  FOLDER_MMagic = "Data/Animations/Magic/MMagic/Clips/";
+    private const string  FOLDER_MFighter = "Data/Animations/Fighter/MFighter/Clips/";
     private const string  FOLDER_FDarkElf = "Data/Animations/DarkElf/FDarkElf/";
     private const string MMagic = "MMagic";
+    private const string MFighter = "MFighter";
     private const string FDarkElf = "FDarkElf";
     public class SkillClips
     {
@@ -56,6 +59,9 @@ public class SkillAnimationDatabase
 
     public static void Initialize()
     {
+        if (_raceCacheMMagic.Count > 0)
+            return;
+
         //MMagic Эти ролики берет для переиспользования (этот override аниматор)
         _raceCacheMMagic.Add("CastLong_" + MMagic, new SkillClips(FOLDER_MMagic, "MMagic_M000_b.ao_CastLong_MMagic"));
         _raceCacheMMagic.Add("CastMid_"+ MMagic, new SkillClips(FOLDER_MMagic, "MMagic_M000_b.ao_CastMid_MMagic"));
@@ -64,6 +70,11 @@ public class SkillAnimationDatabase
         _raceCacheMMagic.Add("MagicNoTarget_" + MMagic, new SkillClips(FOLDER_MMagic, "MMagic_M000_b.ao_MagicNoTarget_MMagic"));
         _raceCacheMMagic.Add("MagicNotarget_" + MMagic, new SkillClips(FOLDER_MMagic, "MMagic_M000_b.ao_MagicNoTarget_MMagic"));
         _raceCacheMMagic.Add("MagicThrow_" + MMagic, new SkillClips(FOLDER_MMagic, "MMagic_M000_b.ao_MagicThrow_MMagic"));
+
+        _raceCacheMFighter.Add("CastMid_" + MFighter, new SkillClips(FOLDER_MFighter, "MFighter_m000_b.ao_CastMid_MFighter"));
+        _raceCacheMFighter.Add("CastEnd_" + MFighter, new SkillClips(FOLDER_MFighter, "MFighter_m000_b.ao_CastEnd_MFighter"));
+        _raceCacheMFighter.Add("MagicShot_" + MFighter, new SkillClips(FOLDER_MFighter, "MFighter_m000_b.ao_MagicShot_MFighter"));
+        _raceCacheMFighter.Add("MagicThrow_" + MFighter, new SkillClips(FOLDER_MFighter, "MFighter_m000_b.ao_MagicThrow_MFighter"));
 
         //эти ролики берет для замены на свои (т.е это оригинальный аниматор)
         //FDarkElf
@@ -78,25 +89,36 @@ public class SkillAnimationDatabase
 
     public static void LoadRaceAnimations(string raceName)
     {
-        if(MMagic == raceName)
-        {
-            foreach (var item in _raceCacheMMagic)
-            {
-                _raceCacheMMagic[item.Key].Load();
-            }
-        }
+        Dictionary<string, SkillClips> cache = CacheFor(raceName);
+        if (cache == null)
+            return;
+
+        foreach (var item in cache)
+            item.Value.Load();
     }
 
     public static AnimationClip GetOverrideClip(string overrideAnimName, string raceName)
     {
-        if (MMagic == raceName)
+        Dictionary<string, SkillClips> cache = CacheFor(raceName);
+        if (cache == null || string.IsNullOrEmpty(overrideAnimName))
+            return null;
+
+        string key = overrideAnimName + "_" + raceName;
+        if (cache.TryGetValue(key, out SkillClips clips))
         {
-            string key = overrideAnimName + "_" + raceName;
-            if (_raceCacheMMagic.ContainsKey(key))
-            {
-                return _raceCacheMMagic[key].GetClip();
-            }
+            clips.Load();
+            return clips.GetClip();
         }
+        return null;
+    }
+
+    static Dictionary<string, SkillClips> CacheFor(string raceName)
+    {
+        Initialize();
+        if (raceName == MMagic)
+            return _raceCacheMMagic;
+        if (raceName == MFighter)
+            return _raceCacheMFighter;
         return null;
     }
 

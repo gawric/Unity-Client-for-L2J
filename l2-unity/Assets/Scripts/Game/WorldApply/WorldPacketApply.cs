@@ -312,17 +312,7 @@ public sealed class WorldPacketApply
         if (dto == null)
             return;
 
-        if (dto.SkillId == 4247)
-        {
-            Entity logged = GetEntity(dto.AttackerObjId);
-            Debug.Log(
-                "[WINDSTRIKE] packet MagicSkillUse skill=4247 attacker=" + dto.AttackerObjId +
-                " target=" + dto.TargetId +
-                " hitMs=" + dto.HitTime +
-                " entity=" + (logged != null ? logged.name : "missing"));
-            CrasherSlideLog.Event(logged, "MagicSkillUse",
-                "skill=4247 hitMs=" + dto.HitTime + " target=" + dto.TargetId);
-        }
+
 
         Entity entity = GetEntity(dto.AttackerObjId);
         if (entity == null)
@@ -331,23 +321,11 @@ public sealed class WorldPacketApply
         EntityWorldApply apply;
         if (entity == null || !TryResolve(entity, out apply))
         {
-            if (dto.SkillId == 4247)
-            {
-                Debug.Log(
-                    "[WINDSTRIKE] resolve FAIL type=" +
-                    (entity != null ? entity.GetType().Name : "null"));
-            }
+
             return;
         }
 
-        if (dto.SkillId == 4247)
-        {
-            Debug.Log(
-                "[WINDSTRIKE] resolve type=" + entity.GetType().Name +
-                " apply=" + apply.GetType().Name +
-                " dead=" + entity.IsDead() +
-                " id=" + (entity.Identity != null ? entity.Identity.Id.ToString() : "null"));
-        }
+
 
         MagicSkillUseTrace.Begin(dto.SkillId);
         try
@@ -358,8 +336,6 @@ public sealed class WorldPacketApply
         }
         catch (Exception ex)
         {
-            if (dto.SkillId == 4247)
-                Debug.LogError("[WINDSTRIKE] OnMagicSkillUse exception " + ex);
             throw;
         }
         finally
@@ -373,14 +349,7 @@ public sealed class WorldPacketApply
     {
         if (dto == null)
             return;
-        if (dto.SkillId == 4247)
-        {
-            Entity logged = GetEntity(dto.ObjectId);
-            Debug.Log(
-                "[WINDSTRIKE] packet MagicSkillLaunched skill=4247 object=" + dto.ObjectId +
-                " entity=" + (logged != null ? logged.name : "missing"));
-            CrasherSlideLog.Event(logged, "MagicSkillLaunched", "skill=4247");
-        }
+
         Entity entity = GetEntity(dto.ObjectId);
         if (entity == null)
             entity = PlayerEntity.Instance;

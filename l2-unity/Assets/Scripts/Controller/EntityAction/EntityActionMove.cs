@@ -67,8 +67,6 @@ public sealed class EntityActionMove : IEntityActionProcess
         // CharInfoMoveBudgetLog.StartPoint(entity as UserEntity, destination);
         if (distance <= 0.12f)
         {
-            CrasherSlideLog.Event(entity, "move-point-ARRIVED",
-                "dist=" + distance.ToString("F2") + " walkRequested=false");
             entity.ActionSlot.PawnDist = 0f;
             L2PawnRange.ClearIgnoredPawn(entity);
             if (entity.Identity != null)
@@ -88,8 +86,7 @@ public sealed class EntityActionMove : IEntityActionProcess
         if (existing != null && existing.IsMove())
         {
             MagicGaitTrace.Decision(entity, "move-point-retarget", "existing.IsMove=true");
-            CrasherSlideLog.Event(entity, "move-point-retarget",
-                "walkRequested=" + (entity is UserEntity) + " running=" + entity.Running);
+
             existing.RetargetPoint(destination, entity.Running);
             // Re-apply the locomotion clip. After a target death the actor was
             // switched to wait/idle (EntityActionIdle.Enter → PlayStandWait), which
@@ -111,8 +108,6 @@ public sealed class EntityActionMove : IEntityActionProcess
         }
         else
         {
-            CrasherSlideLog.Event(entity, "move-point-new",
-                "walkRequested=true walking=" + (!entity.Running));
             EntityActionVisual.StartMove(entity, !entity.Running);
         }
     }
@@ -168,10 +163,6 @@ public sealed class EntityActionMove : IEntityActionProcess
 
         if (inRange)
         {
-            CrasherSlideLog.Event(entity, "move-pawn-INRANGE",
-                "toPawn=" + toPawn.ToString("F2") +
-                " stop=" + stopDistance.ToString("F2") +
-                " walkRequested=false");
             MagicGaitTrace.Event(entity, "move-pawn-INRANGE→NotifyArrived",
                 "toPawn=" + toPawn.ToString("F2") + " stop=" + stopDistance.ToString("F2"));
             if (EntityActionMachine.Instance != null)
@@ -192,10 +183,7 @@ public sealed class EntityActionMove : IEntityActionProcess
         {
             MagicGaitTrace.Decision(entity, "move-pawn-retarget",
                 "reuse existing isMove=" + existing.IsMove());
-            CrasherSlideLog.Event(entity, "move-pawn-retarget",
-                "isMove=" + existing.IsMove() +
-                " walkRequested=" + (entity is UserEntity) +
-                " toPawn=" + toPawn.ToString("F2"));
+
             existing.RetargetPawn(pawn.transform, stopDistance, entity.Running);
             if (entity is UserEntity)
                 existing.ReplayUserGait();
@@ -203,10 +191,7 @@ public sealed class EntityActionMove : IEntityActionProcess
         }
 
         MagicGaitTrace.Decision(entity, "move-pawn-new", "no existing MovementData");
-        CrasherSlideLog.Event(entity, "move-pawn-new",
-            "toPawn=" + toPawn.ToString("F2") +
-            " stop=" + stopDistance.ToString("F2") +
-            " walkRequested=" + (entity is UserEntity));
+
         MovementTarget target = new MovementTarget(pawn.transform, stopDistance, entity.Running);
         MovementData data = new MovementData(entity, target, _pawnYaw);
         MoveAllCharacters.Instance.AddMoveData(entity.Identity.Id, data);

@@ -68,9 +68,7 @@ public sealed class EntityActionAttack : IEntityActionProcess
                     // " pktAtkToNow=" + VectorUtils.Distance2D(attack.AttackerPos, entity.transform.position).ToString("F2"));
             entity.ActionSlot.AttackSwingId++;
             EntityActionVisual.PlayMeleeAttack(entity);
-            CrasherSlideLog.Event(entity, "Attack.Enter",
-                "target=" + (target.Identity != null ? target.Identity.Name : "?") +
-                " dist=" + atkDist.ToString("F2"));
+
             if (HitManager.Instance != null)
                 HitManager.Instance.ArmRemoteMeleeHit(entity, target, attack);
         }

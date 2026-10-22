@@ -49,6 +49,7 @@ public sealed class NpcSpawner
         EntitySpawnShared.ReapplyGroundAfterActivate(npcGo, identity);
 
         InitNpc(npc, npcGo, world);
+        PetSummonRise.TryBegin(npc);
         _deco.Start(npc);
         world.RegisterNpc(npc);
         if (_appearFade != null && !npc.IsDead())

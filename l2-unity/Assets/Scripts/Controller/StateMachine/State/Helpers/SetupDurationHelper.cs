@@ -45,6 +45,37 @@ public class SetupDurationHelper
         return useSkill != null && PotionSkillIds.Contains(useSkill.SkillId);
     }
 
+    /// <summary>
+    /// Skillgrp animation tag with at least one real clip. Wolf Collar is is_magic=0
+    /// but animation [f] (CastMid / CastEnd / MagicThrow).
+    /// </summary>
+    public static bool TryGetPlayableCombo(MagicSkillUseDto useSkill, out AnimationCombo combo)
+    {
+        combo = null;
+        if (useSkill == null || SkillgrpTable.Instance == null)
+            return false;
+
+        combo = SkillgrpTable.Instance.GetAnimComboBySkillId(useSkill.SkillId, useSkill.SkillLvl);
+        if (combo == null)
+            return false;
+
+        string[] cycle = combo.GetAnimCycle();
+        if (cycle == null)
+            return false;
+
+        for (int i = 0; i < cycle.Length; i++)
+        {
+            if (string.IsNullOrWhiteSpace(cycle[i]))
+                continue;
+            if (string.Equals(cycle[i].Trim(), "none", StringComparison.OrdinalIgnoreCase))
+                continue;
+            return true;
+        }
+
+        combo = null;
+        return false;
+    }
+
     public static bool IsPickupAnimationPlaying(int objectId)
     {
         if (IncomingPacketActions.Animations == null)

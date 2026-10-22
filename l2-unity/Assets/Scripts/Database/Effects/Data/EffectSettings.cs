@@ -15,6 +15,9 @@ public abstract class EffectSettings: ScriptableObject
     [Header("Общие настройки")]
     public float defaultLifeTime = 3.0f;
 
+    [Tooltip("EnterEventgrp: life and emission come from the effect config, not defaultLifeTime.")]
+    public bool useConfigLifetime = false;
+
     [Tooltip("Если включено, эффект будет перемещаться вместе с персонажем")]
     public bool isFollowCaster = false;
 

@@ -59,7 +59,27 @@ public class NewPhysicalSkillsState : AbstractAttackEvents
                 {
                     SetupDurationHelper.FinishPotionUse(_stateMachine, _stateMachine.Player, useSkill);
                 }
-                else
+                else if (SetupDurationHelper.TryGetPlayableCombo(useSkill, out AnimationCombo castCombo) &&
+                         useSkill.SkillGrp != null &&
+                         SkillExecutor.Instance != null)
+                {
+                    Entity entity = _stateMachine.Player;
+                    if (useSkill.SkillId == 2046)
+                    {
+                        string[] cycle = castCombo.GetAnimCycle();
+                        Debug.Log(
+                            "[SUMMON_ANIM] APPLY_SELF branch=combo skill=2046" +
+                            " anim=" + useSkill.SkillGrp.Animation +
+                            " hitMs=" + useSkill.HitTime +
+                            " cycle=" + (cycle == null ? "null" : string.Join(",", cycle)) +
+                            " state=" + _stateMachine.State);
+                    }
+                    SetupDurationHelper.SetupDurationIfHitTimeNot0(
+                        useSkill, entity.Identity.Id, entity, castCombo);
+                    SkillExecutor.Instance.ExecuteSkillOverride(
+                        useSkill.SkillGrp, entity, castCombo, _events);
+                }
+                else if (skillgrp != null && SkillExecutor.Instance != null)
                 {
                     AnimationCombo combo = new AnimationCombo("-1", new string[1] { skillgrp.GetAnimOperationType3() }, "");
                     SkillExecutor.Instance.ExecuteSkill(_stateMachine.Player, combo, _events);

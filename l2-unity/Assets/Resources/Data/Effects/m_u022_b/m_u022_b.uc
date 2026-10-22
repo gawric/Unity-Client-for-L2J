@@ -1,0 +1,116 @@
+class m_u022_b extends Emitter;
+
+defaultproperties
+{
+     Begin Object Class=SpriteEmitter Name=SpriteEmitter8
+         Acceleration=(Z=40.000000)
+         UseColorScale=True
+         ColorScale(0)=(Color=(B=255,G=255,R=255,A=255))
+         ColorScale(1)=(RelativeTime=0.550000,Color=(B=73,G=73,R=73,A=255))
+         ColorScale(2)=(RelativeTime=0.782143,Color=(B=69,G=69,R=69,A=255))
+         ColorScale(3)=(RelativeTime=1.000000,Color=(B=255,G=255,R=255,A=255))
+         ColorScaleRepeats=20.000000
+         ColorMultiplierRange=(X=(Min=0.850000),Y=(Min=0.850000),Z=(Min=0.731000,Max=0.859000))
+         Opacity=0.960000
+         FadeOutStartTime=1.500000
+         FadeOut=True
+         FadeInEndTime=0.630000
+         FadeIn=True
+         MaxParticles=12
+         RespawnDeadParticles=False
+         Name="BlueDust"
+         StartLocationOffset=(Z=10.000000)
+         StartLocationRange=(X=(Min=-27.000000,Max=27.000000),Y=(Min=-27.000000,Max=27.000000))
+         SphereRadiusRange=(Min=8.000000,Max=8.000000)
+         SpinParticles=True
+         SpinsPerSecondRange=(X=(Min=0.300000,Max=0.500000))
+         UseSizeScale=True
+         UseRegularSizeScale=False
+         UniformSize=True
+         SizeScale(0)=(RelativeTime=0.140000,RelativeSize=0.900000)
+         SizeScale(1)=(RelativeTime=0.380000,RelativeSize=0.800000)
+         SizeScale(2)=(RelativeTime=0.780000,RelativeSize=0.300000)
+         SizeScale(3)=(RelativeTime=1.000000,RelativeSize=0.010000)
+         StartSizeRange=(X=(Min=7.000000,Max=7.000000),Y=(Min=7.000000,Max=7.000000),Z=(Min=7.000000,Max=7.000000))
+         InitialParticlesPerSecond=10.000000
+         AutomaticInitialSpawning=False
+         Texture=Texture'LineageEffectsTextures.Particles.fx_m_t0005'
+         TextureUSubdivisions=4
+         TextureVSubdivisions=4
+         UseRandomSubdivision=True
+         SubdivisionStart=6
+         SubdivisionEnd=8
+         LifetimeRange=(Min=2.500000,Max=3.000000)
+         InitialDelayRange=(Min=0.650000,Max=0.650000)
+         StartVelocityRange=(X=(Min=-20.000000,Max=-20.000000),Y=(Min=-20.000000,Max=-20.000000),Z=(Min=10.000000,Max=10.000000))
+         VelocityLossRange=(X=(Max=1.368000),Y=(Max=1.368000))
+         GetVelocityDirectionFrom=PTVD_OwnerAndStartPosition
+     End Object
+     Emitters(0)=SpriteEmitter'SpriteEmitter8'
+     Begin Object Class=BeamEmitter Name=BeamEmitter2
+         BeamEndPoints(0)=(offset=(Z=(Min=-170.000000,Max=-170.000000)))
+         DetermineEndPointBy=PTEP_Offset
+         UseColorScale=True
+         ColorScale(0)=(Color=(B=255,G=255,R=255,A=255))
+         ColorScale(1)=(RelativeTime=0.521429,Color=(B=231,G=231,R=231,A=255))
+         ColorScale(2)=(RelativeTime=1.000000,Color=(B=255,G=255,R=255,A=255))
+         ColorScaleRepeats=10.000000
+         ColorMultiplierRange=(X=(Min=0.500000,Max=0.704000),Y=(Min=0.500000,Max=0.704000),Z=(Min=0.500000,Max=0.704000))
+         Opacity=0.330000
+         FadeOutStartTime=1.000000
+         FadeOut=True
+         FadeInEndTime=0.500000
+         FadeIn=True
+         RespawnDeadParticles=False
+         Name="Beams"
+         StartLocationOffset=(Z=150.000000)
+         StartLocationRange=(X=(Min=-20.000000,Max=10.000000),Y=(Min=-15.000000,Max=15.000000),Z=(Min=40.000000,Max=40.000000))
+         StartLocationShape=PTLS_Polar
+         StartLocationPolarRange=(X=(Max=360.000000),Y=(Min=70.000000,Max=110.000000),Z=(Min=13.000000,Max=13.000000))
+         StartSizeRange=(X=(Min=6.000000,Max=10.000000))
+         InitialParticlesPerSecond=7.000000
+         AutomaticInitialSpawning=False
+         Texture=Texture'LineageEffectsTextures.Particles.fx_m_t0004'
+         LifetimeRange=(Min=3.000000,Max=3.000000)
+     End Object
+     Emitters(1)=BeamEmitter'BeamEmitter2'
+     Begin Object Class=MeshEmitter Name=MeshEmitter8
+         StaticMesh=StaticMesh'LineageEffectsStaticmeshes.Aura.auracharge01'
+         UseMeshBlendMode=False
+         RenderTwoSided=True
+         UseColorScale=True
+         ColorScale(0)=(Color=(B=255,G=255,R=255,A=255))
+         ColorScale(1)=(RelativeTime=0.471429,Color=(B=191,G=191,R=191,A=255))
+         ColorScale(2)=(RelativeTime=1.000000,Color=(B=255,G=255,R=255,A=255))
+         ColorScaleRepeats=20.000000
+         ColorMultiplierRange=(X=(Min=0.400000,Max=0.400000),Y=(Min=0.400000,Max=0.400000))
+         Opacity=0.400000
+         FadeOutStartTime=1.360000
+         FadeOut=True
+         FadeInEndTime=0.500000
+         FadeIn=True
+         MaxParticles=1
+         RespawnDeadParticles=False
+         Name="MeshBlue"
+         StartLocationOffset=(Z=-20.000000)
+         UseSizeScale=True
+         UseRegularSizeScale=False
+         SizeScale(0)=(RelativeTime=0.460000,RelativeSize=0.990000)
+         SizeScale(1)=(RelativeTime=1.000000,RelativeSize=1.000000)
+         SizeScaleRepeats=20.000000
+         StartSizeRange=(X=(Min=0.380000,Max=0.380000),Y=(Min=0.380000,Max=0.380000),Z=(Min=3.000000,Max=3.000000))
+         InitialParticlesPerSecond=1000.000000
+         AutomaticInitialSpawning=False
+         LifetimeRange=(Min=3.000000,Max=3.000000)
+         InitialDelayRange=(Min=0.500000,Max=0.500000)
+     End Object
+     Emitters(2)=MeshEmitter'MeshEmitter8'
+     AutoReplay=True
+     Physics=PHYS_Trailer
+     bUseDynamicLights=False
+     bLightChanged=True
+     bNoDelete=False
+     bTrailerPrePivot=True
+     bAcceptsProjectors=False
+     DrawScale=0.250000
+}

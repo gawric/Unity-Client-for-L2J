@@ -38,7 +38,7 @@ public static class EntityActionVisual
 
         if (!CanPlayAnim(entity))
         {
-            CrasherSlideLog.Event(entity, "StartMove-NOANIM", "walking=" + walking);
+
             return;
         }
 
@@ -47,7 +47,7 @@ public static class EntityActionVisual
         else if (entity is MonsterEntity monster && IncomingPacketActions.Animations != null)
         {
             string anim = walking ? AnimationNames.MONSTER_WALK.ToString() : AnimationNames.MONSTER_RUN.ToString();
-            CrasherSlideLog.Event(monster, "StartMove", "anim=" + anim + " force=" + force);
+
             IncomingPacketActions.Animations.PlayMonsterAnimation(monster.Identity.Id, anim);
         }
     }
@@ -82,7 +82,7 @@ public static class EntityActionVisual
         {
             if (IncomingPacketActions.Animations != null && monster.Identity != null)
             {
-                CrasherSlideLog.Event(monster, "StopMove", "anim=wait");
+
                 IncomingPacketActions.Animations.PlayMonsterAnimation(
                     monster.Identity.Id,
                     AnimationNames.MONSTER_WAIT.ToString());
@@ -103,7 +103,7 @@ public static class EntityActionVisual
 
         if (entity is MonsterEntity monster && IncomingPacketActions.Animations != null)
         {
-            CrasherSlideLog.Event(monster, "PlayMelee", "anim=atk01");
+
             IncomingPacketActions.Animations.PlayMonsterAnimation(monster.Identity.Id, AnimationNames.MONSTER_ATK01.ToString());
         }
     }
@@ -176,7 +176,7 @@ public static class EntityActionVisual
 
         if (entity is MonsterEntity monster && IncomingPacketActions.Animations != null && monster.Identity != null)
         {
-            CrasherSlideLog.Event(monster, "PlayCombatWait", "anim=atkwait");
+      
             IncomingPacketActions.Animations.PlayMonsterAnimation(monster.Identity.Id, "atkwait");
         }
     }

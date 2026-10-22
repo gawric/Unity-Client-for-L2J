@@ -18,8 +18,14 @@ public static class EntitySpawnShared
         npcNames = npcNames != null ? npcNames : NpcNameTable.Instance;
         models = models != null ? models : ModelTable.Instance;
 
-        Npcgrp npcgrp = npcGrps.GetNpcgrp(identity.NpcId);
+        int visualNpcId = identity.NpcId;
+        if (npcGrps.GetNpcgrp(visualNpcId) == null)
+            visualNpcId = PetVisuals.VisualNpcId(identity.NpcId);
+
+        Npcgrp npcgrp = npcGrps.GetNpcgrp(visualNpcId);
         NpcName npcName = npcNames.GetNpcName(identity.NpcId);
+        if (npcName == null)
+            npcName = npcNames.GetNpcName(visualNpcId);
         if (npcName == null || npcgrp == null)
         {
             // Debug.LogError("Npc " + identity.NpcId + " could not be loaded correctly.");
@@ -156,6 +162,9 @@ public static class EntitySpawnShared
 
     static bool TryApplyGroundSnap(GameObject go, EntityIdentity identity)
     {
+        if (PetSummonRise.IsRising(go))
+            return false;
+
         Vector3 from = go.transform.position;
         if (!GroundSnapHelper.TrySnapToGround(from, out Vector3 snapped))
             return false;
@@ -230,12 +239,23 @@ public static class EntitySpawnShared
         appearance.CollisionRadius = npcgrp.CollisionRadius;
         appearance.CollisionHeight = npcgrp.CollisionHeight;
 
+        string packetName = identity.Name;
+        string packetTitle = identity.Title;
         npc.Status = request.Status;
         npc.Stats = request.Stats;
         npc.Identity = identity;
         npc.Identity.NpcClass = npcgrp.ClassName;
-        npc.Identity.Name = npcName.Name;
-        npc.Identity.Title = npcName.Title;
+        bool pet = identity.Owned || PetVisuals.VisualNpcId(identity.NpcId) != identity.NpcId;
+        if (!pet)
+        {
+            npc.Identity.Name = npcName.Name;
+            npc.Identity.Title = npcName.Title;
+        }
+        else
+        {
+            npc.Identity.Name = string.IsNullOrEmpty(packetName) ? npcName.Name : packetName;
+            npc.Identity.Title = string.IsNullOrEmpty(packetTitle) ? npcName.Title : packetTitle;
+        }
         if ((npc.Identity.Title == null || npc.Identity.Title.Length == 0) &&
             identity.EntityType == EntityType.Monster)
         {
@@ -296,6 +316,9 @@ public static class EntitySpawnShared
     static void SeedNpcHpFromGrp(Entity npc, Npcgrp npcgrp)
     {
         if (npc == null || npcgrp == null || npc.Stats == null || npc.Status == null)
+            return;
+
+        if (npc.Identity != null && npc.Identity.Owned && npc.Stats.MaxHp > 1)
             return;
 
         int grpHp = Mathf.Max(1, Mathf.RoundToInt(npcgrp.MaxHp));

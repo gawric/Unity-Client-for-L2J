@@ -47,6 +47,7 @@ public sealed class MonsterSpawner
         EntitySpawnShared.ReapplyGroundAfterActivate(npcGo, identity);
 
         InitMonster(npc, npcGo, world);
+        PetSummonRise.TryBegin(npc);
         _deco.Start(npc);
         // CharInfoSpeedLog.LogNpcPacket(npc, "OnNpcInfo spawn");
         world.RegisterNpc(npc);

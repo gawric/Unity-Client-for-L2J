@@ -1,6 +1,7 @@
 #if UNITY_EDITOR
 using System;
 using System.Collections.Generic;
+using System.IO;
 using UnityEditor;
 using UnityEngine;
 
@@ -52,6 +53,95 @@ public sealed class L2EffectGeneratorWindow : EditorWindow
             "Assets/Resources/Data/Effects/wh_heal",
             "wh_heal",
             1011);
+    }
+
+    /// <summary>
+    /// Wolf Collar skill 2046, skillgrp visual 1111, class su_summon_a_ca.
+    /// Unity.exe -executeMethod L2EffectGeneratorWindow.GenerateSummonCli
+    /// </summary>
+    public static void GenerateSummonCli()
+    {
+        AssetDatabase.Refresh();
+        GenerateCli(
+            "Assets/Resources/Data/Effects/su_summon_a_ca",
+            "su_summon_a_ca",
+            2046);
+    }
+
+    /// <summary>
+    /// Every effect class named in StreamingAssets/Data/Meta/EnterEventgrp.txt.
+    /// Unity.exe -executeMethod L2EffectGeneratorWindow.GenerateEnterEventsCli
+    /// </summary>
+    public static void GenerateEnterEventsCli()
+    {
+        AssetDatabase.Refresh();
+        bool ok = true;
+        foreach (string effectName in ReadEnterEventEffectNames())
+        {
+            string folder = "Assets/Resources/Data/Effects/" + effectName;
+            if (!AssetDatabase.IsValidFolder(folder))
+            {
+                Debug.LogError("[L2EffectGenerator] missing folder " + folder);
+                ok = false;
+                continue;
+            }
+
+            L2EffectGeneratorFolderBuilder.BuildResult result =
+                L2EffectGeneratorFolderBuilder.CreateFromFolder(folder, effectName, 0, false);
+            for (int i = 0; i < result.LogLines.Count; i++)
+                Debug.Log("[L2EffectGenerator] " + result.LogLines[i]);
+            if (!result.Success)
+            {
+                Debug.LogError("[L2EffectGenerator] " + result.ErrorMessage);
+                ok = false;
+                continue;
+            }
+
+            string compositePath = folder + "/" + effectName + "_composite.prefab";
+            if (!L2EffectGeneratorSkillBinder.TryEnsureEnterEvent(
+                    effectName,
+                    compositePath,
+                    out string bindLog,
+                    out string bindError))
+            {
+                Debug.LogError("[L2EffectGenerator] " + bindError);
+                ok = false;
+                continue;
+            }
+
+            Debug.Log("[L2EffectGenerator] " + bindLog);
+        }
+
+        EditorApplication.Exit(ok ? 0 : 1);
+    }
+
+    static IEnumerable<string> ReadEnterEventEffectNames()
+    {
+        var names = new List<string>();
+        var seen = new HashSet<string>();
+        string path = Path.Combine(
+            Application.dataPath,
+            "StreamingAssets/Data/Meta/EnterEventgrp.txt");
+        if (!File.Exists(path))
+            return names;
+
+        foreach (string line in File.ReadAllLines(path))
+        {
+            if (string.IsNullOrWhiteSpace(line) || line.StartsWith("id\t"))
+                continue;
+            string[] cols = line.Split('\t');
+            if (cols.Length < 8)
+                continue;
+            string effect = cols[7].Trim();
+            int dot = effect.LastIndexOf('.');
+            if (dot >= 0)
+                effect = effect.Substring(dot + 1);
+            if (effect.Length == 0 || !seen.Add(effect))
+                continue;
+            names.Add(effect);
+        }
+
+        return names;
     }
 
     /// <summary>

@@ -65,6 +65,7 @@ public sealed class AppLifetimeScope : LifetimeScope
         builder.RegisterInstance(SkillgrpTable.Instance);
         builder.RegisterInstance(MobSkillAnimgrpTable.Instance);
         builder.RegisterInstance(AnimTweenTable.Instance);
+        builder.RegisterInstance(EnterEventTable.Instance);
         builder.RegisterInstance(ModelTable.Instance);
         builder.RegisterInstance(LogongrpTable.Instance);
         builder.RegisterInstance(SystemMessageTable.Instance);

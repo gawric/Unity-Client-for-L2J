@@ -283,6 +283,18 @@ public class AnimationManager : BaseAnimationManager , IAnimationManager
                 playedOnGraph = castBody.TryPlayCastPhase(overrideAnimationName, triggerName);
         }
 
+        if (SkillAnimationRunner.Trace)
+        {
+            BaseAnimationController body = castBody;
+            Debug.Log(
+                "[SUMMON_ANIM] RaceOverride trigger=" + triggerName +
+                " override=" + overrideAnimationName +
+                " playedOnGraph=" + playedOnGraph +
+                " controller=" + (body != null ? body.GetType().Name : "null") +
+                " animator=" + (body != null ? body.GetAnimatorName() : "none") +
+                " expectedFinish=" + expectedFinishName);
+        }
+
         if (!playedOnGraph)
         {
             //Root Animator FDarkElf
@@ -524,7 +536,14 @@ public class AnimationManager : BaseAnimationManager , IAnimationManager
     {
         IAnimationController controller = GetRegisteredController(objectId);
         if (controller == null)
+        {
+            if (SkillAnimationRunner.Trace)
+                Debug.Log("[SUMMON_ANIM] trigger skip controller=null name=" + animationName + " objectId=" + objectId);
             return;
+        }
+
+        if (SkillAnimationRunner.Trace)
+            Debug.Log("[SUMMON_ANIM] trigger name=" + animationName + " useFinal=" + useFinalName + " objectId=" + objectId);
 
         if(useFinalName) animationName = GetFinalNameAnim(objectId, animationName);
 
@@ -651,13 +670,7 @@ public class AnimationManager : BaseAnimationManager , IAnimationManager
             float duration = fixedDuration ?? LocomotionCrossFadeSettings.ResolveDuration(stateName, controller);
             bool already = PlayerLocomotionCrossFade.IsAlreadyPlaying(controller, stateName);
             bool played = MonsterCrossFade.TryPlay(controller, stateName, family, duration);
-            CrasherSlideLog.EventId(objectId, "PlayMonster",
-                "request=" + animationName +
-                " state=" + stateName +
-                " family=" + family +
-                " already=" + already +
-                " played=" + played +
-                " fade=" + duration.ToString("F3"));
+
             return;
         }
 

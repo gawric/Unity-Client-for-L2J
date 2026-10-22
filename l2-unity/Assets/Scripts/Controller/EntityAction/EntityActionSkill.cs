@@ -422,6 +422,17 @@ public sealed class EntityActionSkill : IEntityActionProcess
             }
         }
 
+        if (SetupDurationHelper.TryGetPlayableCombo(magic, out AnimationCombo castCombo) &&
+            magic.SkillGrp != null &&
+            SkillExecutor.Instance != null)
+        {
+            SetupDurationHelper.SetupDurationIfHitTimeNot0(
+                magic, entity.Identity.Id, entity, castCombo);
+            SkillExecutor.Instance.ExecuteSkillOverride(
+                magic.SkillGrp, entity, castCombo, ResolveEvents(entity));
+            return;
+        }
+
         Skillgrp skillgrp = magic.SkillGrp;
         if (skillgrp != null && SkillExecutor.Instance != null)
         {
@@ -507,19 +518,7 @@ public sealed class EntityActionSkill : IEntityActionProcess
             cast.SpawnShotVisualsImmediately = !hasNpcOverride;
 
         PlaySkillEffect(entity, magic);
-        if (magic.SkillId == 4247)
-        {
-            Debug.Log(
-                "[WINDSTRIKE] play effect 1177 skill=4247 seq=" +
-                (hasNpcOverride ? sequence : "none") +
-                " immediate=" + (cast != null && cast.SpawnShotVisualsImmediately) +
-                " hitMs=" + magic.HitTime +
-                " npc=" + npcId);
-            CrasherSlideLog.Event(entity, "WindstrikePlay",
-                "seq=" + (hasNpcOverride ? sequence : "none") +
-                " immediate=" + (cast != null && cast.SpawnShotVisualsImmediately) +
-                " hitMs=" + magic.HitTime);
-        }
+
 
         if (hasNpcOverride &&
             IncomingPacketActions.Animations != null &&

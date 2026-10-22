@@ -56,6 +56,19 @@ public class SkillExecutor : MonoBehaviour
             effects.PlayEffect(skill.Id, entity.transform, entity.GetMagicCastData());
 
         string[] cycle = animationCombo.GetAnimCycle();
+        SkillAnimationRunner.Trace = skill != null && skill.Id == 2046;
+        if (SkillAnimationRunner.Trace)
+        {
+            Debug.Log(
+                "[SUMMON_ANIM] ExecuteOverride objectId=" + objectId +
+                " anim=" + skill.Animation +
+                " isMagic=" + skill.IsMagic +
+                " hitGrp=" + skill.HitTime +
+                " cycle=" + (cycle == null ? "null" : string.Join(",", cycle)) +
+                " long=" + isLong +
+                " runner=" + (_animRunner != null) +
+                " animations=" + ((_animations != null ? _animations : IncomingPacketActions.Animations) != null));
+        }
         IAnimationManager animations = _animations != null ? _animations : IncomingPacketActions.Animations;
         if (isLong)
         {

@@ -523,6 +523,16 @@ public class BaseAnimationController : AnimationEventsBase, IAnimationController
     {
         string raceName = _animator?.runtimeAnimatorController.name;
         AnimationClip clip = SkillAnimationDatabase.GetOverrideClip(overrideAnimName , raceName);
+        bool hasSlot = HasClip(animName);
+        if (SkillAnimationRunner.Trace)
+        {
+            Debug.Log(
+                "[SUMMON_ANIM] ReplaceAnimClip slot=" + animName +
+                " override=" + overrideAnimName +
+                " race=" + raceName +
+                " clip=" + (clip != null ? clip.name : "null") +
+                " hasSlot=" + hasSlot);
+        }
         if (HasClip(animName))
         {
             _overrideController[animName] = clip;

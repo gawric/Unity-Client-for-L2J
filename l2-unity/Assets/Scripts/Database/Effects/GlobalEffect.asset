@@ -16,20 +16,30 @@ MonoBehaviour:
   - id: -1
     prefab: {fileID: 6218837199439611435, guid: 87a0d43ba0915b447a8370030fc8eedc, type: 3}
     useWeaponShot: 0
+    spiritShot: 0
     comment: WndStrike(OldVersion_Disabled)
     settings: {fileID: 11400000, guid: c02f996917eecba46986a49309d210d1, type: 2}
     ignoreFlightTimeForCast: 0
   - id: 99999
     prefab: {fileID: 8500736706040560274, guid: 60f4bfabf7d4afa40887a508ef09dcb7, type: 3}
     useWeaponShot: 0
+    spiritShot: 0
     comment: LevelUp
     settings: {fileID: 11400000, guid: 19c27f6b5bdc15f438b14170676fbf4b, type: 2}
     ignoreFlightTimeForCast: 1
   - id: 2039
     prefab: {fileID: 2966461980551934870, guid: b4e82c44d6393d346ac5b9ba0d7cdd18, type: 3}
     useWeaponShot: 1
+    spiritShot: 0
     comment: soulshot-ng
     settings: {fileID: 11400000, guid: 525f3348611dff143bfa0da70228506f, type: 2}
+    ignoreFlightTimeForCast: 1
+  - id: 2046
+    prefab: {fileID: 4742296666828580571, guid: 29f84eb79e94eb849a77b5669d299a0e, type: 3}
+    useWeaponShot: 0
+    spiritShot: 0
+    comment: summon-pet-1111-su_summon_a_ca
+    settings: {fileID: 11400000, guid: e73b899fdfd5e1243a008820002a9c0e, type: 2}
     ignoreFlightTimeForCast: 1
   - id: 2047
     prefab: {fileID: 224729188706837472, guid: 98ef5f7569bbfff4395a1b3292382f39, type: 3}
@@ -48,228 +58,294 @@ MonoBehaviour:
   - id: 99998
     prefab: {fileID: 2165087678591533806, guid: da427266e77111640b2c85a67e7f0ffe, type: 3}
     useWeaponShot: 0
+    spiritShot: 0
     comment: soulshot-fog
     settings: {fileID: 11400000, guid: 1ffc492d749ea054f9c03ebb11d95032, type: 2}
     ignoreFlightTimeForCast: 1
   - id: 1177
     prefab: {fileID: 2600326504193966759, guid: 3d4fc1321e1ca4540ab96dcfeb58412b, type: 3}
     useWeaponShot: 0
+    spiritShot: 0
     comment: wind-strike-composite-effect-v2
     settings: {fileID: 11400000, guid: c02f996917eecba46986a49309d210d1, type: 2}
     ignoreFlightTimeForCast: 0
   - id: 1184
     prefab: {fileID: 8067259653779221568, guid: a60bfac386ddfaf43b780cddbf8d86fd, type: 3}
     useWeaponShot: 0
+    spiritShot: 0
     comment: ice-bolt-composite-effect
     settings: {fileID: 11400000, guid: e540cb9c791a7e444b8e4801c60e1a70, type: 2}
     ignoreFlightTimeForCast: 1
   - id: 1011
     prefab: {fileID: 8248475147850649914, guid: 9118613dd3f5fcf4c8b03fb95b69889c, type: 3}
     useWeaponShot: 0
+    spiritShot: 0
     comment: heal-composite-effect
     settings: {fileID: 11400000, guid: 71be8ca0eae2cd44fbcbd0243ca6ff9f, type: 2}
     ignoreFlightTimeForCast: 1
   - id: 1216
     prefab: {fileID: 8248475147850649914, guid: 9118613dd3f5fcf4c8b03fb95b69889c, type: 3}
     useWeaponShot: 0
+    spiritShot: 0
     comment: heal-composite-effect
     settings: {fileID: 11400000, guid: 71be8ca0eae2cd44fbcbd0243ca6ff9f, type: 2}
     ignoreFlightTimeForCast: 1
   - id: 1168
     prefab: {fileID: 5073533988503188716, guid: 6cd030edd5e44dc4bbdc99342cc4a214, type: 3}
     useWeaponShot: 0
+    spiritShot: 0
     comment: curse-poison-effect
     settings: {fileID: 11400000, guid: 32b8e356a6514494cb7425f31ee60898, type: 2}
     ignoreFlightTimeForCast: 1
   - id: 1147
     prefab: {fileID: 3739915897607163408, guid: 470f1e7645a302147b6d2b0dee399c30, type: 3}
     useWeaponShot: 0
+    spiritShot: 0
     comment: vampiric-touch-effect
     settings: {fileID: 11400000, guid: 5b8dc6046d4381541bf1b9e6b1e707ee, type: 2}
     ignoreFlightTimeForCast: 1
   - id: 1164
     prefab: {fileID: 7612483555992430085, guid: 19442df339bf1714ea979a5dde6f90cc, type: 3}
     useWeaponShot: 0
+    spiritShot: 0
     comment: curse-weakness-effect
     settings: {fileID: 11400000, guid: 5de638f04240ef249a0d92a299aca7bf, type: 2}
     ignoreFlightTimeForCast: 1
   - id: 1015
     prefab: {fileID: -2331866982259287529, guid: 0a1ab700809977949bd61dd85067c905, type: 3}
     useWeaponShot: 0
+    spiritShot: 0
     comment: battle-heal-composite-effect-v2
     settings: {fileID: 11400000, guid: 8a59a8af482172b45ae1974088ba7b1e, type: 2}
     ignoreFlightTimeForCast: 1
   - id: 1012
     prefab: {fileID: -2331866982259287529, guid: 6f984f99a4852004f8aea8a601c2af6b, type: 3}
     useWeaponShot: 0
+    spiritShot: 0
     comment: cure-poison-effect
     settings: {fileID: 11400000, guid: 379a78eda0ba8ef40961f6ef9d85878a, type: 2}
     ignoreFlightTimeForCast: 1
   - id: 1040
     prefab: {fileID: 5193115092179553701, guid: dc1d7e3decd583c42b78da4a2c0414a4, type: 3}
     useWeaponShot: 0
+    spiritShot: 0
     comment: shield-composite-effect
     settings: {fileID: 11400000, guid: a8f3c2e1d4b5678901234abcdef56789, type: 2}
     ignoreFlightTimeForCast: 1
   - id: 1068
     prefab: {fileID: 797508600007295199, guid: 2836745c77435f34091cf86a98ac9a61, type: 3}
     useWeaponShot: 0
+    spiritShot: 0
     comment: might-composite-effect
     settings: {fileID: 11400000, guid: e73b899fdfd5e1243a008820002a9c0e, type: 2}
     ignoreFlightTimeForCast: 1
   - id: 4028
     prefab: {fileID: 2968870932579777287, guid: 7e4e7c87a9339b449a1b872a6f01e8e9, type: 3}
     useWeaponShot: 0
+    spiritShot: 0
     comment: npc-might-mo_war_cry
     settings: {fileID: 11400000, guid: e73b899fdfd5e1243a008820002a9c0e, type: 2}
     ignoreFlightTimeForCast: 1
   - id: 4247
     prefab: {fileID: 2600326504193966759, guid: 3d4fc1321e1ca4540ab96dcfeb58412b, type: 3}
     useWeaponShot: 0
+    spiritShot: 0
     comment: npc-windstrike-1177
     settings: {fileID: 11400000, guid: c02f996917eecba46986a49309d210d1, type: 2}
     ignoreFlightTimeForCast: 0
   - id: 4249
     prefab: {fileID: 8067259653779221568, guid: a60bfac386ddfaf43b780cddbf8d86fd, type: 3}
     useWeaponShot: 0
+    spiritShot: 0
     comment: npc-decrease-speed-1184
     settings: {fileID: 11400000, guid: e540cb9c791a7e444b8e4801c60e1a70, type: 2}
     ignoreFlightTimeForCast: 1
   - id: 4035
     prefab: {fileID: 5073533988503188716, guid: 6cd030edd5e44dc4bbdc99342cc4a214, type: 3}
     useWeaponShot: 0
+    spiritShot: 0
     comment: npc-poison-1168
     settings: {fileID: 11400000, guid: 32b8e356a6514494cb7425f31ee60898, type: 2}
     ignoreFlightTimeForCast: 1
   - id: 4031
     prefab: {fileID: 5193115092179553701, guid: dc1d7e3decd583c42b78da4a2c0414a4, type: 3}
     useWeaponShot: 0
+    spiritShot: 0
     comment: npc-clan-aegis-1040
     settings: {fileID: 11400000, guid: a8f3c2e1d4b5678901234abcdef56789, type: 2}
     ignoreFlightTimeForCast: 1
   - id: 4074
     prefab: {fileID: 797508600007295199, guid: 2836745c77435f34091cf86a98ac9a61, type: 3}
     useWeaponShot: 0
+    spiritShot: 0
     comment: npc-haste-1068
     settings: {fileID: 11400000, guid: e73b899fdfd5e1243a008820002a9c0e, type: 2}
     ignoreFlightTimeForCast: 1
   - id: 4119
     prefab: {fileID: 5073533988503188716, guid: 6cd030edd5e44dc4bbdc99342cc4a214, type: 3}
     useWeaponShot: 0
+    spiritShot: 0
     comment: npc-decrease-accuracy-1168
     settings: {fileID: 11400000, guid: 32b8e356a6514494cb7425f31ee60898, type: 2}
     ignoreFlightTimeForCast: 1
   - id: 2013
     prefab: {fileID: 1435013334709449354, guid: 1eaec3ad6bfc2c84e89567ee20786e0c, type: 3}
     useWeaponShot: 0
+    spiritShot: 0
     comment: teleport-composite-effect
     settings: {fileID: 11400000, guid: dd6f482471331114da04e05ef1d9dddb, type: 2}
     ignoreFlightTimeForCast: 1
   - id: 2031
     prefab: {fileID: 2595007125146735222, guid: 3f05ace42cf604c4aae86789a698f5c3, type: 3}
     useWeaponShot: 0
+    spiritShot: 0
     comment: it-healing-potion-effect
     settings: {fileID: 11400000, guid: 304118563f04a3c46812acac35e7ba2e, type: 2}
     ignoreFlightTimeForCast: 1
   - id: 2011
     prefab: {fileID: 2595007125146735222, guid: 3f05ace42cf604c4aae86789a698f5c3, type: 3}
     useWeaponShot: 0
+    spiritShot: 0
     comment: it-haste-potion-effect
     settings: {fileID: 11400000, guid: cf003ce1643c62640a960af58930287b, type: 2}
     ignoreFlightTimeForCast: 1
   - id: 99997
     prefab: {fileID: 720686262775047825, guid: a6591ce429474df46874126c3dc0c6a4, type: 3}
     useWeaponShot: 0
+    spiritShot: 0
     comment: simple_atk_effect
     settings: {fileID: 11400000, guid: 39ad4dfd5fe718841a26f54f9f4b3702, type: 2}
     ignoreFlightTimeForCast: 1
   - id: 3
     prefab: {fileID: 5808942669273333594, guid: a1c7d3a47cad6db40bea1a5ea2ad1a9e, type: 3}
     useWeaponShot: 0
+    spiritShot: 0
     comment: power_strike
     settings: {fileID: 11400000, guid: 539430148bf8dfa41bf71e9aa073a74a, type: 2}
     ignoreFlightTimeForCast: 1
   - id: 56001
     prefab: {fileID: 1907917464583194202, guid: 1c316dd6db6d87047aeff4b29429a145, type: 3}
     useWeaponShot: 0
+    spiritShot: 0
     comment: e_u056_a drop land / coins
     settings: {fileID: 11400000, guid: 56001e056a0000000000000000000001, type: 2}
     ignoreFlightTimeForCast: 1
   - id: 56002
     prefab: {fileID: 2128254535069956145, guid: f1f7330b6829b664fa1a4a57ca01088b, type: 3}
     useWeaponShot: 0
+    spiritShot: 0
     comment: e_u056_b drop ground glow
     settings: {fileID: 11400000, guid: 56002e056b0000000000000000000001, type: 2}
     ignoreFlightTimeForCast: 1
   - id: 2278
     prefab: {fileID: 2595007125146735222, guid: 3f05ace42cf604c4aae86789a698f5c3, type: 3}
     useWeaponShot: 0
+    spiritShot: 0
     comment: "herb-of-life\u2192it-healing-potion-effect"
     settings: {fileID: 11400000, guid: 304118563f04a3c46812acac35e7ba2e, type: 2}
     ignoreFlightTimeForCast: 1
   - id: 2279
     prefab: {fileID: 2595007125146735222, guid: 3f05ace42cf604c4aae86789a698f5c3, type: 3}
     useWeaponShot: 0
+    spiritShot: 0
     comment: "herb-of-mana\u2192it-healing-potion-effect"
     settings: {fileID: 11400000, guid: 304118563f04a3c46812acac35e7ba2e, type: 2}
     ignoreFlightTimeForCast: 1
   - id: 2280
     prefab: {fileID: 2595007125146735222, guid: 3f05ace42cf604c4aae86789a698f5c3, type: 3}
     useWeaponShot: 0
+    spiritShot: 0
     comment: "herb-of-power\u2192it-healing-potion-effect"
     settings: {fileID: 11400000, guid: 304118563f04a3c46812acac35e7ba2e, type: 2}
     ignoreFlightTimeForCast: 1
   - id: 2281
     prefab: {fileID: 2595007125146735222, guid: 3f05ace42cf604c4aae86789a698f5c3, type: 3}
     useWeaponShot: 0
+    spiritShot: 0
     comment: "herb-of-magic\u2192it-healing-potion-effect"
     settings: {fileID: 11400000, guid: 304118563f04a3c46812acac35e7ba2e, type: 2}
     ignoreFlightTimeForCast: 1
   - id: 2282
     prefab: {fileID: 2595007125146735222, guid: 3f05ace42cf604c4aae86789a698f5c3, type: 3}
     useWeaponShot: 0
+    spiritShot: 0
     comment: "herb-of-atk-spd\u2192it-haste-potion-effect"
     settings: {fileID: 11400000, guid: cf003ce1643c62640a960af58930287b, type: 2}
     ignoreFlightTimeForCast: 1
   - id: 2283
     prefab: {fileID: 2595007125146735222, guid: 3f05ace42cf604c4aae86789a698f5c3, type: 3}
     useWeaponShot: 0
+    spiritShot: 0
     comment: "herb-of-casting-spd\u2192it-haste-potion-effect"
     settings: {fileID: 11400000, guid: cf003ce1643c62640a960af58930287b, type: 2}
     ignoreFlightTimeForCast: 1
   - id: 2284
     prefab: {fileID: 2595007125146735222, guid: 3f05ace42cf604c4aae86789a698f5c3, type: 3}
     useWeaponShot: 0
+    spiritShot: 0
     comment: "herb-of-critical\u2192it-healing-potion-effect"
     settings: {fileID: 11400000, guid: 304118563f04a3c46812acac35e7ba2e, type: 2}
     ignoreFlightTimeForCast: 1
   - id: 2285
     prefab: {fileID: 2595007125146735222, guid: 3f05ace42cf604c4aae86789a698f5c3, type: 3}
     useWeaponShot: 0
+    spiritShot: 0
     comment: "herb-of-speed\u2192it-haste-potion-effect"
     settings: {fileID: 11400000, guid: cf003ce1643c62640a960af58930287b, type: 2}
     ignoreFlightTimeForCast: 1
   - id: 2244
     prefab: {fileID: 2595007125146735222, guid: 3f05ace42cf604c4aae86789a698f5c3, type: 3}
     useWeaponShot: 0
+    spiritShot: 0
     comment: "herb-of-life-c4\u2192it-healing-potion-effect"
     settings: {fileID: 11400000, guid: 304118563f04a3c46812acac35e7ba2e, type: 2}
     ignoreFlightTimeForCast: 1
   - id: 2245
     prefab: {fileID: 2595007125146735222, guid: 3f05ace42cf604c4aae86789a698f5c3, type: 3}
     useWeaponShot: 0
+    spiritShot: 0
     comment: "herb-of-mana-c4\u2192it-healing-potion-effect"
     settings: {fileID: 11400000, guid: 304118563f04a3c46812acac35e7ba2e, type: 2}
     ignoreFlightTimeForCast: 1
   - id: 2246
     prefab: {fileID: 2595007125146735222, guid: 3f05ace42cf604c4aae86789a698f5c3, type: 3}
     useWeaponShot: 0
+    spiritShot: 0
     comment: "herb-of-power-c4\u2192it-healing-potion-effect"
     settings: {fileID: 11400000, guid: 304118563f04a3c46812acac35e7ba2e, type: 2}
     ignoreFlightTimeForCast: 1
   - id: 2247
     prefab: {fileID: 2595007125146735222, guid: 3f05ace42cf604c4aae86789a698f5c3, type: 3}
     useWeaponShot: 0
+    spiritShot: 0
     comment: "herb-of-magic-c4\u2192it-healing-potion-effect"
     settings: {fileID: 11400000, guid: 304118563f04a3c46812acac35e7ba2e, type: 2}
+    ignoreFlightTimeForCast: 1
+  - id: 991001
+    prefab: {fileID: 6905028591230738466, guid: d860c6e0179082249bf33020cd35231e, type: 3}
+    useWeaponShot: 0
+    spiritShot: 0
+    comment: EnterEventgrp e_u011_b
+    settings: {fileID: 11400000, guid: 7c4e9a1b2d8f4e6a9c0b5d3e1f7a8b24, type: 2}
+    ignoreFlightTimeForCast: 1
+  - id: 991002
+    prefab: {fileID: 4154092825132661667, guid: f59a3ae04b4c96a438131370a48fe43f, type: 3}
+    useWeaponShot: 0
+    spiritShot: 0
+    comment: EnterEventgrp e_u005_b
+    settings: {fileID: 11400000, guid: 7c4e9a1b2d8f4e6a9c0b5d3e1f7a8b24, type: 2}
+    ignoreFlightTimeForCast: 1
+  - id: 991003
+    prefab: {fileID: 2742843681162955272, guid: a8e802c686ff6924cb55569cb1f39961, type: 3}
+    useWeaponShot: 0
+    spiritShot: 0
+    comment: EnterEventgrp e_u830_entrance
+    settings: {fileID: 11400000, guid: 7c4e9a1b2d8f4e6a9c0b5d3e1f7a8b24, type: 2}
+    ignoreFlightTimeForCast: 1
+  - id: 991004
+    prefab: {fileID: 2432127727376357895, guid: 7e8492d1e95db914d91632bc82864362, type: 3}
+    useWeaponShot: 0
+    spiritShot: 0
+    comment: EnterEventgrp m_u022_b
+    settings: {fileID: 11400000, guid: 7c4e9a1b2d8f4e6a9c0b5d3e1f7a8b24, type: 2}
     ignoreFlightTimeForCast: 1

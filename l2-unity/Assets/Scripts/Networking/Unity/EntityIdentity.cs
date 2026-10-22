@@ -27,6 +27,8 @@ public class EntityIdentity
     [SerializeField] private bool _owned = false;
     private bool _isHideHpBar = false;
     public bool IsRunning { get; set; }
+    /// <summary>PetInfo summon byte. 2 means the pet just appeared.</summary>
+    public byte SummonState { get; set; }
     public EntityType EntityType { get => _entityType; set => _entityType = value; }
     public int Id { get => _id; set => _id = value; }
 

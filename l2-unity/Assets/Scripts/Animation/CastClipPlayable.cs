@@ -139,6 +139,14 @@ public sealed class CastClipPlayable
 
         if (!IsGraphAlive || _animator == null || string.IsNullOrEmpty(overrideAnimName))
         {
+            if (SkillAnimationRunner.Trace)
+            {
+                Debug.Log(
+                    "[SUMMON_ANIM] TryPlay reject graph=" + IsGraphAlive +
+                    " animator=" + (_animator != null) +
+                    " override='" + overrideAnimName + "'" +
+                    " phase=" + phaseTriggerName);
+            }
             return false;
         }
 
@@ -148,6 +156,13 @@ public sealed class CastClipPlayable
         AnimationClip clip = SkillAnimationDatabase.GetOverrideClip(overrideAnimName, raceName);
         if (clip == null)
         {
+            if (SkillAnimationRunner.Trace)
+            {
+                Debug.Log(
+                    "[SUMMON_ANIM] TryPlay clip missing race=" + raceName +
+                    " key=" + overrideAnimName + "_" + raceName +
+                    " phase=" + phaseTriggerName);
+            }
             return false;
         }
 
