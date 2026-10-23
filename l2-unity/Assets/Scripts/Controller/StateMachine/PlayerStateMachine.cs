@@ -148,5 +148,31 @@ public class PlayerStateMachine : MonoBehaviour
         // WaitReturnLog.Dump("PlayerStateMachine.OnWaitReturn");
         NotifyEvent(Event.WAIT_RETURN);
     }
+
+    public bool Riding
+    {
+        get
+        {
+            return Player != null
+                && StriderRideService.Instance != null
+                && StriderRideService.Instance.IsRiding(Player);
+        }
+    }
+
+    public void ToggleRide()
+    {
+        if (Player == null || _currentState == PlayerState.DEAD)
+            return;
+        StriderRideService ride = StriderRideService.Instance;
+        if (ride == null)
+            return;
+
+        if (ride.IsRiding(Player))
+            ride.Dismount(Player);
+        else if (!ride.TryMount(Player))
+            return;
+
+        NotifyEvent(Event.RIDE);
+    }
 }
 

@@ -30,12 +30,15 @@ public class NewIdleState : StateBase
             case Event.WAIT_RETURN:
                 HandleWaitReturn(payload);
                 break;
+            case Event.RIDE:
+                PlayAnimation(ForRide(AnimationNames.WAIT));
+                break;
         }
     }
 
     private void HandleEnterWorld()
     {
-        PlayAnimation(AnimationNames.WAIT);
+        PlayAnimation(ForRide(AnimationNames.WAIT));
     }
 
     private void HandleEquipChange()
@@ -43,7 +46,7 @@ public class NewIdleState : StateBase
         var animation = _stateMachine.Player.isAutoAttack
             ? AnimationNames.ATK_WAIT
             : AnimationNames.WAIT;
-        PlayAnimation(animation);
+        PlayAnimation(ForRide(animation));
 
     }
 
@@ -51,7 +54,7 @@ public class NewIdleState : StateBase
     {
         bool useAtkWait = _stateMachine.Player != null && _stateMachine.Player.isAutoAttack;
         var animation = useAtkWait ? AnimationNames.ATK_WAIT : AnimationNames.WAIT;
-        PlayAnimation(animation);
+        PlayAnimation(ForRide(animation));
     }
 
     private void HandleWaitReturn(object payload = null)
@@ -66,7 +69,7 @@ public class NewIdleState : StateBase
         bool fromCombatSmb = IsWaitReturnFromCombatSmb(payload);
         bool targetDead = IsCurrentTargetDead();
         bool useAtkWait = _stateMachine.Player != null && _stateMachine.Player.isAutoAttack;
-        var animation = useAtkWait ? AnimationNames.ATK_WAIT : AnimationNames.WAIT;
+        var animation = ForRide(useAtkWait ? AnimationNames.ATK_WAIT : AnimationNames.WAIT);
 
         // Skip only early external WAIT_RETURN (DieDto / skill Complete) while swing still plays.
         // SMB SwitchToIdle uses wall clock — animNorm often < 0.95 when it fires; must CrossFade.

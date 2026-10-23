@@ -244,13 +244,24 @@ public class MoveAllCharacters : MonoBehaviour, IMoveAllCharacters
         data.SyncUserGait();
         float speed = data.GetSpeed();
         if (L2PawnWalk.IsCharInfoPawn(data.GetEntity()))
+        {
             data.StepCharInfo(target, speed);
+        }
         else
         {
             Vector3 direction = new Vector3(dx, 0f, dz);
             float dist = Mathf.Sqrt(distSq);
             direction.x /= dist;
             direction.z /= dist;
+
+            // Clamp the final step so the pawn lands exactly on target instead
+            // of overshooting it. Interlude calcVelocity does Dest/dt when the
+            // remaining distance is shorter than one frame step; we reproduce that
+            // as dist/dt here so monsters/NPCs stop without a cut-off jerk.
+            float stepLength = speed * Time.deltaTime;
+            if (stepLength >= dist)
+                speed = dist / Time.deltaTime;
+
             data.Move(direction, speed);
         }
 

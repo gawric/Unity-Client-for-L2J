@@ -74,6 +74,12 @@ public class NpcCursorManager : MonoBehaviour
 
     void ApplyTargetedEntityCursor(Entity entity)
     {
+        if (PetVisuals.IsPet(entity.Identity))
+        {
+            ApplyCursor(TalkCursorId, _hoverCursorTalk);
+            return;
+        }
+
         switch (entity)
         {
             case MonsterEntity _:

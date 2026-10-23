@@ -110,6 +110,12 @@ public sealed class NameplateEntryStore
             return;
         }
 
+        // Hidden entities (pooled, ride-hidden pets, despawning) must never get a plate.
+        if (!entity.gameObject.activeInHierarchy)
+        {
+            return;
+        }
+
         EntityIdentity idn = entity.Identity;
         if (string.IsNullOrEmpty(idn.Name))
         {
@@ -185,8 +191,11 @@ public sealed class NameplateEntryStore
                 continue;
             }
 
-            if (e.Target == null)
+            if (e.Target == null || e.Entity == null ||
+                !e.Entity.gameObject.activeInHierarchy)
             {
+                // Destroyed or hidden (pooled / ride-hidden / despawning): drop at once
+                // instead of waiting for the distance or camera cull.
                 _removeIds.Add(id);
                 continue;
             }

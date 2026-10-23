@@ -294,7 +294,7 @@ public class Entity : MonoBehaviour {
     public void UpdateNpcWalkSpd(float walkSpeed)
     {
         float scaled = StatsConverter.Instance.ConvertStat(Stat.SPEED, walkSpeed);
-        float anim_converted = NumberUtils.NpcLocomotionAnimRate();
+        float anim_converted = NpcLocomotionAnimRateForMesh("Walk");
         if (_networkAnimationReceive != null) _networkAnimationReceive.SetWalkSpeed(anim_converted);
         Stats.UnitySpeedWalking = scaled;
     }
@@ -303,10 +303,35 @@ public class Entity : MonoBehaviour {
     public void UpdateNpcRunningSpd(float runSpeed)
     {
         float scaled = StatsConverter.Instance.ConvertStat(Stat.SPEED, runSpeed);
-        float anim_converted = NumberUtils.NpcLocomotionAnimRate();
+        float anim_converted = NpcLocomotionAnimRateForMesh("run");
         if (_networkAnimationReceive != null) _networkAnimationReceive.SetRunSpeed(anim_converted);
         Stats.UnitySpeedRun = scaled;
 
+    }
+
+    /// <summary>
+    /// Monster/NPC locomotion anim rate read from AnimTween col "rate" for this
+    /// mesh (runtimeAnimatorController.name = prefab stem, e.g. wolf → wolf_anim),
+    /// corrected for the imported 24 fps Unity clip timeline: 1.10 * rate/24.
+    /// Falls back to the former 1.10 * 30/24 hardcode when the mesh is not listed.
+    /// </summary>
+    float NpcLocomotionAnimRateForMesh(string sequence)
+    {
+        string controllerName = _networkAnimationReceive != null
+            ? _networkAnimationReceive.GetAnimatorName()
+            : null;
+
+        if (string.IsNullOrEmpty(controllerName))
+            return NumberUtils.NpcLocomotionAnimRate();
+
+        // runtimeAnimatorController.name is the override controller's stem
+        // (e.g. "wolf"); AnimTween lists it as "<stem>_anim" (e.g. wolf_anim).
+        string mesh = controllerName.EndsWith("_anim", System.StringComparison.OrdinalIgnoreCase)
+            ? controllerName
+            : controllerName + "_anim";
+
+        float rate = AnimTweenTable.Instance.TryGetRate(mesh, sequence);
+        return NumberUtils.NpcLocomotionAnimRate(rate);
     } 
 
 

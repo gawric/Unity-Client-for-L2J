@@ -67,6 +67,7 @@ public sealed class NpcSpawner
             return;
         }
         EntitySpawnShared.InitializeNpcAnimation(animationController);
+        EntitySpawnShared.LogStriderAppear("spawn", npc);
         EntitySpawnShared.BindGearAndAnimation(npc, npcGo, animationController);
         EntitySpawnShared.RegisterAnimation(world, npc.Identity.Id, animationController, npc);
         EntitySpawnShared.ApplyNpcMoveSpeeds(npc, false);

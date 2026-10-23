@@ -60,6 +60,9 @@ public static class AnimationNames
     public static readonly Animation WAIT = new Animation("wait_", TypesAnimation.OtherType);
     public static readonly Animation WALK = new Animation("walk_", TypesAnimation.OtherType);
     public static readonly Animation RUN = new Animation("run_", TypesAnimation.OtherType);
+    public static readonly Animation STRIDER_WAIT = new Animation("strider_wait", TypesAnimation.OtherType);
+    public static readonly Animation STRIDER_WALK = new Animation("strider_walk", TypesAnimation.OtherType);
+    public static readonly Animation STRIDER_RUN = new Animation("strider_run", TypesAnimation.OtherType);
     public static readonly Animation DEAD = new Animation("death", TypesAnimation.OtherType);
     public static readonly Animation REBIRTH = new Animation("rebirth", TypesAnimation.OtherType);
     public static readonly Animation ATK01 = new Animation("jatk01_", TypesAnimation.MeleeAttack);

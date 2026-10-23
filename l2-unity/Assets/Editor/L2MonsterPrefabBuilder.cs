@@ -81,6 +81,21 @@ public static class L2MonsterPrefabBuilder
         WireLikeKeltir();
     }
 
+    public static void WireSingle(string prefabPath)
+    {
+        AnimatorController basic = AssetDatabase.LoadAssetAtPath<AnimatorController>(BasicController);
+        if (basic == null)
+        {
+            Debug.LogError("[L2Monster] Missing Monster_Basic.controller");
+            return;
+        }
+
+        string line = WireOne(prefabPath, basic, CollectSlotOriginals(basic));
+        AssetDatabase.SaveAssets();
+        AssetDatabase.Refresh();
+        Debug.Log("[L2Monster] " + line);
+    }
+
     public static void WireLikeKeltir()
     {
         var log = new StringBuilder();

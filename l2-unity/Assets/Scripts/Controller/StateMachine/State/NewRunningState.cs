@@ -22,11 +22,14 @@ public class NewRunningState : StateBase
                 break;
 
             case Event.MOVE_TO:
-                IncomingPacketActions.Animations.PlayAnimation(_stateMachine.GetObjectId() , AnimationNames.RUN.ToString(), true);
+                IncomingPacketActions.Animations.PlayAnimation(_stateMachine.GetObjectId() , ForRide(AnimationNames.RUN).ToString(), true);
                 break;
 
             case Event.CHANGE_EQUIP:
-                IncomingPacketActions.Animations.PlayAnimation(_stateMachine.GetObjectId() , AnimationNames.RUN.ToString(), true);
+                IncomingPacketActions.Animations.PlayAnimation(_stateMachine.GetObjectId() , ForRide(AnimationNames.RUN).ToString(), true);
+                break;
+            case Event.RIDE:
+                IncomingPacketActions.Animations.PlayAnimation(_stateMachine.GetObjectId() , ForRide(AnimationNames.RUN).ToString(), true);
                 break;
         }
     }

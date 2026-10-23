@@ -245,7 +245,7 @@ public static class EntitySpawnShared
         npc.Stats = request.Stats;
         npc.Identity = identity;
         npc.Identity.NpcClass = npcgrp.ClassName;
-        bool pet = identity.Owned || PetVisuals.VisualNpcId(identity.NpcId) != identity.NpcId;
+        bool pet = PetVisuals.IsPet(identity);
         if (!pet)
         {
             npc.Identity.Name = npcName.Name;
@@ -311,6 +311,99 @@ public static class EntitySpawnShared
         }
 
         CrowdAnimTest.Apply(controller);
+    }
+
+    public static void LogStriderAppear(string when, Entity entity, string detail = null)
+    {
+        if (entity == null || entity.Identity == null)
+            return;
+        int npcId = entity.Identity.NpcId;
+        if (npcId != 12526 && npcId != 12527 && npcId != 12528)
+            return;
+
+        Animator animator = entity.GetComponentInChildren<Animator>(true);
+        int waitHash = Animator.StringToHash("wait");
+        bool hasWait = animator != null && animator.HasState(0, waitHash);
+        bool isWait = animator != null && animator.GetCurrentAnimatorStateInfo(0).shortNameHash == waitHash;
+        string clip = "(none)";
+        string controller = "(none)";
+        string speed = "-";
+        string enabled = "-";
+        if (animator != null)
+        {
+            controller = animator.runtimeAnimatorController != null
+                ? animator.runtimeAnimatorController.name
+                : "(no controller)";
+            speed = animator.speed.ToString("F3");
+            enabled = animator.enabled.ToString() + " patkspd=" + animator.GetFloat("patkspd").ToString("F3");
+            AnimatorClipInfo[] infos = animator.GetCurrentAnimatorClipInfo(0);
+            if (infos.Length > 0 && infos[0].clip != null)
+                clip = infos[0].clip.name + " w=" + infos[0].weight.ToString("F2");
+        }
+
+        Debug.Log(
+            "[STRIDER_WAIT] when=" + when +
+            " npc=" + npcId +
+            " controller=" + controller +
+            " enabled=" + enabled +
+            " speed=" + speed +
+            " hasWait=" + hasWait +
+            " stateIsWait=" + isWait +
+            " clip=" + clip +
+            (string.IsNullOrEmpty(detail) ? "" : " " + detail));
+    }
+
+    public static bool IsStriderNpc(Entity entity)
+    {
+        if (entity == null || entity.Identity == null)
+            return false;
+        int npcId = entity.Identity.NpcId;
+        return npcId == 12526 || npcId == 12527 || npcId == 12528;
+    }
+
+    public static void LogStriderGait(string when, Entity entity, string detail = null)
+    {
+        if (!IsStriderNpc(entity))
+            return;
+
+        Animator animator = entity.GetComponentInChildren<Animator>(true);
+        string state = "-";
+        string clip = "(none)";
+        if (animator != null)
+        {
+            AnimatorStateInfo info = animator.GetCurrentAnimatorStateInfo(0);
+            if (info.IsName("run"))
+                state = "run";
+            else if (info.IsName("walk"))
+                state = "walk";
+            else if (info.IsName("wait"))
+                state = "wait";
+            else if (info.IsName("atk01"))
+                state = "atk01";
+            else if (info.IsName("atkwait"))
+                state = "atkwait";
+            else
+                state = "other";
+            AnimatorClipInfo[] infos = animator.GetCurrentAnimatorClipInfo(0);
+            if (infos.Length > 0 && infos[0].clip != null)
+                clip = infos[0].clip.name;
+        }
+
+        bool moving = MoveAllCharacters.Instance != null &&
+            MoveAllCharacters.Instance.IsMoving(entity.Identity.Id);
+        string action = entity.ActionSlot != null ? entity.ActionSlot.Action.ToString() : "-";
+        Debug.Log(
+            "[STRIDER_GAIT] when=" + when +
+            " npc=" + entity.Identity.NpcId +
+            " id=" + entity.Identity.Id +
+            " active=" + entity.gameObject.activeInHierarchy +
+            " action=" + action +
+            " moving=" + moving +
+            " running=" + entity.Running +
+            " inCombat=" + entity.InCombat +
+            " state=" + state +
+            " clip=" + clip +
+            (string.IsNullOrEmpty(detail) ? "" : " " + detail));
     }
 
     static void SeedNpcHpFromGrp(Entity npc, Npcgrp npcgrp)

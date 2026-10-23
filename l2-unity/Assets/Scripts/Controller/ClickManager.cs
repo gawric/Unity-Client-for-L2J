@@ -197,7 +197,8 @@ public class ClickManager : MonoBehaviour
             Targets.Target.Identity != null &&
             Targets.Target.Identity.Id == clickTarget.Identity.Id &&
             !clickTarget.IsDead() &&
-            clickTarget.GetEntity() is MonsterEntity)
+            clickTarget.GetEntity() is MonsterEntity &&
+            !PetVisuals.IsPet(clickTarget.Identity))
         {
             Targets.SetAttackTarget();
         }

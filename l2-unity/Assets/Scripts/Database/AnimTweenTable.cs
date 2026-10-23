@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -32,6 +32,14 @@ public sealed class AnimTweenTable
     readonly Dictionary<string, float> _byFamily =
         new Dictionary<string, float>(StringComparer.OrdinalIgnoreCase);
 
+    // Sequence source rate (AnimTween col "rate", e.g. 30/24/15 fps). Imported
+    // Unity clips are keyed on a 24 fps timeline, so playback speed must be
+    // rate/24 to reproduce the L2 wall-clock cycle length.
+    readonly Dictionary<string, float> _rateByMeshSequence =
+        new Dictionary<string, float>(StringComparer.OrdinalIgnoreCase);
+    readonly Dictionary<string, float> _rateBySequence =
+        new Dictionary<string, float>(StringComparer.OrdinalIgnoreCase);
+
     public int Count => _byMeshSequence.Count;
 
     public void Initialize()
@@ -39,6 +47,8 @@ public sealed class AnimTweenTable
         _byMeshSequence.Clear();
         _bySequence.Clear();
         _byFamily.Clear();
+        _rateByMeshSequence.Clear();
+        _rateBySequence.Clear();
 
         string dataPath = Path.Combine(Application.streamingAssetsPath, RelativePath);
         if (!File.Exists(dataPath))
@@ -73,6 +83,17 @@ public sealed class AnimTweenTable
                 if (!_bySequence.ContainsKey(sequence))
                     _bySequence.Add(sequence, tween);
 
+                // Store the sequence source rate (30/24/15…) so locomotion can scale
+                // the 24 fps Unity clip by rate/24.
+                if (float.TryParse(cols[4], NumberStyles.Float, CultureInfo.InvariantCulture, out float rate) && rate > 0f)
+                {
+                    string key = mesh + "\0" + sequence;
+                    if (!_rateByMeshSequence.ContainsKey(key))
+                        _rateByMeshSequence.Add(key, rate);
+                    if (!_rateBySequence.ContainsKey(sequence))
+                        _rateBySequence.Add(sequence, rate);
+                }
+
                 string family = FamilyOf(sequence);
                 if (family != null && !_byFamily.ContainsKey(family))
                     _byFamily.Add(family, tween);
@@ -103,6 +124,25 @@ public sealed class AnimTweenTable
         }
 
         return TryGetTween(sequence, out seconds);
+    }
+
+    /// <summary>
+    /// Source sequence rate (fps) from AnimTween col "rate". Falls back to the
+    /// sequence family when the exact mesh+sequence is not listed.
+    /// </summary>
+    public float TryGetRate(string sequence, float fallback = 30f)
+    {
+        if (!string.IsNullOrEmpty(sequence) && _rateBySequence.TryGetValue(sequence, out float rate))
+            return rate;
+        return fallback;
+    }
+
+    public float TryGetRate(string mesh, string sequence, float fallback = 30f)
+    {
+        if (!string.IsNullOrEmpty(mesh) && !string.IsNullOrEmpty(sequence)
+            && _rateByMeshSequence.TryGetValue(mesh + "\0" + sequence, out float rate))
+            return rate;
+        return TryGetRate(sequence, fallback);
     }
 
     /// <summary>

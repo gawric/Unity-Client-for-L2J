@@ -9,6 +9,10 @@ public class MovementData
 
     private float _verticalVelocity = 0;
     private float _gravity = 28;
+
+    // PhysicsVolume.TerminalVelocity (2500 UU/s) scaled to Unity meters (1/52.5),
+    // matching PlayerController so falling monsters/NPCs cap identically.
+    const float TerminalVelocity = 47.62f;
     private bool _isMove;
     private Vector3 _lastPos;
     private bool _hasLastPos;
@@ -175,7 +179,10 @@ public class MovementData
         if (action == EntityActionKind.Attack ||
             action == EntityActionKind.Skill ||
             action == EntityActionKind.Stop)
+        {
+            EntitySpawnShared.LogStriderGait("reconcile-skip", _entity, "reason=action");
             return false;
+        }
 
         NetworkAnimationController controller = _entity.GetAnimatorController();
         Animator animator = controller != null ? controller.GetAnimator() : null;
@@ -185,7 +192,12 @@ public class MovementData
         AnimatorStateInfo state = animator.GetCurrentAnimatorStateInfo(0);
         bool staleLocomotion = state.IsName("walk") || state.IsName("run");
         if (!staleLocomotion)
+        {
+            EntitySpawnShared.LogStriderGait("reconcile-keep", _entity, "reason=not-run-or-walk");
             return true;
+        }
+
+        EntitySpawnShared.LogStriderGait("reconcile-stop", _entity, "to=wait");
 
         // Debug.Log(
             // "[MOVE_ANIM_RECONCILE] nick=" + EntityActionCombatLog.NameOf(_entity) +
@@ -494,7 +506,7 @@ public class MovementData
         // processLanded / ToFloor settle the pawn onto the floor under it. We
         // reproduce that split: XY move first, then gravity + a downward capsule
         // probe to snap Y. Without this CharInfo players float / spawn underground.
-        stepped = ApplyCharInfoGravityAndGround(stepped, Time.deltaTime);
+        stepped = ApplyCharInfoGravityAndGround(stepped, Time.deltaTime, out _);
 
         LookAlong(t, look);
 
@@ -518,7 +530,7 @@ public class MovementData
     /// GroundSnapHelper / spawn / NetworkTransformReceive so the pawn does not
     /// bounce between two different ground conventions.
     /// </summary>
-    private Vector3 ApplyCharInfoGravityAndGround(Vector3 position, float deltaTime)
+    private Vector3 ApplyCharInfoGravityAndGround(Vector3 position, float deltaTime, out bool grounded)
     {
         float radius = _entity != null ? _entity.GetCollissionRadius() : 0f;
         if (radius <= 0.001f)
@@ -544,12 +556,17 @@ public class MovementData
             // above the ground each frame vs. its spawn height.
             targetY = hit.point.y;
             _verticalVelocity = 0f;
+            grounded = true;
         }
         else
         {
-            // No floor below: keep falling (Interlude physFalling branch).
+            // No floor below: keep falling (Interlude physFalling branch), capped
+            // at terminal velocity like the fixed PlayerController.
             _verticalVelocity -= _gravity * deltaTime;
+            if (_verticalVelocity < -TerminalVelocity)
+                _verticalVelocity = -TerminalVelocity;
             targetY = position.y + _verticalVelocity * deltaTime;
+            grounded = false;
         }
 
         return new Vector3(position.x, targetY, position.z);
@@ -565,8 +582,8 @@ public class MovementData
             return;
         }
 
-        direction = ApplyGravity(direction);
         CharacterMove(_entity, direction, speed);
+
         CheckLocomotionAnimation();
         LookAlong(GetTransform(), lookDir);
     }
@@ -651,13 +668,17 @@ public class MovementData
     private void CharacterMove(Entity entity , Vector3 direction , float speed)
     {
         CharacterController character = GetControllerToTypeEntity(entity);
-        StartMove(character, direction, speed);
-        
+        // Match PlayerController: gravity (Y) is integrated separately so the
+        // vertical velocity is NOT scaled by run speed. Combining them made the
+        // monsters/NPCs bob "light" — the faster they ran, the weaker gravity felt.
+        Vector3 planar = new Vector3(direction.x, 0f, direction.z);
+        float vy = ApplyGravity(Time.deltaTime);
+        StartMove(character, planar, speed, vy);
     }
 
    
 
-    private void StartMove(CharacterController character, Vector3 direction, float speed)
+    private void StartMove(CharacterController character, Vector3 direction, float speed, float verticalVelocity)
     {
         if (character == null || !character.enabled || !character.gameObject.activeInHierarchy)
             return;
@@ -665,33 +686,35 @@ public class MovementData
         if (character.radius <= 0.001f || character.height <= 0.001f)
             return;
 
-        character.Move(direction * speed * Time.deltaTime);
+        Vector3 planar = direction * speed * Time.deltaTime;
+        planar.y = verticalVelocity * Time.deltaTime;
+        character.Move(planar);
     }
 
-    private Vector3 ApplyGravity(Vector3 dir)
+    /// <summary>
+    /// Interlude physWalking / physFalling vertical integrator (matches
+    /// PlayerController.ApplyGravity). Grounded: small downward bias keeps the
+    /// CharacterController touching the floor. Airborne: gravity capped at
+    /// PhysicsVolume.TerminalVelocity (2500 UU/s → 47.62 m/s).
+    /// </summary>
+    private float ApplyGravity(float deltaTime)
     {
-        /* Handle gravity */
         var character = GetControllerToTypeEntity(_entity);
 
-        if(character != null)
+        if (character == null)
+            return 0f;
+
+        if (character.isGrounded)
         {
-            if (character.isGrounded)
-            {
-                if (_verticalVelocity < -1.25f)
-                {
-                    _verticalVelocity = -1.25f;
-                }
-            }
-            else
-            {
-                _verticalVelocity -= _gravity * Time.deltaTime;
-            }
-            dir.y = _verticalVelocity;
-
-            return dir;
+            _verticalVelocity = -2f;
         }
-
-        return dir;
+        else
+        {
+            _verticalVelocity -= _gravity * deltaTime;
+            if (_verticalVelocity < -TerminalVelocity)
+                _verticalVelocity = -TerminalVelocity;
+        }
+        return _verticalVelocity;
     }
 
     public void OnFinish(Vector3 target)
@@ -714,6 +737,7 @@ public class MovementData
         else
             _entity.transform.position = dest;
         SetEventToTypeEntity(_entity);
+        EntitySpawnShared.LogStriderGait("arrived", _entity);
     }
 
 

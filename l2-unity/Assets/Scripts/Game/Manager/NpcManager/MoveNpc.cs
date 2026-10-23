@@ -20,6 +20,8 @@ public class MoveNpc : MonoBehaviour
     private Vector3 _targetMove;
     private float _verticalVelocity = 0;
     private float _gravity = 28;
+    // PhysicsVolume.TerminalVelocity (2500 UU/s) scaled to Unity meters (1/52.5).
+    const float TerminalVelocity = 47.62f;
     private CharacterController _controller;
     private NpcEntity _entity;
 
@@ -138,12 +140,24 @@ public class MoveNpc : MonoBehaviour
 
                 Vector3 point = gravityOffTarget - gravityOffTransform;
                 Vector3 lookDir = point.normalized;
-                Vector3 direction = ApplyGravity(lookDir);
+                float vy = ApplyGravity(Time.deltaTime);
+
+                // Clamp the final step to land exactly on target (Interlude
+                // calcVelocity: Dest/dt when remaining distance < one frame step),
+                // so NPCs stop without overshooting / a cut-off jerk.
+                float stepLength = monsterSpeed * Time.deltaTime;
+                if (stepLength >= distance)
+                    monsterSpeed = distance / Time.deltaTime;
 
                 if (_isTeleport == false)
                 {
                     _detectedIsMove = true;
-                    _controller.Move(direction * monsterSpeed * Time.deltaTime);
+                    // Planar velocity scaled by run speed, gravity integrated
+                    // separately (matches PlayerController) so vertical speed is
+                    // not masked/"lightened" by monsterSpeed.
+                    Vector3 step = lookDir * monsterSpeed * Time.deltaTime;
+                    step.y = vy * Time.deltaTime;
+                    _controller.Move(step);
 
                     if (lookDir.sqrMagnitude > 0.0001f)
                     {
@@ -250,23 +264,23 @@ public class MoveNpc : MonoBehaviour
  
 
 
-    private Vector3 ApplyGravity(Vector3 dir)
+    /// <summary>
+    /// Matches PlayerController.ApplyGravity: grounded bias -2f, airborne
+    /// gravity capped at terminal velocity (2500 UU/s → 47.62 m/s).
+    /// </summary>
+    private float ApplyGravity(float deltaTime)
     {
-        /* Handle gravity */
         if (_controller.isGrounded)
         {
-            if (_verticalVelocity < -1.25f)
-            {
-                _verticalVelocity = -1.25f;
-            }
+            _verticalVelocity = -2f;
         }
         else
         {
-            _verticalVelocity -= _gravity * Time.deltaTime;
+            _verticalVelocity -= _gravity * deltaTime;
+            if (_verticalVelocity < -TerminalVelocity)
+                _verticalVelocity = -TerminalVelocity;
         }
-        dir.y = _verticalVelocity;
-
-        return dir;
+        return _verticalVelocity;
     }
 
 

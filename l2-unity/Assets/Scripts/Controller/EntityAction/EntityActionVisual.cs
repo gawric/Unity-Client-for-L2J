@@ -38,7 +38,7 @@ public static class EntityActionVisual
 
         if (!CanPlayAnim(entity))
         {
-
+            EntitySpawnShared.LogStriderGait("start-move-blocked", entity, "walking=" + walking);
             return;
         }
 
@@ -49,6 +49,7 @@ public static class EntityActionVisual
             string anim = walking ? AnimationNames.MONSTER_WALK.ToString() : AnimationNames.MONSTER_RUN.ToString();
 
             IncomingPacketActions.Animations.PlayMonsterAnimation(monster.Identity.Id, anim);
+            EntitySpawnShared.LogStriderGait("start-move", monster, "asked=" + anim);
         }
     }
 
@@ -86,6 +87,7 @@ public static class EntityActionVisual
                 IncomingPacketActions.Animations.PlayMonsterAnimation(
                     monster.Identity.Id,
                     AnimationNames.MONSTER_WAIT.ToString());
+                EntitySpawnShared.LogStriderGait("stop-move", monster, "asked=wait");
             }
         }
     }

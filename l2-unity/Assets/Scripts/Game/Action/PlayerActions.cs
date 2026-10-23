@@ -31,6 +31,7 @@ public class PlayerActions : MonoBehaviour
         _actions.Add(ActionType.Sit, new SitStandAction());
         _actions.Add(ActionType.WalkRun, new WalkRunAction());
         _actions.Add(ActionType.NextTarget, new NextTargetAction());
+        _actions.Add(ActionType.RideStrider, new RideStriderAction());
     }
 
     private void OnDestroy()

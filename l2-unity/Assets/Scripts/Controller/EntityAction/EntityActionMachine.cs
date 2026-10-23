@@ -334,14 +334,7 @@ public sealed class EntityActionMachine : ITickable
             return;
         if (IsSkillOrAttack(entity.ActionSlot.Action) || ShouldHoldCombatIdle(entity))
         {
-            // EntityActionCombatLog.LogIfWatch(entity,
-                // "NotifyArrived ignore name=" + EntityActionCombatLog.NameOf(entity) +
-                // " action=" + entity.ActionSlot.Action +
-                // " inCombat=" + entity.InCombat);
-            // EntityActionCombatLog.LogCiPawn(entity,
-                // "Arrived IGNORE nick=" + EntityActionCombatLog.NameOf(entity) +
-                // " action=" + entity.ActionSlot.Action +
-                // " inCombat=" + entity.InCombat);
+            EntitySpawnShared.LogStriderGait("arrived-ignore", entity, "reason=combat");
             return;
         }
 

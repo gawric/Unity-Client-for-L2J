@@ -22,6 +22,18 @@ public class MonsterStateAtk : MonsterStateBase
         LoadComponents(animator);
         _swingId = _entity != null ? _entity.ActionSlot.AttackSwingId : 0;
 
+        // EnterEventgrp plays atk01 when a summon appears (strider 12527 and the same state).
+        // That is not a combat swing. PAtk speed is still 0, so the attack curve writes
+        // patkspd=0 and the body freezes on the first frame. Keep patkspd at 1 here.
+        // ReturnAppearToWait sends the one-shot back to wait; Attack/Skill keep the curve.
+        if (!IsCombatSwing())
+        {
+            if (_networkAnimationController != null)
+                _networkAnimationController.SetPAtkSpeed(1f);
+            StopAnimationTrigger(animator, parameterName);
+            return;
+        }
+
         AnimatorClipInfo[] clipInfos = animator.GetNextAnimatorClipInfo(0);
 
         if (clipInfos == null || clipInfos.Length == 0)
@@ -48,8 +60,11 @@ public class MonsterStateAtk : MonsterStateBase
     override public void OnStateUpdate(Animator animator, AnimatorStateInfo stateInfo, int layerIndex) {
         if (TryFinishSkill(stateInfo))
             return;
-        if (_entity != null && _entity.ActionSlot.Action != EntityActionKind.Attack)
+        if (!IsCombatSwing())
+        {
+            ReturnAppearToWait(animator, stateInfo, layerIndex);
             return;
+        }
         if (IsStaleSwing())
             return;
 
@@ -115,6 +130,26 @@ public class MonsterStateAtk : MonsterStateBase
 
         _isSwitchIdle = true;
         EntityActionMachine.Instance.Set(_entity, EntityActionKind.Idle, null);
+    }
+
+    bool IsCombatSwing()
+    {
+        return _entity != null &&
+            (_entity.ActionSlot.Action == EntityActionKind.Attack ||
+             _entity.ActionSlot.Action == EntityActionKind.Skill);
+    }
+
+    void ReturnAppearToWait(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
+    {
+        if (_isSwitchIdle || stateInfo.normalizedTime < 1f)
+            return;
+        _isSwitchIdle = true;
+        if (_entity != null && !_entity.IsDead() && EntityActionMachine.Instance != null)
+        {
+            EntityActionMachine.Instance.Set(_entity, EntityActionKind.Idle, "wait");
+            return;
+        }
+        animator.CrossFade("wait", 0.12f, layerIndex);
     }
 
     bool IsStaleSwing()

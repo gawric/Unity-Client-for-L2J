@@ -9,5 +9,6 @@
     Assist = 6,
     PartyInvite = 7,
     PartyLeave = 8,
-    PartyKick = 9
+    PartyKick = 9,
+    RideStrider = 11
 }

@@ -72,6 +72,20 @@ public class AnimationManager : BaseAnimationManager , IAnimationManager
         if (controller == null)
             return;
 
+        if (PlayerStriderAnim.TryResolve(animationName, out bool mountRunning))
+        {
+            if (StriderRideService.Instance != null)
+                StriderRideService.Instance.SetMountGait(objectId, mountRunning);
+            if (!PlayerLocomotionCrossFade.IsAlreadyPlaying(controller, PlayerStriderAnim.State))
+            {
+                DesableLastPlayerAnimationElseTrue(objectId, controller);
+                controller.SetAnimatorSpeed(1f);
+                PlayerLocomotionCrossFade.TryPlay(controller, PlayerStriderAnim.State, 0.12f);
+            }
+            SetRecentName(objectId, PlayerStriderAnim.State);
+            return;
+        }
+
         // Bare names without weapon suffix (death / rebirth) — before GetFinalNameAnim appends _1HS etc.
         if (PlayerDeathAnim.TryResolve(animationName, out string bareStateName))
         {

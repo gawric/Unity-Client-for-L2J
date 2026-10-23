@@ -38,7 +38,7 @@ public class ActionSlot : L2DraggableSlot
 
         if (_tooltipManipulator != null)
         {
-            _tooltipManipulator.SetText(Action.Name);
+            _tooltipManipulator.SetText(Action != null ? Action.Name : "Ride Strider");
         }
     }
 
@@ -69,7 +69,12 @@ public class ActionSlot : L2DraggableSlot
         {
             return "action008";
         }
+        else if (actionType == ActionType.RideStrider)
+        {
+            return "etc_pet_ride_01";
+        }
 
-        return ActionNameTable.Instance.GetAction(actionType)._icon;
+        ActionData named = ActionNameTable.Instance.GetAction(actionType);
+        return named != null ? named._icon : "action001";
     }
 }

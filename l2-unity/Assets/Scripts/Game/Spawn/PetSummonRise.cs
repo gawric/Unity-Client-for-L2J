@@ -58,6 +58,7 @@ public sealed class PetSummonRise : MonoBehaviour
             " rows=" + EnterEventTable.Instance.Count);
         SpawnGroundEffect(row.EffectClass, end, entity.transform.rotation, entity);
         PlayEnterAnim(entity, row.AnimName);
+        EntitySpawnShared.LogStriderAppear("enter", entity, "asked=" + row.AnimName);
 
         if (!moves)
         {
@@ -98,6 +99,7 @@ public sealed class PetSummonRise : MonoBehaviour
                 entity.Identity.SummonState = 0;
             }
             SetControllersEnabled(entity.gameObject, true);
+            EntitySpawnShared.LogStriderAppear("risen", entity);
         }
 
         _active = false;

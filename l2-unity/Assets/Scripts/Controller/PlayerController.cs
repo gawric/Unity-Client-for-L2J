@@ -16,6 +16,10 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float _jumpForce = 10;
     [SerializeField] private float _gravity = 28;
 
+    // PhysicsVolume.TerminalVelocity (2500 UU/s) scaled to Unity meters (1/52.5).
+    // Caps falling speed the same way Interlude physFalling does.
+    private const float TerminalVelocity = 47.62f;
+
 
     /* Target */
     private MovementTarget _movementTarget;
@@ -48,7 +52,6 @@ public class PlayerController : MonoBehaviour
     private bool _turnsAround = true;
 
     private float _moveTimer = 0f;
-    private float _elapsedTime = 0;
 
     
     private bool _isFirst = false;
@@ -129,21 +132,31 @@ public class PlayerController : MonoBehaviour
         if(VectorUtils.Distance2D(characterPosition, targetPosition) > _movementTarget.GetDistance())
         {
 
-            _elapsedTime = Time.time;
             _moveTimer += Time.deltaTime;
             SwitchWalkToRun();
 
             float finalAngle = GetFinalAngle(targetPosition, characterPosition);
 
             float speed = GetMovementSpeed();
-            Vector3 newPosition = GetNewPosition(targetPosition, characterPosition, speed);
-            Vector3 newPositionPlusGravity = ApplyGravity(newPosition , _elapsedTime);
+            Vector3 velocity = GetNewPosition(targetPosition, characterPosition, speed);
+
+            // APawn::calcVelocity arrival clamp (Pawn.h): when the remaining
+            // distance is below this frame's step, Velocity = Dest / DeltaTime so
+            // the pawn lands on the destination instead of overshooting and
+            // snapping back on the next frame.
+            Vector3 toTarget = targetPosition - characterPosition;
+            float toTargetDist = toTarget.magnitude;
+            float stepLength = speed * Time.deltaTime;
+            if (toTargetDist > 0.0001f && toTargetDist < stepLength)
+                velocity = toTarget / Time.deltaTime;
+
+            velocity.y = ApplyGravity(Time.deltaTime);
 
             Quaternion targetRotation = GetNewRotate(finalAngle);
             float r_speed = _calcSpeed.GetSpeedRotate(_behindPlayer);
-            transform.rotation = Quaternion.Lerp(transform.rotation, targetRotation , r_speed);
+            transform.rotation = Quaternion.Lerp(transform.rotation, targetRotation, FrameIndependentLerp(r_speed, Time.deltaTime));
 
-            _controller.Move(newPositionPlusGravity * Time.deltaTime);
+            _controller.Move(velocity * Time.deltaTime);
 
 
             _isFirst = false;
@@ -379,23 +392,39 @@ public class PlayerController : MonoBehaviour
     }
 
     
-    public Vector3 ApplyGravity(Vector3 dir , float elapsedTime)
+    /// <summary>
+    /// Vertical velocity integrator with Interlude physWalking / physFalling semantics.
+    /// Grounded: planar velocity — Physics isGrounded holds the pawn on the floor, a
+    /// small downward bias keeps the CharacterController touching it over slopes.
+    /// Airborne: accumulate gravity, capped at terminal velocity.
+    /// Returns the Y velocity (m/s); the caller integrates it with dt exactly once.
+    /// </summary>
+    private float ApplyGravity(float deltaTime)
     {
-        /* Handle gravity */
         if (_controller.isGrounded)
         {
-            if (_verticalVelocity < -1.25f)
-            {
-                _verticalVelocity = -1.25f;
-            }
+            _verticalVelocity = -2f;
         }
         else
         {
-            _verticalVelocity -= _gravity * elapsedTime;
+            _verticalVelocity -= _gravity * deltaTime;
+            if (_verticalVelocity < -TerminalVelocity)
+                _verticalVelocity = -TerminalVelocity;
         }
-        dir.y = _verticalVelocity;
+        return _verticalVelocity;
+    }
 
-        return dir;
+    /// <summary>
+    /// Frame-rate independent lerp factor preserving the legacy per-frame feel
+    /// (0.06 / 0.2 fractions) at the game's 60 fps target. Without this,
+    /// Quaternion.Lerp(t) sped up or slowed down with the frame rate.
+    /// </summary>
+    private static float FrameIndependentLerp(float perFrameFraction, float deltaTime)
+    {
+        if (perFrameFraction <= 0f) return 0f;
+        if (perFrameFraction >= 1f) return 1f;
+        float rate = -60f * Mathf.Log(1f - perFrameFraction);
+        return 1f - Mathf.Exp(-rate * deltaTime);
     }
 
    

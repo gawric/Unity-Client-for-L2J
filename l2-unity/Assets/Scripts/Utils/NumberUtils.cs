@@ -59,6 +59,18 @@ public class NumberUtils {
         return L2NpcMovePlayRate * L2SequenceFps / UnityClipFps;
     }
 
+    /// <summary>
+    /// Same as <see cref="NpcLocomotionAnimRate()"/> but with a source rate read
+    /// from AnimTween col "rate" (monsters are 30/24/15 fps). rate/24 corrects the
+    /// imported 24 fps Unity clip to the L2 wall-clock cycle length.
+    /// </summary>
+    public static float NpcLocomotionAnimRate(float sourceRate)
+    {
+        if (sourceRate <= 0f)
+            sourceRate = L2SequenceFps;
+        return L2NpcMovePlayRate * sourceRate / UnityClipFps;
+    }
+
 
     public static float FloorToNearest(float value, float step) {
         return step * Mathf.Floor(value / step);
