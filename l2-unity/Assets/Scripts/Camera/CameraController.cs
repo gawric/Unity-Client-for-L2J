@@ -15,6 +15,11 @@ public class CameraController : MonoBehaviour
     public const float L2ReferencePlayerHeight = 1.6f;
 
     private Vector3 _lerpLookAt;
+    private Vector3 _lastLookAt;
+    private bool _hasLookAt;
+    private Vector3 _prevCamPos;
+    private bool _hasCamPos;
+    private float _camLogIn;
     [SerializeField] private float _x, _y = L2PitchDegrees;
     private Vector3 _lookAt;
     private LayerMask _collisionMask;
@@ -131,6 +136,8 @@ public class CameraController : MonoBehaviour
         _resolvedPlayerHeight = ResolvePlayerHeight();
         _lookAt = LookAtPoint();
         _lerpLookAt = _lookAt;
+        _lastLookAt = _lookAt;
+        _hasLookAt = true;
         _y = _pitchAngle;
         _currentDistance = _camDistance;
 
@@ -215,23 +222,37 @@ public class CameraController : MonoBehaviour
     private void UpdatePosition()
     {
         Quaternion rotation = Quaternion.Euler(_y, _x, 0f);
+        Vector3 previousLookAt = _hasLookAt ? _lastLookAt : LookAtPoint();
         _lookAt = LookAtPoint();
+        _lastLookAt = _lookAt;
+        _hasLookAt = true;
 
-        if (_smoothCamera)
+        // XZ stays on the pawn's step so a stop does not leave a coasting tail.
+        // Y is eased: while running the capsule bounces a few millimetres a
+        // frame, and copying that into the camera reads as a shake.
+        Vector3 step = _lookAt - previousLookAt;
+        bool snapped = !_smoothCamera || (step.x * step.x + step.z * step.z) < 0.000004f;
+        if (_lerpLookAt == Vector3.zero)
+            _lerpLookAt = _lookAt;
+
+        if (snapped)
         {
-            if (_lerpLookAt == Vector3.zero)
-            {
-                _lerpLookAt = _lookAt;
-            }
-
-            _lerpLookAt = Vector3.Lerp(_lerpLookAt, _lookAt, _smoothness * Time.deltaTime);
+            _lerpLookAt.x = _lookAt.x;
+            _lerpLookAt.z = _lookAt.z;
         }
         else
         {
-            _lerpLookAt = _lookAt;
+            _lerpLookAt.x += step.x;
+            _lerpLookAt.z += step.z;
+            float t = 1f - Mathf.Exp(-_smoothness * Time.deltaTime);
+            _lerpLookAt.x = Mathf.Lerp(_lerpLookAt.x, _lookAt.x, t);
+            _lerpLookAt.z = Mathf.Lerp(_lerpLookAt.z, _lookAt.z, t);
         }
 
-        float desiredDistance = _camDistance;
+        float yBlend = 1f - Mathf.Exp(-14f * Time.deltaTime);
+        _lerpLookAt.y = Mathf.Lerp(_lerpLookAt.y, _lookAt.y, yBlend);
+
+        float wantedDistance = _camDistance;
         if (!_disableCollisionZoom)
         {
             if (_collisionDetector == null && _camera != null)
@@ -244,14 +265,20 @@ public class CameraController : MonoBehaviour
                 _collisionDetector.DetectSphereCollision(
                     _lerpLookAt,
                     rotation,
-                    desiredDistance,
+                    wantedDistance,
                     L2CollisionRadiusMeters * WorldScale,
                     L2TraceExtraMeters * WorldScale);
-                desiredDistance = _collisionDetector.AdjustedDistance;
+                _currentDistance = _collisionDetector.AdjustedDistance;
+            }
+            else
+            {
+                _currentDistance = wantedDistance;
             }
         }
-
-        _currentDistance = desiredDistance;
+        else
+        {
+            _currentDistance = wantedDistance;
+        }
         Vector3 adjustedPosition = _lerpLookAt + rotation * (Vector3.forward * -_currentDistance);
         if (float.IsNaN(adjustedPosition.x))
         {
@@ -259,6 +286,29 @@ public class CameraController : MonoBehaviour
         }
 
         transform.SetPositionAndRotation(adjustedPosition, rotation);
+        LogCamera(previousLookAt, snapped, wantedDistance, adjustedPosition);
+    }
+
+    void LogCamera(Vector3 previousLookAt, bool snapped, float wantedDistance, Vector3 camPos)
+    {
+        Vector3 pawnStep = _lookAt - previousLookAt;
+        Vector3 camStep = _hasCamPos ? camPos - _prevCamPos : Vector3.zero;
+        _prevCamPos = camPos;
+        _hasCamPos = true;
+
+        float pawnMm = pawnStep.magnitude * 1000f;
+        float camMm = camStep.magnitude * 1000f;
+        _camLogIn -= Time.deltaTime;
+
+        bool shake = pawnMm < 1f && camMm > 0.3f;
+        bool runSample = pawnMm > 5f && _camLogIn <= 0f;
+        if (!shake && !runSample)
+            return;
+
+        if (runSample)
+            _camLogIn = 0.5f;
+
+   
     }
 
     public void SetHeading(float heading)

@@ -212,7 +212,6 @@ public class NewIdleState : StateBase
                 return;
             }
 
-            // WaitReturnLog.Play(objectId, animName);
             IncomingPacketActions.Animations.PlayAnimation(objectId, animName, true);
         });
     }

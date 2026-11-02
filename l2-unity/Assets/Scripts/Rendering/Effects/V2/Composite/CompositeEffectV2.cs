@@ -32,6 +32,10 @@ public class CompositeEffectV2 : CompositePrefabEffect
     bool _v2SubscribedShoot;
     bool _v2SubscribedHit;
     bool _v2DirectShootObserved;
+    Transform _cubicMuzzle;
+    Transform _cubicAim;
+    BaseEffect _cubicImpactPrefab;
+    bool _cubicImpactPlayed;
 
     protected override string DebugPrefix => "[CompositeEffectV2]";
 
@@ -77,6 +81,145 @@ public class CompositeEffectV2 : CompositePrefabEffect
         }
     }
 
+    float _strikeScale = 1f;
+
+    /// <summary>
+    /// AEmitter::SetSizeScale for a cubic shot (Storm / Aqua, argument 0.6).
+    /// Applied when the part is spawned, without rewriting the prefab scale.
+    /// </summary>
+    public void MultiplyPartScale(float factor)
+    {
+        if (factor > 0f)
+            _strikeScale = factor;
+    }
+
+    /// <summary>
+    /// Cubic strike has no caster animation. NCubicSkillProcess spawns the
+    /// projectile on the threshold frame, which is the shoot event.
+    /// </summary>
+    public void ReleaseShot()
+    {
+        ProcessV2Shoot("cubic");
+    }
+
+    /// <summary>
+    /// True when a part is an outbound flight element: name suffix _fl / _ra / _pr,
+    /// a launched ShotProjectile, or a launched skill projectile stored as HomeFlight.
+    /// The vampiric return orb (m_u003_b) stays a target burst with no outbound shot.
+    /// </summary>
+    public bool HasCubicOutboundFlight()
+    {
+        if (_v2Parts == null)
+        {
+            return false;
+        }
+
+        for (int i = 0; i < _v2Parts.Length; i++)
+        {
+            if (IsCubicOutboundFlight(_v2Parts[i]))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// Cubic shot: the flying part leaves <paramref name="muzzle"/> and travels
+    /// to <paramref name="aim"/>. Heal and on-target bursts do not call this.
+    /// </summary>
+    public void ArmCubicOutbound(Transform muzzle, Transform aim)
+    {
+        _cubicMuzzle = muzzle;
+        _cubicAim = aim;
+    }
+
+    /// <summary>
+    /// Explosion played when the outbound orb reaches the target.
+    /// </summary>
+    public void ArmCubicImpact(BaseEffect prefab)
+    {
+        _cubicImpactPrefab = prefab;
+        _cubicImpactPlayed = false;
+        if (prefab == null || ProjectileManager.Instance == null || _v2SubscribedHit)
+        {
+            return;
+        }
+
+        ProjectileManager.Instance.OnHitEffectProjectile += HandleV2ProjectileHit;
+        _v2SubscribedHit = true;
+    }
+
+    void SpawnCubicImpact(Transform target, Vector3 hitPoint, Vector3 hitDirection)
+    {
+        Vector3 point = hitPoint.sqrMagnitude > 0.0001f
+            ? hitPoint
+            : (target != null ? target.position : transform.position);
+        BaseEffect fx = Instantiate(_cubicImpactPrefab, point, Quaternion.identity);
+        fx.gameObject.name = _cubicImpactPrefab.name;
+        MagicCastData cast = new MagicCastData();
+        cast.StartTime = Time.time;
+        cast.SpawnShotVisualsImmediately = true;
+        Entity body = target != null ? target.GetComponentInParent<Entity>() : null;
+        if (body != null && body.Identity != null)
+        {
+            cast.TargetObjectId = body.Identity.Id;
+        }
+
+        Transform owner = target != null ? target : fx.transform;
+        EffectSettings settings = _settings;
+        if (settings == null)
+        {
+            EffectParticle fallback = ScriptableObject.CreateInstance<EffectParticle>();
+            fallback.defaultLifeTime = 2f;
+            fallback.hideTime = 0f;
+            settings = fallback;
+        }
+
+        fx.Setup(settings, cast, owner);
+        fx.Play();
+    }
+
+    static bool IsCubicOutboundFlight(CompositePart part)
+    {
+        if (part == null || !part.IsSpawnable || IsVampiricReturnOrb(part.name))
+        {
+            return false;
+        }
+
+        if (HasOutboundFlightSuffix(part.name))
+        {
+            return true;
+        }
+
+        ShotProjectilePart shot = part as ShotProjectilePart;
+        if (shot != null && shot.IsLaunchedProjectile)
+        {
+            return true;
+        }
+
+        HomeFlightPart home = part as HomeFlightPart;
+        return home != null && home.IsLaunchedProjectile;
+    }
+
+    static bool HasOutboundFlightSuffix(string partName)
+    {
+        if (string.IsNullOrEmpty(partName))
+        {
+            return false;
+        }
+
+        return partName.EndsWith("_fl", System.StringComparison.OrdinalIgnoreCase) ||
+               partName.EndsWith("_ra", System.StringComparison.OrdinalIgnoreCase) ||
+               partName.EndsWith("_pr", System.StringComparison.OrdinalIgnoreCase);
+    }
+
+    static bool IsVampiricReturnOrb(string partName)
+    {
+        return string.Equals(partName, "m_u003_b", System.StringComparison.OrdinalIgnoreCase);
+    }
+
     protected override void PlayV2()
     {
         if (!HasSpawnableV2Parts)
@@ -88,6 +231,7 @@ public class CompositeEffectV2 : CompositePrefabEffect
 
         _playStartedAt = Time.time;
         RefreshV2Context();
+        ExtendLifeForAuthoredHold(SelectLifetimeSettings());
         LogHomeSpawnPlay();
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
         // Debug.Log(
@@ -124,6 +268,28 @@ public class CompositeEffectV2 : CompositePrefabEffect
     protected override void PreparePartPlayback(CompositePrefabPart part, BaseEffect instance)
     {
         PrepareV2Playback(instance);
+    }
+
+    void ExtendLifeForAuthoredHold(EffectSettings settings)
+    {
+        if (settings == null || ReferenceEquals(settings, _settings) || _v2Parts == null)
+        {
+            return;
+        }
+
+        float life = settings.defaultLifeTime;
+        for (int i = 0; i < _v2Parts.Length; i++)
+        {
+            CompositePart part = _v2Parts[i];
+            if (part == null || part.prefab == null)
+            {
+                continue;
+            }
+
+            life = Mathf.Max(life, ParticleGroupV2.LongestAuthoredHold(part.prefab));
+        }
+
+        settings.defaultLifeTime = life;
     }
 
     void ExtendLifetimeThroughProjectileImpact(EffectSettings lifeTimeSettings)
@@ -330,6 +496,12 @@ public class CompositeEffectV2 : CompositePrefabEffect
             return;
         }
 
+        if (_cubicMuzzle != null && IsCubicOutboundFlight(part))
+        {
+            followTransform = null;
+            worldPosition = _cubicMuzzle.position;
+        }
+
         Vector3 spawnPosition = CompositeEffectUtilities.ResolveSpawnPosition(
             followTransform,
             worldPosition,
@@ -342,7 +514,7 @@ public class CompositeEffectV2 : CompositePrefabEffect
         Vector3 afterInstantiate = instance.transform.position;
         CompositePartSpawnHelper.AttachIfFollow(part.follow, followTransform, instance.transform, worldPosition);
         Vector3 afterAttach = instance.transform.position;
-        CompositePartSpawnHelper.ApplyScale(part.scale, instance.transform);
+        CompositePartSpawnHelper.ApplyScale(part.scale * _strikeScale, instance.transform);
 
         Transform setupOwner = followTransform != null
             ? followTransform
@@ -355,6 +527,12 @@ public class CompositeEffectV2 : CompositePrefabEffect
             // Debug.LogWarning($"{DebugPrefix} settings are null for part {part.name}.");
             Destroy(instance.gameObject);
             return;
+        }
+
+        float authoredHold = ParticleGroupV2.LongestAuthoredHold(part.prefab);
+        if (authoredHold > partSettings.defaultLifeTime)
+        {
+            partSettings.defaultLifeTime = authoredHold;
         }
 
         part.ConfigurePlayback(instance, partSettings, _castData, _context);
@@ -505,6 +683,22 @@ public class CompositeEffectV2 : CompositePrefabEffect
     void RefreshV2Context()
     {
         _context = CompositeEffectUtilities.RebuildPreservingHit(_context, _owner, _castData);
+        if (_context == null || _cubicAim == null)
+        {
+            return;
+        }
+
+        _context.TargetTransform = _cubicAim;
+        Entity aimBody = _cubicAim.GetComponent<Entity>();
+        if (aimBody == null)
+        {
+            aimBody = _cubicAim.GetComponentInParent<Entity>();
+        }
+
+        if (aimBody != null)
+        {
+            _context.TargetEntity = aimBody;
+        }
     }
 
     void EnsureHitPointFromTarget()
@@ -554,6 +748,11 @@ public class CompositeEffectV2 : CompositePrefabEffect
             return;
         }
 
+        if (TryLaunchCubicOutbound(part, instance, false))
+        {
+            return;
+        }
+
         HomeFlightPart home = part as HomeFlightPart;
         if (home != null)
         {
@@ -584,6 +783,11 @@ public class CompositeEffectV2 : CompositePrefabEffect
             return;
         }
 
+        if (TryLaunchCubicOutbound(part, instance, true))
+        {
+            return;
+        }
+
         HomeFlightPart home = part as HomeFlightPart;
         if (home != null)
         {
@@ -605,6 +809,74 @@ public class CompositeEffectV2 : CompositePrefabEffect
         {
             _launchedProjectiles.Add(part);
         }
+    }
+
+    /// <summary>
+    /// Returns true when this part is the cubic's outbound orb, so the home-flight
+    /// path (target back to the caster) is not used.
+    /// </summary>
+    bool TryLaunchCubicOutbound(CompositePart part, BaseEffect instance, bool onShoot)
+    {
+        if (!IsCubicOutboundFlight(part) || _cubicAim == null || instance == null)
+        {
+            return false;
+        }
+
+        bool launchNow = onShoot;
+        HomeFlightPart home = part as HomeFlightPart;
+        ShotProjectilePart shot = part as ShotProjectilePart;
+        if (home != null)
+        {
+            launchNow = onShoot ? home.ShouldLaunchOnShoot : home.ShouldLaunchImmediately;
+        }
+        else if (shot != null)
+        {
+            launchNow = onShoot ? shot.ShouldLaunchOnShoot : shot.ShouldLaunchImmediately;
+        }
+
+        if (!launchNow)
+        {
+            return true;
+        }
+
+        if (_launchedProjectiles.Contains(part))
+        {
+            return true;
+        }
+
+        Transform projectile = instance.transform;
+        projectile.SetParent(null, true);
+        if (_cubicMuzzle != null)
+        {
+            projectile.position = _cubicMuzzle.position;
+        }
+
+        if (ProjectileManager.Instance == null)
+        {
+            return true;
+        }
+
+        Vector3 start = projectile.position;
+        ProjectileData settings = new ProjectileData
+        {
+            prefab = instance.gameObject,
+            transform = projectile,
+            startPosition = start,
+            targetTransform = _cubicAim,
+            impactType = ProjectileImpactType.EffectOnly
+        };
+        if (home != null && home.speed > 0.01f)
+        {
+            settings.speed = home.speed;
+        }
+        else if (shot != null && shot.speed > 0.01f)
+        {
+            settings.speed = shot.speed;
+        }
+
+        ProjectileManager.Instance.LaunchProjectile(instance.gameObject, start, _cubicAim, settings);
+        _launchedProjectiles.Add(part);
+        return true;
     }
 
     void SubscribeV2ShootIfNeeded()
@@ -816,7 +1088,20 @@ public class CompositeEffectV2 : CompositePrefabEffect
         Vector3 hitDirection,
         int attackerEntityId)
     {
-        if (_pendingHitCollider.Count == 0 || projectilePrefab == null)
+        if (projectilePrefab == null)
+        {
+            return;
+        }
+
+        bool ours = projectilePrefab.transform != null &&
+                    IsFromLaunchedV2Projectile(projectilePrefab.transform);
+        if (ours && _cubicImpactPrefab != null && !_cubicImpactPlayed)
+        {
+            _cubicImpactPlayed = true;
+            SpawnCubicImpact(target, hitPoint, hitDirection);
+        }
+
+        if (_pendingHitCollider.Count == 0)
         {
             return;
         }

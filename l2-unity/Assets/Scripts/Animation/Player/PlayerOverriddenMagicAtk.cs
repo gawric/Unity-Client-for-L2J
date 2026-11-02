@@ -266,11 +266,6 @@ public class PlayerOverriddenMagicAtk : StateMachineBehaviour
 
         _phaseFinished = true;
         int objectId = animator.GetInteger(AnimatorUtils.OBJECT_ID);
-        // Debug.Log(
-            // $"{MagicExitLogTag} PHASE_DONE state={parameterName} idx={stateIndex} final={isFinalShotState} " +
-            // $"local={localElapsed:F3}s global={globalElapsed:F3}s norm={stateInfo.normalizedTime:F3} " +
-            // $"wallDone={wallDone} globalWall={globalWall:F3}s globalWallDone={globalWallDone} " +
-            // $"→ NotifyMagicPhaseFinished");
 
         if (AnimationManager.Instance != null)
         {
@@ -334,9 +329,6 @@ public class PlayerOverriddenMagicAtk : StateMachineBehaviour
         // MOVE_TO after Ice Bolt already started walk/run. Do not pull that back into atkwait.
         if (PlayerStateMachine.Instance != null && PlayerStateMachine.Instance.ShouldKeepLocomotion())
         {
-            // Debug.Log(
-                // $"{MagicExitLogTag} SwitchToIdle SKIP_LOCOMOTION state={parameterName} " +
-                // $"sm={PlayerStateMachine.Instance.State} intention={PlayerStateMachine.Instance.Intention}");
             return;
         }
 

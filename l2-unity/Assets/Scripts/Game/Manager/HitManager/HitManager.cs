@@ -592,6 +592,26 @@ public class HitManager : MonoBehaviour
     // Slightly less than full CollisionRadius — full radius sat a bit too close to the attacker.
     private const float SoulshotSpawnRadiusScale = 0.3f;
 
+    /// <summary>
+    /// Surface point of the target facing <paramref name="fromWorld"/>.
+    /// Same capsule center and CollisionRadius as a soulshot impact. The spark
+    /// itself is inset (see <see cref="SoulshotSpawnRadiusScale"/>); a cubic
+    /// stops on the surface, beside the body.
+    /// </summary>
+    public static Vector3 BorderFacing(Entity target, Vector3 fromWorld)
+    {
+        if (target == null || target.transform == null)
+            return fromWorld;
+
+        Vector3 center = ResolveTargetImpactCenter(target);
+        float radius = ResolveTargetCollisionRadius(target);
+        Vector3 toward = Flat(center - fromWorld);
+        if (toward.sqrMagnitude < 0.0001f || radius <= 0.0001f)
+            return center;
+
+        return center - toward * radius;
+    }
+
     private static Vector3 ResolveSoulshotSpawnPoint(Entity target, Vector3 impactDir, Vector3 hitPointFallback)
     {
         if (target == null)

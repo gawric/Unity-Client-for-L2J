@@ -89,7 +89,7 @@ public class BaseAnimationController : AnimationEventsBase, IAnimationController
 
     void Update()
     {
-        if (_castPlayable == null || !_castPlayable.IsActive)
+        if (_castPlayable == null || !_castPlayable.IsTicking)
             return;
         _castPlayable.Tick();
     }

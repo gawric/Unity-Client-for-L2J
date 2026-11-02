@@ -8,6 +8,7 @@ public sealed class WorldPacketApply
     private readonly World _world;
     private readonly HtmlWindow _html;
     private readonly PlayerPositionSender _positionSender;
+    private readonly CubicService _cubics;
 
     public WorldPacketApply(
         World world,
@@ -16,11 +17,13 @@ public sealed class WorldPacketApply
         PlayerWorldApply playerApply,
         NpcWorldApply npcApply,
         MonsterWorldApply monsterApply,
-        UserWorldApply userApply)
+        UserWorldApply userApply,
+        CubicService cubics)
     {
         _world = world;
         _html = html;
         _positionSender = positionSender;
+        _cubics = cubics;
         Register<PlayerEntity>(playerApply);
         Register<NpcEntity>(npcApply);
         Register<MonsterEntity>(monsterApply);
@@ -318,14 +321,14 @@ public sealed class WorldPacketApply
         if (entity == null)
             entity = PlayerEntity.Instance;
 
+        // Arm before the pawn cast. A missing animation combo used to throw
+        // inside the player state and this call never ran.
+        if (CubicConstants.CubicTypeForSkill(dto.SkillId) != 0)
+            ArmCubicSkill(entity, dto);
+
         EntityWorldApply apply;
         if (entity == null || !TryResolve(entity, out apply))
-        {
-
             return;
-        }
-
-
 
         MagicSkillUseTrace.Begin(dto.SkillId);
         try
@@ -336,13 +339,39 @@ public sealed class WorldPacketApply
         }
         catch (Exception ex)
         {
+            if (CubicConstants.CubicTypeForSkill(dto.SkillId) != 0)
+            {
+                Debug.LogWarning("[Cubic] pawn cast threw skill=" + dto.SkillId +
+                                 " " + ex.GetType().Name + ": " + ex.Message);
+            }
             throw;
         }
         finally
         {
             MagicSkillUseTrace.End();
         }
-        // UnityReplaySession.OnMagicSkillUse(entity, dto);
+    }
+
+    void ArmCubicSkill(Entity entity, MagicSkillUseDto dto)
+    {
+        if (entity == null)
+        {
+            Debug.Log("[Cubic] pkt skill=" + dto.SkillId +
+                      " atk=" + dto.AttackerObjId +
+                      " tgt=" + dto.TargetId +
+                      " why=no-attacker");
+            return;
+        }
+
+        Entity cubicTarget = _world != null ? _world.GetEntityNoLockSync(dto.TargetId) : null;
+        int atkEntity = entity.Identity != null ? entity.Identity.Id : 0;
+        Debug.Log("[Cubic] pkt skill=" + dto.SkillId +
+                  " atk=" + dto.AttackerObjId +
+                  " atkEntity=" + atkEntity +
+                  " tgt=" + dto.TargetId +
+                  " tgtEntity=" + (cubicTarget != null ? "yes" : "no") +
+                  " branch=charinfo");
+        _cubics.OnMagicSkillUse(entity, cubicTarget, dto);
     }
 
     public void MagicSkillLaunched(MagicSkillLaunchedDto dto)

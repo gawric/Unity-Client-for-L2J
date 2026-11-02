@@ -1,0 +1,182 @@
+class e_u096_cubic extends NCubics;
+
+defaultproperties
+{
+     Begin Object Class=SpriteEmitter Name=SpriteEmitter3
+         UseColorScale=True
+         ColorScale(0)=(Color=(B=255,G=255,R=255,A=255))
+         ColorScale(1)=(RelativeTime=0.300000,Color=(B=201,G=201,R=201,A=255))
+         ColorScale(2)=(RelativeTime=1.000000,Color=(B=255,G=255,R=255,A=255))
+         ColorScaleRepeats=1000.000000
+         ColorMultiplierRange=(X=(Min=0.550000,Max=0.550000),Y=(Min=0.850000,Max=0.850000))
+         Opacity=0.900000
+         OpacityRatio=1.000000
+         FadeOutStartTime=1.000000
+         MaxParticles=1
+         Name="SpriteEmitter6"
+         SpinCCWorCW=(X=1.000000)
+         SpinsPerSecondRange=(X=(Min=0.100000,Max=0.100000))
+         UseSizeScale=True
+         UseRegularSizeScale=False
+         SizeScale(0)=(RelativeTime=0.460000,RelativeSize=0.700000)
+         SizeScale(1)=(RelativeTime=1.000000,RelativeSize=1.000000)
+         SizeScaleRepeats=7.000000
+         StartSizeRange=(X=(Min=5.000000,Max=5.000000),Y=(Min=5.000000,Max=5.000000),Z=(Min=5.000000,Max=5.000000))
+         UniformSize=True
+         InitialParticlesPerSecond=100000.000000
+         AutomaticInitialSpawning=False
+         Texture=Texture'LineageEffectsTextures.Cubics.fx_m_t4026'
+         LifetimeRange=(Min=10.000000,Max=10.000000)
+         Name="SpriteEmitter3"
+     End Object
+     Emitters(0)=SpriteEmitter'lineageeffect.e_u096_cubic.SpriteEmitter3'
+     Begin Object Class=MeshEmitter Name=MeshEmitter3
+         StaticMesh=StaticMesh'LineageEffectsStaticmeshes.Cubics.cubic_12Faces'
+         ColorScale(0)=(Color=(B=255,G=255,R=255,A=255))
+         ColorScale(1)=(RelativeTime=0.532143,Color=(B=255,G=255,R=255,A=200))
+         ColorScale(2)=(RelativeTime=1.000000,Color=(B=255,G=255,R=255,A=255))
+         ColorScaleRepeats=99.000000
+         OpacityRatio=1.000000
+         FadeOutStartTime=10.000000
+         MaxParticles=1
+         Name="MeshEmitter3"
+         ZWrite=True
+         SpinParticles=True
+         SpinCCWorCW=(X=1.000000)
+         SpinsPerSecondRange=(X=(Min=1.000000,Max=1.000000))
+         StartSizeRange=(X=(Min=0.050000,Max=0.050000),Y=(Min=0.050000,Max=0.050000),Z=(Min=0.050000,Max=0.050000))
+         UniformSize=True
+         InitialParticlesPerSecond=100000.000000
+         AutomaticInitialSpawning=False
+         DrawStyle=PTDS_AlphaBlend
+         LifetimeRange=(Min=10.000000,Max=10.000000)
+         Name="MeshEmitter3"
+     End Object
+     Emitters(1)=MeshEmitter'lineageeffect.e_u096_cubic.MeshEmitter3'
+     Begin Object Class=SpriteEmitter Name=SpriteEmitter0
+         UseColorScale=True
+         ColorScale(0)=(Color=(B=255,G=255,R=255,A=255))
+         ColorScale(1)=(RelativeTime=0.300000,Color=(B=201,G=201,R=201,A=255))
+         ColorScale(2)=(RelativeTime=1.000000,Color=(B=255,G=255,R=255,A=255))
+         ColorScaleRepeats=1000.000000
+         ColorMultiplierRange=(X=(Min=0.503000,Max=0.503000),Y=(Min=0.570000,Max=0.570000),Z=(Min=0.677000,Max=0.677000))
+         Opacity=0.500000
+         OpacityRatio=1.000000
+         FadeOutStartTime=1.000000
+         MaxParticles=1
+         Name="SpriteEmitter6"
+         SpinCCWorCW=(X=1.000000)
+         SpinsPerSecondRange=(X=(Min=0.100000,Max=0.100000))
+         UseSizeScale=True
+         UseRegularSizeScale=False
+         SizeScale(0)=(RelativeTime=0.460000,RelativeSize=0.700000)
+         SizeScale(1)=(RelativeTime=1.000000,RelativeSize=1.000000)
+         SizeScaleRepeats=7.000000
+         StartSizeRange=(X=(Min=3.750000,Max=3.750000),Y=(Min=3.750000,Max=3.750000),Z=(Min=3.750000,Max=3.750000))
+         UniformSize=True
+         InitialParticlesPerSecond=100000.000000
+         AutomaticInitialSpawning=False
+         Texture=Texture'LineageEffectsTextures.Etc.fx_m_t0153'
+         SubdivisionStart=3
+         SubdivisionEnd=3
+         LifetimeRange=(Min=10.000000,Max=10.000000)
+         Name="SpriteEmitter0"
+     End Object
+     Emitters(2)=SpriteEmitter'lineageeffect.e_u096_cubic.SpriteEmitter0'
+     Begin Object Class=MeshEmitter Name=MeshEmitter2
+         StaticMesh=StaticMesh'LineageEffectsStaticmeshes.Etc.twist_m04'
+         UseMeshBlendMode=False
+         RenderTwoSided=True
+         ColorScale(0)=(Color=(B=255,G=255,R=255,A=255))
+         ColorScale(1)=(RelativeTime=0.500000,Color=(B=128,G=128,R=128,A=255))
+         ColorScale(2)=(RelativeTime=1.000000,Color=(B=255,G=255,R=255,A=255))
+         ColorScaleRepeats=10.000000
+         ColorMultiplierRange=(X=(Min=0.200000,Max=0.503000),Y=(Min=0.500000),Z=(Min=0.300000,Max=0.803000))
+         OpacityRatio=1.000000
+         FadeOutStartTime=2.580000
+         FadeOut=True
+         FadeInEndTime=0.420000
+         FadeIn=True
+         Name="MeshEmitter0"
+         SpinParticles=True
+         SpinsPerSecondRange=(X=(Min=0.600000,Max=0.600000))
+         StartSpinRange=(X=(Min=-1.000000,Max=1.000000),Y=(Min=-1.000000,Max=1.000000),Z=(Min=-1.000000,Max=1.000000))
+         UseRegularSizeScale=False
+         SizeScale(0)=(RelativeSize=0.700000)
+         SizeScale(1)=(RelativeTime=0.500000,RelativeSize=1.000000)
+         SizeScale(2)=(RelativeTime=1.000000,RelativeSize=0.700000)
+         SizeScaleRepeats=1.000000
+         StartSizeRange=(X=(Min=0.004500,Max=0.004500),Y=(Min=0.004500,Max=0.004500),Z=(Min=0.004500,Max=0.004500))
+         UniformSize=True
+         InitialParticlesPerSecond=2.000000
+         AutomaticInitialSpawning=False
+         LifetimeRange=(Min=3.000000,Max=3.000000)
+         Name="MeshEmitter2"
+     End Object
+     Emitters(3)=MeshEmitter'lineageeffect.e_u096_cubic.MeshEmitter2'
+     Begin Object Class=SpriteEmitter Name=SpriteEmitter2
+         UseColorScale=True
+         ColorScale(0)=(Color=(B=255,G=255,R=255,A=255))
+         ColorScale(1)=(RelativeTime=0.525000,Color=(B=80,G=80,R=80,A=255))
+         ColorScale(2)=(RelativeTime=1.000000,Color=(B=255,G=255,R=255,A=255))
+         ColorScaleRepeats=10.000000
+         ColorMultiplierRange=(X=(Min=0.386000,Max=0.541000),Y=(Min=0.658000))
+         OpacityRatio=1.000000
+         FadeOutStartTime=0.540000
+         FadeOut=True
+         FadeInEndTime=0.220000
+         FadeIn=True
+         MaxParticles=6
+         Name="SpriteEmitter6"
+         SpinParticles=True
+         SpinsPerSecondRange=(X=(Min=-0.300000,Max=0.300000))
+         StartSpinRange=(X=(Min=-1.000000,Max=1.000000))
+         UseSizeScale=True
+         UseRegularSizeScale=False
+         SizeScale(0)=(RelativeSize=0.500000)
+         SizeScale(1)=(RelativeTime=1.000000,RelativeSize=2.000000)
+         StartSizeRange=(X=(Min=1.300000,Max=1.300000),Y=(Min=0.200000,Max=0.200000),Z=(Min=0.300000,Max=0.300000))
+         UniformSize=True
+         InitialParticlesPerSecond=3.000000
+         AutomaticInitialSpawning=False
+         Texture=Texture'LineageEffectsTextures.Particles2.fx_m_t2033'
+         TextureUSubdivisions=2
+         TextureVSubdivisions=2
+         SubdivisionEnd=7
+         UseRandomSubdivision=True
+         LifetimeRange=(Min=1.000000,Max=1.000000)
+         StartVelocityRange=(X=(Min=-7.000000,Max=7.000000),Y=(Min=-7.000000,Max=7.000000),Z=(Min=-7.000000,Max=7.000000))
+         VelocityLossRange=(X=(Min=2.500000,Max=2.500000),Y=(Min=2.500000,Max=2.500000),Z=(Min=2.500000,Max=2.500000))
+         Name="SpriteEmitter2"
+     End Object
+     Emitters(4)=SpriteEmitter'lineageeffect.e_u096_cubic.SpriteEmitter2'
+     Begin Object Class=SpriteEmitter Name=SpriteEmitter4
+         UseColorScale=True
+         ColorScale(0)=(Color=(B=156,G=189,R=43,A=255))
+         ColorScale(1)=(RelativeTime=1.000000,Color=(B=181,G=201,R=84,A=255))
+         ColorMultiplierRange=(Y=(Min=0.720000,Max=0.720000))
+         OpacityRatio=1.000000
+         FadeOutStartTime=0.680000
+         FadeOut=True
+         MaxParticles=2
+         Name="SpriteEmitter7"
+         StartLocationShape=PTLS_Sphere
+         SphereRadiusRange=(Min=1.000000,Max=2.000000)
+         StartSizeRange=(X=(Min=3.000000,Max=4.000000),Y=(Min=3.000000,Max=4.000000),Z=(Min=3.000000,Max=4.000000))
+         UniformSize=True
+         InitialParticlesPerSecond=3.000000
+         AutomaticInitialSpawning=False
+         Texture=Texture'LineageEffectsTextures.Lobby.fx_m_t_3147'
+         TextureUSubdivisions=4
+         TextureVSubdivisions=4
+         BlendBetweenSubdivisions=True
+         SubdivisionEnd=15
+         LifetimeRange=(Min=0.800000,Max=1.000000)
+         Name="SpriteEmitter4"
+     End Object
+     Emitters(5)=SpriteEmitter'lineageeffect.e_u096_cubic.SpriteEmitter4'
+     AutoDestroy=True
+     bLightChanged=True
+     bSunAffect=True
+     DrawScale=0.001000
+}

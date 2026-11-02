@@ -110,9 +110,6 @@ public class AnimationManager : BaseAnimationManager , IAnimationManager
             if (PlayerLocomotionCrossFade.ShouldSkip(controller, locoStateName, GetCurrentAnimationName(objectId)))
             {
                 SetRecentName(objectId, locoStateName);
-                // Debug.Log(
-                    // $"AnimationManager> skip crossfade {family} player {entity.name} " +
-                    // $"state={locoStateName} reason=already_playing");
                 return;
             }
 

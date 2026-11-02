@@ -5,15 +5,18 @@ public sealed class PlayerSpawner
     private readonly CameraController _camera;
     private readonly CharacterInfoWindow _characterInfo;
     private readonly CharacterBuilder _characterBuilder;
+    private readonly CubicService _cubics;
 
     public PlayerSpawner(
         CameraController camera,
         CharacterInfoWindow characterInfo,
-        CharacterBuilder characterBuilder)
+        CharacterBuilder characterBuilder,
+        CubicService cubics)
     {
         _camera = camera;
         _characterInfo = characterInfo;
         _characterBuilder = characterBuilder;
+        _cubics = cubics;
     }
 
     public PlayerEntity Spawn(
@@ -100,6 +103,7 @@ public sealed class PlayerSpawner
             PlayerStateMachine.Instance.Player = player;
 
         world.RegisterPlayer(player);
+        _cubics.Sync(player);
         return player;
     }
 
@@ -117,5 +121,6 @@ public sealed class PlayerSpawner
         player.UpdatePAtkSpeedPlayer((int)statsIntr.BasePAtkSpeed);
         player.UpdateMAtkSpeed((int)statsIntr.MAtkSpd);
         player.RefreshVisuals();
+        _cubics.Sync(player);
     }
 }

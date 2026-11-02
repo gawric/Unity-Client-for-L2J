@@ -101,6 +101,7 @@ public sealed class GameLifetimeScope : LifetimeScope
         builder.Register<L2PawnYaw>(Lifetime.Singleton);
         builder.RegisterEntryPoint<EntityActionMachine>().AsSelf();
         builder.RegisterEntryPoint<StriderRideService>().AsSelf();
+        builder.RegisterEntryPoint<CubicService>().AsSelf();
         builder.RegisterEntryPoint<UnityChainTicker>();
         builder.Register<PlayerWorldApply>(Lifetime.Singleton);
         builder.Register<NpcWorldApply>(Lifetime.Singleton);

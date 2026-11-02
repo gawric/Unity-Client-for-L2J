@@ -81,6 +81,13 @@ public sealed class PlayerWorldApply : EntityWorldApply
         if (_skillbar != null)
             _skillbar.ShowCooldown(dto.SkillId, Shortcut.TYPE_SKILL, dto.Reusedelay);
 
+        // Cubic skills (4050 Vampiric and the rest) have animation None.
+        // The player cast state null-refs that combo and the packet dies before
+        // the cubic can fly. CharInfo / monsters shoot this case from
+        // EntityActionSkill; the cubic fires that shot when its cast matures.
+        if (dto != null && CubicConstants.CubicTypeForSkill(dto.SkillId) != 0)
+            return;
+
         if (WeaponChargeSkill.IsCharge(dto.SkillId))
         {
             ApplyWeaponChargeShot(entity, dto);

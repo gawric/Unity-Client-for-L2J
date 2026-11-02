@@ -238,10 +238,15 @@ public class UserInfoDto : IWireDto
         _info.Stats.PvpKills = reader.ReadI();
         int cubics_size = reader.ReadSh();
 
-        for(int i=0; i < cubics_size; i++)
+        // Do NOT discard these: this short list is the ONLY place the client
+        // ever learns which cubics exist. The native client stores it in
+        // APawn::NCubicArray (+0x1674) via APawn::CheckCubicStatus(count, ids).
+        int[] cubicIds = new int[cubics_size];
+        for (int i = 0; i < cubics_size; i++)
         {
-            reader.ReadSh();
+            cubicIds[i] = reader.ReadSh();
         }
+        _info.Stats.Cubics = cubicIds;
 
         byte isInPartyMatchRoom = reader.ReadB();
         int isInvisible = reader.ReadI();

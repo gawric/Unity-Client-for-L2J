@@ -11,8 +11,16 @@ public class MonsterStateDeath : MonsterStateBase
         LoadComponents(animator);
         StopAnimationTrigger(animator, parameterName);
 
-        if (IsPoseHeld())
+        // A stale corpse flag must not freeze a new fall that is still blending in from run.
+        if (IsFreshFall(animator, stateInfo, layerIndex))
+        {
+            if (_entity != null && _entity.ActionSlot != null)
+                _entity.ActionSlot.DeathPoseHeld = false;
+        }
+        else if (IsPoseHeld())
+        {
             SetSpeed(animator, 0f);
+        }
     }
 
     override public void OnStateUpdate(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
@@ -44,9 +52,29 @@ public class MonsterStateDeath : MonsterStateBase
         if (backToDeath)
             return;
 
+        LoadComponents(animator);
         SetSpeed(animator, 1f);
         if (_entity != null && _entity.ActionSlot != null)
             _entity.ActionSlot.DeathPoseHeld = false;
+    }
+
+    bool IsFreshFall(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
+    {
+        if (animator == null || stateInfo.normalizedTime >= 0.05f)
+            return false;
+        if (!animator.IsInTransition(layerIndex))
+            return !animator.GetCurrentAnimatorStateInfo(layerIndex).IsName(MonsterAnim.Death);
+
+        AnimatorStateInfo current = animator.GetCurrentAnimatorStateInfo(layerIndex);
+        if (current.IsName(MonsterAnim.Death))
+            return false;
+
+        AnimatorClipInfo[] clips = animator.GetCurrentAnimatorClipInfo(layerIndex);
+        if (clips != null && clips.Length > 0 && clips[0].clip != null &&
+            clips[0].clip.name.IndexOf("death", System.StringComparison.OrdinalIgnoreCase) >= 0)
+            return false;
+
+        return true;
     }
 
     bool IsPoseHeld()

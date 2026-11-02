@@ -247,7 +247,11 @@ public static class EntityActionVisual
         }
 
         if (entity != null)
+        {
             entity.SetDead(true);
+            if (entity.ActionSlot != null)
+                entity.ActionSlot.DeathPoseHeld = false;
+        }
 
         if (!CanPlayAnim(entity))
             return;
@@ -262,10 +266,31 @@ public static class EntityActionVisual
             IncomingPacketActions.Animations.PlayMonsterAnimation(monster.Identity.Id, AnimationNames.DEAD.ToString());
     }
 
+    public static void PlayUserRide(UserEntity user, string move)
+    {
+        if (user == null || user.Identity == null)
+            return;
+        NetworkAnimationController nac = user.GetAnimatorController();
+        if (nac == null)
+            return;
+
+        bool running = move == "run" || move == "walk";
+        if (StriderRideService.Instance != null)
+            StriderRideService.Instance.SetMountGait(user.Identity.Id, running);
+        nac.SetAnimatorSpeed(1f);
+        nac.SetPAtkSpeed(1f);
+        PlayerLocomotionCrossFade.TryPlay(nac, PlayerStriderAnim.State, 0.12f);
+    }
+
     static void PlayUserLocomotion(UserEntity user, string move, float? fadeDuration = null, bool force = false)
     {
         if (user == null || user.IsDead())
             return;
+        if (StriderRideService.Instance != null && StriderRideService.Instance.IsRiding(user))
+        {
+            PlayUserRide(user, move);
+            return;
+        }
         // During an attack swing we must NOT override the stance back to a stand
         // (wait/atkwait), but locomotion (run/walk) must still play so a chasing
         // pawn keeps running toward its target instead of freezing mid-swing.

@@ -1,0 +1,107 @@
+class m_u037_d extends NSkillProjectile; // 아이스 대거 - 발사체
+
+defaultproperties
+{
+     Speed=1000.000000
+     AccSpeed=3000.000000
+     Begin Object Class=SpriteEmitter Name=SpriteEmitter0
+         ColorScale(0)=(Color=(B=255,G=255,R=255,A=255))
+         ColorScale(1)=(RelativeTime=1.000000,Color=(B=255,G=255,R=255,A=255))
+         OpacityRatio=1.000000
+         FadeOutStartTime=0.120000
+         FadeOut=True
+         MaxParticles=43
+         RespawnDeadParticles=False
+         Name="Steam"
+         StartLocationOffset=(X=5.000000)
+         StartLocationRange=(X=(Min=-10.000000,Max=10.000000),Y=(Min=-2.000000,Max=2.000000),Z=(Min=-2.000000,Max=2.000000))
+         StartLocationPolarRange=(X=(Min=90.000000,Max=90.000000),Y=(Max=360.000000),Z=(Min=5.000000,Max=5.000000))
+         SpinParticles=True
+         SpinsPerSecondRange=(X=(Min=0.500000,Max=1.000000))
+         StartSpinRange=(X=(Max=1.000000))
+         UseSizeScale=True
+         UseRegularSizeScale=False
+         SizeScale(0)=(RelativeTime=1.000000,RelativeSize=1.500000)
+         StartSizeRange=(X=(Min=12.000000,Max=16.000000),Y=(Min=12.000000,Max=16.000000),Z=(Min=12.000000,Max=16.000000))
+         UniformSize=True
+         InitialParticlesPerSecond=20.000000
+         AutomaticInitialSpawning=False
+         DrawStyle=PTDS_AlphaBlend
+         Texture=Texture'LineageEffectsTextures.Particles.fx_m_t0071'
+         TextureUSubdivisions=4
+         TextureVSubdivisions=4
+         SubdivisionStart=10
+         SubdivisionEnd=13
+         UseRandomSubdivision=True
+         LifetimeRange=(Min=0.300000,Max=0.300000)
+         StartVelocityRange=(X=(Min=-300.000000,Max=-300.000000),Y=(Min=-50.000000,Max=50.000000),Z=(Min=-50.000000,Max=50.000000))
+         WarmupTicksPerSecond=8.000000
+         RelativeWarmupTime=0.500000
+         Name="SpriteEmitter0"
+     End Object
+     Emitters(0)=SpriteEmitter'lineageeffect.m_u037_d.SpriteEmitter0'
+     Begin Object Class=MeshEmitter Name=MeshEmitter6
+         StaticMesh=StaticMesh'LineageEffectsStaticmeshes.water.watericedagger00'
+         ColorScale(0)=(Color=(B=255,G=255,R=255,A=255))
+         ColorScale(1)=(RelativeTime=1.000000,Color=(B=255,G=255,R=255,A=255))
+         OpacityRatio=1.000000
+         MaxParticles=1
+         RespawnDeadParticles=False
+         Name="Icedagger"
+         SpinParticles=True
+         SpinCCWorCW=(Y=0.000000,Z=0.000000)
+         SpinsPerSecondRange=(Z=(Min=3.000000,Max=3.000000))
+         StartSpinRange=(Z=(Min=0.500000,Max=0.500000))
+         UseSizeScale=True
+         UseRegularSizeScale=False
+         SizeScale(0)=(RelativeSize=1.350000)
+         SizeScale(1)=(RelativeTime=1.000000,RelativeSize=1.350000)
+         StartSizeRange=(X=(Min=0.120000,Max=0.120000),Y=(Min=0.120000,Max=0.120000),Z=(Min=0.120000,Max=0.120000))
+         InitialParticlesPerSecond=1000.000000
+         AutomaticInitialSpawning=False
+         DrawStyle=PTDS_Regular
+         LifetimeRange=(Min=2.000000,Max=2.000000)
+         Name="MeshEmitter6"
+     End Object
+     Emitters(1)=MeshEmitter'lineageeffect.m_u037_d.MeshEmitter6'
+     Begin Object Class=SpriteEmitter Name=SpriteEmitter3
+         ColorScale(0)=(Color=(B=255,G=255,R=255,A=255))
+         ColorScale(1)=(RelativeTime=1.000000,Color=(B=255,G=255,R=255,A=255))
+         ColorMultiplierRange=(X=(Min=0.500000),Y=(Min=0.500000),Z=(Min=0.600000))
+         OpacityRatio=1.000000
+         FadeOutStartTime=0.910000
+         FadeOut=True
+         MaxParticles=40
+         RespawnDeadParticles=False
+         Name="Kira"
+         StartLocationOffset=(X=5.000000)
+         StartLocationRange=(X=(Min=-15.000000,Max=15.000000),Y=(Min=-6.000000,Max=6.000000),Z=(Min=-6.000000,Max=6.000000))
+         SpinParticles=True
+         StartSpinRange=(X=(Min=0.030000,Max=0.030000))
+         UseSizeScale=True
+         UseRegularSizeScale=False
+         SizeScale(0)=(RelativeTime=0.120000,RelativeSize=3.000000)
+         SizeScale(1)=(RelativeTime=0.500000,RelativeSize=1.000000)
+         SizeScale(2)=(RelativeTime=0.790000,RelativeSize=0.100000)
+         SizeScale(3)=(RelativeTime=1.000000,RelativeSize=0.010000)
+         StartSizeRange=(X=(Min=3.000000,Max=5.000000),Y=(Min=3.000000,Max=5.000000),Z=(Min=3.000000,Max=5.000000))
+         UniformSize=True
+         InitialParticlesPerSecond=20.000000
+         AutomaticInitialSpawning=False
+         Texture=Texture'LineageEffectsTextures.Particles.fx_m_t0085'
+         TextureUSubdivisions=2
+         TextureVSubdivisions=2
+         SubdivisionStart=1
+         SubdivisionEnd=2
+         UseRandomSubdivision=True
+         LifetimeRange=(Min=0.500000,Max=0.500000)
+         StartVelocityRange=(X=(Min=-200.000000,Max=-200.000000))
+         WarmupTicksPerSecond=8.000000
+         RelativeWarmupTime=0.500000
+         Name="SpriteEmitter3"
+     End Object
+     Emitters(2)=SpriteEmitter'lineageeffect.m_u037_d.SpriteEmitter3'
+     AutoDestroy=True
+     DrawScale=0.020000
+     bDirectional=True
+}

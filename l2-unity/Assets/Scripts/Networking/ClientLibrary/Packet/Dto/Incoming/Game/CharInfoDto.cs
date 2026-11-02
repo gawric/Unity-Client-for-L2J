@@ -11,6 +11,7 @@ public class CharInfoDto : IWireDto
     public PlayerStats Stats { get; private set; }
     public PlayerAppearance Appearance { get; private set; }
     public bool AlikeDead { get; private set; }
+    public byte MountType { get; private set; }
     public int PacketRace { get; private set; }
     public int PacketClassFirst { get; private set; }
     public int PacketClassSecond { get; private set; }
@@ -139,12 +140,17 @@ public class CharInfoDto : IWireDto
         reader.ReadB();
         AlikeDead = reader.ReadB() == 1;
         reader.ReadB();
-        reader.ReadB();
+        MountType = reader.ReadB();
         reader.ReadB();
 
         int cubicCount = reader.ReadH();
+
+        // Same list as UserInfo: the only carrier of cubic types. Native
+        // counterpart is APawn::CheckCubicStatus(count, ids) (Live 0x1E1C20).
+        int[] cubicIds = new int[cubicCount];
         for (int i = 0; i < cubicCount; i++)
-            reader.ReadH();
+            cubicIds[i] = reader.ReadH();
+        Stats.Cubics = cubicIds;
 
         reader.ReadB();
         reader.ReadI();

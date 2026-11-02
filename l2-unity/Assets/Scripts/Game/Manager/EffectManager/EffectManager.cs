@@ -17,6 +17,28 @@ public class EffectManager : MonoBehaviour
     void Awake() => Instance = this;
 
 
+    public bool HasEffect(int id)
+    {
+        return database != null && database.TryGetEffectData(id, out _);
+    }
+
+    /// <summary>
+    /// skillgrp.skill_visual_effect is the shared cast visual. Summon Storm Cubic
+    /// (10) and Wolf Collar (2046) both name 1111, while the prefab row may live
+    /// on only one of those ids.
+    /// </summary>
+    public int ResolveListedEffectId(int skillId, string visualEffect)
+    {
+        if (HasEffect(skillId))
+            return skillId;
+
+        int visual;
+        if (int.TryParse(visualEffect, out visual) && visual > 0 && HasEffect(visual))
+            return visual;
+
+        return skillId;
+    }
+
     public void PlayEffect(int id, Transform target, MagicCastData castData = null)
     {
         bool windstrike = id == 4247;

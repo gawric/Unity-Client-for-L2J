@@ -58,6 +58,40 @@ public sealed class ParticleGroupV2 : EffectPart, IParticleEmitterV2
     public Material[] GpuMaterials => _runtime != null ? _runtime.GpuMaterials : null;
     public bool IsComplete => _runtime != null && _runtime.IsComplete;
     public ParticleLifetimePolicy LifetimePolicy => _lifetimePolicy;
+
+    /// <summary>
+    /// How long this emitter's particles are authored to stay up.
+    /// Looping and host-owned streams keep the composite clock.
+    /// </summary>
+    public float AuthoredHoldSeconds()
+    {
+        if (_respawnDeadParticles || _hostOwnedEmission)
+        {
+            return 0f;
+        }
+
+        return _duration > 0f ? _duration : 0f;
+    }
+
+    public static float LongestAuthoredHold(Component root)
+    {
+        if (root == null)
+        {
+            return 0f;
+        }
+
+        float longest = 0f;
+        ParticleGroupV2[] groups = root.GetComponentsInChildren<ParticleGroupV2>(true);
+        for (int i = 0; i < groups.Length; i++)
+        {
+            if (groups[i] != null)
+            {
+                longest = Mathf.Max(longest, groups[i].AuthoredHoldSeconds());
+            }
+        }
+
+        return longest;
+    }
     public bool HasFixedDuration => _hasFixedDuration;
     public float AuthoredDuration => Mathf.Max(0.01f, _duration);
     public ParticleDrawBatch DrawBatch

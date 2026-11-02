@@ -42,6 +42,11 @@ public sealed class CastClipPlayable
     private MagicCastData _castData;
     private AnimationEvent[] _events;
     private bool[] _eventFired;
+    private bool _exitBlending;
+    private float _exitBlendStart;
+    private float _exitBlendDuration;
+
+    public bool IsTicking => _active || _exitBlending;
 
     public void Bind(BaseAnimationController owner, Animator animator)
     {
@@ -130,6 +135,7 @@ public sealed class CastClipPlayable
 
     public bool TryPlay(string overrideAnimName, string phaseTriggerName)
     {
+        _exitBlending = false;
         ReleaseLongHold();
         // Only the first cast builds the graph. Later casts reuse it.
         if (!IsGraphAlive)
@@ -237,6 +243,7 @@ public sealed class CastClipPlayable
     {
         MagicGaitTrace.EventId(_objectId, "CastClip.Stop",
             "finishName=" + _finishName + " finalShot=" + _finalShot + " keepGraph=True");
+        _exitBlending = false;
         ReleaseLongHold();
         _active = false;
         _finished = true;
@@ -265,6 +272,11 @@ public sealed class CastClipPlayable
 
     public void Tick()
     {
+        if (_exitBlending)
+        {
+            TickExitBlend();
+        }
+
         if (!_active || _finished || !_clipPlayable.IsValid())
         {
             return;
@@ -318,13 +330,74 @@ public sealed class CastClipPlayable
         if (finishedShot)
         {
             SwitchToIdle();
-            Stop();
+            BeginShotExitBlend();
         }
+    }
+
+    /// <summary>
+    /// The controller has been in wait the whole cast, so CrossFade into wait is
+    /// skipped. Blend the frozen shot clip into that wait pose over the AnimTween.
+    /// </summary>
+    void BeginShotExitBlend()
+    {
+        _active = false;
+        _exitBlendDuration = ResolveWaitTween();
+        _exitBlendStart = Time.time;
+        _exitBlending = _mixer.IsValid() && _exitBlendDuration > 0.01f;
+        if (_clipPlayable.IsValid())
+        {
+            _clipPlayable.SetSpeed(0f);
+        }
+
+        if (_animator != null)
+        {
+            _animator.speed = 1f;
+        }
+
+        if (_controllerPlayable.IsValid())
+        {
+            PlayableExtensions.SetSpeed(_controllerPlayable, 1f);
+        }
+
+        if (!_exitBlending && _mixer.IsValid())
+        {
+            _mixer.SetInputWeight(0, 1f);
+            _mixer.SetInputWeight(1, 0f);
+        }
+    }
+
+    void TickExitBlend()
+    {
+        if (!_mixer.IsValid())
+        {
+            _exitBlending = false;
+            return;
+        }
+
+        float duration = Mathf.Max(0.01f, _exitBlendDuration);
+        float blend = Mathf.Clamp01((Time.time - _exitBlendStart) / duration);
+        _mixer.SetInputWeight(0, blend);
+        _mixer.SetInputWeight(1, 1f - blend);
+        if (blend >= 1f)
+        {
+            _exitBlending = false;
+        }
+    }
+
+    static float ResolveWaitTween()
+    {
+        if (AnimTweenTable.Instance.TryGetTween("wait", out float tween) && tween > 0.01f)
+        {
+            return tween;
+        }
+
+        return LocomotionCrossFadeSettings.FixedDuration;
     }
 
     public void Dispose()
     {
         _active = false;
+        _exitBlending = false;
         _finished = true;
         _ready = false;
         if (_graph.IsValid())

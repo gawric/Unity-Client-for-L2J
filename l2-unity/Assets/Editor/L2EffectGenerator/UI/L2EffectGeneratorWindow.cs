@@ -115,6 +115,73 @@ public sealed class L2EffectGeneratorWindow : EditorWindow
         EditorApplication.Exit(ok ? 0 : 1);
     }
 
+    /// <summary>
+    /// Cubic body and cast emitters. Each folder is Assets/Resources/Data/Effects/&lt;class&gt;.
+    /// Unity.exe -batchmode -nographics -quit -executeMethod L2EffectGeneratorWindow.GenerateCubicsCli
+    /// </summary>
+    public static void GenerateCubicsCli()
+    {
+        AssetDatabase.Refresh();
+        string[] names =
+        {
+            "s_u013_a", "s_u013_b", "s_u013_c", "s_u013_d", "s_u013_e", "s_u013_x",
+            "e_u096_cubic",
+            "m_u000_c", "m_u000_d", "m_u001_b", "m_u003_c", "m_u007_b", "m_u013_c",
+            "m_u018_b", "m_u037_d", "s_u011_a"
+        };
+
+        bool ok = true;
+        for (int n = 0; n < names.Length; n++)
+        {
+            string effectName = names[n];
+            string folder = "Assets/Resources/Data/Effects/" + effectName;
+            if (!AssetDatabase.IsValidFolder(folder))
+            {
+                Debug.LogError("[L2EffectGenerator] missing folder " + folder);
+                ok = false;
+                continue;
+            }
+
+            L2EffectGeneratorFolderBuilder.BuildResult result =
+                L2EffectGeneratorFolderBuilder.CreateFromFolder(folder, effectName, 0, false);
+            if (!result.Success && result.SkillIdCandidates != null && result.SkillIdCandidates.Count > 0)
+            {
+                Debug.Log("[L2EffectGenerator] " + effectName +
+                          " skill was ambiguous, retrying with " + result.SkillIdCandidates[0]);
+                result = L2EffectGeneratorFolderBuilder.CreateFromFolder(
+                    folder, effectName, result.SkillIdCandidates[0], false);
+            }
+
+            for (int i = 0; i < result.LogLines.Count; i++)
+                Debug.Log("[L2EffectGenerator] " + effectName + " " + result.LogLines[i]);
+            if (!result.Success)
+            {
+                Debug.LogError("[L2EffectGenerator] " + effectName + " " + result.ErrorMessage);
+                ok = false;
+            }
+        }
+
+        EditorApplication.Exit(ok ? 0 : 1);
+    }
+
+    /// <summary>
+    /// Storm cubic hit burst. skill-effects 4049 ExplosionAction.
+    /// Unity.exe -batchmode -nographics -quit -executeMethod L2EffectGeneratorWindow.GenerateCubicImpactCli
+    /// </summary>
+    public static void GenerateCubicImpactCli()
+    {
+        AssetDatabase.Refresh();
+        const string effectName = "m_u000_d";
+        string folder = "Assets/Resources/Data/Effects/" + effectName;
+        L2EffectGeneratorFolderBuilder.BuildResult result =
+            L2EffectGeneratorFolderBuilder.CreateFromFolder(folder, effectName, 4049, false);
+        for (int i = 0; i < result.LogLines.Count; i++)
+            Debug.Log("[L2EffectGenerator] " + effectName + " " + result.LogLines[i]);
+        if (!result.Success)
+            Debug.LogError("[L2EffectGenerator] " + effectName + " " + result.ErrorMessage);
+        EditorApplication.Exit(result.Success ? 0 : 1);
+    }
+
     static IEnumerable<string> ReadEnterEventEffectNames()
     {
         var names = new List<string>();

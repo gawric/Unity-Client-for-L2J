@@ -37,6 +37,15 @@ public class PlayerStats : Stats
     [SerializeField] private int _pvpKills;
     [SerializeField] private int _pkKills;
 
+    // L2 cubic list, delivered inside CharInfo (0x03) / UserInfo (0x04).
+    // There is NO standalone "summon cubic" packet on the client protocol:
+    // the server embeds `short count` + `short ids[]` in the char/user info
+    // packet, and the native client feeds it to
+    // APawn::CheckCubicStatus(count, ids) (Live RVA 0x1E1C20).
+    // LIVE VERIFIED values: ids are cubic types 1..9 (1 = Storm Cubic,
+    // emitter LineageEffect.s_u013_a).
+    [SerializeField] private int[] _cubics = new int[0];
+
     public int PAtk { get { return _pAtk; } set { _pAtk = value; } }
     public int MAtk { get { return _mAtk; } set { _mAtk = value; } }
     public int PEvasion { get { return _pEvasion; } set { _pEvasion = value; } }
@@ -70,6 +79,17 @@ public class PlayerStats : Stats
     public int Karma { get { return _karma; } set { _karma = value; } }
     public int PvpKills { get { return _pvpKills; } set { _pvpKills = value; } }
     public int PkKills { get { return _pkKills; } set { _pkKills = value; } }
+
+    /// <summary>
+    /// Cubic types currently following this actor (1..9), in slot order.
+    /// Mirrors the native APawn::NCubicArray (+0x1674) contents; index in this
+    /// array is the CubicIndex the client assigns at ANCubics+0x4EC.
+    /// </summary>
+    public int[] Cubics
+    {
+        get { return _cubics ?? (_cubics = new int[0]); }
+        set { _cubics = value ?? new int[0]; }
+    }
 
     public double ExpPercent(int level)
     {

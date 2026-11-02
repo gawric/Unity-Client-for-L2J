@@ -7,17 +7,20 @@ public sealed class UserSpawner
     private readonly Func<UserEntity, UserBowArrowEvents> _createBowArrowEvents;
     private readonly AppearFadeService _appearFade;
     private readonly L2PawnYaw _pawnYaw;
+    private readonly CubicService _cubics;
 
     public UserSpawner(
         CharacterBuilder characterBuilder,
         Func<UserEntity, UserBowArrowEvents> createBowArrowEvents,
         AppearFadeService appearFade,
-        L2PawnYaw pawnYaw)
+        L2PawnYaw pawnYaw,
+        CubicService cubics)
     {
         _characterBuilder = characterBuilder;
         _createBowArrowEvents = createBowArrowEvents;
         _appearFade = appearFade;
         _pawnYaw = pawnYaw;
+        _cubics = cubics;
     }
 
     public UserEntity Spawn(CharInfoDto info, IWorldSpawnContext world)
@@ -128,6 +131,7 @@ public sealed class UserSpawner
         // CharInfoSpeedLog.LogPacket(user, "OnCharInfo spawn");
 
         world.RegisterUser(user);
+        _cubics.Sync(user);
         if (info.AlikeDead || user.IsDead())
             EntityActionVisual.PlayDeath(user, true);
         else if (_appearFade != null)
@@ -162,6 +166,7 @@ public sealed class UserSpawner
         user.Status = info.Status;
         user.Stats = info.Stats;
         user.Appearance = info.Appearance;
+        _cubics.Sync(user);
         user.Running = info.Appearance.Running;
         user.SetDead(info.AlikeDead);
 

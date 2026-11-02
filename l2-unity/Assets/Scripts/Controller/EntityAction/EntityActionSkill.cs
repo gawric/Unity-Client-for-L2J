@@ -50,6 +50,18 @@ public sealed class EntityActionSkill : IEntityActionProcess
             return;
         }
 
+        // Same none-anim case as a monster, but the caster is the cubic, not
+        // this pawn. Entering the body cast would stop the owner and then
+        // fail the missing combo. CubicService fires PlayImmediateSkillShot
+        // from the cubic when NCubicSkillProcess crosses the shot threshold.
+        if (CubicConstants.CubicTypeForSkill(magic.SkillId) != 0)
+        {
+            UserEntity user = entity as UserEntity;
+            if (user != null)
+                user.BeginAttackVisual(0.05f);
+            return;
+        }
+
         bool wasMoving = entity.Identity != null && MoveAllCharacters.Instance != null &&
             MoveAllCharacters.Instance.IsMoving(entity.Identity.Id);
         MagicGaitTrace.Event(entity, "Skill.Enter",
@@ -445,6 +457,56 @@ public sealed class EntityActionSkill : IEntityActionProcess
         PlaySkillEffect(entity, magic);
     }
 
+    /// <summary>
+    /// Cast data used by CharInfo / monster skills whose animation is None:
+    /// the shot fires on the first tick instead of waiting for an AttackShot notify.
+    /// </summary>
+    public static MagicCastData BuildImmediateCast(Entity owner, MagicSkillUseDto magic, Transform aim)
+    {
+        Entity target = magic != null ? ResolveEntity(magic.TargetId) : null;
+        Transform flightAim = target != null ? target.transform : aim;
+        float flightTimeMs = SetupDurationHelper.ResolveMagicFlightTimeMs(
+            owner, magic != null ? magic.SkillId : 0, flightAim);
+
+        MagicCastData cast = new MagicCastData();
+        cast.Setup(
+            magic != null ? magic.HitTime : 0,
+            flightTimeMs,
+            Array.Empty<float>(),
+            0f,
+            magic != null ? magic.TargetId : 0,
+            SetupDurationHelper.CastStyleOf(magic),
+            SetupDurationHelper.MixComboOf(magic));
+        cast.SpawnShotVisualsImmediately = true;
+        return cast;
+    }
+
+    /// <summary>
+    /// Shoots <paramref name="magic"/> the way a CharInfo pawn shoots an
+    /// animation-None skill. <paramref name="caster"/> is the cubic. Returns
+    /// false when EffectManager has no row for the skill, so the caller can
+    /// spawn the native emitter with <see cref="BuildImmediateCast"/>.
+    /// </summary>
+    public static bool PlayImmediateSkillShot(Entity owner, MagicSkillUseDto magic, Transform caster)
+    {
+        if (owner == null || magic == null)
+            return false;
+
+        EffectManager effects = IncomingPacketActions.Effects;
+        if (effects == null)
+            return false;
+
+        int effectId = magic.SkillGrp != null
+            ? effects.ResolveListedEffectId(magic.SkillId, magic.SkillGrp.SkillVisualEffect)
+            : magic.SkillId;
+        if (!effects.HasEffect(effectId))
+            return false;
+
+        Transform at = caster != null ? caster : owner.transform;
+        effects.PlayEffect(effectId, at, BuildImmediateCast(owner, magic, at));
+        return true;
+    }
+
     static void PlaySkillEffect(Entity entity, MagicSkillUseDto magic)
     {
         bool windstrike = magic != null && magic.SkillId == 4247;
@@ -469,7 +531,10 @@ public sealed class EntityActionSkill : IEntityActionProcess
                 " immediate=" + (cast != null && cast.SpawnShotVisualsImmediately) +
                 " targetId=" + (cast != null ? cast.TargetObjectId : 0));
         }
-        effects.PlayEffect(magic.SkillId, entity.transform, cast);
+        int effectId = magic.SkillGrp != null
+            ? effects.ResolveListedEffectId(magic.SkillId, magic.SkillGrp.SkillVisualEffect)
+            : magic.SkillId;
+        effects.PlayEffect(effectId, entity.transform, cast);
         if (windstrike)
             Debug.Log("[WINDSTRIKE] PlaySkillEffect returned");
     }

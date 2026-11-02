@@ -52,8 +52,11 @@ public class SkillExecutor : MonoBehaviour
         int objectId = entity.Identity.Id;
 
         EffectManager effects = _effects != null ? _effects : IncomingPacketActions.Effects;
-        if (effects != null)
-            effects.PlayEffect(skill.Id, entity.transform, entity.GetMagicCastData());
+        if (effects != null && skill != null)
+        {
+            int effectId = effects.ResolveListedEffectId(skill.Id, skill.SkillVisualEffect);
+            effects.PlayEffect(effectId, entity.transform, entity.GetMagicCastData());
+        }
 
         string[] cycle = animationCombo.GetAnimCycle();
         SkillAnimationRunner.Trace = skill != null && skill.Id == 2046;

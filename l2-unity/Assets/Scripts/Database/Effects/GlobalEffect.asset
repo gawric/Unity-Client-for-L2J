@@ -41,6 +41,13 @@ MonoBehaviour:
     comment: summon-pet-1111-su_summon_a_ca
     settings: {fileID: 11400000, guid: e73b899fdfd5e1243a008820002a9c0e, type: 2}
     ignoreFlightTimeForCast: 1
+  - id: 1111
+    prefab: {fileID: 4742296666828580571, guid: 29f84eb79e94eb849a77b5669d299a0e, type: 3}
+    useWeaponShot: 0
+    spiritShot: 0
+    comment: summon-cast-1111-su_summon_a_ca
+    settings: {fileID: 11400000, guid: e73b899fdfd5e1243a008820002a9c0e, type: 2}
+    ignoreFlightTimeForCast: 1
   - id: 2047
     prefab: {fileID: 224729188706837472, guid: 98ef5f7569bbfff4395a1b3292382f39, type: 3}
     useWeaponShot: 1

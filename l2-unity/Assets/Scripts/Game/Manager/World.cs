@@ -40,6 +40,7 @@ public class World : MonoBehaviour, IWorldSpawnContext {
     [Inject] private ItemSpawner _itemSpawner;
     [Inject] private ItemDropPresentationService _itemDropPresentation;
     [Inject] private NpcDecoService _npcDeco;
+    [Inject] private CubicService _cubics;
     [Inject] private ItemDropLayerService _dropLayers;
     [Inject] private NpcgrpTable _npcGrps;
     [Inject] private NpcNameTable _npcNames;
@@ -240,6 +241,9 @@ public class World : MonoBehaviour, IWorldSpawnContext {
         if (EntityActionMachine.Instance != null)
             EntityActionMachine.Instance.Remove(entity);
 
+        if (_cubics != null)
+            _cubics.Release(id);
+
         if (_gravityNpc != null)
             _gravityNpc.DeleteGravity(id);
 
@@ -363,13 +367,30 @@ public class World : MonoBehaviour, IWorldSpawnContext {
 
         // GearFlowLog.Info("SpawnUser CREATE UserEntity id=" + id +
             // " nick=" + info.Identity.Name + " " + GearFlowLog.Paperdoll(info.Appearance));
-        _userSpawner.Spawn(info, this);
+        UserEntity spawned = _userSpawner.Spawn(info, this);
+        ApplyCharRide(spawned, info.MountType);
     }
 
     public void UpdateUser(Entity entity, CharInfoDto info)
     {
         if (_userSpawner != null)
             _userSpawner.UpdateInfo(entity, info);
+        ApplyCharRide(entity, info != null ? info.MountType : (byte)0);
+    }
+
+    static void ApplyCharRide(Entity entity, byte mountType)
+    {
+        StriderRideService ride = StriderRideService.Instance;
+        if (ride == null || entity == null)
+            return;
+        if (mountType == 1)
+        {
+            bool wasRiding = ride.IsRiding(entity);
+            if (ride.TryMount(entity) && !wasRiding)
+                EntityActionVisual.PlayUserRide(entity as UserEntity, "wait");
+        }
+        else if (ride.IsRiding(entity))
+            ride.Dismount(entity);
     }
 
     public void RegisterNpc(Entity npc)
