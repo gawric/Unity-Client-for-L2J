@@ -60,7 +60,12 @@ public class ThirdPersonListener : MonoBehaviour
         } else {
             _attributes.position = FMODUnity.RuntimeUtils.ToFMODVector(_player.transform.position);
         }
-        
+
+        if (_cam == null && Camera.main != null)
+            _cam = Camera.main.gameObject;
+        if (_cam == null)
+            return;
+
         _attributes.forward = FMODUnity.RuntimeUtils.ToFMODVector(_cam.transform.forward);
         _attributes.up = FMODUnity.RuntimeUtils.ToFMODVector(_cam.transform.up);
         FMODUnity.RuntimeManager.StudioSystem.setListenerAttributes(_listener, _attributes);

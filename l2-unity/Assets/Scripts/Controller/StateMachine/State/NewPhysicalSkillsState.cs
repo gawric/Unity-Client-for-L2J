@@ -26,6 +26,12 @@ public class NewPhysicalSkillsState : AbstractAttackEvents
             case Event.READY_TO_ACT:
 
                 AnimationCombo animComboAct = SkillgrpTable.Instance.GetAnimComboBySkillId(useSkill.SkillId, useSkill.SkillLvl);
+                Debug.Log(
+                    "[RES_CAST] PhysicalState READY_TO_ACT skill=" + useSkill.SkillId +
+                    " anim=" + (useSkill.SkillGrp != null ? useSkill.SkillGrp.Animation : "-") +
+                    " clips=" + ClipList(animComboAct) +
+                    " effectHardcodedSkill3=" + (useSkill.SkillId == 3) +
+                    " executor=" + (SkillExecutor.Instance != null));
                 //not use bow atk
                 //RotateFaceToMonster(_stateMachine.Player);
                 SkillExecutor.Instance.ExecuteSkill(_stateMachine.Player, animComboAct, _events);
@@ -45,6 +51,13 @@ public class NewPhysicalSkillsState : AbstractAttackEvents
                 break;
             case Event.APPLY_SELF_SKILL:
                 Skillgrp skillgrp = useSkill.SkillGrp;
+                string selfBranch = SetupDurationHelper.IsLongCastSkill(useSkill) ? "long-2013"
+                    : SetupDurationHelper.IsUsePotion(useSkill) ? "potion"
+                    : "later";
+                Debug.Log(
+                    "[RES_CAST] PhysicalState APPLY_SELF skill=" + useSkill.SkillId +
+                    " anim=" + (skillgrp != null ? skillgrp.Animation : "-") +
+                    " firstBranch=" + selfBranch);
                 //2013 scroll effect
                 if (SetupDurationHelper.IsLongCastSkill(useSkill))
                 {
@@ -74,6 +87,8 @@ public class NewPhysicalSkillsState : AbstractAttackEvents
                             " cycle=" + (cycle == null ? "null" : string.Join(",", cycle)) +
                             " state=" + _stateMachine.State);
                     }
+                    Debug.Log(
+                        "[RES_CAST] PhysicalState APPLY_SELF branch=combo clips=" + ClipList(castCombo));
                     SetupDurationHelper.SetupDurationIfHitTimeNot0(
                         useSkill, entity.Identity.Id, entity, castCombo);
                     SkillExecutor.Instance.ExecuteSkillOverride(
@@ -81,8 +96,14 @@ public class NewPhysicalSkillsState : AbstractAttackEvents
                 }
                 else if (skillgrp != null && SkillExecutor.Instance != null)
                 {
-                    AnimationCombo combo = new AnimationCombo("-1", new string[1] { skillgrp.GetAnimOperationType3() }, "");
+                    string op = skillgrp.GetAnimOperationType3();
+                    Debug.Log("[RES_CAST] PhysicalState APPLY_SELF branch=operation3 clip=" + op);
+                    AnimationCombo combo = new AnimationCombo("-1", new string[1] { op }, "");
                     SkillExecutor.Instance.ExecuteSkill(_stateMachine.Player, combo, _events);
+                }
+                else
+                {
+                    Debug.Log("[RES_CAST] PhysicalState APPLY_SELF branch=none");
                 }
 
 
@@ -112,6 +133,16 @@ public class NewPhysicalSkillsState : AbstractAttackEvents
     }
 
 
+
+    static string ClipList(AnimationCombo combo)
+    {
+        if (combo == null)
+            return "combo-null";
+        string[] cycle = combo.GetAnimCycle();
+        if (cycle == null)
+            return "cycle-null";
+        return string.Join(" | ", cycle);
+    }
 
     private MagicSkillUseDto GetPayload(object payload)
     {

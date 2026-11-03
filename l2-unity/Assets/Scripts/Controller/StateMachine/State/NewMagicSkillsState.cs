@@ -23,6 +23,16 @@ public class NewMagicSkillsState  : AbstractAttackEvents
             case Event.READY_TO_ACT:
 
                 AnimationCombo readyCombo = SkillgrpTable.Instance.GetAnimComboBySkillId(useSkill.SkillId, useSkill.SkillLvl);
+                Debug.Log(
+                    "[RES_CAST] MagicState READY_TO_ACT skill=" + useSkill.SkillId +
+                    " long=" + SetupDurationHelper.IsLongCastSkill(useSkill) +
+                    " clips=" + (readyCombo != null ? string.Join(" | ", readyCombo.GetAnimCycle()) : "combo-null"));
+                if (SetupDurationHelper.IsLongCastSkill(useSkill) && readyCombo != null)
+                {
+                    SetupDurationHelper.SetupLongCastDurationIfHitTimeNot0(useSkill, objectId, entity, readyCombo);
+                    SkillExecutor.Instance.ExecuteSkillOverride(useSkill.SkillGrp, entity, readyCombo, _events, isLong: true);
+                    break;
+                }
                 string[] orderedReadyCycle = SetupDurationHelper.BuildOrderedCycleForOverrideTiming(readyCombo.GetAnimCycle());
                 float[] durations = IncomingPacketActions.Animations.GetOverrideClipsDurations(objectId, orderedReadyCycle);
                 float shotEventTime = SetupDurationHelper.ResolveShotEventTime(objectId, orderedReadyCycle);
@@ -44,6 +54,12 @@ public class NewMagicSkillsState  : AbstractAttackEvents
                 }
 
                 AnimationCombo selfCombo = SkillgrpTable.Instance.GetAnimComboBySkillId(useSkill.SkillId, useSkill.SkillLvl);
+                if (SetupDurationHelper.IsLongCastSkill(useSkill) && selfCombo != null)
+                {
+                    SetupDurationHelper.SetupLongCastDurationIfHitTimeNot0(useSkill, objectId, entity, selfCombo);
+                    SkillExecutor.Instance.ExecuteSkillOverride(useSkill.SkillGrp, entity, selfCombo, _events, isLong: true);
+                    break;
+                }
                 SetupDurationHelper.SetupDurationIfHitTimeNot0(useSkill, objectId, entity, selfCombo);
                 SkillExecutor.Instance.ExecuteSkillOverride(useSkill.SkillGrp, entity, selfCombo, _events);
                 break;

@@ -152,6 +152,13 @@ public class CameraController : MonoBehaviour
             _camera = GetComponent<Camera>();
         }
 
+        if (_camera != null)
+        {
+            _camera.enabled = true;
+            if (ThirdPersonListener.Instance != null)
+                ThirdPersonListener.Instance.Cam = _camera.gameObject;
+        }
+
         _collisionDetector = new CameraCollisionDetection(_camera, _target, _camOffset, _collisionMask);
         ApplyL2Fov();
     }

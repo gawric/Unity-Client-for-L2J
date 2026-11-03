@@ -93,7 +93,25 @@ public static class L2EffectGeneratorSkillBinder
 
         if (boundCount == 0)
         {
-            logLine = "WARNING skill visual id " + skillId + " is missing from GlobalEffect.asset.";
+            EffectDatabase.EffectData created = new EffectDatabase.EffectData();
+            created.id = skillId;
+            created.prefab = effect;
+            created.comment = PathFileName(compositePrefabPath);
+            created.ignoreFlightTimeForCast = true;
+            for (int i = 0; i < database.effects.Count; i++)
+            {
+                EffectDatabase.EffectData donor = database.effects[i];
+                if (donor != null && donor.id == 1011 && donor.settings != null)
+                {
+                    created.settings = donor.settings;
+                    break;
+                }
+            }
+
+            database.effects.Add(created);
+            EditorUtility.SetDirty(database);
+            AssetDatabase.SaveAssets();
+            logLine = "added GlobalEffect row skill " + skillId + " prefab -> " + compositePrefabPath;
             return true;
         }
 

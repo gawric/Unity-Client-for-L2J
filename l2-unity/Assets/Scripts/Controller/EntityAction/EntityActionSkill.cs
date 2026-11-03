@@ -140,13 +140,14 @@ public sealed class EntityActionSkill : IEntityActionProcess
                 return;
             }
 
-            string branch = selfCast ? "self" : IsMagicSkill(magic) ? "magic" : "physical";
+            bool universalCast = SetupDurationHelper.UsesUniversalCast(magic);
+            string branch = selfCast ? "self" : (IsMagicSkill(magic) || universalCast) ? "magic" : "physical";
             if (windstrike)
                 Debug.Log("[WINDSTRIKE] branch=" + branch);
 
             if (selfCast)
                 ExecuteSelfSkill(entity, magic);
-            else if (IsMagicSkill(magic))
+            else if (IsMagicSkill(magic) || universalCast)
                 ExecuteMagicSkill(entity, magic, target);
             else
                 ExecutePhysicalSkill(entity, magic);
@@ -294,10 +295,11 @@ public sealed class EntityActionSkill : IEntityActionProcess
             return;
         }
 
-        bool follow = IsMagicSkill(magic) || CombatFacingService.IsUsingBow(entity);
+        bool magicCast = IsMagicSkill(magic) || SetupDurationHelper.UsesUniversalCast(magic);
+        bool follow = magicCast || CombatFacingService.IsUsingBow(entity);
         if (follow)
         {
-            int rate = IsMagicSkill(magic)
+            int rate = magicCast
                 ? L2PawnYaw.MagicRotationRateYaw
                 : L2PawnYaw.RotationRateYaw;
             CombatFacingService.Ensure().BeginFollow(objectId, entity.transform, target.transform, rate);

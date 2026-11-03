@@ -101,6 +101,13 @@ public static class L2EffectGeneratorAssetOverrides
     const int FxMt0005Uv2Cell = 2;
     const float FxMt0005Uv2CellRgbBoost = 2f;
 
+    const string FxMt0067Atlas = "fx_m_t0067";
+    const int FxMt0067USub = 2;
+    const int FxMt0067VSub = 4;
+    const int FxMt0067DumpedStart = 2;
+    const int FxMt0067DumpedEnd = 4;
+    const int FxMt0067CorrectEnd = 3;
+
     const string FxMt0006Atlas = "fx_m_t0006";
     const string FxMt0006LinearAtlas = "fx_m_t0006_sRGB_Disabled";
     const int FxMt0006USub = 4;
@@ -432,6 +439,43 @@ public static class L2EffectGeneratorAssetOverrides
         start = FxMt0054Cell;
         end = FxMt0054DumpedEnd;
         return true;
+    }
+
+    /// <summary>
+    /// fx_m_t0067 2x4 with UseRandomSubdivision and cells 2..4 is a bad dump.
+    /// Keep the 2x4 atlas, sample static cell 0, and store the range as 2..3.
+    /// </summary>
+    public static bool TryCorrectFxMt0067Uv24Random(
+        UcEmitterDefinition emitter,
+        ref int start,
+        ref int end)
+    {
+        if (!IsFxMt0067Uv24RandomDump(emitter))
+        {
+            return false;
+        }
+
+        start = FxMt0067DumpedStart;
+        end = FxMt0067CorrectEnd;
+        return true;
+    }
+
+    public static bool IsFxMt0067Uv24RandomDump(UcEmitterDefinition emitter)
+    {
+        if (emitter == null ||
+            !emitter.UseRandomSubdivision ||
+            emitter.TextureUSubdivisions != FxMt0067USub ||
+            emitter.TextureVSubdivisions != FxMt0067VSub ||
+            emitter.SubdivisionStart != FxMt0067DumpedStart ||
+            emitter.SubdivisionEnd != FxMt0067DumpedEnd)
+        {
+            return false;
+        }
+
+        return string.Equals(
+            GetUcObjectName(emitter.TextureReference),
+            FxMt0067Atlas,
+            StringComparison.OrdinalIgnoreCase);
     }
 
     /// <summary>

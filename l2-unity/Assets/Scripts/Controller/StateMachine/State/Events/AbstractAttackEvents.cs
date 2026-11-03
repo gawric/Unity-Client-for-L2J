@@ -72,6 +72,33 @@ public abstract class AbstractAttackEvents : StateBase
     }
 
 
+    void LogPhysicalList(string where, string animName)
+    {
+        if (_stateMachine == null || _stateMachine.State != PlayerState.PHYSICAL_SKILLS)
+            return;
+
+        bool listed = false;
+        string list = "";
+        if (_specialsBows != null)
+        {
+            for (int i = 0; i < _specialsBows.Length; i++)
+            {
+                string name = _specialsBows[i] != null ? _specialsBows[i].ToString() : "";
+                if (i > 0)
+                    list += ",";
+                list += name;
+                if (animName == name)
+                    listed = true;
+            }
+        }
+
+        Debug.Log(
+            "[RES_CAST] PhysicalList " + where +
+            " anim=" + animName +
+            " listed=" + listed +
+            " list=" + list);
+    }
+
     private int ResolveFacingObjectId()
     {
         if (_stateMachine != null)
@@ -107,6 +134,7 @@ public abstract class AbstractAttackEvents : StateBase
 
     private void CallBackAnimationFinish(string animName)
     {
+        LogPhysicalList("Finish", animName);
         foreach (Animation special in _specialsBows)
         {
             if (animName != special.ToString())
@@ -174,6 +202,7 @@ public abstract class AbstractAttackEvents : StateBase
 
     private void CallBackStartShoot(string animName)
     {
+        LogPhysicalList("Shoot", animName);
         // Bow / magic: release aim-follow at projectile launch (not during flight).
         CombatFacingService.Instance?.EndFollow(ResolveFacingObjectId(), "shoot");
         // ReplayAttackTrace.Write(

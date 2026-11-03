@@ -104,8 +104,22 @@ public sealed class PlayerWorldApply : EntityWorldApply
         if (PlayerStateMachine.Instance == null)
             return;
 
+        bool listedMagic = dto.SkillGrp != null && dto.SkillGrp.IsMagic == 1;
+        bool universalCast = SetupDurationHelper.UsesUniversalCast(dto);
+        bool magic = listedMagic || universalCast;
+        Debug.Log(
+            "[RES_CAST] Player.OnMagicSkillUse skill=" + dto.SkillId +
+            " lvl=" + dto.SkillLvl +
+            " hitMs=" + dto.HitTime +
+            " target=" + dto.TargetId +
+            " isMagic=" + (dto.SkillGrp != null ? dto.SkillGrp.IsMagic.ToString() : "skillgrp-null") +
+            " anim=" + (dto.SkillGrp != null ? dto.SkillGrp.Animation : "-") +
+            " visual=" + (dto.SkillGrp != null ? dto.SkillGrp.SkillVisualEffect : "-") +
+            " universalCast=" + universalCast +
+            " intention=" + (magic ? "MAGIC" : "PHYSICAL"));
+
         PlayerStateMachine.Instance.ChangeIntention(
-            dto.SkillGrp.IsMagic == 1 ?
+            magic ?
                 Intention.INTENTION_MAGIC_ATTACK :
                 Intention.INTENTION_PHYSICAL_SKILLS_ATTACK,
             dto);

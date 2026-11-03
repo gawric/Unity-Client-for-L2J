@@ -94,6 +94,8 @@ public sealed class EntityActionMove : IEntityActionProcess
             // forces a fresh StartMove so the run/walk clip plays again.
             if (entity is UserEntity)
                 existing.ReplayUserGait();
+            else
+                EnsureMonsterLocomotion(entity);
             return;
         }
 
@@ -187,6 +189,8 @@ public sealed class EntityActionMove : IEntityActionProcess
             existing.RetargetPawn(pawn.transform, stopDistance, entity.Running);
             if (entity is UserEntity)
                 existing.ReplayUserGait();
+            else
+                EnsureMonsterLocomotion(entity);
             return;
         }
 
@@ -197,6 +201,46 @@ public sealed class EntityActionMove : IEntityActionProcess
         MoveAllCharacters.Instance.AddMoveData(entity.Identity.Id, data);
         // Non-forcing: SyncUserGait OffGait force-replays once if still on wait.
         // Unconditional ForceReplay restarted the run clip every new chase packet.
-        data.SyncUserGait();
+        // SyncUserGait returns immediately for monsters.
+        if (entity is UserEntity)
+            data.SyncUserGait();
+        else
+            EnsureMonsterLocomotion(entity);
+    }
+
+    // A later MoveTo only retargets the pawn. MonsterCrossFade skips when walk/run
+    // is already playing, so a packet does not restart the stride. A swing in
+    // progress is left alone.
+    void EnsureMonsterLocomotion(Entity entity)
+    {
+        if (!(entity is MonsterEntity))
+            return;
+        if (MonsterGaitAlreadyPlaying(entity))
+            return;
+        EntityActionVisual.StartMove(entity, !entity.Running);
+    }
+
+    static bool MonsterGaitAlreadyPlaying(Entity entity)
+    {
+        NetworkAnimationController controller = entity.GetAnimatorController();
+        Animator animator = controller != null ? controller.GetAnimator() : null;
+        if (animator == null)
+            return false;
+
+        string gait = entity.Running ? MonsterAnim.Run : MonsterAnim.Walk;
+        if (PlayerLocomotionCrossFade.IsAlreadyPlaying(animator, gait))
+            return true;
+
+        if (SwingBusy(animator.GetCurrentAnimatorStateInfo(0)))
+            return true;
+        if (!animator.IsInTransition(0))
+            return false;
+        return SwingBusy(animator.GetNextAnimatorStateInfo(0));
+    }
+
+    static bool SwingBusy(AnimatorStateInfo state)
+    {
+        return (state.IsName(MonsterAnim.Atk01) || state.IsName(MonsterAnim.SpAtk01))
+            && state.normalizedTime < 1.05f;
     }
 }

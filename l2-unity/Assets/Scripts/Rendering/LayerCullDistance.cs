@@ -32,6 +32,8 @@ public class LayerCullDistance : MonoBehaviour
 
     private float[] ApplyCulling(Camera camera)
     {
+        if (camera == null)
+            return null;
         float[] distances = new float[32];
         distances[LayerMask.NameToLayer("Deco")] = _decoCullDistance;
         camera.layerCullDistances = distances;

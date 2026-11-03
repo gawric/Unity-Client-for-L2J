@@ -39,6 +39,8 @@ public static class EntityActionVisual
         if (!CanPlayAnim(entity))
         {
             EntitySpawnShared.LogStriderGait("start-move-blocked", entity, "walking=" + walking);
+            if (entity is MonsterEntity)
+                MonsterGaitLog.Ask(entity, "start-move-blocked", "walking=" + walking);
             return;
         }
 
@@ -49,6 +51,7 @@ public static class EntityActionVisual
             string anim = walking ? AnimationNames.MONSTER_WALK.ToString() : AnimationNames.MONSTER_RUN.ToString();
 
             IncomingPacketActions.Animations.PlayMonsterAnimation(monster.Identity.Id, anim);
+            MonsterGaitLog.Ask(monster, "start-move", "asked=" + anim + " walking=" + walking);
             EntitySpawnShared.LogStriderGait("start-move", monster, "asked=" + anim);
         }
     }
@@ -87,6 +90,7 @@ public static class EntityActionVisual
                 IncomingPacketActions.Animations.PlayMonsterAnimation(
                     monster.Identity.Id,
                     AnimationNames.MONSTER_WAIT.ToString());
+                MonsterGaitLog.Ask(monster, "stop-move", "asked=wait");
                 EntitySpawnShared.LogStriderGait("stop-move", monster, "asked=wait");
             }
         }
@@ -107,6 +111,7 @@ public static class EntityActionVisual
         {
 
             IncomingPacketActions.Animations.PlayMonsterAnimation(monster.Identity.Id, AnimationNames.MONSTER_ATK01.ToString());
+            MonsterGaitLog.Ask(monster, "melee", "asked=atk01");
         }
     }
 
@@ -180,6 +185,7 @@ public static class EntityActionVisual
         {
       
             IncomingPacketActions.Animations.PlayMonsterAnimation(monster.Identity.Id, "atkwait");
+            MonsterGaitLog.Ask(monster, "combat-wait", "asked=atkwait");
         }
     }
 
@@ -241,6 +247,8 @@ public static class EntityActionVisual
     {
         if (!alreadyCorpse && IsPlayingDeath(entity))
         {
+            if (entity is MonsterEntity)
+                Debug.Log("[DEATH_SPEED] PlayDeath skip already-playing " + DeathPose(entity));
             if (entity != null)
                 entity.SetDead(true);
             return;
@@ -263,7 +271,31 @@ public static class EntityActionVisual
         }
 
         if (entity is MonsterEntity monster && IncomingPacketActions.Animations != null)
+        {
+            Debug.Log("[DEATH_SPEED] PlayDeath start " + DeathPose(monster));
             IncomingPacketActions.Animations.PlayMonsterAnimation(monster.Identity.Id, AnimationNames.DEAD.ToString());
+            MonsterGaitLog.Ask(monster, "death", "asked=death");
+        }
+    }
+
+    static string DeathPose(Entity entity)
+    {
+        NetworkAnimationController nac = entity != null ? entity.GetAnimatorController() : null;
+        Animator animator = nac != null ? nac.GetAnimator() : null;
+        string clip = "-";
+        if (animator != null)
+        {
+            AnimatorClipInfo[] clips = animator.GetCurrentAnimatorClipInfo(0);
+            if (clips != null && clips.Length > 0 && clips[0].clip != null)
+                clip = clips[0].clip.name;
+        }
+
+        return "id=" + (entity != null && entity.Identity != null ? entity.Identity.Id.ToString() : "-") +
+            " name=" + (entity != null && entity.Identity != null ? entity.Identity.Name : "-") +
+            " held=" + (entity != null && entity.ActionSlot != null && entity.ActionSlot.DeathPoseHeld) +
+            " speed=" + (animator != null ? animator.speed.ToString("F3") : "-") +
+            " transition=" + (animator != null && animator.IsInTransition(0)) +
+            " clip=" + clip;
     }
 
     public static void PlayUserRide(UserEntity user, string move)

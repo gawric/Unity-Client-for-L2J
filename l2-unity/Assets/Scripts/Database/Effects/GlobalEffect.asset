@@ -356,3 +356,10 @@ MonoBehaviour:
     comment: EnterEventgrp m_u022_b
     settings: {fileID: 11400000, guid: 7c4e9a1b2d8f4e6a9c0b5d3e1f7a8b24, type: 2}
     ignoreFlightTimeForCast: 1
+  - id: 1016
+    prefab: {fileID: 6075553314018201323, guid: 209f6366f87c03f459cd806411975ac4, type: 3}
+    useWeaponShot: 0
+    spiritShot: 0
+    comment: wh_resurrection_composite.prefab
+    settings: {fileID: 11400000, guid: 71be8ca0eae2cd44fbcbd0243ca6ff9f, type: 2}
+    ignoreFlightTimeForCast: 1

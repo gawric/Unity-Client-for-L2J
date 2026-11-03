@@ -76,6 +76,39 @@ public class SetupDurationHelper
         return false;
     }
 
+    static readonly HashSet<string> UniversalCastClips = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+    {
+        "CastShort", "CastMid", "CastLong", "CastEnd",
+        "CastShort2", "CastMid2", "CastEnd2",
+        "MagicShot", "MagicThrow", "MagicNoTarget", "MagicNotarget"
+    };
+
+    /// <summary>
+    /// CastLong / CastEnd / MagicThrow and the other cast-combo names play on the
+    /// shared CastMid / CastEnd / MagicShot states. SpAtk stays on the physical path.
+    /// </summary>
+    public static bool UsesUniversalCast(MagicSkillUseDto useSkill)
+    {
+        if (!TryGetPlayableCombo(useSkill, out AnimationCombo combo))
+            return false;
+
+        string[] cycle = combo.GetAnimCycle();
+        bool any = false;
+        for (int i = 0; i < cycle.Length; i++)
+        {
+            if (string.IsNullOrWhiteSpace(cycle[i]))
+                continue;
+            string name = cycle[i].Trim();
+            if (string.Equals(name, "none", StringComparison.OrdinalIgnoreCase))
+                continue;
+            if (!UniversalCastClips.Contains(name))
+                return false;
+            any = true;
+        }
+
+        return any;
+    }
+
     public static bool IsPickupAnimationPlaying(int objectId)
     {
         if (IncomingPacketActions.Animations == null)

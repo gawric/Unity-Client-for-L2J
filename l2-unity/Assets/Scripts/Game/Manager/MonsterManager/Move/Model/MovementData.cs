@@ -582,7 +582,12 @@ public class MovementData
             return;
         }
 
+        Transform movedFrom = GetTransform();
+        Vector3 beforeStep = movedFrom != null ? movedFrom.position : Vector3.zero;
         CharacterMove(_entity, direction, speed);
+        Transform movedTo = GetTransform();
+        float stepped = movedTo != null ? VectorUtils.Distance2D(beforeStep, movedTo.position) : 0f;
+        MonsterGaitLog.SampleMove(_entity, stepped, _gaitAnim);
 
         CheckLocomotionAnimation();
         LookAlong(GetTransform(), lookDir);

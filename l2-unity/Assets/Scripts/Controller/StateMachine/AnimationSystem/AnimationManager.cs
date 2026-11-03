@@ -681,6 +681,7 @@ public class AnimationManager : BaseAnimationManager , IAnimationManager
             float duration = fixedDuration ?? LocomotionCrossFadeSettings.ResolveDuration(stateName, controller);
             bool already = PlayerLocomotionCrossFade.IsAlreadyPlaying(controller, stateName);
             bool played = MonsterCrossFade.TryPlay(controller, stateName, family, duration);
+            MonsterGaitLog.Play(objectId, stateName, already, played);
 
             return;
         }

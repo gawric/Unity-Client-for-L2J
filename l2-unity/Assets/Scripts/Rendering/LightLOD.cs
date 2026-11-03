@@ -89,6 +89,8 @@ public class LightLOD : MonoBehaviour
 
     private void AdjustLODQuality(Camera camera)
     {
+        if (camera == null)
+            return;
         _squareDistanceFromCamera = Vector3.SqrMagnitude(
             camera.transform.position - transform.position
         );

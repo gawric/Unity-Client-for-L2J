@@ -266,6 +266,8 @@ public class CharSelectWindow : L2Window {
         }
     }
 
+    public bool UiReady { get { return _levelLabel != null && _charNameManipulator != null; } }
+
     public CharSelectInfoPackage GetSelectChar()
     {
         return _selectChar;

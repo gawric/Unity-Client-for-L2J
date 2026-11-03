@@ -55,6 +55,12 @@ public class NewPhysicalSkillsIntention : IntentionBase
                 IncomingPacketActions.Player.RotateToAttacker(targetEntity.transform.position);
             }
 
+            Debug.Log(
+                "[RES_CAST] PhysicalIntention skill=" + useSkill.SkillId +
+                " selfId=" + objectId +
+                " targetId=" + useSkill.TargetId +
+                " targetFound=" + (targetEntity != null) +
+                " branch=" + (objectId != useSkill.TargetId ? "READY_TO_ACT" : "APPLY_SELF_SKILL"));
             IfUseSelf(objectId, useSkill);
 
         }

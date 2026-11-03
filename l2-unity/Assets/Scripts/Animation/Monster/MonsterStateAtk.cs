@@ -58,6 +58,10 @@ public class MonsterStateAtk : MonsterStateBase
     }
 
     override public void OnStateUpdate(Animator animator, AnimatorStateInfo stateInfo, int layerIndex) {
+        // Die already started the death crossfade. Switching this swing to wait
+        // cancels it and the body stays standing.
+        if (_entity != null && _entity.IsDead())
+            return;
         if (TryFinishSkill(stateInfo))
             return;
         if (!IsCombatSwing())
@@ -129,7 +133,7 @@ public class MonsterStateAtk : MonsterStateBase
             return;
 
         _isSwitchIdle = true;
-        EntityActionMachine.Instance.Set(_entity, EntityActionKind.Idle, null);
+        EntityActionMachine.Instance.Set(_entity, EntityActionKind.Idle, GaitIfMoving());
     }
 
     bool IsCombatSwing()
@@ -141,15 +145,26 @@ public class MonsterStateAtk : MonsterStateBase
 
     void ReturnAppearToWait(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
+        if (_entity != null && _entity.IsDead())
+            return;
         if (_isSwitchIdle || stateInfo.normalizedTime < 1f)
             return;
         _isSwitchIdle = true;
         if (_entity != null && !_entity.IsDead() && EntityActionMachine.Instance != null)
         {
-            EntityActionMachine.Instance.Set(_entity, EntityActionKind.Idle, "wait");
+            EntityActionMachine.Instance.Set(_entity, EntityActionKind.Idle, GaitIfMoving());
             return;
         }
         animator.CrossFade("wait", 0.12f, layerIndex);
+    }
+
+    string GaitIfMoving()
+    {
+        if (_entity == null || _entity.Identity == null || MoveAllCharacters.Instance == null)
+            return null;
+        if (!MoveAllCharacters.Instance.IsMoving(_entity.Identity.Id))
+            return null;
+        return _entity.Running ? "run" : "walk";
     }
 
     bool IsStaleSwing()

@@ -507,6 +507,8 @@ public class BaseAnimationController : AnimationEventsBase, IAnimationController
             return;
         _animator.speed = value;
         _castPlayable?.SetControllerSpeed(value);
+        if (value < 0.05f)
+            MonsterGaitLog.SpeedZero(_animator, value);
     }
 
     public void SetEnabled(bool value)

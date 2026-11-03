@@ -91,13 +91,11 @@ public sealed class EntityActionMachine : ITickable
         if (entity == null)
             return;
 
-        string src = string.IsNullOrEmpty(source) ? "machine" : source;
-
         // EntityActionCombatLog.LogIfWatch(entity,
             // "Die name=" + EntityActionCombatLog.NameOf(entity) +
             // " allowed=" + IsAllowed(entity) +
             // " alreadyCorpse=" + alreadyCorpse +
-            // " src=" + src +
+            // " src=" + source +
             // " inCombat=" + entity.InCombat +
             // " action=" + entity.ActionSlot.Action);
 

@@ -56,6 +56,87 @@ public sealed class L2EffectGeneratorWindow : EditorWindow
     }
 
     /// <summary>
+    /// Skill 1016 / Scroll of Resurrection 2014. Cast is wh_heal_ca, burst is wh_resurrection_ta.
+    /// The target emitters wait 2.7s from actor spawn, so that part must start with the cast.
+    /// Unity.exe -executeMethod L2EffectGeneratorWindow.GenerateResurrectionCli
+    /// </summary>
+    public static void GenerateResurrectionCli()
+    {
+        AssetDatabase.Refresh();
+        bool ok = GenerateResurrection();
+        EditorApplication.Exit(ok ? 0 : 1);
+    }
+
+    public static bool GenerateResurrection()
+    {
+        const string folder = "Assets/Resources/Data/Effects/wh_resurrection";
+        const string effectName = "wh_resurrection";
+        L2EffectGeneratorFolderBuilder.BuildResult result =
+            L2EffectGeneratorFolderBuilder.CreateFromFolder(folder, effectName, 1016, true);
+        for (int i = 0; i < result.LogLines.Count; i++)
+            Debug.Log("[L2EffectGenerator] " + result.LogLines[i]);
+        if (!result.Success)
+        {
+            Debug.LogError("[L2EffectGenerator] " + result.ErrorMessage);
+            return false;
+        }
+
+        string compositePath = folder + "/" + effectName + "_composite.prefab";
+        SpawnResurrectionBurstWithCast(compositePath);
+        if (!L2EffectGeneratorSkillBinder.TryBindComposite(
+                2014, compositePath, out string bindLog, out string bindError))
+        {
+            Debug.LogError("[L2EffectGenerator] " + bindError);
+            return false;
+        }
+
+        if (!string.IsNullOrEmpty(bindLog))
+            Debug.Log("[L2EffectGenerator] " + bindLog);
+        return true;
+    }
+
+    static void SpawnResurrectionBurstWithCast(string compositePath)
+    {
+        GameObject root = AssetDatabase.LoadAssetAtPath<GameObject>(compositePath);
+        CompositeEffectV2 composite = root != null ? root.GetComponent<CompositeEffectV2>() : null;
+        if (composite == null)
+        {
+            Debug.LogWarning("[L2EffectGenerator] resurrection composite missing " + compositePath);
+            return;
+        }
+
+        SerializedObject serialized = new SerializedObject(composite);
+        SerializedProperty parts = serialized.FindProperty("_v2Parts");
+        if (parts == null || !parts.isArray)
+            return;
+
+        int changed = 0;
+        for (int i = 0; i < parts.arraySize; i++)
+        {
+            SerializedProperty part = parts.GetArrayElementAtIndex(i);
+            SerializedProperty name = part.FindPropertyRelative("name");
+            if (name == null || name.stringValue == null ||
+                name.stringValue.IndexOf("resurrection_ta", System.StringComparison.OrdinalIgnoreCase) < 0)
+                continue;
+
+            SerializedProperty timing = part.FindPropertyRelative("spawnTiming");
+            if (timing != null && timing.intValue != (int)CompositePartSpawnTiming.Immediate)
+            {
+                timing.intValue = (int)CompositePartSpawnTiming.Immediate;
+                changed++;
+            }
+        }
+
+        if (changed > 0)
+        {
+            serialized.ApplyModifiedPropertiesWithoutUndo();
+            EditorUtility.SetDirty(composite);
+            AssetDatabase.SaveAssets();
+            Debug.Log("[L2EffectGenerator] resurrection burst starts with the cast (" + changed + " part)");
+        }
+    }
+
+    /// <summary>
     /// Wolf Collar skill 2046, skillgrp visual 1111, class su_summon_a_ca.
     /// Unity.exe -executeMethod L2EffectGeneratorWindow.GenerateSummonCli
     /// </summary>

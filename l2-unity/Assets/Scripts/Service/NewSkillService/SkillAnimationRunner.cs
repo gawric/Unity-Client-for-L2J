@@ -28,7 +28,7 @@ public class SkillAnimationRunner
             return;
         }
 
-        // Debug.Log($"[SkillRun] START objectId={objectId} cycleLength={cycle.Length}");
+        Debug.Log("[RES_CAST] SkillRun triggers objectId=" + objectId + " clips=" + string.Join(" | ", cycle));
 
         for (int i = 0; i < cycle.Length; i++)
         {

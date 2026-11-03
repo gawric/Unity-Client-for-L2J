@@ -122,9 +122,12 @@ public class LoginCameraManager : MonoBehaviour
     }
 
     public void DisableMainCamera() {
-        if (Camera.main != null) {
-            // Debug.Log("Disabling camera " + Camera.main.transform);
-            Camera.main.enabled = false;
+        Camera main = Camera.main;
+        // The world camera is already in the preloaded Game scene. Autologin
+        // reaches CharSelect while that camera is still Camera.main; turning it
+        // off here leaves the world with no camera after the lobby is unloaded.
+        if (main != null && main.GetComponent<CameraController>() == null) {
+            main.enabled = false;
         } else if(_activeCamera != null) {
             _activeCamera.enabled = false;
         }

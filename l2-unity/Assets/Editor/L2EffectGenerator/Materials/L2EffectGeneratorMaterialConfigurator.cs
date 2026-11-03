@@ -364,6 +364,16 @@ public static class L2EffectGeneratorMaterialConfigurator
             SetFloat(material, "_StaticSubdivision", 2f);
         }
 
+        if (L2EffectGeneratorAssetOverrides.IsFxMt0067Uv24RandomDump(emitter))
+        {
+            SetFloat(material, "_TextureUSubdivisions", 2f);
+            SetFloat(material, "_TextureVSubdivisions", 4f);
+            SetFloat(material, "_SubdivisionStart", 2f);
+            SetFloat(material, "_SubdivisionEnd", 3f);
+            SetFloat(material, "_FlipbookMode", 0f);
+            SetFloat(material, "_StaticSubdivision", 0f);
+        }
+
         float orientation = ResolveOrientationMode(emitter.UseDirectionAs);
         if (orientation > 1.5f && orientation < 2.5f)
         {
@@ -911,7 +921,9 @@ public static class L2EffectGeneratorMaterialConfigurator
     {
         start = emitter.SubdivisionStart;
         end = emitter.SubdivisionEnd;
-        if (L2EffectGeneratorAssetOverrides.TryCorrectFxMt0005Subdivision68(
+        if (L2EffectGeneratorAssetOverrides.TryCorrectFxMt0067Uv24Random(
+                emitter, ref start, ref end) ||
+            L2EffectGeneratorAssetOverrides.TryCorrectFxMt0005Subdivision68(
                 emitter, ref start, ref end) ||
             L2EffectGeneratorAssetOverrides.TryCorrectFxMt0005Uv2Cell2(
                 emitter, ref start, ref end) ||

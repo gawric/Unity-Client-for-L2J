@@ -123,6 +123,8 @@ public class GameManager : MonoBehaviour {
         GameObject.Destroy(IncomingPacketActions.LoginUi.gameObject);
         PlayerInfoInterlude playerInfo = _gameClient.PlayerInfo;
         IncomingPacketActions.GameWorld.SpawnPlayer(playerInfo.Identity, playerInfo.Status, playerInfo.Stats, playerInfo.Appearance);
+        if (_loadingCamera != null)
+            _loadingCamera.enabled = false;
         IncomingPacketActions.Ui.StopLoading();
         PlayerStateMachine.Instance.enabled = true;
         WorldSpawnReady = true;
