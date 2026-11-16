@@ -51,6 +51,10 @@ public static class GroundSnapHelper
         snapped = position;
         LayerMask mask = WalkableMask(groundMask);
 
+        // A high ray sees only the roof when it shares a mesh collider with the floor.
+        float localAbove = Mathf.Clamp(startAbove, 0f, MaxLift);
+        if (TryPickNearServerY(position, position.y + localAbove, localAbove + Mathf.Min(maxDistance, MaxDrop), mask, 0f, out snapped))
+            return true;
         if (TryPickNearServerY(position, position.y + startAbove, startAbove + maxDistance, mask, 0f, out snapped))
             return true;
         if (TryPickNearServerY(position, HighOriginY, HighMaxDistance, mask, 0f, out snapped))

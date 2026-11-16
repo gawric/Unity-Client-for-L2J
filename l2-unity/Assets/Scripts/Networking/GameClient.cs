@@ -7,6 +7,8 @@ public class GameClient : DefaultClient {
     private int _playKey2;
     private readonly object syncLock = new object();
     private bool _isLoadComplete { get; set; }
+    public PlayerParty Party { get; } = new PlayerParty();
+    public PlayerDuel Duel { get; } = new PlayerDuel();
 
     public PlayerInfoInterlude PlayerInfo { get { return _playerInfo; } set { _playerInfo = value; } }
     public string CurrentPlayer { get { return _playerInfo.Identity.Name; } }
@@ -32,6 +34,8 @@ public class GameClient : DefaultClient {
     }
 
     protected override void CreateAsyncClient() {
+        Party.Clear();
+        Duel.Clear();
         clientPacketHandler = new GameClientPacketHandler();
         serverPacketHandler = new GameServerPacketHandler(Network.Protocol, Network.Dispatcher);
 
@@ -107,6 +111,8 @@ public class GameClient : DefaultClient {
     }
 
     public override void OnDisconnect() {
+        Party.Clear();
+        Duel.Clear();
         base.OnDisconnect();
     }
 

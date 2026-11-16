@@ -137,7 +137,7 @@ public sealed class L2FxCompositorRenderPass : ScriptableRenderPass
             return;
         }
 
-        CommandBuffer cmd = CommandBufferPool.Get("L2Fx D3D9 Compositor");
+        CommandBuffer cmd = CommandBufferPool.Get();
         using (new ProfilingScope(cmd, Sampler))
         {
             Shader.SetGlobalFloat(D3D9ActiveId, 1f);
@@ -182,7 +182,7 @@ public sealed class L2FxCompositorRenderPass : ScriptableRenderPass
             return;
         }
 
-        CommandBuffer cmd = CommandBufferPool.Get("L2 FX Direct UNORM");
+        CommandBuffer cmd = CommandBufferPool.Get();
         using (new ProfilingScope(cmd, Sampler))
         {
             cmd.SetGlobalFloat(D3D9ActiveId, 1f);

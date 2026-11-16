@@ -112,6 +112,7 @@ public class LoginClient : DefaultClient {
             clientPacketHandler = new LoginClientPacketHandler();
             serverPacketHandler = new LoginServerPacketHandler(Network.Protocol, Network.Dispatcher);
 
+            LoginEndpoint.Apply(ref _serverIp, ref _serverPort);
             _client = new AsynchronousClient(_serverIp, _serverPort, this, clientPacketHandler, serverPacketHandler, true, Network);
         }
           

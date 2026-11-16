@@ -9,6 +9,7 @@ public sealed class AskJoinPartyIncoming : IncomingWirePacket<AskJoinPartyDto>
         {
             IncomingPacketActions.PartyInvite.AddData(packet);
             IncomingPacketActions.PartyInvite.ShowWindow();
+            LocalDemoPartyProbe.TryRespond(IncomingPacketActions.PartyInvite, packet);
         });
     }
 }

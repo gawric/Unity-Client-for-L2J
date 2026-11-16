@@ -183,11 +183,23 @@ public class ClickManager : MonoBehaviour
         Game.Send(new MoveToCommand(PlayerEntity.Instance.transform.position, lastClickPosition));
     }
 
+    public void ClickEntity(GameObject entityRoot)
+    {
+        _targetObjectData = new ObjectData(entityRoot);
+        OnClickOnEntity();
+    }
+
     public void OnClickOnEntity()
     {
         TargetData clickTarget = new TargetData(_targetObjectData);
         if (clickTarget == null || clickTarget.Identity == null)
         {
+            return;
+        }
+
+        if (InputManager.Instance != null && InputManager.Instance.ForceAttackPressed)
+        {
+            PlayerActions.Instance?.ForceAttack(clickTarget.GetEntity());
             return;
         }
 

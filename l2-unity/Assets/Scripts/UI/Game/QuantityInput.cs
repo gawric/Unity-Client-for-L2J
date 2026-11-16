@@ -1,4 +1,4 @@
-﻿
+
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -15,7 +15,6 @@ public class QuantityInput : L2PopupWindow
 {
     private static QuantityInput _instance;
     private object _parentWindow;
-    private VisualElement _root;
     private TextField _userInput;
 
     public static QuantityInput Instance { get { return _instance; } }
@@ -63,7 +62,7 @@ public class QuantityInput : L2PopupWindow
 
         RegisterAllNumbers();
 
-        _userInput.RegisterValueChangedCallback(evt => OnValueChanged(evt));
+        _userInput.RegisterValueChangedCallback(OnValueChanged);
         _userInput.RegisterCallback<ClickEvent>((evt) => OnClick(evt, inputBg));
 
         OnCenterScreen(root);
@@ -99,8 +98,8 @@ public class QuantityInput : L2PopupWindow
         if (long.TryParse(number, out _))
         {
             string value1 = ToolTipsUtils.ConvertPriceToNormal(_userInput.value + number);
-            long numberInt = long.Parse(value1);
-            _userInput.value = ToolTipsUtils.ConvertToPrice(numberInt);
+            if (long.TryParse(value1, out long numberInt))
+                _userInput.value = ToolTipsUtils.ConvertToPrice(numberInt);
         }
     }
 
@@ -141,16 +140,14 @@ public class QuantityInput : L2PopupWindow
     private void OnClickSuccess(ClickEvent evt)
     {
         string value = ToolTipsUtils.ConvertPriceToNormal(_userInput.value);
-        OnButtonOk?.Invoke(value);
-        base.HideWindow();
+        SubmitQuantity(value);
     }
 
 
 
     private void OnClickClose(ClickEvent evt)
     {
-        OnButtonClose?.Invoke();
-        base.HideWindow();
+        CancelSelection();
     }
 
 
@@ -158,6 +155,21 @@ public class QuantityInput : L2PopupWindow
 
   
 
+
+    public bool SubmitQuantity(string value)
+    {
+        if (!int.TryParse(value, out int quantity) || quantity <= 0 || (_count > 0 && quantity > _count))
+            return false;
+        OnButtonOk?.Invoke(quantity.ToString());
+        base.HideWindow();
+        return true;
+    }
+
+    public void CancelSelection()
+    {
+        OnButtonClose?.Invoke();
+        base.HideWindow();
+    }
 
     private void OnValueChanged(ChangeEvent<string> evt)
     {
@@ -173,7 +185,12 @@ public class QuantityInput : L2PopupWindow
         
 
         string digitsOnly = ToolTipsUtils.ConvertPriceToNormal(evt.newValue);
-        if (digitsOnly.Length > 20) return;
+        if (digitsOnly.Length > 20)
+        {
+            _userInput.SetValueWithoutNotify(evt.previousValue);
+            _userInput.RegisterValueChangedCallback(OnValueChanged);
+            return;
+        }
         if (string.IsNullOrEmpty(digitsOnly) || !long.TryParse(digitsOnly, out long newValue))
         {
             _userInput.SetValueWithoutNotify(evt.previousValue);

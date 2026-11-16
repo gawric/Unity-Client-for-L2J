@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -41,6 +41,11 @@ public class DealerWindow : L2PopupWindow
     private Label _panelSellHeaderName;
     private Label _panelBuyHeaderName;
     private int _listId;
+    private MerchantCart _merchantCart;
+    private int _currentMoney;
+    public int CurrentListId => _listId;
+    public ProductType CurrentProductType => _productType;
+    public long DisplayedPrice { get; private set; }
     private Label _windowName;
     public static DealerWindow Instance
     {
@@ -95,7 +100,7 @@ public class DealerWindow : L2PopupWindow
         succesBtn.RegisterCallback<ClickEvent>((evt) => HandleSuccessButtonClick());
         RegisterCloseWindowEventByName("CloseButton");
         _panelSellHeaderName.text = "Sell";
-        _panelSellHeaderName.text = "Buy";
+        _panelBuyHeaderName.text = "Buy";
 
         DragManipulator drag = new DragManipulator(dragArea, _windowEle);
         dragArea.AddManipulator(drag);
@@ -113,9 +118,17 @@ public class DealerWindow : L2PopupWindow
 
    public void UpdateBuyData(List<Product>listBuy ,bool  isModifySell , int listId)
    {
+        DetachQuantityHandlers();
         _listId = listId;
-        _listBuy = listBuy;
         _isModifySell = isModifySell;
+        _merchantCart = (_productType == ProductType.BUY || _productType == ProductType.SELL)
+            ? new MerchantCart(listBuy, _productType == ProductType.BUY, IsStackable) : null;
+        if (_merchantCart != null)
+        {
+            RefreshMerchantCart();
+            return;
+        }
+        _listBuy = listBuy;
         if(_listSell != null) _listSell.Clear();
 
         //UnityEngine.Debug.Log("Server size list buy " + listBuy.Count);
@@ -135,6 +148,23 @@ public class DealerWindow : L2PopupWindow
     public void SetWindowName(string windowName)
     {
         _windowName.text = windowName;
+    }
+
+    private static bool IsStackable(Product product) => product.GetConsumeCategory() != ConsumeCategory.Normal;
+
+    private void RefreshMerchantCart()
+    {
+        _listBuy = _merchantCart.Available;
+        _listSell = _merchantCart.Selected;
+        _shopCellCreator.ClearSell(_tabSell);
+        _shopCellCreator.CreateSell(_listBuy, _tabSell, _contentSell, _windowEle);
+        _shopCellCreator.ClearBuy(_inventorySlotsBuy, _tabBuy);
+        _shopCellCreator.CreateBuy(_listSell, _tabBuy, _contentBuy, _windowEle);
+        for (int i = 0; i < _listSell.Count; i++)
+            _inventorySlotsBuy[i].AssignProduct(_listSell[i]);
+        ToolTipManager.GetInstance().SetBuyData(_listSell);
+        _itemEvalutor.UpdateAllPrice(_listSell);
+        _itemEvalutor.UpdateWeight(_listSell, _currentDataWeight, _maxWeight);
     }
 
     public void SetHeaderNameBuyPanel(string headerName)
@@ -174,6 +204,30 @@ public class DealerWindow : L2PopupWindow
   
     private void MoveРЎellElsePriceType(SlotType type , List<Product> listServer, int position)
     {
+        if (_merchantCart != null)
+        {
+            bool toBasket = type == SlotType.PriceSell;
+            var products = toBasket ? _merchantCart.Available : _merchantCart.Selected;
+            if (!IsIndexValid(products, position)) return;
+            Product product = products[position];
+            int maximum = _merchantCart.Maximum(product, toBasket);
+            if (maximum <= 0) return;
+            if (IsStackable(product) && maximum > 1)
+            {
+                DetachQuantityHandlers();
+                RefreshOpacity(0.7f);
+                RefreshSelectData(products, position, type);
+                QuantityInput.Instance.ShowWindow(maximum);
+                QuantityInput.Instance.OnButtonOk += OnSelectedQuantity;
+                QuantityInput.Instance.OnButtonClose += OnCloseQuantity;
+            }
+            else
+            {
+                _merchantCart.Move(product, 1, toBasket);
+                RefreshMerchantCart();
+            }
+            return;
+        }
 
         if (type == SlotType.PriceBuy)
         {
@@ -232,14 +286,28 @@ public class DealerWindow : L2PopupWindow
 
     private void OnSelectedQuantity(string value)
     {
-        QuantityInput.Instance.OnButtonOk -= OnSelectedQuantity;
+        DetachQuantityHandlers();
         UseSuccessInParentWindow(this, value, _listServer);
     }
 
     private void OnCloseQuantity()
     {
-        QuantityInput.Instance.OnButtonClose -= OnCloseQuantity;
+        DetachQuantityHandlers();
         UseCloseInParentWindow();
+    }
+
+    private void DetachQuantityHandlers()
+    {
+        if (QuantityInput.Instance == null) return;
+        QuantityInput.Instance.OnButtonOk -= OnSelectedQuantity;
+        QuantityInput.Instance.OnButtonClose -= OnCloseQuantity;
+        if (_windowEle != null) RefreshOpacity(1);
+    }
+
+    public override void HideWindow()
+    {
+        DetachQuantityHandlers();
+        base.HideWindow();
     }
 
     private void UseCloseInParentWindow()
@@ -251,11 +319,21 @@ public class DealerWindow : L2PopupWindow
     {
          _dealerWindow.RefreshOpacity(1);
         // Debug.Log("Move value 1 " + value);
-         _dealerWindow.MoveРЎellElseQuantitySelected(_type, listServer, _position, int.Parse(value));
+         if (int.TryParse(value, out int quantity) && quantity > 0)
+             _dealerWindow.MoveРЎellElseQuantitySelected(_type, listServer, _position, quantity);
     }
 
     public void MoveРЎellElseQuantitySelected(SlotType type, List<Product> listServer, int position , int selectCount)
     {
+        if (_merchantCart != null)
+        {
+            bool toBasket = type == SlotType.PriceSell;
+            var products = toBasket ? _merchantCart.Available : _merchantCart.Selected;
+            if (IsIndexValid(products, position) && _merchantCart.Move(products[position], selectCount, toBasket))
+                RefreshMerchantCart();
+            return;
+        }
+        if (selectCount <= 0) return;
 
         if (type == SlotType.PriceBuy)
         {
@@ -310,8 +388,9 @@ public class DealerWindow : L2PopupWindow
         return _weiBarBg;
     }
 
-    public void UpdatePrice(int allPrice)
+    public void UpdatePrice(long allPrice)
     {
+        DisplayedPrice = allPrice;
         _price.text = ToolTipsUtils.ConvertToPrice(allPrice);
     }
     
@@ -332,6 +411,7 @@ public class DealerWindow : L2PopupWindow
 
     public void UpdateAdena(int adena)
     {
+        _currentMoney = adena;
         _adena.text = ToolTipsUtils.ConvertToPrice(adena);
     }
 
@@ -436,8 +516,17 @@ public class DealerWindow : L2PopupWindow
     }
 
   
-    private void HandleSuccessButtonClick()
+    private void HandleSuccessButtonClick() => ConfirmSelection();
+
+    public bool ConfirmSelection()
     {
+        if (_listSell == null || _listSell.Count == 0)
+            return false;
+        if (_productType == ProductType.WHDepositList && (long)_listSell.Count * 30 > _currentMoney)
+            return false;
+        if (_merchantCart != null && (!_merchantCart.TryGetTotal(out long total) ||
+            total > int.MaxValue || (_productType == ProductType.BUY && total > _currentMoney)))
+            return false;
         HideWindow();
 
         if (!_isModifySell)
@@ -481,6 +570,7 @@ public class DealerWindow : L2PopupWindow
             }
         }
 
+        return true;
     }
 
     private void SendServer(INetworkCommand packet)

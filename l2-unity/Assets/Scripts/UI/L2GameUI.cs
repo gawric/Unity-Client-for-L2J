@@ -9,6 +9,8 @@ public class L2GameUI : L2UI
     [SerializeField] private bool _mouseEnabled = true;
 
     private List<L2PopupWindow> _openedWindows;
+    private PartyPanel _partyPanel;
+    private DuelPanel _duelPanel;
 
     private static L2GameUI _instance;
     public static L2GameUI Instance { get { return _instance; } }
@@ -30,6 +32,8 @@ public class L2GameUI : L2UI
 
     private void OnDestroy()
     {
+        _partyPanel?.Dispose();
+        _duelPanel?.Dispose();
         _instance = null;
     }
 
@@ -52,6 +56,11 @@ public class L2GameUI : L2UI
     protected override void LoadUI()
     {
         base.LoadUI();
+        if (IncomingPacketActions.Game != null)
+        {
+            _partyPanel = new PartyPanel(_rootVisualContainer, IncomingPacketActions.Game.Party);
+            _duelPanel = new DuelPanel(_rootVisualContainer, IncomingPacketActions.Game.Duel);
+        }
 
         if (L2LoginUI.Instance != null)
         {

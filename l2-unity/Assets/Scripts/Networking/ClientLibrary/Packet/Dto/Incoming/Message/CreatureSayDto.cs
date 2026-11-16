@@ -19,8 +19,6 @@ public class CreatureSayDto : IWireDto
         {
               senderName = reader.ReadOtherS();
 
-              reader.ReadI();//High Five NPCString ID
-
               text = reader.ReadOtherS();
 
               int dataType = data.Type;

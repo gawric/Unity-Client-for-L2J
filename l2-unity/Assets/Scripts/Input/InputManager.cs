@@ -5,6 +5,8 @@ using UnityEngine.InputSystem;
 
 public class InputManager : MonoBehaviour
 {
+    public bool ForceAttackPressed => Keyboard.current != null &&
+        (Keyboard.current.leftCtrlKey.isPressed || Keyboard.current.rightCtrlKey.isPressed);
     #region InputActions
     // Mouse
     private InputAction _leftClickAction;

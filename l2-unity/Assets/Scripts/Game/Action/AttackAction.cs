@@ -38,6 +38,11 @@ public class AttackAction : L2Action
                 if (target != null && !target.IsDead())
                 {
                     Entity entity = target.GetEntity();
+                    if (InputManager.Instance != null && InputManager.Instance.ForceAttackPressed)
+                    {
+                        PlayerActions.Instance?.ForceAttack(entity);
+                        return;
+                    }
                     if (entity is MonsterEntity)
                     {
                         // Debug.Log("Trying To Attack");

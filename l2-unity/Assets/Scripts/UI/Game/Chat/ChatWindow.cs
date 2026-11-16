@@ -190,41 +190,62 @@ public class ChatWindow : L2Window
 
         L2GameUI.Instance.BlurFocus();
 
-        if (sendMessage)
-        {
-            string text = _chatInput.text;
-            if (text.Length > 0)
-            {
-                if (CanSend(1100))
-                {
-                    if (IsGmCommand(text))
-                    {
-                        String prefix = "admin_";
-                        string gmCommand = text.Substring(2);
-                        string command = prefix + gmCommand;
-                        IncomingPacketActions.Game.Send(new RequestBypassToServerCommand(command));
-                        // Debug.Log("ChatWindow: requested admin command :" + command);
-                    }
-                    else
-                    {
-                        var commands = PlayerCommands.FindByText(text);
-                        if (commands != null)
-                        {
-                            IncomingPacketActions.Game.Send(new RequestUserCommandCommand(commands.Id));
-                            // Debug.Log("ChatWindow: requested player command :" + commands  + " id: " + commands.Id);
-                        }
-                        else
-                        {
-                            SendChatMessage(_activeTab, text);
-                        }
-                    }
+        if (sendMessage && SubmitText(_chatInput.text))
+            _chatInput.value = "";
+    }
 
-                    _chatInput.value = "";
-                }
-                else
-                    _activeTab.ConcatMessage("Server:Please dont spam the chat.");
+    public bool SubmitText(string text)
+    {
+        if (string.IsNullOrWhiteSpace(text) || _activeTab == null)
+            return false;
+        if (!CanSend(1100))
+        {
+            _activeTab.ConcatMessage("Server:Please dont spam the chat.");
+            return false;
+        }
+
+        if (text.Equals("/invite", StringComparison.OrdinalIgnoreCase) || text.StartsWith("/invite ", StringComparison.OrdinalIgnoreCase))
+        {
+            if (!PartyActions.Invite(text.Length > 7 ? text.Substring(8) : null))
+            {
+                _activeTab.ConcatMessage("Server: Select a player or use /invite Name.");
+                return false;
             }
         }
+        else if (text.Trim().Equals("/leave", StringComparison.OrdinalIgnoreCase))
+        {
+            PartyActions.Leave();
+        }
+        else if (text.Equals("/duel", StringComparison.OrdinalIgnoreCase) || text.StartsWith("/duel ", StringComparison.OrdinalIgnoreCase))
+        {
+            if (!DuelActions.Challenge(text.Length > 5 ? text.Substring(6) : null))
+                return false;
+        }
+        else if (text.Equals("/partyduel", StringComparison.OrdinalIgnoreCase) || text.StartsWith("/partyduel ", StringComparison.OrdinalIgnoreCase))
+        {
+            if (!DuelActions.Challenge(text.Length > 10 ? text.Substring(11) : null, true))
+                return false;
+        }
+        else if (text.Trim().Equals("/withdraw", StringComparison.OrdinalIgnoreCase))
+        {
+            DuelActions.Surrender();
+        }
+        else if (IsGmCommand(text))
+        {
+            string command = text.Substring(2).Trim();
+            if (command.Length == 0)
+                return false;
+            IncomingPacketActions.Game.Send(new SendBypassBuildCmdCommand(command));
+        }
+        else
+        {
+            var command = PlayerCommands.FindByText(text);
+            if (command != null)
+                IncomingPacketActions.Game.Send(new RequestUserCommandCommand(command.Id));
+            else
+                SendChatMessage(_activeTab, text);
+        }
+        return true;
     }
 
     public static bool IsGmCommand(string text)
@@ -276,6 +297,13 @@ public class ChatWindow : L2Window
 
     public void SendChatMessage(ChatTab tab, string text)
     {
+        if (text.StartsWith("#", StringComparison.Ordinal))
+        {
+            string message = text.Substring(1).TrimStart();
+            if (message.Length > 0)
+                IncomingPacketActions.Game.Send(new RequestSay2Command(ChatTypes.GetById(3), message, ""));
+            return;
+        }
         ChatTypeData data = ChatTypes.GetById(tab.TabId);
         if (data != null)
         {
@@ -310,6 +338,9 @@ public class ChatWindow : L2Window
     public void ReceiveChatMessage(CreatureMessage data)
     {
         ChatType messageType = (ChatType)data._data.Type;
+        if (UnityAutoLogin.IsActive)
+            Debug.Log("[LocalDemoChat] type=" + messageType + " " + data);
+
 
         // Debug.Log("Creature Say: Received:" + data.ToString() + " Type: " + messageType + " ChatTypeId: " + data._data.Type);
 
@@ -318,7 +349,7 @@ public class ChatWindow : L2Window
         {
             ChatTab tab = _tabs[i];
 
-            if (tab.ChatType == messageType || tab.ChatType == ChatType.GENERAL && isAnnounce || tab.ChatType == ChatType.GENERAL && messageType == ChatType.WHISPER)
+            if (tab.ChatType == messageType || tab.ChatType == ChatType.GENERAL && (isAnnounce || messageType == ChatType.WHISPER || messageType == ChatType.PARTY))
             {
                 tab.ConcatMessage(data.ToString());
             }

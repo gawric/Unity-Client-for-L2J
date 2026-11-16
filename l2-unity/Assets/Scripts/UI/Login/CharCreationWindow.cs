@@ -247,6 +247,18 @@ public class CharCreationWindow : L2Window {
     {
         labelError.text = error;
     }
+
+    public bool TryCreateHuman(string name, string className)
+    {
+        if (_playerTemplates == null || _playerTemplates.Count == 0)
+            return false;
+
+        var command = new CharacterCreateCommand(
+            _playerTemplates, className, "Male", "Type A", "Type A", "Type A", "Human", name);
+        GameClient game = _login != null && _login.Game != null ? _login.Game : IncomingPacketActions.Game;
+        game.Send(command);
+        return true;
+    }
     private void CreateButtonPressed()
     {
 

@@ -31,6 +31,13 @@ public class CharacterSelector : MonoBehaviour
     public int SelectedSlot { get { return _selectedCharacterSlot; } }
     public int InterludeCount { get { return _charactersInterlude != null ? _charactersInterlude.Count : 0; } }
 
+    public int FindInterludeSlot(string name)
+    {
+        return _charactersInterlude != null
+            ? _charactersInterlude.FindIndex(character => character.Name == name)
+            : -1;
+    }
+
     /// <summary>Spawned lobby pawns (Interlude / legacy select row).</summary>
     public IReadOnlyList<GameObject> CharacterPawns => _characterGameObjects;
 
