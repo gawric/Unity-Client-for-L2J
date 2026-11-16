@@ -31,6 +31,8 @@ public class PlayerActions : MonoBehaviour
         _actions.Add(ActionType.Sit, new SitStandAction());
         _actions.Add(ActionType.WalkRun, new WalkRunAction());
         _actions.Add(ActionType.NextTarget, new NextTargetAction());
+        _actions.Add(ActionType.PartyInvite, new PartyInviteAction());
+        _actions.Add(ActionType.PartyLeave, new PartyLeaveAction());
         _actions.Add(ActionType.RideStrider, new RideStriderAction());
     }
 
@@ -75,5 +77,17 @@ public class PlayerActions : MonoBehaviour
         if (game == null)
             return;
         game.Send(new RequestMagicSkillUseCommand(skillId, 0, 0));
+    }
+
+    public bool ForceAttack(Entity target)
+    {
+        PlayerEntity player = PlayerEntity.Instance;
+        GameClient game = _gameClient != null ? _gameClient : IncomingPacketActions.Game;
+        if (game == null || player == null || player.Identity == null || target == null || target.Identity == null ||
+            target.Identity.Id == player.Identity.Id || target.IsDead() || player.IsDead())
+            return false;
+        Vector3 position = player.Identity.GetL2jPos();
+        game.Send(new AttackRequestCommand(target.Identity.Id, (int)position.x, (int)position.y, (int)position.z));
+        return true;
     }
 }

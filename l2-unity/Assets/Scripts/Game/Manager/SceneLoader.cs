@@ -14,6 +14,7 @@ public class SceneLoader : MonoBehaviour
     private readonly HashSet<string> _loadedTiles = new HashSet<string>();
     private bool _worldStreaming;
     private bool _streamingBusy;
+    private Coroutine _gamePreload;
 
     private GameManager Manager
     {
@@ -59,8 +60,10 @@ public class SceneLoader : MonoBehaviour
     {
         Manager.StartLoading();
         yield return LoadSceneAdditiveIfNeeded(_lobbyScene);
+        _gamePreload = StartCoroutine(PreloadGameScene());
         Manager.OnGameLaunched();
-        yield return PreloadGameScene();
+        yield return _gamePreload;
+        _gamePreload = null;
     }
 
     private IEnumerator PreloadGameScene()
@@ -86,6 +89,12 @@ public class SceneLoader : MonoBehaviour
 
     private IEnumerator LoadSWMapRoutine(Vector3 l2Pos)
     {
+        if (_gamePreload != null)
+        {
+            if (UnityAutoLogin.IsActive)
+                Debug.Log("[SceneLoader] waiting for Game preload before world activation");
+            yield return _gamePreload;
+        }
         yield return LoadSceneAdditiveIfNeeded(_gameScene);
         SetSceneRootsActive(_gameScene, true, true);
 

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+using System.IO;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class SellListDto : IWireDto
@@ -18,9 +19,14 @@ public class SellListDto : IWireDto
 
     public void ReadFrom(PacketReader reader)
     {
+        _listProduct.Clear();
+        if (!reader.HasRemaining(10))
+            throw new InvalidDataException("Truncated merchant header");
         _money = reader.ReadI();
         _listId = reader.ReadI();
-        _size = reader.ReadSh();
+        _size = (ushort)reader.ReadSh();
+        if (reader.Remaining != _size * 32)
+            throw new InvalidDataException("Merchant row count does not match payload");
 
         for (int i = 0; i < _size; i++)
         {

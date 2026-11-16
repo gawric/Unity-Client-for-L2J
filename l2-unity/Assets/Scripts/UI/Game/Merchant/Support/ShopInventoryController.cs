@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using static L2Slot;
 using UnityEngine.UIElements;
 using System;
@@ -30,9 +30,9 @@ public class ShopInventoryController
         var inventorySlotSell = _dealerWindow.GetInventorySlotsSell();
         var inventorySlotTemplate = _dealerWindow.GetInventorySlotTemplate();
 
-        if (listBuy == null | listBuy.Count == 0)
+        if (listBuy == null || listBuy.Count == 0)
         {
-            var inventorySlotsSell = CreateEmptyTab(tabSell , contentSell, inventorySlotSell, inventorySlotTemplate);
+            var inventorySlotsSell = CreateEmptyTab(tabSell , contentSell, inventorySlotSell, inventorySlotTemplate, SlotType.PriceSell);
             _dealerWindow.SetInventorySlotsSell(inventorySlotsSell);
         }
         else
@@ -57,9 +57,9 @@ public class ShopInventoryController
         var inventorySlotBuy = _dealerWindow.GetInventorySlotsBuy();
         var inventorySlotTemplate = _dealerWindow.GetInventorySlotTemplate();
 
-        if (listBuy == null | listBuy.Count == 0)
+        if (listBuy == null || listBuy.Count == 0)
         {
-            var inventorySlotsBuy  = CreateEmptyTab(tabBuy, contentBuy, inventorySlotBuy, inventorySlotTemplate);
+            var inventorySlotsBuy  = CreateEmptyTab(tabBuy, contentBuy, inventorySlotBuy, inventorySlotTemplate, SlotType.PriceBuy);
             _dealerWindow.SetInventorySlotsBuy(inventorySlotsBuy);
         }
         else
@@ -70,7 +70,7 @@ public class ShopInventoryController
 
   
 
-    private InventorySlot[] CreateEmptyTab(InventoryTab tabSell, VisualElement contentSell , InventorySlot[] inventorySlotsSell , VisualTreeAsset inventorySlotTemplate)
+    private InventorySlot[] CreateEmptyTab(InventoryTab tabSell, VisualElement contentSell , InventorySlot[] inventorySlotsSell , VisualTreeAsset inventorySlotTemplate, SlotType type)
     {
         inventorySlotsSell = new InventorySlot[_defaultCount];
 
@@ -79,7 +79,7 @@ public class ShopInventoryController
             VisualElement slotElement = inventorySlotTemplate.Instantiate()[0];
             contentSell.Add(slotElement);
 
-            InventorySlot slot = new InventorySlot(i, slotElement, tabSell, SlotType.PriceSell , false);
+            InventorySlot slot = new InventorySlot(i, slotElement, tabSell, type, false);
             inventorySlotsSell[i] = slot;
         }
         

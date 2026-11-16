@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -40,7 +40,13 @@ public class ShopItemEvaluator
 
     public void UpdateAllPrice(List<Product> _listSell)
     {
-        int allPrice = 0;
+        if (_dealer.CurrentProductType == ProductType.WHDepositList)
+        {
+            // Interlude charges per submitted item stack, regardless of its quantity.
+            _dealer.UpdatePrice((long)(_listSell?.Count ?? 0) * 30);
+            return;
+        }
+        long allPrice = 0;
 
         if (_listSell != null)
         {
@@ -51,7 +57,7 @@ public class ShopItemEvaluator
                 {
                     if(product.Count > 1)
                     {
-                        allPrice += product.Price * product.Count;
+                        allPrice += (long)product.Price * product.Count;
                     }
                     else
                     {

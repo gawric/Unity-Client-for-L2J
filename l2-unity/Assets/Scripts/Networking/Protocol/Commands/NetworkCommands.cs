@@ -151,6 +151,31 @@ public sealed class AuthLoginCommand : INetworkCommand
     }
 }
 
+public sealed class AttackRequestCommand : INetworkCommand
+{
+    public int ObjectId;
+    public int X;
+    public int Y;
+    public int Z;
+    public AttackRequestCommand(int objectId, int x, int y, int z) { ObjectId = objectId; X = x; Y = y; Z = z; }
+}
+
+public sealed class RequestDuelStartCommand : INetworkCommand
+{
+    public string Name;
+    public bool Party;
+    public RequestDuelStartCommand(string name, bool party) { Name = name; Party = party; }
+}
+
+public sealed class RequestDuelAnswerStartCommand : INetworkCommand
+{
+    public bool Party;
+    public bool Accepted;
+    public RequestDuelAnswerStartCommand(bool party, bool accepted) { Party = party; Accepted = accepted; }
+}
+
+public sealed class RequestDuelSurrenderCommand : INetworkCommand { }
+
 public sealed class RequestSkillCoolTimeCommand : INetworkCommand
 {
 }
@@ -196,6 +221,16 @@ public sealed class RequestSay2Command : INetworkCommand
         Data = data;
         Message = message;
         TargetName = targetName;
+    }
+}
+
+public sealed class SendBypassBuildCmdCommand : INetworkCommand
+{
+    public string Command;
+
+    public SendBypassBuildCmdCommand(string command)
+    {
+        Command = command;
     }
 }
 
@@ -418,6 +453,20 @@ public sealed class RequestAcquireSkillInfoCommand : INetworkCommand
         SkillType = skillType;
     }
 }
+
+public sealed class RequestJoinPartyCommand : INetworkCommand
+{
+    public string Name;
+    public int DistributionType;
+
+    public RequestJoinPartyCommand(string name, int distributionType)
+    {
+        Name = name;
+        DistributionType = distributionType;
+    }
+}
+
+public sealed class RequestWithDrawalPartyCommand : INetworkCommand { }
 
 public sealed class RequestAnswerJoinPartyCommand : INetworkCommand
 {

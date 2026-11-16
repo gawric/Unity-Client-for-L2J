@@ -8,6 +8,5 @@
             </ui:GroupBox>
         </ui:ScrollView>
     </ui:VisualElement>
-    <TabButton />
     <ui:Instance template="ChatTabHeader" name="ChatTabHeader" />
 </ui:UXML>

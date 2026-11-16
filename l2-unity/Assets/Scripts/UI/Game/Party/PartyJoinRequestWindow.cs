@@ -122,19 +122,25 @@ public class PartyInvitationWindow : L2PopupWindow
 
     private void OnYesClicked(ClickEvent evt)
     {
-        SendAcceptResponse();
-        HideWindow();
+        Respond(true);
     }
 
     private void OnNoClicked(ClickEvent evt)
     {
-        SendDeclineResponse();
-        HideWindow();
+        Respond(false);
     }
 
     private void OnTimeout()
     {
-        SendDeclineResponse();
+        Respond(false);
+    }
+
+    public void Respond(bool accepted)
+    {
+        if (accepted)
+            SendAcceptResponse();
+        else
+            SendDeclineResponse();
         HideWindow();
     }
 

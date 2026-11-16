@@ -14,7 +14,7 @@
                 </ui:VisualElement>
             </ui:VisualElement>
         </ui:VisualElement>
-        <ui:VisualElement style="flex-grow: 1; justify-content: flex-end; width: 33.3%; max-width: 33.3%; min-width: 33.3%; align-items: center;">
+        <ui:VisualElement picking-mode="Ignore" style="flex-grow: 1; justify-content: flex-end; width: 33.3%; max-width: 33.3%; min-width: 33.3%; align-items: center;">
             <ui:VisualElement name="CharacterRotateWindow" style="flex-grow: 0; height: 50px; min-height: auto; min-width: auto; flex-shrink: 0; flex-direction: row; margin-bottom: 100px;">
                 <ui:Button text="&#10;" parse-escape-sequences="true" display-tooltip-when-elided="true" name="TurnLeftButton" tabindex="-1" focusable="false" class="l2-button" style="height: 45px; width: 50px;">
                     <ui:VisualElement name="ButtonBg" tabindex="-1" class="l2-button-bg" style="width: 64px; height: 64px;" />

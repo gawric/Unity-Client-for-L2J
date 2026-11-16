@@ -22,6 +22,19 @@ public class HtmlWindow : L2PopupWindow
 
     private string _normalHtml = "";
     private string _communityHtml = "";
+    public string CurrentHtml => _isCommunityBoardOpen ? _communityHtml : _normalHtml;
+
+    public bool TryActivateLink(string command)
+    {
+        foreach (Match match in Regex.Matches(CurrentHtml, @"<a\b[^>]*\baction\s*=\s*([""'])(.*?)\1", RegexOptions.IgnoreCase | RegexOptions.Singleline))
+        {
+            string action = System.Net.WebUtility.HtmlDecode(match.Groups[2].Value);
+            if (new ParseHref("", action).Action != command) continue;
+            OnHtmlAction(command);
+            return true;
+        }
+        return false;
+    }
 
     private void Awake()
     {
@@ -150,13 +163,14 @@ public class HtmlWindow : L2PopupWindow
         if (_content == null)
             return;
 
-        _content.Clear();
-
         string title = ExtractTitle(html);
         SetWindowTitle(!string.IsNullOrEmpty(title) ? title : defaultTitle);
 
-        L2HtmlRenderer renderer = new L2HtmlRenderer(_content, OnHtmlAction);
+        var body = new VisualElement { name = "HtmlBody" };
+        L2HtmlRenderer renderer = new L2HtmlRenderer(body, OnHtmlAction);
         renderer.Render(html);
+        _content.Clear();
+        _content.Add(body);
     }
 
     public void ToggleCommunityBoard(bool close)
