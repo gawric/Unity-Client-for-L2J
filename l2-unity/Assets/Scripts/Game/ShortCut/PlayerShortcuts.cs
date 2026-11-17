@@ -60,8 +60,18 @@ public class PlayerShortcuts : MonoBehaviour
 
     private void VerifySkillbarInputs()
     {
+        if (IncomingPacketActions.Input == null)
+        {
+            return;
+        }
+
         foreach (Shortcut shortcut in _shortcuts.Values)
         {
+            if (shortcut == null || shortcut.Slot < 0 || shortcut.Slot >= MAXIMUM_SHORTCUTS_PER_BAR)
+            {
+                continue;
+            }
+
             for (int i = 0; i < _pageMap.Length; i++)
             {
                 if (_pageMap[i] == shortcut.Page)

@@ -21,6 +21,21 @@ public class MultiSellListDto : IWireDto
         _listMultisell = new List<MultiSellData>();
     }
 
+    public MultiSellListDto(int listId, int page, int pageSize, int finished) : this()
+    {
+        _listId = listId;
+        _page = page;
+        _pageSize = pageSize;
+        _finished = finished;
+    }
+
+    public void AddEntry(MultiSellData data)
+    {
+        _listMultisell.Add(data);
+        _listOnlyItem.AddRange(data.ProductList);
+        _size = _listMultisell.Count;
+    }
+
     public void ReadFrom(PacketReader reader)
     {
         

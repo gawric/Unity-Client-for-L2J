@@ -19,6 +19,22 @@ public class PledgeShowMemberListAddDto : IWireDto
         get => _clanMember;
     }
 
+    public static PledgeShowMemberListAddDto From(
+        string name, int level, int classId, int online, int pledgeType, int race, int sex)
+    {
+        return new PledgeShowMemberListAddDto
+        {
+            _memberName = name,
+            _lvl = level,
+            _classId = classId,
+            _isOnline = online,
+            _pledgeType = pledgeType,
+            _race = race,
+            _sex = sex,
+            _clanMember = new ClanMember(name, level, classId, sex, race, online, pledgeType),
+        };
+    }
+
     
 
     public void ReadFrom(PacketReader reader)

@@ -16,6 +16,13 @@ public class WarehouseDepositListDto : IWireDto
         _items = new List<Product>();
     }
 
+    public static WarehouseDepositListDto From(int whType, int adena, List<Product> products)
+    {
+        WarehouseDepositListDto dto = new WarehouseDepositListDto { _whType = whType, _playerAdena = adena };
+        if (products != null) dto._items.AddRange(products);
+        return dto;
+    }
+
     public void ReadFrom(PacketReader reader)
     {
         _whType = reader.ReadSh();

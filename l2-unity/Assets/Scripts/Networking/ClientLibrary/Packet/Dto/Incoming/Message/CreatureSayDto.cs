@@ -6,6 +6,29 @@ public class CreatureSayDto : IWireDto
     private string text;
     private CreatureMessage message;
     public CreatureMessage Message { get { return message; } }
+
+    public static CreatureSayDto From(int objectId, int chatType, string senderName, string text)
+    {
+        ChatTypeData data = ChatTypes.GetById(chatType);
+        CreatureMessage message = null;
+        if (data != null)
+        {
+            int dataType = data.Type;
+            message = new CreatureMessage(
+                dataType == 10 || dataType == 18 ? "Announcements" : senderName,
+                text,
+                data);
+        }
+
+        return new CreatureSayDto
+        {
+            objectId = objectId,
+            chatType = chatType,
+            senderName = senderName,
+            text = text,
+            message = message,
+        };
+    }
     
 
     public void ReadFrom(PacketReader reader)

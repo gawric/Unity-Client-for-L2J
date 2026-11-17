@@ -18,6 +18,46 @@ public class ItemListDto : IWireDto
     
     private int indexInventory = 0;
     private int indexEquip = 0;
+
+    public ItemListDto()
+    {
+        items = new Dictionary<int, ItemInstance>();
+        equip = new Dictionary<int, ItemInstance>();
+    }
+
+    public void SetShowWindow(bool value)
+    {
+        showWindow = value;
+    }
+
+    public void AddParsedItem(ItemInstance item)
+    {
+        if (item == null)
+        {
+            return;
+        }
+
+        if (item.Equipped)
+        {
+            if (!equip.ContainsKey(item.ObjectId))
+            {
+                equip.Add(item.ObjectId, item);
+            }
+        }
+        else
+        {
+            if (!items.ContainsKey(item.ObjectId))
+            {
+                items.Add(item.ObjectId, item);
+            }
+        }
+    }
+
+    public void FinishParsedItems()
+    {
+        _adenaCount = GetAdenaCount(items.Values.ToList());
+    }
+
     public void ReadFrom(PacketReader reader)
     {
         showWindow = reader.ReadSh() == 1;

@@ -17,6 +17,11 @@ public sealed class InterludeProtocol : IProtocol
         _outgoing = outgoing;
     }
 
+    public int ProtocolVersion
+    {
+        get { return 746; }
+    }
+
     public IOutgoingPacket EncodeGame(INetworkCommand command, bool encrypt)
     {
         IOutgoingPacket packet = ToPacket(command);

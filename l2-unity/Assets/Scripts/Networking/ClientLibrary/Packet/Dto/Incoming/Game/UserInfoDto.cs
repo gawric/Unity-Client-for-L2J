@@ -16,6 +16,11 @@ public class UserInfoDto : IWireDto
         _info = info;
     }
 
+    public static UserInfoDto From(PlayerInfoInterlude info)
+    {
+        return new UserInfoDto(info);
+    }
+
     public void ReadFrom(PacketReader reader)
     {
         int x = reader.ReadI();

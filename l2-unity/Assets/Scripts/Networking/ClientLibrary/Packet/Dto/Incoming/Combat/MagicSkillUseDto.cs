@@ -44,6 +44,31 @@ public class MagicSkillUseDto : IWireDto
 
     public Skillgrp SkillGrp { get => _skillGrp; }
 
+    public static MagicSkillUseDto From(
+        int attackerId, int targetId, int skillId, int skillLevel,
+        int hitTime, int reuseDelay, Vector3 attackerPos, Vector3 targetPos)
+    {
+        MagicSkillUseDto dto = new MagicSkillUseDto
+        {
+            _attackerObjId = attackerId,
+            _targetObjId = targetId,
+            _skillId = skillId,
+            _skilllvl = skillLevel,
+            _hittime = hitTime,
+            _reusedelay = reuseDelay,
+            _attackerPos = attackerPos,
+            _targetPos = targetPos,
+        };
+        dto._aX = (int)attackerPos.x;
+        dto._aY = (int)attackerPos.y;
+        dto._aZ = (int)attackerPos.z;
+        dto._tX = (int)targetPos.x;
+        dto._tY = (int)targetPos.y;
+        dto._tZ = (int)targetPos.z;
+        dto._skillGrp = SkillgrpTable.Instance.GetSkill(skillId, skillLevel);
+        return dto;
+    }
+
     
 
     public void ReadFrom(PacketReader reader)

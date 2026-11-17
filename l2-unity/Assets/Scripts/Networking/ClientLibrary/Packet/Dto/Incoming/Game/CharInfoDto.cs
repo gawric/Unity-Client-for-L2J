@@ -24,6 +24,15 @@ public class CharInfoDto : IWireDto
         Appearance = new PlayerAppearance();
     }
 
+    public void SetPacketMeta(int race, int classFirst, int classSecond, bool alikeDead, byte mountType)
+    {
+        PacketRace = race;
+        PacketClassFirst = classFirst;
+        PacketClassSecond = classSecond;
+        AlikeDead = alikeDead;
+        MountType = mountType;
+    }
+
     public void ReadFrom(PacketReader reader)
     {
         int x = reader.ReadI();

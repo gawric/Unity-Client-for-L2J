@@ -7,6 +7,9 @@ public class ShortCutRegisterDto : IWireDto
     private Shortcut shortcut;
     
     public Shortcut Shortcut { get => shortcut; }
+
+    /// <summary>Factory para protocolos con otro layout (Lucera 166). No afecta a ReadFrom.</summary>
+    public static ShortCutRegisterDto From(Shortcut value) => new ShortCutRegisterDto { shortcut = value };
     public void ReadFrom(PacketReader reader)
     {
         int type = reader.ReadI();

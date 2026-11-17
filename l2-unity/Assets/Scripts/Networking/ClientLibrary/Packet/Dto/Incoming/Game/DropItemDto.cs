@@ -14,6 +14,25 @@ public sealed class DropItemDto : IWireDto
     public int Unknown { get; private set; }
     public Vector3 UnityPos { get; private set; }
 
+    public static DropItemDto From(
+        int charObjId, int objectId, int itemId, int x, int y, int z,
+        bool stackable, int count, int unknown)
+    {
+        return new DropItemDto
+        {
+            CharObjId = charObjId,
+            ObjectId = objectId,
+            ItemId = itemId,
+            X = x,
+            Y = y,
+            Z = z,
+            Stackable = stackable,
+            Count = count,
+            Unknown = unknown,
+            UnityPos = VectorUtils.ConvertPosToUnity(new Vector3(x, y, z)),
+        };
+    }
+
     public void ReadFrom(PacketReader reader)
     {
         CharObjId = reader.ReadI();

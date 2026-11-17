@@ -6,6 +6,17 @@ public class DieDto : IWireDto
     public bool _allowFixedRes;
     public int ObjectId { get =>_objectId; }
 
+    public static DieDto From(int objectId, bool canTeleport, bool sweepable, bool allowFixedRes)
+    {
+        return new DieDto
+        {
+            _objectId = objectId,
+            _canTeleport = canTeleport,
+            _sweepable = sweepable,
+            _allowFixedRes = allowFixedRes,
+        };
+    }
+
     
 
     public void ReadFrom(PacketReader reader)

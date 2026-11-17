@@ -35,6 +35,31 @@ public class AttackDto : IWireDto
 
     public Hit FirstHit { get => _firstHit; }
 
+    public static AttackDto From(
+        int attackerId, int targetId, int damage, int flags,
+        Vector3 attackerPos, Vector3 targetPos, Hit[] hits)
+    {
+        Hit[] allHits = hits ?? new Hit[0];
+        AttackDto dto = new AttackDto
+        {
+            _attackerObjId = attackerId,
+            _targetObjId = targetId,
+            _damage = damage,
+            Flags = flags,
+            _attackerPos = attackerPos,
+            _targetPos = targetPos,
+            _aX = (int)attackerPos.x,
+            _aY = (int)attackerPos.y,
+            _aZ = (int)attackerPos.z,
+            _tX = (int)targetPos.x,
+            _tY = (int)targetPos.y,
+            _tZ = (int)targetPos.z,
+            array = allHits,
+            _firstHit = allHits.Length > 0 ? allHits[0] : new Hit(targetId, damage, flags),
+        };
+        return dto;
+    }
+
     
 
     public void ReadFrom(PacketReader reader)

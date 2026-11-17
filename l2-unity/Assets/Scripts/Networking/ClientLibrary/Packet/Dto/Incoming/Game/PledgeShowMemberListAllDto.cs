@@ -65,7 +65,41 @@ public class PledgeShowMemberListAllDto : IWireDto
     }
     public bool IsWar => _isWar;
 
-    
+    public static PledgeShowMemberListAllDto From(
+        int pledgeTypeEnabled, int clanId, int pledgeType, string pledgeName,
+        string subPledgeLeaderName, int leaderId, int crestId, int level,
+        int castleId, int clanHallId, int rank, int reputationScore,
+        int dissolvingExpiryTime, int allyId, string allyName, int allyCrestId,
+        bool isWar, List<ClanMember> members)
+    {
+        PledgeShowMemberListAllDto dto = new PledgeShowMemberListAllDto
+        {
+            _pledgeTypeEnabled = pledgeTypeEnabled,
+            _clanId = clanId,
+            _pledgeType = pledgeType,
+            _pledgeName = pledgeName,
+            _subPledgeLeaderName = subPledgeLeaderName,
+            _leadernId = leaderId,
+            _crestId = crestId,
+            _level = level,
+            _castleId = castleId,
+            _clanHallId = clanHallId,
+            _rank = rank,
+            _reputationScore = reputationScore,
+            _dissolvingExpiryTime = dissolvingExpiryTime,
+            _allyId = allyId,
+            _allyName = allyName,
+            _allyCrestId = allyCrestId,
+            _isWar = isWar,
+        };
+        if (members != null)
+        {
+            dto._members.AddRange(members);
+        }
+
+        return dto;
+    }
+
     public void ReadFrom(PacketReader reader)
     {
         _pledgeTypeEnabled = reader.ReadI();

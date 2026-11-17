@@ -15,6 +15,11 @@ public class CharSelectedDto : IWireDto
         _info.Appearance = new PlayerAppearance();
     }
 
+    public static CharSelectedDto From(PlayerInfoInterlude info)
+    {
+        return new CharSelectedDto { _info = info };
+    }
+
     public void ReadFrom(PacketReader reader)
     {
         CharSelectInfoPackage selectChar = CharSelectWindow.Instance.GetSelectChar();

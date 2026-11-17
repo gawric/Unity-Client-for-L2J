@@ -12,6 +12,13 @@ public class BuyListSeedDto : IWireDto
     public List<Product> List{ get => _list;}
     public int CurrentMoney { get => _money; }
 
+    public static BuyListSeedDto From(int manorId, int money, List<Product> products)
+    {
+        BuyListSeedDto dto = new BuyListSeedDto { _manorId = manorId, _money = money };
+        if (products != null) dto._list.AddRange(products);
+        return dto;
+    }
+
     
 
     public void ReadFrom(PacketReader reader)

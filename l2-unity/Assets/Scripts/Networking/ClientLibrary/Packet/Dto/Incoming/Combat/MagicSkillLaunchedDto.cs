@@ -15,6 +15,17 @@ public class MagicSkillLaunchedDto : IWireDto
     public int SkillLvl { get => _skillLvl; }
     public int[] TargetArray { get => _targetArray; }
 
+    public static MagicSkillLaunchedDto From(int objectId, int skillId, int skillLevel, int[] targets)
+    {
+        return new MagicSkillLaunchedDto
+        {
+            _objectId = objectId,
+            _skillId = skillId,
+            _skillLvl = skillLevel,
+            _targetArray = targets ?? new int[0],
+        };
+    }
+
     public void ReadFrom(PacketReader reader)
     {
          _objectId = reader.ReadI();

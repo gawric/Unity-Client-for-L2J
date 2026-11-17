@@ -17,6 +17,17 @@ public class PackageSendableListDto : IWireDto
         _items = new List<Product>();
     }
 
+    public static PackageSendableListDto From(int playerObject, int adena, List<Product> products)
+    {
+        PackageSendableListDto dto = new PackageSendableListDto
+        {
+            _playerObject = playerObject,
+            _playerAdena = adena,
+        };
+        if (products != null) dto._items.AddRange(products);
+        return dto;
+    }
+
     public void ReadFrom(PacketReader reader)
     {
         _playerObject = reader.ReadI();
