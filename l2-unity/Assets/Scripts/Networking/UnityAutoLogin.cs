@@ -24,7 +24,11 @@ public sealed class UnityAutoLogin : MonoBehaviour
     string _password = "2222";
     int _serverId = 1;
     int _slot = 2;
+    string _serverIp = "127.0.0.1";
     string _chat = string.Empty;
+    string _createName = string.Empty;
+    bool _createRequested;
+    bool _createSent;
     float _chatDelay = 20f;
     float _deadline;
     bool _connected;
@@ -34,6 +38,7 @@ public sealed class UnityAutoLogin : MonoBehaviour
     bool _worldNoted;
     float _worldAt;
     bool _finished;
+    GameState _lastState;
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
     static void Boot()
@@ -68,10 +73,17 @@ public sealed class UnityAutoLogin : MonoBehaviour
         if (manager == null || login == null)
             return;
 
+        if (manager.GameState != _lastState)
+        {
+            _lastState = manager.GameState;
+            Debug.Log("[AutoLogin] state=" + _lastState);
+        }
+
         if (!_connected && manager.GameState == GameState.LOGIN_SCREEN)
         {
             login.Account = _account;
             login.Password = _password;
+            login.ServerIp = _serverIp;
             _connected = true;
             Debug.Log("[AutoLogin] Sending RequestAuthLogin...");
             login.Connect();
@@ -93,6 +105,27 @@ public sealed class UnityAutoLogin : MonoBehaviour
 
         if (!_charSelectSent && manager.GameState == GameState.CHAR_SELECT)
             TryEnterCharacter();
+
+        if (!string.IsNullOrEmpty(_createName) && !_createRequested && manager.GameState == GameState.CHAR_SELECT)
+        {
+            CharacterSelector selectorForCreate = CharacterSelector.Instance;
+            if (selectorForCreate != null && selectorForCreate.InterludeCount == 0)
+            {
+                _createRequested = true;
+                Debug.Log("[AutoLogin] cuenta sin personajes, pidiendo NewCharacter");
+                IncomingPacketActions.Game.Send(new NewCharacterCommand());
+            }
+        }
+
+        if (!_createSent && manager.GameState == GameState.CHAR_CREATION)
+        {
+            CharCreationWindow creation = CharCreationWindow.Instance;
+            if (creation != null && creation.AutoCreate(_createName))
+            {
+                _createSent = true;
+                Debug.Log("[AutoLogin] CharacterCreate enviado name=" + _createName);
+            }
+        }
 
         if (manager.WorldSpawnReady)
             OnWorldReady();
@@ -172,6 +205,10 @@ public sealed class UnityAutoLogin : MonoBehaviour
                 _password = value;
             else if (key.Equals("serverId", StringComparison.OrdinalIgnoreCase))
                 _serverId = ParseInt(value, _serverId);
+            else if (key.Equals("serverIp", StringComparison.OrdinalIgnoreCase))
+                _serverIp = value;
+            else if (key.Equals("create", StringComparison.OrdinalIgnoreCase))
+                _createName = value;
             else if (key.Equals("slot", StringComparison.OrdinalIgnoreCase))
                 _slot = ParseInt(value, _slot);
             else if (key.Equals("chat", StringComparison.OrdinalIgnoreCase))

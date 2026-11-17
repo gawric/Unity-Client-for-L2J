@@ -452,10 +452,12 @@ public class ParticleSingle : EffectPart
                 // _smoothShaderHoldRelease,
                 // renderer,
                 // runtimeMat);
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
             if (L2FxQuadSizeDiagnostic.ShouldTrace(name, _owner, transform))
             {
                 L2FxQuadSizeDiagnostic.Log(name, renderer, now, runtimeMat);
             }
+#endif
         }
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD

@@ -10,7 +10,11 @@ public class PledgeInfoDto : IWireDto
     public int ClanId => _clanId;
     public string ClanName => _clanName;
     public string AllyName => _allyName;
-    
+
+    public static PledgeInfoDto From(int clanId, string clanName, string allyName)
+    {
+        return new PledgeInfoDto { _clanId = clanId, _clanName = clanName, _allyName = allyName };
+    }
     public void ReadFrom(PacketReader reader)
     {
         _clanId = reader.ReadI();

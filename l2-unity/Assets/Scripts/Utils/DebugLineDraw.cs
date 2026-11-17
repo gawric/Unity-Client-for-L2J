@@ -5,6 +5,7 @@ public class DebugLineDraw
     public static void ShowDrawLineDebug(int objId, Vector3 source, Vector3 targetObj, Color color)
     {
         var _debugObject = GameObject.FindWithTag("DebugMove");
+        if (_debugObject == null) return;
         var _debugLine = _debugObject.GetComponent<DrawLine>();
 
         //var vector1 = new Vector3(transform.x, transform.y, transform.z);
@@ -15,6 +16,7 @@ public class DebugLineDraw
     public static void ShowDrawLineDebugNpc(int objId, Vector3 source, Vector3 targetObj, Color color)
     {
         var _debugObject = GameObject.FindWithTag("DebugMove");
+        if (_debugObject == null) return;
         var _debugLine = _debugObject.GetComponent<DrawLine>();
 
         //var vector1 = new Vector3(transform.x, transform.y, transform.z);
@@ -25,6 +27,7 @@ public class DebugLineDraw
     public static void RemoveDrawLineDebug(int objId)
     {
         var _debugObject = GameObject.FindWithTag("DebugMove");
+        if (_debugObject == null) return;
         var _debugLine = _debugObject.GetComponent<DrawLine>();
 
         //var vector1 = new Vector3(transform.x, transform.y, transform.z);

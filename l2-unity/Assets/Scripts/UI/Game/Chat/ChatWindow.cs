@@ -100,17 +100,23 @@ public class ChatWindow : L2Window
     private void CreateTabs()
     {
         _chatTabView = GetElementById("ChatTabView");
+        if (_chatTabView == null || _tabs == null || _tabTemplate == null || _tabHeaderTemplate == null)
+        {
+            return;
+        }
 
         VisualElement tabHeaderContainer = _chatTabView.Q<VisualElement>("tab-header-container");
         if (tabHeaderContainer == null)
         {
             // Debug.LogError("tab-header-container is null");
+            return;
         }
         VisualElement tabContainer = _chatTabView.Q<VisualElement>("tab-content-container");
 
         if (tabContainer == null)
         {
             // Debug.LogError("tab-content-container");
+            return;
         }
 
         for (int i = 0; i < _tabs.Count; i++)

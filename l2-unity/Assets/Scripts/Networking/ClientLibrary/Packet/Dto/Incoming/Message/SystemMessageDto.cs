@@ -10,6 +10,11 @@ public class SystemMessageDto : IWireDto
     public SMParam[] Params { get { return _params; } }
     public int Id { get { return _smId; } }
 
+    public static SystemMessageDto From(int id, SMParam[] parameters)
+    {
+        return new SystemMessageDto { _smId = id, _params = parameters };
+    }
+
     
 
     public void ReadFrom(PacketReader reader)

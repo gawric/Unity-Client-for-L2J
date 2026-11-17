@@ -11,6 +11,17 @@ public class TradeStartDto : IWireDto
     public int PlayerId { get => _player; }
     public List<ItemInstance> ItemList { get => _itemList; }
 
+    public static TradeStartDto From(int playerId, List<ItemInstance> items)
+    {
+        TradeStartDto dto = new TradeStartDto { _player = playerId };
+        if (items != null)
+        {
+            dto._itemList.AddRange(items);
+        }
+
+        return dto;
+    }
+
     
 
     //public TradeStartDto(Player player)

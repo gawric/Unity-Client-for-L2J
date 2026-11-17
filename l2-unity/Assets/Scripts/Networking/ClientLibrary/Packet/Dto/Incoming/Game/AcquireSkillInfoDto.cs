@@ -22,6 +22,23 @@ public class AcquireSkillInfoDto : IWireDto
         _requiredSkillInfo = new List<RequiredSkillInfo>();
     }
 
+    public static AcquireSkillInfoDto From(int id, int level, int spCost, int mode, List<RequiredSkillInfo> required)
+    {
+        AcquireSkillInfoDto dto = new AcquireSkillInfoDto
+        {
+            _id = id,
+            _level = level,
+            _spCost = spCost,
+            _mode = mode,
+        };
+        if (required != null)
+        {
+            dto._requiredSkillInfo.AddRange(required);
+        }
+
+        return dto;
+    }
+
     public void ReadFrom(PacketReader reader)
     {
         _id = reader.ReadI();

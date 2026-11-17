@@ -10,6 +10,19 @@ public sealed class GetItemDto : IWireDto
     public int Z { get; private set; }
     public Vector3 UnityPos { get; private set; }
 
+    public static GetItemDto From(int playerId, int objectId, int x, int y, int z)
+    {
+        return new GetItemDto
+        {
+            PlayerId = playerId,
+            ObjectId = objectId,
+            X = x,
+            Y = y,
+            Z = z,
+            UnityPos = VectorUtils.ConvertPosToUnity(new Vector3(x, y, z)),
+        };
+    }
+
     public void ReadFrom(PacketReader reader)
     {
         PlayerId = reader.ReadI();

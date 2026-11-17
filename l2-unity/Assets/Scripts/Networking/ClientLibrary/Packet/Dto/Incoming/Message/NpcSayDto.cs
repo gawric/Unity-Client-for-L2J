@@ -16,6 +16,19 @@ public class NpcSayDto : IWireDto
     public CreatureMessage NpcMessage { get => message; }
     
 
+    /// <summary>Factory para protocolos con otro layout (Lucera 166). No afecta a ReadFrom.</summary>
+    public static NpcSayDto From(int objectId, int textType, int npcId, string text)
+    {
+        NpcSayDto dto = new NpcSayDto();
+        dto._objectId = objectId;
+        dto._textType = textType;
+        dto._npcId = npcId;
+        dto._textMessage = text;
+        NpcName npcName = NpcNameTable.Instance.GetNpcName(npcId);
+        dto.CreateMessage(textType, text, npcName != null ? npcName.Name : "");
+        return dto;
+    }
+
     public void ReadFrom(PacketReader reader)
     {
         //Debug.Log("Пришел пакет NpcSay 1" + " text " + _textMessage);

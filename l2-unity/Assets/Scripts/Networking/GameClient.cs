@@ -66,7 +66,9 @@ public class GameClient : DefaultClient {
         // else
             // LobbyFlowLog.Error("GameClient.OnConnectionSuccess Manager is null");
 
-        int protocol = manager != null ? manager.ProtocolVersion : 746;
+        int protocol = _network != null && _network.Protocol != null
+            ? _network.Protocol.ProtocolVersion
+            : (manager != null ? manager.ProtocolVersion : 746);
         // LobbyFlowLog.Info("TX ProtocolVersion=" + protocol + " crypt=" + IsCryptEnabled());
         SendPlain(new ProtocolVersionCommand(protocol));
     }

@@ -16,6 +16,13 @@ public class WarehouseWithdrawListDto : IWireDto
         _items = new List<Product>();
     }
 
+    public static WarehouseWithdrawListDto From(int whType, int adena, List<Product> products)
+    {
+        WarehouseWithdrawListDto dto = new WarehouseWithdrawListDto { _whType = whType, _playerAdena = adena };
+        if (products != null) dto._items.AddRange(products);
+        return dto;
+    }
+
     public void ReadFrom(PacketReader reader)
     {
         _whType = reader.ReadSh();

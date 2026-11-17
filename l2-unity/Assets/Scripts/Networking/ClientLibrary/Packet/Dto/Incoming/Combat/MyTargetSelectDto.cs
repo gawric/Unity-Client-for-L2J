@@ -11,7 +11,14 @@ public class MyTargetSelectDto : IWireDto
 
     public int ObjectId { get => _objectId; }
     public string Color { get => _color; }
-    
+
+    public static MyTargetSelectDto From(int objectId, int colorCode)
+    {
+        MyTargetSelectDto dto = new MyTargetSelectDto();
+        dto._objectId = objectId;
+        dto._color = dto.ParceColor(colorCode);
+        return dto;
+    }
 
     public void ReadFrom(PacketReader reader)
     {

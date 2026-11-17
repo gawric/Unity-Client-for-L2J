@@ -19,7 +19,12 @@ public sealed class AppLifetimeScope : LifetimeScope
         builder.Register<OutgoingPacketAutoRegistry>(Lifetime.Singleton)
             .AsSelf()
             .As<IOutgoingPacketAutoRegistry>();
-        builder.Register<InterludeProtocol>(Lifetime.Singleton).As<IProtocol>().AsSelf();
+        builder.Register<ProtocolFactory>(Lifetime.Singleton)
+            .AsSelf()
+            .As<IProtocolFactory>();
+        builder.Register<IProtocol>(
+            container => container.Resolve<ProtocolFactory>().Create(ServerProfile.Active),
+            Lifetime.Singleton);
         builder.Register<PacketApplyQueue>(Lifetime.Singleton);
         builder.Register<NetworkDispatcher>(Lifetime.Singleton).As<INetworkDispatcher>().AsSelf();
         builder.Register<IncomingGameQueue>(Lifetime.Singleton);

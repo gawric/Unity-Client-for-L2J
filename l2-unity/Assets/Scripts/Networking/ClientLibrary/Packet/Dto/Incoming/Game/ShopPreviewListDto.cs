@@ -15,6 +15,21 @@ public class ShopPreviewListDto : IWireDto
         _listProduct = new List<Product>();
     }
 
+    public static ShopPreviewListDto From(int money, int listId, List<Product> products)
+    {
+        ShopPreviewListDto dto = new ShopPreviewListDto
+        {
+            _money = money,
+            _listId = listId,
+        };
+        if (products != null)
+        {
+            dto._listProduct.AddRange(products);
+        }
+
+        return dto;
+    }
+
     public void ReadFrom(PacketReader reader)
     {
         var unk1 = reader.ReadB();

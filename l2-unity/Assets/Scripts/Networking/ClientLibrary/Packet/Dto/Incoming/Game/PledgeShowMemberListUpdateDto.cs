@@ -18,6 +18,23 @@ public class PledgeShowMemberListUpdateDto : IWireDto
     public int Race => _race;
     public int IsOnline => _isOnline;
     public int PledgeType => _pledgeType;
+
+    public static PledgeShowMemberListUpdateDto From(
+        string name, int level, int classId, int sex, int race,
+        int isOnline, int pledgeType, int hasSponsor)
+    {
+        return new PledgeShowMemberListUpdateDto
+        {
+            _name = name,
+            _level = level,
+            _classId = classId,
+            _sex = sex,
+            _race = race,
+            _isOnline = isOnline,
+            _pledgeType = pledgeType,
+            _hasSponsor = hasSponsor,
+        };
+    }
     public int HasSponsor => _hasSponsor;
 
     

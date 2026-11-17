@@ -12,6 +12,31 @@ public class InventoryUpdateDto : IWireDto
     private int indexEquipItems = 0;
     public Dictionary<int, ItemInstance> Items { get { return items; } }
     public Dictionary<int, ItemInstance> EquipItems { get { return equipItems; } }
+
+    public InventoryUpdateDto()
+    {
+        items = new Dictionary<int, ItemInstance>();
+        equipItems = new Dictionary<int, ItemInstance>();
+    }
+
+    public void AddParsedItem(ItemInstance item, int lastChange)
+    {
+        if (item == null)
+        {
+            return;
+        }
+
+        item.LastChange = lastChange;
+        if (item.Equipped)
+        {
+            equipItems[item.ObjectId] = item;
+        }
+        else
+        {
+            items[item.ObjectId] = item;
+        }
+    }
+
     public void ReadFrom(PacketReader reader)
     {
         
